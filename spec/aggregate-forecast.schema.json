@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/aggregate-forecast.schema.json",
+  "title": "Aggregate Forecast",
+  "description": "An aggregate or ensemble forecast with provenance and dependency assumptions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "aggregateForecastId",
+    "questionId",
+    "createdAt",
+    "method",
+    "recencyHandling",
+    "includedForecasts",
+    "forecastOutput",
+    "dependencyAssessment"
+  ],
+  "properties": {
+    "aggregateForecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "method": {
+      "type": "string",
+      "enum": [
+        "simple_average",
+        "weighted_average",
+        "weighted_median",
+        "stacked_ensemble",
+        "manual"
+      ]
+    },
+    "recencyHandling": {
+      "type": "string",
+      "enum": ["none", "latest_only", "time_weighted", "decayed_weight"]
+    },
+    "includedForecasts": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["forecastId", "sourceClass", "weight"],
+        "properties": {
+          "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+          "sourceClass": {
+            "type": "string",
+            "enum": ["baseline", "model", "human", "market", "external_aggregate"]
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0
+          },
+          "included": { "type": "boolean", "default": true },
+          "exclusionReason": {
+            "type": "string",
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "forecastOutput": { "$ref": "common.schema.json#/$defs/forecastOutput" },
+    "dependencyAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["independenceLevel", "notes"],
+      "properties": {
+        "independenceLevel": {
+          "type": "string",
+          "enum": ["unknown", "low", "medium", "high"]
+        },
+        "dependencyGraphRef": { "$ref": "common.schema.json#/$defs/uri" },
+        "notes": {
+          "type": "string",
+          "maxLength": 1200
+        }
+      }
+    }
+  }
+}

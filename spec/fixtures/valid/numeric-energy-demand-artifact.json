@@ -1,0 +1,49 @@
+{
+  "forecastId": "forecast-003",
+  "questionId": "question-002",
+  "questionStatus": "open",
+  "domain": "energy-demand",
+  "horizon": {
+    "startsAt": "2026-07-01T00:00:00Z",
+    "endsAt": "2026-07-01T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-30T12:00:00Z",
+  "closedAt": "2026-06-30T18:00:00Z",
+  "outputType": "interval",
+  "forecastOutput": {
+    "outputType": "interval",
+    "unit": "MW",
+    "lower": 18200,
+    "upper": 19800,
+    "coverage": 0.8
+  },
+  "baselineForecast": {
+    "outputType": "interval",
+    "unit": "MW",
+    "lower": 17800,
+    "upper": 20400,
+    "coverage": 0.8
+  },
+  "model": {
+    "modelId": "model-003",
+    "version": "fixture-interval-v0",
+    "trainingCutoff": "2026-06-28T00:00:00Z",
+    "configurationHash": "sha256-model-config-002"
+  },
+  "evidencePacketId": "evidence-003",
+  "resolutionPlan": {
+    "resolutionCriteria": "Resolve to the maximum hourly demand in megawatts recorded by the Example Region demand fixture for 2026-07-01.",
+    "resolutionAuthority": "OPE fixture resolver",
+    "primaryResolutionSource": {
+      "sourceId": "source-003",
+      "name": "Example Region demand fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/example-region-demand-2026-07-01.json",
+      "retrievedAt": "2026-07-02T09:00:00Z",
+      "contentHash": "sha256-demand-fixture-001"
+    },
+    "fallbackResolutionSources": [],
+    "scheduledResolutionAt": "2026-07-02T12:00:00Z"
+  }
+}

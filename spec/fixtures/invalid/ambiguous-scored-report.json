@@ -1,0 +1,12 @@
+{
+  "scoringReportId": "scoring-002",
+  "questionId": "question-003",
+  "forecastId": "forecast-004",
+  "resolutionRecordId": "resolution-002",
+  "scoreStatus": "scored",
+  "scoringRule": "brier",
+  "primaryScore": 0.25,
+  "higherIsBetter": false,
+  "excludedReason": "Invalid fixture: ambiguous questions must be excluded, not scored.",
+  "generatedAt": "2026-06-04T10:30:00Z"
+}

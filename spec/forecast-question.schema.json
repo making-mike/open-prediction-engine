@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/forecast-question.schema.json",
+  "title": "Forecast Question",
+  "description": "A resolvable forecast question contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "questionId",
+    "title",
+    "domain",
+    "outputType",
+    "status",
+    "openAt",
+    "closeAt",
+    "resolveAt",
+    "horizon",
+    "resolutionCriteria",
+    "resolutionAuthority",
+    "primaryResolutionSource",
+    "validOutcomeSpace",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "title": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 240
+    },
+    "background": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "open",
+        "closed",
+        "resolved",
+        "ambiguous",
+        "annulled",
+        "re_resolved"
+      ]
+    },
+    "openAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "closeAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "resolveAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+    "resolutionCriteria": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 5000
+    },
+    "resolutionAuthority": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160
+    },
+    "resolutionMode": {
+      "type": "string",
+      "enum": [
+        "source_behavior",
+        "true_answer",
+        "admin_judgment",
+        "automated_measurement"
+      ]
+    },
+    "primaryResolutionSource": { "$ref": "common.schema.json#/$defs/sourceRef" },
+    "fallbackResolutionSources": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" },
+      "maxItems": 5,
+      "default": []
+    },
+    "validOutcomeSpace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "minItems": 1
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" }
+      }
+    },
+    "clarificationHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["clarifiedAt", "summary"],
+        "properties": {
+          "clarifiedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          }
+        }
+      },
+      "default": []
+    },
+    "incentiveRiskReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["riskLevel", "notes"],
+      "properties": {
+        "riskLevel": { "$ref": "common.schema.json#/$defs/riskLevel" },
+        "notes": {
+          "type": "string",
+          "maxLength": 1200
+        }
+      }
+    },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "sourceRef": {
+    "sourceId": "source-301",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-05.json",
+    "retrievedAt": "2026-06-06T09:00:00Z",
+    "contentHash": "sha256-ops-source-301"
+  },
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-05",
+  "coverageStatus": "missing_declared_geography",
+  "events": []
+}

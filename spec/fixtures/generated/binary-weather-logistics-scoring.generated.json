@@ -1,0 +1,18 @@
+{
+  "scoringReportId": "scoring-generated-001",
+  "questionId": "question-001",
+  "forecastId": "forecast-002",
+  "historyId": "history-001",
+  "resolutionRecordId": "resolution-001",
+  "scoreStatus": "scored",
+  "scoringRule": "brier",
+  "primaryScore": 0.3481,
+  "higherIsBetter": false,
+  "timeWeighting": {
+    "method": "latest_only",
+    "totalWeight": 1
+  },
+  "baselineScore": 0.6084,
+  "baselineLift": 0.2603,
+  "generatedAt": "2026-06-04T10:20:00Z"
+}

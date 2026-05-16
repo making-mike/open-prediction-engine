@@ -1,0 +1,38 @@
+{
+  "caseId": "fixturecase-201",
+  "outputPrefix": "weather-logistics-ambiguous",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-04",
+  "questionId": "question-201",
+  "forecastId": "forecast-201",
+  "baselineForecastId": "forecast-200",
+  "evidencePacketId": "evidence-201",
+  "historyId": "history-201",
+  "resolutionRecordId": "resolution-201",
+  "featureSnapshotId": "featuresnapshot-201",
+  "normalizedSourceSetId": "sourceset-201",
+  "scoringReportId": "scoring-201",
+  "openAt": "2026-06-02T00:00:00Z",
+  "baselineForecastedAt": "2026-06-02T12:00:00Z",
+  "forecastedAt": "2026-06-03T10:00:00Z",
+  "closeAt": "2026-06-03T18:00:00Z",
+  "resolveAt": "2026-06-05T12:00:00Z",
+  "resolvedAt": "2026-06-05T10:00:00Z",
+  "generatedAt": "2026-06-05T10:20:00Z",
+  "resolutionStatus": "ambiguous",
+  "unscorableReason": "The operations fixture reports a weather-coded disruption, but the weather observation fixture has conflicting station reports around the declared precipitation threshold.",
+  "horizon": {
+    "startsAt": "2026-06-04T00:00:00Z",
+    "endsAt": "2026-06-04T23:59:59Z",
+    "label": "1-day"
+  },
+  "precipitationThresholdMm": 20,
+  "routeDensity": "medium",
+  "model": {
+    "modelId": "model-201",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  }
+}

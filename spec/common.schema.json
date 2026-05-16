@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/common.schema.json",
+  "title": "OPE Common Definitions",
+  "description": "Shared schema definitions for Open Prediction Engine contracts.",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-[0-9]{3,}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "horizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startsAt", "endsAt", "label"],
+      "properties": {
+        "startsAt": { "$ref": "#/$defs/timestamp" },
+        "endsAt": { "$ref": "#/$defs/timestamp" },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "outputType": {
+      "type": "string",
+      "enum": [
+        "binary",
+        "categorical",
+        "numeric_distribution",
+        "interval",
+        "quantile",
+        "date_time"
+      ]
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "name", "sourceType"],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "official",
+            "public_dataset",
+            "internal_dataset",
+            "human_judgment",
+            "model_output",
+            "market_price",
+            "aggregate",
+            "other"
+          ]
+        },
+        "uri": { "$ref": "#/$defs/uri" },
+        "retrievedAt": { "$ref": "#/$defs/timestamp" },
+        "contentHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        }
+      }
+    },
+    "modelIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modelId", "version"],
+      "properties": {
+        "modelId": { "$ref": "#/$defs/id" },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "trainingCutoff": { "$ref": "#/$defs/timestamp" },
+        "configurationHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        }
+      }
+    },
+    "forecastOutput": {
+      "oneOf": [
+        { "$ref": "#/$defs/binaryForecast" },
+        { "$ref": "#/$defs/categoricalForecast" },
+        { "$ref": "#/$defs/numericDistributionForecast" },
+        { "$ref": "#/$defs/intervalForecast" },
+        { "$ref": "#/$defs/quantileForecast" },
+        { "$ref": "#/$defs/dateTimeForecast" }
+      ]
+    },
+    "binaryForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "probability"],
+      "properties": {
+        "outputType": { "const": "binary" },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "categoricalForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "probabilities"],
+      "properties": {
+        "outputType": { "const": "categorical" },
+        "probabilities": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "probability"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "probability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "numericDistributionForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "unit", "mean"],
+      "properties": {
+        "outputType": { "const": "numeric_distribution" },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "mean": { "type": "number" },
+        "median": { "type": "number" },
+        "lower": { "type": "number" },
+        "upper": { "type": "number" }
+      }
+    },
+    "intervalForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "unit", "lower", "upper", "coverage"],
+      "properties": {
+        "outputType": { "const": "interval" },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "lower": { "type": "number" },
+        "upper": { "type": "number" },
+        "coverage": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        }
+      }
+    },
+    "quantileForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "unit", "quantiles"],
+      "properties": {
+        "outputType": { "const": "quantile" },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "quantiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["q", "value"],
+            "properties": {
+              "q": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "value": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "dateTimeForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "expectedAt"],
+      "properties": {
+        "outputType": { "const": "date_time" },
+        "expectedAt": { "$ref": "#/$defs/timestamp" },
+        "lowerAt": { "$ref": "#/$defs/timestamp" },
+        "upperAt": { "$ref": "#/$defs/timestamp" },
+        "coverage": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        }
+      }
+    },
+    "resolvedOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outputType", "value"],
+      "properties": {
+        "outputType": { "$ref": "#/$defs/outputType" },
+        "value": {},
+        "unit": {
+          "type": "string",
+          "maxLength": 40
+        }
+      }
+    },
+    "scoringRule": {
+      "type": "string",
+      "enum": [
+        "brier",
+        "multiclass_brier",
+        "log_score",
+        "crps",
+        "pinball_loss",
+        "interval_score",
+        "not_scored"
+      ]
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["minimal", "limited", "high", "blocked"]
+    }
+  }
+}

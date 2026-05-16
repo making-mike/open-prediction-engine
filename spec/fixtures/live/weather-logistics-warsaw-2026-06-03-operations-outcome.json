@@ -1,0 +1,22 @@
+{
+  "sourceRef": {
+    "sourceId": "source-402",
+    "name": "Declared Warsaw operations event source",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/live/warsaw-operations-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-live-ops-outcome-401"
+  },
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "coverageStatus": "complete",
+  "events": [
+    {
+      "eventId": "liveopsevent-401",
+      "occurredAt": "2026-06-03T12:40:00Z",
+      "eventCode": "weather_delay",
+      "weatherCoded": true,
+      "affectedStops": 34
+    }
+  ]
+}

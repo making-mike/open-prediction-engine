@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/track-record-report.schema.json",
+  "title": "Track Record Report",
+  "description": "Compact and full performance summary for comparable forecast sets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trackRecordReportId",
+    "generatedAt",
+    "coveragePeriod",
+    "domain",
+    "horizonBucket",
+    "outputType",
+    "counts",
+    "summary"
+  ],
+  "properties": {
+    "trackRecordReportId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "coveragePeriod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startsAt", "endsAt"],
+      "properties": {
+        "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "horizonBucket": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nForecasts",
+        "nResolved",
+        "nAmbiguous",
+        "nAnnulled"
+      ],
+      "properties": {
+        "nForecasts": { "type": "integer", "minimum": 0 },
+        "nResolved": { "type": "integer", "minimum": 0 },
+        "nAmbiguous": { "type": "integer", "minimum": 0 },
+        "nAnnulled": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primaryScoringRule"],
+      "properties": {
+        "primaryScoringRule": { "$ref": "common.schema.json#/$defs/scoringRule" },
+        "primaryScore": { "type": "number" },
+        "baselineScore": { "type": "number" },
+        "baselineLift": { "type": "number" },
+        "calibrationError": { "type": "number", "minimum": 0 },
+        "lastUpdated": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "scoreHistogram": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lower", "upper", "count"],
+        "properties": {
+          "lower": { "type": "number" },
+          "upper": { "type": "number" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "slices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "counts", "summary"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "counts": { "$ref": "#/properties/counts" },
+          "summary": { "$ref": "#/properties/summary" }
+        }
+      }
+    }
+  }
+}

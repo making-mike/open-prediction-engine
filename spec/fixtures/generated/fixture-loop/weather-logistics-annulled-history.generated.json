@@ -1,0 +1,42 @@
+{
+  "historyId": "history-301",
+  "questionId": "question-301",
+  "entries": [
+    {
+      "forecastId": "forecast-300",
+      "forecastedAt": "2026-06-03T12:00:00Z",
+      "state": "superseded",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-100",
+        "version": "historical-frequency-fixture-v0"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.22
+      },
+      "rationaleSummary": "Historical-frequency baseline generated from the fixture baseline history."
+    },
+    {
+      "forecastId": "forecast-301",
+      "forecastedAt": "2026-06-04T10:00:00Z",
+      "state": "active",
+      "sourceClass": "model",
+      "model": {
+        "modelId": "model-301",
+        "version": "weather-logistics-fixture-loop-v0",
+        "trainingCutoff": "2026-05-30T00:00:00Z",
+        "configurationHash": "sha256-fixture-loop-model-001"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.15
+      },
+      "supersedesForecastId": "forecast-300",
+      "rationaleSummary": "The deterministic fixture model raises the disruption estimate when the precipitation forecast crosses the declared heavy-rain threshold.",
+      "evidencePacketId": "evidence-301"
+    }
+  ],
+  "createdAt": "2026-06-03T12:00:00Z",
+  "updatedAt": "2026-06-04T10:00:00Z"
+}

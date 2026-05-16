@@ -1,0 +1,23 @@
+{
+  "latitude": 52.24,
+  "longitude": 21,
+  "generationtime_ms": 0.082,
+  "utc_offset_seconds": 7200,
+  "timezone": "Europe/Warsaw",
+  "timezone_abbreviation": "CEST",
+  "elevation": 112,
+  "daily_units": {
+    "time": "iso8601",
+    "precipitation_sum": "mm",
+    "precipitation_probability_max": "%",
+    "weather_code": "wmo code",
+    "wind_gusts_10m_max": "km/h"
+  },
+  "daily": {
+    "time": ["2026-06-03"],
+    "precipitation_sum": [24],
+    "precipitation_probability_max": [86],
+    "weather_code": [63],
+    "wind_gusts_10m_max": [41.8]
+  }
+}

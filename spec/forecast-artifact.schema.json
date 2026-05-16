@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/forecast-artifact.schema.json",
+  "title": "Forecast Artifact",
+  "description": "A portable forecast result emitted by OPE.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "forecastId",
+    "questionId",
+    "questionStatus",
+    "domain",
+    "horizon",
+    "forecastedAt",
+    "outputType",
+    "forecastOutput",
+    "baselineForecast",
+    "model",
+    "evidencePacketId",
+    "resolutionPlan"
+  ],
+  "properties": {
+    "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionStatus": {
+      "type": "string",
+      "enum": ["approved", "open", "closed"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+    "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "closedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "forecastOutput": { "$ref": "common.schema.json#/$defs/forecastOutput" },
+    "baselineForecast": { "$ref": "common.schema.json#/$defs/forecastOutput" },
+    "aggregateForecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "model": { "$ref": "common.schema.json#/$defs/modelIdentity" },
+    "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+    "resolutionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolutionCriteria",
+        "resolutionAuthority",
+        "primaryResolutionSource",
+        "scheduledResolutionAt"
+      ],
+      "properties": {
+        "resolutionCriteria": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 5000
+        },
+        "resolutionAuthority": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "primaryResolutionSource": { "$ref": "common.schema.json#/$defs/sourceRef" },
+        "fallbackResolutionSources": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/sourceRef" },
+          "maxItems": 5
+        },
+        "scheduledResolutionAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    }
+  }
+}

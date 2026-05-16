@@ -1,0 +1,10 @@
+{
+  "publicationStatus": "provisional",
+  "qualityClaimStatus": "not_enough_resolved_live_outcomes",
+  "minimumCalibrationSampleSize": 30,
+  "resolvedComparableLiveOutcomes": 1,
+  "questionId": "question-401",
+  "forecastId": "forecast-402",
+  "resolutionRecordId": "resolution-401",
+  "generatedAt": "2026-06-04T10:35:00Z"
+}

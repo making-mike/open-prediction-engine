@@ -1,0 +1,41 @@
+{
+  "benchmarkRunId": "benchmarkrun-001",
+  "startedAt": "2026-06-02T10:05:00Z",
+  "endedAt": "2026-06-02T10:10:00Z",
+  "status": "completed",
+  "questionIds": ["question-101"],
+  "model": {
+    "modelId": "model-101",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  },
+  "retrievalWindow": {
+    "startsAt": "2026-06-01T00:00:00Z",
+    "endsAt": "2026-06-02T10:00:00Z"
+  },
+  "sourceFetches": [
+    {
+      "sourceId": "source-102",
+      "name": "Warsaw weather forecast fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-03.json",
+      "retrievedAt": "2026-06-02T09:30:00Z",
+      "contentHash": "sha256-weather-forecast-source-101"
+    },
+    {
+      "sourceId": "source-103",
+      "name": "Warsaw weather logistics baseline fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+      "retrievedAt": "2026-06-01T11:30:00Z",
+      "contentHash": "sha256-baseline-source-101"
+    }
+  ],
+  "leakageControls": {
+    "knownAnswerExcluded": true,
+    "postOutcomeDataBlocked": true,
+    "sourceTimestampsRecorded": true,
+    "auditNotes": "Only pre-forecast weather forecast and baseline history fixture sources are included."
+  }
+}

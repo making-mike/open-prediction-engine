@@ -1,0 +1,48 @@
+{
+  "questionId": "question-001",
+  "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+  "background": "This fixture models a narrow weather-linked logistics disruption question. It is not a live forecast.",
+  "domain": "weather-logistics",
+  "outputType": "binary",
+  "status": "open",
+  "openAt": "2026-06-01T00:00:00Z",
+  "closeAt": "2026-06-02T18:00:00Z",
+  "resolveAt": "2026-06-04T12:00:00Z",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "resolutionCriteria": "Resolve Yes if the declared operations fixture reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the weather fixture records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+  "resolutionAuthority": "OPE fixture resolver",
+  "resolutionMode": "automated_measurement",
+  "primaryResolutionSource": {
+    "sourceId": "source-001",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/warsaw-logistics-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-ops-fixture-001"
+  },
+  "fallbackResolutionSources": [
+    {
+      "sourceId": "source-002",
+      "name": "Warsaw weather fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/warsaw-weather-2026-06-03.json",
+      "retrievedAt": "2026-06-04T09:00:00Z",
+      "contentHash": "sha256-weather-fixture-001"
+    }
+  ],
+  "validOutcomeSpace": {
+    "description": "Binary outcome: Yes if the disruption and precipitation conditions are both satisfied; No otherwise.",
+    "labels": ["yes", "no"]
+  },
+  "clarificationHistory": [],
+  "incentiveRiskReview": {
+    "riskLevel": "minimal",
+    "notes": "Synthetic fixture data with no live operational exposure."
+  },
+  "createdAt": "2026-05-16T10:00:00Z",
+  "updatedAt": "2026-05-16T10:00:00Z"
+}

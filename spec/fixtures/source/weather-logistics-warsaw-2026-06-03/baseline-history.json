@@ -1,0 +1,17 @@
+{
+  "sourceRef": {
+    "sourceId": "source-103",
+    "name": "Warsaw weather logistics baseline fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+    "retrievedAt": "2026-06-01T11:30:00Z",
+    "contentHash": "sha256-baseline-source-101"
+  },
+  "geography": "Warsaw",
+  "lookbackStartsAt": "2026-03-01T00:00:00Z",
+  "lookbackEndsAt": "2026-05-31T23:59:59Z",
+  "weatherThresholdBucket": "daily_precipitation_gte_20mm",
+  "comparableServiceDays": 64,
+  "disruptionDays": 14,
+  "smoothing": "none"
+}

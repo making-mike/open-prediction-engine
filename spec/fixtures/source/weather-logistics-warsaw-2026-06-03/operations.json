@@ -1,0 +1,21 @@
+{
+  "sourceRef": {
+    "sourceId": "source-101",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-ops-source-101"
+  },
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "events": [
+    {
+      "eventId": "opsevent-101",
+      "occurredAt": "2026-06-03T12:40:00Z",
+      "eventCode": "weather_delay",
+      "weatherCoded": true,
+      "affectedStops": 34
+    }
+  ]
+}

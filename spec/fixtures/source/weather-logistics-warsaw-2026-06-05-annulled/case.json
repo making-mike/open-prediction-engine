@@ -1,0 +1,38 @@
+{
+  "caseId": "fixturecase-301",
+  "outputPrefix": "weather-logistics-annulled",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-05",
+  "questionId": "question-301",
+  "forecastId": "forecast-301",
+  "baselineForecastId": "forecast-300",
+  "evidencePacketId": "evidence-301",
+  "historyId": "history-301",
+  "resolutionRecordId": "resolution-301",
+  "featureSnapshotId": "featuresnapshot-301",
+  "normalizedSourceSetId": "sourceset-301",
+  "scoringReportId": "scoring-301",
+  "openAt": "2026-06-03T00:00:00Z",
+  "baselineForecastedAt": "2026-06-03T12:00:00Z",
+  "forecastedAt": "2026-06-04T10:00:00Z",
+  "closeAt": "2026-06-04T18:00:00Z",
+  "resolveAt": "2026-06-06T12:00:00Z",
+  "resolvedAt": "2026-06-06T10:00:00Z",
+  "generatedAt": "2026-06-06T10:20:00Z",
+  "resolutionStatus": "annulled",
+  "unscorableReason": "The operations fixture does not cover the declared geography for the service day, so the question contract cannot be resolved as written.",
+  "horizon": {
+    "startsAt": "2026-06-05T00:00:00Z",
+    "endsAt": "2026-06-05T23:59:59Z",
+    "label": "1-day"
+  },
+  "precipitationThresholdMm": 20,
+  "routeDensity": "medium",
+  "model": {
+    "modelId": "model-301",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  }
+}

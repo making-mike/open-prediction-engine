@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/benchmark-run.schema.json",
+  "title": "Benchmark Run",
+  "description": "Anti-leakage benchmark execution record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "benchmarkRunId",
+    "startedAt",
+    "status",
+    "questionIds",
+    "model",
+    "retrievalWindow",
+    "leakageControls"
+  ],
+  "properties": {
+    "benchmarkRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "startedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "endedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "running", "completed", "failed", "invalidated"]
+    },
+    "questionIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "model": { "$ref": "common.schema.json#/$defs/modelIdentity" },
+    "retrievalWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startsAt", "endsAt"],
+      "properties": {
+        "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "sourceFetches": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+    },
+    "leakageControls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "knownAnswerExcluded",
+        "postOutcomeDataBlocked",
+        "sourceTimestampsRecorded"
+      ],
+      "properties": {
+        "knownAnswerExcluded": { "type": "boolean" },
+        "postOutcomeDataBlocked": { "type": "boolean" },
+        "sourceTimestampsRecorded": { "type": "boolean" },
+        "auditNotes": {
+          "type": "string",
+          "maxLength": 1200
+        }
+      }
+    }
+  }
+}

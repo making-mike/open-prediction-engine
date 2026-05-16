@@ -1,0 +1,14 @@
+{
+  "publicationStatus": "provisional",
+  "qualityClaimStatus": "not_enough_resolved_pipeline_outcomes",
+  "minimumCalibrationSampleSize": 30,
+  "resolvedComparablePipelineOutcomes": 1,
+  "requestId": "forecastrequest-006",
+  "pipelineRunId": "pipelinerun-501",
+  "questionId": "question-501",
+  "forecastId": "forecast-502",
+  "evidencePacketId": "evidence-501",
+  "resolutionRecordId": "resolution-501",
+  "forecastArtifactPath": "spec/fixtures/generated/pipeline/weather-logistics-pipeline-artifact.generated.json",
+  "generatedAt": "2026-06-04T10:45:00Z"
+}

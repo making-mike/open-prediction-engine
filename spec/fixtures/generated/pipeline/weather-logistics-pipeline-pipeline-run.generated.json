@@ -1,0 +1,27 @@
+{
+  "pipelineRunId": "pipelinerun-501",
+  "requestId": "forecastrequest-006",
+  "decisionStatus": "accepted",
+  "executionStatus": "generated_fixture",
+  "executionMode": "fixture_dry_run",
+  "effectfulGeneration": false,
+  "generatedAt": "2026-06-02T10:01:00Z",
+  "controls": {
+    "requestValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "modelClass": "deterministic_fixture",
+    "sourceMode": "committed_fixture"
+  },
+  "outputs": {
+    "questionId": "question-501",
+    "forecastId": "forecast-502",
+    "evidencePacketId": "evidence-501",
+    "historyId": "history-501",
+    "forecastArtifactPath": "spec/fixtures/generated/pipeline/weather-logistics-pipeline-artifact.generated.json"
+  },
+  "notes": [
+    "Local scaffold only; no network API or hosted service.",
+    "Forecast remains unresolved until the outcome resolver runs for matching declared sources."
+  ]
+}

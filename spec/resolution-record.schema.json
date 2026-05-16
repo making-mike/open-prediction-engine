@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/resolution-record.schema.json",
+  "title": "Resolution Record",
+  "description": "Outcome or unscorable status for a forecast question.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolutionRecordId",
+    "questionId",
+    "status",
+    "resolvedAt",
+    "resolutionSource",
+    "resolutionAuthority"
+  ],
+  "properties": {
+    "resolutionRecordId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "ambiguous",
+        "annulled",
+        "disputed",
+        "corrected",
+        "stale_source"
+      ]
+    },
+    "resolvedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "resolutionSource": { "$ref": "common.schema.json#/$defs/sourceRef" },
+    "resolutionAuthority": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160
+    },
+    "resolvedOutcome": { "$ref": "common.schema.json#/$defs/resolvedOutcome" },
+    "unscorableReason": {
+      "type": "string",
+      "maxLength": 1200
+    },
+    "supportingEvidence": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/uri" },
+      "maxItems": 20
+    },
+    "replacesResolutionRecordId": { "$ref": "common.schema.json#/$defs/id" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "resolved" } },
+        "required": ["status"]
+      },
+      "then": { "required": ["resolvedOutcome"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["ambiguous", "annulled", "disputed", "stale_source"]
+          }
+        },
+        "required": ["status"]
+      },
+      "then": { "required": ["unscorableReason"] }
+    }
+  ]
+}

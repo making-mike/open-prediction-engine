@@ -1,0 +1,40 @@
+{
+  "questionId": "question-002",
+  "title": "What will the fixture grid demand peak be in Example Region on 2026-07-01?",
+  "background": "This fixture models a numeric forecast question for contract coverage. It is not a live energy forecast.",
+  "domain": "energy-demand",
+  "outputType": "interval",
+  "status": "open",
+  "openAt": "2026-06-29T00:00:00Z",
+  "closeAt": "2026-06-30T18:00:00Z",
+  "resolveAt": "2026-07-02T12:00:00Z",
+  "horizon": {
+    "startsAt": "2026-07-01T00:00:00Z",
+    "endsAt": "2026-07-01T23:59:59Z",
+    "label": "1-day"
+  },
+  "resolutionCriteria": "Resolve to the maximum hourly demand in megawatts recorded by the Example Region demand fixture for 2026-07-01.",
+  "resolutionAuthority": "OPE fixture resolver",
+  "resolutionMode": "automated_measurement",
+  "primaryResolutionSource": {
+    "sourceId": "source-003",
+    "name": "Example Region demand fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/example-region-demand-2026-07-01.json",
+    "retrievedAt": "2026-07-02T09:00:00Z",
+    "contentHash": "sha256-demand-fixture-001"
+  },
+  "validOutcomeSpace": {
+    "description": "Numeric peak demand in megawatts.",
+    "unit": "MW",
+    "minimum": 0,
+    "maximum": 50000
+  },
+  "clarificationHistory": [],
+  "incentiveRiskReview": {
+    "riskLevel": "minimal",
+    "notes": "Synthetic fixture data only."
+  },
+  "createdAt": "2026-05-16T10:30:00Z",
+  "updatedAt": "2026-05-16T10:30:00Z"
+}

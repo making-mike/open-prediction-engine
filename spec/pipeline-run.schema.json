@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pipeline-run.schema.json",
+  "title": "Forecast Pipeline Run",
+  "description": "Local forecast pipeline execution summary for a validated request.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipelineRunId",
+    "requestId",
+    "decisionStatus",
+    "executionStatus",
+    "executionMode",
+    "effectfulGeneration",
+    "generatedAt",
+    "controls",
+    "outputs"
+  ],
+  "properties": {
+    "pipelineRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["accepted", "blocked", "rejected", "canceled"]
+    },
+    "executionStatus": {
+      "type": "string",
+      "enum": ["generated_fixture", "not_generated", "failed"]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["fixture_dry_run"]
+    },
+    "effectfulGeneration": { "type": "boolean" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestValidated",
+        "networkAccess",
+        "liveFetch",
+        "modelClass",
+        "sourceMode"
+      ],
+      "properties": {
+        "requestValidated": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "modelClass": {
+          "type": "string",
+          "enum": ["deterministic_fixture"]
+        },
+        "sourceMode": {
+          "type": "string",
+          "enum": ["committed_fixture"]
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionId",
+        "forecastId",
+        "evidencePacketId",
+        "historyId",
+        "forecastArtifactPath"
+      ],
+      "properties": {
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "historyId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastArtifactPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 240
+      },
+      "maxItems": 8
+    }
+  }
+}

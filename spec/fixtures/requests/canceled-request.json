@@ -1,0 +1,26 @@
+{
+  "requestId": "forecastrequest-003",
+  "requestedAt": "2026-06-02T09:55:00Z",
+  "requesterId": "agent-fixture",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "questionText": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+  "outputType": "binary",
+  "horizonLabel": "1-day",
+  "requestedAction": "validate_only",
+  "riskReview": {
+    "highImpact": false,
+    "paid": false,
+    "external": false,
+    "privacySensitive": false
+  },
+  "approval": {
+    "status": "not_required"
+  },
+  "controls": {
+    "maxCostUsd": 0,
+    "timeoutSeconds": 60,
+    "cancelRequested": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sourceRef": {
+    "sourceId": "source-403",
+    "name": "Open-Meteo weather observation for Warsaw",
+    "sourceType": "public_dataset",
+    "uri": "https://archive-api.open-meteo.com/v1/archive?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&start_date=2026-06-03&end_date=2026-06-03",
+    "retrievedAt": "2026-06-04T09:05:00Z",
+    "contentHash": "sha256-live-weather-observation-401"
+  },
+  "provider": "Open-Meteo",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "sourceStatus": "current",
+  "observation": {
+    "observedAt": "2026-06-04T08:00:00Z",
+    "dailyPrecipitationMm": 27.2,
+    "qualityFlag": "complete"
+  }
+}

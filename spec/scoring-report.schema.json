@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/scoring-report.schema.json",
+  "title": "Scoring Report",
+  "description": "Scoring result for a forecast or forecast history.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scoringReportId",
+    "questionId",
+    "resolutionRecordId",
+    "scoreStatus",
+    "scoringRule",
+    "generatedAt"
+  ],
+  "properties": {
+    "scoringReportId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "historyId": { "$ref": "common.schema.json#/$defs/id" },
+    "resolutionRecordId": { "$ref": "common.schema.json#/$defs/id" },
+    "scoreStatus": {
+      "type": "string",
+      "enum": ["scored", "excluded"]
+    },
+    "scoringRule": { "$ref": "common.schema.json#/$defs/scoringRule" },
+    "primaryScore": { "type": "number" },
+    "higherIsBetter": { "type": "boolean" },
+    "timeWeighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["none", "standing_forecast_time", "latest_only"]
+        },
+        "totalWeight": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "baselineScore": { "type": "number" },
+    "baselineLift": { "type": "number" },
+    "excludedReason": {
+      "type": "string",
+      "maxLength": 1200
+    },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "scoreStatus": { "const": "scored" } },
+        "required": ["scoreStatus"]
+      },
+      "then": {
+        "required": ["forecastId", "primaryScore", "higherIsBetter"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "scoreStatus": { "const": "excluded" } },
+        "required": ["scoreStatus"]
+      },
+      "then": {
+        "required": ["excludedReason"]
+      }
+    }
+  ]
+}

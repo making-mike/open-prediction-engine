@@ -1,0 +1,82 @@
+{
+  "evidencePacketId": "evidence-101",
+  "forecastId": "forecast-101",
+  "questionId": "question-101",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T10:00:00Z",
+  "model": {
+    "modelId": "model-101",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  },
+  "inputSourceClasses": [
+    "internal_dataset"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "source-102",
+      "name": "Warsaw weather forecast fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-03.json",
+      "retrievedAt": "2026-06-02T09:30:00Z",
+      "contentHash": "sha256-weather-forecast-source-101"
+    },
+    {
+      "sourceId": "source-103",
+      "name": "Warsaw weather logistics baseline fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+      "retrievedAt": "2026-06-01T11:30:00Z",
+      "contentHash": "sha256-baseline-source-101"
+    }
+  ],
+  "featureSnapshotRef": "https://example.test/fixtures/generated/fixture-loop/weather-logistics-feature-snapshot.generated.json",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.41
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "calibrationBand": {
+    "lower": 0.33,
+    "upper": 0.49,
+    "coverage": 0.8,
+    "sampleSize": 64
+  },
+  "rationaleSummary": "The deterministic fixture model raises the disruption estimate when the precipitation forecast crosses the declared heavy-rain threshold.",
+  "keyFactors": [
+    "forecast precipitation 24.0 mm",
+    "threshold 20.0 mm",
+    "baseline disruption rate 0.22",
+    "route density medium"
+  ],
+  "resolutionCriteria": "Resolve Yes if the declared operations fixture reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the weather fixture records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+  "resolutionSource": {
+    "sourceId": "source-101",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-ops-source-101"
+  },
+  "fallbackResolutionSources": [
+    {
+      "sourceId": "source-104",
+      "name": "Warsaw weather observation fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-03.json",
+      "retrievedAt": "2026-06-04T09:00:00Z",
+      "contentHash": "sha256-weather-observation-source-101"
+    }
+  ],
+  "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+}

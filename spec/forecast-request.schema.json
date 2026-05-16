@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/forecast-request.schema.json",
+  "title": "Forecast Request",
+  "description": "Controlled forecast request intake record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "requestedAt",
+    "requesterId",
+    "domain",
+    "geography",
+    "serviceDate",
+    "questionText",
+    "outputType",
+    "horizonLabel",
+    "requestedAction",
+    "riskReview",
+    "approval",
+    "controls"
+  ],
+  "properties": {
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "requestedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "requesterId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "geography": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "serviceDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "questionText": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "horizonLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "requestedAction": {
+      "type": "string",
+      "enum": ["validate_only", "generate_forecast"]
+    },
+    "riskReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["highImpact", "paid", "external", "privacySensitive"],
+      "properties": {
+        "highImpact": { "type": "boolean" },
+        "paid": { "type": "boolean" },
+        "external": { "type": "boolean" },
+        "privacySensitive": { "type": "boolean" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["not_required", "pending", "approved", "rejected"]
+        },
+        "approvedBy": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "approvedAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxCostUsd", "timeoutSeconds", "cancelRequested"],
+      "properties": {
+        "maxCostUsd": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 25
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "cancelRequested": { "type": "boolean" }
+      }
+    }
+  }
+}

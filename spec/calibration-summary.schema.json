@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/calibration-summary.schema.json",
+  "title": "Calibration Summary",
+  "description": "Calibration report for comparable probabilistic forecasts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "calibrationSummaryId",
+    "generatedAt",
+    "domain",
+    "horizonBucket",
+    "outputType",
+    "coveragePeriod",
+    "sampleSize",
+    "buckets"
+  ],
+  "properties": {
+    "calibrationSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "horizonBucket": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "coveragePeriod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startsAt", "endsAt"],
+      "properties": {
+        "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "sampleSize": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expectedCalibrationError": {
+      "type": "number",
+      "minimum": 0
+    },
+    "buckets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lowerProbability",
+          "upperProbability",
+          "count",
+          "meanForecastProbability",
+          "observedFrequency"
+        ],
+        "properties": {
+          "lowerProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "upperProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "meanForecastProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "observedFrequency": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    }
+  }
+}

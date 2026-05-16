@@ -1,0 +1,81 @@
+{
+  "normalizedSourceSetId": "sourceset-101",
+  "caseId": "fixturecase-001",
+  "generatedAt": "2026-06-04T10:20:00Z",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "records": [
+    {
+      "sourceRole": "forecast_input",
+      "sourceRef": {
+        "sourceId": "source-102",
+        "name": "Warsaw weather forecast fixture",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-03.json",
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "contentHash": "sha256-weather-forecast-source-101"
+      },
+      "normalizedFields": {
+        "forecastDailyPrecipitationMm": 24,
+        "forecastIssuedAt": "2026-06-02T09:00:00Z",
+        "warningLevel": "heavy_rain"
+      }
+    },
+    {
+      "sourceRole": "resolution_support",
+      "sourceRef": {
+        "sourceId": "source-104",
+        "name": "Warsaw weather observation fixture",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-03.json",
+        "retrievedAt": "2026-06-04T09:00:00Z",
+        "contentHash": "sha256-weather-observation-source-101"
+      },
+      "normalizedFields": {
+        "observedDailyPrecipitationMm": 27.2,
+        "observationRecordedAt": "2026-06-04T08:00:00Z",
+        "qualityFlag": "complete"
+      }
+    },
+    {
+      "sourceRole": "resolution_primary",
+      "sourceRef": {
+        "sourceId": "source-101",
+        "name": "Warsaw logistics operations fixture",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-03.json",
+        "retrievedAt": "2026-06-04T09:00:00Z",
+        "contentHash": "sha256-ops-source-101"
+      },
+      "normalizedFields": {
+        "weatherCodedDisruptionCount": 1,
+        "affectedStops": 34,
+        "eventCodes": [
+          "weather_delay"
+        ],
+        "coverageStatus": "complete"
+      }
+    },
+    {
+      "sourceRole": "baseline_input",
+      "sourceRef": {
+        "sourceId": "source-103",
+        "name": "Warsaw weather logistics baseline fixture",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+        "retrievedAt": "2026-06-01T11:30:00Z",
+        "contentHash": "sha256-baseline-source-101"
+      },
+      "normalizedFields": {
+        "lookbackStartsAt": "2026-03-01T00:00:00Z",
+        "lookbackEndsAt": "2026-05-31T23:59:59Z",
+        "weatherThresholdBucket": "daily_precipitation_gte_20mm",
+        "comparableServiceDays": 64,
+        "disruptionDays": 14,
+        "baselineProbability": 0.22,
+        "smoothing": "none"
+      }
+    }
+  ]
+}

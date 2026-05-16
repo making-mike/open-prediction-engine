@@ -1,0 +1,30 @@
+{
+  "aggregateForecastId": "aggregateforecast-001",
+  "questionId": "question-101",
+  "createdAt": "2026-06-02T10:05:00Z",
+  "method": "weighted_average",
+  "recencyHandling": "latest_only",
+  "includedForecasts": [
+    {
+      "forecastId": "forecast-100",
+      "sourceClass": "baseline",
+      "weight": 0.25,
+      "included": true
+    },
+    {
+      "forecastId": "forecast-101",
+      "sourceClass": "model",
+      "weight": 0.75,
+      "included": true
+    }
+  ],
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.36
+  },
+  "dependencyAssessment": {
+    "independenceLevel": "low",
+    "dependencyGraphRef": "https://example.test/fixtures/dependency/weather-logistics-aggregate-001.json",
+    "notes": "The model forecast uses the same weather and baseline sources as the baseline forecast, so the aggregate must not claim high independence."
+  }
+}

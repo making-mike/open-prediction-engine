@@ -1,0 +1,37 @@
+{
+  "forecastId": "forecast-006",
+  "questionId": "question-999",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T10:00:00Z",
+  "outputType": "binary",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.41
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "model": {
+    "modelId": "model-002",
+    "version": "weather-logistics-fixture-v0"
+  },
+  "evidencePacketId": "evidence-002",
+  "resolutionPlan": {
+    "resolutionCriteria": "Invalid fixture: artifact questionId does not match the expected request binding for question-001.",
+    "resolutionAuthority": "OPE fixture resolver",
+    "primaryResolutionSource": {
+      "sourceId": "source-001",
+      "name": "Warsaw logistics operations fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/warsaw-logistics-2026-06-03.json"
+    },
+    "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+  }
+}

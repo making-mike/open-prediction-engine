@@ -1,0 +1,30 @@
+{
+  "forecastSourceRef": {
+    "sourceId": "source-302",
+    "name": "Warsaw weather forecast fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-05.json",
+    "retrievedAt": "2026-06-04T09:30:00Z",
+    "contentHash": "sha256-weather-forecast-source-301"
+  },
+  "observationSourceRef": {
+    "sourceId": "source-304",
+    "name": "Warsaw weather observation fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-05.json",
+    "retrievedAt": "2026-06-06T09:00:00Z",
+    "contentHash": "sha256-weather-observation-source-301"
+  },
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-05",
+  "forecast": {
+    "issuedAt": "2026-06-04T09:00:00Z",
+    "dailyPrecipitationMm": 18,
+    "warningLevel": "rain"
+  },
+  "observation": {
+    "observedAt": "2026-06-06T08:00:00Z",
+    "dailyPrecipitationMm": 22.4,
+    "qualityFlag": "complete"
+  }
+}

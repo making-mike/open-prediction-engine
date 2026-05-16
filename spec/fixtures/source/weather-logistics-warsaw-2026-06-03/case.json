@@ -1,0 +1,37 @@
+{
+  "caseId": "fixturecase-001",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "questionId": "question-101",
+  "forecastId": "forecast-101",
+  "baselineForecastId": "forecast-100",
+  "evidencePacketId": "evidence-101",
+  "historyId": "history-101",
+  "resolutionRecordId": "resolution-101",
+  "featureSnapshotId": "featuresnapshot-101",
+  "normalizedSourceSetId": "sourceset-101",
+  "scoringReportId": "scoring-101",
+  "calibrationSummaryId": "calibration-101",
+  "trackRecordReportId": "trackrecord-101",
+  "openAt": "2026-06-01T00:00:00Z",
+  "baselineForecastedAt": "2026-06-01T12:00:00Z",
+  "forecastedAt": "2026-06-02T10:00:00Z",
+  "closeAt": "2026-06-02T18:00:00Z",
+  "resolveAt": "2026-06-04T12:00:00Z",
+  "resolvedAt": "2026-06-04T10:00:00Z",
+  "generatedAt": "2026-06-04T10:20:00Z",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "precipitationThresholdMm": 20,
+  "routeDensity": "medium",
+  "model": {
+    "modelId": "model-101",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  }
+}

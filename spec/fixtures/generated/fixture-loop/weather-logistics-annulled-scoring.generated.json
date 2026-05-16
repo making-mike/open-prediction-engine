@@ -1,0 +1,11 @@
+{
+  "scoringReportId": "scoring-301",
+  "questionId": "question-301",
+  "forecastId": "forecast-301",
+  "historyId": "history-301",
+  "resolutionRecordId": "resolution-301",
+  "scoreStatus": "excluded",
+  "scoringRule": "not_scored",
+  "excludedReason": "The operations fixture does not cover the declared geography for the service day, so the question contract cannot be resolved as written.",
+  "generatedAt": "2026-06-06T10:20:00Z"
+}

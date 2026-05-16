@@ -1,0 +1,11 @@
+{
+  "scoringReportId": "scoring-201",
+  "questionId": "question-201",
+  "forecastId": "forecast-201",
+  "historyId": "history-201",
+  "resolutionRecordId": "resolution-201",
+  "scoreStatus": "excluded",
+  "scoringRule": "not_scored",
+  "excludedReason": "The operations fixture reports a weather-coded disruption, but the weather observation fixture has conflicting station reports around the declared precipitation threshold.",
+  "generatedAt": "2026-06-05T10:20:00Z"
+}

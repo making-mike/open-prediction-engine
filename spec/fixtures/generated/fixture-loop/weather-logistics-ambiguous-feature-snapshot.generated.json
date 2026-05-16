@@ -1,0 +1,23 @@
+{
+  "featureSnapshotId": "featuresnapshot-201",
+  "questionId": "question-201",
+  "generatedAt": "2026-06-03T10:00:00Z",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-04T00:00:00Z",
+    "endsAt": "2026-06-04T23:59:59Z",
+    "label": "1-day"
+  },
+  "sourceIds": [
+    "source-202",
+    "source-203"
+  ],
+  "features": {
+    "forecastDailyPrecipitationMm": 23.0,
+    "precipitationThresholdMm": 20.0,
+    "forecastExceedsThreshold": true,
+    "baselineComparableServiceDays": 64,
+    "baselineDisruptionRate": 0.22,
+    "routeDensity": "medium"
+  }
+}

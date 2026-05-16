@@ -1,0 +1,13 @@
+[project]
+name = "open-prediction-engine"
+version = "0.0.0"
+description = "Contract-first forecasting engine fixtures, schemas, and bootstrap checks."
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.ope]
+runtime = "python3"
+package-manager = "none"
+test-command = "python3 scripts/run_checks.py"
+release-check-command = "python3 scripts/release_check.py"
+cli-command = "python3 scripts/ope.py"

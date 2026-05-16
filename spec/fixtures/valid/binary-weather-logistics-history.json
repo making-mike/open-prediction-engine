@@ -1,0 +1,43 @@
+{
+  "historyId": "history-001",
+  "questionId": "question-001",
+  "entries": [
+    {
+      "forecastId": "forecast-001",
+      "forecastedAt": "2026-06-01T12:00:00Z",
+      "state": "superseded",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-001",
+        "version": "historical-frequency-v0"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.22
+      },
+      "rationaleSummary": "Historical disruption base rate for the fixture domain.",
+      "evidencePacketId": "evidence-001"
+    },
+    {
+      "forecastId": "forecast-002",
+      "forecastedAt": "2026-06-02T10:00:00Z",
+      "state": "active",
+      "sourceClass": "model",
+      "model": {
+        "modelId": "model-002",
+        "version": "weather-logistics-fixture-v0",
+        "trainingCutoff": "2026-05-30T00:00:00Z",
+        "configurationHash": "sha256-model-config-001"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.41
+      },
+      "supersedesForecastId": "forecast-001",
+      "rationaleSummary": "Updated after precipitation fixture crossed the heavy-rain threshold.",
+      "evidencePacketId": "evidence-002"
+    }
+  ],
+  "createdAt": "2026-06-01T12:00:00Z",
+  "updatedAt": "2026-06-02T10:00:00Z"
+}

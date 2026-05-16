@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/release-manifest.schema.json",
+  "title": "Release Manifest",
+  "description": "Machine-readable summary of the local OPE release surface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "releaseManifestId",
+    "generatedAt",
+    "project",
+    "releaseStatus",
+    "ci",
+    "commands",
+    "contracts",
+    "readSurfaces",
+    "claimBoundaries",
+    "nonGoals"
+  ],
+  "properties": {
+    "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "runtime", "packageManager"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "runtime": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "packageManager": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "releaseStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "networkApiImplemented",
+        "hostedServiceImplemented",
+        "liveCalibrationClaimAllowed"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["fixture_ready"]
+        },
+        "networkApiImplemented": { "type": "boolean" },
+        "hostedServiceImplemented": { "type": "boolean" },
+        "liveCalibrationClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["setupCheck", "test", "releaseCheck", "cli"],
+      "properties": {
+        "setupCheck": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "test": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "releaseCheck": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "cli": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "ci": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "workflowPath", "releaseCheckCommand", "compileCommand"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["github_actions"]
+        },
+        "workflowPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "releaseCheckCommand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "compileCommand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaFileCount", "schemaFiles"],
+      "properties": {
+        "schemaFileCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "schemaFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "readSurfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["recordType", "count"],
+        "properties": {
+          "recordType": {
+            "type": "string",
+            "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "claimBoundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "minimumCalibrationSampleSize",
+        "resolvedPipelineOutcomes",
+        "resolvedLiveOutcomes",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "minimumCalibrationSampleSize": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resolvedPipelineOutcomes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolvedLiveOutcomes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "qualityClaimStatus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "nonGoals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      }
+    }
+  }
+}

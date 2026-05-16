@@ -1,0 +1,41 @@
+{
+  "benchmarkRunId": "benchmarkrun-002",
+  "startedAt": "2026-06-04T09:05:00Z",
+  "endedAt": "2026-06-04T09:10:00Z",
+  "status": "invalidated",
+  "questionIds": ["question-101"],
+  "model": {
+    "modelId": "model-101",
+    "version": "weather-logistics-fixture-loop-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-fixture-loop-model-001"
+  },
+  "retrievalWindow": {
+    "startsAt": "2026-06-01T00:00:00Z",
+    "endsAt": "2026-06-04T09:00:00Z"
+  },
+  "sourceFetches": [
+    {
+      "sourceId": "source-102",
+      "name": "Warsaw weather forecast fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-03.json",
+      "retrievedAt": "2026-06-02T09:30:00Z",
+      "contentHash": "sha256-weather-forecast-source-101"
+    },
+    {
+      "sourceId": "source-104",
+      "name": "Warsaw weather observation fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-03.json",
+      "retrievedAt": "2026-06-04T09:00:00Z",
+      "contentHash": "sha256-weather-observation-source-101"
+    }
+  ],
+  "leakageControls": {
+    "knownAnswerExcluded": false,
+    "postOutcomeDataBlocked": false,
+    "sourceTimestampsRecorded": true,
+    "auditNotes": "Intentionally contaminated fixture: includes the weather observation fallback source from the resolution plan."
+  }
+}

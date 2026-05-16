@@ -1,0 +1,23 @@
+{
+  "resolutionRecordId": "resolution-101",
+  "questionId": "question-101",
+  "status": "resolved",
+  "resolvedAt": "2026-06-04T10:00:00Z",
+  "resolutionSource": {
+    "sourceId": "source-101",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-ops-source-101"
+  },
+  "resolutionAuthority": "OPE fixture resolver",
+  "resolvedOutcome": {
+    "outputType": "binary",
+    "value": true
+  },
+  "supportingEvidence": [
+    "https://example.test/fixtures/source/warsaw-logistics-2026-06-03.json",
+    "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-03.json"
+  ]
+}

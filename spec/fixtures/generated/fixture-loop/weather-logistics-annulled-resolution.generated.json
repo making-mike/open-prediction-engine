@@ -1,0 +1,20 @@
+{
+  "resolutionRecordId": "resolution-301",
+  "questionId": "question-301",
+  "status": "annulled",
+  "resolvedAt": "2026-06-06T10:00:00Z",
+  "resolutionSource": {
+    "sourceId": "source-301",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-05.json",
+    "retrievedAt": "2026-06-06T09:00:00Z",
+    "contentHash": "sha256-ops-source-301"
+  },
+  "resolutionAuthority": "OPE fixture resolver",
+  "unscorableReason": "The operations fixture does not cover the declared geography for the service day, so the question contract cannot be resolved as written.",
+  "supportingEvidence": [
+    "https://example.test/fixtures/source/warsaw-logistics-2026-06-05.json",
+    "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-05.json"
+  ]
+}

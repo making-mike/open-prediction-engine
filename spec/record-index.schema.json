@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/record-index.schema.json",
+  "title": "Public Record Index",
+  "description": "Read-only index of public generated OPE records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recordIndexId", "generatedAt", "access", "recordSets"],
+  "properties": {
+    "recordIndexId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "source"],
+      "properties": {
+        "mode": { "const": "read_only_file" },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "recordSets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["recordType", "count", "records"],
+        "properties": {
+          "recordType": {
+            "type": "string",
+            "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["recordType", "recordId"],
+              "properties": {
+                "recordType": {
+                  "type": "string",
+                  "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+                },
+                "recordId": { "$ref": "common.schema.json#/$defs/id" },
+                "questionId": { "$ref": "common.schema.json#/$defs/id" },
+                "domain": { "$ref": "common.schema.json#/$defs/domain" },
+                "horizonBucket": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+                "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+                "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

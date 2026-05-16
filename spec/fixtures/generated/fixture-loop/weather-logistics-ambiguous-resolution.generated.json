@@ -1,0 +1,20 @@
+{
+  "resolutionRecordId": "resolution-201",
+  "questionId": "question-201",
+  "status": "ambiguous",
+  "resolvedAt": "2026-06-05T10:00:00Z",
+  "resolutionSource": {
+    "sourceId": "source-201",
+    "name": "Warsaw logistics operations fixture",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/fixtures/source/warsaw-logistics-2026-06-04.json",
+    "retrievedAt": "2026-06-05T09:00:00Z",
+    "contentHash": "sha256-ops-source-201"
+  },
+  "resolutionAuthority": "OPE fixture resolver",
+  "unscorableReason": "The operations fixture reports a weather-coded disruption, but the weather observation fixture has conflicting station reports around the declared precipitation threshold.",
+  "supportingEvidence": [
+    "https://example.test/fixtures/source/warsaw-logistics-2026-06-04.json",
+    "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-04.json"
+  ]
+}

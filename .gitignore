@@ -1,0 +1,4 @@
+/open-prediction-stack-memo.md
+.ope/live/
+__pycache__/
+*.pyc

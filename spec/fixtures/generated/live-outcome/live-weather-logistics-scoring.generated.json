@@ -1,0 +1,18 @@
+{
+  "scoringReportId": "scoring-401",
+  "questionId": "question-401",
+  "forecastId": "forecast-402",
+  "historyId": "history-401",
+  "resolutionRecordId": "resolution-401",
+  "scoreStatus": "scored",
+  "scoringRule": "brier",
+  "primaryScore": 0.3481,
+  "higherIsBetter": false,
+  "timeWeighting": {
+    "method": "latest_only",
+    "totalWeight": 1
+  },
+  "baselineScore": 0.6084,
+  "baselineLift": 0.2603,
+  "generatedAt": "2026-06-04T10:35:00Z"
+}

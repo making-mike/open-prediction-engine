@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/evidence-packet.schema.json",
+  "title": "Evidence Packet",
+  "description": "Evidence and provenance bundle for a forecast artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidencePacketId",
+    "forecastId",
+    "questionId",
+    "domain",
+    "horizon",
+    "forecastedAt",
+    "model",
+    "inputSourceClasses",
+    "provenanceReferences",
+    "forecastOutput",
+    "baselineForecast",
+    "resolutionCriteria",
+    "resolutionSource",
+    "scheduledResolutionAt"
+  ],
+  "properties": {
+    "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+    "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionStatus": {
+      "type": "string",
+      "enum": ["approved", "open", "closed"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+    "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "model": { "$ref": "common.schema.json#/$defs/modelIdentity" },
+    "inputSourceClasses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "official",
+          "public_dataset",
+          "internal_dataset",
+          "human_judgment",
+          "model_output",
+          "market_price",
+          "aggregate",
+          "other"
+        ]
+      }
+    },
+    "provenanceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+    },
+    "featureSnapshotRef": { "$ref": "common.schema.json#/$defs/uri" },
+    "forecastOutput": { "$ref": "common.schema.json#/$defs/forecastOutput" },
+    "baselineForecast": { "$ref": "common.schema.json#/$defs/forecastOutput" },
+    "aggregateForecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "calibrationBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lower": { "type": "number" },
+        "upper": { "type": "number" },
+        "coverage": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "sampleSize": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rationaleSummary": {
+      "type": "string",
+      "maxLength": 1200
+    },
+    "keyFactors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 240
+      },
+      "maxItems": 12
+    },
+    "resolutionCriteria": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 5000
+    },
+    "resolutionSource": { "$ref": "common.schema.json#/$defs/sourceRef" },
+    "fallbackResolutionSources": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" },
+      "maxItems": 5
+    },
+    "scheduledResolutionAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+  }
+}

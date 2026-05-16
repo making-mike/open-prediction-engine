@@ -1,0 +1,80 @@
+{
+  "releaseManifestId": "releasemanifest-001",
+  "generatedAt": "2026-06-06T11:00:00Z",
+  "project": {
+    "name": "open-prediction-engine",
+    "runtime": "python3-standard-library",
+    "packageManager": "none"
+  },
+  "releaseStatus": {
+    "status": "fixture_ready",
+    "networkApiImplemented": false,
+    "hostedServiceImplemented": false,
+    "liveCalibrationClaimAllowed": false
+  },
+  "ci": {
+    "provider": "github_actions",
+    "workflowPath": ".github/workflows/release-check.yml",
+    "releaseCheckCommand": "python3 scripts/release_check.py",
+    "compileCommand": "python3 -m py_compile scripts/*.py"
+  },
+  "commands": {
+    "setupCheck": "python3 --version",
+    "test": "python3 scripts/run_checks.py",
+    "releaseCheck": "python3 scripts/release_check.py",
+    "cli": "python3 scripts/ope.py"
+  },
+  "contracts": {
+    "schemaFileCount": 16,
+    "schemaFiles": [
+      "spec/aggregate-forecast.schema.json",
+      "spec/benchmark-run.schema.json",
+      "spec/calibration-summary.schema.json",
+      "spec/common.schema.json",
+      "spec/evidence-packet.schema.json",
+      "spec/forecast-artifact.schema.json",
+      "spec/forecast-card.schema.json",
+      "spec/forecast-history.schema.json",
+      "spec/forecast-question.schema.json",
+      "spec/forecast-request.schema.json",
+      "spec/pipeline-run.schema.json",
+      "spec/record-index.schema.json",
+      "spec/release-manifest.schema.json",
+      "spec/resolution-record.schema.json",
+      "spec/scoring-report.schema.json",
+      "spec/track-record-report.schema.json"
+    ]
+  },
+  "readSurfaces": [
+    {
+      "recordType": "forecast-artifact",
+      "count": 5
+    },
+    {
+      "recordType": "forecast-bundle",
+      "count": 5
+    },
+    {
+      "recordType": "forecast-card",
+      "count": 5
+    },
+    {
+      "recordType": "track-record",
+      "count": 4
+    }
+  ],
+  "claimBoundaries": {
+    "domain": "weather-logistics",
+    "minimumCalibrationSampleSize": 30,
+    "resolvedPipelineOutcomes": 1,
+    "resolvedLiveOutcomes": 1,
+    "qualityClaimStatus": "not_enough_resolved_comparable_outcomes"
+  },
+  "nonGoals": [
+    "network_api",
+    "hosted_service",
+    "production_live_data_workflow",
+    "live_calibration_claim",
+    "universal_prediction_oracle"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "calibrationSummaryId": "calibration-401",
+  "generatedAt": "2026-06-04T10:35:00Z",
+  "domain": "weather-logistics",
+  "horizonBucket": "1-day",
+  "outputType": "binary",
+  "coveragePeriod": {
+    "startsAt": "2026-06-02T10:00:00Z",
+    "endsAt": "2026-06-04T10:30:00Z"
+  },
+  "sampleSize": 1,
+  "expectedCalibrationError": 0.59,
+  "buckets": [
+    {
+      "lowerProbability": 0.0,
+      "upperProbability": 0.1,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.1,
+      "upperProbability": 0.2,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.2,
+      "upperProbability": 0.3,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.3,
+      "upperProbability": 0.4,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.4,
+      "upperProbability": 0.5,
+      "count": 1,
+      "meanForecastProbability": 0.41,
+      "observedFrequency": 1.0
+    },
+    {
+      "lowerProbability": 0.5,
+      "upperProbability": 0.6,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.6,
+      "upperProbability": 0.7,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.7,
+      "upperProbability": 0.8,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.8,
+      "upperProbability": 0.9,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    },
+    {
+      "lowerProbability": 0.9,
+      "upperProbability": 1.0,
+      "count": 0,
+      "meanForecastProbability": 0.0,
+      "observedFrequency": 0.0
+    }
+  ]
+}
