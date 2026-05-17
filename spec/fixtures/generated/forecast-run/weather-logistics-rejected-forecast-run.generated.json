@@ -1,0 +1,66 @@
+{
+  "forecastRunSummaryId": "forecastrun-002",
+  "generatedAt": "2026-06-06T13:05:00Z",
+  "request": {
+    "requestId": "forecastrequest-004",
+    "requestPath": "spec/fixtures/requests/unresolvable-request.json",
+    "requestedAction": "validate_only",
+    "dataMode": "provided",
+    "domain": "weather-logistics",
+    "geography": "Krakow",
+    "serviceDate": "2026-06-03",
+    "horizonLabel": "1-day"
+  },
+  "runStatus": "rejected",
+  "decisionStatus": "rejected",
+  "executionMode": "not_started",
+  "sourceMode": "none",
+  "controls": {
+    "requestValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "paidAction": false,
+    "privateSourceAccess": false
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-004",
+    "sourcePolicyId": "sourcepolicy-001",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "methodSelectionId": null,
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "forecastCardId": null,
+    "forecastBundleId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "planStatus": null,
+    "gatheringStatus": null,
+    "forecastStatus": null,
+    "resolutionStatus": null,
+    "scoreStatus": null,
+    "qualityClaimStatus": null
+  },
+  "outputs": {
+    "forecastCard": null,
+    "evidenceTrace": null,
+    "lifecycleBundle": null,
+    "resolutionStatus": null,
+    "scoringSummary": null
+  },
+  "forecast": null,
+  "qualityClaim": null,
+  "error": {
+    "code": "unsupported_geography",
+    "message": "Geography is not allow-listed.",
+    "retryable": false
+  },
+  "warnings": [
+    "No forecast outputs were generated for this run.",
+    "Failure summary is sanitized and does not expose raw diagnostics."
+  ]
+}

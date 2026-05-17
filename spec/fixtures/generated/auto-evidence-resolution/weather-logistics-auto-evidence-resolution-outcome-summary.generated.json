@@ -1,0 +1,18 @@
+{
+  "publicationStatus": "provisional",
+  "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes",
+  "minimumCalibrationSampleSize": 30,
+  "resolvedComparableAutoEvidenceOutcomes": 1,
+  "requestId": "forecastrequest-007",
+  "pipelineRunId": "pipelinerun-601",
+  "evidencePlanId": "evidenceplan-019",
+  "evidenceSourceSetId": "evidencesourceset-019",
+  "sourcePolicyId": "sourcepolicy-019",
+  "sourceMode": "auto_evidence_fixture_replay",
+  "questionId": "question-601",
+  "forecastId": "forecast-602",
+  "evidencePacketId": "evidence-601",
+  "resolutionRecordId": "resolution-601",
+  "forecastArtifactPath": "spec/fixtures/generated/auto-evidence/weather-logistics-auto-evidence-artifact.generated.json",
+  "generatedAt": "2026-06-04T12:15:00Z"
+}

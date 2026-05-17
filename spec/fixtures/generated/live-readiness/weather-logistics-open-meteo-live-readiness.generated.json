@@ -1,0 +1,113 @@
+{
+  "liveConnectorReadinessId": "liveconnectorreadiness-001",
+  "generatedAt": "2026-06-06T14:25:00Z",
+  "readinessStatus": "ready_for_explicit_integration_check",
+  "domain": "weather-logistics",
+  "connector": {
+    "connectorId": "sourceconnector-001",
+    "connectorKey": "open_meteo_weather",
+    "displayName": "Open-Meteo weather forecast",
+    "sourceClass": "public_dataset"
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "sourcePolicyId": "sourcepolicy-019",
+    "evidencePlanId": "evidenceplan-019",
+    "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+    "sourceConnectorResultSetId": "sourceconnectorresults-001",
+    "connectorResultId": "connectorresult-001",
+    "fixtureEvidenceTraceId": "evidencetrace-602",
+    "fixtureForecastId": "forecast-602",
+    "fixtureQuestionId": "question-601"
+  },
+  "executionModes": {
+    "fixtureReplay": {
+      "mode": "fixture_replay",
+      "implemented": true,
+      "enabledInNormalChecks": true,
+      "networkAccess": false,
+      "liveFetch": false,
+      "requiresExplicitFlag": false,
+      "command": "python3 scripts/ope.py gather-evidence --check",
+      "resultStatus": "succeeded_fixture_replay"
+    },
+    "integrationLiveFetch": {
+      "mode": "integration_live_fetch",
+      "implemented": true,
+      "enabledInNormalChecks": false,
+      "networkAccess": true,
+      "liveFetch": true,
+      "requiresExplicitFlag": true,
+      "command": "python3 scripts/ope.py live-readiness --live --service-date YYYY-MM-DD",
+      "resultStatus": "not_run_by_default"
+    },
+    "hostedLiveFetch": {
+      "mode": "hosted_live_fetch",
+      "implemented": false,
+      "enabledInNormalChecks": false,
+      "networkAccess": true,
+      "liveFetch": true,
+      "requiresExplicitFlag": true,
+      "command": "future hosted runtime connector execution",
+      "resultStatus": "not_implemented"
+    }
+  },
+  "approvalBoundary": {
+    "operatorExplicitFlagRequired": true,
+    "sourcePolicyApprovalRequired": false,
+    "paid": false,
+    "effectful": false,
+    "privacySensitive": false,
+    "approvalRecordRequiredBeforeForecastUse": true
+  },
+  "networkBoundary": {
+    "allowedEndpoint": "https://api.open-meteo.com/v1/forecast",
+    "allowBroadWebSearch": false,
+    "maxNetworkCalls": 1,
+    "timeoutSeconds": 20,
+    "maxCostUsd": 0,
+    "normalChecksNetworkAccess": false
+  },
+  "freshnessBoundary": {
+    "maxSourceAgeHours": 24,
+    "requireRetrievedAt": true,
+    "requireServiceDateBinding": true
+  },
+  "retentionBoundary": {
+    "rawSourceRetention": "metadata_only",
+    "storeContentHash": true,
+    "rawPreviewStored": false,
+    "storeNormalizedFields": true
+  },
+  "diagnosticsBoundary": {
+    "sanitizedErrors": true,
+    "rawDiagnosticStored": false,
+    "rawStackTraceExposed": false,
+    "publicFailureMessage": "Live connector check failed; inspect trusted local logs or rerun explicitly."
+  },
+  "credentialBoundary": {
+    "promptVisibleCredentialsAccepted": false,
+    "credentialUsed": false,
+    "credentialLocation": "none"
+  },
+  "traceBinding": {
+    "fixtureTracePreserved": true,
+    "integrationTraceMustBeCompatible": true,
+    "requestResultBindingRequired": true,
+    "forecastUseRequiresConnectorResult": true,
+    "forecastUseRequiresEvidenceTrace": true
+  },
+  "claimBoundary": {
+    "normalReleaseChecksOffline": true,
+    "integrationLiveFetchPartOfRelease": false,
+    "hostedRuntimeImplemented": false,
+    "allEvidenceClaimed": false,
+    "liveCalibrationClaimAllowed": false,
+    "forecastQualityClaimAllowed": false
+  },
+  "warnings": [
+    "Normal release checks remain offline and deterministic.",
+    "Integration live fetch is opt-in and limited to the allow-listed Open-Meteo endpoint.",
+    "Successful live readiness does not create a production hosted runtime or a live calibration claim."
+  ]
+}

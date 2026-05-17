@@ -75,6 +75,95 @@ def check_forecast_card_read() -> None:
         raise AssertionError("forecast card should not expose source hashes or supporting evidence URIs")
 
 
+def check_historical_forecast_card_read() -> None:
+    response = read_record("forecast-card", "forecast-702", "question-701")
+    record = response["record"]
+    if record["forecast"]["probability"] != 0.22:
+        raise AssertionError("historical forecast card returned wrong probability")
+    if record["forecast"] != record["baseline"]:
+        raise AssertionError("historical forecast card should show baseline equality")
+    if record["requestBinding"]["sourceMode"] != "committed_fixture":
+        raise AssertionError("historical forecast card missed committed fixture binding")
+    if record["links"]["evidenceTrace"] is not None:
+        raise AssertionError("historical forecast card should not link an auto-evidence trace")
+
+
+def check_setup_forecast_card_read() -> None:
+    response = read_record("forecast-card", "forecast-901", "question-901")
+    record = response["record"]
+    setup = record["setupBinding"]
+    if setup["setupForecastRunId"] != "setupforecastrun-901":
+        raise AssertionError("setup forecast card missed setup run binding")
+    if setup["sourceIntakeReportId"] != "sourceintakereport-001":
+        raise AssertionError("setup forecast card missed source intake binding")
+    if setup["setupBenchmarkGateId"] != "setupbenchmarkgate-001":
+        raise AssertionError("setup forecast card missed setup benchmark gate binding")
+    if setup["selectedMethodClass"] != "deterministic_statistical":
+        raise AssertionError("setup forecast card returned wrong selected method")
+    if record["forecast"]["probability"] <= record["baseline"]["probability"]:
+        raise AssertionError("setup forecast card should show deterministic lift over baseline")
+    if record["links"]["evidenceTrace"] is not None:
+        raise AssertionError("setup forecast card should not link an auto-evidence trace")
+
+
+def check_source_handoff_forecast_card_read() -> None:
+    response = read_record("forecast-card", "forecast-1102", "question-1102")
+    record = response["record"]
+    setup = record["setupBinding"]
+    if setup["setupForecastRunId"] != "setupforecastrun-1102":
+        raise AssertionError("source-handoff forecast card missed setup run binding")
+    if setup["sourceIntakeHandoffId"] != "sourceintakehandoff-002":
+        raise AssertionError("source-handoff forecast card missed handoff binding")
+    if setup["sourceHandoffMethodGateId"] != "sourcehandoffmethodgate-002":
+        raise AssertionError("source-handoff forecast card missed method gate binding")
+    if setup["sourceIntakeReportId"] != "sourceintakereport-102":
+        raise AssertionError("source-handoff forecast card missed source intake binding")
+    if setup["setupBenchmarkGateId"] != "setupbenchmarkgate-102":
+        raise AssertionError("source-handoff forecast card missed benchmark gate binding")
+    if setup["selectedMethodClass"] != "deterministic_statistical":
+        raise AssertionError("source-handoff forecast card returned wrong selected method")
+    if record["forecast"]["probability"] <= record["baseline"]["probability"]:
+        raise AssertionError("source-handoff forecast card should show deterministic lift over baseline")
+    if record["links"]["evidenceTrace"] is not None:
+        raise AssertionError("source-handoff forecast card should not link an auto-evidence trace")
+
+
+def check_evidence_trace_read() -> None:
+    response = read_record("evidence-trace", "forecast-602", "question-601")
+    record = response["record"]
+    if record["evidenceTraceId"] != "evidencetrace-602":
+        raise AssertionError("evidence trace lookup returned wrong trace")
+    if record["recordBinding"]["evidencePlanId"] != "evidenceplan-019":
+        raise AssertionError("evidence trace missed evidence-plan binding")
+    if record["recordBinding"]["evidenceSourceSetId"] != "evidencesourceset-019":
+        raise AssertionError("evidence trace missed source-set binding")
+    if record["recordBinding"]["sourceConnectorRegistryId"] != "sourceconnectorregistry-001":
+        raise AssertionError("evidence trace missed connector registry binding")
+    if record["recordBinding"]["sourceConnectorResultSetId"] != "sourceconnectorresults-001":
+        raise AssertionError("evidence trace missed connector result-set binding")
+    if record["provenanceSummary"]["allEvidenceClaimed"] is not False:
+        raise AssertionError("evidence trace must not claim all evidence coverage")
+    if record["controls"]["rawStackTracesExposed"] is not False:
+        raise AssertionError("evidence trace should not expose raw stack traces")
+    rendered = json.dumps(record)
+    if "fixturePath" in rendered or "rawSourceMetadata" in rendered:
+        raise AssertionError("evidence trace should not expose raw fixture metadata")
+
+
+def check_evidence_source_set_read() -> None:
+    response = read_record("evidence-source-set", "evidencesourceset-019")
+    record = response["record"]
+    if record["sourceConnectorRegistryId"] != "sourceconnectorregistry-001":
+        raise AssertionError("evidence source-set read missed connector registry binding")
+
+
+def check_source_connector_results_read() -> None:
+    response = read_record("source-connector-results", "sourceconnectorresults-001")
+    record = response["record"]
+    if record["sourceConnectorResultSetId"] != "sourceconnectorresults-001":
+        raise AssertionError("source connector result read returned wrong result set")
+
+
 def check_record_list() -> None:
     response = list_records("forecast-artifact", domain="weather-logistics")
     if response["count"] < 1:
@@ -89,6 +178,10 @@ def check_record_list() -> None:
     cards = list_records("forecast-card", domain="weather-logistics")
     if cards["count"] < 1:
         raise AssertionError("forecast card list should include weather-logistics cards")
+
+    traces = list_records("evidence-trace", domain="weather-logistics")
+    if traces["count"] < 1:
+        raise AssertionError("evidence trace list should include weather-logistics traces")
 
 
 def check_binding_failure() -> None:
@@ -149,6 +242,12 @@ def main() -> None:
     check_track_record_read()
     check_forecast_bundle_read()
     check_forecast_card_read()
+    check_historical_forecast_card_read()
+    check_setup_forecast_card_read()
+    check_source_handoff_forecast_card_read()
+    check_evidence_trace_read()
+    check_evidence_source_set_read()
+    check_source_connector_results_read()
     check_record_list()
     check_binding_failure()
     check_sanitized_not_found()

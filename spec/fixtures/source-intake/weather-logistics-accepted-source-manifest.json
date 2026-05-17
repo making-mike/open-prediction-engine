@@ -1,0 +1,223 @@
+{
+  "sourceManifestId": "sourcemanifest-001",
+  "createdAt": "2026-06-02T10:00:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "forecastParameters": {
+    "questionTemplateId": "template-001",
+    "horizonLabel": "1-day",
+    "forecastCloseTime": "2026-06-02T12:00:00Z",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "assetIdentifier": null,
+    "location": null,
+    "targetWindow": null
+  },
+  "sources": [
+    {
+      "sourceId": "manifestsource-001",
+      "sourceRole": "weather_forecast",
+      "displayName": "Open-Meteo Warsaw Forecast",
+      "connectorType": "public_api",
+      "sourceClass": "public_dataset",
+      "sourceRef": "https://api.open-meteo.example/fixture/warsaw",
+      "contentHash": "hash-weather-accepted-001",
+      "rowCount": 1,
+      "positiveOutcomeCount": null,
+      "retrieval": {
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 24
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "public",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "geography",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "retrieved_at",
+          "observedType": "date_time",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "forecast_daily_precipitation_mm",
+          "observedType": "number",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "source_status",
+          "observedType": "categorical",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ],
+      "featureSummary": {
+        "numericValues": [
+          {
+            "fieldName": "forecast_daily_precipitation_mm",
+            "value": 24.0,
+            "unit": "mm"
+          }
+        ],
+        "categoricalValues": [
+          {
+            "fieldName": "source_status",
+            "value": "current"
+          }
+        ]
+      }
+    },
+    {
+      "sourceId": "manifestsource-002",
+      "sourceRole": "historical_baseline",
+      "displayName": "Historical Delivery Disruption Rows",
+      "connectorType": "local_file",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://fixtures/weather-logistics/history.csv",
+      "contentHash": "hash-history-accepted-001",
+      "rowCount": 90,
+      "positiveOutcomeCount": 12,
+      "retrieval": {
+        "retrievedAt": "2026-06-01T18:00:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-01-01",
+        "serviceDateEnd": "2026-06-01",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 90,
+          "nonNullCount": 90,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "geography",
+          "observedType": "string",
+          "sampleCount": 90,
+          "nonNullCount": 90,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disruption_observed",
+          "observedType": "boolean",
+          "sampleCount": 90,
+          "nonNullCount": 90,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "precipitation_mm",
+          "observedType": "number",
+          "sampleCount": 90,
+          "nonNullCount": 90,
+          "exampleValuesStored": false
+        }
+      ]
+    },
+    {
+      "sourceId": "manifestsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "displayName": "Declared Post-Window Operations Outcome",
+      "connectorType": "manual_upload",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://fixtures/weather-logistics/outcome.csv",
+      "contentHash": "hash-outcome-accepted-001",
+      "rowCount": 1,
+      "positiveOutcomeCount": 1,
+      "retrieval": {
+        "retrievedAt": null,
+        "availableBeforeForecastClose": false,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "geography",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disruption_observed",
+          "observedType": "boolean",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "resolution_notes",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ]
+    }
+  ]
+}

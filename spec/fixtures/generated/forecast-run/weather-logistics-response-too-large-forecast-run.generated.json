@@ -1,0 +1,66 @@
+{
+  "forecastRunSummaryId": "forecastrun-006",
+  "generatedAt": "2026-06-06T13:05:00Z",
+  "request": {
+    "requestId": "forecastrequest-007",
+    "requestPath": "spec/fixtures/requests/auto-weather-logistics-request.json",
+    "requestedAction": "generate_forecast",
+    "dataMode": "auto",
+    "domain": "weather-logistics",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "horizonLabel": "1-day"
+  },
+  "runStatus": "failed",
+  "decisionStatus": "accepted",
+  "executionMode": "not_started",
+  "sourceMode": "none",
+  "controls": {
+    "requestValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "paidAction": false,
+    "privateSourceAccess": false
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "sourcePolicyId": "sourcepolicy-019",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "methodSelectionId": null,
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "forecastCardId": null,
+    "forecastBundleId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "planStatus": null,
+    "gatheringStatus": null,
+    "forecastStatus": null,
+    "resolutionStatus": null,
+    "scoreStatus": null,
+    "qualityClaimStatus": null
+  },
+  "outputs": {
+    "forecastCard": null,
+    "evidenceTrace": null,
+    "lifecycleBundle": null,
+    "resolutionStatus": null,
+    "scoringSummary": null
+  },
+  "forecast": null,
+  "qualityClaim": null,
+  "error": {
+    "code": "response_too_large",
+    "message": "Forecast run summary exceeds configured size limit.",
+    "retryable": false
+  },
+  "warnings": [
+    "No forecast outputs were generated for this run.",
+    "Failure summary is sanitized and does not expose raw diagnostics."
+  ]
+}

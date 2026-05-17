@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-envelope.schema.json",
+  "title": "Agent Adapter Envelope",
+  "description": "Stable transport-neutral envelope for agent-facing OPE adapter calls.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentEnvelopeId",
+    "generatedAt",
+    "adapter",
+    "operation",
+    "adapterRequest",
+    "recordBinding",
+    "state",
+    "status",
+    "exitCode",
+    "payload",
+    "error",
+    "warnings"
+  ],
+  "properties": {
+    "agentEnvelopeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface", "adapterVersion", "transport", "capabilityMode"],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "enum": ["local_cli", "future_mcp", "future_http", "future_queue"]
+        },
+        "adapterVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "transport": {
+          "type": "string",
+          "enum": ["stdio_process", "mcp_tool", "http_json", "queue_message"]
+        },
+        "capabilityMode": {
+          "type": "string",
+          "enum": [
+            "validation",
+            "read_only",
+            "dry_run_generation",
+            "resolution_check",
+            "scoring_read"
+          ]
+        }
+      }
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "forecast_request_validation",
+        "evidence_plan",
+        "evidence_trace",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "adapterRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "inputRecordType",
+        "inputRef",
+        "questionId",
+        "forecastId",
+        "maxBytes",
+        "callerIntent"
+      ],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "forecast_request_validation",
+            "evidence_plan",
+            "evidence_trace",
+            "forecast_card",
+            "lifecycle_bundle",
+            "resolution_status",
+            "scoring_summary"
+          ]
+        },
+        "inputRecordType": {
+          "type": "string",
+          "enum": [
+            "forecast_request",
+            "evidence_gathering_plan",
+            "evidence_trace",
+            "forecast_card",
+            "lifecycle_bundle",
+            "resolution_status",
+            "scoring_summary"
+          ]
+        },
+        "inputRef": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "forecastId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "maxBytes": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            { "type": "null" }
+          ]
+        },
+        "callerIntent": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        }
+      }
+    },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "pipelineRunId",
+        "questionId",
+        "forecastId",
+        "evidencePlanId",
+        "evidenceSourceSetId",
+        "sourcePolicyId",
+        "resolutionRecordId",
+        "scoringReportId"
+      ],
+      "properties": {
+        "requestId": { "$ref": "#/$defs/nullableId" },
+        "pipelineRunId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "evidencePlanId": { "$ref": "#/$defs/nullableId" },
+        "evidenceSourceSetId": { "$ref": "#/$defs/nullableId" },
+        "sourcePolicyId": { "$ref": "#/$defs/nullableId" },
+        "resolutionRecordId": { "$ref": "#/$defs/nullableId" },
+        "scoringReportId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionStatus",
+        "approvalStatus",
+        "dataMode",
+        "planStatus",
+        "executionMode",
+        "sourceMode",
+        "forecastStatus",
+        "resolutionStatus",
+        "scoreStatus",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "decisionStatus": { "$ref": "#/$defs/nullableState" },
+        "approvalStatus": { "$ref": "#/$defs/nullableState" },
+        "dataMode": { "$ref": "#/$defs/nullableState" },
+        "planStatus": { "$ref": "#/$defs/nullableState" },
+        "executionMode": { "$ref": "#/$defs/nullableState" },
+        "sourceMode": { "$ref": "#/$defs/nullableState" },
+        "forecastStatus": { "$ref": "#/$defs/nullableState" },
+        "resolutionStatus": { "$ref": "#/$defs/nullableState" },
+        "scoreStatus": { "$ref": "#/$defs/nullableState" },
+        "qualityClaimStatus": { "$ref": "#/$defs/nullableState" }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "error"]
+    },
+    "exitCode": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "payload": {
+      "oneOf": [
+        { "type": "object" },
+        { "type": "null" }
+      ]
+    },
+    "error": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "retryable"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "bad_request",
+                "validation_failed",
+                "approval_required",
+                "not_found",
+                "access_denied",
+                "binding_mismatch",
+                "conflict",
+                "response_too_large",
+                "rate_limited",
+                "internal_error"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            },
+            "retryable": { "type": "boolean" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "ok" }
+        }
+      },
+      "then": {
+        "properties": {
+          "exitCode": { "const": 0 },
+          "payload": { "type": "object" },
+          "error": { "const": null }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "error" }
+        }
+      },
+      "then": {
+        "properties": {
+          "exitCode": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 255
+          },
+          "payload": { "const": null },
+          "error": { "type": "object" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableState": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        { "type": "null" }
+      ]
+    }
+  }
+}

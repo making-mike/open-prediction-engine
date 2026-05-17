@@ -1,0 +1,78 @@
+{
+  "evidencePacketId": "evidence-801",
+  "forecastId": "forecast-801",
+  "questionId": "question-601",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T18:20:00Z",
+  "model": {
+    "modelId": "model-801",
+    "version": "weather-logistics-auto-evidence-recalculation-fixture-v1",
+    "configurationHash": "sha256-recalculation-model-001"
+  },
+  "inputSourceClasses": [
+    "internal_dataset",
+    "public_dataset"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "source-801",
+      "name": "Updated Open-Meteo weather forecast for Warsaw",
+      "sourceType": "public_dataset",
+      "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+      "retrievedAt": "2026-06-02T18:00:00Z",
+      "contentHash": "sha256-updated-weather-source-801"
+    },
+    {
+      "sourceId": "source-103",
+      "name": "Warsaw weather logistics baseline fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+      "retrievedAt": "2026-06-01T11:30:00Z",
+      "contentHash": "sha256-baseline-source-101"
+    }
+  ],
+  "featureSnapshotRef": "https://example.test/fixtures/generated/recalculation/weather-logistics-recalculated-feature-snapshot.generated.json",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.57
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "calibrationBand": {
+    "lower": 0.48,
+    "upper": 0.66,
+    "coverage": 0.8,
+    "sampleSize": 64
+  },
+  "rationaleSummary": "Recalculation appended a new forecast after updated pre-close precipitation evidence increased forecast severity.",
+  "keyFactors": [
+    "updated forecast precipitation 34.0 mm",
+    "previous forecast precipitation 24.0 mm",
+    "threshold 20 mm",
+    "previous probability 0.41",
+    "updated probability 0.57",
+    "append-only history; no post-outcome evidence"
+  ],
+  "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+  "resolutionSource": {
+    "sourceId": "source-402",
+    "name": "Declared Warsaw operations event source",
+    "sourceType": "internal_dataset"
+  },
+  "fallbackResolutionSources": [
+    {
+      "sourceId": "source-403",
+      "name": "Open-Meteo weather observation for Warsaw",
+      "sourceType": "public_dataset"
+    }
+  ],
+  "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+}

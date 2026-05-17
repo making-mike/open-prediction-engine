@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-source-adapter-capability.schema.json",
+  "title": "Private Source Adapter Capability",
+  "description": "Domain-agnostic capability declaration for private source adapters before any generic connector runtime executes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSourceAdapterCapabilityId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "boundPrivateSetupWorkflowId",
+    "boundPrivateSetupWorkflowPath",
+    "supportedSourceKinds",
+    "adapters",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSourceAdapterCapabilityId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["capability_contract_only"]
+    },
+    "boundPrivateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSetupWorkflowPath": { "$ref": "#/$defs/path" },
+    "supportedSourceKinds": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/sourceKind" }
+    },
+    "adapters": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/adapter" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "declarationsDoNotExecute",
+        "normalChecksOffline",
+        "credentialStorageImplemented",
+        "genericPrivateApiRuntimeImplemented",
+        "genericPrivateDatabaseRuntimeImplemented",
+        "manualUploadRuntimeImplemented",
+        "arbitraryPrivateSchemaParsingImplemented"
+      ],
+      "properties": {
+        "declarationsDoNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "credentialStorageImplemented": { "type": "boolean" },
+        "genericPrivateApiRuntimeImplemented": { "type": "boolean" },
+        "genericPrivateDatabaseRuntimeImplemented": { "type": "boolean" },
+        "manualUploadRuntimeImplemented": { "type": "boolean" },
+        "arbitraryPrivateSchemaParsingImplemented": { "type": "boolean" }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "manual_upload",
+        "auto_evidence_connector",
+        "private_api",
+        "private_database"
+      ]
+    },
+    "implementationStatus": {
+      "type": "string",
+      "enum": [
+        "implemented_fixture",
+        "planned_contract_only",
+        "unsupported_current_runtime"
+      ]
+    },
+    "availabilityStatus": {
+      "type": "string",
+      "enum": [
+        "available_fixture",
+        "approval_gated_fixture",
+        "planned_contract_only",
+        "unsupported_current_runtime"
+      ]
+    },
+    "credentialBoundary": {
+      "type": "string",
+      "enum": [
+        "none_required",
+        "caller_provided_out_of_band",
+        "not_supported"
+      ]
+    },
+    "promptVisibility": {
+      "type": "string",
+      "enum": [
+        "metadata_only_prompt_visible",
+        "no_secrets_prompt_visible",
+        "not_prompt_visible"
+      ]
+    },
+    "setupOutcome": {
+      "type": "string",
+      "enum": [
+        "setup_ready",
+        "needs_confirmation",
+        "unsupported_source",
+        "runtime_not_implemented"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "use_source_builder",
+        "use_manual_mapping_confirmation",
+        "use_auto_evidence_fixture",
+        "wait_for_runtime",
+        "replace_source"
+      ]
+    },
+    "blockedAction": {
+      "type": "string",
+      "enum": [
+        "fetch_live_private_api",
+        "connect_private_database",
+        "store_credentials",
+        "parse_arbitrary_private_schema",
+        "include_secrets_in_artifacts",
+        "run_effectful_query",
+        "ingest_manual_upload",
+        "claim_live_freshness",
+        "create_forecast_without_intake"
+      ]
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterId",
+        "sourceKind",
+        "displayName",
+        "implementationStatus",
+        "availabilityStatus",
+        "setupOutcomeIfRequested",
+        "canInspect",
+        "canFetchLive",
+        "canParseGeneric",
+        "canStoreSecrets",
+        "canExecuteInNormalChecks",
+        "approvalRequired",
+        "credentialBoundary",
+        "promptVisibility",
+        "privacyBoundary",
+        "freshnessBoundary",
+        "rateLimitBoundary",
+        "auditLogBoundary",
+        "supportedContracts",
+        "blockedActions",
+        "nextAction"
+      ],
+      "properties": {
+        "adapterId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "implementationStatus": { "$ref": "#/$defs/implementationStatus" },
+        "availabilityStatus": { "$ref": "#/$defs/availabilityStatus" },
+        "setupOutcomeIfRequested": { "$ref": "#/$defs/setupOutcome" },
+        "canInspect": { "type": "boolean" },
+        "canFetchLive": { "type": "boolean" },
+        "canParseGeneric": { "type": "boolean" },
+        "canStoreSecrets": { "type": "boolean" },
+        "canExecuteInNormalChecks": { "type": "boolean" },
+        "approvalRequired": { "type": "boolean" },
+        "credentialBoundary": { "$ref": "#/$defs/credentialBoundary" },
+        "promptVisibility": { "$ref": "#/$defs/promptVisibility" },
+        "privacyBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        },
+        "freshnessBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        },
+        "rateLimitBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        },
+        "auditLogBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        },
+        "supportedContracts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "blockedActions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/blockedAction" }
+        },
+        "nextAction": { "$ref": "#/$defs/nextAction" }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "agentEnvelopeId": "agentenvelope-006",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "resolution_check"
+  },
+  "operation": "resolution_status",
+  "adapterRequest": {
+    "operation": "resolution_status",
+    "inputRecordType": "resolution_status",
+    "inputRef": "resolution-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "maxBytes": 65536,
+    "callerIntent": "Check whether the forecast is resolved, ambiguous, annulled, or still pending."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "approved",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "auto_evidence_fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "forecastId": "forecast-602",
+    "questionId": "question-601",
+    "resolutionRecordId": "resolution-601",
+    "resolutionStatus": "resolved",
+    "resolvedAt": "2026-06-04T12:10:00Z",
+    "resolvedOutcome": {
+      "outputType": "binary",
+      "value": true
+    },
+    "resolutionSource": {
+      "sourceId": "source-402",
+      "name": "Declared Warsaw operations event source",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/live/warsaw-operations-2026-06-03.json",
+      "retrievedAt": "2026-06-04T09:00:00Z",
+      "contentHash": "sha256-live-ops-outcome-401"
+    },
+    "qualityClaim": {
+      "publicationStatus": "provisional",
+      "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes",
+      "minimumCalibrationSampleSize": 30,
+      "resolvedComparableAutoEvidenceOutcomes": 1
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Resolution is fixture-mode and should not be treated as a production live-source workflow."
+  ]
+}

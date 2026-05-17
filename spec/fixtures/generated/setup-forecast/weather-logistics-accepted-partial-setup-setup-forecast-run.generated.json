@@ -1,0 +1,52 @@
+{
+  "setupForecastRunId": "setupforecastrun-902",
+  "generatedAt": "2026-06-06T18:05:00Z",
+  "case": "accepted_partial",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-002",
+  "fieldMappingId": "fieldmapping-002",
+  "sourceIntakeReportId": "sourceintakereport-002",
+  "sourceIntakeHandoffId": null,
+  "sourceHandoffMethodGateId": null,
+  "setupMethodDecisionId": "setupmethoddecision-002",
+  "setupBenchmarkGateId": null,
+  "intakeStatus": "accepted_partial",
+  "methodDecisionStatus": "baseline_selected",
+  "selectedMethodClass": "historical_baseline",
+  "selectedForecastMode": "baseline_only",
+  "runStatus": "generated",
+  "executionMode": "fixture_dry_run",
+  "sourceMode": "source_intake_fixture",
+  "controls": {
+    "sourceIntakeValidated": true,
+    "methodDecisionValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "localLiveDraftConsumed": false,
+    "forecastArtifactsCreated": true
+  },
+  "recordBinding": {
+    "questionId": "question-902",
+    "forecastId": "forecast-902",
+    "evidencePacketId": "evidence-902",
+    "historyId": "history-902",
+    "forecastCardId": "forecastcard-forecast-902",
+    "forecastBundleId": "forecastbundle-forecast-902"
+  },
+  "outputs": {
+    "questionPath": "spec/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-question.generated.json",
+    "featureSnapshotPath": "spec/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-feature-snapshot.generated.json",
+    "evidencePacketPath": "spec/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-evidence.generated.json",
+    "forecastArtifactPath": "spec/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-artifact.generated.json",
+    "forecastHistoryPath": "spec/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-history.generated.json"
+  },
+  "blockedReasons": [],
+  "nextActions": [],
+  "warnings": [
+    "Setup-aware execution is fixture-mode only.",
+    "Generated forecast uses the selected baseline method.",
+    "Ignored local live drafts are not consumed by this milestone."
+  ]
+}

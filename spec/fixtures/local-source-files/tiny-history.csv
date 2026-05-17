@@ -1,0 +1,7 @@
+service_date,geography,disrupted,precipitation_mm
+2026-05-27,Warsaw,true,17.2
+2026-05-28,Warsaw,false,2.1
+2026-05-29,Warsaw,false,0
+2026-05-30,Warsaw,true,28.4
+2026-05-31,Warsaw,false,4.5
+2026-06-01,Warsaw,true,21.7

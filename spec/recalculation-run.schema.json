@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/recalculation-run.schema.json",
+  "title": "Recalculation Run",
+  "description": "Append-only forecast recalculation result for changed pre-resolution evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recalculationRunId",
+    "generatedAt",
+    "domainSetupId",
+    "domain",
+    "questionId",
+    "triggerId",
+    "runStatus",
+    "previousForecast",
+    "updatedForecast",
+    "changedEvidence",
+    "historyAppend",
+    "rejectionReasons",
+    "warnings"
+  ],
+  "properties": {
+    "recalculationRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "triggerId": { "$ref": "common.schema.json#/$defs/id" },
+    "runStatus": {
+      "type": "string",
+      "enum": ["updated", "rejected"]
+    },
+    "previousForecast": { "$ref": "#/$defs/forecastPointer" },
+    "updatedForecast": { "$ref": "#/$defs/nullableForecastPointer" },
+    "changedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changedSourceRefs",
+        "previousEvidencePacketId",
+        "updatedEvidencePacketId",
+        "reasonForUpdate"
+      ],
+      "properties": {
+        "changedSourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+        },
+        "previousEvidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "updatedEvidencePacketId": { "$ref": "#/$defs/nullableId" },
+        "reasonForUpdate": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        }
+      }
+    },
+    "historyAppend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "historyId",
+        "appendOnly",
+        "previousEntryState",
+        "updatedEntryState",
+        "supersedesForecastId",
+        "appendedForecastId"
+      ],
+      "properties": {
+        "historyId": { "$ref": "common.schema.json#/$defs/id" },
+        "appendOnly": { "type": "boolean" },
+        "previousEntryState": {
+          "type": "string",
+          "enum": ["active", "superseded", "reaffirmed", "withdrawn", "none"]
+        },
+        "updatedEntryState": {
+          "type": "string",
+          "enum": ["active", "superseded", "reaffirmed", "withdrawn", "none"]
+        },
+        "supersedesForecastId": { "$ref": "#/$defs/nullableId" },
+        "appendedForecastId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "rejectionReasons": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableForecastPointer": {
+      "oneOf": [
+        { "$ref": "#/$defs/forecastPointer" },
+        { "type": "null" }
+      ]
+    },
+    "forecastPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "evidencePacketId",
+        "forecastedAt",
+        "modelVersion",
+        "probability"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "modelVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

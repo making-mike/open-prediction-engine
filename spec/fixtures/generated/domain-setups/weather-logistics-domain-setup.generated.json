@@ -1,0 +1,333 @@
+{
+  "domainSetupId": "domainsetup-001",
+  "generatedAt": "2026-06-06T15:10:00Z",
+  "domain": "weather-logistics",
+  "displayName": "Weather Logistics Reference Setup",
+  "setupKind": "reference_setup",
+  "maturityStatus": "fixture_ready",
+  "domainPurpose": "Forecast binary operational disruption risk from weather signals, historical baselines, and declared post-window outcomes in a local fixture-safe reference domain.",
+  "questionTemplates": [
+    {
+      "templateId": "template-001",
+      "template": "Will heavy rain disrupt last-mile delivery operations in {geography} on {service_date}?",
+      "outputType": "binary",
+      "horizonLabels": [
+        "1-day",
+        "same-day"
+      ],
+      "requiredParameters": [
+        "geography",
+        "service_date"
+      ],
+      "resolvabilityRules": [
+        "The service date must be known before forecast close.",
+        "The geography must map to an allowed location in the source policy.",
+        "The disruption outcome must be declared after the service window closes."
+      ]
+    }
+  ],
+  "sourceRoles": [
+    {
+      "roleId": "sourcerole-001",
+      "roleKey": "weather_forecast",
+      "displayName": "Forecast-Time Weather Evidence",
+      "timing": "forecast_time",
+      "purpose": "Provides weather features available before forecast close for the requested geography and date.",
+      "requiredFields": [
+        {
+          "fieldName": "geography",
+          "fieldType": "string",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must match the requested geography."
+          ]
+        },
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must match the requested service date."
+          ]
+        },
+        {
+          "fieldName": "retrieved_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be before forecast close and inside the retrieval window."
+          ]
+        },
+        {
+          "fieldName": "forecast_daily_precipitation_mm",
+          "fieldType": "number",
+          "requiredFor": [
+            "forecast",
+            "classification"
+          ],
+          "validationRules": [
+            "Must be a non-negative millimeter value."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "source_status",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Use current or corrected source status."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "official",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-002",
+      "roleKey": "historical_baseline",
+      "displayName": "Historical Baseline Inputs",
+      "timing": "baseline",
+      "purpose": "Provides comparable prior outcomes for baseline frequency and method comparison.",
+      "requiredFields": [
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must predate the forecast target date."
+          ]
+        },
+        {
+          "fieldName": "geography",
+          "fieldType": "string",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must match or map to the requested geography."
+          ]
+        },
+        {
+          "fieldName": "disruption_observed",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "baseline",
+            "scoring"
+          ],
+          "validationRules": [
+            "Must be a resolved binary outcome."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "precipitation_mm",
+          "fieldType": "number",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Use when historical weather severity is available."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-003",
+      "roleKey": "declared_operations_outcome",
+      "displayName": "Declared Operations Outcome",
+      "timing": "resolution",
+      "purpose": "Provides post-window resolution and scoring evidence after the delivery operations window closes.",
+      "requiredFields": [
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecast service date."
+          ]
+        },
+        {
+          "fieldName": "geography",
+          "fieldType": "string",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecast geography."
+          ]
+        },
+        {
+          "fieldName": "disruption_observed",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "resolution",
+            "scoring"
+          ],
+          "validationRules": [
+            "Must resolve to true or false."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "resolution_notes",
+          "fieldType": "string",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Use only for sanitized resolution notes."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset",
+        "human_judgment"
+      ],
+      "forecastTimeAllowed": false
+    }
+  ],
+  "entityRequirements": [
+    {
+      "entityType": "geography",
+      "canonicalField": "geography",
+      "aliasPolicy": "user_provided_registry",
+      "required": true
+    }
+  ],
+  "resolutionPolicy": {
+    "primarySourceRole": "declared_operations_outcome",
+    "fallbackSourceRoles": [],
+    "yesOutcomeDefinition": "Declared operations outcome says disruption_observed is true for the target date.",
+    "noOutcomeDefinition": "Declared operations outcome says disruption_observed is false for the target date.",
+    "ambiguousIf": [
+      "Outcome source reports conflicting disruption states.",
+      "The operations window changed after forecast close in a way that changes the question meaning."
+    ],
+    "annulledIf": [
+      "The delivery operation did not occur for reasons unrelated to weather.",
+      "The requested geography or service date was invalid before forecast close."
+    ],
+    "resolutionTiming": "Resolve after the service date operations window closes and before scoring.",
+    "scoringRule": "brier"
+  },
+  "scoringPolicy": {
+    "primaryScoringRule": "brier",
+    "baselineComparisonRequired": true,
+    "excludeAmbiguousOutcomes": true,
+    "excludeAnnulledOutcomes": true,
+    "reportingSlices": [
+      "domain",
+      "domain_setup",
+      "horizon",
+      "output_type",
+      "resolution_source",
+      "source_policy",
+      "method_class",
+      "coverage_period",
+      "sample_size"
+    ],
+    "minimumResolvedForecastsForQualityClaim": 100
+  },
+  "baselinePolicy": {
+    "baselineRequired": true,
+    "allowedBaselineMethods": [
+      "historical_frequency",
+      "climatology_frequency"
+    ],
+    "minimumComparableRows": 30,
+    "minimumPositiveOutcomes": 1,
+    "fallbackWhenInsufficientData": "baseline_only"
+  },
+  "methodPolicy": {
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "deterministic_statistical"
+    ],
+    "selectionRule": "Select the strongest enabled method with clean comparable benchmark evidence for the request source policy; otherwise fall back to the historical baseline.",
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "recalculationPolicy": {
+    "supported": true,
+    "triggerTypes": [
+      "source_file_changed",
+      "schedule",
+      "agent_submitted_evidence",
+      "manual"
+    ],
+    "appendHistoryRequired": true,
+    "postOutcomeEvidenceAllowed": false
+  },
+  "localImplementation": {
+    "forecastRunnable": true,
+    "generatedForecastRecords": true,
+    "cliForecastCommand": "python3 scripts/ope.py forecast-run",
+    "readSurfaceAvailable": true,
+    "implementationNotes": "Reference setup is fixture-ready through local CLI and generated forecast records."
+  },
+  "claimPolicy": {
+    "allowedClaims": [
+      "Fixture-ready reference setup for local weather-logistics forecast records.",
+      "Baseline comparison and evidence provenance are available for generated fixture records."
+    ],
+    "blockedClaims": [
+      "Live calibration claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal domain coverage claim"
+    ],
+    "minimumResolvedForecastsForCalibration": 100,
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "universalDomainClaimAllowed": false
+  },
+  "agentSetupGuidance": {
+    "setupQuestions": [
+      "Which geography and service date are being forecast?",
+      "Which source policy allows forecast-time weather evidence?",
+      "Which outcome source will resolve the disruption state after the service window?"
+    ],
+    "requiredBeforeForecast": [
+      "A resolvable binary question with forecast close and service date.",
+      "Allowed forecast-time weather evidence or committed fixture evidence.",
+      "A baseline input source and resolution source binding."
+    ],
+    "safeFailureModes": [
+      "Reject if the requested source policy allows unbounded web search.",
+      "Fall back to baseline when stronger methods lack clean benchmark evidence.",
+      "Do not score ambiguous, annulled, or unresolved outcomes as normal forecasts."
+    ]
+  },
+  "warnings": [
+    "Weather-logistics is a reference setup, not the product boundary.",
+    "Fixture-ready does not mean calibrated, production-ready, or live-source forecast-ready.",
+    "Resolution data must not be used as forecast-time evidence."
+  ]
+}

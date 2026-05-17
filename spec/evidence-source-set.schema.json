@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/evidence-source-set.schema.json",
+  "title": "Evidence Source Set",
+  "description": "Normalized source and provenance records gathered under an evidence plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidenceSourceSetId",
+    "requestId",
+    "evidencePlanId",
+    "generatedAt",
+    "executionMode",
+    "dataMode",
+    "sourcePolicyId",
+    "sourceConnectorRegistryId",
+    "sourceConnectorResultSetId",
+    "domain",
+    "geography",
+    "serviceDate",
+    "records",
+    "provenanceSummary",
+    "controls",
+    "warnings"
+  ],
+  "properties": {
+    "evidenceSourceSetId": { "$ref": "common.schema.json#/$defs/id" },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "executionMode": {
+      "type": "string",
+      "enum": ["fixture_replay", "live_fetch"]
+    },
+    "dataMode": {
+      "type": "string",
+      "enum": ["auto", "hybrid"]
+    },
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "geography": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "serviceDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "recordId",
+          "sourceRole",
+          "connector",
+          "connectorBinding",
+          "plannedIntentIds",
+          "sourceRef",
+          "rawSourceMetadata",
+          "sourceQuality",
+          "normalizedFields"
+        ],
+        "properties": {
+          "recordId": { "$ref": "common.schema.json#/$defs/id" },
+          "sourceRole": {
+            "type": "string",
+            "enum": [
+              "forecast_input",
+              "baseline_input",
+              "resolution_primary",
+              "resolution_support"
+            ]
+          },
+          "connector": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "connectorBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceConnectorRegistryId",
+              "connectorId",
+              "sourceConnectorResultSetId",
+              "connectorResultId"
+            ],
+            "properties": {
+              "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+              "connectorId": { "$ref": "common.schema.json#/$defs/id" },
+              "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+              "connectorResultId": { "$ref": "common.schema.json#/$defs/id" }
+            }
+          },
+          "plannedIntentIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": { "$ref": "common.schema.json#/$defs/id" }
+          },
+          "sourceRef": { "$ref": "common.schema.json#/$defs/sourceRef" },
+          "rawSourceMetadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["mode", "fixturePath", "contentHash"],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["fixture_replay", "live_fetch"]
+              },
+              "fixturePath": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "contentHash": {
+                "type": "string",
+                "minLength": 8,
+                "maxLength": 128
+              }
+            }
+          },
+          "sourceQuality": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "coverage", "freshnessStatus"],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["current", "corrected", "stale", "unavailable", "conflicting"]
+              },
+              "coverage": {
+                "type": "string",
+                "enum": ["complete", "partial", "missing"]
+              },
+              "freshnessStatus": {
+                "type": "string",
+                "enum": ["within_policy", "outside_policy", "unknown"]
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 240
+              }
+            }
+          },
+          "normalizedFields": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "provenanceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceCount",
+        "connectorsUsed",
+        "sourceClassesUsed",
+        "unavailableEvidenceCount",
+        "allEvidenceClaimed"
+      ],
+      "properties": {
+        "sourceCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "connectorsUsed": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "sourceClassesUsed": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "enum": [
+              "official",
+              "public_dataset",
+              "internal_dataset",
+              "human_judgment",
+              "model_output",
+              "market_price",
+              "aggregate",
+              "other"
+            ]
+          }
+        },
+        "unavailableEvidenceCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allEvidenceClaimed": { "type": "boolean" }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAccess", "liveFetch", "effectfulGeneration"],
+      "properties": {
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

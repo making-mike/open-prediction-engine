@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/field-mapping.schema.json",
+  "title": "Field Mapping",
+  "description": "Mapping from caller-provided source fields to OPE setup-required fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fieldMappingId",
+    "createdAt",
+    "domainSetupId",
+    "domain",
+    "sourceManifestId",
+    "mappings",
+    "aliasMappings"
+  ],
+  "properties": {
+    "fieldMappingId": { "$ref": "common.schema.json#/$defs/id" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceManifestId": { "$ref": "common.schema.json#/$defs/id" },
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 120,
+      "items": { "$ref": "#/$defs/fieldMapping" }
+    },
+    "aliasMappings": {
+      "type": "array",
+      "maxItems": 40,
+      "items": { "$ref": "#/$defs/aliasMapping" }
+    }
+  },
+  "$defs": {
+    "mappingOrigin": {
+      "type": "string",
+      "enum": ["user_provided", "registry_backed", "agent_inferred", "deterministic_exact_match"]
+    },
+    "mappingStatus": {
+      "type": "string",
+      "enum": ["confirmed", "proposed", "rejected"]
+    },
+    "fieldMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mappingId",
+        "sourceId",
+        "sourceRole",
+        "sourceField",
+        "targetField",
+        "targetFieldType",
+        "mappingOrigin",
+        "mappingStatus",
+        "confidence",
+        "requiresConfirmation",
+        "validationNotes"
+      ],
+      "properties": {
+        "mappingId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "sourceField": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "targetField": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "targetFieldType": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "date", "date_time", "categorical", "id"]
+        },
+        "mappingOrigin": { "$ref": "#/$defs/mappingOrigin" },
+        "mappingStatus": { "$ref": "#/$defs/mappingStatus" },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "requiresConfirmation": { "type": "boolean" },
+        "validationNotes": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "aliasMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aliasMappingId",
+        "entityType",
+        "sourceValue",
+        "canonicalValue",
+        "mappingOrigin",
+        "mappingStatus",
+        "requiresConfirmation"
+      ],
+      "properties": {
+        "aliasMappingId": { "$ref": "common.schema.json#/$defs/id" },
+        "entityType": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "sourceValue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "canonicalValue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "mappingOrigin": { "$ref": "#/$defs/mappingOrigin" },
+        "mappingStatus": { "$ref": "#/$defs/mappingStatus" },
+        "requiresConfirmation": { "type": "boolean" }
+      }
+    }
+  }
+}

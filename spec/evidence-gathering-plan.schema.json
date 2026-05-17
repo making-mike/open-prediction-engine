@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/evidence-gathering-plan.schema.json",
+  "title": "Evidence Gathering Plan",
+  "description": "Dry-run plan for policy-bound evidence gathering before any live fetch or forecast generation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidencePlanId",
+    "requestId",
+    "generatedAt",
+    "planStatus",
+    "executionMode",
+    "dataMode",
+    "domain",
+    "geography",
+    "serviceDate",
+    "horizonLabel",
+    "questionHash",
+    "sourcePolicy",
+    "sourceConnectorRegistryId",
+    "expectedSourceConnectorResultSetId",
+    "connectorPolicyChecks",
+    "plannedConnectors",
+    "searchIntents",
+    "inclusionRules",
+    "exclusionRules",
+    "unavailableEvidence",
+    "controls",
+    "warnings"
+  ],
+  "properties": {
+    "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "planStatus": {
+      "type": "string",
+      "enum": ["planned", "blocked", "rejected", "requires_approval"]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["dry_run", "fixture_replay", "live_fetch"]
+    },
+    "dataMode": {
+      "type": "string",
+      "enum": ["provided", "auto", "hybrid"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "geography": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "serviceDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "horizonLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "questionHash": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "sourcePolicy": { "$ref": "source-policy.schema.json" },
+    "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "expectedSourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+    "connectorPolicyChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceConnectorRegistryId",
+        "expectedSourceConnectorResultSetId",
+        "requestedConnectors",
+        "registeredConnectors",
+        "unregisteredConnectors",
+        "unsupportedConnectors",
+        "resolutionOnlyConnectors",
+        "forecastTimeConnectors",
+        "allRequestedConnectorsRegistered"
+      ],
+      "properties": {
+        "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "expectedSourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestedConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "registeredConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "unregisteredConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "unsupportedConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "resolutionOnlyConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "forecastTimeConnectors": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "allRequestedConnectorsRegistered": { "type": "boolean" }
+      }
+    },
+    "plannedConnectors": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["connector", "purpose", "networkAccess"],
+        "properties": {
+          "connector": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          },
+          "networkAccess": { "type": "boolean" }
+        }
+      }
+    },
+    "searchIntents": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["intentId", "connector", "sourceClass", "purpose", "query"],
+        "properties": {
+          "intentId": { "$ref": "common.schema.json#/$defs/id" },
+          "connector": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "sourceClass": {
+            "type": "string",
+            "enum": [
+              "official",
+              "public_dataset",
+              "internal_dataset",
+              "human_judgment",
+              "model_output",
+              "market_price",
+              "aggregate",
+              "other"
+            ]
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          },
+          "query": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 300
+          },
+          "expectedEvidence": {
+            "type": "string",
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "inclusionRules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "exclusionRules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "unavailableEvidence": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "reason", "impact"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAccess", "liveFetch", "effectfulGeneration"],
+      "properties": {
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

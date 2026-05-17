@@ -1,0 +1,262 @@
+{
+  "sourceConnectorResultSetId": "sourceconnectorresults-001",
+  "generatedAt": "2026-06-06T13:45:00Z",
+  "requestId": "forecastrequest-007",
+  "evidencePlanId": "evidenceplan-019",
+  "sourcePolicyId": "sourcepolicy-019",
+  "domain": "weather-logistics",
+  "executionMode": "fixture_replay",
+  "connectorResults": [
+    {
+      "connectorResultId": "connectorresult-001",
+      "connectorKey": "open_meteo_weather",
+      "sourceClass": "public_dataset",
+      "sourceRole": "forecast_input",
+      "resultStatus": "succeeded_fixture_replay",
+      "plannedIntentIds": [
+        "intent-019"
+      ],
+      "rawSourceMetadata": {
+        "mode": "fixture_replay",
+        "fixturePath": "spec/fixtures/live/open-meteo-warsaw-forecast-response.json",
+        "sourceUri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum%2Cprecipitation_probability_max%2Cweather_code%2Cwind_gusts_10m_max&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+        "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a",
+        "rawPreviewStored": false
+      },
+      "normalizedFields": {
+        "forecastDailyPrecipitationMm": 24,
+        "precipitationProbabilityMaxPercent": 86,
+        "weatherCode": 63,
+        "windGusts10mMaxKmh": 41.8,
+        "timezone": "Europe/Warsaw",
+        "utcOffsetSeconds": 7200,
+        "latitude": 52.24,
+        "longitude": 21,
+        "dailyUnits": {
+          "time": "iso8601",
+          "precipitation_sum": "mm",
+          "precipitation_probability_max": "%",
+          "weather_code": "wmo code",
+          "wind_gusts_10m_max": "km/h"
+        }
+      },
+      "unavailableEvidence": [],
+      "retrievalDiagnostics": {
+        "diagnosticLevel": "none",
+        "publicMessage": "Fixture replay succeeded.",
+        "rawDiagnosticStored": false,
+        "rawStackTraceExposed": false
+      },
+      "provenance": {
+        "sourceRef": {
+          "sourceId": "source-401",
+          "name": "Open-Meteo weather forecast for Warsaw",
+          "sourceType": "public_dataset",
+          "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum%2Cprecipitation_probability_max%2Cweather_code%2Cwind_gusts_10m_max&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+          "retrievedAt": "2026-06-02T09:30:00Z",
+          "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a"
+        },
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "storesContentHash": true,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "credentialUsed": false,
+        "promptVisibleCredentialAccepted": false
+      }
+    },
+    {
+      "connectorResultId": "connectorresult-002",
+      "connectorKey": "committed_fixture",
+      "sourceClass": "internal_dataset",
+      "sourceRole": "baseline_input",
+      "resultStatus": "succeeded_fixture_replay",
+      "plannedIntentIds": [
+        "intent-020"
+      ],
+      "rawSourceMetadata": {
+        "mode": "fixture_replay",
+        "fixturePath": "spec/fixtures/source/weather-logistics-warsaw-2026-06-03/baseline-history.json",
+        "sourceUri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+        "contentHash": "sha256-baseline-source-101",
+        "rawPreviewStored": false
+      },
+      "normalizedFields": {
+        "lookbackStartsAt": "2026-03-01T00:00:00Z",
+        "lookbackEndsAt": "2026-05-31T23:59:59Z",
+        "weatherThresholdBucket": "daily_precipitation_gte_20mm",
+        "comparableServiceDays": 64,
+        "disruptionDays": 14,
+        "smoothing": "none"
+      },
+      "unavailableEvidence": [],
+      "retrievalDiagnostics": {
+        "diagnosticLevel": "none",
+        "publicMessage": "Fixture replay succeeded.",
+        "rawDiagnosticStored": false,
+        "rawStackTraceExposed": false
+      },
+      "provenance": {
+        "sourceRef": {
+          "sourceId": "source-103",
+          "name": "Warsaw weather logistics baseline fixture",
+          "sourceType": "internal_dataset",
+          "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+          "retrievedAt": "2026-06-01T11:30:00Z",
+          "contentHash": "sha256-baseline-source-101"
+        },
+        "retrievedAt": "2026-06-01T11:30:00Z",
+        "storesContentHash": true,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "credentialUsed": false,
+        "promptVisibleCredentialAccepted": false
+      }
+    },
+    {
+      "connectorResultId": "connectorresult-003",
+      "connectorKey": "declared_operations_fixture",
+      "sourceClass": "internal_dataset",
+      "sourceRole": "resolution_primary",
+      "resultStatus": "skipped_resolution_only",
+      "plannedIntentIds": [],
+      "rawSourceMetadata": {
+        "mode": "not_fetched",
+        "fixturePath": "spec/fixtures/live/weather-logistics-warsaw-2026-06-03-operations-outcome.json",
+        "sourceUri": null,
+        "contentHash": null,
+        "rawPreviewStored": false
+      },
+      "normalizedFields": null,
+      "unavailableEvidence": [
+        {
+          "label": "Declared operations outcome",
+          "reason": "Outcome evidence is only valid after the service day and must not enter forecast-time evidence.",
+          "agentNextAction": "Wait for resolution time before reading resolution or scoring outputs."
+        }
+      ],
+      "retrievalDiagnostics": {
+        "diagnosticLevel": "sanitized",
+        "publicMessage": "Resolution-only connector skipped during forecast-time gathering.",
+        "rawDiagnosticStored": false,
+        "rawStackTraceExposed": false
+      },
+      "provenance": {
+        "sourceRef": null,
+        "retrievedAt": null,
+        "storesContentHash": false,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "credentialUsed": false,
+        "promptVisibleCredentialAccepted": false
+      }
+    },
+    {
+      "connectorResultId": "connectorresult-004",
+      "connectorKey": "web_search",
+      "sourceClass": "other",
+      "sourceRole": "unsupported",
+      "resultStatus": "unsupported",
+      "plannedIntentIds": [],
+      "rawSourceMetadata": {
+        "mode": "unsupported",
+        "fixturePath": null,
+        "sourceUri": null,
+        "contentHash": null,
+        "rawPreviewStored": false
+      },
+      "normalizedFields": null,
+      "unavailableEvidence": [
+        {
+          "label": "General web search",
+          "reason": "Broad web search is not enabled for this fixture-safe auto-evidence path.",
+          "agentNextAction": "Use only source classes and connectors allowed by the source policy."
+        }
+      ],
+      "retrievalDiagnostics": {
+        "diagnosticLevel": "sanitized",
+        "publicMessage": "Connector is unsupported for the current fixture-safe source policy.",
+        "rawDiagnosticStored": false,
+        "rawStackTraceExposed": false
+      },
+      "provenance": {
+        "sourceRef": null,
+        "retrievedAt": null,
+        "storesContentHash": false,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "credentialUsed": false,
+        "promptVisibleCredentialAccepted": false
+      }
+    },
+    {
+      "connectorResultId": "connectorresult-005",
+      "connectorKey": "market_price_feed",
+      "sourceClass": "market_price",
+      "sourceRole": "unsupported",
+      "resultStatus": "unsupported",
+      "plannedIntentIds": [],
+      "rawSourceMetadata": {
+        "mode": "unsupported",
+        "fixturePath": null,
+        "sourceUri": null,
+        "contentHash": null,
+        "rawPreviewStored": false
+      },
+      "normalizedFields": null,
+      "unavailableEvidence": [
+        {
+          "label": "Market price source class",
+          "reason": "Market-price evidence is unsupported for the weather-logistics wedge.",
+          "agentNextAction": "Use only source classes and connectors allowed by the source policy."
+        }
+      ],
+      "retrievalDiagnostics": {
+        "diagnosticLevel": "sanitized",
+        "publicMessage": "Connector is unsupported for the current fixture-safe source policy.",
+        "rawDiagnosticStored": false,
+        "rawStackTraceExposed": false
+      },
+      "provenance": {
+        "sourceRef": null,
+        "retrievedAt": null,
+        "storesContentHash": false,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "credentialUsed": false,
+        "promptVisibleCredentialAccepted": false
+      }
+    }
+  ],
+  "controls": {
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "credentialUsed": false,
+    "promptVisibleCredentialAccepted": false
+  },
+  "warnings": [
+    "Connector results are fixture-safe and do not fetch live internet sources.",
+    "Unsupported connector results explain unavailable evidence without raw diagnostics.",
+    "No connector result claims complete coverage of all possible evidence."
+  ]
+}

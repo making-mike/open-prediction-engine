@@ -1,0 +1,42 @@
+{
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-003",
+  "generatedAt": "2026-06-06T18:35:00Z",
+  "case": "insufficient_confirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeHandoffId": "sourceintakehandoff-003",
+  "sourceIntakeReportId": "sourceintakereport-103",
+  "setupBenchmarkGateId": "setupbenchmarkgate-103",
+  "setupMethodDecisionId": "setupmethoddecision-103",
+  "handoffStatus": "needs_more_data",
+  "handoffNextAction": "collect_more_data",
+  "methodGateStatus": "needs_more_data",
+  "nextAction": "collect_more_data",
+  "sourceIntakeStatus": "rejected",
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "forecastArtifactsCreated": false,
+  "eligibilitySummary": {
+    "benchmarkGateStatus": "blocked",
+    "benchmarkExecutionAllowed": false,
+    "methodDecisionStatus": "rejected",
+    "baselineFinalEligibilityStatus": "rejected",
+    "deterministicFinalEligibilityStatus": "rejected",
+    "qualityClaimAllowed": false
+  },
+  "requiredActions": [
+    "Remove or replace rejected source localsource-002 for role historical_baseline.",
+    "Resolve rejected source-intake checks before selecting a forecast method."
+  ],
+  "warnings": [
+    "Source-handoff method gates do not create forecast artifacts.",
+    "Accepted method decisions still require an explicit setup forecast execution step.",
+    "Source-builder handoffs do not create forecast artifacts.",
+    "Setup method gates are still required after accepted source intake.",
+    "Source intake reports do not produce forecast artifacts.",
+    "Rejected intake must not bind generated forecast outputs.",
+    "Setup method decisions do not create forecast artifacts.",
+    "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+    "Candidate eligibility is scoped to this domain setup and source intake report."
+  ]
+}

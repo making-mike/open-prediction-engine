@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/method-selection.schema.json",
+  "title": "Method Selection",
+  "description": "Method-selection explanation for a forecast request.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "methodSelectionId",
+    "generatedAt",
+    "requestId",
+    "methodRegistryId",
+    "domain",
+    "horizonBucket",
+    "outputType",
+    "sourcePolicyId",
+    "selectionStatus",
+    "selectedMethodId",
+    "selectedMethodClass",
+    "selectedModel",
+    "fallbackMethodId",
+    "candidateMethods",
+    "qualityBoundary",
+    "selectionReasons",
+    "warnings"
+  ],
+  "properties": {
+    "methodSelectionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "methodRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "horizonBucket": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "selectionStatus": {
+      "type": "string",
+      "enum": ["candidate_selected", "fallback_selected", "rejected"]
+    },
+    "selectedMethodId": { "$ref": "common.schema.json#/$defs/id" },
+    "selectedMethodClass": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "deterministic_statistical",
+        "model_assisted",
+        "retrieval_assisted",
+        "ensemble",
+        "external_reference"
+      ]
+    },
+    "selectedModel": { "$ref": "common.schema.json#/$defs/modelIdentity" },
+    "fallbackMethodId": { "$ref": "common.schema.json#/$defs/id" },
+    "candidateMethods": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "methodId",
+          "methodClass",
+          "status",
+          "eligibilityStatus",
+          "benchmarkStatus",
+          "sampleSize",
+          "rejectionReasons"
+        ],
+        "properties": {
+          "methodId": { "$ref": "common.schema.json#/$defs/id" },
+          "methodClass": {
+            "type": "string",
+            "enum": [
+              "deterministic_statistical",
+              "model_assisted",
+              "retrieval_assisted",
+              "ensemble",
+              "external_reference"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["enabled", "proposed", "disabled"]
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": ["eligible", "rejected"]
+          },
+          "benchmarkStatus": {
+            "type": "string",
+            "enum": ["benchmarked", "not_benchmarked"]
+          },
+          "candidateBenchmarkRunId": { "$ref": "common.schema.json#/$defs/id" },
+          "benchmarkSourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+          "sampleSize": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "baselineLift": { "type": "number" },
+          "rejectionReasons": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 160
+            }
+          }
+        }
+      }
+    },
+    "qualityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "horizonBucket",
+        "outputType",
+        "sourcePolicyId",
+        "coveragePeriod",
+        "sampleSize",
+        "minimumComparableBenchmarks",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "horizonBucket": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "coveragePeriod": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["startsAt", "endsAt"],
+          "properties": {
+            "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+          }
+        },
+        "sampleSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimumComparableBenchmarks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "qualityClaimStatus": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        }
+      }
+    },
+    "selectionReasons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

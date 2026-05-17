@@ -1,0 +1,100 @@
+{
+  "forecastRunSummaryId": "forecastrun-001",
+  "generatedAt": "2026-06-06T13:05:00Z",
+  "request": {
+    "requestId": "forecastrequest-007",
+    "requestPath": "spec/fixtures/requests/auto-weather-logistics-request.json",
+    "requestedAction": "generate_forecast",
+    "dataMode": "auto",
+    "domain": "weather-logistics",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "horizonLabel": "1-day"
+  },
+  "runStatus": "completed",
+  "decisionStatus": "accepted",
+  "executionMode": "fixture_dry_run",
+  "sourceMode": "auto_evidence_fixture_replay",
+  "controls": {
+    "requestValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "paidAction": false,
+    "privateSourceAccess": false
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "sourcePolicyId": "sourcepolicy-019",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "methodSelectionId": "methodselection-001",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "forecastCardId": "forecastcard-forecast-602",
+    "forecastBundleId": "forecastbundle-forecast-602",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "planStatus": "planned",
+    "gatheringStatus": "fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "outputs": {
+    "forecastCard": {
+      "operation": "forecast_card",
+      "recordType": "forecast-card",
+      "recordId": "forecast-602",
+      "questionId": "question-601"
+    },
+    "evidenceTrace": {
+      "operation": "evidence_trace",
+      "recordType": "evidence-trace",
+      "recordId": "forecast-602",
+      "questionId": "question-601"
+    },
+    "lifecycleBundle": {
+      "operation": "lifecycle_bundle",
+      "recordType": "forecast-bundle",
+      "recordId": "forecast-602",
+      "questionId": "question-601"
+    },
+    "resolutionStatus": {
+      "operation": "resolution_status",
+      "recordType": "resolution-record",
+      "recordId": "resolution-601",
+      "questionId": "question-601"
+    },
+    "scoringSummary": {
+      "operation": "scoring_summary",
+      "recordType": "scoring-report",
+      "recordId": "scoring-601",
+      "questionId": "question-601"
+    }
+  },
+  "forecast": {
+    "forecastedAt": "2026-06-02T10:00:00Z",
+    "modelId": "model-601",
+    "modelVersion": "weather-logistics-auto-evidence-fixture-v0",
+    "probability": 0.41,
+    "baselineProbability": 0.22
+  },
+  "qualityClaim": {
+    "status": "not_enough_resolved_auto_evidence_outcomes",
+    "minimumSampleSize": 30,
+    "resolvedComparableOutcomes": 1,
+    "sampleSize": 1,
+    "trackRecordReportId": "trackrecord-601"
+  },
+  "error": null,
+  "warnings": [
+    "Fixture-mode run only; no live source was fetched.",
+    "Forecast quality remains provisional until enough comparable outcomes resolve.",
+    "Use forecastCard for compact action context, evidenceTrace for source provenance, and lifecycleBundle for audit context."
+  ]
+}

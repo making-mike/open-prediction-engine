@@ -1,0 +1,522 @@
+{
+  "agentEnvelopeId": "agentenvelope-004",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "evidence_trace",
+  "adapterRequest": {
+    "operation": "evidence_trace",
+    "inputRecordType": "evidence_trace",
+    "inputRef": "forecast-602",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "maxBytes": 65536,
+    "callerIntent": "Inspect connector-bound evidence provenance without reading raw fixtures."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "approved",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "auto_evidence_fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "recordType": "evidence-trace",
+    "recordId": "forecast-602",
+    "access": {
+      "mode": "read_only_file",
+      "maxRecordsPerRequest": 1
+    },
+    "record": {
+      "evidenceTraceId": "evidencetrace-602",
+      "forecastId": "forecast-602",
+      "questionId": "question-601",
+      "domain": "weather-logistics",
+      "traceStatus": "complete_fixture_trace",
+      "generatedAt": "2026-06-02T10:02:00Z",
+      "recordBinding": {
+        "requestId": "forecastrequest-007",
+        "pipelineRunId": "pipelinerun-601",
+        "questionId": "question-601",
+        "forecastId": "forecast-602",
+        "forecastArtifactId": "forecast-602",
+        "evidencePacketId": "evidence-601",
+        "evidencePlanId": "evidenceplan-019",
+        "evidenceSourceSetId": "evidencesourceset-019",
+        "sourcePolicyId": "sourcepolicy-019",
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "sourceConnectorResultSetId": "sourceconnectorresults-001",
+        "resolutionRecordId": "resolution-601",
+        "scoringReportId": "scoring-601"
+      },
+      "sourcePolicy": {
+        "sourcePolicyId": "sourcepolicy-019",
+        "allowedSourceClasses": [
+          "official",
+          "public_dataset",
+          "internal_dataset"
+        ],
+        "allowedConnectors": [
+          "open_meteo_weather",
+          "committed_fixture"
+        ],
+        "allowNetworkAccess": true,
+        "maxNetworkCalls": 2,
+        "maxCostUsd": 0,
+        "freshness": {
+          "maxSourceAgeHours": 24,
+          "requireRetrievedAt": true
+        },
+        "retrievalWindow": {
+          "startsAt": "2026-06-02T00:00:00Z",
+          "endsAt": "2026-06-02T23:59:59Z"
+        },
+        "approvalRequired": false,
+        "retention": {
+          "rawSourceRetention": "metadata_only",
+          "storeContentHashes": true
+        }
+      },
+      "connectorPolicyChecks": {
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "expectedSourceConnectorResultSetId": "sourceconnectorresults-001",
+        "requestedConnectors": [
+          "committed_fixture",
+          "open_meteo_weather"
+        ],
+        "registeredConnectors": [
+          "committed_fixture",
+          "open_meteo_weather"
+        ],
+        "unregisteredConnectors": [],
+        "unsupportedConnectors": [],
+        "resolutionOnlyConnectors": [],
+        "forecastTimeConnectors": [
+          "committed_fixture",
+          "open_meteo_weather"
+        ],
+        "allRequestedConnectorsRegistered": true
+      },
+      "connectorRegistry": {
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "defaultExecutionMode": "fixture_replay",
+        "connectors": [
+          {
+            "connectorId": "sourceconnector-001",
+            "connectorKey": "open_meteo_weather",
+            "status": "enabled_fixture_replay",
+            "sourceClass": "public_dataset",
+            "allowedFor": [
+              "forecast_time_evidence"
+            ],
+            "allowedBySourcePolicy": true,
+            "retrievalMode": "fixture_replay",
+            "networkAccessInNormalChecks": false,
+            "liveFetchRequiresApproval": false,
+            "acceptsPromptVisibleCredentials": false,
+            "rawStackTracesExposed": false,
+            "allEvidenceClaimed": false,
+            "risk": {
+              "effectful": false,
+              "paid": false,
+              "privacySensitive": false
+            }
+          },
+          {
+            "connectorId": "sourceconnector-002",
+            "connectorKey": "committed_fixture",
+            "status": "enabled_fixture_replay",
+            "sourceClass": "internal_dataset",
+            "allowedFor": [
+              "baseline_input"
+            ],
+            "allowedBySourcePolicy": true,
+            "retrievalMode": "committed_fixture",
+            "networkAccessInNormalChecks": false,
+            "liveFetchRequiresApproval": false,
+            "acceptsPromptVisibleCredentials": false,
+            "rawStackTracesExposed": false,
+            "allEvidenceClaimed": false,
+            "risk": {
+              "effectful": false,
+              "paid": false,
+              "privacySensitive": false
+            }
+          },
+          {
+            "connectorId": "sourceconnector-003",
+            "connectorKey": "declared_operations_fixture",
+            "status": "resolution_only",
+            "sourceClass": "internal_dataset",
+            "allowedFor": [
+              "resolution_only"
+            ],
+            "allowedBySourcePolicy": false,
+            "retrievalMode": "committed_fixture",
+            "networkAccessInNormalChecks": false,
+            "liveFetchRequiresApproval": false,
+            "acceptsPromptVisibleCredentials": false,
+            "rawStackTracesExposed": false,
+            "allEvidenceClaimed": false,
+            "risk": {
+              "effectful": false,
+              "paid": false,
+              "privacySensitive": false
+            }
+          },
+          {
+            "connectorId": "sourceconnector-004",
+            "connectorKey": "web_search",
+            "status": "unsupported",
+            "sourceClass": "other",
+            "allowedFor": [
+              "not_allowed"
+            ],
+            "allowedBySourcePolicy": false,
+            "retrievalMode": "unsupported",
+            "networkAccessInNormalChecks": false,
+            "liveFetchRequiresApproval": false,
+            "acceptsPromptVisibleCredentials": false,
+            "rawStackTracesExposed": false,
+            "allEvidenceClaimed": false,
+            "risk": {
+              "effectful": false,
+              "paid": false,
+              "privacySensitive": false
+            }
+          },
+          {
+            "connectorId": "sourceconnector-005",
+            "connectorKey": "market_price_feed",
+            "status": "unsupported",
+            "sourceClass": "market_price",
+            "allowedFor": [
+              "not_allowed"
+            ],
+            "allowedBySourcePolicy": false,
+            "retrievalMode": "unsupported",
+            "networkAccessInNormalChecks": false,
+            "liveFetchRequiresApproval": false,
+            "acceptsPromptVisibleCredentials": false,
+            "rawStackTracesExposed": false,
+            "allEvidenceClaimed": false,
+            "risk": {
+              "effectful": false,
+              "paid": false,
+              "privacySensitive": false
+            }
+          }
+        ],
+        "unsupportedSourceClasses": [
+          "human_judgment",
+          "model_output",
+          "market_price",
+          "aggregate",
+          "other"
+        ]
+      },
+      "sourceConnectorResults": {
+        "sourceConnectorResultSetId": "sourceconnectorresults-001",
+        "usedResults": [
+          {
+            "connectorResultId": "connectorresult-001",
+            "connectorKey": "open_meteo_weather",
+            "sourceClass": "public_dataset",
+            "sourceRole": "forecast_input",
+            "resultStatus": "succeeded_fixture_replay",
+            "plannedIntentIds": [
+              "intent-019"
+            ],
+            "unavailableEvidence": [],
+            "retrievalDiagnostics": {
+              "diagnosticLevel": "none",
+              "publicMessage": "Fixture replay succeeded.",
+              "rawStackTraceExposed": false
+            },
+            "provenance": {
+              "retrievedAt": "2026-06-02T09:30:00Z",
+              "storesContentHash": true,
+              "allEvidenceClaimed": false
+            },
+            "controls": {
+              "networkAccess": false,
+              "liveFetch": false,
+              "effectfulGeneration": false,
+              "credentialUsed": false,
+              "promptVisibleCredentialAccepted": false
+            }
+          },
+          {
+            "connectorResultId": "connectorresult-002",
+            "connectorKey": "committed_fixture",
+            "sourceClass": "internal_dataset",
+            "sourceRole": "baseline_input",
+            "resultStatus": "succeeded_fixture_replay",
+            "plannedIntentIds": [
+              "intent-020"
+            ],
+            "unavailableEvidence": [],
+            "retrievalDiagnostics": {
+              "diagnosticLevel": "none",
+              "publicMessage": "Fixture replay succeeded.",
+              "rawStackTraceExposed": false
+            },
+            "provenance": {
+              "retrievedAt": "2026-06-01T11:30:00Z",
+              "storesContentHash": true,
+              "allEvidenceClaimed": false
+            },
+            "controls": {
+              "networkAccess": false,
+              "liveFetch": false,
+              "effectfulGeneration": false,
+              "credentialUsed": false,
+              "promptVisibleCredentialAccepted": false
+            }
+          }
+        ],
+        "unavailableOrSkippedResults": [
+          {
+            "connectorResultId": "connectorresult-003",
+            "connectorKey": "declared_operations_fixture",
+            "sourceClass": "internal_dataset",
+            "sourceRole": "resolution_primary",
+            "resultStatus": "skipped_resolution_only",
+            "plannedIntentIds": [],
+            "unavailableEvidence": [
+              {
+                "label": "Declared operations outcome",
+                "reason": "Outcome evidence is only valid after the service day and must not enter forecast-time evidence.",
+                "agentNextAction": "Wait for resolution time before reading resolution or scoring outputs."
+              }
+            ],
+            "retrievalDiagnostics": {
+              "diagnosticLevel": "sanitized",
+              "publicMessage": "Resolution-only connector skipped during forecast-time gathering.",
+              "rawStackTraceExposed": false
+            },
+            "provenance": {
+              "retrievedAt": null,
+              "storesContentHash": false,
+              "allEvidenceClaimed": false
+            },
+            "controls": {
+              "networkAccess": false,
+              "liveFetch": false,
+              "effectfulGeneration": false,
+              "credentialUsed": false,
+              "promptVisibleCredentialAccepted": false
+            }
+          },
+          {
+            "connectorResultId": "connectorresult-004",
+            "connectorKey": "web_search",
+            "sourceClass": "other",
+            "sourceRole": "unsupported",
+            "resultStatus": "unsupported",
+            "plannedIntentIds": [],
+            "unavailableEvidence": [
+              {
+                "label": "General web search",
+                "reason": "Broad web search is not enabled for this fixture-safe auto-evidence path.",
+                "agentNextAction": "Use only source classes and connectors allowed by the source policy."
+              }
+            ],
+            "retrievalDiagnostics": {
+              "diagnosticLevel": "sanitized",
+              "publicMessage": "Connector is unsupported for the current fixture-safe source policy.",
+              "rawStackTraceExposed": false
+            },
+            "provenance": {
+              "retrievedAt": null,
+              "storesContentHash": false,
+              "allEvidenceClaimed": false
+            },
+            "controls": {
+              "networkAccess": false,
+              "liveFetch": false,
+              "effectfulGeneration": false,
+              "credentialUsed": false,
+              "promptVisibleCredentialAccepted": false
+            }
+          },
+          {
+            "connectorResultId": "connectorresult-005",
+            "connectorKey": "market_price_feed",
+            "sourceClass": "market_price",
+            "sourceRole": "unsupported",
+            "resultStatus": "unsupported",
+            "plannedIntentIds": [],
+            "unavailableEvidence": [
+              {
+                "label": "Market price source class",
+                "reason": "Market-price evidence is unsupported for the weather-logistics wedge.",
+                "agentNextAction": "Use only source classes and connectors allowed by the source policy."
+              }
+            ],
+            "retrievalDiagnostics": {
+              "diagnosticLevel": "sanitized",
+              "publicMessage": "Connector is unsupported for the current fixture-safe source policy.",
+              "rawStackTraceExposed": false
+            },
+            "provenance": {
+              "retrievedAt": null,
+              "storesContentHash": false,
+              "allEvidenceClaimed": false
+            },
+            "controls": {
+              "networkAccess": false,
+              "liveFetch": false,
+              "effectfulGeneration": false,
+              "credentialUsed": false,
+              "promptVisibleCredentialAccepted": false
+            }
+          }
+        ]
+      },
+      "gatheredSourceRecords": [
+        {
+          "recordId": "sourcerecord-019",
+          "sourceRole": "forecast_input",
+          "connector": "open_meteo_weather",
+          "connectorBinding": {
+            "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+            "connectorId": "sourceconnector-001",
+            "sourceConnectorResultSetId": "sourceconnectorresults-001",
+            "connectorResultId": "connectorresult-001"
+          },
+          "plannedIntentIds": [
+            "intent-019"
+          ],
+          "sourceRef": {
+            "sourceId": "source-401",
+            "name": "Open-Meteo weather forecast for Warsaw",
+            "sourceType": "public_dataset",
+            "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum%2Cprecipitation_probability_max%2Cweather_code%2Cwind_gusts_10m_max&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+            "retrievedAt": "2026-06-02T09:30:00Z",
+            "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a"
+          },
+          "sourceQuality": {
+            "status": "current",
+            "coverage": "complete",
+            "freshnessStatus": "within_policy",
+            "notes": "Fixture replay of the allow-listed Open-Meteo weather connector."
+          },
+          "normalizedFieldNames": [
+            "dailyUnits",
+            "forecastDailyPrecipitationMm",
+            "latitude",
+            "longitude",
+            "precipitationProbabilityMaxPercent",
+            "timezone",
+            "utcOffsetSeconds",
+            "weatherCode",
+            "windGusts10mMaxKmh"
+          ]
+        },
+        {
+          "recordId": "sourcerecord-020",
+          "sourceRole": "baseline_input",
+          "connector": "committed_fixture",
+          "connectorBinding": {
+            "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+            "connectorId": "sourceconnector-002",
+            "sourceConnectorResultSetId": "sourceconnectorresults-001",
+            "connectorResultId": "connectorresult-002"
+          },
+          "plannedIntentIds": [
+            "intent-020"
+          ],
+          "sourceRef": {
+            "sourceId": "source-103",
+            "name": "Warsaw weather logistics baseline fixture",
+            "sourceType": "internal_dataset",
+            "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+            "retrievedAt": "2026-06-01T11:30:00Z",
+            "contentHash": "sha256-baseline-source-101"
+          },
+          "sourceQuality": {
+            "status": "current",
+            "coverage": "complete",
+            "freshnessStatus": "within_policy",
+            "notes": "Committed historical-frequency baseline fixture for transparent comparison."
+          },
+          "normalizedFieldNames": [
+            "comparableServiceDays",
+            "disruptionDays",
+            "lookbackEndsAt",
+            "lookbackStartsAt",
+            "smoothing",
+            "weatherThresholdBucket"
+          ]
+        }
+      ],
+      "provenanceSummary": {
+        "sourceCount": 2,
+        "connectorsUsed": [
+          "committed_fixture",
+          "open_meteo_weather"
+        ],
+        "sourceClassesUsed": [
+          "internal_dataset",
+          "public_dataset"
+        ],
+        "unavailableEvidenceCount": 2,
+        "allEvidenceClaimed": false
+      },
+      "controls": {
+        "readOnly": true,
+        "networkAccess": false,
+        "liveFetch": false,
+        "effectfulGeneration": false,
+        "rawStackTracesExposed": false,
+        "promptVisibleCredentialsAccepted": false
+      },
+      "warnings": [
+        "Evidence trace is read-only and built from generated local records.",
+        "Trace excludes raw fixture contents and raw diagnostics.",
+        "Connector results do not claim all possible internet evidence was gathered.",
+        "Fixture-mode evidence must not be generalized to live calibration quality."
+      ],
+      "links": {
+        "forecastCard": "forecastcard-forecast-602",
+        "forecastBundle": "forecastbundle-forecast-602",
+        "forecastArtifact": "forecast-602",
+        "evidencePacket": "evidence-601",
+        "evidencePlan": "evidenceplan-019",
+        "evidenceSourceSet": "evidencesourceset-019",
+        "sourceConnectorRegistry": "sourceconnectorregistry-001",
+        "sourceConnectorResultSet": "sourceconnectorresults-001"
+      }
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Evidence trace is read-only and built from generated local records.",
+    "Trace excludes raw fixture contents and raw diagnostics.",
+    "Connector results do not claim all possible internet evidence was gathered.",
+    "Fixture-mode evidence must not be generalized to live calibration quality."
+  ]
+}

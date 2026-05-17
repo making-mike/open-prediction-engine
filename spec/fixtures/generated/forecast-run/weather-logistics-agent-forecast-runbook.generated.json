@@ -1,0 +1,360 @@
+{
+  "agentForecastRunbookId": "forecastrunbook-001",
+  "generatedAt": "2026-06-06T13:30:00Z",
+  "domain": "weather-logistics",
+  "runtimeStatus": "local_fixture_safe",
+  "entrypoints": {
+    "cliCommand": "python3 scripts/ope.py forecast-run",
+    "mcpTool": "ope_forecast_run",
+    "summarySchema": "spec/forecast-run-summary.schema.json",
+    "intakeMatrixSchema": "spec/forecast-run-intake-matrix.schema.json",
+    "runbookSchema": "spec/agent-forecast-runbook.schema.json"
+  },
+  "workflow": [
+    {
+      "stepId": "runbookstep-001",
+      "order": 1,
+      "name": "validate_request",
+      "purpose": "Validate the request before any forecast run or evidence work.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation forecast_request_validation --request spec/fixtures/requests/auto-weather-logistics-request.json",
+      "mcpTool": "ope_forecast_request_validation",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "validation_only",
+      "nextActionLabel": "inspect_decision",
+      "stopCondition": "Stop or revise if the request is rejected, blocked, or canceled."
+    },
+    {
+      "stepId": "runbookstep-002",
+      "order": 2,
+      "name": "run_forecast",
+      "purpose": "Run the local fixture-safe forecast orchestration for the accepted auto-evidence request.",
+      "cliCommand": "python3 scripts/ope.py forecast-run",
+      "mcpTool": "ope_forecast_run",
+      "expectedSchema": "spec/forecast-run-summary.schema.json",
+      "sideEffectLevel": "fixture_dry_run",
+      "nextActionLabel": "read_forecast_card",
+      "stopCondition": "Branch on runStatus and error.code before reading downstream outputs."
+    },
+    {
+      "stepId": "runbookstep-003",
+      "order": 3,
+      "name": "inspect_intake_outcome",
+      "purpose": "Map the forecast-run outcome to an explicit safe next action.",
+      "cliCommand": "python3 scripts/ope.py forecast-run-matrix",
+      "mcpTool": null,
+      "expectedSchema": "spec/forecast-run-intake-matrix.schema.json",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "inspect_decision",
+      "stopCondition": "Do not read forecast outputs for non-completed outcomes."
+    },
+    {
+      "stepId": "runbookstep-004",
+      "order": 4,
+      "name": "read_forecast_card",
+      "purpose": "Read compact probability, baseline, status, and quality-claim warnings.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_forecast_card",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "read_evidence_trace",
+      "stopCondition": "Stop if forecastId or questionId no longer matches the forecast-run summary."
+    },
+    {
+      "stepId": "runbookstep-005",
+      "order": 5,
+      "name": "read_evidence_trace",
+      "purpose": "Read connector-bound source provenance without raw fixture contents.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation evidence_trace --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_evidence_trace",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "read_lifecycle_bundle",
+      "stopCondition": "Do not treat connector trace coverage as all internet evidence."
+    },
+    {
+      "stepId": "runbookstep-006",
+      "order": 6,
+      "name": "read_lifecycle_bundle",
+      "purpose": "Read audit context, evidence, provenance, resolution, and scoring bindings.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_lifecycle_bundle",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "check_resolution_status",
+      "stopCondition": "Use the bundle for audit context, not as a new source of forecast semantics."
+    },
+    {
+      "stepId": "runbookstep-007",
+      "order": 7,
+      "name": "check_resolution_status",
+      "purpose": "Confirm whether the forecast is resolved, provisional, ambiguous, or unscorable.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_resolution_status",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "status_read",
+      "nextActionLabel": "read_scoring_summary",
+      "stopCondition": "Do not treat unresolved or unscorable outcomes as normal scored forecasts."
+    },
+    {
+      "stepId": "runbookstep-008",
+      "order": 8,
+      "name": "read_scoring_summary",
+      "purpose": "Inspect score, baseline comparison, and quality-claim boundary before acting.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_scoring_summary",
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "sideEffectLevel": "scoring_read",
+      "nextActionLabel": "read_scoring_summary",
+      "stopCondition": "Do not generalize one fixture score into a live calibration claim."
+    }
+  ],
+  "outcomePlaybooks": [
+    {
+      "outcomeClass": "accepted",
+      "runStatus": "completed",
+      "decisionStatus": "accepted",
+      "retryPolicy": "not_needed",
+      "nextActionLabel": "read_forecast_card",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-agent-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": false,
+      "generatesForecastOutputs": true,
+      "mustNotBindForecastOutputs": false,
+      "agentInstruction": "Use forecastCard for compact action context or lifecycleBundle for audit context."
+    },
+    {
+      "outcomeClass": "rejected",
+      "runStatus": "rejected",
+      "decisionStatus": "rejected",
+      "retryPolicy": "revise_request_then_retry",
+      "nextActionLabel": "revise_request",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-rejected-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": true,
+      "generatesForecastOutputs": false,
+      "mustNotBindForecastOutputs": true,
+      "agentInstruction": "Revise the geography, question text, or source policy before retrying."
+    },
+    {
+      "outcomeClass": "blocked",
+      "runStatus": "blocked",
+      "decisionStatus": "blocked",
+      "retryPolicy": "approval_then_retry",
+      "nextActionLabel": "request_approval",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-blocked-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": true,
+      "generatesForecastOutputs": false,
+      "mustNotBindForecastOutputs": true,
+      "agentInstruction": "Request explicit approval before retrying the forecast run."
+    },
+    {
+      "outcomeClass": "canceled",
+      "runStatus": "canceled",
+      "decisionStatus": "canceled",
+      "retryPolicy": "stop_terminal",
+      "nextActionLabel": "stop_terminal",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-canceled-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": true,
+      "generatesForecastOutputs": false,
+      "mustNotBindForecastOutputs": true,
+      "agentInstruction": "Stop; the caller canceled the request before execution."
+    },
+    {
+      "outcomeClass": "unsupported_fixture_path",
+      "runStatus": "failed",
+      "decisionStatus": "accepted",
+      "retryPolicy": "supported_fixture_or_runtime_expansion_required",
+      "nextActionLabel": "use_supported_fixture_or_wait",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-unsupported-fixture-path-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": true,
+      "generatesForecastOutputs": false,
+      "mustNotBindForecastOutputs": true,
+      "agentInstruction": "Use the supported auto-evidence fixture request or wait for broader runtime support."
+    },
+    {
+      "outcomeClass": "response_too_large",
+      "runStatus": "failed",
+      "decisionStatus": "accepted",
+      "retryPolicy": "increase_max_bytes_or_read_smaller_output",
+      "nextActionLabel": "increase_max_bytes_or_read_smaller_output",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-response-too-large-forecast-run.generated.json",
+      "mcpTool": "ope_forecast_run",
+      "mcpIsError": true,
+      "generatesForecastOutputs": false,
+      "mustNotBindForecastOutputs": true,
+      "agentInstruction": "Retry with a larger maxBytes limit or read smaller operation-specific outputs."
+    }
+  ],
+  "readSurfaceChoices": [
+    {
+      "operation": "forecast_card",
+      "whenToUse": "Use first for compact action context after a completed forecast run.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_forecast_card",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "agentRule": "Do not treat provisional quality claims as calibrated live performance."
+    },
+    {
+      "operation": "evidence_trace",
+      "whenToUse": "Use when the caller needs connector-bound source provenance without raw fixture contents.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation evidence_trace --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_evidence_trace",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "agentRule": "Do not treat connector trace coverage as all internet evidence."
+    },
+    {
+      "operation": "lifecycle_bundle",
+      "whenToUse": "Use when the caller needs evidence, provenance, history, resolution, and scoring context.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_lifecycle_bundle",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "agentRule": "Use for audit or explanation, not as a separate forecast source."
+    },
+    {
+      "operation": "resolution_status",
+      "whenToUse": "Use before deciding whether to wait, resolve, score, or report an outcome.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_resolution_status",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "agentRule": "Exclude ambiguous, annulled, or unresolved outcomes from normal scoring claims."
+    },
+    {
+      "operation": "scoring_summary",
+      "whenToUse": "Use before making baseline-comparison or quality-sensitive downstream decisions.",
+      "cliCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-602 --question-id question-601",
+      "mcpTool": "ope_scoring_summary",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "expectedSchema": "spec/agent-envelope.schema.json",
+      "agentRule": "Report scores with domain, horizon, sample-size, and fixture-mode boundaries."
+    }
+  ],
+  "guards": [
+    {
+      "guardId": "runbookguard-001",
+      "name": "request_result_binding",
+      "rule": "Carry requestId, forecastId, and questionId from the forecast-run summary into every read.",
+      "checkedBy": [
+        "scripts/check_agent_forecast_run.py",
+        "scripts/check_agent_forecast_runbook.py"
+      ]
+    },
+    {
+      "guardId": "runbookguard-002",
+      "name": "non_completed_no_outputs",
+      "rule": "Rejected, blocked, canceled, unsupported, and oversized outcomes must not bind forecast outputs.",
+      "checkedBy": [
+        "scripts/check_forecast_run_intake_matrix.py",
+        "scripts/check_agent_forecast_runbook.py"
+      ]
+    },
+    {
+      "guardId": "runbookguard-003",
+      "name": "approval_gate",
+      "rule": "Approval-required requests must ask for approval before retry and must not bypass request policy.",
+      "checkedBy": [
+        "scripts/check_forecast_requests.py",
+        "scripts/check_mcp_adapter.py"
+      ]
+    },
+    {
+      "guardId": "runbookguard-004",
+      "name": "local_fixture_boundary",
+      "rule": "Treat forecast-run as local fixture-safe orchestration, not hosted execution or live internet search.",
+      "checkedBy": [
+        "scripts/check_agent_forecast_run.py",
+        "scripts/generate_release_manifest.py"
+      ]
+    },
+    {
+      "guardId": "runbookguard-005",
+      "name": "credential_boundary",
+      "rule": "Never pass secrets, tokens, private data, or credentials in prompt-visible tool arguments.",
+      "checkedBy": [
+        "scripts/check_mcp_adapter.py",
+        "scripts/check_hardening.py"
+      ]
+    },
+    {
+      "guardId": "runbookguard-006",
+      "name": "quality_claim_boundary",
+      "rule": "Report forecast quality with sample-size and fixture-mode warnings until enough outcomes resolve.",
+      "checkedBy": [
+        "scripts/check_agent_forecast_run.py",
+        "scripts/check_auto_evidence_resolution.py"
+      ]
+    }
+  ],
+  "exampleSequence": {
+    "requestFixture": "spec/fixtures/requests/auto-weather-logistics-request.json",
+    "forecastId": "forecast-602",
+    "questionId": "question-601",
+    "commands": [
+      {
+        "order": 1,
+        "command": "python3 scripts/ope.py forecast-run",
+        "expectedSignal": "runStatus completed with forecastId forecast-602"
+      },
+      {
+        "order": 2,
+        "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-602 --question-id question-601",
+        "expectedSignal": "compact forecast card with provisional quality claim"
+      },
+      {
+        "order": 3,
+        "command": "python3 scripts/ope.py read --record-type evidence-trace --id forecast-602 --question-id question-601",
+        "expectedSignal": "connector-bound evidence trace with source set and result bindings"
+      },
+      {
+        "order": 4,
+        "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-602 --question-id question-601",
+        "expectedSignal": "bound lifecycle bundle with evidence and scoring context"
+      },
+      {
+        "order": 5,
+        "command": "python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-602 --question-id question-601",
+        "expectedSignal": "resolution status envelope bound to the same forecast and question"
+      },
+      {
+        "order": 6,
+        "command": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-602 --question-id question-601",
+        "expectedSignal": "scoring summary envelope with baseline comparison boundary"
+      }
+    ],
+    "mcpTools": [
+      "ope_forecast_run",
+      "ope_forecast_card",
+      "ope_evidence_trace",
+      "ope_lifecycle_bundle",
+      "ope_resolution_status",
+      "ope_scoring_summary"
+    ]
+  },
+  "warnings": [
+    "Runbook describes local CLI and MCP stdio behavior only.",
+    "The default forecast-run path is fixture-safe and does not fetch live internet sources.",
+    "Non-completed outcomes must not be treated as generated forecasts.",
+    "Quality claims remain provisional until enough comparable outcomes resolve."
+  ]
+}

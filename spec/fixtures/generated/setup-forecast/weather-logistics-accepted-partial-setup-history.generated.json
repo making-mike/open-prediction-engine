@@ -1,0 +1,25 @@
+{
+  "historyId": "history-902",
+  "questionId": "question-902",
+  "entries": [
+    {
+      "forecastId": "forecast-902",
+      "forecastedAt": "2026-06-02T10:30:00Z",
+      "state": "active",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-902",
+        "version": "setup-aware-historical-baseline-fixture-v1",
+        "configurationHash": "sha256-setup-forecast-model-902"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.1341
+      },
+      "rationaleSummary": "Setup-aware execution selected the historical baseline because stronger methods are not enabled for this intake.",
+      "evidencePacketId": "evidence-902"
+    }
+  ],
+  "createdAt": "2026-06-02T10:30:00Z",
+  "updatedAt": "2026-06-02T10:30:00Z"
+}

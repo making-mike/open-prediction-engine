@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-source-adapter-outcome-matrix.schema.json",
+  "title": "Private Source Adapter Outcome Matrix",
+  "description": "Agent-facing decision matrix for private source adapter attempts before setup execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSourceAdapterOutcomeMatrixId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "boundPrivateSourceAdapterCapabilityId",
+    "boundPrivateSetupWorkflowId",
+    "boundPrivateSourceAdapterCapabilityPath",
+    "outcomeClasses",
+    "outcomeRows",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSourceAdapterOutcomeMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["decision_matrix_contract_only"]
+    },
+    "boundPrivateSourceAdapterCapabilityId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterCapabilityPath": { "$ref": "#/$defs/path" },
+    "outcomeClasses": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/outcomeClass" }
+    },
+    "outcomeRows": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/outcomeRow" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matrixDoesNotExecute",
+        "normalChecksOffline",
+        "createsSourceManifests",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials",
+        "privateAdapterRuntimeImplemented"
+      ],
+      "properties": {
+        "matrixDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "privateAdapterRuntimeImplemented": { "type": "boolean" }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "manual_upload",
+        "auto_evidence_connector",
+        "private_api",
+        "private_database",
+        "unregistered_source",
+        "unsafe_source"
+      ]
+    },
+    "capabilityBindingStatus": {
+      "type": "string",
+      "enum": [
+        "bound_adapter",
+        "not_in_capability_contract",
+        "blocked_by_safety_policy"
+      ]
+    },
+    "outcomeName": {
+      "type": "string",
+      "enum": [
+        "available_fixture",
+        "approval_required_fixture",
+        "planned_runtime",
+        "unsupported_source",
+        "credential_missing",
+        "rejected_unsafe_source"
+      ]
+    },
+    "setupOutcomeClass": {
+      "type": "string",
+      "enum": [
+        "setup_ready",
+        "needs_confirmation",
+        "rejected_source",
+        "unsupported_source",
+        "runtime_not_implemented"
+      ]
+    },
+    "agentNextAction": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "follow_row_next_action",
+        "request_mapping_confirmation",
+        "use_auto_evidence_fixture",
+        "wait_for_runtime",
+        "request_credentials_after_runtime",
+        "replace_source",
+        "reject_source"
+      ]
+    },
+    "blockedArtifact": {
+      "type": "string",
+      "enum": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ]
+    },
+    "outcomeClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomeClassId",
+        "outcomeClass",
+        "setupOutcomeClass",
+        "terminal",
+        "canEnterSetup",
+        "agentNextAction",
+        "description"
+      ],
+      "properties": {
+        "outcomeClassId": { "$ref": "common.schema.json#/$defs/id" },
+        "outcomeClass": { "$ref": "#/$defs/outcomeName" },
+        "setupOutcomeClass": { "$ref": "#/$defs/setupOutcomeClass" },
+        "terminal": { "type": "boolean" },
+        "canEnterSetup": { "type": "boolean" },
+        "agentNextAction": { "$ref": "#/$defs/agentNextAction" },
+        "description": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "outcomeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomeRowId",
+        "sourceKind",
+        "capabilityBindingStatus",
+        "outcomeClass",
+        "setupOutcomeClass",
+        "canEnterSetup",
+        "canExecuteSourceRead",
+        "requiresApproval",
+        "requiresCredential",
+        "hasCredentialRuntime",
+        "canCreateSourceManifest",
+        "canCreateForecastArtifacts",
+        "canCreateScoringRecords",
+        "agentNextAction",
+        "blockedArtifacts",
+        "reasonCodes",
+        "agentInstruction"
+      ],
+      "properties": {
+        "outcomeRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "adapterId": { "$ref": "common.schema.json#/$defs/id" },
+        "capabilityBindingStatus": { "$ref": "#/$defs/capabilityBindingStatus" },
+        "outcomeClass": { "$ref": "#/$defs/outcomeName" },
+        "setupOutcomeClass": { "$ref": "#/$defs/setupOutcomeClass" },
+        "canEnterSetup": { "type": "boolean" },
+        "canExecuteSourceRead": { "type": "boolean" },
+        "requiresApproval": { "type": "boolean" },
+        "requiresCredential": { "type": "boolean" },
+        "hasCredentialRuntime": { "type": "boolean" },
+        "canCreateSourceManifest": { "type": "boolean" },
+        "canCreateForecastArtifacts": { "type": "boolean" },
+        "canCreateScoringRecords": { "type": "boolean" },
+        "agentNextAction": { "$ref": "#/$defs/agentNextAction" },
+        "blockedArtifacts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "$ref": "#/$defs/blockedArtifact" }
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 96
+          }
+        },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

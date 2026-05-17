@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/setup-method-decision.schema.json",
+  "title": "Setup Method Decision",
+  "description": "Setup-aware method decision that combines domain setup policy, source intake, and benchmark boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "setupMethodDecisionId",
+    "generatedAt",
+    "domainSetupId",
+    "domain",
+    "sourceIntakeReportId",
+    "sourceManifestId",
+    "fieldMappingId",
+    "intakeStatus",
+    "decisionStatus",
+    "selectedMethodClass",
+    "selectedForecastMode",
+    "selectedSetupBenchmarkGateId",
+    "setupPolicy",
+    "sourceIntakeSummary",
+    "methodCandidates",
+    "requiredActions",
+    "qualityClaimBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "setupMethodDecisionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceIntakeReportId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourceIntakeHandoffId": { "$ref": "#/$defs/nullableId" },
+    "sourceManifestId": { "$ref": "common.schema.json#/$defs/id" },
+    "fieldMappingId": { "$ref": "common.schema.json#/$defs/id" },
+    "intakeStatus": {
+      "type": "string",
+      "enum": ["accepted", "accepted_partial", "needs_confirmation", "rejected"]
+    },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["method_selected", "baseline_selected", "needs_confirmation", "rejected"]
+    },
+    "selectedMethodClass": {
+      "type": "string",
+      "enum": [
+        "historical_baseline",
+        "historical_conditioned_frequency",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "none"
+      ]
+    },
+    "selectedForecastMode": {
+      "type": "string",
+      "enum": [
+        "baseline_only",
+        "historical_conditioned",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "blocked"
+      ]
+    },
+    "setupPolicy": { "$ref": "#/$defs/setupPolicy" },
+    "selectedSetupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+    "sourceIntakeSummary": { "$ref": "#/$defs/sourceIntakeSummary" },
+    "methodCandidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/methodCandidate" }
+    },
+    "requiredActions": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "qualityClaimBoundary": { "$ref": "#/$defs/qualityClaimBoundary" },
+    "warnings": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "methodClass": {
+      "type": "string",
+      "enum": [
+        "historical_baseline",
+        "historical_conditioned_frequency",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble"
+      ]
+    },
+    "setupPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineRequired",
+        "enabledMethodClasses",
+        "baselineComparisonRequired",
+        "leakageCheckRequired",
+        "methodDecisionRecordRequired"
+      ],
+      "properties": {
+        "baselineRequired": { "type": "boolean" },
+        "enabledMethodClasses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/methodClass" }
+        },
+        "baselineComparisonRequired": { "type": "boolean" },
+        "leakageCheckRequired": { "type": "boolean" },
+        "methodDecisionRecordRequired": { "type": "boolean" }
+      }
+    },
+    "sourceIntakeSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canProduceForecast",
+        "forecastGenerationAllowed",
+        "usableSourceRoles",
+        "missingRequiredRoles",
+        "rejectedSourceRoles",
+        "proposedMappingCount",
+        "sourceRejectionReasonCodes"
+      ],
+      "properties": {
+        "canProduceForecast": { "type": "boolean" },
+        "forecastGenerationAllowed": { "type": "boolean" },
+        "usableSourceRoles": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "missingRequiredRoles": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "rejectedSourceRoles": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "proposedMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 120
+        },
+        "sourceRejectionReasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "methodCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodClass",
+        "sourceEligibilityStatus",
+        "benchmarkEligibilityStatus",
+        "finalEligibilityStatus",
+        "setupBenchmarkGateId",
+        "benchmarkQualityClaimStatus",
+        "requiredSourceRoles",
+        "reasonCodes"
+      ],
+      "properties": {
+        "methodClass": { "$ref": "#/$defs/methodClass" },
+        "sourceEligibilityStatus": {
+          "type": "string",
+          "enum": ["eligible", "needs_confirmation", "rejected"]
+        },
+        "benchmarkEligibilityStatus": {
+          "type": "string",
+          "enum": ["eligible", "not_benchmarked", "not_required", "rejected"]
+        },
+        "finalEligibilityStatus": {
+          "type": "string",
+          "enum": ["eligible", "needs_confirmation", "rejected"]
+        },
+        "setupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+        "benchmarkQualityClaimStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 160
+            },
+            { "type": "null" }
+          ]
+        },
+        "requiredSourceRoles": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "qualityClaimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualityClaimAllowed",
+        "benchmarkClaimAllowed",
+        "calibrationClaimAllowed",
+        "productionReadinessClaimAllowed",
+        "stateOfTheArtClaimAllowed",
+        "blockedClaims"
+      ],
+      "properties": {
+        "qualityClaimAllowed": { "type": "boolean" },
+        "benchmarkClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "productionReadinessClaimAllowed": { "type": "boolean" },
+        "stateOfTheArtClaimAllowed": { "type": "boolean" },
+        "blockedClaims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

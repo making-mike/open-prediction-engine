@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-workflow.schema.json",
+  "title": "Private Setup Workflow",
+  "description": "Domain-agnostic workflow contract for agent-assisted private prediction engine setup.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupWorkflowId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "supportedSourceKinds",
+    "phases",
+    "outcomeClasses",
+    "referenceImplementation",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["local_fixture_contract"]
+    },
+    "supportedSourceKinds": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/sourceKindSupport" }
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/phase" }
+    },
+    "outcomeClasses": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/outcomeClass" }
+    },
+    "referenceImplementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referenceDomain",
+        "referenceRunbookId",
+        "referenceRunbookPath",
+        "referenceRunbookCommand",
+        "implementedFixturePath",
+        "forecastId",
+        "questionId",
+        "trackRecordReportId",
+        "implementedNow",
+        "claimBoundary"
+      ],
+      "properties": {
+        "referenceDomain": { "$ref": "common.schema.json#/$defs/domain" },
+        "referenceRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+        "referenceRunbookPath": { "$ref": "#/$defs/path" },
+        "referenceRunbookCommand": { "$ref": "#/$defs/command" },
+        "implementedFixturePath": { "$ref": "#/$defs/path" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "trackRecordReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "implementedNow": { "type": "boolean" },
+        "claimBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "private_api",
+        "private_database",
+        "manual_upload",
+        "manual_mapping",
+        "auto_evidence_connector"
+      ]
+    },
+    "implementationStatus": {
+      "type": "string",
+      "enum": [
+        "implemented_fixture",
+        "planned_contract_only",
+        "unsupported_current_runtime"
+      ]
+    },
+    "phaseName": {
+      "type": "string",
+      "enum": [
+        "source_discovery",
+        "mapping_confirmation",
+        "source_intake",
+        "method_gating",
+        "forecast_execution",
+        "recalculation",
+        "resolution",
+        "scoring"
+      ]
+    },
+    "outcomeName": {
+      "type": "string",
+      "enum": [
+        "setup_ready",
+        "needs_confirmation",
+        "needs_more_data",
+        "rejected_source",
+        "unsupported_source",
+        "runtime_not_implemented"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "confirm_mapping",
+        "collect_more_data",
+        "replace_source",
+        "use_supported_source",
+        "run_method_gate",
+        "run_forecast",
+        "wait_for_runtime",
+        "read_records",
+        "stop_terminal"
+      ]
+    },
+    "sourceKindSupport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKind",
+        "implementationStatus",
+        "currentBoundary",
+        "allowedInCurrentFixture",
+        "requiresApproval"
+      ],
+      "properties": {
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "implementationStatus": { "$ref": "#/$defs/implementationStatus" },
+        "currentBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "allowedInCurrentFixture": { "type": "boolean" },
+        "requiresApproval": { "type": "boolean" }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phaseId",
+        "order",
+        "phase",
+        "purpose",
+        "implementedNow",
+        "currentSurface",
+        "inputContracts",
+        "outputContracts",
+        "allowedSourceKinds",
+        "possibleOutcomes",
+        "guardrail"
+      ],
+      "properties": {
+        "phaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "phase": { "$ref": "#/$defs/phaseName" },
+        "purpose": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "implementedNow": { "type": "boolean" },
+        "currentSurface": { "$ref": "#/$defs/command" },
+        "inputContracts": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "outputContracts": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "allowedSourceKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/sourceKind" }
+        },
+        "possibleOutcomes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/outcomeName" }
+        },
+        "guardrail": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "outcomeClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomeClass",
+        "terminal",
+        "canForecast",
+        "canScore",
+        "nextAction",
+        "agentInstruction"
+      ],
+      "properties": {
+        "outcomeClass": { "$ref": "#/$defs/outcomeName" },
+        "terminal": { "type": "boolean" },
+        "canForecast": { "type": "boolean" },
+        "canScore": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "fieldMappingId": "fieldmapping-003",
+  "createdAt": "2026-06-02T10:00:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-003",
+  "mappings": [
+    {
+      "mappingId": "mapping-017",
+      "sourceId": "manifestsource-006",
+      "sourceRole": "weather_forecast",
+      "sourceField": "city",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-018",
+      "sourceId": "manifestsource-006",
+      "sourceRole": "weather_forecast",
+      "sourceField": "date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-019",
+      "sourceId": "manifestsource-006",
+      "sourceRole": "weather_forecast",
+      "sourceField": "loaded_at",
+      "targetField": "retrieved_at",
+      "targetFieldType": "date_time",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-020",
+      "sourceId": "manifestsource-006",
+      "sourceRole": "weather_forecast",
+      "sourceField": "rain_mm",
+      "targetField": "forecast_daily_precipitation_mm",
+      "targetFieldType": "number",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-021",
+      "sourceId": "manifestsource-007",
+      "sourceRole": "historical_baseline",
+      "sourceField": "date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-022",
+      "sourceId": "manifestsource-007",
+      "sourceRole": "historical_baseline",
+      "sourceField": "city",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-023",
+      "sourceId": "manifestsource-007",
+      "sourceRole": "historical_baseline",
+      "sourceField": "disrupted",
+      "targetField": "disruption_observed",
+      "targetFieldType": "boolean",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-024",
+      "sourceId": "manifestsource-008",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-025",
+      "sourceId": "manifestsource-008",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "city",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    },
+    {
+      "mappingId": "mapping-026",
+      "sourceId": "manifestsource-008",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "disrupted",
+      "targetField": "disruption_observed",
+      "targetFieldType": "boolean",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "confidence": 0.76,
+      "requiresConfirmation": true,
+      "validationNotes": [
+        "Agent-inferred mapping must be confirmed before forecast execution."
+      ]
+    }
+  ],
+  "aliasMappings": [
+    {
+      "aliasMappingId": "aliasmapping-003",
+      "entityType": "geography",
+      "sourceValue": "Warsaw",
+      "canonicalValue": "warsaw",
+      "mappingOrigin": "agent_inferred",
+      "mappingStatus": "proposed",
+      "requiresConfirmation": true
+    }
+  ]
+}

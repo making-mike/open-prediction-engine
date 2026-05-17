@@ -1,0 +1,291 @@
+{
+  "setupMethodDecisionId": "setupmethoddecision-004",
+  "generatedAt": "2026-06-06T17:05:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeReportId": "sourceintakereport-004",
+  "sourceManifestId": "sourcemanifest-004",
+  "fieldMappingId": "fieldmapping-004",
+  "intakeStatus": "rejected",
+  "decisionStatus": "rejected",
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "selectedSetupBenchmarkGateId": null,
+  "setupPolicy": {
+    "baselineRequired": true,
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "deterministic_statistical"
+    ],
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "sourceIntakeSummary": {
+    "canProduceForecast": false,
+    "forecastGenerationAllowed": false,
+    "usableSourceRoles": [],
+    "missingRequiredRoles": [],
+    "rejectedSourceRoles": [
+      "historical_baseline",
+      "weather_forecast"
+    ],
+    "proposedMappingCount": 0,
+    "sourceRejectionReasonCodes": [
+      "all_required_fields_mapped",
+      "available_before_forecast_close",
+      "entity_scope_matches",
+      "insufficient_comparable_rows",
+      "insufficient_positive_outcomes",
+      "missing_required_fields",
+      "no_post_outcome_evidence_detected",
+      "not_available_before_forecast_close",
+      "not_baseline_source",
+      "post_close_or_unavailable_forecast_source",
+      "privacy_boundary_ok",
+      "rejected_required_mappings",
+      "source_contains_secrets",
+      "source_fresh_enough",
+      "source_retrieved_after_forecast_close",
+      "type_mismatch",
+      "types_compatible"
+    ]
+  },
+  "methodCandidates": [
+    {
+      "methodClass": "historical_baseline",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "not_required",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "missing_historical_baseline",
+        "missing_required_fields",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    },
+    {
+      "methodClass": "historical_conditioned_frequency",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "missing_required_fields",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": "setupbenchmarkgate-004",
+      "benchmarkQualityClaimStatus": "not_enough_comparable_benchmarks",
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "baseline_lift_positive",
+        "entity_scope_matches",
+        "execution_sample_threshold_met",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "missing_historical_baseline",
+        "missing_required_fields",
+        "missing_weather_forecast",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "quality_sample_threshold_not_met",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    },
+    {
+      "methodClass": "model_assisted",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "missing_required_fields",
+        "missing_weather_forecast",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    },
+    {
+      "methodClass": "external_reference",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "method_not_enabled_by_setup_policy",
+        "missing_required_fields",
+        "missing_weather_forecast",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    },
+    {
+      "methodClass": "ensemble",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "missing_required_fields",
+        "missing_weather_forecast",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_intake_rejected",
+        "source_rejected",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Declare how role declared_operations_outcome will be resolved later.",
+    "Remove or replace rejected source manifestsource-009 for role weather_forecast.",
+    "Remove or replace rejected source manifestsource-010 for role historical_baseline.",
+    "Resolve rejected source-intake checks before selecting a forecast method."
+  ],
+  "qualityClaimBoundary": {
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "blockedClaims": [
+      "Live calibration claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal domain coverage claim"
+    ]
+  },
+  "warnings": [
+    "Setup method decisions do not create forecast artifacts.",
+    "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+    "Candidate eligibility is scoped to this domain setup and source intake report."
+  ]
+}

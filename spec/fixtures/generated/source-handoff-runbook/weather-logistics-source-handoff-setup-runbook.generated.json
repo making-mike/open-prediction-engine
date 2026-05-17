@@ -1,0 +1,400 @@
+{
+  "sourceHandoffSetupRunbookId": "sourcehandoffsetuprunbook-001",
+  "generatedAt": "2026-06-06T19:35:00Z",
+  "domain": "weather-logistics",
+  "runtimeStatus": "local_fixture_safe",
+  "entrypoints": {
+    "sourceBuilderCommand": "python3 scripts/ope.py source-builder",
+    "sourceHandoffCommand": "python3 scripts/ope.py source-handoff",
+    "methodGateCommand": "python3 scripts/ope.py source-handoff-method",
+    "forecastCommand": "python3 scripts/ope.py source-handoff-forecast",
+    "resolutionCommand": "python3 scripts/ope.py resolve-source-handoff",
+    "runbookCommand": "python3 scripts/ope.py source-handoff-runbook",
+    "runbookSchema": "spec/source-handoff-setup-runbook.schema.json"
+  },
+  "workflow": [
+    {
+      "stepId": "sourcehandoffsetupstep-001",
+      "order": 1,
+      "name": "inspect_sources",
+      "purpose": "Inspect caller-approved local files and draft manifest and mapping records.",
+      "cliCommand": "python3 scripts/ope.py source-builder",
+      "expectedSchema": "spec/source-manifest-build.schema.json",
+      "sideEffectLevel": "draft_only",
+      "nextActionLabel": "inspect_sources",
+      "stopCondition": "Stop if the builder rejects secrets, unsupported formats, oversized files, or leakage indicators."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-002",
+      "order": 2,
+      "name": "handoff_to_source_intake",
+      "purpose": "Classify builder drafts into confirmation, more-data, replacement, or method-gating next actions.",
+      "cliCommand": "python3 scripts/ope.py source-handoff",
+      "expectedSchema": "spec/source-intake-handoff.schema.json",
+      "sideEffectLevel": "non_generating_gate",
+      "nextActionLabel": "proceed_to_method_gating",
+      "stopCondition": "Do not continue to method gates unless the handoff says proceed_to_method_gating."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-003",
+      "order": 3,
+      "name": "run_method_gate",
+      "purpose": "Bind accepted source intake to setup benchmark and method decisions without creating forecasts.",
+      "cliCommand": "python3 scripts/ope.py source-handoff-method",
+      "expectedSchema": "spec/source-handoff-method-gate.schema.json",
+      "sideEffectLevel": "non_generating_gate",
+      "nextActionLabel": "run_explicit_forecast",
+      "stopCondition": "Do not create artifacts unless the method gate awaits explicit setup forecast execution."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-004",
+      "order": 4,
+      "name": "execute_forecast",
+      "purpose": "Run explicit setup forecast execution for the confirmed handoff only.",
+      "cliCommand": "python3 scripts/ope.py source-handoff-forecast --case confirmed_builder_draft",
+      "expectedSchema": "spec/setup-forecast-run.schema.json",
+      "sideEffectLevel": "fixture_generation",
+      "nextActionLabel": "resolve_source_handoff",
+      "stopCondition": "Blocked setup forecast runs must not bind forecast IDs or artifact paths."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-005",
+      "order": 5,
+      "name": "resolve_forecast",
+      "purpose": "Resolve and score the generated handoff forecast from declared outcome sources.",
+      "cliCommand": "python3 scripts/ope.py resolve-source-handoff",
+      "expectedSchema": "spec/resolution-record.schema.json",
+      "sideEffectLevel": "fixture_resolution",
+      "nextActionLabel": "read_resolved_forecast_card",
+      "stopCondition": "Do not score blocked handoff cases or use resolution sources as forecast-time evidence."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-006",
+      "order": 6,
+      "name": "read_forecast_card",
+      "purpose": "Read compact probability, baseline, resolution, score, and claim-boundary fields.",
+      "cliCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "expectedSchema": "spec/forecast-card.schema.json",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "read_lifecycle_bundle",
+      "stopCondition": "Stop if the card does not preserve handoff and method-gate bindings."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-007",
+      "order": 7,
+      "name": "read_lifecycle_bundle",
+      "purpose": "Read the bound forecast lifecycle for audit context and provenance review.",
+      "cliCommand": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "expectedSchema": "synthetic forecast-bundle read view",
+      "sideEffectLevel": "read_only",
+      "nextActionLabel": "read_track_record",
+      "stopCondition": "Use the bundle for audit context, not as a new source of forecast semantics."
+    },
+    {
+      "stepId": "sourcehandoffsetupstep-008",
+      "order": 8,
+      "name": "read_track_record",
+      "purpose": "Inspect the one-outcome track record and sample-size claim boundary.",
+      "cliCommand": "python3 scripts/ope.py read --record-type track-record --id trackrecord-1102",
+      "expectedSchema": "spec/track-record-report.schema.json",
+      "sideEffectLevel": "scoring_read",
+      "nextActionLabel": "stop_terminal",
+      "stopCondition": "Do not generalize one resolved handoff outcome into a calibration or quality claim."
+    }
+  ],
+  "casePlaybooks": [
+    {
+      "case": "unconfirmed_builder_draft",
+      "sourceIntakeHandoffId": "sourceintakehandoff-001",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-001",
+      "setupForecastRunId": "setupforecastrun-1101",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": "needs_confirmation",
+      "sourceHandoffNextAction": "ask_mapping_confirmation",
+      "methodGateNextAction": "ask_mapping_confirmation",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "ask_mapping_confirmation",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Ask the caller to confirm proposed mappings before method gates or forecast execution."
+    },
+    {
+      "case": "confirmed_builder_draft",
+      "sourceIntakeHandoffId": "sourceintakehandoff-002",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+      "setupForecastRunId": "setupforecastrun-1102",
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "sourceIntakeStatus": "accepted",
+      "sourceHandoffNextAction": "proceed_to_method_gating",
+      "methodGateNextAction": "await_explicit_setup_forecast_execution",
+      "forecastRunStatus": "generated",
+      "selectedMethodClass": "deterministic_statistical",
+      "generatesForecastOutputs": true,
+      "scored": true,
+      "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes",
+      "nextActionLabel": "read_resolved_forecast_card",
+      "mustNotForecast": false,
+      "mustNotScore": false,
+      "agentInstruction": "Read forecast-1102 card, bundle, or track record; keep quality claims sample-size-blocked."
+    },
+    {
+      "case": "insufficient_confirmed_builder_draft",
+      "sourceIntakeHandoffId": "sourceintakehandoff-003",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-003",
+      "setupForecastRunId": "setupforecastrun-1103",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": "rejected",
+      "sourceHandoffNextAction": "collect_more_data",
+      "methodGateNextAction": "collect_more_data",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "collect_more_data",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Collect enough pre-close source rows before retrying source intake and method gates."
+    },
+    {
+      "case": "contains_secret",
+      "sourceIntakeHandoffId": "sourceintakehandoff-004",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-004",
+      "setupForecastRunId": "setupforecastrun-1104",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": null,
+      "sourceHandoffNextAction": "replace_rejected_sources",
+      "methodGateNextAction": "replace_rejected_sources",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "replace_rejected_sources",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Replace rejected sources before source intake; do not pass rejected files to forecast execution."
+    },
+    {
+      "case": "unsupported_format",
+      "sourceIntakeHandoffId": "sourceintakehandoff-005",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-005",
+      "setupForecastRunId": "setupforecastrun-1105",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": null,
+      "sourceHandoffNextAction": "replace_rejected_sources",
+      "methodGateNextAction": "replace_rejected_sources",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "replace_rejected_sources",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Replace rejected sources before source intake; do not pass rejected files to forecast execution."
+    },
+    {
+      "case": "oversized",
+      "sourceIntakeHandoffId": "sourceintakehandoff-006",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-006",
+      "setupForecastRunId": "setupforecastrun-1106",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": null,
+      "sourceHandoffNextAction": "replace_rejected_sources",
+      "methodGateNextAction": "replace_rejected_sources",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "replace_rejected_sources",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Replace rejected sources before source intake; do not pass rejected files to forecast execution."
+    },
+    {
+      "case": "leakage",
+      "sourceIntakeHandoffId": "sourceintakehandoff-007",
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-007",
+      "setupForecastRunId": "setupforecastrun-1107",
+      "forecastId": null,
+      "questionId": null,
+      "sourceIntakeStatus": null,
+      "sourceHandoffNextAction": "replace_rejected_sources",
+      "methodGateNextAction": "replace_rejected_sources",
+      "forecastRunStatus": "blocked",
+      "selectedMethodClass": "none",
+      "generatesForecastOutputs": false,
+      "scored": false,
+      "qualityClaimStatus": "not_applicable",
+      "nextActionLabel": "replace_rejected_sources",
+      "mustNotForecast": true,
+      "mustNotScore": true,
+      "agentInstruction": "Replace rejected sources before source intake; do not pass rejected files to forecast execution."
+    }
+  ],
+  "readSurfaceChoices": [
+    {
+      "operation": "source_handoff_summaries",
+      "whenToUse": "Use before execution to inspect source-builder handoff, method-gate, and forecast-run state.",
+      "cliCommand": "python3 scripts/ope.py source-handoff",
+      "requires": [],
+      "agentRule": "Treat source-handoff and method-gate summaries as guidance, not generated forecasts."
+    },
+    {
+      "operation": "resolution_outputs",
+      "whenToUse": "Use after forecast execution to check source-handoff resolution fixture drift.",
+      "cliCommand": "python3 scripts/ope.py resolve-source-handoff",
+      "requires": [
+        "forecast-1102",
+        "question-1102"
+      ],
+      "agentRule": "Only generated forecast-1102 is resolved; blocked handoff cases stay non-scored."
+    },
+    {
+      "operation": "forecast_card",
+      "whenToUse": "Use for compact probability, baseline, resolved outcome, score, and claim boundary.",
+      "cliCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "agentRule": "Do not hide sample-size warnings or source-handoff setup bindings from downstream agents."
+    },
+    {
+      "operation": "lifecycle_bundle",
+      "whenToUse": "Use when the caller needs the bound forecast lifecycle and provenance context.",
+      "cliCommand": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "requires": [
+        "forecastId",
+        "questionId"
+      ],
+      "agentRule": "Use for audit context without redefining forecast, evidence, resolution, or scoring semantics."
+    },
+    {
+      "operation": "track_record",
+      "whenToUse": "Use after resolution to inspect Brier score, baseline comparison, and one-outcome boundary.",
+      "cliCommand": "python3 scripts/ope.py read --record-type track-record --id trackrecord-1102",
+      "requires": [
+        "trackRecordReportId"
+      ],
+      "agentRule": "One resolved source-handoff outcome is not a calibration or quality claim."
+    }
+  ],
+  "guards": [
+    {
+      "guardId": "sourcehandoffsetupguard-001",
+      "name": "mapping_confirmation_gate",
+      "rule": "Unconfirmed builder mappings must ask for confirmation before method gates or forecast execution.",
+      "checkedBy": [
+        "scripts/check_source_intake_handoff.py",
+        "scripts/check_source_handoff_setup_runbook.py"
+      ]
+    },
+    {
+      "guardId": "sourcehandoffsetupguard-002",
+      "name": "blocked_cases_no_forecast",
+      "rule": "Blocked source-handoff cases must not bind forecast IDs, question IDs, cards, bundles, or artifacts.",
+      "checkedBy": [
+        "scripts/check_source_handoff_forecast.py",
+        "scripts/check_source_handoff_setup_runbook.py"
+      ]
+    },
+    {
+      "guardId": "sourcehandoffsetupguard-003",
+      "name": "blocked_cases_no_score",
+      "rule": "Blocked source-handoff cases must not create resolution, scoring, calibration, or track-record outputs.",
+      "checkedBy": [
+        "scripts/check_source_handoff_resolution.py",
+        "scripts/check_source_handoff_setup_runbook.py"
+      ]
+    },
+    {
+      "guardId": "sourcehandoffsetupguard-004",
+      "name": "resolution_source_boundary",
+      "rule": "Declared outcome sources may resolve outcomes but must not enter forecast-time provenance.",
+      "checkedBy": [
+        "scripts/resolve_source_handoff_outcome.py",
+        "scripts/check_source_handoff_resolution.py"
+      ]
+    },
+    {
+      "guardId": "sourcehandoffsetupguard-005",
+      "name": "sample_size_boundary",
+      "rule": "One resolved source-handoff outcome must keep quality and calibration claims blocked.",
+      "checkedBy": [
+        "scripts/check_source_handoff_resolution.py",
+        "scripts/check_source_handoff_setup_runbook.py"
+      ]
+    },
+    {
+      "guardId": "sourcehandoffsetupguard-006",
+      "name": "local_fixture_boundary",
+      "rule": "The source-handoff setup runbook describes local fixture behavior, not hosted private API parsing.",
+      "checkedBy": [
+        "scripts/check_source_handoff_setup_runbook.py",
+        "scripts/generate_release_manifest.py"
+      ]
+    }
+  ],
+  "exampleSequence": {
+    "case": "confirmed_builder_draft",
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "commands": [
+      {
+        "order": 1,
+        "command": "python3 scripts/ope.py source-builder --case local_draft",
+        "expectedSignal": "draft manifest and mapping from caller-approved local files"
+      },
+      {
+        "order": 2,
+        "command": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+        "expectedSignal": "nextAction proceed_to_method_gating"
+      },
+      {
+        "order": 3,
+        "command": "python3 scripts/ope.py source-handoff-method --case confirmed_builder_draft",
+        "expectedSignal": "methodGateStatus method_selected without forecast artifacts"
+      },
+      {
+        "order": 4,
+        "command": "python3 scripts/ope.py source-handoff-forecast --case confirmed_builder_draft",
+        "expectedSignal": "runStatus generated with forecastId forecast-1102"
+      },
+      {
+        "order": 5,
+        "command": "python3 scripts/ope.py resolve-source-handoff",
+        "expectedSignal": "checked six source-handoff resolution outputs"
+      },
+      {
+        "order": 6,
+        "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "expectedSignal": "resolved scored forecast card with source-handoff setup binding"
+      },
+      {
+        "order": 7,
+        "command": "python3 scripts/ope.py read --record-type track-record --id trackrecord-1102",
+        "expectedSignal": "one resolved outcome with sample-size claim boundary"
+      }
+    ]
+  },
+  "warnings": [
+    "Runbook describes local fixture-safe CLI behavior only.",
+    "Source-builder drafts remain proposals until source intake and setup gates accept them.",
+    "Unconfirmed mappings, insufficient data, and builder-rejected sources must not generate forecasts.",
+    "Only forecast-1102 resolves and scores in this fixture path.",
+    "One resolved source-handoff outcome is not a quality, calibration, production, or state-of-the-art claim."
+  ]
+}

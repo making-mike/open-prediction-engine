@@ -1,21 +1,25 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Purpose
 
-This roadmap turns the OPE whitepaper into an execution plan.
+This roadmap turns the OPE whitepaper and product context into an execution plan.
 
 The project should advance in this order:
 
 1. Define machine-readable contracts.
 2. Prove scoring and resolution on fixtures.
-3. Choose one narrow forecast domain.
-4. Build one complete evidence loop.
+3. Choose one narrow reference forecast domain.
+4. Build one complete evidence loop for that reference domain.
 5. Add benchmark and anti-leakage controls.
 6. Expose agent-facing access only after the core records are stable.
+7. Add domain-agnostic private engine setup contracts.
+8. Add source manifests, field mappings, method policies, and recalculation history.
+9. Add policy-bound auto-evidence gathering for `data: auto`.
+10. Add stronger forecasting methods only after baseline and benchmark controls exist.
 
-The roadmap is intentionally contract-first. OPE should not start as a generic LLM forecast endpoint.
+The roadmap is intentionally contract-first, agent-native, and domain-agnostic. OPE should not start as a generic LLM forecast endpoint or an unbounded web crawler. Weather-logistics is the reference wedge used to prove the standard, not the product's long-term boundary.
 
 ## Current Status
 
@@ -25,6 +29,7 @@ Done:
 - Public narrative in `whitepaper.md`.
 - Research-backed whitepaper evaluation in `research/whitepaper-evaluation.md`.
 - Agent baseline and decision log under `.agents/`.
+- Compact product context in `PRODUCT.md`.
 - Decision to treat question governance and forecast histories as core contracts.
 - Weather-linked logistics selected as the first domain wedge.
 - Fixture-only evidence loop for the selected wedge.
@@ -47,15 +52,59 @@ Done:
 - Schema-bound forecast cards and public record index contracts.
 - Generated release manifest with local surface and claim-boundary summary.
 - CI release gate for local fixture-ready checks.
+- Initial `data: auto` request, source-policy contract, evidence-gathering plan contract, evidence-source-set contract, dry-run planner, fixture-replay source gatherer, request-bound auto-evidence forecast outputs, and fixture-mode auto-evidence resolution/scoring.
+- Auto-evidence guardrails for source injection, prompt injection, stale sources, unavailable sources, conflicting sources, and gated live-fetch mode.
+- First weather-logistics method registry with clean baseline comparison and expanded model-assisted leakage fixtures.
+- Method-comparison report covering every non-baseline method.
+- Method-selection explanation that falls back to the baseline when comparable method evidence is insufficient.
+- Transport-neutral agent envelope contract with generated local examples for request validation, evidence planning, forecast card reads, lifecycle bundle reads, resolution status, scoring summary, and sanitized errors.
+- Local single-operation agent adapter dispatcher exposed as `python3 scripts/ope.py agent-call`.
+- Checked mapping from the local agent dispatcher to the local MCP stdio scaffold plus future HTTP and queue adapters.
+- Local MCP stdio scaffold exposed as `python3 scripts/ope.py mcp-stdio` with seven checked agent tools returning OPE envelopes.
+- Local forecast-run orchestrator exposed as `python3 scripts/ope.py forecast-run` and MCP tool `ope_forecast_run`.
+- Checked forecast-run intake matrix and agent runbook exposed as `python3 scripts/ope.py forecast-run-matrix` and `python3 scripts/ope.py forecast-runbook`.
+- Checked source connector registry and result set exposed as `python3 scripts/ope.py source-connectors`.
+- Evidence plans now bind to connector registry/result-set IDs and explain unregistered, unsupported, and resolution-only connectors before gathering.
+- The auto-evidence gatherer now rejects non-executable connector policies and binds source-set records to connector registry/result entries.
+- Read-only evidence traces now link forecasts to source policy, evidence plan, source set, connector registry, connector results, and gathered source records.
+- Historical-only baseline forecasts now run without API evidence, live fetches, or auto-evidence connectors, returning a baseline-equal forecast for agents that provide or restrict OPE to historical data.
+- Live connector readiness now separates normal fixture replay, explicit integration live fetch, and future hosted live fetch for the Open-Meteo connector without adding network access to release checks.
+- Product context now frames OPE as a domain-agnostic package and standard for agents setting up private prediction engines from connected source data.
+- Domain setup contracts now describe a fixture-ready weather-logistics reference setup and a candidate seaport berth-availability private setup with maturity labels and claim boundaries.
+- Source manifest and field mapping intake reports now classify bounded data as accepted, accepted-partial, needs-confirmation, or rejected before any forecast is produced.
+- Local source manifest builder now inspects small caller-approved CSV/JSON files, emits draft source manifests and field mappings, rejects secrets, oversized files, unsupported formats, and leakage indicators, and keeps drafts out of public read surfaces.
+- Source-builder to source-intake handoffs now classify unconfirmed, confirmed, insufficient-sample, and rejected builder drafts into deterministic next actions for agents.
+- Setup-aware method decisions now explain benchmark-gated deterministic selection, baseline fallback, missing forecast-time evidence, unconfirmed mappings, rejected intake, and benchmark boundaries before forecast artifacts are created.
+- Setup-aware forecast execution now creates deterministic or baseline forecast artifacts, evidence packets, histories, cards, and bundles from accepted setup intake while keeping blocked setup outcomes non-generating.
+- Setup benchmark gates now let accepted setup intake use a deterministic statistical fixture method only when source roles, benchmark bindings, anti-leakage controls, positive lift, and execution sample thresholds pass, while quality claims remain blocked.
+- Recalculation history now appends updated forecast states when new pre-close evidence arrives and rejects post-outcome resolution evidence as forecast input.
+- Ignored local live capture workspace now saves sanitized opt-in connector result sets and converts successful captures into local source-set drafts without changing release artifacts.
+- Builder handoffs now flow into setup benchmark and method decisions through a non-generating source-handoff method gate.
+- Confirmed builder handoffs can now explicitly generate `forecast-1102`; blocked handoff cases remain non-generating.
+- Source-handoff forecasts can now resolve and score `forecast-1102` from the declared outcome source while keeping blocked handoff cases non-scored and quality claims sample-size-blocked.
+- A checked source-handoff setup runbook now gives agents one local workflow from source inspection to resolved forecast card and track-record boundary.
+- A domain-agnostic private setup workflow contract now separates setup phases and source-kind boundaries before future private API/database runtimes exist.
+- A checked private source adapter intake bridge now routes adapter outcomes to source-builder, source-handoff confirmation, fixture evidence, wait, replace, or stop actions without executing private sources or creating forecast records.
 
 Not started:
 
+- General private engine setup workflow.
+- Arbitrary private API/database parsing beyond checked setup and local source-builder fixtures.
+- Additional setup-aware method classes beyond the current deterministic fixture path.
+- Forecast execution that consumes ignored local live drafts.
+- Watch or scheduler runtime beyond checked recalculation fixtures.
+- Production hosted, HTTP, or queue agent adapter runtime.
 - Hosted service runtime and network API.
+- Production forecast use of live connector results.
 - Generated language-specific runtime types, if needed later.
 
 In progress:
 
 - None.
+
+Next:
+
+- Milestone 51: Private Setup Request Contract.
 
 ## Milestone 0: Project Baseline
 
@@ -527,9 +576,963 @@ Exit criteria:
 - Normal release checks fail if the CI workflow stops running the canonical release command.
 - The CI workflow remains a release-readiness gate, not a hosted deployment pipeline.
 
+## Milestone 19: Agent-Native Auto-Evidence Forecasting
+
+Status: Complete.
+
+Goal: let an agent request a forecast with `data: auto`, gather allowed public evidence under a declared source policy, and receive an agent-readable probabilistic forecast artifact with provenance, baseline comparison, uncertainty, and resolution metadata.
+
+Product direction:
+
+- Primary runtime actor: an agent or automated workflow.
+- Primary adopter: a human developer supervising or integrating that agent.
+- First domain: `weather-logistics`.
+- First output type: binary probability.
+- First evidence mode: best available allowed public evidence, not unbounded internet crawling.
+- First interface: local CLI and JSON records, designed so MCP, HTTP, queue, or hosted adapters can wrap it later.
+
+Tasks:
+
+- [x] Add `PRODUCT.md` to persistent repo context.
+- [x] Extend or add request contracts for `dataMode`: `provided`, `auto`, and `hybrid`.
+- [x] Define `sourcePolicy` fields: allowed source classes, allowed connectors, retrieval window, freshness requirements, licensing constraints, max cost, max network calls, and approval gates.
+- [x] Add an evidence-gathering plan record that captures search intent, connector plan, inclusion rules, exclusion rules, and unavailable evidence.
+- [x] Add an auto-evidence dry-run command that returns the proposed question contract and evidence plan before fetching live sources.
+- [x] Add an allow-listed fixture-replay evidence path for the weather-logistics wedge, starting with public weather evidence already compatible with existing Open-Meteo fixture mode.
+- [x] Record raw source metadata, normalized source records, source quality, fetch timestamps, and provenance references for fixture-replay auto-evidence runs.
+- [x] Add source injection, prompt injection, stale source, unavailable source, and conflicting source tests.
+- [x] Keep effectful live fetches explicitly mode-gated and fixture-replayable in tests.
+- [x] Generate a forecast card and lifecycle bundle from an auto-evidence request.
+- [x] Preserve request, source policy, evidence plan, evidence packet, forecast artifact, history, resolution, score, and track-record bindings.
+- [x] Update release manifest and read index with implemented auto-evidence capability only after commands and checks exist.
+- [x] Document the current claim boundary: OPE gathered allowed evidence under a declared policy, not all possible evidence.
+
+Exit criteria:
+
+- One local command can validate an agent forecast request with `data: auto` and produce a machine-readable evidence plan.
+- One checked command can run the weather-logistics auto-evidence path in fixture-replay mode without unbounded network access.
+- One generated forecast card shows the forecast probability, baseline comparison, source policy, evidence mode, and claim warnings.
+- Release checks fail if auto-evidence output loses source policy, provenance, request binding, or claim warnings.
+- Public docs still avoid state-of-the-art or live calibration claims until benchmark and outcome evidence support them.
+
+## Milestone 20: Forecasting Method Registry And Benchmark Upgrade
+
+Status: Complete.
+
+Goal: make "best available methods" concrete, comparable, and claim-safe before OPE advertises stronger forecasting quality.
+
+Tasks:
+
+- [x] Define a method registry for baseline, deterministic statistical, model-assisted, retrieval-assisted, ensemble, and external-reference methods.
+- [x] Require every method to declare model identity, version, training cutoff when applicable, inputs, uncertainty method, known limitations, and compatible domains.
+- [x] Add benchmark fixtures for method comparison in the first wedge.
+- [x] Compare every non-baseline method against the baseline under the same source policy and retrieval window.
+- [x] Add temporal leakage, known-answer, source-contamination, and post-resolution retrieval checks for model-assisted methods.
+- [x] Add method-selection rules that favor simpler baselines when evidence quality is insufficient.
+- [x] Report method quality only by domain, horizon, output type, source policy, coverage period, and sample size.
+
+Exit criteria:
+
+- OPE can explain why a method was selected for a forecast.
+- OPE can show whether the method has beaten the baseline in comparable checked conditions.
+- Documentation can describe supported methods without claiming state-of-the-art performance prematurely.
+
+## Milestone 21: Agent Adapter Contract
+
+Status: Complete.
+
+Goal: make OPE easy for agents to call without coupling the engine to one transport.
+
+Tasks:
+
+- [x] Define stable JSON input and output envelopes for forecast request, evidence plan, forecast card, lifecycle bundle, resolution status, and scoring summary.
+- [x] Standardize exit codes and sanitized error payloads for agent callers.
+- [x] Add a read/write capability matrix for local CLI, future MCP, future HTTP, and future queue adapters.
+- [x] Add transcript-style examples showing an agent requesting a forecast, reading the card, inspecting the bundle, and deciding whether to act or escalate.
+- [x] Keep adapters thin: they may expose OPE records, but they must not redefine forecast, evidence, resolution, or scoring semantics.
+
+Exit criteria:
+
+- A future MCP or HTTP implementation can wrap the local engine without changing record contracts.
+- Agents can distinguish validation, dry-run, live-fetch, resolved, scored, ambiguous, annulled, and approval-required states from JSON alone.
+
+Implemented artifacts:
+
+- `spec/agent-envelope.schema.json`
+- `spec/agent-adapter.md`
+- `spec/fixtures/generated/agent-adapter/`
+- `scripts/build_agent_adapter_fixtures.py`
+- `scripts/check_agent_adapter.py`
+- `python3 scripts/ope.py agent-envelopes`
+
+## Milestone 22: Local Agent Adapter Dispatcher
+
+Status: Complete.
+
+Goal: turn the envelope contract into a narrow local dispatcher that terminal agents can call operation by operation.
+
+Tasks:
+
+- [x] Add a local `agent-call` or equivalent command that accepts an operation, IDs, and max-byte limit and returns one `agent-envelope.schema.json` response.
+- [x] Support the implemented read and validation operations: forecast request validation, evidence plan, forecast card, lifecycle bundle, resolution status, and scoring summary.
+- [x] Return the standardized exit codes and sanitized error payloads from the dispatcher, not only from generated examples.
+- [x] Add request binding checks for forecast ID, question ID, request ID, source-policy ID, resolution record ID, and scoring report ID.
+- [x] Add CLI smoke tests for success, not-found, binding mismatch, approval-required, and response-too-large cases.
+- [x] Keep the dispatcher local and transport-neutral so MCP, HTTP, or queue adapters can wrap it later.
+
+Exit criteria:
+
+- A terminal agent can request exactly one adapter operation and receive one schema-bound JSON envelope.
+- The dispatcher remains a thin wrapper over OPE contracts and local records, not a new forecasting semantic layer.
+
+Implemented artifacts:
+
+- `scripts/agent_adapter_dispatcher.py`
+- `scripts/check_agent_adapter_dispatcher.py`
+- `python3 scripts/ope.py agent-call`
+
+## Milestone 23: Agent Adapter Protocol Mapping
+
+Status: Complete.
+
+Goal: define how the local dispatcher maps onto MCP stdio and future HTTP or queue adapters without implementing a hosted service too early.
+
+Tasks:
+
+- [x] Add a machine-readable adapter capability document that lists operations, input fields, output envelope schema, exit-code mapping, and side-effect level.
+- [x] Define MCP tool names and argument shapes that wrap `agent-call` one operation at a time.
+- [x] Define HTTP endpoint and status-code mapping for the same operations without changing OPE record semantics.
+- [x] Define queue message and result-envelope mapping for asynchronous future forecast runs.
+- [x] Add approval-gate and credential-boundary notes for each transport.
+- [x] Add examples showing how an agent should choose card, bundle, resolution, or scoring reads before taking downstream action.
+- [x] Keep protocol mapping as documentation and checked fixtures until each adapter runtime is introduced.
+
+Exit criteria:
+
+- MCP, HTTP, or queue adapters can be implemented from a checked mapping document without changing the local dispatcher.
+- Public docs still avoid claiming HTTP, queue, or hosted-service support before those runtimes exist.
+
+Implemented artifacts:
+
+- `spec/agent-adapter-protocol-map.schema.json`
+- `spec/agent-adapter-protocol-map.md`
+- `spec/fixtures/generated/agent-adapter/ope-agent-adapter-protocol-map.generated.json`
+- `scripts/generate_agent_adapter_protocol_map.py`
+- `scripts/check_agent_adapter_protocol_map.py`
+- `python3 scripts/ope.py agent-protocol-map`
+
+## Milestone 24: MCP Adapter Scaffold
+
+Status: Complete.
+
+Goal: implement the first non-local protocol wrapper over the existing agent envelope without changing forecast, evidence, resolution, or scoring semantics.
+
+Tasks:
+
+- [x] Choose the smallest MCP runtime shape compatible with the repository's no-service local workflow.
+- [x] Expose one MCP tool per mapped operation: request validation, evidence plan, forecast card, lifecycle bundle, resolution status, and scoring summary.
+- [x] Preserve the `agent-envelope.schema.json` response shape, sanitized errors, standardized exit codes, warnings, and record bindings.
+- [x] Keep all tools read-only or validation/dry-run; do not add production live fetching, paid actions, or private-source access.
+- [x] Keep credentials out of prompt-visible tool arguments and returned OPE records.
+- [x] Add a local MCP smoke checker that calls each tool through the scaffold or a deterministic equivalent.
+- [x] Update docs to claim only local MCP scaffold support, not hosted service support.
+
+Exit criteria:
+
+- An agent host can call the six existing local adapter operations through an MCP-shaped surface and receive the same schema-bound envelopes.
+- Release checks fail if MCP mappings drift from `agent-call` behavior or claim broader runtime capability than implemented.
+
+Implemented artifacts:
+
+- `scripts/ope_mcp_stdio.py`
+- `scripts/check_mcp_adapter.py`
+- `python3 scripts/ope.py mcp-stdio`
+- updated `spec/agent-adapter-protocol-map.schema.json`
+- updated `spec/fixtures/generated/agent-adapter/ope-agent-adapter-protocol-map.generated.json`
+
+## Milestone 25: Agent Forecast Run Orchestrator
+
+Status: Complete.
+
+Goal: give agents one local, schema-bound way to turn an accepted fixture-mode forecast request into the bound forecast outputs they need, without forcing every caller to manually chain the internal commands.
+
+Tasks:
+
+- [x] Define a forecast-run summary contract that binds request ID, source policy ID, evidence plan ID, source-set ID, method-selection ID, forecast ID, question ID, card ID, bundle ID, resolution status, and scoring status.
+- [x] Add a local `forecast-run` command that validates a request and runs only the already-checked fixture-safe path for the first weather-logistics wedge.
+- [x] Return a compact run summary plus links to the forecast card, lifecycle bundle, resolution status, and scoring summary.
+- [x] Add failure summaries for rejected, approval-required, unresolvable, and response-too-large requests.
+- [x] Add an MCP tool that wraps the run orchestrator only after the CLI summary is schema-bound and checked.
+- [x] Keep live fetching, paid actions, private-source access, and hosted execution out of scope.
+
+Exit criteria:
+
+- An agent can submit the fixture-mode `data: auto` request and receive one bound summary that points to the forecast card and lifecycle bundle.
+- Release checks fail if the run summary loses request/result binding or overstates live evidence, calibration, or method quality.
+
+Implemented artifacts:
+
+- `spec/forecast-run-summary.schema.json`
+- `spec/agent-forecast-run.md`
+- `spec/fixtures/generated/forecast-run/weather-logistics-agent-forecast-run.generated.json`
+- `scripts/run_agent_forecast.py`
+- `scripts/check_agent_forecast_run.py`
+- `python3 scripts/ope.py forecast-run`
+- MCP tool `ope_forecast_run`
+
+## Milestone 26: Forecast Run Intake Matrix
+
+Status: Complete.
+
+Goal: make every forecast-run request outcome explicit before expanding orchestration beyond the default fixture-safe path.
+
+Tasks:
+
+- [x] Add checked forecast-run summaries for accepted, rejected, blocked, canceled, unsupported-fixture-path, and response-too-large requests.
+- [x] Define which request decisions are terminal and which are retryable after approval, clarification, or policy changes.
+- [x] Add a compact request outcome matrix for agents choosing whether to wait, ask for approval, revise the request, or stop.
+- [x] Ensure MCP `ope_forecast_run` preserves the same outcome classes as the CLI.
+- [x] Keep all non-default paths non-generating until a broader runtime decision is made.
+
+Exit criteria:
+
+- Agents can inspect a forecast-run failure summary and decide the next safe action without reading raw diagnostics.
+- Release checks fail if a rejected or approval-gated request accidentally binds generated forecast outputs.
+
+Implemented artifacts:
+
+- `spec/forecast-run-intake-matrix.schema.json`
+- `spec/fixtures/generated/forecast-run/weather-logistics-forecast-run-intake-matrix.generated.json`
+- checked failure summaries under `spec/fixtures/generated/forecast-run/`
+- `scripts/generate_forecast_run_intake_matrix.py`
+- `scripts/check_forecast_run_intake_matrix.py`
+- `python3 scripts/ope.py forecast-run-matrix`
+- MCP parity checks for every `ope_forecast_run` intake class
+
+## Milestone 27: Agent Forecast Runbook
+
+Status: Complete.
+
+Goal: give human developers and agents a compact operational guide for requesting a forecast, interpreting the run summary, choosing the next read surface, and handling every intake outcome.
+
+Tasks:
+
+- [x] Add a checked agent runbook that maps request validation, forecast run, forecast card, lifecycle bundle, resolution status, and scoring summary into one safe caller workflow.
+- [x] Include examples for default `data: auto`, approval-required, rejected, canceled, unsupported, and response-too-large paths.
+- [x] Define machine-readable next-action labels that align with the intake matrix without inventing new runtime behavior.
+- [x] Add a local check that fails if the runbook examples drift from committed fixtures or MCP tool expectations.
+- [x] Keep the runbook scoped to local CLI and MCP stdio behavior until a hosted runtime exists.
+
+Exit criteria:
+
+- A supervised agent can follow the runbook from request to forecast card without guessing which command or MCP tool to call next.
+- Release checks fail if the documented next action contradicts the schema-bound intake matrix.
+
+Implemented artifacts:
+
+- `spec/agent-forecast-runbook.schema.json`
+- `spec/agent-forecast-runbook.md`
+- `spec/fixtures/generated/forecast-run/weather-logistics-agent-forecast-runbook.generated.json`
+- `scripts/generate_agent_forecast_runbook.py`
+- `scripts/check_agent_forecast_runbook.py`
+- `python3 scripts/ope.py forecast-runbook`
+- CLI and release checks covering runbook drift and outcome/action alignment
+
+## Milestone 28: Policy-Bound Source Connector Contract
+
+Status: Complete.
+
+Goal: define the first reusable connector contract for `data: auto` evidence discovery and retrieval before adding broader live evidence gathering.
+
+Tasks:
+
+- [x] Add a schema for connector capability, allowed source class, freshness, rate-limit, credential, and provenance boundaries.
+- [x] Add fixture connector records for the current weather source and at least one explicitly unsupported source class.
+- [x] Define connector result records that separate raw source metadata, normalized fields, unavailable evidence, and retrieval diagnostics.
+- [x] Add checks that prevent connector records from exposing secrets, raw stack traces, or prompt-visible credentials.
+- [x] Keep normal checks fixture-safe and avoid unbounded web search or live network dependency.
+
+Exit criteria:
+
+- Agents can inspect which source connectors are allowed for the first domain before asking OPE to gather evidence.
+- Release checks fail if a connector fixture implies unrestricted internet access, hidden credentials, or live calibration quality.
+
+Implemented artifacts:
+
+- `spec/source-connector-registry.schema.json`
+- `spec/source-connector-result-set.schema.json`
+- `spec/source-connectors.md`
+- `spec/fixtures/generated/source-connectors/weather-logistics-source-connector-registry.generated.json`
+- `spec/fixtures/generated/source-connectors/weather-logistics-source-connector-results.generated.json`
+- `scripts/generate_source_connectors.py`
+- `scripts/check_source_connectors.py`
+- `python3 scripts/ope.py source-connectors`
+
+## Milestone 29: Connector-Bound Evidence Plan Validation
+
+Status: Complete.
+
+Goal: make evidence planning validate every requested connector against the checked connector registry before any gatherer or future live runtime can use it.
+
+Tasks:
+
+- [x] Bind evidence-gathering plans to connector registry IDs and connector result-set IDs.
+- [x] Reject or explain any request whose source policy names a connector missing from the registry.
+- [x] Fail closed when a source policy allows an unsupported connector or unsupported source class.
+- [x] Add checks that keep resolution-only connectors out of forecast-time search intents.
+- [x] Preserve fixture-safe behavior while preparing the path for future allow-listed live connectors.
+
+Exit criteria:
+
+- Agents can see whether a request source policy is executable before OPE attempts evidence gathering.
+- Release checks fail if the evidence plan drifts from the connector registry or silently treats unsupported connectors as usable.
+
+Implemented artifacts:
+
+- `scripts/source_connector_catalog.py`
+- `connectorPolicyChecks` in `spec/evidence-gathering-plan.schema.json`
+- generated evidence plan binding to `sourceconnectorregistry-001` and `sourceconnectorresults-001`
+- request-intake reasons for unregistered, unsupported, and resolution-only auto connectors
+- expanded `scripts/check_auto_evidence_plan.py` connector validation cases
+
+## Milestone 30: Connector-Aware Evidence Gathering Gate
+
+Status: Complete.
+
+Goal: make the fixture gatherer consume connector-policy checks directly so no source result can be gathered unless the evidence plan marks its connector forecast-time executable.
+
+Tasks:
+
+- [x] Require gatherers to read `connectorPolicyChecks` and reject plans with unregistered, unsupported, or resolution-only forecast-time connectors.
+- [x] Bind each source-set record to a connector registry entry and connector result entry.
+- [x] Add checks that source-set connectors are a subset of `forecastTimeConnectors`.
+- [x] Add a fixture for a mixed valid plus unsupported connector request and verify supported evidence is not partially gathered without an explicit rejected status.
+- [x] Preserve the current fixture-replay path for the default weather-logistics request.
+
+Exit criteria:
+
+- Evidence gathering cannot proceed from a plan that is not connector-executable.
+- Release checks fail if source-set records drift from connector registry and result-set bindings.
+
+Implemented artifacts:
+
+- `ensure_plan_connector_executable()` in `scripts/gather_auto_evidence.py`
+- `connectorBinding` in `spec/evidence-source-set.schema.json`
+- generated source-set binding to `sourceconnectorregistry-001` and `sourceconnectorresults-001`
+- expanded `scripts/check_auto_evidence_gathering.py` connector-policy rejection cases
+- expanded `scripts/check_source_connectors.py` source-set/result-set binding checks
+
+## Milestone 31: Agent-Readable Evidence Trace Surface
+
+Status: Complete.
+
+Goal: make connector-bound evidence trace records easy for agents to inspect without reading unrelated forecast artifacts or raw source fixtures.
+
+Tasks:
+
+- [x] Add read-only record types for evidence source sets and source connector result sets.
+- [x] Add a compact evidence-trace view that links request, evidence plan, source policy, connector registry, connector results, gathered source records, and forecast artifact IDs.
+- [x] Expose the trace through the local CLI and, if consistent with the current adapter boundary, through the agent dispatcher/MCP scaffold.
+- [x] Keep trace output sanitized: no raw stack traces, no prompt-visible credentials, and no claim that all internet evidence was gathered.
+- [x] Update runbook and forecast-card links so agents can choose between compact cards, full lifecycle bundles, and evidence traces.
+
+Exit criteria:
+
+- Agents can inspect exactly which connectors and source records supported a forecast without re-running generation.
+- Release checks fail if evidence trace bindings drift from request, plan, source set, connector result set, or forecast artifact IDs.
+
+Implemented artifacts:
+
+- `spec/evidence-trace.schema.json`
+- `evidence-trace`, `evidence-source-set`, and `source-connector-results` read types in `scripts/read_ope_record.py`
+- `python3 scripts/ope.py read --record-type evidence-trace --id forecast-602 --question-id question-601`
+- `evidence_trace` agent operation in the local dispatcher, protocol map, and MCP stdio scaffold
+- forecast-card evidence-trace links and forecast-run evidence-trace output refs
+- expanded read, agent, CLI, MCP, runbook, and protocol-map checks
+
+## Milestone 32: Historical-Only Baseline Forecast Path
+
+Status: Complete.
+
+Goal: let an agent or developer request a forecast using only committed historical data, without relying on a weather API, live source connector, or model-adjusted forecast signal.
+
+Tasks:
+
+- [x] Add a historical-only request fixture using `dataMode: provided`, `committed_fixture`, zero network calls, and no external source access.
+- [x] Add a no-API forecast generator that produces question, feature snapshot, evidence packet, forecast artifact, forecast history, and pipeline-run records.
+- [x] Make the forecast output equal the historical-frequency baseline and explicitly mark that no forecast-time weather signal was used.
+- [x] Expose the path through the local CLI and forecast-run wrapper.
+- [x] Keep read surfaces claim-safe: forecast cards and lifecycle bundles are available, evidence traces are not linked because no connector-bound evidence gathering ran.
+- [x] Add checks so release validation fails if the historical-only path uses network access, live fetches, weather forecast features, or a non-baseline forecast probability.
+
+Exit criteria:
+
+- A developer can run a no-API historical forecast and receive probability `0.22` from `14 / 64` comparable historical disruption days.
+- Agents can distinguish the historical-only forecast from the auto-evidence forecast: `forecast-702` uses `committed_fixture`, has no evidence trace, and has forecast probability equal to baseline probability.
+
+Implemented artifacts:
+
+- `spec/fixtures/requests/historical-weather-logistics-request.json`
+- `scripts/run_historical_baseline_forecast.py`
+- `scripts/check_historical_baseline_forecast.py`
+- `python3 scripts/ope.py historical-forecast`
+- `python3 scripts/ope.py forecast-run --request spec/fixtures/requests/historical-weather-logistics-request.json`
+- generated records under `spec/fixtures/generated/historical-baseline/`
+
+## Milestone 33: Policy-Bound Live Connector Readiness Gate
+
+Status: Complete.
+
+Goal: prepare the first live evidence connector path without making normal checks network-dependent or implying unrestricted internet search.
+
+Tasks:
+
+- [x] Split connector execution modes into normal fixture replay, explicit integration live fetch, and future hosted live fetch.
+- [x] Add a live-connector readiness contract that states approval, network, timeout, source freshness, raw retention, and diagnostic boundaries.
+- [x] Add an integration-scoped Open-Meteo live-fetch check that is skipped by normal release checks unless explicitly requested.
+- [x] Preserve the same evidence plan, source set, connector result, and evidence trace bindings for fixture and live modes.
+- [x] Update docs so agents know when to use fixture-safe traces, integration live checks, or wait for a hosted runtime.
+
+Exit criteria:
+
+- Normal release checks remain offline and deterministic.
+- A developer can intentionally run an integration-scoped live connector check and receive the same sanitized connector-bound records without expanding OPE into unbounded web search.
+
+Implemented artifacts:
+
+- `spec/live-connector-readiness.schema.json`
+- `spec/live-connector-readiness.md`
+- `spec/fixtures/generated/live-readiness/weather-logistics-open-meteo-live-readiness.generated.json`
+- `scripts/generate_live_connector_readiness.py`
+- `scripts/check_live_connector_readiness.py`
+- `python3 scripts/ope.py live-readiness`
+
+## Milestone 34: Domain-Agnostic Engine Setup Contract
+
+Status: Complete.
+
+Goal: define the OPE-standard setup record that lets an agent create or use a private prediction engine for any operational domain while preserving resolvable questions, source policies, method policies, maturity labels, and claim boundaries.
+
+Tasks:
+
+- [x] Add `domain-setup.schema.json` for candidate and reference engine setups.
+- [x] Include question templates, output types, horizons, source roles, required fields, resolution rules, scoring rules, baseline policy, method policy, and maturity status.
+- [x] Add a generated reference setup for `weather-logistics` without making weather-logistics the product boundary.
+- [x] Add a candidate setup fixture for a second domain-like scenario, such as seaport berth availability, to prove domain-agnostic shape without implementing the full model.
+- [x] Add checks that candidate setups cannot claim calibration, benchmarked quality, or production readiness.
+- [x] Expose setup inspection through the local CLI for agents.
+- [x] Update docs so agents understand setup statuses: candidate, fixture-ready, benchmarked, live-provisional, calibrated.
+
+Exit criteria:
+
+- Agents can inspect a domain-agnostic setup contract before connecting data or requesting a forecast.
+- Weather-logistics is represented as a reference setup, while at least one non-weather-logistics candidate fixture proves OPE can describe new private prediction engines without overclaiming support.
+
+Implemented artifacts:
+
+- `spec/domain-setup.schema.json`
+- `spec/domain-setup.md`
+- `spec/fixtures/generated/domain-setups/weather-logistics-domain-setup.generated.json`
+- `spec/fixtures/generated/domain-setups/seaport-berth-availability-domain-setup.generated.json`
+- `scripts/generate_domain_setups.py`
+- `scripts/check_domain_setups.py`
+- `python3 scripts/ope.py domain-setups`
+
+## Milestone 35: Source Manifest And Field Mapping Intake
+
+Status: Complete.
+
+Goal: let an agent provide a bounded manifest of files, APIs, or databases and have OPE classify, map, validate, and explain source usability before forecasting.
+
+Tasks:
+
+- [x] Add `source-manifest.schema.json` for caller-provided sources, connector type, source role, retrieval metadata, and privacy posture.
+- [x] Add `field-mapping.schema.json` for user-provided, registry-backed, and agent-inferred mappings.
+- [x] Add deterministic checks for required fields, type parsing, entity/geography matching, timestamp availability, source freshness, leakage risk, and sample size.
+- [x] Add fixtures for accepted, accepted-partial, needs-confirmation, and rejected source manifests.
+- [x] Add a local CLI command that returns a source intake report without producing a forecast.
+- [x] Keep LLM or agent-inferred mappings as proposals until deterministic validation or user confirmation accepts them.
+
+Exit criteria:
+
+- An agent can pass a bounded source manifest and receive a machine-readable answer to: what can be used, what is missing, what needs confirmation, and which forecast methods are possible.
+
+Implemented artifacts:
+
+- `spec/source-manifest.schema.json`
+- `spec/field-mapping.schema.json`
+- `spec/source-intake-report.schema.json`
+- `spec/source-intake.md`
+- `spec/fixtures/source-intake/`
+- `spec/fixtures/generated/source-intake/`
+- `scripts/generate_source_intake.py`
+- `scripts/check_source_intake.py`
+- `python3 scripts/ope.py source-intake`
+
+## Milestone 36: Setup-Aware Forecast Method Policy
+
+Status: Complete.
+
+Goal: make "best justified method" concrete for any engine setup by selecting among baseline, historical-conditioned, model-assisted, external-reference, and ensemble methods based on available data and benchmark evidence.
+
+Tasks:
+
+- [x] Extend method selection to read domain setup, source manifest, field mappings, sample-size checks, and method policy.
+- [x] Add method eligibility reasons for insufficient data, missing outcome labels, missing forecast-time evidence, or leakage risk.
+- [x] Add setup-aware baseline fallback rules.
+- [x] Emit a method-decision record that agents can inspect before or with the forecast card.
+- [x] Keep state-of-the-art and best-performance claims blocked unless benchmark and track-record evidence justify them.
+
+Exit criteria:
+
+- OPE can explain why a private setup received a baseline forecast, historical-conditioned forecast, model-assisted forecast, or rejection.
+
+Implemented artifacts:
+
+- `spec/setup-method-decision.schema.json`
+- `spec/setup-method-decision.md`
+- `spec/fixtures/generated/setup-method-decision/`
+- `scripts/select_setup_method.py`
+- `scripts/check_setup_method_decision.py`
+- `python3 scripts/ope.py setup-method`
+
+## Milestone 37: Recalculation History For New Evidence
+
+Status: Complete.
+
+Goal: make OPE update probabilities when new source data arrives without overwriting prior forecasts.
+
+Tasks:
+
+- [x] Add a recalculation trigger contract for changed files, API events, scheduled refreshes, or agent-submitted new evidence.
+- [x] Add forecast-history append rules for recalculated forecasts.
+- [x] Preserve previous probability, new probability, changed evidence refs, method version, and reason for update.
+- [x] Add checks that post-outcome resolution data cannot enter forecast-time recalculation.
+- [x] Add a fixture showing an operational forecast whose probability changes after new evidence arrives.
+
+Exit criteria:
+
+- Agents can distinguish original forecast, updated forecast, withdrawn forecast, and resolved outcome without losing the historical belief trail.
+
+Implemented artifacts:
+
+- `spec/recalculation-trigger.schema.json`
+- `spec/recalculation-run.schema.json`
+- `spec/recalculation-history.md`
+- `spec/fixtures/generated/recalculation/`
+- `scripts/generate_recalculation_history.py`
+- `scripts/check_recalculation_history.py`
+- `python3 scripts/ope.py recalculation`
+
+## Milestone 38: Opt-In Live Evidence Capture Workspace
+
+Status: Complete.
+
+Goal: let a developer intentionally capture a sanitized live connector result into a local ignored workspace while preserving the same connector/result/evidence-trace boundaries used by fixture replay.
+
+Tasks:
+
+- [x] Add a `--save-local` mode for explicit live readiness checks that writes only sanitized connector-bound JSON under `.ope/live/`.
+- [x] Validate saved live connector outputs against the same public result and readiness boundaries before they can be read by development tools.
+- [x] Add a local command that converts one saved live connector result into a non-committed evidence source-set draft.
+- [x] Keep saved live outputs out of git, normal release checks, public record index, track records, and calibration reports.
+- [x] Document when an agent may inspect a local live draft and why it is not yet forecast evidence.
+
+Exit criteria:
+
+- A developer can intentionally run one live connector fetch, store a sanitized local draft, and validate it without committing raw live data or changing release checks.
+- Agents can distinguish committed fixture evidence, ignored local live drafts, and future hosted live evidence.
+
+Implemented artifacts:
+
+- `spec/live-capture-workspace.md`
+- `.ope/live/` git ignore boundary
+- `scripts/live_capture_workspace.py`
+- `scripts/check_live_capture_workspace.py`
+- `python3 scripts/ope.py live-readiness --live --save-local --service-date YYYY-MM-DD`
+- `python3 scripts/ope.py live-capture --input .ope/live/open-meteo-warsaw-YYYY-MM-DD-source-connector-results.json --check`
+- `python3 scripts/ope.py live-capture --input .ope/live/open-meteo-warsaw-YYYY-MM-DD-source-connector-results.json --draft-source-set --write`
+
+## Milestone 39: Setup-Aware Forecast Execution
+
+Status: Complete.
+
+Goal: let OPE create forecast artifacts from a domain setup, accepted source intake, and setup-aware method decision while preserving the existing forecast card, evidence trace, and lifecycle bundle boundaries.
+
+Tasks:
+
+- [x] Add a setup-bound forecast execution summary that consumes `domain-setup`, `source-intake-report`, and `setup-method-decision` records.
+- [x] Generate a forecast only for accepted or accepted-partial intake with a selected enabled method.
+- [x] Preserve blocked behavior for needs-confirmation, rejected intake, missing mappings, missing forecast-time evidence, and missing benchmark support.
+- [x] Emit forecast artifact, evidence packet, history, card, and bundle records with setup, source-intake, and method-decision bindings.
+- [x] Add checks that local live drafts cannot be consumed unless an explicit future source policy allows them.
+
+Exit criteria:
+
+- An agent can move from private setup intake to a claim-safe forecast artifact when the method decision allows execution.
+- Blocked setup decisions remain non-generating and explain the next safe action.
+
+Implemented artifacts:
+
+- `spec/setup-forecast-run.schema.json`
+- `spec/setup-forecast-execution.md`
+- `spec/fixtures/generated/setup-forecast/`
+- `scripts/run_setup_forecast.py`
+- `scripts/check_setup_forecast.py`
+- `python3 scripts/ope.py setup-forecast`
+- forecast-card and lifecycle-bundle setup bindings for setup-generated forecasts
+
+## Milestone 40: Setup-Specific Stronger Method Benchmark Gate
+
+Status: Complete.
+
+Goal: let OPE promote a setup from baseline-only execution to a stronger method only when the setup has clean, comparable benchmark evidence and explicit anti-leakage controls.
+
+Tasks:
+
+- [x] Add setup-bound benchmark references that connect a `domain-setup`, source-intake profile, method class, and comparable historical outcome set.
+- [x] Extend setup method decisions so `deterministic_statistical` can become eligible only when benchmark evidence beats the baseline under the setup policy.
+- [x] Add checks for temporal leakage, resolution-source contamination, sample-size thresholds, and missing benchmark references at the setup level.
+- [x] Extend setup forecast execution to generate a non-baseline method only when the method decision is benchmark-approved.
+- [x] Keep forecast cards explicit about baseline probability, model probability, method class, and claim status.
+
+Exit criteria:
+
+- Agents can see exactly why a setup remains baseline-only or why a stronger method is allowed.
+- OPE still blocks state-of-the-art, calibration, and production claims unless benchmark and resolved-outcome evidence support them.
+
+Implemented artifacts:
+
+- `spec/setup-benchmark-gate.schema.json`
+- `spec/fixtures/generated/setup-benchmark/`
+- `scripts/generate_setup_benchmark_gate.py`
+- `scripts/check_setup_benchmark_gate.py`
+- `python3 scripts/ope.py setup-benchmark`
+- setup method decisions with selected benchmark-gate bindings
+- setup forecast execution that emits deterministic forecast probability only for benchmark-approved intake
+
+## Milestone 41: Local Source Manifest Builder
+
+Status: Complete.
+
+Goal: let an agent inspect caller-approved local files and draft an OPE source manifest plus field-mapping proposal without producing forecasts or treating inferred mappings as verified facts.
+
+Tasks:
+
+- [x] Add a local read-only source inspection command for small CSV and JSON files.
+- [x] Emit a draft source manifest with field inventory, row counts, timestamps, privacy flags, and sanitized feature summaries.
+- [x] Emit a draft field mapping with explicit `user_provided`, `registry_backed`, or `agent_inferred` origins.
+- [x] Mark agent-inferred mappings as proposed and require confirmation before forecast execution.
+- [x] Add checks that the builder rejects secrets, oversized files, unsupported formats, and post-outcome leakage indicators.
+- [x] Keep generated drafts out of public read surfaces until source intake accepts them.
+
+Exit criteria:
+
+- A developer or agent can point OPE at local fixture files and receive a draft manifest/mapping pair suitable for source intake.
+- OPE still does not forecast from arbitrary private files until intake and method gates approve the setup.
+
+Implemented artifacts:
+
+- `spec/source-manifest-build.schema.json`
+- `spec/source-manifest-builder.md`
+- `spec/fixtures/local-source-files/`
+- `spec/fixtures/generated/source-builder/`
+- `scripts/build_source_manifest.py`
+- `scripts/check_source_manifest_builder.py`
+- `python3 scripts/ope.py source-builder`
+- source-builder checks in normal repository and CLI checks
+
+## Milestone 42: Builder Draft Intake Handoff
+
+Status: Complete.
+
+Goal: make the path from local source-builder drafts to source intake explicit, including confirmation of proposed mappings, without allowing unconfirmed drafts to generate forecasts.
+
+Tasks:
+
+- [x] Add a checked handoff record that binds a source-manifest build to source intake inputs.
+- [x] Add an unconfirmed-builder-draft case that source intake classifies as `needs_confirmation`.
+- [x] Add a confirmed-builder-draft case that source intake can classify according to available source roles and sample-size limits.
+- [x] Preserve source-builder rejection reasons when drafts cannot enter source intake.
+- [x] Add CLI output that tells agents whether to ask for mapping confirmation, collect more data, or proceed to method gating.
+- [x] Keep draft source-builder artifacts out of public read surfaces until source intake and later gates accept them.
+
+Exit criteria:
+
+- An agent can inspect local files, draft source manifest inputs, submit those draft inputs to source intake, and receive a deterministic next action.
+- Forecast execution remains blocked unless source intake and setup method gates approve the resulting setup.
+
+Implemented artifacts:
+
+- `spec/source-intake-handoff.schema.json`
+- `spec/source-intake-handoff.md`
+- `spec/fixtures/generated/source-handoff/`
+- `scripts/generate_source_intake_handoff.py`
+- `scripts/check_source_intake_handoff.py`
+- `python3 scripts/ope.py source-handoff`
+- handoff cases for unconfirmed, confirmed, insufficient-sample, secret, unsupported-format, oversized, and leakage outcomes
+
+## Milestone 43: Builder Handoff Method Gate
+
+Status: Complete.
+
+Goal: let accepted source-handoff records flow into setup benchmark and setup method decisions without creating forecast artifacts.
+
+Tasks:
+
+- [x] Add setup benchmark gates for confirmed builder-handoff intake reports.
+- [x] Add setup method decisions that consume handoff-bound source-intake reports.
+- [x] Preserve `ask_mapping_confirmation`, `collect_more_data`, and `replace_rejected_sources` handoff outcomes as non-method-selecting cases.
+- [x] Add CLI output that shows whether a builder-handoff accepted draft reaches baseline or deterministic method eligibility.
+- [x] Keep forecast execution separate until a later explicit setup forecast run consumes a method decision.
+
+Exit criteria:
+
+- An agent can inspect files, confirm mappings, pass accepted source intake into method gates, and see the selected method or blocking reason.
+- No handoff path creates forecast artifacts before setup forecast execution explicitly allows it.
+
+Implemented artifacts:
+
+- `spec/source-handoff-method-gate.schema.json`
+- `spec/source-handoff-method-gate.md`
+- `spec/fixtures/generated/source-handoff-method/`
+- `scripts/generate_source_handoff_method_gate.py`
+- `scripts/check_source_handoff_method_gate.py`
+- `python3 scripts/ope.py source-handoff-method`
+- handoff-bound setup benchmark gates and setup method decisions for unconfirmed, confirmed, insufficient, and builder-rejected outcomes
+
+## Milestone 44: Explicit Setup Forecast From Handoff Method Decision
+
+Status: Complete.
+
+Goal: let an agent explicitly execute a setup forecast from an accepted source-handoff method decision, while keeping blocked handoff outcomes non-generating.
+
+Tasks:
+
+- [x] Add a handoff-bound setup forecast execution path that consumes `sourcehandoffmethodgate-002`.
+- [x] Bind the resulting forecast run to the handoff, source-intake report, setup benchmark gate, and setup method decision.
+- [x] Keep unconfirmed, insufficient, and builder-rejected handoff method gates as blocked run summaries with no forecast IDs.
+- [x] Add CLI output that distinguishes method-gate readiness from actual forecast execution.
+- [x] Preserve the existing setup forecast claim boundary: deterministic execution can run in fixtures, but quality, calibration, production, and state-of-the-art claims stay blocked.
+
+Exit criteria:
+
+- An agent can go from approved local-file sources to an explicit setup forecast command without bypassing source intake, benchmark gates, or method decisions.
+- Every blocked handoff method outcome remains non-generating and explains the next action.
+
+Implemented artifacts:
+
+- `spec/source-handoff-forecast.md`
+- `spec/fixtures/generated/source-handoff-forecast/`
+- `scripts/run_source_handoff_forecast.py`
+- `scripts/check_source_handoff_forecast.py`
+- `python3 scripts/ope.py source-handoff-forecast`
+- forecast card and lifecycle bundle read support for `forecast-1102`
+- setup forecast run bindings for `sourceIntakeHandoffId` and `sourceHandoffMethodGateId`
+
+## Milestone 45: Source-Handoff Forecast Resolution And Scoring
+
+Status: Complete.
+
+Goal: resolve and score the handoff-bound forecast so the source-builder-to-forecast path has the same lifecycle coverage as other generated forecast paths.
+
+Tasks:
+
+- [x] Add a fixture resolver for `forecast-1102` using the declared outcome source bound through the handoff source manifest.
+- [x] Emit resolution, scoring, calibration, track-record, and outcome-summary records for the handoff-bound forecast.
+- [x] Keep unresolved and blocked handoff runs out of scoring summaries.
+- [x] Extend forecast card and bundle checks so `forecast-1102` exposes resolution and score once resolved.
+- [x] Preserve claim boundaries: quality and calibration claims remain blocked until declared comparable sample thresholds are met.
+
+Exit criteria:
+
+- An agent can inspect the full handoff-bound lifecycle from local source files through forecast, resolution, score, and read surfaces.
+- Blocked handoff cases remain non-generating and non-scored.
+
+Implemented artifacts:
+
+- `spec/source-handoff-resolution.md`
+- `spec/fixtures/generated/source-handoff-resolution/`
+- `scripts/resolve_source_handoff_outcome.py`
+- `scripts/check_source_handoff_resolution.py`
+- `python3 scripts/ope.py resolve-source-handoff`
+- resolved and scored forecast card, lifecycle bundle, track-record, and outcome summary for `forecast-1102`
+
+## Milestone 46: Source-Handoff Agent Setup Runbook
+
+Status: Complete.
+
+Goal: give agents one compact, checked workflow for private source setup that spans local file inspection, source intake handoff, method gating, explicit forecast execution, resolution, scoring, and safe next actions.
+
+Tasks:
+
+- [x] Add an agent-facing source-handoff setup runbook that maps each lifecycle step to existing CLI commands and future adapter surfaces.
+- [x] Include next-action labels for confirmed, unconfirmed, insufficient-data, builder-rejected, forecast-generated, resolved, and sample-size-blocked cases.
+- [x] Bind the runbook to existing source-builder, handoff, method-gate, forecast, resolution, card, bundle, and track-record records.
+- [x] Add checks that the runbook does not imply unconfirmed mappings can forecast, blocked cases can score, or one resolved outcome can justify calibration claims.
+- [x] Expose the runbook through the local CLI and document how agents should use it before building a broader private engine workflow.
+
+Exit criteria:
+
+- An agent can follow one checked local guide from caller-approved source files to a claim-safe resolved forecast card.
+- The guide preserves OPE's domain-agnostic setup vision without advertising arbitrary private API/database parsing, hosted runtime behavior, or live calibration.
+
+Implemented artifacts:
+
+- `spec/source-handoff-setup-runbook.schema.json`
+- `spec/source-handoff-setup-runbook.md`
+- `spec/fixtures/generated/source-handoff-runbook/weather-logistics-source-handoff-setup-runbook.generated.json`
+- `scripts/generate_source_handoff_setup_runbook.py`
+- `scripts/check_source_handoff_setup_runbook.py`
+- `python3 scripts/ope.py source-handoff-runbook`
+- CLI and repository checks covering case next actions, blocked case boundaries, and sample-size claim boundaries
+
+## Milestone 47: General Private Setup Workflow Contract
+
+Status: Complete.
+
+Goal: turn the source-handoff fixture path into a domain-agnostic private setup workflow contract without claiming arbitrary private API/database parsing or hosted runtime support.
+
+Tasks:
+
+- [x] Define a setup workflow summary that can represent local files now and future caller-approved APIs or databases later.
+- [x] Separate setup phases into source discovery, mapping confirmation, source intake, method gating, forecast execution, recalculation, resolution, and scoring.
+- [x] Add outcome classes for setup-ready, needs-confirmation, needs-more-data, rejected-source, unsupported-source, and runtime-not-implemented.
+- [x] Preserve current source-handoff runbook as the weather-logistics fixture example of the general workflow.
+- [x] Add checks that the general workflow remains domain-agnostic, source-policy-bound, and claim-safe.
+
+Exit criteria:
+
+- Agents can inspect one domain-agnostic setup workflow contract before choosing a concrete setup path.
+- The contract guides future private source support without implying OPE already parses arbitrary APIs, databases, or live private systems.
+
+Implemented artifacts:
+
+- `spec/private-setup-workflow.schema.json`
+- `spec/private-setup-workflow.md`
+- `spec/fixtures/generated/private-setup-workflow/ope-private-setup-workflow.generated.json`
+- `scripts/generate_private_setup_workflow.py`
+- `scripts/check_private_setup_workflow.py`
+- `python3 scripts/ope.py private-setup-workflow`
+- repository and CLI checks covering phase order, outcome classes, source-kind implementation status, reference fixture binding, and claim boundaries
+
+## Milestone 48: Private Source Adapter Capability Contract
+
+Status: Complete.
+
+Goal: define how local-file, manual-upload, private API, and private database adapters declare capabilities, permissions, credentials, freshness, privacy, and effect boundaries before any generic connector runtime is implemented.
+
+Tasks:
+
+- [x] Add a source adapter capability contract for local files, private APIs, private databases, and manual uploads.
+- [x] Separate capability declaration from source execution, so planned adapters cannot fetch or parse data by implication.
+- [x] Include approval, credential, prompt-visibility, privacy, freshness, rate-limit, and audit-log boundaries.
+- [x] Bind the capability contract to the private setup workflow source kinds.
+- [x] Add checks that private API and database adapters remain non-executable until an explicit runtime lands.
+
+Exit criteria:
+
+- Agents can inspect whether a private source kind is available, planned, unsupported, or approval-gated before attempting setup.
+- No private source adapter claims execution, credential access, or live data use without an implemented and checked runtime.
+
+Implemented artifacts:
+
+- `spec/private-source-adapter-capability.schema.json`
+- `spec/private-source-adapters.md`
+- `spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-capabilities.generated.json`
+- `scripts/generate_private_source_adapter_capabilities.py`
+- `scripts/check_private_source_adapter_capabilities.py`
+- `python3 scripts/ope.py private-source-adapters`
+- private setup workflow source-kind expansion for planned `manual_upload`
+- repository and CLI checks covering source-kind binding, declaration-only behavior, offline normal checks, secret-storage bans, manual-upload/private-API/private-database runtime-not-implemented status, and local-file/manual-mapping/auto-evidence fixture boundaries
+
+## Milestone 49: Private Source Adapter Outcome Matrix
+
+Status: Complete.
+
+Goal: define the agent-facing outcome matrix for source adapter attempts before any setup execution, so callers can see whether a source should proceed, request approval, wait for runtime, or be replaced.
+
+Tasks:
+
+- [x] Add a checked outcome matrix for private source adapter decisions.
+- [x] Cover at least available fixture, approval-required fixture, planned runtime, unsupported source, credential-missing, and rejected unsafe source outcomes.
+- [x] Bind each outcome to the private source adapter capability contract and private setup workflow outcome classes.
+- [x] Add CLI output that lets agents inspect next actions without executing source reads.
+- [x] Preserve the rule that planned private adapters cannot create source manifests, forecast artifacts, or scoring records.
+
+Exit criteria:
+
+- Agents can turn adapter capabilities into deterministic next actions before attempting setup.
+- Planned private adapters remain non-executing and claim-safe while still giving useful setup guidance.
+
+Implemented artifacts:
+
+- `spec/private-source-adapter-outcome-matrix.schema.json`
+- `spec/private-source-adapter-outcomes.md`
+- `spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-outcome-matrix.generated.json`
+- `scripts/generate_private_source_adapter_outcome_matrix.py`
+- `scripts/check_private_source_adapter_outcome_matrix.py`
+- `python3 scripts/ope.py private-source-adapter-outcomes`
+- repository and CLI checks covering capability binding, workflow outcome binding, available fixture, approval-required fixture, planned runtime, unsupported source, credential-missing, rejected unsafe source, non-execution, and blocked artifact creation
+
+## Milestone 50: Adapter Outcome To Source Intake Bridge
+
+Status: Complete.
+
+Goal: define the checked bridge from adapter outcome decisions into the first allowed source-intake entrypoint, so agents know when to run source builder, ask confirmation, use fixture evidence, wait for runtime, or stop.
+
+Tasks:
+
+- [x] Add a bridge contract that consumes the private source adapter outcome matrix.
+- [x] Map outcome rows to allowed commands, required inputs, blocked outputs, and retry conditions.
+- [x] Bind `available_fixture` local files to source-builder and `approval_required_fixture` mappings to source-handoff confirmation.
+- [x] Keep planned, unsupported, unsafe, and credential-missing cases non-generating.
+- [x] Add CLI and checks for bridge drift and source-artifact boundaries.
+
+Exit criteria:
+
+- Agents can move from adapter outcome decisions to the correct next local command without guessing.
+- No bridge path creates forecast artifacts or scoring records before source intake, method gates, and explicit forecast execution allow it.
+
+Implemented artifacts:
+
+- `spec/private-source-adapter-intake-bridge.schema.json`
+- `spec/private-source-adapter-bridge.md`
+- `spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-intake-bridge.generated.json`
+- `scripts/generate_private_source_adapter_intake_bridge.py`
+- `scripts/check_private_source_adapter_intake_bridge.py`
+- `python3 scripts/ope.py private-source-adapter-bridge`
+- repository and CLI checks covering outcome-matrix binding, checked entrypoints, caller confirmation before source-handoff, planned-runtime blocking, unsupported and unsafe source stops, and no source, forecast, score, live-fetch, or credential artifact creation
+
+## Milestone 51: Private Setup Request Contract
+
+Status: Planned.
+
+Goal: define the agent-facing request record that starts private engine setup before adapter routing, so a caller can declare the forecast intent, setup mode, source policy, selected source kinds, approval state, and expected outputs without OPE guessing or reading private data.
+
+Tasks:
+
+- [ ] Add a private setup request schema with forecast-question draft, domain setup reference, requested source kinds, setup mode, source policy, approval state, and desired output surface.
+- [ ] Add fixture requests for local files, confirmed/manual mappings, fixture auto-evidence, planned manual upload, planned private API/database, unregistered source, and unsafe source.
+- [ ] Map request rows to adapter capabilities, adapter outcomes, and bridge entrypoints without executing source reads.
+- [ ] Preserve approval and credential boundaries for private sources, manual mappings, effectful actions, and unsafe inputs.
+- [ ] Add CLI and checks that classify requests into proceed, confirm, fixture, wait, replace, reject, or stop actions before source intake.
+
+Exit criteria:
+
+- Agents can hand OPE one setup-intent record and receive the safe first setup action without reverse-engineering capability, outcome, and bridge contracts separately.
+- The request contract remains domain-agnostic and does not imply arbitrary API/database parsing, live private fetching, forecast execution, or scoring.
+
 ## Open Decisions
 
 - When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
+- What is the smallest domain setup contract that remains useful across private operational domains?
+- Which source-manifest and mapping format should agents use for local files, APIs, and databases?
+- How should OPE represent agent-inferred mappings without treating them as verified facts?
+- Which source-policy contract should govern `data: auto` in private engine setups?
+- Which live public sources are acceptable for the reference weather-logistics setup beyond Open-Meteo fixture replay?
+- Should the first auto-evidence implementation include web search, or only allow-listed APIs and feeds?
+- What minimum benchmark evidence is required before OPE can describe a method as state of the art for a domain?
 - How should TypeScript or other language-specific validators be generated from the JSON Schema-first contracts if a service runtime is added?
 - Should track-record reports use Brier score as the default public metric for binary forecasts, or log score with Brier as supporting metric?
 - Should benchmark mode support LLM forecasters in the first implementation, or only deterministic/statistical models?
@@ -539,11 +1542,18 @@ Exit criteria:
 Do not claim:
 
 - OPE predicts anything.
+- OPE has searched all internet evidence.
 - OPE is calibrated in domains without resolved sample evidence.
 - OPE is better than baselines before baseline-lift reports exist.
-- OPE supports agent protocol compatibility before an implemented adapter exists.
+- OPE uses state-of-the-art methods before benchmark and method-registry evidence exists.
+- OPE private candidate setups are production-ready or calibrated before evidence supports that label.
+- OPE supports agent protocol compatibility beyond the tested local MCP stdio scaffold.
 - OPE provides independent verification or legal compliance.
 
 Allowed near-term claim:
 
 > OPE is building a contract-first forecasting engine that records forecast histories, resolves outcomes, scores predictions, and reports calibration by domain and horizon.
+
+Allowed product-direction claim:
+
+> OPE is being designed as an agent-native forecasting package and standard that helps agents set up private prediction engines from connected source data and return auditable probabilistic forecast artifacts.

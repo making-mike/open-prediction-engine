@@ -1,0 +1,382 @@
+{
+  "privateSourceAdapterOutcomeMatrixId": "privateadapteroutcomematrix-001",
+  "generatedAt": "2026-06-06T21:30:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "decision_matrix_contract_only",
+  "boundPrivateSourceAdapterCapabilityId": "privatesourceadaptercapability-001",
+  "boundPrivateSetupWorkflowId": "privatesetupworkflow-001",
+  "boundPrivateSourceAdapterCapabilityPath": "spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-capabilities.generated.json",
+  "outcomeClasses": [
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-001",
+      "outcomeClass": "available_fixture",
+      "setupOutcomeClass": "setup_ready",
+      "terminal": false,
+      "canEnterSetup": true,
+      "agentNextAction": "follow_row_next_action",
+      "description": "The source kind is available in the local fixture surface and can proceed to the row-specific checked command."
+    },
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-002",
+      "outcomeClass": "approval_required_fixture",
+      "setupOutcomeClass": "needs_confirmation",
+      "terminal": false,
+      "canEnterSetup": false,
+      "agentNextAction": "request_mapping_confirmation",
+      "description": "The source kind is fixture-supported only after caller confirmation or approval."
+    },
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-003",
+      "outcomeClass": "planned_runtime",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "terminal": true,
+      "canEnterSetup": false,
+      "agentNextAction": "wait_for_runtime",
+      "description": "The source kind is declared for future support, but the current local runtime cannot execute it."
+    },
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-004",
+      "outcomeClass": "unsupported_source",
+      "setupOutcomeClass": "unsupported_source",
+      "terminal": true,
+      "canEnterSetup": false,
+      "agentNextAction": "replace_source",
+      "description": "The source kind is outside the capability contract and must be replaced before setup."
+    },
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-005",
+      "outcomeClass": "credential_missing",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "terminal": true,
+      "canEnterSetup": false,
+      "agentNextAction": "request_credentials_after_runtime",
+      "description": "The source would require credentials, but no credential runtime is implemented in the current local surface."
+    },
+    {
+      "outcomeClassId": "privateadapteroutcomeclass-006",
+      "outcomeClass": "rejected_unsafe_source",
+      "setupOutcomeClass": "rejected_source",
+      "terminal": true,
+      "canEnterSetup": false,
+      "agentNextAction": "reject_source",
+      "description": "The source is unsafe for setup and must not enter source intake, forecasting, or scoring."
+    }
+  ],
+  "outcomeRows": [
+    {
+      "outcomeRowId": "privateadapteroutcomerow-001",
+      "sourceKind": "local_file",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "available_fixture",
+      "setupOutcomeClass": "setup_ready",
+      "canEnterSetup": true,
+      "canExecuteSourceRead": true,
+      "requiresApproval": false,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": true,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "run_source_builder",
+      "blockedArtifacts": [
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "fixture_available",
+        "approved_local_file_required",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Run the source builder on caller-approved local files, then continue through handoff and intake.",
+      "adapterId": "privateadapter-local-file-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-002",
+      "sourceKind": "manual_mapping",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "approval_required_fixture",
+      "setupOutcomeClass": "needs_confirmation",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": true,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "request_mapping_confirmation",
+      "blockedArtifacts": [
+        "source_manifest",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "caller_confirmation_required",
+        "mapping_is_proposal",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Ask the caller to confirm proposed mappings before treating them as source-intake inputs.",
+      "adapterId": "privateadapter-manual-mapping-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-003",
+      "sourceKind": "auto_evidence_connector",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "available_fixture",
+      "setupOutcomeClass": "setup_ready",
+      "canEnterSetup": true,
+      "canExecuteSourceRead": true,
+      "requiresApproval": false,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "use_auto_evidence_fixture",
+      "blockedArtifacts": [
+        "source_manifest",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "fixture_replay_available",
+        "normal_checks_offline",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Use policy-bound fixture replay only; do not claim production live evidence gathering.",
+      "adapterId": "privateadapter-auto-evidence-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-004",
+      "sourceKind": "manual_upload",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "planned_runtime",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": true,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "wait_for_runtime",
+      "blockedArtifacts": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "manual_upload_runtime_missing",
+        "approval_required",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Do not ingest uploaded data until an explicit upload runtime and approval path are implemented.",
+      "adapterId": "privateadapter-manual-upload-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-005",
+      "sourceKind": "private_api",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "credential_missing",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": true,
+      "requiresCredential": true,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "request_credentials_after_runtime",
+      "blockedArtifacts": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "private_api_runtime_missing",
+        "credential_runtime_missing",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Do not request or expose credentials in OPE artifacts; wait for an explicit private API runtime.",
+      "adapterId": "privateadapter-private-api-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-006",
+      "sourceKind": "private_database",
+      "capabilityBindingStatus": "bound_adapter",
+      "outcomeClass": "credential_missing",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": true,
+      "requiresCredential": true,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "request_credentials_after_runtime",
+      "blockedArtifacts": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "private_database_runtime_missing",
+        "credential_runtime_missing",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Do not connect databases or run queries until an explicit private database runtime exists.",
+      "adapterId": "privateadapter-private-database-001"
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-007",
+      "sourceKind": "unregistered_source",
+      "capabilityBindingStatus": "not_in_capability_contract",
+      "outcomeClass": "unsupported_source",
+      "setupOutcomeClass": "unsupported_source",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": false,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "replace_source",
+      "blockedArtifacts": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "source_kind_unregistered",
+        "capability_contract_missing",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Replace the source with a source kind declared in the private source adapter capability contract."
+    },
+    {
+      "outcomeRowId": "privateadapteroutcomerow-008",
+      "sourceKind": "unsafe_source",
+      "capabilityBindingStatus": "blocked_by_safety_policy",
+      "outcomeClass": "rejected_unsafe_source",
+      "setupOutcomeClass": "rejected_source",
+      "canEnterSetup": false,
+      "canExecuteSourceRead": false,
+      "requiresApproval": false,
+      "requiresCredential": false,
+      "hasCredentialRuntime": false,
+      "canCreateSourceManifest": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "agentNextAction": "reject_source",
+      "blockedArtifacts": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "reasonCodes": [
+        "unsafe_source",
+        "secret_or_leakage_risk",
+        "forecast_outputs_blocked"
+      ],
+      "agentInstruction": "Reject the source and keep it out of source intake, method gates, forecasts, and scoring."
+    }
+  ],
+  "executionBoundary": {
+    "matrixDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "createsSourceManifests": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false,
+    "privateAdapterRuntimeImplemented": false
+  },
+  "guards": [
+    {
+      "guardId": "privateadaptermatrixguard-001",
+      "name": "capability_binding",
+      "rule": "Every declared source kind in the capability contract must have one bound outcome row.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    },
+    {
+      "guardId": "privateadaptermatrixguard-002",
+      "name": "workflow_outcome_binding",
+      "rule": "Every matrix outcome must bind to a private setup workflow outcome class.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    },
+    {
+      "guardId": "privateadaptermatrixguard-003",
+      "name": "no_execution",
+      "rule": "The matrix may recommend next actions but must not execute source reads by itself.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    },
+    {
+      "guardId": "privateadaptermatrixguard-004",
+      "name": "no_artifacts",
+      "rule": "The matrix must not create forecast artifacts, cards, scoring records, or credential records.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    },
+    {
+      "guardId": "privateadaptermatrixguard-005",
+      "name": "planned_runtimes_blocked",
+      "rule": "Manual upload, private API, and private database rows must stay runtime-not-implemented.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    },
+    {
+      "guardId": "privateadaptermatrixguard-006",
+      "name": "unsafe_sources_rejected",
+      "rule": "Unsafe and unregistered sources must not enter setup, source intake, forecasting, or scoring.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_outcome_matrix.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "This matrix recommends agent next actions; it does not execute source reads.",
+    "Planned private adapters cannot create source manifests, forecast artifacts, cards, or scoring records.",
+    "Credentials must stay out of OPE artifacts and prompt-visible records.",
+    "Unsafe and unregistered sources must be replaced before setup continues."
+  ]
+}

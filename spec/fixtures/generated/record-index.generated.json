@@ -7,8 +7,34 @@
   },
   "recordSets": [
     {
+      "recordType": "evidence-source-set",
+      "count": 1,
+      "records": [
+        {
+          "recordType": "evidence-source-set",
+          "recordId": "evidencesourceset-019",
+          "domain": "weather-logistics",
+          "generatedAt": "2026-06-02T09:58:00Z"
+        }
+      ]
+    },
+    {
+      "recordType": "evidence-trace",
+      "count": 1,
+      "records": [
+        {
+          "recordType": "evidence-trace",
+          "recordId": "forecast-602",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        }
+      ]
+    },
+    {
       "recordType": "forecast-artifact",
-      "count": 5,
+      "count": 11,
       "records": [
         {
           "recordType": "forecast-artifact",
@@ -17,6 +43,14 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-1102",
+          "questionId": "question-1102",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:45:00Z"
         },
         {
           "recordType": "forecast-artifact",
@@ -49,12 +83,52 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-602",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-801",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T18:20:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-702",
+          "questionId": "question-701",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-901",
+          "questionId": "question-901",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-902",
+          "questionId": "question-902",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
         }
       ]
     },
     {
       "recordType": "forecast-bundle",
-      "count": 5,
+      "count": 11,
       "records": [
         {
           "recordType": "forecast-bundle",
@@ -63,6 +137,14 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-1102",
+          "questionId": "question-1102",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:45:00Z"
         },
         {
           "recordType": "forecast-bundle",
@@ -95,12 +177,52 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-602",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-801",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T18:20:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-702",
+          "questionId": "question-701",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-901",
+          "questionId": "question-901",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-902",
+          "questionId": "question-902",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
         }
       ]
     },
     {
       "recordType": "forecast-card",
-      "count": 5,
+      "count": 11,
       "records": [
         {
           "recordType": "forecast-card",
@@ -109,6 +231,14 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-1102",
+          "questionId": "question-1102",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:45:00Z"
         },
         {
           "recordType": "forecast-card",
@@ -141,12 +271,64 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-602",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-801",
+          "questionId": "question-601",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T18:20:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-702",
+          "questionId": "question-701",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:00:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-901",
+          "questionId": "question-901",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-902",
+          "questionId": "question-902",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-02T10:30:00Z"
+        }
+      ]
+    },
+    {
+      "recordType": "source-connector-results",
+      "count": 1,
+      "records": [
+        {
+          "recordType": "source-connector-results",
+          "recordId": "sourceconnectorresults-001",
+          "domain": "weather-logistics",
+          "generatedAt": "2026-06-06T13:45:00Z"
         }
       ]
     },
     {
       "recordType": "track-record",
-      "count": 4,
+      "count": 6,
       "records": [
         {
           "recordType": "track-record",
@@ -155,6 +337,14 @@
           "horizonBucket": "1-day",
           "outputType": "binary",
           "generatedAt": "2026-06-04T10:20:00Z"
+        },
+        {
+          "recordType": "track-record",
+          "recordId": "trackrecord-1102",
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "generatedAt": "2026-06-04T12:35:00Z"
         },
         {
           "recordType": "track-record",
@@ -171,6 +361,14 @@
           "horizonBucket": "1-day",
           "outputType": "binary",
           "generatedAt": "2026-06-04T10:45:00Z"
+        },
+        {
+          "recordType": "track-record",
+          "recordId": "trackrecord-601",
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "generatedAt": "2026-06-04T12:15:00Z"
         },
         {
           "recordType": "track-record",

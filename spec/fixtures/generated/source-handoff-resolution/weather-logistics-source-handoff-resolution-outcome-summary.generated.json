@@ -1,0 +1,18 @@
+{
+  "publicationStatus": "provisional",
+  "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes",
+  "minimumCalibrationSampleSize": 30,
+  "resolvedComparableSourceHandoffOutcomes": 1,
+  "setupForecastRunId": "setupforecastrun-1102",
+  "sourceIntakeHandoffId": "sourceintakehandoff-002",
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+  "sourceIntakeReportId": "sourceintakereport-102",
+  "setupMethodDecisionId": "setupmethoddecision-102",
+  "setupBenchmarkGateId": "setupbenchmarkgate-102",
+  "questionId": "question-1102",
+  "forecastId": "forecast-1102",
+  "evidencePacketId": "evidence-1102",
+  "resolutionRecordId": "resolution-1102",
+  "forecastArtifactPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-artifact.generated.json",
+  "generatedAt": "2026-06-04T12:35:00Z"
+}

@@ -1,0 +1,65 @@
+{
+  "evidencePacketId": "evidence-902",
+  "forecastId": "forecast-902",
+  "questionId": "question-902",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T10:30:00Z",
+  "model": {
+    "modelId": "model-902",
+    "version": "setup-aware-historical-baseline-fixture-v1",
+    "configurationHash": "sha256-setup-forecast-model-902"
+  },
+  "inputSourceClasses": [
+    "internal_dataset"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "manifestsource-004",
+      "name": "Historical Delivery Baseline Only",
+      "sourceType": "internal_dataset",
+      "uri": "local://fixtures/weather-logistics/history-baseline-only.csv",
+      "retrievedAt": "2026-06-01T18:00:00Z",
+      "contentHash": "hash-history-partial-001"
+    }
+  ],
+  "featureSnapshotRef": "https://example.test/fixtures/generated/setup-forecast/weather-logistics-accepted-partial-setup-feature-snapshot.generated.json",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.1341
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.1341
+  },
+  "calibrationBand": {
+    "lower": 0.0341,
+    "upper": 0.2341,
+    "coverage": 0.8,
+    "sampleSize": 80
+  },
+  "rationaleSummary": "Setup-aware execution selected the historical baseline because stronger methods are not enabled for this intake.",
+  "keyFactors": [
+    "source intake report sourceintakereport-002",
+    "setup method decision setupmethoddecision-002",
+    "selected method historical_baseline",
+    "historical disruption days 10",
+    "comparable service days 80",
+    "no local live draft consumed"
+  ],
+  "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+  "resolutionSource": {
+    "sourceId": "manifestsource-005",
+    "name": "Declared Outcome Placeholder",
+    "sourceType": "internal_dataset",
+    "uri": "local://fixtures/weather-logistics/outcome-placeholder.csv",
+    "contentHash": "hash-outcome-partial-001"
+  },
+  "fallbackResolutionSources": [],
+  "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+}

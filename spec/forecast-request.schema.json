@@ -16,6 +16,8 @@
     "outputType",
     "horizonLabel",
     "requestedAction",
+    "dataMode",
+    "sourcePolicy",
     "riskReview",
     "approval",
     "controls"
@@ -53,6 +55,11 @@
       "type": "string",
       "enum": ["validate_only", "generate_forecast"]
     },
+    "dataMode": {
+      "type": "string",
+      "enum": ["provided", "auto", "hybrid"]
+    },
+    "sourcePolicy": { "$ref": "source-policy.schema.json" },
     "riskReview": {
       "type": "object",
       "additionalProperties": false,

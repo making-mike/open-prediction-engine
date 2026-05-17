@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-handoff-setup-runbook.schema.json",
+  "title": "Source Handoff Setup Runbook",
+  "description": "Machine-readable local caller workflow for source-builder to source-handoff forecast setup.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceHandoffSetupRunbookId",
+    "generatedAt",
+    "domain",
+    "runtimeStatus",
+    "entrypoints",
+    "workflow",
+    "casePlaybooks",
+    "readSurfaceChoices",
+    "guards",
+    "exampleSequence",
+    "warnings"
+  ],
+  "properties": {
+    "sourceHandoffSetupRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["local_fixture_safe"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceBuilderCommand",
+        "sourceHandoffCommand",
+        "methodGateCommand",
+        "forecastCommand",
+        "resolutionCommand",
+        "runbookCommand",
+        "runbookSchema"
+      ],
+      "properties": {
+        "sourceBuilderCommand": { "$ref": "#/$defs/command" },
+        "sourceHandoffCommand": { "$ref": "#/$defs/command" },
+        "methodGateCommand": { "$ref": "#/$defs/command" },
+        "forecastCommand": { "$ref": "#/$defs/command" },
+        "resolutionCommand": { "$ref": "#/$defs/command" },
+        "runbookCommand": { "$ref": "#/$defs/command" },
+        "runbookSchema": {
+          "type": "string",
+          "const": "spec/source-handoff-setup-runbook.schema.json"
+        }
+      }
+    },
+    "workflow": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 9,
+      "items": { "$ref": "#/$defs/workflowStep" }
+    },
+    "casePlaybooks": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/casePlaybook" }
+    },
+    "readSurfaceChoices": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/readSurfaceChoice" }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "exampleSequence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "forecastId", "questionId", "commands"],
+      "properties": {
+        "case": { "$ref": "#/$defs/sourceHandoffCase" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "commands": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/exampleCommand" }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "sourceHandoffCase": {
+      "type": "string",
+      "enum": [
+        "unconfirmed_builder_draft",
+        "confirmed_builder_draft",
+        "insufficient_confirmed_builder_draft",
+        "contains_secret",
+        "unsupported_format",
+        "oversized",
+        "leakage"
+      ]
+    },
+    "sourceIntakeStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["accepted", "rejected", "needs_confirmation"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "handoffNextAction": {
+      "type": "string",
+      "enum": [
+        "ask_mapping_confirmation",
+        "proceed_to_method_gating",
+        "collect_more_data",
+        "replace_rejected_sources"
+      ]
+    },
+    "methodGateNextAction": {
+      "type": "string",
+      "enum": [
+        "ask_mapping_confirmation",
+        "await_explicit_setup_forecast_execution",
+        "collect_more_data",
+        "replace_rejected_sources",
+        "review_method_rejection"
+      ]
+    },
+    "forecastRunStatus": {
+      "type": "string",
+      "enum": ["generated", "blocked"]
+    },
+    "selectedMethodClass": {
+      "type": "string",
+      "enum": ["none", "historical_baseline", "deterministic_statistical"]
+    },
+    "qualityClaimStatus": {
+      "type": "string",
+      "enum": ["not_applicable", "not_enough_resolved_source_handoff_outcomes"]
+    },
+    "nextActionLabel": {
+      "type": "string",
+      "enum": [
+        "inspect_sources",
+        "ask_mapping_confirmation",
+        "proceed_to_method_gating",
+        "collect_more_data",
+        "replace_rejected_sources",
+        "run_explicit_forecast",
+        "resolve_source_handoff",
+        "read_resolved_forecast_card",
+        "read_lifecycle_bundle",
+        "read_track_record",
+        "stop_terminal"
+      ]
+    },
+    "sideEffectLevel": {
+      "type": "string",
+      "enum": [
+        "draft_only",
+        "non_generating_gate",
+        "fixture_generation",
+        "fixture_resolution",
+        "read_only",
+        "scoring_read"
+      ]
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "order",
+        "name",
+        "purpose",
+        "cliCommand",
+        "expectedSchema",
+        "sideEffectLevel",
+        "nextActionLabel",
+        "stopCondition"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "expectedSchema": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        "sideEffectLevel": { "$ref": "#/$defs/sideEffectLevel" },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "casePlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case",
+        "sourceIntakeHandoffId",
+        "sourceHandoffMethodGateId",
+        "setupForecastRunId",
+        "forecastId",
+        "questionId",
+        "sourceIntakeStatus",
+        "sourceHandoffNextAction",
+        "methodGateNextAction",
+        "forecastRunStatus",
+        "selectedMethodClass",
+        "generatesForecastOutputs",
+        "scored",
+        "qualityClaimStatus",
+        "nextActionLabel",
+        "mustNotForecast",
+        "mustNotScore",
+        "agentInstruction"
+      ],
+      "properties": {
+        "case": { "$ref": "#/$defs/sourceHandoffCase" },
+        "sourceIntakeHandoffId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceHandoffMethodGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "setupForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "sourceIntakeStatus": { "$ref": "#/$defs/sourceIntakeStatus" },
+        "sourceHandoffNextAction": { "$ref": "#/$defs/handoffNextAction" },
+        "methodGateNextAction": { "$ref": "#/$defs/methodGateNextAction" },
+        "forecastRunStatus": { "$ref": "#/$defs/forecastRunStatus" },
+        "selectedMethodClass": { "$ref": "#/$defs/selectedMethodClass" },
+        "generatesForecastOutputs": { "type": "boolean" },
+        "scored": { "type": "boolean" },
+        "qualityClaimStatus": { "$ref": "#/$defs/qualityClaimStatus" },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "mustNotForecast": { "type": "boolean" },
+        "mustNotScore": { "type": "boolean" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "readSurfaceChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "whenToUse", "cliCommand", "requires", "agentRule"],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "source_handoff_summaries",
+            "forecast_card",
+            "lifecycle_bundle",
+            "track_record",
+            "resolution_outputs"
+          ]
+        },
+        "whenToUse": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "requires": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          }
+        },
+        "agentRule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    "exampleCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "command", "expectedSignal"],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "command": { "$ref": "#/$defs/command" },
+        "expectedSignal": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        }
+      }
+    }
+  }
+}

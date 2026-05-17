@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-manifest-build.schema.json",
+  "title": "Source Manifest Build",
+  "description": "Local read-only source inspection result that may produce draft source-manifest and field-mapping records before source intake.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceManifestBuildId",
+    "generatedAt",
+    "domainSetupId",
+    "domain",
+    "buildStatus",
+    "forecastGenerationAllowed",
+    "canEnterSourceIntake",
+    "confirmationRequired",
+    "inputFiles",
+    "draftArtifacts",
+    "requiredActions",
+    "warnings"
+  ],
+  "properties": {
+    "sourceManifestBuildId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "buildStatus": {
+      "type": "string",
+      "enum": ["draft_ready", "rejected"]
+    },
+    "forecastGenerationAllowed": { "type": "boolean" },
+    "canEnterSourceIntake": { "type": "boolean" },
+    "confirmationRequired": { "type": "boolean" },
+    "inputFiles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/inputFileDecision" }
+    },
+    "draftArtifacts": { "$ref": "#/$defs/draftArtifacts" },
+    "requiredActions": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        { "type": "null" }
+      ]
+    },
+    "nullableHash": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        { "type": "null" }
+      ]
+    },
+    "nullableInteger": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        { "type": "null" }
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "inputFileDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileId",
+        "localPath",
+        "sourceRole",
+        "fileFormat",
+        "inspectionStatus",
+        "byteSize",
+        "rowCount",
+        "contentHash",
+        "detectedFields",
+        "privacyFlags",
+        "leakageFlags",
+        "reasonCodes"
+      ],
+      "properties": {
+        "fileId": { "$ref": "common.schema.json#/$defs/id" },
+        "localPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        "sourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "fileFormat": {
+          "type": "string",
+          "enum": ["csv", "json", "unsupported"]
+        },
+        "inspectionStatus": {
+          "type": "string",
+          "enum": ["inspected", "rejected"]
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "rowCount": { "$ref": "#/$defs/nullableInteger" },
+        "contentHash": { "$ref": "#/$defs/nullableHash" },
+        "detectedFields": {
+          "type": "array",
+          "maxItems": 80,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "privacyFlags": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["containsSecrets", "containsPersonalData", "approvalRequired"],
+          "properties": {
+            "containsSecrets": { "type": "boolean" },
+            "containsPersonalData": { "type": "boolean" },
+            "approvalRequired": { "type": "boolean" }
+          }
+        },
+        "leakageFlags": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hasPostOutcomeIndicators", "availableBeforeForecastClose"],
+          "properties": {
+            "hasPostOutcomeIndicators": { "type": "boolean" },
+            "availableBeforeForecastClose": { "type": "boolean" }
+          }
+        },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "draftArtifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceManifestId",
+        "fieldMappingId",
+        "sourceManifestPath",
+        "fieldMappingPath"
+      ],
+      "properties": {
+        "sourceManifestId": { "$ref": "#/$defs/nullableId" },
+        "fieldMappingId": { "$ref": "#/$defs/nullableId" },
+        "sourceManifestPath": { "$ref": "#/$defs/nullableString" },
+        "fieldMappingPath": { "$ref": "#/$defs/nullableString" }
+      }
+    }
+  }
+}

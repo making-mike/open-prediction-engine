@@ -1,0 +1,47 @@
+{
+  "sourceManifestBuildId": "sourcemanifestbuild-003",
+  "generatedAt": "2026-06-06T17:30:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "buildStatus": "rejected",
+  "forecastGenerationAllowed": false,
+  "canEnterSourceIntake": false,
+  "confirmationRequired": false,
+  "inputFiles": [
+    {
+      "fileId": "localfile-001",
+      "localPath": "spec/fixtures/local-source-files/unsupported.txt",
+      "sourceRole": "historical_baseline",
+      "fileFormat": "unsupported",
+      "inspectionStatus": "rejected",
+      "byteSize": 88,
+      "rowCount": null,
+      "contentHash": "856b0e92fc865851da4a399269e42a17dd131a3b1d5e835e4ae1553fda7e6e5a",
+      "detectedFields": [],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": false,
+        "availableBeforeForecastClose": true
+      },
+      "reasonCodes": [
+        "unsupported_format"
+      ]
+    }
+  ],
+  "draftArtifacts": {
+    "sourceManifestId": null,
+    "fieldMappingId": null,
+    "sourceManifestPath": null,
+    "fieldMappingPath": null
+  },
+  "requiredActions": [
+    "Remove rejected files or provide caller-approved supported CSV/JSON sources."
+  ],
+  "warnings": [
+    "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+  ]
+}

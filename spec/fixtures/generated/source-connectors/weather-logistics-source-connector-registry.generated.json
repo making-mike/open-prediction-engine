@@ -1,0 +1,281 @@
+{
+  "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+  "generatedAt": "2026-06-06T13:45:00Z",
+  "domain": "weather-logistics",
+  "sourcePolicyId": "sourcepolicy-019",
+  "defaultExecutionMode": "fixture_replay",
+  "connectors": [
+    {
+      "connectorId": "sourceconnector-001",
+      "connectorKey": "open_meteo_weather",
+      "displayName": "Open-Meteo Weather Forecast",
+      "status": "enabled_fixture_replay",
+      "sourceClass": "public_dataset",
+      "allowedFor": [
+        "forecast_time_evidence"
+      ],
+      "policyBinding": {
+        "allowedBySourcePolicy": true,
+        "sourcePolicyId": "sourcepolicy-019",
+        "approvalRequired": false
+      },
+      "capability": {
+        "retrievalMode": "fixture_replay",
+        "networkAccessInNormalChecks": false,
+        "liveFetchRequiresApproval": false,
+        "maxNetworkCalls": 2,
+        "maxCostUsd": 0.0
+      },
+      "freshness": {
+        "maxSourceAgeHours": 24,
+        "requireRetrievedAt": true
+      },
+      "rateLimit": {
+        "maxRequestsPerRun": 2,
+        "cooldownSeconds": 0,
+        "enforcedInNormalChecks": true
+      },
+      "credentialBoundary": {
+        "acceptsPromptVisibleCredentials": false,
+        "credentialLocation": "none",
+        "notes": "No prompt-visible credentials are accepted for this local fixture-safe connector."
+      },
+      "provenanceBoundary": {
+        "rawSourceRetention": "metadata_only",
+        "storesContentHash": true,
+        "storesRetrievedAt": true,
+        "allEvidenceClaimed": false
+      },
+      "diagnosticsBoundary": {
+        "sanitizedErrors": true,
+        "exposesRawStackTraces": false
+      },
+      "risk": {
+        "effectful": false,
+        "paid": false,
+        "privacySensitive": false
+      },
+      "agentUse": "Use for forecast-time public weather evidence in the weather-logistics wedge."
+    },
+    {
+      "connectorId": "sourceconnector-002",
+      "connectorKey": "committed_fixture",
+      "displayName": "Committed Baseline Fixture",
+      "status": "enabled_fixture_replay",
+      "sourceClass": "internal_dataset",
+      "allowedFor": [
+        "baseline_input"
+      ],
+      "policyBinding": {
+        "allowedBySourcePolicy": true,
+        "sourcePolicyId": "sourcepolicy-019",
+        "approvalRequired": false
+      },
+      "capability": {
+        "retrievalMode": "committed_fixture",
+        "networkAccessInNormalChecks": false,
+        "liveFetchRequiresApproval": false,
+        "maxNetworkCalls": 0,
+        "maxCostUsd": 0
+      },
+      "freshness": {
+        "maxSourceAgeHours": 24,
+        "requireRetrievedAt": true
+      },
+      "rateLimit": {
+        "maxRequestsPerRun": 0,
+        "cooldownSeconds": 0,
+        "enforcedInNormalChecks": true
+      },
+      "credentialBoundary": {
+        "acceptsPromptVisibleCredentials": false,
+        "credentialLocation": "none",
+        "notes": "No prompt-visible credentials are accepted for this local fixture-safe connector."
+      },
+      "provenanceBoundary": {
+        "rawSourceRetention": "fixture_only",
+        "storesContentHash": true,
+        "storesRetrievedAt": true,
+        "allEvidenceClaimed": false
+      },
+      "diagnosticsBoundary": {
+        "sanitizedErrors": true,
+        "exposesRawStackTraces": false
+      },
+      "risk": {
+        "effectful": false,
+        "paid": false,
+        "privacySensitive": false
+      },
+      "agentUse": "Use for transparent baseline comparison from committed local fixtures."
+    },
+    {
+      "connectorId": "sourceconnector-003",
+      "connectorKey": "declared_operations_fixture",
+      "displayName": "Declared Operations Outcome Fixture",
+      "status": "resolution_only",
+      "sourceClass": "internal_dataset",
+      "allowedFor": [
+        "resolution_only"
+      ],
+      "policyBinding": {
+        "allowedBySourcePolicy": false,
+        "sourcePolicyId": null,
+        "approvalRequired": false
+      },
+      "capability": {
+        "retrievalMode": "committed_fixture",
+        "networkAccessInNormalChecks": false,
+        "liveFetchRequiresApproval": false,
+        "maxNetworkCalls": 0,
+        "maxCostUsd": 0
+      },
+      "freshness": {
+        "maxSourceAgeHours": null,
+        "requireRetrievedAt": false
+      },
+      "rateLimit": {
+        "maxRequestsPerRun": 0,
+        "cooldownSeconds": 0,
+        "enforcedInNormalChecks": true
+      },
+      "credentialBoundary": {
+        "acceptsPromptVisibleCredentials": false,
+        "credentialLocation": "none",
+        "notes": "No prompt-visible credentials are accepted for this local fixture-safe connector."
+      },
+      "provenanceBoundary": {
+        "rawSourceRetention": "fixture_only",
+        "storesContentHash": true,
+        "storesRetrievedAt": false,
+        "allEvidenceClaimed": false
+      },
+      "diagnosticsBoundary": {
+        "sanitizedErrors": true,
+        "exposesRawStackTraces": false
+      },
+      "risk": {
+        "effectful": false,
+        "paid": false,
+        "privacySensitive": false
+      },
+      "agentUse": "Use only after the service window for resolution and scoring, never as forecast-time evidence."
+    },
+    {
+      "connectorId": "sourceconnector-004",
+      "connectorKey": "web_search",
+      "displayName": "General Web Search",
+      "status": "unsupported",
+      "sourceClass": "other",
+      "allowedFor": [
+        "not_allowed"
+      ],
+      "policyBinding": {
+        "allowedBySourcePolicy": false,
+        "sourcePolicyId": null,
+        "approvalRequired": true
+      },
+      "capability": {
+        "retrievalMode": "unsupported",
+        "networkAccessInNormalChecks": false,
+        "liveFetchRequiresApproval": false,
+        "maxNetworkCalls": 0,
+        "maxCostUsd": 0
+      },
+      "freshness": {
+        "maxSourceAgeHours": null,
+        "requireRetrievedAt": false
+      },
+      "rateLimit": {
+        "maxRequestsPerRun": 0,
+        "cooldownSeconds": 0,
+        "enforcedInNormalChecks": true
+      },
+      "credentialBoundary": {
+        "acceptsPromptVisibleCredentials": false,
+        "credentialLocation": "none",
+        "notes": "No prompt-visible credentials are accepted for this local fixture-safe connector."
+      },
+      "provenanceBoundary": {
+        "rawSourceRetention": "none",
+        "storesContentHash": false,
+        "storesRetrievedAt": false,
+        "allEvidenceClaimed": false
+      },
+      "diagnosticsBoundary": {
+        "sanitizedErrors": true,
+        "exposesRawStackTraces": false
+      },
+      "risk": {
+        "effectful": false,
+        "paid": false,
+        "privacySensitive": false
+      },
+      "agentUse": "Do not use; broad web search is outside the first fixture-safe auto-evidence milestone."
+    },
+    {
+      "connectorId": "sourceconnector-005",
+      "connectorKey": "market_price_feed",
+      "displayName": "Market Price Feed",
+      "status": "unsupported",
+      "sourceClass": "market_price",
+      "allowedFor": [
+        "not_allowed"
+      ],
+      "policyBinding": {
+        "allowedBySourcePolicy": false,
+        "sourcePolicyId": null,
+        "approvalRequired": true
+      },
+      "capability": {
+        "retrievalMode": "unsupported",
+        "networkAccessInNormalChecks": false,
+        "liveFetchRequiresApproval": false,
+        "maxNetworkCalls": 0,
+        "maxCostUsd": 0
+      },
+      "freshness": {
+        "maxSourceAgeHours": null,
+        "requireRetrievedAt": false
+      },
+      "rateLimit": {
+        "maxRequestsPerRun": 0,
+        "cooldownSeconds": 0,
+        "enforcedInNormalChecks": true
+      },
+      "credentialBoundary": {
+        "acceptsPromptVisibleCredentials": false,
+        "credentialLocation": "none",
+        "notes": "No prompt-visible credentials are accepted for this local fixture-safe connector."
+      },
+      "provenanceBoundary": {
+        "rawSourceRetention": "none",
+        "storesContentHash": false,
+        "storesRetrievedAt": false,
+        "allEvidenceClaimed": false
+      },
+      "diagnosticsBoundary": {
+        "sanitizedErrors": true,
+        "exposesRawStackTraces": false
+      },
+      "risk": {
+        "effectful": false,
+        "paid": false,
+        "privacySensitive": false
+      },
+      "agentUse": "Do not use for weather-logistics; market-price sources are unsupported in this domain wedge."
+    }
+  ],
+  "unsupportedSourceClasses": [
+    "human_judgment",
+    "model_output",
+    "market_price",
+    "aggregate",
+    "other"
+  ],
+  "warnings": [
+    "Normal checks use fixture replay and do not perform live network calls.",
+    "The registry does not authorize unbounded internet search.",
+    "Unsupported source classes must not be silently used for forecast-time evidence."
+  ]
+}

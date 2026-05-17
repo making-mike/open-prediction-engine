@@ -1,0 +1,58 @@
+{
+  "setupForecastRunId": "setupforecastrun-1105",
+  "generatedAt": "2026-06-06T19:05:00Z",
+  "case": "unsupported_format",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": null,
+  "fieldMappingId": null,
+  "sourceIntakeReportId": null,
+  "sourceIntakeHandoffId": "sourceintakehandoff-005",
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-005",
+  "setupMethodDecisionId": null,
+  "setupBenchmarkGateId": null,
+  "intakeStatus": null,
+  "methodDecisionStatus": null,
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "runStatus": "blocked",
+  "executionMode": "not_started",
+  "sourceMode": "none",
+  "controls": {
+    "sourceIntakeValidated": false,
+    "methodDecisionValidated": false,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "localLiveDraftConsumed": false,
+    "forecastArtifactsCreated": false
+  },
+  "recordBinding": {
+    "questionId": null,
+    "forecastId": null,
+    "evidencePacketId": null,
+    "historyId": null,
+    "forecastCardId": null,
+    "forecastBundleId": null
+  },
+  "outputs": {
+    "questionPath": null,
+    "featureSnapshotPath": null,
+    "evidencePacketPath": null,
+    "forecastArtifactPath": null,
+    "forecastHistoryPath": null
+  },
+  "blockedReasons": [
+    "builder_rejection",
+    "source_intake_not_entered",
+    "unsupported_format"
+  ],
+  "nextActions": [
+    "Replace rejected builder inputs before source intake: unsupported_format."
+  ],
+  "warnings": [
+    "Source-handoff setup forecast execution is fixture-mode only.",
+    "Execution requires a prior source-intake handoff, source-handoff method gate, setup benchmark gate, and setup method decision.",
+    "Blocked handoff outcomes do not bind forecast IDs or artifact paths."
+  ]
+}

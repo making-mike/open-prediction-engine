@@ -1,0 +1,40 @@
+{
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+  "generatedAt": "2026-06-06T18:35:00Z",
+  "case": "confirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeHandoffId": "sourceintakehandoff-002",
+  "sourceIntakeReportId": "sourceintakereport-102",
+  "setupBenchmarkGateId": "setupbenchmarkgate-102",
+  "setupMethodDecisionId": "setupmethoddecision-102",
+  "handoffStatus": "ready_for_method_gating",
+  "handoffNextAction": "proceed_to_method_gating",
+  "methodGateStatus": "method_selected",
+  "nextAction": "await_explicit_setup_forecast_execution",
+  "sourceIntakeStatus": "accepted",
+  "selectedMethodClass": "deterministic_statistical",
+  "selectedForecastMode": "deterministic_statistical",
+  "forecastArtifactsCreated": false,
+  "eligibilitySummary": {
+    "benchmarkGateStatus": "approved_provisional",
+    "benchmarkExecutionAllowed": true,
+    "methodDecisionStatus": "method_selected",
+    "baselineFinalEligibilityStatus": "eligible",
+    "deterministicFinalEligibilityStatus": "eligible",
+    "qualityClaimAllowed": false
+  },
+  "requiredActions": [
+    "Method gate passed; run an explicit setup forecast execution step before any forecast artifact is created."
+  ],
+  "warnings": [
+    "Source-handoff method gates do not create forecast artifacts.",
+    "Accepted method decisions still require an explicit setup forecast execution step.",
+    "Source-builder handoffs do not create forecast artifacts.",
+    "Setup method gates are still required after accepted source intake.",
+    "Source intake reports do not produce forecast artifacts.",
+    "Setup method decisions do not create forecast artifacts.",
+    "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+    "Candidate eligibility is scoped to this domain setup and source intake report."
+  ]
+}

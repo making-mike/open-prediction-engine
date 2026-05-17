@@ -11,6 +11,9 @@ Supported record types:
 - `forecast-bundle`
 - `forecast-card`
 - `forecast-artifact`
+- `evidence-trace`
+- `evidence-source-set`
+- `source-connector-results`
 - `track-record`
 
 Forecast bundles are assembled on read from public generated records and are looked up by `forecastId`.
@@ -18,6 +21,12 @@ Forecast bundles are assembled on read from public generated records and are loo
 Forecast cards are compact, claim-safe summaries assembled from the same lifecycle records and are looked up by `forecastId`.
 
 Forecast artifacts are looked up by `forecastId`.
+
+Evidence traces are compact read-only provenance views assembled from forecast artifacts, evidence plans, evidence source sets, connector registry records, and connector result sets. They are looked up by `forecastId`.
+
+Evidence source sets are looked up by `evidenceSourceSetId`.
+
+Source connector result sets are looked up by `sourceConnectorResultSetId`.
 
 Track records are looked up by `trackRecordReportId`.
 
@@ -40,6 +49,21 @@ Read a compact forecast card:
 
 ```bash
 python3 scripts/ope.py read --record-type forecast-card --id forecast-502 --question-id question-501
+python3 scripts/ope.py read --record-type forecast-card --id forecast-602 --question-id question-601
+python3 scripts/ope.py read --record-type forecast-card --id forecast-702 --question-id question-701
+```
+
+Read a connector-bound evidence trace:
+
+```bash
+python3 scripts/ope.py read --record-type evidence-trace --id forecast-602 --question-id question-601
+```
+
+Read source-set and connector-result records:
+
+```bash
+python3 scripts/ope.py read --record-type evidence-source-set --id evidencesourceset-019
+python3 scripts/ope.py read --record-type source-connector-results --id sourceconnectorresults-001
 ```
 
 Read a track record:
@@ -64,6 +88,9 @@ The file interface enforces:
 - optional question binding for question-scoped records
 - forecast artifact binding to the sibling evidence packet when available
 - forecast bundle binding across artifact, evidence, history, resolution, scoring, outcome summary, and pipeline run records when those records exist
+- forecast cards expose compact request, source-policy, evidence-plan, evidence-source-set, and source-mode bindings when available
+- historical-only forecast cards expose `committed_fixture` source mode and do not link evidence traces
+- evidence traces expose connector registry/result bindings without raw fixture contents or raw diagnostics
 - forecast cards omit source hashes, supporting evidence URIs, raw provenance arrays, and full rationale text
 - public error sanitization
 - access denial for private or embargoed records

@@ -1,0 +1,30 @@
+{
+  "featureSnapshotId": "featuresnapshot-902",
+  "domainSetupId": "domainsetup-001",
+  "sourceIntakeReportId": "sourceintakereport-002",
+  "setupMethodDecisionId": "setupmethoddecision-002",
+  "questionId": "question-902",
+  "generatedAt": "2026-06-02T10:30:00Z",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "sourceIds": [
+    "manifestsource-004"
+  ],
+  "features": {
+    "forecastSignalUsed": false,
+    "baselineMethod": "source_intake_historical_frequency",
+    "comparableServiceDays": 80,
+    "disruptionDays": 10,
+    "smoothing": "laplace_add_one",
+    "sourceManifestId": "sourcemanifest-002",
+    "sourceId": "manifestsource-004",
+    "selectedMethodClass": "historical_baseline",
+    "setupBenchmarkGateId": null,
+    "baselineProbability": 0.1341,
+    "forecastProbability": 0.1341
+  }
+}

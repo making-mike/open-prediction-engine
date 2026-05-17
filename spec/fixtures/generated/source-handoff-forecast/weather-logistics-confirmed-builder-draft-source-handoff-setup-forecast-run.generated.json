@@ -1,0 +1,52 @@
+{
+  "setupForecastRunId": "setupforecastrun-1102",
+  "generatedAt": "2026-06-06T19:05:00Z",
+  "case": "confirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifestdraft-001",
+  "fieldMappingId": "fieldmappingdraft-102",
+  "sourceIntakeReportId": "sourceintakereport-102",
+  "sourceIntakeHandoffId": "sourceintakehandoff-002",
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+  "setupMethodDecisionId": "setupmethoddecision-102",
+  "setupBenchmarkGateId": "setupbenchmarkgate-102",
+  "intakeStatus": "accepted",
+  "methodDecisionStatus": "method_selected",
+  "selectedMethodClass": "deterministic_statistical",
+  "selectedForecastMode": "deterministic_statistical",
+  "runStatus": "generated",
+  "executionMode": "fixture_dry_run",
+  "sourceMode": "source_handoff_fixture",
+  "controls": {
+    "sourceIntakeValidated": true,
+    "methodDecisionValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "localLiveDraftConsumed": false,
+    "forecastArtifactsCreated": true
+  },
+  "recordBinding": {
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePacketId": "evidence-1102",
+    "historyId": "history-1102",
+    "forecastCardId": "forecastcard-forecast-1102",
+    "forecastBundleId": "forecastbundle-forecast-1102"
+  },
+  "outputs": {
+    "questionPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-question.generated.json",
+    "featureSnapshotPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-feature-snapshot.generated.json",
+    "evidencePacketPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-evidence.generated.json",
+    "forecastArtifactPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-artifact.generated.json",
+    "forecastHistoryPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-history.generated.json"
+  },
+  "blockedReasons": [],
+  "nextActions": [],
+  "warnings": [
+    "Source-handoff setup forecast execution is fixture-mode only.",
+    "Execution requires a prior source-intake handoff, source-handoff method gate, setup benchmark gate, and setup method decision.",
+    "Generated forecast uses a handoff-bound deterministic method; quality claims remain blocked."
+  ]
+}

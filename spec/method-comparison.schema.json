@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/method-comparison.schema.json",
+  "title": "Method Comparison",
+  "description": "Baseline comparison report for registered forecasting methods.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "methodComparisonId",
+    "generatedAt",
+    "methodRegistryId",
+    "domain",
+    "baselineMethodId",
+    "comparisons",
+    "qualityBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "methodComparisonId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "methodRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "baselineMethodId": { "$ref": "common.schema.json#/$defs/id" },
+    "comparisons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "methodId",
+          "methodClass",
+          "status",
+          "comparisonStatus",
+          "baselineMethodId",
+          "sameQuestionSet",
+          "sameSourcePolicy",
+          "sameRetrievalWindow",
+          "leakageValidated",
+          "sampleSize",
+          "qualityClaimStatus",
+          "reasons"
+        ],
+        "properties": {
+          "methodId": { "$ref": "common.schema.json#/$defs/id" },
+          "methodClass": {
+            "type": "string",
+            "enum": [
+              "deterministic_statistical",
+              "model_assisted",
+              "retrieval_assisted",
+              "ensemble",
+              "external_reference"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["enabled", "proposed", "disabled"]
+          },
+          "comparisonStatus": {
+            "type": "string",
+            "enum": ["comparable_checked", "not_comparable"]
+          },
+          "baselineMethodId": { "$ref": "common.schema.json#/$defs/id" },
+          "baselineBenchmarkRunId": { "$ref": "common.schema.json#/$defs/id" },
+          "candidateBenchmarkRunId": { "$ref": "common.schema.json#/$defs/id" },
+          "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+          "retrievalWindow": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["startsAt", "endsAt"],
+            "properties": {
+              "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+            }
+          },
+          "sameQuestionSet": { "type": "boolean" },
+          "sameSourcePolicy": { "type": "boolean" },
+          "sameRetrievalWindow": { "type": "boolean" },
+          "leakageValidated": { "type": "boolean" },
+          "sampleSize": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "baselineLift": { "type": "number" },
+          "qualityClaimStatus": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "reasons": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 160
+            }
+          }
+        }
+      }
+    },
+    "qualityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "minimumComparableBenchmarks",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "minimumComparableBenchmarks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "qualityClaimStatus": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

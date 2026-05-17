@@ -53,7 +53,7 @@
         },
         "sourceMode": {
           "type": "string",
-          "enum": ["committed_fixture"]
+          "enum": ["committed_fixture", "auto_evidence_fixture_replay"]
         }
       }
     },
@@ -76,7 +76,10 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 240
-        }
+        },
+        "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceSourceSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
       }
     },
     "notes": {

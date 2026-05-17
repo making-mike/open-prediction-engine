@@ -1,0 +1,68 @@
+{
+  "agentEnvelopeId": "agentenvelope-007",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "scoring_read"
+  },
+  "operation": "scoring_summary",
+  "adapterRequest": {
+    "operation": "scoring_summary",
+    "inputRecordType": "scoring_summary",
+    "inputRef": "scoring-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "maxBytes": 65536,
+    "callerIntent": "Read the score summary and baseline comparison before making a quality claim."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "approved",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "auto_evidence_fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "forecastId": "forecast-602",
+    "questionId": "question-601",
+    "scoringReportId": "scoring-601",
+    "scoreStatus": "scored",
+    "scoringRule": "brier",
+    "primaryScore": 0.3481,
+    "baselineScore": 0.6084,
+    "baselineLift": 0.2603,
+    "higherIsBetter": false,
+    "generatedAt": "2026-06-04T12:15:00Z",
+    "qualityClaim": {
+      "status": "not_enough_resolved_auto_evidence_outcomes",
+      "minimumSampleSize": 30,
+      "resolvedComparableOutcomes": 1,
+      "sampleSize": 1,
+      "trackRecordReportId": "trackrecord-601"
+    }
+  },
+  "error": null,
+  "warnings": [
+    "A single scored fixture outcome is not enough for a live calibration or quality claim."
+  ]
+}

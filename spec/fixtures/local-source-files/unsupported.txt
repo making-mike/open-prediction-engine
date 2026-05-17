@@ -1,0 +1,1 @@
+This plain text file is intentionally unsupported by the local source manifest builder.

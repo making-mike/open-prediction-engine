@@ -1,0 +1,1301 @@
+{
+  "protocolMapId": "protocolmap-001",
+  "generatedAt": "2026-06-06T12:45:00Z",
+  "adapterContract": {
+    "dispatcherCommand": "python3 scripts/ope.py agent-call",
+    "mcpCommand": "python3 scripts/ope.py mcp-stdio",
+    "mcpProtocolVersion": "2025-11-25",
+    "envelopeSchema": "spec/agent-envelope.schema.json",
+    "runtimeStatus": "local_mcp_stdio_scaffold",
+    "localDispatcherImplemented": true,
+    "protocolRuntimeImplemented": true,
+    "mcpStdioScaffoldImplemented": true,
+    "httpRuntimeImplemented": false,
+    "queueRuntimeImplemented": false
+  },
+  "operations": [
+    {
+      "operation": "forecast_request_validation",
+      "inputRecordType": "forecast_request",
+      "sideEffectLevel": "validation_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "request",
+          "required": true,
+          "type": "path-or-json-object",
+          "source": "agent-call --request",
+          "notes": "Forecast request record to validate without execution."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation forecast_request_validation --request spec/fixtures/requests/auto-weather-logistics-request.json",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_forecast_request_validation",
+        "argumentFields": [
+          {
+            "name": "request",
+            "required": true,
+            "type": "path-or-json-object",
+            "source": "agent-call --request",
+            "notes": "Forecast request record to validate without execution."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/forecast-request-validation",
+        "argumentFields": [
+          {
+            "name": "request",
+            "required": true,
+            "type": "path-or-json-object",
+            "source": "agent-call --request",
+            "notes": "Forecast request record to validate without execution."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.forecast_request_validation.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use before any forecast execution, live fetch, paid action, or privacy-sensitive action.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "evidence_plan",
+      "inputRecordType": "evidence_gathering_plan",
+      "sideEffectLevel": "dry_run_generation",
+      "requiresApproval": true,
+      "inputFields": [
+        {
+          "name": "request",
+          "required": true,
+          "type": "path-or-json-object",
+          "source": "agent-call --request",
+          "notes": "Forecast request record used to build a dry-run evidence plan."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation evidence_plan --request spec/fixtures/requests/auto-weather-logistics-request.json",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_evidence_plan",
+        "argumentFields": [
+          {
+            "name": "request",
+            "required": true,
+            "type": "path-or-json-object",
+            "source": "agent-call --request",
+            "notes": "Forecast request record used to build a dry-run evidence plan."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Connector credentials stay server-side and must never appear in prompt-visible arguments or returned records."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/evidence-plan",
+        "argumentFields": [
+          {
+            "name": "request",
+            "required": true,
+            "type": "path-or-json-object",
+            "source": "agent-call --request",
+            "notes": "Forecast request record used to build a dry-run evidence plan."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Connector credentials stay server-side and must never appear in prompt-visible arguments or returned records."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.evidence_plan.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Connector credentials stay server-side and must never appear in prompt-visible arguments or returned records."
+      },
+      "usageGuidance": "Use after an accepted request to inspect source policy, planned connectors, and approval boundaries.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "evidence_trace",
+      "inputRecordType": "evidence_trace",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "forecastId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --forecast-id",
+          "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+        },
+        {
+          "name": "questionId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --question-id",
+          "notes": "Question ID used to prevent cross-question record binding drift."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation evidence_trace --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_evidence_trace",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/evidence-trace",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.evidence_trace.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use when the caller needs connector-bound source provenance without raw fixture contents.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "forecast_card",
+      "inputRecordType": "forecast_card",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "forecastId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --forecast-id",
+          "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+        },
+        {
+          "name": "questionId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --question-id",
+          "notes": "Question ID used to prevent cross-question record binding drift."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_forecast_card",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/forecast-card",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.forecast_card.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use first for compact downstream decisions that need probability, baseline, status, and warnings.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "lifecycle_bundle",
+      "inputRecordType": "lifecycle_bundle",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "forecastId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --forecast-id",
+          "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+        },
+        {
+          "name": "questionId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --question-id",
+          "notes": "Question ID used to prevent cross-question record binding drift."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_lifecycle_bundle",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/lifecycle-bundle",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.lifecycle_bundle.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use when the caller needs audit context, provenance, evidence, history, resolution, and scoring records.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "resolution_status",
+      "inputRecordType": "resolution_status",
+      "sideEffectLevel": "status_read",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "forecastId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --forecast-id",
+          "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+        },
+        {
+          "name": "questionId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --question-id",
+          "notes": "Question ID used to prevent cross-question record binding drift."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_resolution_status",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/resolution-status",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.resolution_status.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent needs to decide whether to wait, resolve, score, or treat a forecast as provisional.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "scoring_summary",
+      "inputRecordType": "scoring_summary",
+      "sideEffectLevel": "scoring_read",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "forecastId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --forecast-id",
+          "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+        },
+        {
+          "name": "questionId",
+          "required": true,
+          "type": "id",
+          "source": "agent-call --question-id",
+          "notes": "Question ID used to prevent cross-question record binding drift."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_scoring_summary",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/scoring-summary",
+        "argumentFields": [
+          {
+            "name": "forecastId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --forecast-id",
+            "notes": "Forecast record ID to bind across card, bundle, resolution, and scoring reads."
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "type": "id",
+            "source": "agent-call --question-id",
+            "notes": "Question ID used to prevent cross-question record binding drift."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.scoring_summary.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    }
+  ],
+  "exitCodeMapping": [
+    {
+      "exitCode": 0,
+      "status": "ok",
+      "errorCodes": [],
+      "meaning": "Success."
+    },
+    {
+      "exitCode": 1,
+      "status": "error",
+      "errorCodes": [
+        "internal_error"
+      ],
+      "meaning": "Internal adapter failure."
+    },
+    {
+      "exitCode": 2,
+      "status": "error",
+      "errorCodes": [
+        "bad_request",
+        "validation_failed"
+      ],
+      "meaning": "Bad, malformed, or contract-invalid caller input."
+    },
+    {
+      "exitCode": 3,
+      "status": "error",
+      "errorCodes": [
+        "approval_required"
+      ],
+      "meaning": "A policy or approval gate blocks the requested operation."
+    },
+    {
+      "exitCode": 4,
+      "status": "error",
+      "errorCodes": [
+        "not_found",
+        "access_denied",
+        "binding_mismatch",
+        "conflict"
+      ],
+      "meaning": "The requested record is missing, denied, conflicting, or not bound to the requested IDs."
+    },
+    {
+      "exitCode": 5,
+      "status": "error",
+      "errorCodes": [
+        "response_too_large",
+        "rate_limited"
+      ],
+      "meaning": "The adapter hit a local size, quota, or rate limit."
+    }
+  ],
+  "transportBoundaries": [
+    {
+      "transport": "local_cli",
+      "implemented": true,
+      "boundary": "Implemented as python3 scripts/ope.py agent-call returning one JSON envelope to stdout.",
+      "approvalGate": "The dispatcher surfaces approval_required and does not bypass request policy.",
+      "credentialBoundary": "No credentials are needed or accepted in local prompt-visible arguments."
+    },
+    {
+      "transport": "mcp",
+      "implemented": true,
+      "boundary": "Implemented locally as a stdio JSON-RPC scaffold exposing one tool per agent operation.",
+      "approvalGate": "The MCP scaffold exposes validation, dry-run, read, status, and scoring tools only.",
+      "credentialBoundary": "MCP credentials must stay in server configuration, not tool arguments or records."
+    },
+    {
+      "transport": "http",
+      "implemented": false,
+      "boundary": "Future HTTP endpoints should keep OPE record semantics and map status from envelope exit codes.",
+      "approvalGate": "Effectful, paid, live-fetch, or privacy-sensitive requests must be approval-gated.",
+      "credentialBoundary": "HTTP credentials must be transport metadata, not forecast artifacts or provenance text."
+    },
+    {
+      "transport": "queue",
+      "implemented": false,
+      "boundary": "Future queues should use request messages plus an ope.agent_envelope.ready result envelope.",
+      "approvalGate": "Queued jobs must persist approval state and reject stale or unapproved effectful work.",
+      "credentialBoundary": "Worker credentials must be scoped server-side and excluded from queued payloads."
+    }
+  ],
+  "decisionExamples": [
+    {
+      "situation": "The agent needs a compact probability before taking a reversible downstream action.",
+      "preferredOperation": "forecast_card",
+      "reason": "The card includes probability, baseline, status, request binding, and claim warnings.",
+      "requiredSignals": [
+        "forecastId",
+        "questionId",
+        "probability",
+        "baseline",
+        "qualityClaim.status"
+      ],
+      "downstreamRule": "Act only when caller policy accepts the quality boundary and resolution status."
+    },
+    {
+      "situation": "The agent needs audit context or wants to explain what evidence supported the forecast.",
+      "preferredOperation": "evidence_trace",
+      "reason": "The trace links the evidence plan, source policy, source set, connector registry, connector results, and gathered source records.",
+      "requiredSignals": [
+        "requestId",
+        "sourcePolicyId",
+        "evidencePlanId",
+        "evidenceSourceSetId",
+        "sourceConnectorResultSetId"
+      ],
+      "downstreamRule": "Use the trace for provenance inspection, not as proof that all possible internet evidence was gathered."
+    },
+    {
+      "situation": "The agent needs the full forecast lifecycle for audit or explanation.",
+      "preferredOperation": "lifecycle_bundle",
+      "reason": "The bundle contains bound lifecycle records, evidence, history, resolution, and scoring context.",
+      "requiredSignals": [
+        "requestId",
+        "sourcePolicyId",
+        "evidencePacket",
+        "forecastHistory",
+        "scoringReport"
+      ],
+      "downstreamRule": "Use the bundle for audit context, not as a separate source of forecast semantics."
+    },
+    {
+      "situation": "The agent needs to know whether a forecast has resolved before scoring or waiting.",
+      "preferredOperation": "resolution_status",
+      "reason": "Resolution status is smaller than a full bundle and carries source and quality-claim status.",
+      "requiredSignals": [
+        "resolutionStatus",
+        "resolvedAt",
+        "resolvedOutcome",
+        "resolutionSource"
+      ],
+      "downstreamRule": "Do not score unresolved, ambiguous, annulled, or missing outcomes as normal resolved forecasts."
+    },
+    {
+      "situation": "The agent needs to compare the forecast to a baseline before using it in a decision.",
+      "preferredOperation": "scoring_summary",
+      "reason": "Scoring summary exposes scoring rule, primary score, baseline score, and quality boundary.",
+      "requiredSignals": [
+        "scoreStatus",
+        "scoringRule",
+        "primaryScore",
+        "baselineScore",
+        "qualityClaim.status"
+      ],
+      "downstreamRule": "Do not generalize one fixture score into a live calibration or state-of-the-art claim."
+    }
+  ],
+  "warnings": [
+    "The MCP stdio adapter is a local scaffold, not a hosted or production adapter runtime.",
+    "HTTP and queue mappings are not implemented runtimes.",
+    "Protocol adapters must preserve OPE record semantics and envelope exit codes.",
+    "Paid, effectful, live-fetch, or privacy-sensitive forecast requests remain approval-gated.",
+    "Do not place secrets in forecast artifacts, provenance metadata, tool arguments, or queued payloads."
+  ]
+}

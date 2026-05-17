@@ -1,0 +1,42 @@
+{
+  "sourceIntakeHandoffId": "sourceintakehandoff-003",
+  "generatedAt": "2026-06-06T18:10:00Z",
+  "case": "insufficient_confirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestBuildId": "sourcemanifestbuild-103",
+  "handoffStatus": "needs_more_data",
+  "nextAction": "collect_more_data",
+  "canEnterSourceIntake": true,
+  "forecastGenerationAllowed": false,
+  "sourceManifestId": "sourcemanifestdraft-103",
+  "fieldMappingId": "fieldmappingdraft-103",
+  "sourceIntakeReportId": "sourceintakereport-103",
+  "sourceIntakeStatus": "rejected",
+  "mappingSummary": {
+    "totalMappings": 13,
+    "proposedMappingCount": 0,
+    "confirmedMappingCount": 13,
+    "agentInferredMappingCount": 0,
+    "requiresConfirmation": false
+  },
+  "builderRejectionSummary": {
+    "rejectedInputCount": 0,
+    "reasonCodes": []
+  },
+  "draftArtifacts": {
+    "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest-build.generated.json",
+    "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest.json",
+    "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-field-mapping.json",
+    "sourceIntakeReportPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-intake-report.generated.json"
+  },
+  "requiredActions": [
+    "Collect enough comparable historical rows and positive outcomes before method gating."
+  ],
+  "warnings": [
+    "Source-builder handoffs do not create forecast artifacts.",
+    "Setup method gates are still required after accepted source intake.",
+    "Source intake reports do not produce forecast artifacts.",
+    "Rejected intake must not bind generated forecast outputs."
+  ]
+}

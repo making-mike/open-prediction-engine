@@ -1,0 +1,36 @@
+{
+  "benchmarkRunId": "benchmarkrun-005",
+  "startedAt": "2026-06-02T10:05:00Z",
+  "endedAt": "2026-06-02T10:10:00Z",
+  "status": "invalidated",
+  "questionIds": ["question-101"],
+  "methodId": "method-201",
+  "model": {
+    "modelId": "model-201",
+    "version": "model-assisted-weather-logistics-fixture-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-model-assisted-method-001"
+  },
+  "sourcePolicyId": "sourcepolicy-001",
+  "retrievalWindow": {
+    "startsAt": "2026-06-01T00:00:00Z",
+    "endsAt": "2026-06-02T10:00:00Z"
+  },
+  "sourceFetches": [
+    {
+      "sourceId": "source-104",
+      "name": "Warsaw weather observation fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-observation-2026-06-03.json",
+      "retrievedAt": "2026-06-02T09:40:00Z",
+      "contentHash": "sha256-weather-observation-source-101"
+    }
+  ],
+  "leakageControls": {
+    "knownAnswerExcluded": true,
+    "postOutcomeDataBlocked": true,
+    "sourceContaminationBlocked": false,
+    "sourceTimestampsRecorded": true,
+    "auditNotes": "Intentionally contaminated fixture: source fetch uses a fallback resolution source ID."
+  }
+}

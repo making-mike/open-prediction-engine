@@ -1,0 +1,40 @@
+{
+  "featureSnapshotId": "featuresnapshot-1102",
+  "domainSetupId": "domainsetup-001",
+  "sourceManifestId": "sourcemanifestdraft-001",
+  "sourceIntakeReportId": "sourceintakereport-102",
+  "sourceIntakeHandoffId": "sourceintakehandoff-002",
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+  "setupMethodDecisionId": "setupmethoddecision-102",
+  "questionId": "question-1102",
+  "generatedAt": "2026-06-02T10:45:00Z",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "sourceIds": [
+    "localsource-002",
+    "localsource-001"
+  ],
+  "features": {
+    "forecastSignalUsed": true,
+    "baselineMethod": "source_intake_historical_frequency",
+    "comparableServiceDays": 30,
+    "disruptionDays": 11,
+    "smoothing": "laplace_add_one",
+    "sourceManifestId": "sourcemanifestdraft-001",
+    "sourceId": "localsource-002",
+    "sourceIntakeHandoffId": "sourceintakehandoff-002",
+    "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+    "selectedMethodClass": "deterministic_statistical",
+    "setupBenchmarkGateId": "setupbenchmarkgate-102",
+    "baselineProbability": 0.375,
+    "forecastProbability": 0.645,
+    "weatherForecastSourceId": "localsource-001",
+    "forecastDailyPrecipitationMm": 24.0,
+    "precipitationThresholdMm": 20.0,
+    "heavyRainAdjustment": 0.27
+  }
+}

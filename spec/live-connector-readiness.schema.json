@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/live-connector-readiness.schema.json",
+  "title": "Live Connector Readiness",
+  "description": "A policy-bound readiness contract for opt-in live source connector checks that stay outside normal offline release checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveConnectorReadinessId",
+    "generatedAt",
+    "readinessStatus",
+    "domain",
+    "connector",
+    "recordBinding",
+    "executionModes",
+    "approvalBoundary",
+    "networkBoundary",
+    "freshnessBoundary",
+    "retentionBoundary",
+    "diagnosticsBoundary",
+    "credentialBoundary",
+    "traceBinding",
+    "claimBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "liveConnectorReadinessId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "readinessStatus": {
+      "type": "string",
+      "enum": ["ready_for_explicit_integration_check", "blocked", "not_ready"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "connector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["connectorId", "connectorKey", "displayName", "sourceClass"],
+      "properties": {
+        "connectorId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorKey": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "sourceClass": { "$ref": "#/$defs/sourceClass" }
+      }
+    },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "sourcePolicyId",
+        "evidencePlanId",
+        "sourceConnectorRegistryId",
+        "sourceConnectorResultSetId",
+        "connectorResultId",
+        "fixtureEvidenceTraceId",
+        "fixtureForecastId",
+        "fixtureQuestionId"
+      ],
+      "properties": {
+        "requestId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorResultId": { "$ref": "common.schema.json#/$defs/id" },
+        "fixtureEvidenceTraceId": { "$ref": "common.schema.json#/$defs/id" },
+        "fixtureForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "fixtureQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "executionModes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixtureReplay", "integrationLiveFetch", "hostedLiveFetch"],
+      "properties": {
+        "fixtureReplay": { "$ref": "#/$defs/executionMode" },
+        "integrationLiveFetch": { "$ref": "#/$defs/executionMode" },
+        "hostedLiveFetch": { "$ref": "#/$defs/executionMode" }
+      }
+    },
+    "approvalBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operatorExplicitFlagRequired",
+        "sourcePolicyApprovalRequired",
+        "paid",
+        "effectful",
+        "privacySensitive",
+        "approvalRecordRequiredBeforeForecastUse"
+      ],
+      "properties": {
+        "operatorExplicitFlagRequired": { "type": "boolean" },
+        "sourcePolicyApprovalRequired": { "type": "boolean" },
+        "paid": { "type": "boolean" },
+        "effectful": { "type": "boolean" },
+        "privacySensitive": { "type": "boolean" },
+        "approvalRecordRequiredBeforeForecastUse": { "type": "boolean" }
+      }
+    },
+    "networkBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedEndpoint",
+        "allowBroadWebSearch",
+        "maxNetworkCalls",
+        "timeoutSeconds",
+        "maxCostUsd",
+        "normalChecksNetworkAccess"
+      ],
+      "properties": {
+        "allowedEndpoint": { "$ref": "common.schema.json#/$defs/uri" },
+        "allowBroadWebSearch": { "type": "boolean" },
+        "maxNetworkCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "maxCostUsd": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 25
+        },
+        "normalChecksNetworkAccess": { "type": "boolean" }
+      }
+    },
+    "freshnessBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxSourceAgeHours", "requireRetrievedAt", "requireServiceDateBinding"],
+      "properties": {
+        "maxSourceAgeHours": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8760
+        },
+        "requireRetrievedAt": { "type": "boolean" },
+        "requireServiceDateBinding": { "type": "boolean" }
+      }
+    },
+    "retentionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rawSourceRetention", "storeContentHash", "rawPreviewStored", "storeNormalizedFields"],
+      "properties": {
+        "rawSourceRetention": {
+          "type": "string",
+          "enum": ["none", "fixture_only", "metadata_only", "full"]
+        },
+        "storeContentHash": { "type": "boolean" },
+        "rawPreviewStored": { "type": "boolean" },
+        "storeNormalizedFields": { "type": "boolean" }
+      }
+    },
+    "diagnosticsBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sanitizedErrors", "rawDiagnosticStored", "rawStackTraceExposed", "publicFailureMessage"],
+      "properties": {
+        "sanitizedErrors": { "type": "boolean" },
+        "rawDiagnosticStored": { "type": "boolean" },
+        "rawStackTraceExposed": { "type": "boolean" },
+        "publicFailureMessage": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "credentialBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["promptVisibleCredentialsAccepted", "credentialUsed", "credentialLocation"],
+      "properties": {
+        "promptVisibleCredentialsAccepted": { "type": "boolean" },
+        "credentialUsed": { "type": "boolean" },
+        "credentialLocation": {
+          "type": "string",
+          "enum": ["none", "server_side_only", "not_applicable"]
+        }
+      }
+    },
+    "traceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureTracePreserved",
+        "integrationTraceMustBeCompatible",
+        "requestResultBindingRequired",
+        "forecastUseRequiresConnectorResult",
+        "forecastUseRequiresEvidenceTrace"
+      ],
+      "properties": {
+        "fixtureTracePreserved": { "type": "boolean" },
+        "integrationTraceMustBeCompatible": { "type": "boolean" },
+        "requestResultBindingRequired": { "type": "boolean" },
+        "forecastUseRequiresConnectorResult": { "type": "boolean" },
+        "forecastUseRequiresEvidenceTrace": { "type": "boolean" }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalReleaseChecksOffline",
+        "integrationLiveFetchPartOfRelease",
+        "hostedRuntimeImplemented",
+        "allEvidenceClaimed",
+        "liveCalibrationClaimAllowed",
+        "forecastQualityClaimAllowed"
+      ],
+      "properties": {
+        "normalReleaseChecksOffline": { "type": "boolean" },
+        "integrationLiveFetchPartOfRelease": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "allEvidenceClaimed": { "type": "boolean" },
+        "liveCalibrationClaimAllowed": { "type": "boolean" },
+        "forecastQualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "sourceClass": {
+      "type": "string",
+      "enum": [
+        "official",
+        "public_dataset",
+        "internal_dataset",
+        "human_judgment",
+        "model_output",
+        "market_price",
+        "aggregate",
+        "other"
+      ]
+    },
+    "executionMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "implemented",
+        "enabledInNormalChecks",
+        "networkAccess",
+        "liveFetch",
+        "requiresExplicitFlag",
+        "command",
+        "resultStatus"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["fixture_replay", "integration_live_fetch", "hosted_live_fetch"]
+        },
+        "implemented": { "type": "boolean" },
+        "enabledInNormalChecks": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "requiresExplicitFlag": { "type": "boolean" },
+        "command": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "resultStatus": {
+          "type": "string",
+          "enum": ["succeeded_fixture_replay", "not_run_by_default", "not_implemented"]
+        }
+      }
+    }
+  }
+}

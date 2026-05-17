@@ -1,0 +1,49 @@
+{
+  "recalculationRunId": "recalculationrun-002",
+  "generatedAt": "2026-06-04T10:06:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "questionId": "question-601",
+  "triggerId": "recalculationtrigger-002",
+  "runStatus": "rejected",
+  "previousForecast": {
+    "forecastId": "forecast-801",
+    "evidencePacketId": "evidence-801",
+    "forecastedAt": "2026-06-02T18:20:00Z",
+    "modelVersion": "weather-logistics-auto-evidence-recalculation-fixture-v1",
+    "probability": 0.57
+  },
+  "updatedForecast": null,
+  "changedEvidence": {
+    "changedSourceRefs": [
+      {
+        "sourceId": "source-402",
+        "name": "Declared Warsaw operations event source",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/live/declared-warsaw-operations-outcome.json",
+        "retrievedAt": "2026-06-04T10:00:00Z",
+        "contentHash": "sha256-declared-outcome-source-402"
+      }
+    ],
+    "previousEvidencePacketId": "evidence-801",
+    "updatedEvidencePacketId": null,
+    "reasonForUpdate": "Rejected because resolution evidence arrived after close and after the outcome window."
+  },
+  "historyAppend": {
+    "historyId": "history-801",
+    "appendOnly": true,
+    "previousEntryState": "active",
+    "updatedEntryState": "none",
+    "supersedesForecastId": null,
+    "appendedForecastId": null
+  },
+  "rejectionReasons": [
+    "post_outcome_evidence",
+    "received_after_forecast_close",
+    "resolution_source_not_forecast_input"
+  ],
+  "warnings": [
+    "Post-outcome evidence must be used for resolution and scoring, not forecast-time recalculation.",
+    "Rejected recalculation does not append a new forecast state."
+  ]
+}

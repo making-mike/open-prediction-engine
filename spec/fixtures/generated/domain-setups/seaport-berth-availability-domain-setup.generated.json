@@ -1,0 +1,533 @@
+{
+  "domainSetupId": "domainsetup-002",
+  "generatedAt": "2026-06-06T15:10:00Z",
+  "domain": "seaport-berth-availability",
+  "displayName": "Seaport Berth Availability Candidate Setup",
+  "setupKind": "candidate_private_setup",
+  "maturityStatus": "candidate",
+  "domainPurpose": "Describe a private operational setup for forecasting whether a scheduled asset will fail to occupy capacity on a target date, leaving capacity potentially available.",
+  "questionTemplates": [
+    {
+      "templateId": "template-002",
+      "template": "Will {asset_identifier} fail to occupy {location} during {service_date}, leaving capacity available?",
+      "outputType": "binary",
+      "horizonLabels": [
+        "same-day",
+        "1-day",
+        "3-day"
+      ],
+      "requiredParameters": [
+        "asset_identifier",
+        "location",
+        "service_date"
+      ],
+      "resolvabilityRules": [
+        "The scheduled asset, location, and target date must be known before forecast close.",
+        "The capacity-occupation rule must state the exact time window and threshold.",
+        "Outcome evidence must be unavailable to the forecast-time method until after close."
+      ]
+    }
+  ],
+  "sourceRoles": [
+    {
+      "roleId": "sourcerole-004",
+      "roleKey": "vessel_schedule",
+      "displayName": "Scheduled Asset Plan",
+      "timing": "forecast_time",
+      "purpose": "Provides planned arrival, departure, asset identity, and requested capacity before forecast close.",
+      "requiredFields": [
+        {
+          "fieldName": "asset_identifier",
+          "fieldType": "id",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be stable across schedule and outcome data."
+          ]
+        },
+        {
+          "fieldName": "location",
+          "fieldType": "string",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must map to the requested capacity location."
+          ]
+        },
+        {
+          "fieldName": "scheduled_eta",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be available before forecast close."
+          ]
+        },
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must match the forecast target date."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "operator",
+          "fieldType": "string",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use only when allowed by the private source policy."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-005",
+      "roleKey": "historical_arrivals",
+      "displayName": "Historical Arrival Outcomes",
+      "timing": "historical_training",
+      "purpose": "Provides prior planned and actual capacity occupation outcomes for baseline and conditioned methods.",
+      "requiredFields": [
+        {
+          "fieldName": "asset_identifier",
+          "fieldType": "id",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must be joinable to schedule records when available."
+          ]
+        },
+        {
+          "fieldName": "scheduled_eta",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must predate the target forecast close."
+          ]
+        },
+        {
+          "fieldName": "actual_arrival_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "baseline",
+            "resolution"
+          ],
+          "validationRules": [
+            "Must be null-free for resolved rows."
+          ]
+        },
+        {
+          "fieldName": "occupied_capacity",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "baseline",
+            "scoring"
+          ],
+          "validationRules": [
+            "Must resolve to true or false."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "delay_minutes",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use non-negative values when available."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-006",
+      "roleKey": "berth_occupancy",
+      "displayName": "Capacity Occupancy Snapshot",
+      "timing": "forecast_time",
+      "purpose": "Provides current capacity status and constraints that may affect availability before forecast close.",
+      "requiredFields": [
+        {
+          "fieldName": "location",
+          "fieldType": "string",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must map to the requested capacity location."
+          ]
+        },
+        {
+          "fieldName": "observed_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be before forecast close."
+          ]
+        },
+        {
+          "fieldName": "capacity_available",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Must be a forecast-time status value."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "constraint_code",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use caller-defined constraint taxonomy."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-007",
+      "roleKey": "ais_position",
+      "displayName": "Position Or Movement Evidence",
+      "timing": "supporting",
+      "purpose": "Provides optional forecast-time movement or position signals when the private setup allows them.",
+      "requiredFields": [
+        {
+          "fieldName": "asset_identifier",
+          "fieldType": "id",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must map to the scheduled asset."
+          ]
+        },
+        {
+          "fieldName": "observed_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be before forecast close."
+          ]
+        },
+        {
+          "fieldName": "distance_to_location_km",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Must be non-negative."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "speed_knots",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use non-negative values when available."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "public_dataset",
+        "internal_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-008",
+      "roleKey": "marine_weather",
+      "displayName": "Weather Or Conditions Evidence",
+      "timing": "supporting",
+      "purpose": "Provides optional weather, sea state, or operational conditions for conditioned methods.",
+      "requiredFields": [
+        {
+          "fieldName": "location",
+          "fieldType": "string",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must map to the requested geography or route segment."
+          ]
+        },
+        {
+          "fieldName": "forecast_valid_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be relevant to the target window."
+          ]
+        },
+        {
+          "fieldName": "condition_severity",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use the setup-defined severity taxonomy."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "wind_speed",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use units declared by the source manifest."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "official",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-009",
+      "roleKey": "operations_outcome",
+      "displayName": "Post-Window Occupancy Outcome",
+      "timing": "resolution",
+      "purpose": "Provides post-window resolution evidence for whether the asset occupied the capacity slot.",
+      "requiredFields": [
+        {
+          "fieldName": "asset_identifier",
+          "fieldType": "id",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecasted asset."
+          ]
+        },
+        {
+          "fieldName": "location",
+          "fieldType": "string",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecasted location."
+          ]
+        },
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecasted service date."
+          ]
+        },
+        {
+          "fieldName": "occupied_capacity",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "resolution",
+            "scoring"
+          ],
+          "validationRules": [
+            "Must resolve to true or false."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "outcome_notes",
+          "fieldType": "string",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Use only sanitized outcome notes."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "internal_dataset",
+        "human_judgment"
+      ],
+      "forecastTimeAllowed": false
+    }
+  ],
+  "entityRequirements": [
+    {
+      "entityType": "asset",
+      "canonicalField": "asset_identifier",
+      "aliasPolicy": "user_provided_registry",
+      "required": true
+    },
+    {
+      "entityType": "location",
+      "canonicalField": "location",
+      "aliasPolicy": "agent_proposed_requires_confirmation",
+      "required": true
+    }
+  ],
+  "resolutionPolicy": {
+    "primarySourceRole": "operations_outcome",
+    "fallbackSourceRoles": [],
+    "yesOutcomeDefinition": "The target asset did not occupy the target capacity slot during the target window.",
+    "noOutcomeDefinition": "The target asset occupied the target capacity slot during the target window.",
+    "ambiguousIf": [
+      "Outcome records disagree about whether the asset occupied the slot.",
+      "The capacity slot or time window cannot be matched to the forecast question."
+    ],
+    "annulledIf": [
+      "The scheduled operation was canceled before forecast close.",
+      "The caller cannot define the target asset, location, or outcome window."
+    ],
+    "resolutionTiming": "Resolve only after the target capacity window closes.",
+    "scoringRule": "brier"
+  },
+  "scoringPolicy": {
+    "primaryScoringRule": "brier",
+    "baselineComparisonRequired": true,
+    "excludeAmbiguousOutcomes": true,
+    "excludeAnnulledOutcomes": true,
+    "reportingSlices": [
+      "domain",
+      "domain_setup",
+      "horizon",
+      "output_type",
+      "resolution_source",
+      "source_policy",
+      "method_class",
+      "coverage_period",
+      "sample_size"
+    ],
+    "minimumResolvedForecastsForQualityClaim": 200
+  },
+  "baselinePolicy": {
+    "baselineRequired": true,
+    "allowedBaselineMethods": [
+      "historical_frequency",
+      "conditioned_historical_frequency"
+    ],
+    "minimumComparableRows": 100,
+    "minimumPositiveOutcomes": 10,
+    "fallbackWhenInsufficientData": "needs_more_data"
+  },
+  "methodPolicy": {
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "historical_conditioned_frequency",
+      "deterministic_statistical",
+      "model_assisted",
+      "external_reference",
+      "ensemble"
+    ],
+    "selectionRule": "Start from the baseline, then enable stronger methods only after source manifests, field mappings, sample-size checks, leakage checks, and comparable benchmarks pass for this private setup.",
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "recalculationPolicy": {
+    "supported": true,
+    "triggerTypes": [
+      "source_file_changed",
+      "api_event",
+      "schedule",
+      "agent_submitted_evidence",
+      "manual"
+    ],
+    "appendHistoryRequired": true,
+    "postOutcomeEvidenceAllowed": false
+  },
+  "localImplementation": {
+    "forecastRunnable": false,
+    "generatedForecastRecords": false,
+    "cliForecastCommand": null,
+    "readSurfaceAvailable": false,
+    "implementationNotes": "Candidate setup is descriptive only until source manifests, field mappings, and checks land."
+  },
+  "claimPolicy": {
+    "allowedClaims": [
+      "Candidate private setup shape can be inspected by agents.",
+      "Required source roles, fields, method policy, and resolution policy are explicit."
+    ],
+    "blockedClaims": [
+      "Calibrated forecast quality claim",
+      "Benchmarked forecast quality claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal domain coverage claim"
+    ],
+    "minimumResolvedForecastsForCalibration": 200,
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "universalDomainClaimAllowed": false
+  },
+  "agentSetupGuidance": {
+    "setupQuestions": [
+      "What exact asset, location, target window, and outcome definition should be forecast?",
+      "Which private files, APIs, or databases can be used before forecast close?",
+      "Which source resolves the outcome after the target window and how is leakage prevented?"
+    ],
+    "requiredBeforeForecast": [
+      "A confirmed source manifest for schedule, historical outcome, and resolution data.",
+      "Field mappings for asset, location, scheduled time, actual outcome, and forecast close.",
+      "Enough comparable historical rows or an explicit needs-more-data decision."
+    ],
+    "safeFailureModes": [
+      "Return needs_more_data when required source roles are missing.",
+      "Treat agent-proposed aliases or mappings as pending until confirmed.",
+      "Block calibration, benchmark, production, and state-of-the-art claims for candidate setups."
+    ]
+  },
+  "warnings": [
+    "Candidate setup does not implement a runnable seaport forecasting model.",
+    "Private source mappings must be supplied or confirmed before forecasting.",
+    "No calibration, benchmark, production, or state-of-the-art claim is allowed for this setup."
+  ]
+}

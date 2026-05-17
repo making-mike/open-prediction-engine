@@ -1,0 +1,37 @@
+{
+  "requestId": "forecastrequest-999",
+  "questionText": "Will qualifying weather disrupt declared last-mile delivery operations in Warsaw during 2026-06-03?",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "outputType": "binary",
+  "horizonLabel": "1-day",
+  "requestedAction": "generate_forecast",
+  "dataMode": "auto",
+  "sourcePolicy": {
+    "sourcePolicyId": "sourcepolicy-999",
+    "allowedSourceClasses": ["public_dataset"],
+    "allowedConnectors": ["open_meteo_weather"],
+    "allowNetworkAccess": true,
+    "maxNetworkCalls": 1,
+    "maxCostUsd": 0,
+    "freshness": {
+      "maxSourceAgeHours": 24
+    },
+    "approvalRequired": false
+  },
+  "riskReview": {
+    "highImpact": false,
+    "paid": false,
+    "external": false,
+    "privacySensitive": false
+  },
+  "approval": {
+    "status": "approved"
+  },
+  "controls": {
+    "cancelRequested": false,
+    "timeoutSeconds": 30,
+    "maxCostUsd": 0
+  }
+}

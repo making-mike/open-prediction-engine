@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-intake-handoff.schema.json",
+  "title": "Source Intake Handoff",
+  "description": "Checked handoff from a local source-manifest build to source intake next actions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceIntakeHandoffId",
+    "generatedAt",
+    "case",
+    "domainSetupId",
+    "domain",
+    "sourceManifestBuildId",
+    "handoffStatus",
+    "nextAction",
+    "canEnterSourceIntake",
+    "forecastGenerationAllowed",
+    "sourceManifestId",
+    "fieldMappingId",
+    "sourceIntakeReportId",
+    "sourceIntakeStatus",
+    "mappingSummary",
+    "builderRejectionSummary",
+    "draftArtifacts",
+    "requiredActions",
+    "warnings"
+  ],
+  "properties": {
+    "sourceIntakeHandoffId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "case": {
+      "type": "string",
+      "enum": [
+        "unconfirmed_builder_draft",
+        "confirmed_builder_draft",
+        "insufficient_confirmed_builder_draft",
+        "contains_secret",
+        "unsupported_format",
+        "oversized",
+        "leakage"
+      ]
+    },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceManifestBuildId": { "$ref": "common.schema.json#/$defs/id" },
+    "handoffStatus": {
+      "type": "string",
+      "enum": [
+        "needs_mapping_confirmation",
+        "ready_for_method_gating",
+        "needs_more_data",
+        "blocked_by_builder_rejection"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "ask_mapping_confirmation",
+        "proceed_to_method_gating",
+        "collect_more_data",
+        "replace_rejected_sources"
+      ]
+    },
+    "canEnterSourceIntake": { "type": "boolean" },
+    "forecastGenerationAllowed": { "type": "boolean" },
+    "sourceManifestId": { "$ref": "#/$defs/nullableId" },
+    "fieldMappingId": { "$ref": "#/$defs/nullableId" },
+    "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+    "sourceIntakeStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["accepted", "accepted_partial", "needs_confirmation", "rejected"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "mappingSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalMappings",
+        "proposedMappingCount",
+        "confirmedMappingCount",
+        "agentInferredMappingCount",
+        "requiresConfirmation"
+      ],
+      "properties": {
+        "totalMappings": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "proposedMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "confirmedMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "agentInferredMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "requiresConfirmation": { "type": "boolean" }
+      }
+    },
+    "builderRejectionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rejectedInputCount", "reasonCodes"],
+      "properties": {
+        "rejectedInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "draftArtifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceManifestBuildPath",
+        "sourceManifestPath",
+        "fieldMappingPath",
+        "sourceIntakeReportPath"
+      ],
+      "properties": {
+        "sourceManifestBuildPath": { "$ref": "#/$defs/nullableString" },
+        "sourceManifestPath": { "$ref": "#/$defs/nullableString" },
+        "fieldMappingPath": { "$ref": "#/$defs/nullableString" },
+        "sourceIntakeReportPath": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "requiredActions": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        { "type": "null" }
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    }
+  }
+}

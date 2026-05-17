@@ -1,0 +1,80 @@
+{
+  "setupForecastRunId": "setupforecastrun-904",
+  "generatedAt": "2026-06-06T18:05:00Z",
+  "case": "rejected",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-004",
+  "fieldMappingId": "fieldmapping-004",
+  "sourceIntakeReportId": "sourceintakereport-004",
+  "sourceIntakeHandoffId": null,
+  "sourceHandoffMethodGateId": null,
+  "setupMethodDecisionId": "setupmethoddecision-004",
+  "setupBenchmarkGateId": null,
+  "intakeStatus": "rejected",
+  "methodDecisionStatus": "rejected",
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "runStatus": "blocked",
+  "executionMode": "not_started",
+  "sourceMode": "none",
+  "controls": {
+    "sourceIntakeValidated": true,
+    "methodDecisionValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "localLiveDraftConsumed": false,
+    "forecastArtifactsCreated": false
+  },
+  "recordBinding": {
+    "questionId": null,
+    "forecastId": null,
+    "evidencePacketId": null,
+    "historyId": null,
+    "forecastCardId": null,
+    "forecastBundleId": null
+  },
+  "outputs": {
+    "questionPath": null,
+    "featureSnapshotPath": null,
+    "evidencePacketPath": null,
+    "forecastArtifactPath": null,
+    "forecastHistoryPath": null
+  },
+  "blockedReasons": [
+    "all_required_fields_mapped",
+    "available_before_forecast_close",
+    "entity_scope_matches",
+    "forecast_generation_not_allowed",
+    "insufficient_comparable_rows",
+    "insufficient_positive_outcomes",
+    "method_decision_rejected",
+    "missing_historical_baseline",
+    "missing_required_fields",
+    "no_post_outcome_evidence_detected",
+    "not_available_before_forecast_close",
+    "not_baseline_source",
+    "post_close_or_unavailable_forecast_source",
+    "privacy_boundary_ok",
+    "rejected_required_mappings",
+    "source_contains_secrets",
+    "source_fresh_enough",
+    "source_intake_rejected",
+    "source_rejected",
+    "source_retrieved_after_forecast_close",
+    "type_mismatch",
+    "types_compatible"
+  ],
+  "nextActions": [
+    "Declare how role declared_operations_outcome will be resolved later.",
+    "Remove or replace rejected source manifestsource-009 for role weather_forecast.",
+    "Remove or replace rejected source manifestsource-010 for role historical_baseline.",
+    "Resolve rejected source-intake checks before selecting a forecast method."
+  ],
+  "warnings": [
+    "Setup-aware execution is fixture-mode only.",
+    "Generated forecast uses the selected baseline method.",
+    "Ignored local live drafts are not consumed by this milestone."
+  ]
+}

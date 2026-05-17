@@ -1,0 +1,561 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/evidence-trace.schema.json",
+  "title": "Evidence Trace",
+  "description": "Compact read-only trace linking a forecast to its evidence plan, source set, connector registry, connector results, and gathered source records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidenceTraceId",
+    "forecastId",
+    "questionId",
+    "domain",
+    "traceStatus",
+    "generatedAt",
+    "recordBinding",
+    "sourcePolicy",
+    "connectorPolicyChecks",
+    "connectorRegistry",
+    "sourceConnectorResults",
+    "gatheredSourceRecords",
+    "provenanceSummary",
+    "controls",
+    "warnings",
+    "links"
+  ],
+  "properties": {
+    "evidenceTraceId": { "$ref": "common.schema.json#/$defs/id" },
+    "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "traceStatus": {
+      "type": "string",
+      "enum": ["complete_fixture_trace"]
+    },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "pipelineRunId",
+        "questionId",
+        "forecastId",
+        "forecastArtifactId",
+        "evidencePacketId",
+        "evidencePlanId",
+        "evidenceSourceSetId",
+        "sourcePolicyId",
+        "sourceConnectorRegistryId",
+        "sourceConnectorResultSetId",
+        "resolutionRecordId",
+        "scoringReportId"
+      ],
+      "properties": {
+        "requestId": { "$ref": "common.schema.json#/$defs/id" },
+        "pipelineRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastArtifactId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceSourceSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionRecordId": { "$ref": "#/$defs/nullableId" },
+        "scoringReportId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "sourcePolicy": { "$ref": "source-policy.schema.json" },
+    "connectorPolicyChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceConnectorRegistryId",
+        "expectedSourceConnectorResultSetId",
+        "requestedConnectors",
+        "registeredConnectors",
+        "unregisteredConnectors",
+        "unsupportedConnectors",
+        "resolutionOnlyConnectors",
+        "forecastTimeConnectors",
+        "allRequestedConnectorsRegistered"
+      ],
+      "properties": {
+        "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "expectedSourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestedConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "registeredConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "unregisteredConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "unsupportedConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "resolutionOnlyConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "forecastTimeConnectors": { "$ref": "#/$defs/connectorKeys" },
+        "allRequestedConnectorsRegistered": { "type": "boolean" }
+      }
+    },
+    "connectorRegistry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceConnectorRegistryId",
+        "defaultExecutionMode",
+        "connectors",
+        "unsupportedSourceClasses"
+      ],
+      "properties": {
+        "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "defaultExecutionMode": {
+          "type": "string",
+          "enum": ["fixture_replay"]
+        },
+        "connectors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/connectorSummary" }
+        },
+        "unsupportedSourceClasses": { "$ref": "#/$defs/sourceClasses" }
+      }
+    },
+    "sourceConnectorResults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceConnectorResultSetId",
+        "usedResults",
+        "unavailableOrSkippedResults"
+      ],
+      "properties": {
+        "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "usedResults": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/connectorResultSummary" }
+        },
+        "unavailableOrSkippedResults": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/connectorResultSummary" }
+        }
+      }
+    },
+    "gatheredSourceRecords": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/sourceRecordSummary" }
+    },
+    "provenanceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceCount",
+        "connectorsUsed",
+        "sourceClassesUsed",
+        "unavailableEvidenceCount",
+        "allEvidenceClaimed"
+      ],
+      "properties": {
+        "sourceCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "connectorsUsed": { "$ref": "#/$defs/connectorKeys" },
+        "sourceClassesUsed": { "$ref": "#/$defs/sourceClasses" },
+        "unavailableEvidenceCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allEvidenceClaimed": { "type": "boolean" }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnly",
+        "networkAccess",
+        "liveFetch",
+        "effectfulGeneration",
+        "rawStackTracesExposed",
+        "promptVisibleCredentialsAccepted"
+      ],
+      "properties": {
+        "readOnly": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" },
+        "rawStackTracesExposed": { "type": "boolean" },
+        "promptVisibleCredentialsAccepted": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastCard",
+        "forecastBundle",
+        "forecastArtifact",
+        "evidencePacket",
+        "evidencePlan",
+        "evidenceSourceSet",
+        "sourceConnectorRegistry",
+        "sourceConnectorResultSet"
+      ],
+      "properties": {
+        "forecastCard": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastBundle": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastArtifact": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacket": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePlan": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceSourceSet": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorRegistry": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceConnectorResultSet": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "connectorKeys": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 80
+      }
+    },
+    "sourceClasses": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "enum": [
+          "official",
+          "public_dataset",
+          "internal_dataset",
+          "human_judgment",
+          "model_output",
+          "market_price",
+          "aggregate",
+          "other"
+        ]
+      }
+    },
+    "connectorSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectorId",
+        "connectorKey",
+        "status",
+        "sourceClass",
+        "allowedFor",
+        "allowedBySourcePolicy",
+        "retrievalMode",
+        "networkAccessInNormalChecks",
+        "liveFetchRequiresApproval",
+        "acceptsPromptVisibleCredentials",
+        "rawStackTracesExposed",
+        "allEvidenceClaimed",
+        "risk"
+      ],
+      "properties": {
+        "connectorId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorKey": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "enabled_fixture_replay",
+            "planned_live_gated",
+            "resolution_only",
+            "unsupported"
+          ]
+        },
+        "sourceClass": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "allowedFor": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "allowedBySourcePolicy": { "type": "boolean" },
+        "retrievalMode": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "networkAccessInNormalChecks": { "type": "boolean" },
+        "liveFetchRequiresApproval": { "type": "boolean" },
+        "acceptsPromptVisibleCredentials": { "type": "boolean" },
+        "rawStackTracesExposed": { "type": "boolean" },
+        "allEvidenceClaimed": { "type": "boolean" },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["effectful", "paid", "privacySensitive"],
+          "properties": {
+            "effectful": { "type": "boolean" },
+            "paid": { "type": "boolean" },
+            "privacySensitive": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "connectorResultSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectorResultId",
+        "connectorKey",
+        "sourceClass",
+        "sourceRole",
+        "resultStatus",
+        "plannedIntentIds",
+        "unavailableEvidence",
+        "retrievalDiagnostics",
+        "provenance",
+        "controls"
+      ],
+      "properties": {
+        "connectorResultId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorKey": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "sourceClass": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "sourceRole": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "resultStatus": {
+          "type": "string",
+          "enum": [
+            "succeeded_fixture_replay",
+            "skipped_resolution_only",
+            "unsupported",
+            "unavailable"
+          ]
+        },
+        "plannedIntentIds": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "unavailableEvidence": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "reason", "agentNextAction"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 120
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 240
+              },
+              "agentNextAction": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 240
+              }
+            }
+          }
+        },
+        "retrievalDiagnostics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["diagnosticLevel", "publicMessage", "rawStackTraceExposed"],
+          "properties": {
+            "diagnosticLevel": {
+              "type": "string",
+              "enum": ["none", "sanitized"]
+            },
+            "publicMessage": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            },
+            "rawStackTraceExposed": { "type": "boolean" }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["retrievedAt", "storesContentHash", "allEvidenceClaimed"],
+          "properties": {
+            "retrievedAt": {
+              "oneOf": [
+                { "$ref": "common.schema.json#/$defs/timestamp" },
+                { "type": "null" }
+              ]
+            },
+            "storesContentHash": { "type": "boolean" },
+            "allEvidenceClaimed": { "type": "boolean" }
+          }
+        },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "networkAccess",
+            "liveFetch",
+            "effectfulGeneration",
+            "credentialUsed",
+            "promptVisibleCredentialAccepted"
+          ],
+          "properties": {
+            "networkAccess": { "type": "boolean" },
+            "liveFetch": { "type": "boolean" },
+            "effectfulGeneration": { "type": "boolean" },
+            "credentialUsed": { "type": "boolean" },
+            "promptVisibleCredentialAccepted": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "sourceRecordSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordId",
+        "sourceRole",
+        "connector",
+        "connectorBinding",
+        "plannedIntentIds",
+        "sourceRef",
+        "sourceQuality",
+        "normalizedFieldNames"
+      ],
+      "properties": {
+        "recordId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceRole": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "connector": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "connectorBinding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceConnectorRegistryId",
+            "connectorId",
+            "sourceConnectorResultSetId",
+            "connectorResultId"
+          ],
+          "properties": {
+            "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+            "connectorId": { "$ref": "common.schema.json#/$defs/id" },
+            "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+            "connectorResultId": { "$ref": "common.schema.json#/$defs/id" }
+          }
+        },
+        "plannedIntentIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "sourceRef": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourceId", "name", "sourceType", "uri", "retrievedAt", "contentHash"],
+          "properties": {
+            "sourceId": { "$ref": "common.schema.json#/$defs/id" },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "sourceType": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 80
+            },
+            "uri": {
+              "oneOf": [
+                { "$ref": "common.schema.json#/$defs/uri" },
+                { "type": "null" }
+              ]
+            },
+            "retrievedAt": {
+              "oneOf": [
+                { "$ref": "common.schema.json#/$defs/timestamp" },
+                { "type": "null" }
+              ]
+            },
+            "contentHash": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 8,
+                  "maxLength": 128
+                },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        "sourceQuality": {
+          "type": "object"
+        },
+        "normalizedFieldNames": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 40,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        }
+      }
+    }
+  }
+}

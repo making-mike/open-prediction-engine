@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-handoff-method-gate.schema.json",
+  "title": "Source Handoff Method Gate",
+  "description": "Summary of setup benchmark and method decision results for a source-builder handoff, without forecast execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceHandoffMethodGateId",
+    "generatedAt",
+    "case",
+    "domainSetupId",
+    "domain",
+    "sourceIntakeHandoffId",
+    "sourceIntakeReportId",
+    "setupBenchmarkGateId",
+    "setupMethodDecisionId",
+    "handoffStatus",
+    "handoffNextAction",
+    "methodGateStatus",
+    "nextAction",
+    "sourceIntakeStatus",
+    "selectedMethodClass",
+    "selectedForecastMode",
+    "forecastArtifactsCreated",
+    "eligibilitySummary",
+    "requiredActions",
+    "warnings"
+  ],
+  "properties": {
+    "sourceHandoffMethodGateId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "case": {
+      "type": "string",
+      "enum": [
+        "unconfirmed_builder_draft",
+        "confirmed_builder_draft",
+        "insufficient_confirmed_builder_draft",
+        "contains_secret",
+        "unsupported_format",
+        "oversized",
+        "leakage"
+      ]
+    },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceIntakeHandoffId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+    "setupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+    "setupMethodDecisionId": { "$ref": "#/$defs/nullableId" },
+    "handoffStatus": {
+      "type": "string",
+      "enum": [
+        "needs_mapping_confirmation",
+        "ready_for_method_gating",
+        "needs_more_data",
+        "blocked_by_builder_rejection"
+      ]
+    },
+    "handoffNextAction": {
+      "type": "string",
+      "enum": [
+        "ask_mapping_confirmation",
+        "proceed_to_method_gating",
+        "collect_more_data",
+        "replace_rejected_sources"
+      ]
+    },
+    "methodGateStatus": {
+      "type": "string",
+      "enum": [
+        "not_entered_source_intake",
+        "needs_mapping_confirmation",
+        "needs_more_data",
+        "method_selected",
+        "baseline_selected",
+        "rejected"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "ask_mapping_confirmation",
+        "collect_more_data",
+        "replace_rejected_sources",
+        "await_explicit_setup_forecast_execution",
+        "review_method_rejection"
+      ]
+    },
+    "sourceIntakeStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["accepted", "accepted_partial", "needs_confirmation", "rejected"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "selectedMethodClass": {
+      "type": "string",
+      "enum": [
+        "historical_baseline",
+        "historical_conditioned_frequency",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "none"
+      ]
+    },
+    "selectedForecastMode": {
+      "type": "string",
+      "enum": [
+        "baseline_only",
+        "historical_conditioned",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "blocked"
+      ]
+    },
+    "forecastArtifactsCreated": { "type": "boolean" },
+    "eligibilitySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "benchmarkGateStatus",
+        "benchmarkExecutionAllowed",
+        "methodDecisionStatus",
+        "baselineFinalEligibilityStatus",
+        "deterministicFinalEligibilityStatus",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "benchmarkGateStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["approved_provisional", "blocked"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "benchmarkExecutionAllowed": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "null" }
+          ]
+        },
+        "methodDecisionStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["method_selected", "baseline_selected", "needs_confirmation", "rejected"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "baselineFinalEligibilityStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["eligible", "needs_confirmation", "rejected"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "deterministicFinalEligibilityStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["eligible", "needs_confirmation", "rejected"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "qualityClaimAllowed": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "requiredActions": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    }
+  }
+}

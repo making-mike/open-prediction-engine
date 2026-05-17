@@ -33,15 +33,27 @@ python3 scripts/release_check.py
 python3 scripts/ope.py release-check
 ```
 
-The current checks are dependency-free. They parse JSON, validate schema-bound fixtures, smoke-test the reusable contract validator, regenerate fixture reports in check mode, verify scoring semantics, check the fixture evidence loop, resolve the fixture-mode live outcome, check and resolve the local forecast pipeline scaffold, check the release manifest and CI workflow, run benchmark anti-leakage checks, validate read-only record access and read-surface contracts, validate controlled request intake, and run hardening guardrails.
+The current checks are dependency-free. They parse JSON, validate schema-bound fixtures, smoke-test the reusable contract validator, regenerate fixture reports in check mode, verify scoring semantics, check the fixture evidence loop, resolve the fixture-mode live outcome, check historical-only baseline forecasting, check setup benchmark gates, check setup-aware deterministic and baseline forecast execution, check explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflow boundaries, private source adapter capability declarations, outcome matrix, and intake bridge, check append-only recalculation history and post-outcome evidence rejection, check and resolve the local forecast pipeline scaffold, check source connector boundaries, check the live connector readiness gate without network access, check ignored local live-capture workspace guardrails, check domain setup records and candidate claim boundaries, check local source manifest builder boundaries, check source-builder to source-intake handoff boundaries, check source-handoff method-gate boundaries, check source manifest and field mapping intake boundaries, check setup-aware method decisions, check agent adapter envelope examples, the local agent-call dispatcher, the local forecast-run summary, intake matrix, and runbook, the local MCP stdio adapter scaffold, and the protocol mapping for future adapters, check the release manifest and CI workflow, run benchmark anti-leakage checks, validate read-only record access and read-surface contracts, validate controlled request intake, and run hardening guardrails.
 
-Read-only access includes forecast artifacts, track records, synthetic forecast bundles, and compact forecast cards assembled from existing public generated records.
+Read-only access includes forecast artifacts, track records, synthetic forecast bundles, compact forecast cards, transport-neutral agent envelope examples, the forecast-run summary, intake matrix, and runbook, the adapter protocol map, local MCP tool results, and one-operation agent-call responses assembled from existing public generated records.
 
 ## Development Rules
 
 - Keep public claims scoped to implemented records and checks.
 - Do not add network calls to normal checks.
 - Do not commit raw live fetches; `.ope/live/` is ignored for local experiments.
+- Keep live connector probes opt-in with `python3 scripts/ope.py live-readiness --live --service-date YYYY-MM-DD`.
+- Treat `.ope/live/` source-set drafts as local development inputs, not public forecast evidence.
+- Treat source-builder outputs as draft local development inputs until source intake and setup gates accept them.
+- Treat source-handoff records as next-action guidance, not forecast outputs.
+- Treat source-handoff method gates as non-generating setup decisions until setup forecast execution is explicitly run.
+- Treat source-handoff forecast execution as fixture-mode only until a service runtime exists.
+- Treat source-handoff resolution as fixture scoring only; one resolved handoff forecast is not a quality or calibration claim.
+- Treat source-handoff setup runbooks as checked local guidance, not broad private source ingestion support.
+- Treat private setup workflows as contracts; generic manual upload, private API, and database runtimes remain unimplemented until a future runtime lands.
+- Treat private source adapter capabilities as declarations only; they must not imply live fetching, credential access, or arbitrary private schema parsing.
+- Treat private source adapter outcome matrices as next-action guidance only; they must not create source, forecast, score, or credential artifacts.
+- Treat private source adapter bridges as routing guidance only; they must not execute source reads or create forecast and scoring artifacts.
 - Add or update fixtures when changing schemas, scoring, lifecycle behavior, request intake, or read access.
 - Prefer small, deterministic scripts over long-running services until the runtime decision changes.
 
@@ -53,6 +65,36 @@ Refresh generated reports only when source fixtures or scoring logic intentional
 python3 scripts/generate_fixture_reports.py --write
 python3 scripts/run_fixture_loop.py --write
 python3 scripts/resolve_live_weather_outcome.py --write
+python3 scripts/plan_auto_evidence.py --write
+python3 scripts/gather_auto_evidence.py --write
+python3 scripts/generate_source_connectors.py --write
+python3 scripts/generate_live_connector_readiness.py --write
+python3 scripts/generate_domain_setups.py --write
+python3 scripts/build_source_manifest.py --write
+python3 scripts/generate_source_intake_handoff.py --write
+python3 scripts/generate_source_handoff_method_gate.py --write
+python3 scripts/generate_source_intake.py --write
+python3 scripts/run_auto_evidence_forecast.py --write
+python3 scripts/resolve_auto_evidence_outcome.py --write
+python3 scripts/run_historical_baseline_forecast.py --write
+python3 scripts/compare_forecasting_methods.py --write
+python3 scripts/select_forecasting_method.py --write
+python3 scripts/generate_setup_benchmark_gate.py --write
+python3 scripts/select_setup_method.py --write
+python3 scripts/run_setup_forecast.py --write
+python3 scripts/run_source_handoff_forecast.py --write
+python3 scripts/resolve_source_handoff_outcome.py --write
+python3 scripts/generate_source_handoff_setup_runbook.py --write
+python3 scripts/generate_private_setup_workflow.py --write
+python3 scripts/generate_private_source_adapter_capabilities.py --write
+python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
+python3 scripts/generate_private_source_adapter_intake_bridge.py --write
+python3 scripts/generate_recalculation_history.py --write
+python3 scripts/run_agent_forecast.py --write
+python3 scripts/generate_forecast_run_intake_matrix.py --write
+python3 scripts/generate_agent_forecast_runbook.py --write
+python3 scripts/build_agent_adapter_fixtures.py --write
+python3 scripts/generate_agent_adapter_protocol_map.py --write
 python3 scripts/run_forecast_pipeline.py --write
 python3 scripts/resolve_pipeline_outcome.py --write
 python3 scripts/generate_record_index.py --write
@@ -76,6 +118,7 @@ Check the deterministic fixture-mode pipeline:
 ```bash
 python3 scripts/ope.py pipeline
 python3 scripts/ope.py resolve-pipeline
+python3 scripts/ope.py setup-forecast
 ```
 
 ## CI

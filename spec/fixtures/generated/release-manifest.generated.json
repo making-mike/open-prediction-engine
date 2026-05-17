@@ -25,42 +25,86 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 16,
+    "schemaFileCount": 48,
     "schemaFiles": [
+      "spec/agent-adapter-protocol-map.schema.json",
+      "spec/agent-envelope.schema.json",
+      "spec/agent-forecast-runbook.schema.json",
       "spec/aggregate-forecast.schema.json",
       "spec/benchmark-run.schema.json",
       "spec/calibration-summary.schema.json",
       "spec/common.schema.json",
+      "spec/domain-setup.schema.json",
+      "spec/evidence-gathering-plan.schema.json",
       "spec/evidence-packet.schema.json",
+      "spec/evidence-source-set.schema.json",
+      "spec/evidence-trace.schema.json",
+      "spec/field-mapping.schema.json",
       "spec/forecast-artifact.schema.json",
       "spec/forecast-card.schema.json",
       "spec/forecast-history.schema.json",
       "spec/forecast-question.schema.json",
       "spec/forecast-request.schema.json",
+      "spec/forecast-run-intake-matrix.schema.json",
+      "spec/forecast-run-summary.schema.json",
+      "spec/live-connector-readiness.schema.json",
+      "spec/method-comparison.schema.json",
+      "spec/method-registry.schema.json",
+      "spec/method-selection.schema.json",
       "spec/pipeline-run.schema.json",
+      "spec/private-setup-workflow.schema.json",
+      "spec/private-source-adapter-capability.schema.json",
+      "spec/private-source-adapter-intake-bridge.schema.json",
+      "spec/private-source-adapter-outcome-matrix.schema.json",
+      "spec/recalculation-run.schema.json",
+      "spec/recalculation-trigger.schema.json",
       "spec/record-index.schema.json",
       "spec/release-manifest.schema.json",
       "spec/resolution-record.schema.json",
       "spec/scoring-report.schema.json",
+      "spec/setup-benchmark-gate.schema.json",
+      "spec/setup-forecast-run.schema.json",
+      "spec/setup-method-decision.schema.json",
+      "spec/source-connector-registry.schema.json",
+      "spec/source-connector-result-set.schema.json",
+      "spec/source-handoff-method-gate.schema.json",
+      "spec/source-handoff-setup-runbook.schema.json",
+      "spec/source-intake-handoff.schema.json",
+      "spec/source-intake-report.schema.json",
+      "spec/source-manifest-build.schema.json",
+      "spec/source-manifest.schema.json",
+      "spec/source-policy.schema.json",
       "spec/track-record-report.schema.json"
     ]
   },
   "readSurfaces": [
     {
+      "recordType": "evidence-source-set",
+      "count": 1
+    },
+    {
+      "recordType": "evidence-trace",
+      "count": 1
+    },
+    {
       "recordType": "forecast-artifact",
-      "count": 5
+      "count": 11
     },
     {
       "recordType": "forecast-bundle",
-      "count": 5
+      "count": 11
     },
     {
       "recordType": "forecast-card",
-      "count": 5
+      "count": 11
+    },
+    {
+      "recordType": "source-connector-results",
+      "count": 1
     },
     {
       "recordType": "track-record",
-      "count": 4
+      "count": 6
     }
   ],
   "claimBoundaries": {
@@ -68,12 +112,28 @@
     "minimumCalibrationSampleSize": 30,
     "resolvedPipelineOutcomes": 1,
     "resolvedLiveOutcomes": 1,
+    "resolvedAutoEvidenceOutcomes": 1,
+    "resolvedSourceHandoffOutcomes": 1,
     "qualityClaimStatus": "not_enough_resolved_comparable_outcomes"
   },
   "nonGoals": [
     "network_api",
     "hosted_service",
+    "production_agent_adapter_runtime",
     "production_live_data_workflow",
+    "production_auto_evidence_fetching",
+    "production_forecast_use_of_live_connector_results",
+    "public_forecast_use_of_local_live_drafts",
+    "public_forecast_use_of_unapproved_source_builder_drafts",
+    "public_forecast_use_of_unapproved_source_handoff_drafts",
+    "generic_private_api_database_runtime",
+    "generic_manual_upload_runtime",
+    "private_source_adapter_execution",
+    "private_source_adapter_outcome_execution",
+    "private_source_adapter_bridge_execution",
+    "integration_live_fetch_in_release_checks",
+    "local_live_capture_in_release_checks",
+    "unbounded_web_crawling",
     "live_calibration_claim",
     "universal_prediction_oracle"
   ]

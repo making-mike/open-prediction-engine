@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/recalculation-trigger.schema.json",
+  "title": "Recalculation Trigger",
+  "description": "Event that may append a new forecast-history state before outcome resolution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recalculationTriggerId",
+    "createdAt",
+    "domainSetupId",
+    "domain",
+    "questionId",
+    "previousForecastId",
+    "previousEvidencePacketId",
+    "triggerType",
+    "triggerStatus",
+    "sourceRole",
+    "forecastCloseTime",
+    "receivedAt",
+    "availableBeforeForecastClose",
+    "postOutcomeEvidence",
+    "changedSourceRefs",
+    "triggerReason",
+    "guardrailReasons"
+  ],
+  "properties": {
+    "recalculationTriggerId": { "$ref": "common.schema.json#/$defs/id" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "questionId": { "$ref": "common.schema.json#/$defs/id" },
+    "previousForecastId": { "$ref": "common.schema.json#/$defs/id" },
+    "previousEvidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+    "triggerType": {
+      "type": "string",
+      "enum": ["source_file_changed", "api_event", "schedule", "agent_submitted_evidence", "manual"]
+    },
+    "triggerStatus": {
+      "type": "string",
+      "enum": ["accepted", "rejected"]
+    },
+    "sourceRole": {
+      "type": "string",
+      "enum": ["forecast_input", "baseline_input", "supporting_evidence", "resolution_primary", "resolution_support"]
+    },
+    "forecastCloseTime": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "receivedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "availableBeforeForecastClose": { "type": "boolean" },
+    "postOutcomeEvidence": { "type": "boolean" },
+    "changedSourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+    },
+    "triggerReason": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "guardrailReasons": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    }
+  }
+}

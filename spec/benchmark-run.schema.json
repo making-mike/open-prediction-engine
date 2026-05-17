@@ -10,7 +10,9 @@
     "startedAt",
     "status",
     "questionIds",
+    "methodId",
     "model",
+    "sourcePolicyId",
     "retrievalWindow",
     "leakageControls"
   ],
@@ -27,7 +29,9 @@
       "minItems": 1,
       "items": { "$ref": "common.schema.json#/$defs/id" }
     },
+    "methodId": { "$ref": "common.schema.json#/$defs/id" },
     "model": { "$ref": "common.schema.json#/$defs/modelIdentity" },
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
     "retrievalWindow": {
       "type": "object",
       "additionalProperties": false,
@@ -47,11 +51,13 @@
       "required": [
         "knownAnswerExcluded",
         "postOutcomeDataBlocked",
+        "sourceContaminationBlocked",
         "sourceTimestampsRecorded"
       ],
       "properties": {
         "knownAnswerExcluded": { "type": "boolean" },
         "postOutcomeDataBlocked": { "type": "boolean" },
+        "sourceContaminationBlocked": { "type": "boolean" },
         "sourceTimestampsRecorded": { "type": "boolean" },
         "auditNotes": {
           "type": "string",

@@ -1,0 +1,126 @@
+{
+  "sourceManifestId": "sourcemanifest-002",
+  "createdAt": "2026-06-02T10:00:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "forecastParameters": {
+    "questionTemplateId": "template-001",
+    "horizonLabel": "1-day",
+    "forecastCloseTime": "2026-06-02T12:00:00Z",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "assetIdentifier": null,
+    "location": null,
+    "targetWindow": null
+  },
+  "sources": [
+    {
+      "sourceId": "manifestsource-004",
+      "sourceRole": "historical_baseline",
+      "displayName": "Historical Delivery Baseline Only",
+      "connectorType": "local_file",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://fixtures/weather-logistics/history-baseline-only.csv",
+      "contentHash": "hash-history-partial-001",
+      "rowCount": 80,
+      "positiveOutcomeCount": 10,
+      "retrieval": {
+        "retrievedAt": "2026-06-01T18:00:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-01-01",
+        "serviceDateEnd": "2026-06-01",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 80,
+          "nonNullCount": 80,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "geography",
+          "observedType": "string",
+          "sampleCount": 80,
+          "nonNullCount": 80,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disruption_observed",
+          "observedType": "boolean",
+          "sampleCount": 80,
+          "nonNullCount": 80,
+          "exampleValuesStored": false
+        }
+      ]
+    },
+    {
+      "sourceId": "manifestsource-005",
+      "sourceRole": "declared_operations_outcome",
+      "displayName": "Declared Outcome Placeholder",
+      "connectorType": "manual_upload",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://fixtures/weather-logistics/outcome-placeholder.csv",
+      "contentHash": "hash-outcome-partial-001",
+      "rowCount": 1,
+      "positiveOutcomeCount": 1,
+      "retrieval": {
+        "retrievedAt": null,
+        "availableBeforeForecastClose": false,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "geography",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disruption_observed",
+          "observedType": "boolean",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ]
+    }
+  ]
+}

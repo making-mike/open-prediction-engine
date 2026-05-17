@@ -1,0 +1,226 @@
+{
+  "sourceManifestId": "sourcemanifestdraft-103",
+  "createdAt": "2026-06-02T10:15:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "forecastParameters": {
+    "questionTemplateId": "template-001",
+    "horizonLabel": "1-day",
+    "forecastCloseTime": "2026-06-02T12:00:00Z",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "assetIdentifier": null,
+    "location": null,
+    "targetWindow": null
+  },
+  "sources": [
+    {
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "displayName": "Weather Forecast",
+      "connectorType": "local_file",
+      "sourceClass": "public_dataset",
+      "sourceRef": "local://spec/fixtures/local-source-files/weather-forecast.json",
+      "contentHash": "dc74ecbb77717ddfda3f5da0a4f7eae106a874c5da2daacbfb94ecdcf5af134b",
+      "rowCount": 1,
+      "positiveOutcomeCount": null,
+      "retrieval": {
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 24
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "public",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "city",
+          "observedType": "categorical",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "loaded_at",
+          "observedType": "date_time",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "rain_mm",
+          "observedType": "integer",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "source_status",
+          "observedType": "categorical",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ],
+      "featureSummary": {
+        "numericValues": [
+          {
+            "fieldName": "forecast_daily_precipitation_mm",
+            "value": 24.0,
+            "unit": "mm"
+          }
+        ],
+        "categoricalValues": [
+          {
+            "fieldName": "source_status",
+            "value": "current"
+          }
+        ]
+      }
+    },
+    {
+      "sourceId": "localsource-002",
+      "sourceRole": "historical_baseline",
+      "displayName": "Historical Baseline",
+      "connectorType": "local_file",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://spec/fixtures/local-source-files/tiny-history.csv",
+      "contentHash": "7ab11502dfe1f27df690ab802db5cbfb5d407fd77308a5ac13c820aea7fd79e9",
+      "rowCount": 6,
+      "positiveOutcomeCount": 3,
+      "retrieval": {
+        "retrievedAt": "2026-06-02T10:15:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-05-27",
+        "serviceDateEnd": "2026-06-01",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "service_date",
+          "observedType": "date",
+          "sampleCount": 6,
+          "nonNullCount": 6,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "geography",
+          "observedType": "categorical",
+          "sampleCount": 6,
+          "nonNullCount": 6,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disrupted",
+          "observedType": "boolean",
+          "sampleCount": 6,
+          "nonNullCount": 6,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "precipitation_mm",
+          "observedType": "number",
+          "sampleCount": 6,
+          "nonNullCount": 6,
+          "exampleValuesStored": false
+        }
+      ],
+      "featureSummary": {
+        "numericValues": [
+          {
+            "fieldName": "precipitation_mm",
+            "value": 17.2,
+            "unit": "mm"
+          }
+        ],
+        "categoricalValues": []
+      }
+    },
+    {
+      "sourceId": "localsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "displayName": "Declared Operations Outcome",
+      "connectorType": "local_file",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://spec/fixtures/local-source-files/outcome.csv",
+      "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39",
+      "rowCount": 1,
+      "positiveOutcomeCount": 1,
+      "retrieval": {
+        "retrievedAt": null,
+        "availableBeforeForecastClose": false,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "city",
+          "observedType": "categorical",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disrupted",
+          "observedType": "boolean",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ]
+    }
+  ]
+}

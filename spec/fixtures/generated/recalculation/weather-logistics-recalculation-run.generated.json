@@ -1,0 +1,52 @@
+{
+  "recalculationRunId": "recalculationrun-001",
+  "generatedAt": "2026-06-02T18:21:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "questionId": "question-601",
+  "triggerId": "recalculationtrigger-001",
+  "runStatus": "updated",
+  "previousForecast": {
+    "forecastId": "forecast-602",
+    "evidencePacketId": "evidence-601",
+    "forecastedAt": "2026-06-02T10:00:00Z",
+    "modelVersion": "weather-logistics-auto-evidence-fixture-v0",
+    "probability": 0.41
+  },
+  "updatedForecast": {
+    "forecastId": "forecast-801",
+    "evidencePacketId": "evidence-801",
+    "forecastedAt": "2026-06-02T18:20:00Z",
+    "modelVersion": "weather-logistics-auto-evidence-recalculation-fixture-v1",
+    "probability": 0.57
+  },
+  "changedEvidence": {
+    "changedSourceRefs": [
+      {
+        "sourceId": "source-801",
+        "name": "Updated Open-Meteo weather forecast for Warsaw",
+        "sourceType": "public_dataset",
+        "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+        "retrievedAt": "2026-06-02T18:00:00Z",
+        "contentHash": "sha256-updated-weather-source-801"
+      }
+    ],
+    "previousEvidencePacketId": "evidence-601",
+    "updatedEvidencePacketId": "evidence-801",
+    "reasonForUpdate": "Updated forecast-time weather evidence increased daily precipitation before forecast close."
+  },
+  "historyAppend": {
+    "historyId": "history-801",
+    "appendOnly": true,
+    "previousEntryState": "superseded",
+    "updatedEntryState": "active",
+    "supersedesForecastId": "forecast-602",
+    "appendedForecastId": "forecast-801"
+  },
+  "rejectionReasons": [],
+  "warnings": [
+    "Recalculation is fixture-safe and append-only.",
+    "Updated probability remains provisional and unresolved.",
+    "No post-outcome evidence was used in this recalculation."
+  ]
+}

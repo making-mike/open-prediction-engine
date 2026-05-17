@@ -1,0 +1,110 @@
+{
+  "methodSelectionId": "methodselection-001",
+  "generatedAt": "2026-06-06T12:05:00Z",
+  "requestId": "forecastrequest-007",
+  "methodRegistryId": "methodregistry-001",
+  "domain": "weather-logistics",
+  "horizonBucket": "1-day",
+  "outputType": "binary",
+  "sourcePolicyId": "sourcepolicy-019",
+  "selectionStatus": "fallback_selected",
+  "selectedMethodId": "method-100",
+  "selectedMethodClass": "baseline",
+  "selectedModel": {
+    "modelId": "model-100",
+    "version": "historical-frequency-fixture-v0",
+    "trainingCutoff": "2026-05-31T23:59:59Z",
+    "configurationHash": "sha256-baseline-method-001"
+  },
+  "fallbackMethodId": "method-100",
+  "candidateMethods": [
+    {
+      "methodId": "method-101",
+      "methodClass": "deterministic_statistical",
+      "status": "enabled",
+      "eligibilityStatus": "rejected",
+      "benchmarkStatus": "benchmarked",
+      "sampleSize": 1,
+      "rejectionReasons": [
+        "benchmark_source_policy_mismatch",
+        "benchmark_sample_below_threshold"
+      ],
+      "candidateBenchmarkRunId": "benchmarkrun-001",
+      "benchmarkSourcePolicyId": "sourcepolicy-001",
+      "baselineLift": 0.2603
+    },
+    {
+      "methodId": "method-201",
+      "methodClass": "model_assisted",
+      "status": "proposed",
+      "eligibilityStatus": "rejected",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "rejectionReasons": [
+        "method_not_enabled",
+        "benchmark_missing",
+        "benchmark_sample_below_threshold"
+      ]
+    },
+    {
+      "methodId": "method-301",
+      "methodClass": "retrieval_assisted",
+      "status": "proposed",
+      "eligibilityStatus": "rejected",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "rejectionReasons": [
+        "method_not_enabled",
+        "benchmark_missing",
+        "benchmark_sample_below_threshold"
+      ]
+    },
+    {
+      "methodId": "method-401",
+      "methodClass": "ensemble",
+      "status": "proposed",
+      "eligibilityStatus": "rejected",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "rejectionReasons": [
+        "method_not_enabled",
+        "benchmark_missing",
+        "benchmark_sample_below_threshold"
+      ]
+    },
+    {
+      "methodId": "method-501",
+      "methodClass": "external_reference",
+      "status": "proposed",
+      "eligibilityStatus": "rejected",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "rejectionReasons": [
+        "method_not_enabled",
+        "benchmark_missing",
+        "benchmark_sample_below_threshold"
+      ]
+    }
+  ],
+  "qualityBoundary": {
+    "domain": "weather-logistics",
+    "horizonBucket": "1-day",
+    "outputType": "binary",
+    "sourcePolicyId": "sourcepolicy-019",
+    "coveragePeriod": {
+      "startsAt": "2026-06-02T00:00:00Z",
+      "endsAt": "2026-06-02T23:59:59Z"
+    },
+    "sampleSize": 0,
+    "minimumComparableBenchmarks": 30,
+    "qualityClaimStatus": "baseline_selected_due_to_insufficient_method_evidence"
+  },
+  "selectionReasons": [
+    "Use the baseline method when an enabled non-baseline method lacks enough comparable benchmark evidence or fails leakage controls.",
+    "No enabled non-baseline method has enough comparable benchmark evidence for this source policy."
+  ],
+  "warnings": [
+    "Method selection is fixture-only and does not make a live performance claim.",
+    "Quality is scoped to domain, horizon, output type, source policy, coverage period, and sample size."
+  ]
+}

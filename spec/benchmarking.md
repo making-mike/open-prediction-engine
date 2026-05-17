@@ -9,7 +9,9 @@ Each benchmark run records:
 - benchmark run ID
 - started and ended timestamps
 - question IDs
+- method ID
 - model ID and version
+- source policy ID
 - model training cutoff when known
 - retrieval window
 - source fetch references with retrieval timestamps
@@ -28,6 +30,7 @@ A clean benchmark run must satisfy all of these checks:
 - fetched sources do not include primary or fallback resolution sources
 - `knownAnswerExcluded` is true
 - `postOutcomeDataBlocked` is true
+- `sourceContaminationBlocked` is true
 - `sourceTimestampsRecorded` is true
 
 ## Post-Resolution Leakage Audit
@@ -45,5 +48,13 @@ When a benchmark run is reviewed after outcomes are known, the audit must check:
 
 The first benchmark fixtures are:
 
+- `spec/fixtures/benchmark/baseline-clean-pre-outcome-run.json`: expected to pass as the baseline comparator.
 - `spec/fixtures/benchmark/clean-pre-outcome-run.json`: expected to pass.
+- `spec/fixtures/benchmark/known-answer-leakage-run.json`: expected to fail the anti-leakage checker.
 - `spec/fixtures/benchmark/post-outcome-leakage-run.json`: expected to fail the anti-leakage checker.
+- `spec/fixtures/benchmark/source-contamination-run.json`: expected to fail the anti-leakage checker.
+- `spec/fixtures/benchmark/temporal-leakage-run.json`: expected to fail the anti-leakage checker.
+
+## Method Registry Binding
+
+The weather-logistics method registry references clean comparable benchmark runs. Enabled non-baseline methods must compare against the baseline under the same question set, source policy, and retrieval window before OPE can report baseline lift.

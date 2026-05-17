@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-intake-report.schema.json",
+  "title": "Source Intake Report",
+  "description": "Deterministic pre-forecast source and mapping usability report.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceIntakeReportId",
+    "generatedAt",
+    "domainSetupId",
+    "domain",
+    "sourceManifestId",
+    "fieldMappingId",
+    "intakeStatus",
+    "canProduceForecast",
+    "forecastGenerationAllowed",
+    "roleCoverage",
+    "sourceDecisions",
+    "mappingDecisions",
+    "methodEligibility",
+    "requiredActions",
+    "warnings"
+  ],
+  "properties": {
+    "sourceIntakeReportId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceManifestId": { "$ref": "common.schema.json#/$defs/id" },
+    "fieldMappingId": { "$ref": "common.schema.json#/$defs/id" },
+    "intakeStatus": {
+      "type": "string",
+      "enum": ["accepted", "accepted_partial", "needs_confirmation", "rejected"]
+    },
+    "canProduceForecast": { "type": "boolean" },
+    "forecastGenerationAllowed": { "type": "boolean" },
+    "roleCoverage": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/roleCoverage" }
+    },
+    "sourceDecisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/sourceDecision" }
+    },
+    "mappingDecisions": {
+      "type": "array",
+      "maxItems": 120,
+      "items": { "$ref": "#/$defs/mappingDecision" }
+    },
+    "methodEligibility": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/methodEligibility" }
+    },
+    "requiredActions": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "checkStatus": {
+      "type": "string",
+      "enum": ["passed", "warning", "needs_confirmation", "failed", "not_applicable"]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "roleCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRole", "requiredForForecast", "status", "sourceIds"],
+      "properties": {
+        "sourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "requiredForForecast": { "type": "boolean" },
+        "status": {
+          "type": "string",
+          "enum": ["present", "partial", "missing", "rejected"]
+        },
+        "sourceIds": {
+          "type": "array",
+          "maxItems": 24,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        }
+      }
+    },
+    "sourceDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "sourceRole", "decision", "reasonCodes", "checks"],
+      "properties": {
+        "sourceId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["usable", "usable_partial", "needs_confirmation", "rejected"]
+        },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" },
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requiredFields",
+            "typeParsing",
+            "entityMatch",
+            "timestampAvailability",
+            "sourceFreshness",
+            "leakageRisk",
+            "sampleSize",
+            "privacy"
+          ],
+          "properties": {
+            "requiredFields": { "$ref": "#/$defs/checkResult" },
+            "typeParsing": { "$ref": "#/$defs/checkResult" },
+            "entityMatch": { "$ref": "#/$defs/checkResult" },
+            "timestampAvailability": { "$ref": "#/$defs/checkResult" },
+            "sourceFreshness": { "$ref": "#/$defs/checkResult" },
+            "leakageRisk": { "$ref": "#/$defs/checkResult" },
+            "sampleSize": { "$ref": "#/$defs/checkResult" },
+            "privacy": { "$ref": "#/$defs/checkResult" }
+          }
+        }
+      }
+    },
+    "checkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes"],
+      "properties": {
+        "status": { "$ref": "#/$defs/checkStatus" },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "mappingDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mappingId",
+        "sourceId",
+        "targetField",
+        "decision",
+        "mappingOrigin",
+        "requiresConfirmation",
+        "reasonCodes"
+      ],
+      "properties": {
+        "mappingId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetField": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["accepted", "proposed", "rejected"]
+        },
+        "mappingOrigin": {
+          "type": "string",
+          "enum": ["user_provided", "registry_backed", "agent_inferred", "deterministic_exact_match"]
+        },
+        "requiresConfirmation": { "type": "boolean" },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    },
+    "methodEligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["methodClass", "eligible", "reasonCodes"],
+      "properties": {
+        "methodClass": {
+          "type": "string",
+          "enum": [
+            "historical_baseline",
+            "historical_conditioned_frequency",
+            "deterministic_statistical",
+            "model_assisted",
+            "external_reference",
+            "ensemble"
+          ]
+        },
+        "eligible": { "type": "boolean" },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+      }
+    }
+  }
+}

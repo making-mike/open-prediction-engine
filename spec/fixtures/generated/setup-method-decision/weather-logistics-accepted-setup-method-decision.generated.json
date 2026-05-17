@@ -1,0 +1,149 @@
+{
+  "setupMethodDecisionId": "setupmethoddecision-001",
+  "generatedAt": "2026-06-06T17:05:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeReportId": "sourceintakereport-001",
+  "sourceManifestId": "sourcemanifest-001",
+  "fieldMappingId": "fieldmapping-001",
+  "intakeStatus": "accepted",
+  "decisionStatus": "method_selected",
+  "selectedMethodClass": "deterministic_statistical",
+  "selectedForecastMode": "deterministic_statistical",
+  "selectedSetupBenchmarkGateId": "setupbenchmarkgate-001",
+  "setupPolicy": {
+    "baselineRequired": true,
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "deterministic_statistical"
+    ],
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "sourceIntakeSummary": {
+    "canProduceForecast": true,
+    "forecastGenerationAllowed": true,
+    "usableSourceRoles": [
+      "declared_operations_outcome",
+      "historical_baseline",
+      "weather_forecast"
+    ],
+    "missingRequiredRoles": [],
+    "rejectedSourceRoles": [],
+    "proposedMappingCount": 0,
+    "sourceRejectionReasonCodes": []
+  },
+  "methodCandidates": [
+    {
+      "methodClass": "historical_baseline",
+      "sourceEligibilityStatus": "eligible",
+      "benchmarkEligibilityStatus": "not_required",
+      "finalEligibilityStatus": "eligible",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "method_eligible_for_setup"
+      ]
+    },
+    {
+      "methodClass": "historical_conditioned_frequency",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "method_not_enabled_by_setup_policy"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "sourceEligibilityStatus": "eligible",
+      "benchmarkEligibilityStatus": "eligible",
+      "finalEligibilityStatus": "eligible",
+      "setupBenchmarkGateId": "setupbenchmarkgate-001",
+      "benchmarkQualityClaimStatus": "not_enough_comparable_benchmarks",
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "baseline_lift_positive",
+        "execution_sample_threshold_met",
+        "method_eligible_for_setup",
+        "quality_sample_threshold_not_met",
+        "setup_benchmark_approved_provisional"
+      ]
+    },
+    {
+      "methodClass": "model_assisted",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "method_not_enabled_by_setup_policy"
+      ]
+    },
+    {
+      "methodClass": "external_reference",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "method_not_enabled_by_setup_policy"
+      ]
+    },
+    {
+      "methodClass": "ensemble",
+      "sourceEligibilityStatus": "rejected",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "rejected",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "method_not_enabled_by_setup_policy"
+      ]
+    }
+  ],
+  "requiredActions": [],
+  "qualityClaimBoundary": {
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "blockedClaims": [
+      "Live calibration claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal domain coverage claim"
+    ]
+  },
+  "warnings": [
+    "Setup method decisions do not create forecast artifacts.",
+    "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+    "Candidate eligibility is scoped to this domain setup and source intake report."
+  ]
+}

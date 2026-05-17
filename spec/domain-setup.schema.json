@@ -1,0 +1,591 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/domain-setup.schema.json",
+  "title": "Domain Setup",
+  "description": "Domain-agnostic setup contract for OPE-compatible private prediction engines.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domainSetupId",
+    "generatedAt",
+    "domain",
+    "displayName",
+    "setupKind",
+    "maturityStatus",
+    "domainPurpose",
+    "questionTemplates",
+    "sourceRoles",
+    "entityRequirements",
+    "resolutionPolicy",
+    "scoringPolicy",
+    "baselinePolicy",
+    "methodPolicy",
+    "recalculationPolicy",
+    "localImplementation",
+    "claimPolicy",
+    "agentSetupGuidance",
+    "warnings"
+  ],
+  "properties": {
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "displayName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "setupKind": {
+      "type": "string",
+      "enum": ["reference_setup", "candidate_private_setup"]
+    },
+    "maturityStatus": {
+      "type": "string",
+      "enum": ["candidate", "fixture_ready", "benchmarked", "live_provisional", "calibrated"]
+    },
+    "domainPurpose": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 360
+    },
+    "questionTemplates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/questionTemplate" }
+    },
+    "sourceRoles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/sourceRole" }
+    },
+    "entityRequirements": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/entityRequirement" }
+    },
+    "resolutionPolicy": { "$ref": "#/$defs/resolutionPolicy" },
+    "scoringPolicy": { "$ref": "#/$defs/scoringPolicy" },
+    "baselinePolicy": { "$ref": "#/$defs/baselinePolicy" },
+    "methodPolicy": { "$ref": "#/$defs/methodPolicy" },
+    "recalculationPolicy": { "$ref": "#/$defs/recalculationPolicy" },
+    "localImplementation": { "$ref": "#/$defs/localImplementation" },
+    "claimPolicy": { "$ref": "#/$defs/claimPolicy" },
+    "agentSetupGuidance": { "$ref": "#/$defs/agentSetupGuidance" },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        { "type": "null" }
+      ]
+    },
+    "questionTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateId",
+        "template",
+        "outputType",
+        "horizonLabels",
+        "requiredParameters",
+        "resolvabilityRules"
+      ],
+      "properties": {
+        "templateId": { "$ref": "common.schema.json#/$defs/id" },
+        "template": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 500
+        },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "horizonLabels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        },
+        "requiredParameters": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "resolvabilityRules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "sourceRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roleId",
+        "roleKey",
+        "displayName",
+        "timing",
+        "purpose",
+        "requiredFields",
+        "optionalFields",
+        "allowedSourceClasses",
+        "forecastTimeAllowed"
+      ],
+      "properties": {
+        "roleId": { "$ref": "common.schema.json#/$defs/id" },
+        "roleKey": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "timing": {
+          "type": "string",
+          "enum": ["historical_training", "forecast_time", "baseline", "resolution", "supporting"]
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 360
+        },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "optionalFields": {
+          "type": "array",
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "allowedSourceClasses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/sourceClass" }
+        },
+        "forecastTimeAllowed": { "type": "boolean" }
+      }
+    },
+    "fieldDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fieldName", "fieldType", "requiredFor", "validationRules"],
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "fieldType": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "date", "date_time", "categorical", "id"]
+        },
+        "requiredFor": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": ["classification", "baseline", "forecast", "resolution", "scoring", "recalculation"]
+          }
+        },
+        "validationRules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "entityRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entityType", "canonicalField", "aliasPolicy", "required"],
+      "properties": {
+        "entityType": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "canonicalField": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "aliasPolicy": {
+          "type": "string",
+          "enum": [
+            "not_required",
+            "user_provided_registry",
+            "built_in_registry",
+            "connector_backed_registry",
+            "agent_proposed_requires_confirmation"
+          ]
+        },
+        "required": { "type": "boolean" }
+      }
+    },
+    "resolutionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primarySourceRole",
+        "fallbackSourceRoles",
+        "yesOutcomeDefinition",
+        "noOutcomeDefinition",
+        "ambiguousIf",
+        "annulledIf",
+        "resolutionTiming",
+        "scoringRule"
+      ],
+      "properties": {
+        "primarySourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "fallbackSourceRoles": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "yesOutcomeDefinition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "noOutcomeDefinition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "ambiguousIf": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        },
+        "annulledIf": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        },
+        "resolutionTiming": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "scoringRule": {
+          "type": "string",
+          "enum": ["brier", "log_score", "interval_score", "pinball_loss"]
+        }
+      }
+    },
+    "baselinePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineRequired",
+        "allowedBaselineMethods",
+        "minimumComparableRows",
+        "minimumPositiveOutcomes",
+        "fallbackWhenInsufficientData"
+      ],
+      "properties": {
+        "baselineRequired": { "type": "boolean" },
+        "allowedBaselineMethods": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "minimumComparableRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "minimumPositiveOutcomes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "fallbackWhenInsufficientData": {
+          "type": "string",
+          "enum": ["reject_forecast", "baseline_only", "needs_more_data"]
+        }
+      }
+    },
+    "scoringPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primaryScoringRule",
+        "baselineComparisonRequired",
+        "excludeAmbiguousOutcomes",
+        "excludeAnnulledOutcomes",
+        "reportingSlices",
+        "minimumResolvedForecastsForQualityClaim"
+      ],
+      "properties": {
+        "primaryScoringRule": {
+          "type": "string",
+          "enum": ["brier", "log_score", "interval_score", "pinball_loss"]
+        },
+        "baselineComparisonRequired": { "type": "boolean" },
+        "excludeAmbiguousOutcomes": { "type": "boolean" },
+        "excludeAnnulledOutcomes": { "type": "boolean" },
+        "reportingSlices": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "enum": [
+              "domain",
+              "domain_setup",
+              "horizon",
+              "output_type",
+              "resolution_source",
+              "source_policy",
+              "method_class",
+              "coverage_period",
+              "sample_size"
+            ]
+          }
+        },
+        "minimumResolvedForecastsForQualityClaim": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "methodPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabledMethodClasses",
+        "selectionRule",
+        "baselineComparisonRequired",
+        "leakageCheckRequired",
+        "methodDecisionRecordRequired"
+      ],
+      "properties": {
+        "enabledMethodClasses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "enum": [
+              "historical_baseline",
+              "historical_conditioned_frequency",
+              "deterministic_statistical",
+              "model_assisted",
+              "external_reference",
+              "ensemble"
+            ]
+          }
+        },
+        "selectionRule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "baselineComparisonRequired": { "type": "boolean" },
+        "leakageCheckRequired": { "type": "boolean" },
+        "methodDecisionRecordRequired": { "type": "boolean" }
+      }
+    },
+    "recalculationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supported", "triggerTypes", "appendHistoryRequired", "postOutcomeEvidenceAllowed"],
+      "properties": {
+        "supported": { "type": "boolean" },
+        "triggerTypes": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": ["source_file_changed", "api_event", "schedule", "agent_submitted_evidence", "manual"]
+          }
+        },
+        "appendHistoryRequired": { "type": "boolean" },
+        "postOutcomeEvidenceAllowed": { "type": "boolean" }
+      }
+    },
+    "localImplementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastRunnable",
+        "generatedForecastRecords",
+        "cliForecastCommand",
+        "readSurfaceAvailable",
+        "implementationNotes"
+      ],
+      "properties": {
+        "forecastRunnable": { "type": "boolean" },
+        "generatedForecastRecords": { "type": "boolean" },
+        "cliForecastCommand": { "$ref": "#/$defs/nullableString" },
+        "readSurfaceAvailable": { "type": "boolean" },
+        "implementationNotes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        }
+      }
+    },
+    "claimPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedClaims",
+        "blockedClaims",
+        "minimumResolvedForecastsForCalibration",
+        "qualityClaimAllowed",
+        "benchmarkClaimAllowed",
+        "calibrationClaimAllowed",
+        "productionReadinessClaimAllowed",
+        "stateOfTheArtClaimAllowed",
+        "universalDomainClaimAllowed"
+      ],
+      "properties": {
+        "allowedClaims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        },
+        "blockedClaims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        },
+        "minimumResolvedForecastsForCalibration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "benchmarkClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "productionReadinessClaimAllowed": { "type": "boolean" },
+        "stateOfTheArtClaimAllowed": { "type": "boolean" },
+        "universalDomainClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "agentSetupGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["setupQuestions", "requiredBeforeForecast", "safeFailureModes"],
+      "properties": {
+        "setupQuestions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        },
+        "requiredBeforeForecast": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        },
+        "safeFailureModes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "sourceClass": {
+      "type": "string",
+      "enum": [
+        "official",
+        "public_dataset",
+        "internal_dataset",
+        "human_judgment",
+        "model_output",
+        "market_price",
+        "aggregate",
+        "other"
+      ]
+    }
+  }
+}

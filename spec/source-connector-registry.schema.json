@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-connector-registry.schema.json",
+  "title": "Source Connector Registry",
+  "description": "Policy-bound connector capabilities for OPE auto-evidence gathering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceConnectorRegistryId",
+    "generatedAt",
+    "domain",
+    "sourcePolicyId",
+    "defaultExecutionMode",
+    "connectors",
+    "unsupportedSourceClasses",
+    "warnings"
+  ],
+  "properties": {
+    "sourceConnectorRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "defaultExecutionMode": {
+      "type": "string",
+      "enum": ["fixture_replay"]
+    },
+    "connectors": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/connector" }
+    },
+    "unsupportedSourceClasses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "enum": [
+          "official",
+          "public_dataset",
+          "internal_dataset",
+          "human_judgment",
+          "model_output",
+          "market_price",
+          "aggregate",
+          "other"
+        ]
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "sourceClass": {
+      "type": "string",
+      "enum": [
+        "official",
+        "public_dataset",
+        "internal_dataset",
+        "human_judgment",
+        "model_output",
+        "market_price",
+        "aggregate",
+        "other"
+      ]
+    },
+    "connector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectorId",
+        "connectorKey",
+        "displayName",
+        "status",
+        "sourceClass",
+        "allowedFor",
+        "policyBinding",
+        "capability",
+        "freshness",
+        "rateLimit",
+        "credentialBoundary",
+        "provenanceBoundary",
+        "diagnosticsBoundary",
+        "risk",
+        "agentUse"
+      ],
+      "properties": {
+        "connectorId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorKey": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "enabled_fixture_replay",
+            "planned_live_gated",
+            "resolution_only",
+            "unsupported"
+          ]
+        },
+        "sourceClass": { "$ref": "#/$defs/sourceClass" },
+        "allowedFor": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "enum": ["forecast_time_evidence", "baseline_input", "resolution_only", "not_allowed"]
+          }
+        },
+        "policyBinding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowedBySourcePolicy", "sourcePolicyId", "approvalRequired"],
+          "properties": {
+            "allowedBySourcePolicy": { "type": "boolean" },
+            "sourcePolicyId": { "$ref": "#/$defs/nullableId" },
+            "approvalRequired": { "type": "boolean" }
+          }
+        },
+        "capability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "retrievalMode",
+            "networkAccessInNormalChecks",
+            "liveFetchRequiresApproval",
+            "maxNetworkCalls",
+            "maxCostUsd"
+          ],
+          "properties": {
+            "retrievalMode": {
+              "type": "string",
+              "enum": ["committed_fixture", "fixture_replay", "live_fetch_gated", "unsupported"]
+            },
+            "networkAccessInNormalChecks": { "type": "boolean" },
+            "liveFetchRequiresApproval": { "type": "boolean" },
+            "maxNetworkCalls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "maxCostUsd": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 25
+            }
+          }
+        },
+        "freshness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxSourceAgeHours", "requireRetrievedAt"],
+          "properties": {
+            "maxSourceAgeHours": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8760
+                },
+                { "type": "null" }
+              ]
+            },
+            "requireRetrievedAt": { "type": "boolean" }
+          }
+        },
+        "rateLimit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxRequestsPerRun", "cooldownSeconds", "enforcedInNormalChecks"],
+          "properties": {
+            "maxRequestsPerRun": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "cooldownSeconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            "enforcedInNormalChecks": { "type": "boolean" }
+          }
+        },
+        "credentialBoundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["acceptsPromptVisibleCredentials", "credentialLocation", "notes"],
+          "properties": {
+            "acceptsPromptVisibleCredentials": { "type": "boolean" },
+            "credentialLocation": {
+              "type": "string",
+              "enum": ["none", "server_side_only", "not_applicable"]
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            }
+          }
+        },
+        "provenanceBoundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rawSourceRetention", "storesContentHash", "storesRetrievedAt", "allEvidenceClaimed"],
+          "properties": {
+            "rawSourceRetention": {
+              "type": "string",
+              "enum": ["none", "fixture_only", "metadata_only", "full"]
+            },
+            "storesContentHash": { "type": "boolean" },
+            "storesRetrievedAt": { "type": "boolean" },
+            "allEvidenceClaimed": { "type": "boolean" }
+          }
+        },
+        "diagnosticsBoundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sanitizedErrors", "exposesRawStackTraces"],
+          "properties": {
+            "sanitizedErrors": { "type": "boolean" },
+            "exposesRawStackTraces": { "type": "boolean" }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["effectful", "paid", "privacySensitive"],
+          "properties": {
+            "effectful": { "type": "boolean" },
+            "paid": { "type": "boolean" },
+            "privacySensitive": { "type": "boolean" }
+          }
+        },
+        "agentUse": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 /open-prediction-stack-memo.md
+.DS_Store
 .ope/live/
 __pycache__/
 *.pyc

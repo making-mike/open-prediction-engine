@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/forecast-run-summary.schema.json",
+  "title": "Forecast Run Summary",
+  "description": "Compact agent-facing summary for one local fixture-safe forecast run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "forecastRunSummaryId",
+    "generatedAt",
+    "request",
+    "runStatus",
+    "decisionStatus",
+    "executionMode",
+    "sourceMode",
+    "controls",
+    "recordBinding",
+    "state",
+    "outputs",
+    "forecast",
+    "qualityClaim",
+    "error",
+    "warnings"
+  ],
+  "properties": {
+    "forecastRunSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "requestPath",
+        "requestedAction",
+        "dataMode",
+        "domain",
+        "geography",
+        "serviceDate",
+        "horizonLabel"
+      ],
+      "properties": {
+        "requestId": { "$ref": "#/$defs/nullableId" },
+        "requestPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "requestedAction": { "$ref": "#/$defs/nullableShortString" },
+        "dataMode": { "$ref": "#/$defs/nullableShortString" },
+        "domain": { "$ref": "#/$defs/nullableShortString" },
+        "geography": { "$ref": "#/$defs/nullableShortString" },
+        "serviceDate": { "$ref": "#/$defs/nullableShortString" },
+        "horizonLabel": { "$ref": "#/$defs/nullableShortString" }
+      }
+    },
+    "runStatus": {
+      "type": "string",
+      "enum": ["completed", "blocked", "rejected", "canceled", "failed"]
+    },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["accepted", "blocked", "rejected", "canceled"]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["fixture_dry_run", "not_started"]
+    },
+    "sourceMode": {
+      "type": "string",
+      "enum": ["auto_evidence_fixture_replay", "committed_fixture", "none"]
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestValidated",
+        "networkAccess",
+        "liveFetch",
+        "effectfulGeneration",
+        "paidAction",
+        "privateSourceAccess"
+      ],
+      "properties": {
+        "requestValidated": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" },
+        "paidAction": { "type": "boolean" },
+        "privateSourceAccess": { "type": "boolean" }
+      }
+    },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "sourcePolicyId",
+        "evidencePlanId",
+        "evidenceSourceSetId",
+        "methodSelectionId",
+        "pipelineRunId",
+        "questionId",
+        "forecastId",
+        "forecastCardId",
+        "forecastBundleId",
+        "resolutionRecordId",
+        "scoringReportId"
+      ],
+      "properties": {
+        "requestId": { "$ref": "#/$defs/nullableId" },
+        "sourcePolicyId": { "$ref": "#/$defs/nullableId" },
+        "evidencePlanId": { "$ref": "#/$defs/nullableId" },
+        "evidenceSourceSetId": { "$ref": "#/$defs/nullableId" },
+        "methodSelectionId": { "$ref": "#/$defs/nullableId" },
+        "pipelineRunId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "forecastCardId": { "$ref": "#/$defs/nullableId" },
+        "forecastBundleId": { "$ref": "#/$defs/nullableId" },
+        "resolutionRecordId": { "$ref": "#/$defs/nullableId" },
+        "scoringReportId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planStatus",
+        "gatheringStatus",
+        "forecastStatus",
+        "resolutionStatus",
+        "scoreStatus",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "planStatus": { "$ref": "#/$defs/nullableShortString" },
+        "gatheringStatus": { "$ref": "#/$defs/nullableShortString" },
+        "forecastStatus": { "$ref": "#/$defs/nullableShortString" },
+        "resolutionStatus": { "$ref": "#/$defs/nullableShortString" },
+        "scoreStatus": { "$ref": "#/$defs/nullableShortString" },
+        "qualityClaimStatus": { "$ref": "#/$defs/nullableShortString" }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastCard",
+        "evidenceTrace",
+        "lifecycleBundle",
+        "resolutionStatus",
+        "scoringSummary"
+      ],
+      "properties": {
+        "forecastCard": { "$ref": "#/$defs/nullableOutputRef" },
+        "evidenceTrace": { "$ref": "#/$defs/nullableOutputRef" },
+        "lifecycleBundle": { "$ref": "#/$defs/nullableOutputRef" },
+        "resolutionStatus": { "$ref": "#/$defs/nullableOutputRef" },
+        "scoringSummary": { "$ref": "#/$defs/nullableOutputRef" }
+      }
+    },
+    "forecast": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "forecastedAt",
+            "modelId",
+            "modelVersion",
+            "probability",
+            "baselineProbability"
+          ],
+          "properties": {
+            "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "modelId": { "$ref": "common.schema.json#/$defs/id" },
+            "modelVersion": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "probability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "baselineProbability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "qualityClaim": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "minimumSampleSize",
+            "resolvedComparableOutcomes",
+            "sampleSize",
+            "trackRecordReportId"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "minimumSampleSize": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resolvedComparableOutcomes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sampleSize": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "trackRecordReportId": { "$ref": "#/$defs/nullableId" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "error": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "retryable"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 80
+            },
+            "message": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            },
+            "retryable": { "type": "boolean" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableShortString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        { "type": "null" }
+      ]
+    },
+    "outputRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "recordType", "recordId", "questionId"],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "forecast_card",
+            "evidence_trace",
+            "lifecycle_bundle",
+            "resolution_status",
+            "scoring_summary"
+          ]
+        },
+        "recordType": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "recordId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "nullableOutputRef": {
+      "oneOf": [
+        { "$ref": "#/$defs/outputRef" },
+        { "type": "null" }
+      ]
+    }
+  }
+}

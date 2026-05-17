@@ -1,0 +1,72 @@
+{
+  "setupForecastRunId": "setupforecastrun-1103",
+  "generatedAt": "2026-06-06T19:05:00Z",
+  "case": "insufficient_confirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifestdraft-103",
+  "fieldMappingId": "fieldmappingdraft-103",
+  "sourceIntakeReportId": "sourceintakereport-103",
+  "sourceIntakeHandoffId": "sourceintakehandoff-003",
+  "sourceHandoffMethodGateId": "sourcehandoffmethodgate-003",
+  "setupMethodDecisionId": "setupmethoddecision-103",
+  "setupBenchmarkGateId": null,
+  "intakeStatus": "rejected",
+  "methodDecisionStatus": "rejected",
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "runStatus": "blocked",
+  "executionMode": "not_started",
+  "sourceMode": "none",
+  "controls": {
+    "sourceIntakeValidated": true,
+    "methodDecisionValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false,
+    "localLiveDraftConsumed": false,
+    "forecastArtifactsCreated": false
+  },
+  "recordBinding": {
+    "questionId": null,
+    "forecastId": null,
+    "evidencePacketId": null,
+    "historyId": null,
+    "forecastCardId": null,
+    "forecastBundleId": null
+  },
+  "outputs": {
+    "questionPath": null,
+    "featureSnapshotPath": null,
+    "evidencePacketPath": null,
+    "forecastArtifactPath": null,
+    "forecastHistoryPath": null
+  },
+  "blockedReasons": [
+    "all_required_fields_mapped",
+    "available_before_forecast_close",
+    "baseline_lift_positive",
+    "entity_scope_matches",
+    "execution_sample_threshold_met",
+    "insufficient_comparable_rows",
+    "method_decision_rejected",
+    "missing_historical_baseline",
+    "more_data_required",
+    "no_post_outcome_evidence_detected",
+    "privacy_boundary_ok",
+    "quality_sample_threshold_not_met",
+    "source_fresh_enough",
+    "source_intake_rejected",
+    "source_rejected",
+    "types_compatible"
+  ],
+  "nextActions": [
+    "Remove or replace rejected source localsource-002 for role historical_baseline.",
+    "Resolve rejected source-intake checks before selecting a forecast method."
+  ],
+  "warnings": [
+    "Source-handoff setup forecast execution is fixture-mode only.",
+    "Execution requires a prior source-intake handoff, source-handoff method gate, setup benchmark gate, and setup method decision.",
+    "Blocked handoff outcomes do not bind forecast IDs or artifact paths."
+  ]
+}

@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCAN_ROOTS = [
     ROOT / "README.md",
     ROOT / "AGENTS.md",
+    ROOT / "PRODUCT.md",
     ROOT / "roadmap.md",
     ROOT / "whitepaper.md",
     ROOT / "research",

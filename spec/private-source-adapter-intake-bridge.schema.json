@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-source-adapter-intake-bridge.schema.json",
+  "title": "Private Source Adapter Intake Bridge",
+  "description": "Checked bridge from private source adapter outcome decisions to allowed source-intake entrypoints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSourceAdapterIntakeBridgeId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "boundPrivateSourceAdapterOutcomeMatrixId",
+    "boundPrivateSourceAdapterCapabilityId",
+    "boundPrivateSetupWorkflowId",
+    "boundPrivateSourceAdapterOutcomeMatrixPath",
+    "bridgeRows",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSourceAdapterIntakeBridgeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["bridge_contract_only"]
+    },
+    "boundPrivateSourceAdapterOutcomeMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterCapabilityId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterOutcomeMatrixPath": { "$ref": "#/$defs/path" },
+    "bridgeRows": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/bridgeRow" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridgeDoesNotExecute",
+        "normalChecksOffline",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials",
+        "privateAdapterRuntimeImplemented",
+        "onlyRoutesToCheckedEntrypoints"
+      ],
+      "properties": {
+        "bridgeDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "privateAdapterRuntimeImplemented": { "type": "boolean" },
+        "onlyRoutesToCheckedEntrypoints": { "type": "boolean" }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "manual_upload",
+        "auto_evidence_connector",
+        "private_api",
+        "private_database",
+        "unregistered_source",
+        "unsafe_source"
+      ]
+    },
+    "outcomeName": {
+      "type": "string",
+      "enum": [
+        "available_fixture",
+        "approval_required_fixture",
+        "planned_runtime",
+        "unsupported_source",
+        "credential_missing",
+        "rejected_unsafe_source"
+      ]
+    },
+    "setupOutcomeClass": {
+      "type": "string",
+      "enum": [
+        "setup_ready",
+        "needs_confirmation",
+        "rejected_source",
+        "unsupported_source",
+        "runtime_not_implemented"
+      ]
+    },
+    "bridgeStatus": {
+      "type": "string",
+      "enum": [
+        "allowed_current_entrypoint",
+        "approval_required",
+        "fixture_entrypoint",
+        "runtime_not_implemented",
+        "unsupported_source",
+        "rejected_source",
+        "credential_runtime_missing"
+      ]
+    },
+    "allowedEntrypoint": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff_confirmation",
+        "auto_evidence_fixture",
+        "no_current_entrypoint"
+      ]
+    },
+    "retryCondition": {
+      "type": "string",
+      "enum": [
+        "no_retry_needed",
+        "after_mapping_confirmation",
+        "after_runtime_available",
+        "after_source_replaced",
+        "never_without_new_source"
+      ]
+    },
+    "downstreamOutput": {
+      "type": "string",
+      "enum": [
+        "source_manifest_build",
+        "draft_source_manifest",
+        "draft_field_mapping",
+        "source_intake_handoff",
+        "source_intake_report",
+        "evidence_source_set"
+      ]
+    },
+    "blockedOutput": {
+      "type": "string",
+      "enum": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ]
+    },
+    "bridgeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridgeRowId",
+        "sourceKind",
+        "outcomeRowId",
+        "outcomeClass",
+        "setupOutcomeClass",
+        "bridgeStatus",
+        "allowedEntrypoint",
+        "currentCommand",
+        "retryCondition",
+        "retryCommand",
+        "requiredInputs",
+        "allowedDownstreamOutputs",
+        "blockedOutputs",
+        "bridgeCreatesOutputs",
+        "canCreateForecastArtifacts",
+        "canCreateScoringRecords",
+        "canStoreCredentials",
+        "agentInstruction"
+      ],
+      "properties": {
+        "bridgeRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "outcomeRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "outcomeClass": { "$ref": "#/$defs/outcomeName" },
+        "setupOutcomeClass": { "$ref": "#/$defs/setupOutcomeClass" },
+        "bridgeStatus": { "$ref": "#/$defs/bridgeStatus" },
+        "allowedEntrypoint": { "$ref": "#/$defs/allowedEntrypoint" },
+        "currentCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "retryCondition": { "$ref": "#/$defs/retryCondition" },
+        "retryCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "requiredInputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          }
+        },
+        "allowedDownstreamOutputs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/downstreamOutput" }
+        },
+        "blockedOutputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/blockedOutput" }
+        },
+        "bridgeCreatesOutputs": { "type": "boolean" },
+        "canCreateForecastArtifacts": { "type": "boolean" },
+        "canCreateScoringRecords": { "type": "boolean" },
+        "canStoreCredentials": { "type": "boolean" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

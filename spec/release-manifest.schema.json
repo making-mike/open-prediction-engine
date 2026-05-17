@@ -144,7 +144,15 @@
         "properties": {
           "recordType": {
             "type": "string",
-            "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+            "enum": [
+              "evidence-source-set",
+              "evidence-trace",
+              "forecast-artifact",
+              "forecast-bundle",
+              "forecast-card",
+              "source-connector-results",
+              "track-record"
+            ]
           },
           "count": {
             "type": "integer",
@@ -161,6 +169,8 @@
         "minimumCalibrationSampleSize",
         "resolvedPipelineOutcomes",
         "resolvedLiveOutcomes",
+        "resolvedAutoEvidenceOutcomes",
+        "resolvedSourceHandoffOutcomes",
         "qualityClaimStatus"
       ],
       "properties": {
@@ -174,6 +184,14 @@
           "minimum": 0
         },
         "resolvedLiveOutcomes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolvedAutoEvidenceOutcomes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolvedSourceHandoffOutcomes": {
           "type": "integer",
           "minimum": 0
         },

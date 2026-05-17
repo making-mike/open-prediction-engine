@@ -1,0 +1,295 @@
+{
+  "privateSourceAdapterCapabilityId": "privatesourceadaptercapability-001",
+  "generatedAt": "2026-06-06T21:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "capability_contract_only",
+  "boundPrivateSetupWorkflowId": "privatesetupworkflow-001",
+  "boundPrivateSetupWorkflowPath": "spec/fixtures/generated/private-setup-workflow/ope-private-setup-workflow.generated.json",
+  "supportedSourceKinds": [
+    "local_file",
+    "manual_mapping",
+    "manual_upload",
+    "auto_evidence_connector",
+    "private_api",
+    "private_database"
+  ],
+  "adapters": [
+    {
+      "adapterId": "privateadapter-local-file-001",
+      "sourceKind": "local_file",
+      "displayName": "Local file source builder",
+      "implementationStatus": "implemented_fixture",
+      "availabilityStatus": "available_fixture",
+      "setupOutcomeIfRequested": "setup_ready",
+      "canInspect": true,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": true,
+      "approvalRequired": false,
+      "credentialBoundary": "none_required",
+      "promptVisibility": "metadata_only_prompt_visible",
+      "privacyBoundary": "Only caller-approved CSV/JSON fixture paths and sanitized metadata enter build records.",
+      "freshnessBoundary": "No watcher exists; freshness comes from explicit caller-provided files.",
+      "rateLimitBoundary": "No remote rate limit; local checks cap file size and source count.",
+      "auditLogBoundary": "Build records capture inspected file metadata, rejection reasons, and generated draft paths.",
+      "supportedContracts": [
+        "spec/source-manifest-build.schema.json",
+        "spec/source-manifest.schema.json",
+        "spec/field-mapping.schema.json",
+        "spec/source-intake-handoff.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "fetch_live_private_api",
+        "connect_private_database",
+        "parse_arbitrary_private_schema",
+        "claim_live_freshness"
+      ],
+      "nextAction": "use_source_builder"
+    },
+    {
+      "adapterId": "privateadapter-manual-mapping-001",
+      "sourceKind": "manual_mapping",
+      "displayName": "Manual mapping confirmation",
+      "implementationStatus": "implemented_fixture",
+      "availabilityStatus": "approval_gated_fixture",
+      "setupOutcomeIfRequested": "needs_confirmation",
+      "canInspect": true,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": true,
+      "approvalRequired": true,
+      "credentialBoundary": "none_required",
+      "promptVisibility": "metadata_only_prompt_visible",
+      "privacyBoundary": "Only mapping decisions and sanitized field names are prompt-visible.",
+      "freshnessBoundary": "Freshness is inherited from the source manifest being confirmed.",
+      "rateLimitBoundary": "No remote rate limit; confirmation is a caller-supervised local action.",
+      "auditLogBoundary": "Handoff records capture whether mappings are proposed, confirmed, or rejected.",
+      "supportedContracts": [
+        "spec/field-mapping.schema.json",
+        "spec/source-intake-handoff.schema.json",
+        "spec/source-intake-report.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "fetch_live_private_api",
+        "connect_private_database",
+        "parse_arbitrary_private_schema"
+      ],
+      "nextAction": "use_manual_mapping_confirmation"
+    },
+    {
+      "adapterId": "privateadapter-manual-upload-001",
+      "sourceKind": "manual_upload",
+      "displayName": "Manual upload intake",
+      "implementationStatus": "planned_contract_only",
+      "availabilityStatus": "planned_contract_only",
+      "setupOutcomeIfRequested": "runtime_not_implemented",
+      "canInspect": false,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": false,
+      "approvalRequired": true,
+      "credentialBoundary": "none_required",
+      "promptVisibility": "no_secrets_prompt_visible",
+      "privacyBoundary": "No uploaded bytes or private rows enter artifacts because upload intake is not implemented.",
+      "freshnessBoundary": "Upload recency must be declared by a future runtime; current checks cannot verify it.",
+      "rateLimitBoundary": "Future upload intake must declare size and rate limits before execution.",
+      "auditLogBoundary": "Future runtime must record approval, upload reference, hash, timestamp, and sanitized errors.",
+      "supportedContracts": [
+        "spec/private-source-adapter-capability.schema.json",
+        "spec/private-setup-workflow.schema.json",
+        "spec/source-policy.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "ingest_manual_upload",
+        "parse_arbitrary_private_schema",
+        "claim_live_freshness"
+      ],
+      "nextAction": "wait_for_runtime"
+    },
+    {
+      "adapterId": "privateadapter-auto-evidence-001",
+      "sourceKind": "auto_evidence_connector",
+      "displayName": "Policy-bound auto-evidence fixture connector",
+      "implementationStatus": "implemented_fixture",
+      "availabilityStatus": "available_fixture",
+      "setupOutcomeIfRequested": "setup_ready",
+      "canInspect": true,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": true,
+      "approvalRequired": false,
+      "credentialBoundary": "none_required",
+      "promptVisibility": "metadata_only_prompt_visible",
+      "privacyBoundary": "Fixture replay exposes normalized public fixture metadata, not private live connector payloads.",
+      "freshnessBoundary": "Normal checks use committed fixtures; live freshness is only an explicit opt-in readiness probe.",
+      "rateLimitBoundary": "Normal checks make no network calls, so external connector rate limits are not exercised.",
+      "auditLogBoundary": "Connector result records capture fixture status, unavailable evidence, and sanitized diagnostics.",
+      "supportedContracts": [
+        "spec/source-policy.schema.json",
+        "spec/evidence-gathering-plan.schema.json",
+        "spec/evidence-source-set.schema.json",
+        "spec/source-connector-registry.schema.json",
+        "spec/source-connector-result-set.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "fetch_live_private_api",
+        "connect_private_database",
+        "claim_live_freshness"
+      ],
+      "nextAction": "use_auto_evidence_fixture"
+    },
+    {
+      "adapterId": "privateadapter-private-api-001",
+      "sourceKind": "private_api",
+      "displayName": "Private API connector",
+      "implementationStatus": "planned_contract_only",
+      "availabilityStatus": "planned_contract_only",
+      "setupOutcomeIfRequested": "runtime_not_implemented",
+      "canInspect": false,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": false,
+      "approvalRequired": true,
+      "credentialBoundary": "caller_provided_out_of_band",
+      "promptVisibility": "no_secrets_prompt_visible",
+      "privacyBoundary": "No private API credentials, request payloads, or response rows enter generated artifacts.",
+      "freshnessBoundary": "Future adapters must declare request time, cache policy, and source freshness before forecasting.",
+      "rateLimitBoundary": "Future adapters must declare rate limits and retries before any call is allowed.",
+      "auditLogBoundary": "Future runtime must record approval, endpoint identity, scopes, timestamps, and sanitized errors.",
+      "supportedContracts": [
+        "spec/private-source-adapter-capability.schema.json",
+        "spec/private-setup-workflow.schema.json",
+        "spec/source-policy.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "fetch_live_private_api",
+        "parse_arbitrary_private_schema",
+        "run_effectful_query",
+        "claim_live_freshness"
+      ],
+      "nextAction": "wait_for_runtime"
+    },
+    {
+      "adapterId": "privateadapter-private-database-001",
+      "sourceKind": "private_database",
+      "displayName": "Private database connector",
+      "implementationStatus": "planned_contract_only",
+      "availabilityStatus": "planned_contract_only",
+      "setupOutcomeIfRequested": "runtime_not_implemented",
+      "canInspect": false,
+      "canFetchLive": false,
+      "canParseGeneric": false,
+      "canStoreSecrets": false,
+      "canExecuteInNormalChecks": false,
+      "approvalRequired": true,
+      "credentialBoundary": "caller_provided_out_of_band",
+      "promptVisibility": "no_secrets_prompt_visible",
+      "privacyBoundary": "No database credentials, query text with secrets, or private rows enter generated artifacts.",
+      "freshnessBoundary": "Future adapters must declare query timestamp, isolation, and freshness policy before forecasting.",
+      "rateLimitBoundary": "Future adapters must declare query limits, timeout, and retry policy before execution.",
+      "auditLogBoundary": "Future runtime must record approval, dataset identity, query boundary, timestamps, and sanitized errors.",
+      "supportedContracts": [
+        "spec/private-source-adapter-capability.schema.json",
+        "spec/private-setup-workflow.schema.json",
+        "spec/source-policy.schema.json"
+      ],
+      "blockedActions": [
+        "store_credentials",
+        "include_secrets_in_artifacts",
+        "create_forecast_without_intake",
+        "connect_private_database",
+        "parse_arbitrary_private_schema",
+        "run_effectful_query",
+        "claim_live_freshness"
+      ],
+      "nextAction": "wait_for_runtime"
+    }
+  ],
+  "executionBoundary": {
+    "declarationsDoNotExecute": true,
+    "normalChecksOffline": true,
+    "credentialStorageImplemented": false,
+    "genericPrivateApiRuntimeImplemented": false,
+    "genericPrivateDatabaseRuntimeImplemented": false,
+    "manualUploadRuntimeImplemented": false,
+    "arbitraryPrivateSchemaParsingImplemented": false
+  },
+  "guards": [
+    {
+      "guardId": "privateadapterguard-001",
+      "name": "declaration_only",
+      "rule": "Capability records describe adapter boundaries and must not execute source reads by implication.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterguard-002",
+      "name": "workflow_source_binding",
+      "rule": "Adapter source kinds must match the domain-agnostic private setup workflow source kinds.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterguard-003",
+      "name": "no_secret_storage",
+      "rule": "Adapters must not store credentials or expose secrets in generated artifacts.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py",
+        "scripts/check_hardening.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterguard-004",
+      "name": "normal_checks_offline",
+      "rule": "Normal checks may inspect fixtures but must not fetch live private API or database data.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py",
+        "scripts/run_checks.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterguard-005",
+      "name": "planned_private_runtimes",
+      "rule": "Private API, private database, and manual upload adapters remain non-executable until a runtime lands.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterguard-006",
+      "name": "freshness_and_audit_boundary",
+      "rule": "Freshness, rate-limit, privacy, and audit boundaries must be declared before setup attempts.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_capabilities.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "This is a capability declaration, not a connector runtime.",
+    "Private API, private database, and manual upload adapters cannot execute in the current local surface.",
+    "No adapter may store credentials or include secrets in forecast artifacts.",
+    "Normal checks remain offline and fixture-safe."
+  ]
+}

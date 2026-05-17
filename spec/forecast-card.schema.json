@@ -22,6 +22,7 @@
     "score",
     "qualityClaim",
     "requestBinding",
+    "setupBinding",
     "warnings",
     "links"
   ],
@@ -161,7 +162,16 @@
     "requestBinding": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["pipelineRunId", "requestId", "effectfulGeneration", "executionMode"],
+      "required": [
+        "pipelineRunId",
+        "requestId",
+        "effectfulGeneration",
+        "executionMode",
+        "sourceMode",
+        "evidencePlanId",
+        "evidenceSourceSetId",
+        "sourcePolicyId"
+      ],
       "properties": {
         "pipelineRunId": {
           "oneOf": [
@@ -189,6 +199,150 @@
             },
             { "type": "null" }
           ]
+        },
+        "sourceMode": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["committed_fixture", "auto_evidence_fixture_replay"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "evidencePlanId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "evidenceSourceSetId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "sourcePolicyId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "setupBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "setupForecastRunId",
+        "domainSetupId",
+        "sourceManifestId",
+        "fieldMappingId",
+        "sourceIntakeReportId",
+        "sourceIntakeHandoffId",
+        "sourceHandoffMethodGateId",
+        "setupMethodDecisionId",
+        "setupBenchmarkGateId",
+        "runStatus",
+        "selectedMethodClass",
+        "selectedForecastMode"
+      ],
+      "properties": {
+        "setupForecastRunId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "domainSetupId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "sourceManifestId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "fieldMappingId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "sourceIntakeReportId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "sourceIntakeHandoffId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "sourceHandoffMethodGateId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "setupMethodDecisionId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "setupBenchmarkGateId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "runStatus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["generated", "blocked"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "selectedMethodClass": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "historical_baseline",
+                "historical_conditioned_frequency",
+                "deterministic_statistical",
+                "model_assisted",
+                "external_reference",
+                "ensemble",
+                "none"
+              ]
+            },
+            { "type": "null" }
+          ]
+        },
+        "selectedForecastMode": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "baseline_only",
+                "historical_conditioned",
+                "deterministic_statistical",
+                "model_assisted",
+                "external_reference",
+                "ensemble",
+                "blocked"
+              ]
+            },
+            { "type": "null" }
+          ]
         }
       }
     },
@@ -207,6 +361,7 @@
       "additionalProperties": false,
       "required": [
         "forecastBundle",
+        "evidenceTrace",
         "forecastArtifact",
         "evidencePacket",
         "resolutionRecord",
@@ -215,6 +370,12 @@
       ],
       "properties": {
         "forecastBundle": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceTrace": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
         "forecastArtifact": { "$ref": "common.schema.json#/$defs/id" },
         "evidencePacket": { "$ref": "common.schema.json#/$defs/id" },
         "resolutionRecord": {

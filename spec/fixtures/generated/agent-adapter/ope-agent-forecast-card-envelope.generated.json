@@ -1,0 +1,146 @@
+{
+  "agentEnvelopeId": "agentenvelope-003",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "forecast_card",
+  "adapterRequest": {
+    "operation": "forecast_card",
+    "inputRecordType": "forecast_card",
+    "inputRef": "forecast-602",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "maxBytes": 65536,
+    "callerIntent": "Read a compact claim-safe forecast card before deciding whether to act."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "approved",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "auto_evidence_fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "recordType": "forecast-card",
+    "recordId": "forecast-602",
+    "access": {
+      "mode": "read_only_file",
+      "maxRecordsPerRequest": 1
+    },
+    "record": {
+      "cardId": "forecastcard-forecast-602",
+      "forecastId": "forecast-602",
+      "questionId": "question-601",
+      "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+      "domain": "weather-logistics",
+      "horizon": {
+        "startsAt": "2026-06-03T00:00:00Z",
+        "endsAt": "2026-06-03T23:59:59Z",
+        "label": "1-day"
+      },
+      "status": "resolved",
+      "forecastedAt": "2026-06-02T10:00:00Z",
+      "closedAt": "2026-06-03T00:00:00Z",
+      "scheduledResolutionAt": "2026-06-04T12:00:00Z",
+      "forecast": {
+        "outputType": "binary",
+        "probability": 0.41
+      },
+      "baseline": {
+        "outputType": "binary",
+        "probability": 0.22
+      },
+      "model": {
+        "modelId": "model-601",
+        "version": "weather-logistics-auto-evidence-fixture-v0"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolvedAt": "2026-06-04T12:10:00Z",
+        "resolvedOutcome": {
+          "outputType": "binary",
+          "value": true
+        }
+      },
+      "score": {
+        "scoreStatus": "scored",
+        "scoringRule": "brier",
+        "primaryScore": 0.3481,
+        "baselineScore": 0.6084,
+        "baselineLift": 0.2603,
+        "generatedAt": "2026-06-04T12:15:00Z"
+      },
+      "qualityClaim": {
+        "status": "not_enough_resolved_auto_evidence_outcomes",
+        "minimumSampleSize": 30,
+        "resolvedComparableOutcomes": 1,
+        "sampleSize": 1,
+        "trackRecordReportId": "trackrecord-601"
+      },
+      "requestBinding": {
+        "pipelineRunId": "pipelinerun-601",
+        "requestId": "forecastrequest-007",
+        "effectfulGeneration": false,
+        "executionMode": "fixture_dry_run",
+        "sourceMode": "auto_evidence_fixture_replay",
+        "evidencePlanId": "evidenceplan-019",
+        "evidenceSourceSetId": "evidencesourceset-019",
+        "sourcePolicyId": "sourcepolicy-019"
+      },
+      "setupBinding": {
+        "setupForecastRunId": null,
+        "domainSetupId": null,
+        "sourceManifestId": null,
+        "fieldMappingId": null,
+        "sourceIntakeReportId": null,
+        "sourceIntakeHandoffId": null,
+        "sourceHandoffMethodGateId": null,
+        "setupMethodDecisionId": null,
+        "setupBenchmarkGateId": null,
+        "runStatus": null,
+        "selectedMethodClass": null,
+        "selectedForecastMode": null
+      },
+      "warnings": [
+        "Fixture-mode record; do not generalize to live performance.",
+        "Calibration and quality claims require the declared minimum comparable resolved outcomes."
+      ],
+      "links": {
+        "forecastBundle": "forecastbundle-forecast-602",
+        "evidenceTrace": "evidencetrace-602",
+        "forecastArtifact": "forecast-602",
+        "evidencePacket": "evidence-601",
+        "resolutionRecord": "resolution-601",
+        "scoringReport": "scoring-601",
+        "trackRecordReport": "trackrecord-601"
+      }
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Fixture-mode record; do not generalize to live performance.",
+    "Calibration and quality claims require the declared minimum comparable resolved outcomes."
+  ]
+}

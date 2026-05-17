@@ -1,0 +1,384 @@
+{
+  "privateSetupWorkflowId": "privatesetupworkflow-001",
+  "generatedAt": "2026-06-06T20:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "local_fixture_contract",
+  "supportedSourceKinds": [
+    {
+      "sourceKind": "local_file",
+      "implementationStatus": "implemented_fixture",
+      "currentBoundary": "Small caller-approved CSV and JSON files are supported only through the checked local source-builder fixture path.",
+      "allowedInCurrentFixture": true,
+      "requiresApproval": false
+    },
+    {
+      "sourceKind": "manual_mapping",
+      "implementationStatus": "implemented_fixture",
+      "currentBoundary": "Manual confirmation can turn proposed mappings into source-intake inputs in checked fixtures.",
+      "allowedInCurrentFixture": true,
+      "requiresApproval": true
+    },
+    {
+      "sourceKind": "manual_upload",
+      "implementationStatus": "planned_contract_only",
+      "currentBoundary": "Manual upload setup can be represented by the workflow, but no generic upload intake runtime is implemented.",
+      "allowedInCurrentFixture": false,
+      "requiresApproval": true
+    },
+    {
+      "sourceKind": "auto_evidence_connector",
+      "implementationStatus": "implemented_fixture",
+      "currentBoundary": "Policy-bound fixture replay is implemented; production live auto-evidence gathering is not.",
+      "allowedInCurrentFixture": true,
+      "requiresApproval": false
+    },
+    {
+      "sourceKind": "private_api",
+      "implementationStatus": "planned_contract_only",
+      "currentBoundary": "Private API setup can be represented by the workflow, but no generic API connector runtime is implemented.",
+      "allowedInCurrentFixture": false,
+      "requiresApproval": true
+    },
+    {
+      "sourceKind": "private_database",
+      "implementationStatus": "planned_contract_only",
+      "currentBoundary": "Private database setup can be represented by the workflow, but no generic database connector runtime is implemented.",
+      "allowedInCurrentFixture": false,
+      "requiresApproval": true
+    }
+  ],
+  "phases": [
+    {
+      "phaseId": "privatesetupphase-001",
+      "order": 1,
+      "phase": "source_discovery",
+      "purpose": "Inspect or declare caller-approved sources before creating source manifests or mappings.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py source-builder",
+      "inputContracts": [
+        "spec/domain-setup.schema.json"
+      ],
+      "outputContracts": [
+        "spec/source-manifest-build.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "rejected_source",
+        "unsupported_source"
+      ],
+      "guardrail": "Discovery drafts source records only; it must not create forecasts or public read surfaces."
+    },
+    {
+      "phaseId": "privatesetupphase-002",
+      "order": 2,
+      "phase": "mapping_confirmation",
+      "purpose": "Confirm or reject agent-inferred source roles, field mappings, and alias mappings.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py source-handoff",
+      "inputContracts": [
+        "spec/source-manifest-build.schema.json",
+        "spec/field-mapping.schema.json"
+      ],
+      "outputContracts": [
+        "spec/source-intake-handoff.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_confirmation",
+        "rejected_source"
+      ],
+      "guardrail": "Agent-inferred mappings remain proposals until deterministic validation or caller confirmation accepts them."
+    },
+    {
+      "phaseId": "privatesetupphase-003",
+      "order": 3,
+      "phase": "source_intake",
+      "purpose": "Classify source manifests and mappings as usable, partial, confirmation-needed, or rejected.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py source-intake",
+      "inputContracts": [
+        "spec/source-manifest.schema.json",
+        "spec/field-mapping.schema.json"
+      ],
+      "outputContracts": [
+        "spec/source-intake-report.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_confirmation",
+        "needs_more_data",
+        "rejected_source"
+      ],
+      "guardrail": "Source intake may classify data, but it must not create forecast artifacts."
+    },
+    {
+      "phaseId": "privatesetupphase-004",
+      "order": 4,
+      "phase": "method_gating",
+      "purpose": "Select the best justified enabled method for the accepted setup and preserve baseline fallback.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py source-handoff-method",
+      "inputContracts": [
+        "spec/source-intake-report.schema.json",
+        "spec/setup-benchmark-gate.schema.json"
+      ],
+      "outputContracts": [
+        "spec/setup-method-decision.schema.json",
+        "spec/source-handoff-method-gate.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_confirmation",
+        "needs_more_data",
+        "rejected_source"
+      ],
+      "guardrail": "Method gates explain eligibility; they must not create forecast outputs."
+    },
+    {
+      "phaseId": "privatesetupphase-005",
+      "order": 5,
+      "phase": "forecast_execution",
+      "purpose": "Create forecast artifacts only after source intake and method decisions allow execution.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py source-handoff-forecast",
+      "inputContracts": [
+        "spec/setup-forecast-run.schema.json",
+        "spec/setup-method-decision.schema.json"
+      ],
+      "outputContracts": [
+        "spec/forecast-question.schema.json",
+        "spec/evidence-packet.schema.json",
+        "spec/forecast-artifact.schema.json",
+        "spec/forecast-history.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_confirmation",
+        "needs_more_data",
+        "rejected_source"
+      ],
+      "guardrail": "Blocked execution outcomes must not bind forecast IDs, cards, bundles, or artifact paths."
+    },
+    {
+      "phaseId": "privatesetupphase-006",
+      "order": 6,
+      "phase": "recalculation",
+      "purpose": "Append forecast updates when new pre-close evidence arrives without overwriting history.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py recalculation",
+      "inputContracts": [
+        "spec/recalculation-trigger.schema.json",
+        "spec/recalculation-run.schema.json"
+      ],
+      "outputContracts": [
+        "spec/forecast-history.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "rejected_source",
+        "runtime_not_implemented"
+      ],
+      "guardrail": "Post-outcome evidence and resolution sources must not alter forecast-time probabilities."
+    },
+    {
+      "phaseId": "privatesetupphase-007",
+      "order": 7,
+      "phase": "resolution",
+      "purpose": "Resolve outcomes from declared resolution sources after the forecast closes.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py resolve-source-handoff",
+      "inputContracts": [
+        "spec/resolution-record.schema.json"
+      ],
+      "outputContracts": [
+        "spec/resolution-record.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_more_data",
+        "runtime_not_implemented"
+      ],
+      "guardrail": "Resolution sources may resolve outcomes but must not enter forecast-time evidence."
+    },
+    {
+      "phaseId": "privatesetupphase-008",
+      "order": 8,
+      "phase": "scoring",
+      "purpose": "Score resolved forecasts and update track-record and calibration summaries with sample-size boundaries.",
+      "implementedNow": true,
+      "currentSurface": "python3 scripts/ope.py read --record-type track-record --id trackrecord-1102",
+      "inputContracts": [
+        "spec/scoring-report.schema.json",
+        "spec/track-record-report.schema.json",
+        "spec/calibration-summary.schema.json"
+      ],
+      "outputContracts": [
+        "spec/scoring-report.schema.json",
+        "spec/track-record-report.schema.json",
+        "spec/calibration-summary.schema.json"
+      ],
+      "allowedSourceKinds": [
+        "local_file",
+        "manual_mapping"
+      ],
+      "possibleOutcomes": [
+        "setup_ready",
+        "needs_more_data"
+      ],
+      "guardrail": "Quality and calibration claims require enough comparable resolved outcomes."
+    }
+  ],
+  "outcomeClasses": [
+    {
+      "outcomeClass": "setup_ready",
+      "terminal": false,
+      "canForecast": true,
+      "canScore": true,
+      "nextAction": "run_method_gate",
+      "agentInstruction": "Continue through method gating, explicit forecast execution, resolution, and read surfaces."
+    },
+    {
+      "outcomeClass": "needs_confirmation",
+      "terminal": false,
+      "canForecast": false,
+      "canScore": false,
+      "nextAction": "confirm_mapping",
+      "agentInstruction": "Ask the caller to confirm proposed mappings before continuing."
+    },
+    {
+      "outcomeClass": "needs_more_data",
+      "terminal": false,
+      "canForecast": false,
+      "canScore": false,
+      "nextAction": "collect_more_data",
+      "agentInstruction": "Collect enough pre-close source rows or outcome evidence before retrying the phase."
+    },
+    {
+      "outcomeClass": "rejected_source",
+      "terminal": true,
+      "canForecast": false,
+      "canScore": false,
+      "nextAction": "replace_source",
+      "agentInstruction": "Replace rejected sources before source intake, method gates, forecast execution, or scoring."
+    },
+    {
+      "outcomeClass": "unsupported_source",
+      "terminal": true,
+      "canForecast": false,
+      "canScore": false,
+      "nextAction": "use_supported_source",
+      "agentInstruction": "Use a supported fixture source or wait for a future connector runtime."
+    },
+    {
+      "outcomeClass": "runtime_not_implemented",
+      "terminal": true,
+      "canForecast": false,
+      "canScore": false,
+      "nextAction": "wait_for_runtime",
+      "agentInstruction": "Do not simulate hosted upload, private API, or database behavior as implemented OPE support."
+    }
+  ],
+  "referenceImplementation": {
+    "referenceDomain": "weather-logistics",
+    "referenceRunbookId": "sourcehandoffsetuprunbook-001",
+    "referenceRunbookPath": "spec/fixtures/generated/source-handoff-runbook/weather-logistics-source-handoff-setup-runbook.generated.json",
+    "referenceRunbookCommand": "python3 scripts/ope.py source-handoff-runbook",
+    "implementedFixturePath": "spec/fixtures/generated/source-handoff-runbook/",
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "trackRecordReportId": "trackrecord-1102",
+    "implementedNow": true,
+    "claimBoundary": "The reference implementation is local fixture-safe and has one resolved source-handoff outcome, below quality and calibration claim thresholds."
+  },
+  "guards": [
+    {
+      "guardId": "privatesetupguard-001",
+      "name": "domain_agnostic_contract",
+      "rule": "The workflow must describe phases and outcomes without hard-coding weather-logistics as the product boundary.",
+      "checkedBy": [
+        "scripts/check_private_setup_workflow.py"
+      ]
+    },
+    {
+      "guardId": "privatesetupguard-002",
+      "name": "reference_wedge_boundary",
+      "rule": "Weather-logistics remains a reference fixture implementation, not proof of broad domain coverage.",
+      "checkedBy": [
+        "scripts/check_private_setup_workflow.py",
+        "scripts/generate_release_manifest.py"
+      ]
+    },
+    {
+      "guardId": "privatesetupguard-003",
+      "name": "private_runtime_boundary",
+      "rule": "Manual uploads, private APIs, and databases are planned contract surfaces until a future runtime implements them.",
+      "checkedBy": [
+        "scripts/check_private_setup_workflow.py"
+      ]
+    },
+    {
+      "guardId": "privatesetupguard-004",
+      "name": "source_policy_boundary",
+      "rule": "Every setup path must declare source policy, mappings, provenance, and unavailable evidence before forecasting.",
+      "checkedBy": [
+        "scripts/check_source_intake.py",
+        "scripts/check_private_setup_workflow.py"
+      ]
+    },
+    {
+      "guardId": "privatesetupguard-005",
+      "name": "blocked_outputs_boundary",
+      "rule": "Rejected, unsupported, unconfirmed, and runtime-not-implemented outcomes must not bind forecast or scoring outputs.",
+      "checkedBy": [
+        "scripts/check_source_handoff_setup_runbook.py",
+        "scripts/check_private_setup_workflow.py"
+      ]
+    },
+    {
+      "guardId": "privatesetupguard-006",
+      "name": "claim_boundary",
+      "rule": "Setup-ready or scored fixture outcomes do not create calibration, production, or state-of-the-art claims.",
+      "checkedBy": [
+        "scripts/check_source_handoff_resolution.py",
+        "scripts/check_private_setup_workflow.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "This workflow is a domain-agnostic contract, not a hosted service runtime.",
+    "Manual uploads, private API setup, and private database setup are represented as planned contract surfaces, not implemented connectors.",
+    "The weather-logistics source-handoff runbook is the current fixture implementation, not a universal setup proof.",
+    "Quality and calibration claims remain tied to comparable resolved outcome counts."
+  ]
+}

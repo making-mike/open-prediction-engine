@@ -1,0 +1,21 @@
+{
+  "resolutionRecordId": "resolution-1102",
+  "questionId": "question-1102",
+  "status": "resolved",
+  "resolvedAt": "2026-06-04T12:30:00Z",
+  "resolutionSource": {
+    "sourceId": "localsource-003",
+    "name": "Declared Operations Outcome",
+    "sourceType": "internal_dataset",
+    "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+    "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+  },
+  "resolutionAuthority": "OPE prototype resolver",
+  "resolvedOutcome": {
+    "outputType": "binary",
+    "value": true
+  },
+  "supportingEvidence": [
+    "local://spec/fixtures/local-source-files/outcome.csv"
+  ]
+}

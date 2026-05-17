@@ -1,0 +1,377 @@
+{
+  "sourceIntakeReportId": "sourceintakereport-101",
+  "generatedAt": "2026-06-06T16:20:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifestdraft-001",
+  "fieldMappingId": "fieldmappingdraft-001",
+  "intakeStatus": "needs_confirmation",
+  "canProduceForecast": false,
+  "forecastGenerationAllowed": false,
+  "roleCoverage": [
+    {
+      "sourceRole": "weather_forecast",
+      "requiredForForecast": true,
+      "status": "partial",
+      "sourceIds": [
+        "localsource-001"
+      ]
+    },
+    {
+      "sourceRole": "historical_baseline",
+      "requiredForForecast": true,
+      "status": "partial",
+      "sourceIds": [
+        "localsource-002"
+      ]
+    },
+    {
+      "sourceRole": "declared_operations_outcome",
+      "requiredForForecast": false,
+      "status": "partial",
+      "sourceIds": [
+        "localsource-003"
+      ]
+    }
+  ],
+  "sourceDecisions": [
+    {
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "decision": "needs_confirmation",
+      "reasonCodes": [
+        "alias_or_mapping_requires_confirmation",
+        "available_before_forecast_close",
+        "no_post_outcome_evidence_detected",
+        "not_baseline_source",
+        "privacy_boundary_ok",
+        "proposed_required_mappings",
+        "source_fresh_enough",
+        "type_parse_after_mapping_confirmation"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "proposed_required_mappings"
+          ]
+        },
+        "typeParsing": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "type_parse_after_mapping_confirmation"
+          ]
+        },
+        "entityMatch": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "alias_or_mapping_requires_confirmation"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_fresh_enough"
+          ]
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected"
+          ]
+        },
+        "sampleSize": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "not_baseline_source"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    },
+    {
+      "sourceId": "localsource-002",
+      "sourceRole": "historical_baseline",
+      "decision": "needs_confirmation",
+      "reasonCodes": [
+        "alias_or_mapping_requires_confirmation",
+        "available_before_forecast_close",
+        "baseline_sample_sufficient",
+        "no_post_outcome_evidence_detected",
+        "privacy_boundary_ok",
+        "proposed_required_mappings",
+        "source_fresh_enough",
+        "type_parse_after_mapping_confirmation"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "proposed_required_mappings"
+          ]
+        },
+        "typeParsing": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "type_parse_after_mapping_confirmation"
+          ]
+        },
+        "entityMatch": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "alias_or_mapping_requires_confirmation"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_fresh_enough"
+          ]
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected"
+          ]
+        },
+        "sampleSize": {
+          "status": "passed",
+          "reasonCodes": [
+            "baseline_sample_sufficient"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    },
+    {
+      "sourceId": "localsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "decision": "needs_confirmation",
+      "reasonCodes": [
+        "alias_or_mapping_requires_confirmation",
+        "not_baseline_source",
+        "privacy_boundary_ok",
+        "proposed_required_mappings",
+        "resolution_role_not_forecast_time",
+        "source_role_resolution_only",
+        "type_parse_after_mapping_confirmation"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "proposed_required_mappings"
+          ]
+        },
+        "typeParsing": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "type_parse_after_mapping_confirmation"
+          ]
+        },
+        "entityMatch": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "alias_or_mapping_requires_confirmation"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time"
+          ]
+        },
+        "leakageRisk": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "source_role_resolution_only"
+          ]
+        },
+        "sampleSize": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "not_baseline_source"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    }
+  ],
+  "mappingDecisions": [
+    {
+      "mappingId": "draftmapping-001",
+      "sourceId": "localsource-001",
+      "targetField": "geography",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-002",
+      "sourceId": "localsource-001",
+      "targetField": "service_date",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-003",
+      "sourceId": "localsource-001",
+      "targetField": "retrieved_at",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-004",
+      "sourceId": "localsource-001",
+      "targetField": "forecast_daily_precipitation_mm",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-005",
+      "sourceId": "localsource-002",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "registry_backed",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-006",
+      "sourceId": "localsource-002",
+      "targetField": "geography",
+      "decision": "accepted",
+      "mappingOrigin": "registry_backed",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-007",
+      "sourceId": "localsource-002",
+      "targetField": "disruption_observed",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-008",
+      "sourceId": "localsource-003",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-009",
+      "sourceId": "localsource-003",
+      "targetField": "geography",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    },
+    {
+      "mappingId": "draftmapping-010",
+      "sourceId": "localsource-003",
+      "targetField": "disruption_observed",
+      "decision": "proposed",
+      "mappingOrigin": "agent_inferred",
+      "requiresConfirmation": true,
+      "reasonCodes": [
+        "mapping_requires_confirmation",
+        "agent_inferred_mapping"
+      ]
+    }
+  ],
+  "methodEligibility": [
+    {
+      "methodClass": "historical_baseline",
+      "eligible": false,
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "missing_usable_historical_baseline"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "eligible": false,
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "missing_usable_historical_baseline",
+        "missing_usable_weather_forecast"
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Confirm proposed field and alias mappings before forecast execution."
+  ],
+  "warnings": [
+    "Source intake reports do not produce forecast artifacts."
+  ]
+}

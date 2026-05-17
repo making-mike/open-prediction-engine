@@ -1,0 +1,110 @@
+{
+  "methodComparisonId": "methodcomparison-001",
+  "generatedAt": "2026-06-06T12:03:00Z",
+  "methodRegistryId": "methodregistry-001",
+  "domain": "weather-logistics",
+  "baselineMethodId": "method-100",
+  "comparisons": [
+    {
+      "methodId": "method-101",
+      "methodClass": "deterministic_statistical",
+      "status": "enabled",
+      "comparisonStatus": "comparable_checked",
+      "baselineMethodId": "method-100",
+      "sameQuestionSet": true,
+      "sameSourcePolicy": true,
+      "sameRetrievalWindow": true,
+      "leakageValidated": true,
+      "sampleSize": 1,
+      "qualityClaimStatus": "not_enough_comparable_benchmarks",
+      "reasons": [
+        "sample_below_quality_threshold"
+      ],
+      "baselineBenchmarkRunId": "benchmarkrun-003",
+      "candidateBenchmarkRunId": "benchmarkrun-001",
+      "sourcePolicyId": "sourcepolicy-001",
+      "retrievalWindow": {
+        "startsAt": "2026-06-01T00:00:00Z",
+        "endsAt": "2026-06-02T10:00:00Z"
+      },
+      "baselineLift": 0.2603
+    },
+    {
+      "methodId": "method-201",
+      "methodClass": "model_assisted",
+      "status": "proposed",
+      "comparisonStatus": "not_comparable",
+      "baselineMethodId": "method-100",
+      "sameQuestionSet": false,
+      "sameSourcePolicy": false,
+      "sameRetrievalWindow": false,
+      "leakageValidated": false,
+      "sampleSize": 0,
+      "qualityClaimStatus": "not_enabled",
+      "reasons": [
+        "benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "method-301",
+      "methodClass": "retrieval_assisted",
+      "status": "proposed",
+      "comparisonStatus": "not_comparable",
+      "baselineMethodId": "method-100",
+      "sameQuestionSet": false,
+      "sameSourcePolicy": false,
+      "sameRetrievalWindow": false,
+      "leakageValidated": false,
+      "sampleSize": 0,
+      "qualityClaimStatus": "not_enabled",
+      "reasons": [
+        "benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "method-401",
+      "methodClass": "ensemble",
+      "status": "proposed",
+      "comparisonStatus": "not_comparable",
+      "baselineMethodId": "method-100",
+      "sameQuestionSet": false,
+      "sameSourcePolicy": false,
+      "sameRetrievalWindow": false,
+      "leakageValidated": false,
+      "sampleSize": 0,
+      "qualityClaimStatus": "not_enabled",
+      "reasons": [
+        "benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "method-501",
+      "methodClass": "external_reference",
+      "status": "proposed",
+      "comparisonStatus": "not_comparable",
+      "baselineMethodId": "method-100",
+      "sameQuestionSet": false,
+      "sameSourcePolicy": false,
+      "sameRetrievalWindow": false,
+      "leakageValidated": false,
+      "sampleSize": 0,
+      "qualityClaimStatus": "not_enabled",
+      "reasons": [
+        "benchmark_missing",
+        "method_not_enabled"
+      ]
+    }
+  ],
+  "qualityBoundary": {
+    "domain": "weather-logistics",
+    "minimumComparableBenchmarks": 30,
+    "qualityClaimStatus": "not_enough_comparable_benchmarks"
+  },
+  "warnings": [
+    "Method comparison is fixture-only and does not make a live performance claim.",
+    "Only comparable clean benchmark runs may support baseline-lift claims."
+  ]
+}

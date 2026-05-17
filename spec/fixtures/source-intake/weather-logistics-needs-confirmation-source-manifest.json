@@ -1,0 +1,187 @@
+{
+  "sourceManifestId": "sourcemanifest-003",
+  "createdAt": "2026-06-02T10:00:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "forecastParameters": {
+    "questionTemplateId": "template-001",
+    "horizonLabel": "1-day",
+    "forecastCloseTime": "2026-06-02T12:00:00Z",
+    "geography": "Warsaw",
+    "serviceDate": "2026-06-03",
+    "assetIdentifier": null,
+    "location": null,
+    "targetWindow": null
+  },
+  "sources": [
+    {
+      "sourceId": "manifestsource-006",
+      "sourceRole": "weather_forecast",
+      "displayName": "Agent Extracted Weather Table",
+      "connectorType": "agent_extraction",
+      "sourceClass": "public_dataset",
+      "sourceRef": "local://agent-extraction/weather-table.json",
+      "contentHash": "hash-weather-confirm-001",
+      "rowCount": 1,
+      "positiveOutcomeCount": null,
+      "retrieval": {
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 24
+      },
+      "coverage": {
+        "geographies": [
+          "Warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "public",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "city",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "loaded_at",
+          "observedType": "date_time",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "rain_mm",
+          "observedType": "number",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ]
+    },
+    {
+      "sourceId": "manifestsource-007",
+      "sourceRole": "historical_baseline",
+      "displayName": "Agent Extracted Historical Rows",
+      "connectorType": "agent_extraction",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://agent-extraction/history-table.json",
+      "contentHash": "hash-history-confirm-001",
+      "rowCount": 60,
+      "positiveOutcomeCount": 7,
+      "retrieval": {
+        "retrievedAt": "2026-06-01T18:00:00Z",
+        "availableBeforeForecastClose": true,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "Warsaw"
+        ],
+        "serviceDateStart": "2026-01-01",
+        "serviceDateEnd": "2026-06-01",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "date",
+          "observedType": "date",
+          "sampleCount": 60,
+          "nonNullCount": 60,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "city",
+          "observedType": "string",
+          "sampleCount": 60,
+          "nonNullCount": 60,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disrupted",
+          "observedType": "boolean",
+          "sampleCount": 60,
+          "nonNullCount": 60,
+          "exampleValuesStored": false
+        }
+      ]
+    },
+    {
+      "sourceId": "manifestsource-008",
+      "sourceRole": "declared_operations_outcome",
+      "displayName": "Agent Proposed Outcome Table",
+      "connectorType": "agent_extraction",
+      "sourceClass": "internal_dataset",
+      "sourceRef": "local://agent-extraction/outcome-table.json",
+      "contentHash": "hash-outcome-confirm-001",
+      "rowCount": 1,
+      "positiveOutcomeCount": 1,
+      "retrieval": {
+        "retrievedAt": null,
+        "availableBeforeForecastClose": false,
+        "maxSourceAgeHours": 8760
+      },
+      "coverage": {
+        "geographies": [
+          "Warsaw"
+        ],
+        "serviceDateStart": "2026-06-03",
+        "serviceDateEnd": "2026-06-03",
+        "entityIdentifiers": []
+      },
+      "privacy": {
+        "privacyClass": "internal",
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false,
+        "rawRetention": "metadata_only"
+      },
+      "fieldInventory": [
+        {
+          "fieldName": "date",
+          "observedType": "date",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "city",
+          "observedType": "string",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        },
+        {
+          "fieldName": "disrupted",
+          "observedType": "boolean",
+          "sampleCount": 1,
+          "nonNullCount": 1,
+          "exampleValuesStored": false
+        }
+      ]
+    }
+  ]
+}

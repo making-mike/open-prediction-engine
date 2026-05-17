@@ -1,0 +1,23 @@
+{
+  "resolutionRecordId": "resolution-601",
+  "questionId": "question-601",
+  "status": "resolved",
+  "resolvedAt": "2026-06-04T12:10:00Z",
+  "resolutionSource": {
+    "sourceId": "source-402",
+    "name": "Declared Warsaw operations event source",
+    "sourceType": "internal_dataset",
+    "uri": "https://example.test/live/warsaw-operations-2026-06-03.json",
+    "retrievedAt": "2026-06-04T09:00:00Z",
+    "contentHash": "sha256-live-ops-outcome-401"
+  },
+  "resolutionAuthority": "OPE prototype resolver",
+  "resolvedOutcome": {
+    "outputType": "binary",
+    "value": true
+  },
+  "supportingEvidence": [
+    "https://example.test/live/warsaw-operations-2026-06-03.json",
+    "https://archive-api.open-meteo.com/v1/archive?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&start_date=2026-06-03&end_date=2026-06-03"
+  ]
+}

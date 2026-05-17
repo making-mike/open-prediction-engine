@@ -1,0 +1,41 @@
+{
+  "forecastId": "forecast-902",
+  "questionId": "question-902",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T10:30:00Z",
+  "closedAt": "2026-06-02T12:00:00Z",
+  "outputType": "binary",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.1341
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.1341
+  },
+  "model": {
+    "modelId": "model-902",
+    "version": "setup-aware-historical-baseline-fixture-v1",
+    "configurationHash": "sha256-setup-forecast-model-902"
+  },
+  "evidencePacketId": "evidence-902",
+  "resolutionPlan": {
+    "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+    "resolutionAuthority": "OPE prototype resolver",
+    "primaryResolutionSource": {
+      "sourceId": "manifestsource-005",
+      "name": "Declared Outcome Placeholder",
+      "sourceType": "internal_dataset",
+      "uri": "local://fixtures/weather-logistics/outcome-placeholder.csv",
+      "contentHash": "hash-outcome-partial-001"
+    },
+    "fallbackResolutionSources": [],
+    "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+  }
+}

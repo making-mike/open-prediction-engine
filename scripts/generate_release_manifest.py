@@ -18,6 +18,16 @@ MANIFEST_PATH = GENERATED / "release-manifest.generated.json"
 RECORD_INDEX = GENERATED / "record-index.generated.json"
 PIPELINE_OUTCOME = GENERATED / "pipeline-resolution" / "weather-logistics-pipeline-resolution-outcome-summary.generated.json"
 LIVE_OUTCOME = GENERATED / "live-outcome" / "live-weather-logistics-outcome-summary.generated.json"
+AUTO_EVIDENCE_OUTCOME = (
+    GENERATED
+    / "auto-evidence-resolution"
+    / "weather-logistics-auto-evidence-resolution-outcome-summary.generated.json"
+)
+SOURCE_HANDOFF_OUTCOME = (
+    GENERATED
+    / "source-handoff-resolution"
+    / "weather-logistics-source-handoff-resolution-outcome-summary.generated.json"
+)
 SCHEMA = SPEC / "release-manifest.schema.json"
 GENERATED_AT = "2026-06-06T11:00:00Z"
 
@@ -51,6 +61,8 @@ def build_manifest() -> dict[str, Any]:
     record_index = load_json(RECORD_INDEX)
     pipeline_outcome = load_json(PIPELINE_OUTCOME)
     live_outcome = load_json(LIVE_OUTCOME)
+    auto_evidence_outcome = load_json(AUTO_EVIDENCE_OUTCOME)
+    source_handoff_outcome = load_json(SOURCE_HANDOFF_OUTCOME)
     schemas = schema_files()
     manifest = {
         "releaseManifestId": "releasemanifest-001",
@@ -88,12 +100,28 @@ def build_manifest() -> dict[str, Any]:
             "minimumCalibrationSampleSize": pipeline_outcome["minimumCalibrationSampleSize"],
             "resolvedPipelineOutcomes": pipeline_outcome["resolvedComparablePipelineOutcomes"],
             "resolvedLiveOutcomes": live_outcome["resolvedComparableLiveOutcomes"],
+            "resolvedAutoEvidenceOutcomes": auto_evidence_outcome["resolvedComparableAutoEvidenceOutcomes"],
+            "resolvedSourceHandoffOutcomes": source_handoff_outcome["resolvedComparableSourceHandoffOutcomes"],
             "qualityClaimStatus": "not_enough_resolved_comparable_outcomes",
         },
         "nonGoals": [
             "network_api",
             "hosted_service",
+            "production_agent_adapter_runtime",
             "production_live_data_workflow",
+            "production_auto_evidence_fetching",
+            "production_forecast_use_of_live_connector_results",
+            "public_forecast_use_of_local_live_drafts",
+            "public_forecast_use_of_unapproved_source_builder_drafts",
+            "public_forecast_use_of_unapproved_source_handoff_drafts",
+            "generic_private_api_database_runtime",
+            "generic_manual_upload_runtime",
+            "private_source_adapter_execution",
+            "private_source_adapter_outcome_execution",
+            "private_source_adapter_bridge_execution",
+            "integration_live_fetch_in_release_checks",
+            "local_live_capture_in_release_checks",
+            "unbounded_web_crawling",
             "live_calibration_claim",
             "universal_prediction_oracle",
         ],

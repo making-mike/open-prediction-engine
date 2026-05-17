@@ -1,0 +1,456 @@
+{
+  "agentEnvelopeId": "agentenvelope-005",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "lifecycle_bundle",
+  "adapterRequest": {
+    "operation": "lifecycle_bundle",
+    "inputRecordType": "lifecycle_bundle",
+    "inputRef": "forecast-602",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "maxBytes": 65536,
+    "callerIntent": "Inspect the bound lifecycle bundle for provenance and audit context."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": "pipelinerun-601",
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": "resolution-601",
+    "scoringReportId": "scoring-601"
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "approved",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "auto_evidence_fixture_replay",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "recordType": "forecast-bundle",
+    "recordId": "forecast-602",
+    "access": {
+      "mode": "read_only_file",
+      "maxRecordsPerRequest": 1
+    },
+    "record": {
+      "bundleId": "forecastbundle-forecast-602",
+      "forecastId": "forecast-602",
+      "questionId": "question-601",
+      "domain": "weather-logistics",
+      "status": "resolved",
+      "includedRecords": {
+        "forecastArtifact": "forecast-602",
+        "evidencePacket": "evidence-601",
+        "forecastQuestion": "question-601",
+        "forecastHistory": null,
+        "resolutionRecord": "resolution-601",
+        "scoringReport": "scoring-601",
+        "calibrationSummary": "calibration-601",
+        "trackRecordReport": "trackrecord-601",
+        "outcomeSummary": "resolution-601",
+        "pipelineRun": "pipelinerun-601",
+        "setupForecastRun": null
+      },
+      "records": {
+        "forecastArtifact": {
+          "forecastId": "forecast-602",
+          "questionId": "question-601",
+          "questionStatus": "open",
+          "domain": "weather-logistics",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "forecastedAt": "2026-06-02T10:00:00Z",
+          "closedAt": "2026-06-03T00:00:00Z",
+          "outputType": "binary",
+          "forecastOutput": {
+            "outputType": "binary",
+            "probability": 0.41
+          },
+          "baselineForecast": {
+            "outputType": "binary",
+            "probability": 0.22
+          },
+          "model": {
+            "modelId": "model-601",
+            "version": "weather-logistics-auto-evidence-fixture-v0",
+            "configurationHash": "sha256-auto-evidence-model-001"
+          },
+          "evidencePacketId": "evidence-601",
+          "resolutionPlan": {
+            "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+            "resolutionAuthority": "OPE prototype resolver",
+            "primaryResolutionSource": {
+              "sourceId": "source-402",
+              "name": "Declared Warsaw operations event source",
+              "sourceType": "internal_dataset"
+            },
+            "fallbackResolutionSources": [
+              {
+                "sourceId": "source-403",
+                "name": "Open-Meteo weather observation for Warsaw",
+                "sourceType": "public_dataset"
+              }
+            ],
+            "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+          }
+        },
+        "evidencePacket": {
+          "evidencePacketId": "evidence-601",
+          "forecastId": "forecast-602",
+          "questionId": "question-601",
+          "questionStatus": "open",
+          "domain": "weather-logistics",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "forecastedAt": "2026-06-02T10:00:00Z",
+          "model": {
+            "modelId": "model-601",
+            "version": "weather-logistics-auto-evidence-fixture-v0",
+            "configurationHash": "sha256-auto-evidence-model-001"
+          },
+          "inputSourceClasses": [
+            "internal_dataset",
+            "public_dataset"
+          ],
+          "provenanceReferences": [
+            {
+              "sourceId": "source-401",
+              "name": "Open-Meteo weather forecast for Warsaw",
+              "sourceType": "public_dataset",
+              "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum%2Cprecipitation_probability_max%2Cweather_code%2Cwind_gusts_10m_max&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+              "retrievedAt": "2026-06-02T09:30:00Z",
+              "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a"
+            },
+            {
+              "sourceId": "source-103",
+              "name": "Warsaw weather logistics baseline fixture",
+              "sourceType": "internal_dataset",
+              "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+              "retrievedAt": "2026-06-01T11:30:00Z",
+              "contentHash": "sha256-baseline-source-101"
+            }
+          ],
+          "featureSnapshotRef": "https://example.test/fixtures/generated/auto-evidence/weather-logistics-auto-evidence-feature-snapshot.generated.json",
+          "forecastOutput": {
+            "outputType": "binary",
+            "probability": 0.41
+          },
+          "baselineForecast": {
+            "outputType": "binary",
+            "probability": 0.22
+          },
+          "calibrationBand": {
+            "lower": 0.33,
+            "upper": 0.49,
+            "coverage": 0.8,
+            "sampleSize": 64
+          },
+          "rationaleSummary": "Auto-evidence fixture replay uses the declared source policy to gather weather evidence, then raises the baseline when forecast precipitation crosses the heavy-rain threshold.",
+          "keyFactors": [
+            "forecast precipitation 24.0 mm",
+            "threshold 20 mm",
+            "baseline disruption rate 0.22",
+            "source policy sourcepolicy-019",
+            "fixture replay; no live source fetch"
+          ],
+          "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+          "resolutionSource": {
+            "sourceId": "source-402",
+            "name": "Declared Warsaw operations event source",
+            "sourceType": "internal_dataset"
+          },
+          "fallbackResolutionSources": [
+            {
+              "sourceId": "source-403",
+              "name": "Open-Meteo weather observation for Warsaw",
+              "sourceType": "public_dataset"
+            }
+          ],
+          "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+        },
+        "forecastQuestion": {
+          "questionId": "question-601",
+          "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+          "background": "Generated by the auto-evidence fixture-replay forecast path for the selected weather-logistics wedge.",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "status": "resolved",
+          "openAt": "2026-06-02T10:00:00Z",
+          "closeAt": "2026-06-03T00:00:00Z",
+          "resolveAt": "2026-06-04T12:00:00Z",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+          "resolutionAuthority": "OPE prototype resolver",
+          "resolutionMode": "automated_measurement",
+          "primaryResolutionSource": {
+            "sourceId": "source-402",
+            "name": "Declared Warsaw operations event source",
+            "sourceType": "internal_dataset"
+          },
+          "fallbackResolutionSources": [
+            {
+              "sourceId": "source-403",
+              "name": "Open-Meteo weather observation for Warsaw",
+              "sourceType": "public_dataset"
+            }
+          ],
+          "validOutcomeSpace": {
+            "description": "Binary outcome: Yes if disruption and precipitation criteria are both satisfied; No otherwise.",
+            "labels": [
+              "yes",
+              "no"
+            ]
+          },
+          "clarificationHistory": [],
+          "incentiveRiskReview": {
+            "riskLevel": "minimal",
+            "notes": "Auto-evidence fixture-replay forecast with no live fetch or private operational data."
+          },
+          "createdAt": "2026-06-02T10:00:00Z",
+          "updatedAt": "2026-06-04T12:10:00Z"
+        },
+        "forecastHistory": null,
+        "resolutionRecord": {
+          "resolutionRecordId": "resolution-601",
+          "questionId": "question-601",
+          "status": "resolved",
+          "resolvedAt": "2026-06-04T12:10:00Z",
+          "resolutionSource": {
+            "sourceId": "source-402",
+            "name": "Declared Warsaw operations event source",
+            "sourceType": "internal_dataset",
+            "uri": "https://example.test/live/warsaw-operations-2026-06-03.json",
+            "retrievedAt": "2026-06-04T09:00:00Z",
+            "contentHash": "sha256-live-ops-outcome-401"
+          },
+          "resolutionAuthority": "OPE prototype resolver",
+          "resolvedOutcome": {
+            "outputType": "binary",
+            "value": true
+          },
+          "supportingEvidence": [
+            "https://example.test/live/warsaw-operations-2026-06-03.json",
+            "https://archive-api.open-meteo.com/v1/archive?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&start_date=2026-06-03&end_date=2026-06-03"
+          ]
+        },
+        "scoringReport": {
+          "scoringReportId": "scoring-601",
+          "questionId": "question-601",
+          "forecastId": "forecast-602",
+          "historyId": "history-601",
+          "resolutionRecordId": "resolution-601",
+          "scoreStatus": "scored",
+          "scoringRule": "brier",
+          "primaryScore": 0.3481,
+          "higherIsBetter": false,
+          "timeWeighting": {
+            "method": "latest_only",
+            "totalWeight": 1
+          },
+          "baselineScore": 0.6084,
+          "baselineLift": 0.2603,
+          "generatedAt": "2026-06-04T12:15:00Z"
+        },
+        "calibrationSummary": {
+          "calibrationSummaryId": "calibration-601",
+          "generatedAt": "2026-06-04T12:15:00Z",
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "coveragePeriod": {
+            "startsAt": "2026-06-02T10:00:00Z",
+            "endsAt": "2026-06-04T12:10:00Z"
+          },
+          "sampleSize": 1,
+          "expectedCalibrationError": 0.59,
+          "buckets": [
+            {
+              "lowerProbability": 0.0,
+              "upperProbability": 0.1,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.1,
+              "upperProbability": 0.2,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.2,
+              "upperProbability": 0.3,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.3,
+              "upperProbability": 0.4,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.4,
+              "upperProbability": 0.5,
+              "count": 1,
+              "meanForecastProbability": 0.41,
+              "observedFrequency": 1.0
+            },
+            {
+              "lowerProbability": 0.5,
+              "upperProbability": 0.6,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.6,
+              "upperProbability": 0.7,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.7,
+              "upperProbability": 0.8,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.8,
+              "upperProbability": 0.9,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.9,
+              "upperProbability": 1.0,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            }
+          ]
+        },
+        "trackRecordReport": {
+          "trackRecordReportId": "trackrecord-601",
+          "generatedAt": "2026-06-04T12:15:00Z",
+          "coveragePeriod": {
+            "startsAt": "2026-06-02T10:00:00Z",
+            "endsAt": "2026-06-04T12:10:00Z"
+          },
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "counts": {
+            "nForecasts": 2,
+            "nResolved": 1,
+            "nAmbiguous": 0,
+            "nAnnulled": 0
+          },
+          "summary": {
+            "primaryScoringRule": "brier",
+            "primaryScore": 0.3481,
+            "baselineScore": 0.6084,
+            "baselineLift": 0.2603,
+            "calibrationError": 0.59,
+            "lastUpdated": "2026-06-04T12:15:00Z"
+          },
+          "scoreHistogram": [
+            {
+              "lower": 0,
+              "upper": 0.5,
+              "count": 1
+            }
+          ],
+          "slices": []
+        },
+        "outcomeSummary": {
+          "publicationStatus": "provisional",
+          "qualityClaimStatus": "not_enough_resolved_auto_evidence_outcomes",
+          "minimumCalibrationSampleSize": 30,
+          "resolvedComparableAutoEvidenceOutcomes": 1,
+          "requestId": "forecastrequest-007",
+          "pipelineRunId": "pipelinerun-601",
+          "evidencePlanId": "evidenceplan-019",
+          "evidenceSourceSetId": "evidencesourceset-019",
+          "sourcePolicyId": "sourcepolicy-019",
+          "sourceMode": "auto_evidence_fixture_replay",
+          "questionId": "question-601",
+          "forecastId": "forecast-602",
+          "evidencePacketId": "evidence-601",
+          "resolutionRecordId": "resolution-601",
+          "forecastArtifactPath": "spec/fixtures/generated/auto-evidence/weather-logistics-auto-evidence-artifact.generated.json",
+          "generatedAt": "2026-06-04T12:15:00Z"
+        },
+        "pipelineRun": {
+          "pipelineRunId": "pipelinerun-601",
+          "requestId": "forecastrequest-007",
+          "decisionStatus": "accepted",
+          "executionStatus": "generated_fixture",
+          "executionMode": "fixture_dry_run",
+          "effectfulGeneration": false,
+          "generatedAt": "2026-06-02T10:02:00Z",
+          "controls": {
+            "requestValidated": true,
+            "networkAccess": false,
+            "liveFetch": false,
+            "modelClass": "deterministic_fixture",
+            "sourceMode": "auto_evidence_fixture_replay"
+          },
+          "outputs": {
+            "questionId": "question-601",
+            "forecastId": "forecast-602",
+            "evidencePacketId": "evidence-601",
+            "historyId": "history-601",
+            "forecastArtifactPath": "spec/fixtures/generated/auto-evidence/weather-logistics-auto-evidence-artifact.generated.json",
+            "evidencePlanId": "evidenceplan-019",
+            "evidenceSourceSetId": "evidencesourceset-019",
+            "sourcePolicyId": "sourcepolicy-019"
+          },
+          "notes": [
+            "Auto-evidence fixture replay only; no live source fetch.",
+            "Resolution and scoring are separate lifecycle steps handled by the matching outcome resolver."
+          ]
+        },
+        "setupForecastRun": null
+      }
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Bundle read is local and read-only; it does not mutate forecast lifecycle records.",
+    "Full bundles are larger than forecast cards and may include detailed provenance records."
+  ]
+}

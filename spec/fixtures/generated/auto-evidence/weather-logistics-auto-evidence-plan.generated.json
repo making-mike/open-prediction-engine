@@ -1,0 +1,125 @@
+{
+  "evidencePlanId": "evidenceplan-019",
+  "requestId": "forecastrequest-007",
+  "generatedAt": "2026-06-02T09:57:30Z",
+  "planStatus": "planned",
+  "executionMode": "dry_run",
+  "dataMode": "auto",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "horizonLabel": "1-day",
+  "questionHash": "sha256-86d6fabde1a76351e16096ed6211a61646bf244f1c8a32b5800047208c51301c",
+  "sourcePolicy": {
+    "sourcePolicyId": "sourcepolicy-019",
+    "allowedSourceClasses": [
+      "official",
+      "public_dataset",
+      "internal_dataset"
+    ],
+    "allowedConnectors": [
+      "open_meteo_weather",
+      "committed_fixture"
+    ],
+    "allowNetworkAccess": true,
+    "maxNetworkCalls": 2,
+    "maxCostUsd": 0,
+    "freshness": {
+      "maxSourceAgeHours": 24,
+      "requireRetrievedAt": true
+    },
+    "retrievalWindow": {
+      "startsAt": "2026-06-02T00:00:00Z",
+      "endsAt": "2026-06-02T23:59:59Z"
+    },
+    "approvalRequired": false,
+    "retention": {
+      "rawSourceRetention": "metadata_only",
+      "storeContentHashes": true
+    }
+  },
+  "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+  "expectedSourceConnectorResultSetId": "sourceconnectorresults-001",
+  "connectorPolicyChecks": {
+    "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+    "expectedSourceConnectorResultSetId": "sourceconnectorresults-001",
+    "requestedConnectors": [
+      "committed_fixture",
+      "open_meteo_weather"
+    ],
+    "registeredConnectors": [
+      "committed_fixture",
+      "open_meteo_weather"
+    ],
+    "unregisteredConnectors": [],
+    "unsupportedConnectors": [],
+    "resolutionOnlyConnectors": [],
+    "forecastTimeConnectors": [
+      "committed_fixture",
+      "open_meteo_weather"
+    ],
+    "allRequestedConnectorsRegistered": true
+  },
+  "plannedConnectors": [
+    {
+      "connector": "open_meteo_weather",
+      "purpose": "Fetch public weather forecast evidence for the declared geography and service date.",
+      "networkAccess": true
+    },
+    {
+      "connector": "committed_fixture",
+      "purpose": "Read committed fixture evidence without a live source call.",
+      "networkAccess": false
+    }
+  ],
+  "searchIntents": [
+    {
+      "intentId": "intent-019",
+      "connector": "open_meteo_weather",
+      "sourceClass": "public_dataset",
+      "purpose": "Forecast-time precipitation evidence for the weather-logistics disruption baseline and model.",
+      "query": "daily precipitation forecast for Warsaw on 2026-06-03",
+      "expectedEvidence": "Daily precipitation forecast, source retrieval timestamp, and source URL."
+    },
+    {
+      "intentId": "intent-020",
+      "connector": "committed_fixture",
+      "sourceClass": "internal_dataset",
+      "purpose": "Historical baseline evidence for transparent comparison before stronger forecast methods.",
+      "query": "weather-logistics baseline history for Warsaw and 1-day heavy-rain disruption",
+      "expectedEvidence": "Comparable service-day count, disruption-day count, weather threshold bucket, and lookback window."
+    }
+  ],
+  "inclusionRules": [
+    "Use only evidence available before the forecast close time.",
+    "Use only connectors allowed by the request source policy.",
+    "Preserve source retrieval timestamps and provenance references."
+  ],
+  "exclusionRules": [
+    "Do not use post-outcome operations records as forecast-time evidence.",
+    "Do not use broad web search unless the source policy explicitly enables it.",
+    "Do not use paid, private, or high-impact sources without approval."
+  ],
+  "unavailableEvidence": [
+    {
+      "label": "Live operations outcome",
+      "reason": "Outcome evidence is only valid after the service day and must not enter forecast-time provenance.",
+      "impact": "Forecast may estimate weather-linked risk, but final disruption resolution waits for declared outcome sources."
+    },
+    {
+      "label": "General web search",
+      "reason": "The first auto-evidence policy does not allow broad web search.",
+      "impact": "The plan is limited to allow-listed weather evidence and declared resolution sources."
+    }
+  ],
+  "controls": {
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false
+  },
+  "warnings": [
+    "Dry-run evidence plan only; no live source was fetched.",
+    "Current auto-evidence support is limited to the weather-logistics wedge.",
+    "This plan does not support a live calibration or state-of-the-art performance claim."
+  ]
+}

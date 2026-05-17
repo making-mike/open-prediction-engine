@@ -1,0 +1,130 @@
+{
+  "evidenceSourceSetId": "evidencesourceset-019",
+  "requestId": "forecastrequest-007",
+  "evidencePlanId": "evidenceplan-019",
+  "generatedAt": "2026-06-02T09:58:00Z",
+  "executionMode": "fixture_replay",
+  "dataMode": "auto",
+  "sourcePolicyId": "sourcepolicy-019",
+  "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+  "sourceConnectorResultSetId": "sourceconnectorresults-001",
+  "domain": "weather-logistics",
+  "geography": "Warsaw",
+  "serviceDate": "2026-06-03",
+  "records": [
+    {
+      "recordId": "sourcerecord-019",
+      "sourceRole": "forecast_input",
+      "connector": "open_meteo_weather",
+      "connectorBinding": {
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "connectorId": "sourceconnector-001",
+        "sourceConnectorResultSetId": "sourceconnectorresults-001",
+        "connectorResultId": "connectorresult-001"
+      },
+      "plannedIntentIds": [
+        "intent-019"
+      ],
+      "sourceRef": {
+        "sourceId": "source-401",
+        "name": "Open-Meteo weather forecast for Warsaw",
+        "sourceType": "public_dataset",
+        "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum%2Cprecipitation_probability_max%2Cweather_code%2Cwind_gusts_10m_max&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+        "retrievedAt": "2026-06-02T09:30:00Z",
+        "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a"
+      },
+      "rawSourceMetadata": {
+        "mode": "fixture_replay",
+        "fixturePath": "spec/fixtures/live/open-meteo-warsaw-forecast-response.json",
+        "contentHash": "sha256-21017581166832bbf26d397d077ed1173dd7d710496c96997cd56a045ba46e9a"
+      },
+      "sourceQuality": {
+        "status": "current",
+        "coverage": "complete",
+        "freshnessStatus": "within_policy",
+        "notes": "Fixture replay of the allow-listed Open-Meteo weather connector."
+      },
+      "normalizedFields": {
+        "forecastDailyPrecipitationMm": 24,
+        "precipitationProbabilityMaxPercent": 86,
+        "weatherCode": 63,
+        "windGusts10mMaxKmh": 41.8,
+        "timezone": "Europe/Warsaw",
+        "utcOffsetSeconds": 7200,
+        "latitude": 52.24,
+        "longitude": 21,
+        "dailyUnits": {
+          "time": "iso8601",
+          "precipitation_sum": "mm",
+          "precipitation_probability_max": "%",
+          "weather_code": "wmo code",
+          "wind_gusts_10m_max": "km/h"
+        }
+      }
+    },
+    {
+      "recordId": "sourcerecord-020",
+      "sourceRole": "baseline_input",
+      "connector": "committed_fixture",
+      "connectorBinding": {
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "connectorId": "sourceconnector-002",
+        "sourceConnectorResultSetId": "sourceconnectorresults-001",
+        "connectorResultId": "connectorresult-002"
+      },
+      "plannedIntentIds": [
+        "intent-020"
+      ],
+      "sourceRef": {
+        "sourceId": "source-103",
+        "name": "Warsaw weather logistics baseline fixture",
+        "sourceType": "internal_dataset",
+        "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+        "retrievedAt": "2026-06-01T11:30:00Z",
+        "contentHash": "sha256-baseline-source-101"
+      },
+      "rawSourceMetadata": {
+        "mode": "fixture_replay",
+        "fixturePath": "spec/fixtures/source/weather-logistics-warsaw-2026-06-03/baseline-history.json",
+        "contentHash": "sha256-baseline-source-101"
+      },
+      "sourceQuality": {
+        "status": "current",
+        "coverage": "complete",
+        "freshnessStatus": "within_policy",
+        "notes": "Committed historical-frequency baseline fixture for transparent comparison."
+      },
+      "normalizedFields": {
+        "lookbackStartsAt": "2026-03-01T00:00:00Z",
+        "lookbackEndsAt": "2026-05-31T23:59:59Z",
+        "weatherThresholdBucket": "daily_precipitation_gte_20mm",
+        "comparableServiceDays": 64,
+        "disruptionDays": 14,
+        "smoothing": "none"
+      }
+    }
+  ],
+  "provenanceSummary": {
+    "sourceCount": 2,
+    "connectorsUsed": [
+      "committed_fixture",
+      "open_meteo_weather"
+    ],
+    "sourceClassesUsed": [
+      "internal_dataset",
+      "public_dataset"
+    ],
+    "unavailableEvidenceCount": 2,
+    "allEvidenceClaimed": false
+  },
+  "controls": {
+    "networkAccess": false,
+    "liveFetch": false,
+    "effectfulGeneration": false
+  },
+  "warnings": [
+    "Fixture replay only; no live source was fetched.",
+    "This source set is forecast-time evidence only and excludes resolution outcome sources.",
+    "This source set does not support a live calibration or state-of-the-art performance claim."
+  ]
+}

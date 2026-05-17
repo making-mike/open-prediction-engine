@@ -1,0 +1,337 @@
+{
+  "privateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+  "generatedAt": "2026-06-06T22:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "bridge_contract_only",
+  "boundPrivateSourceAdapterOutcomeMatrixId": "privateadapteroutcomematrix-001",
+  "boundPrivateSourceAdapterCapabilityId": "privatesourceadaptercapability-001",
+  "boundPrivateSetupWorkflowId": "privatesetupworkflow-001",
+  "boundPrivateSourceAdapterOutcomeMatrixPath": "spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-outcome-matrix.generated.json",
+  "bridgeRows": [
+    {
+      "bridgeRowId": "privateadapterbridge-001",
+      "sourceKind": "local_file",
+      "outcomeRowId": "privateadapteroutcomerow-001",
+      "outcomeClass": "available_fixture",
+      "setupOutcomeClass": "setup_ready",
+      "bridgeStatus": "allowed_current_entrypoint",
+      "allowedEntrypoint": "source_builder",
+      "currentCommand": "python3 scripts/ope.py source-builder",
+      "retryCondition": "no_retry_needed",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "caller_approved_local_file_paths"
+      ],
+      "allowedDownstreamOutputs": [
+        "source_manifest_build",
+        "draft_source_manifest",
+        "draft_field_mapping"
+      ],
+      "blockedOutputs": [
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Run source-builder only for caller-approved local files; continue to handoff before intake or forecasting."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-002",
+      "sourceKind": "manual_mapping",
+      "outcomeRowId": "privateadapteroutcomerow-002",
+      "outcomeClass": "approval_required_fixture",
+      "setupOutcomeClass": "needs_confirmation",
+      "bridgeStatus": "approval_required",
+      "allowedEntrypoint": "source_handoff_confirmation",
+      "currentCommand": "none",
+      "retryCondition": "after_mapping_confirmation",
+      "retryCommand": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+      "requiredInputs": [
+        "caller_confirmed_field_mapping",
+        "source_builder_draft"
+      ],
+      "allowedDownstreamOutputs": [
+        "source_intake_handoff",
+        "source_intake_report"
+      ],
+      "blockedOutputs": [
+        "source_manifest",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Ask the caller to confirm mappings, then run source-handoff confirmation before method gates."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-003",
+      "sourceKind": "auto_evidence_connector",
+      "outcomeRowId": "privateadapteroutcomerow-003",
+      "outcomeClass": "available_fixture",
+      "setupOutcomeClass": "setup_ready",
+      "bridgeStatus": "fixture_entrypoint",
+      "allowedEntrypoint": "auto_evidence_fixture",
+      "currentCommand": "python3 scripts/ope.py gather-evidence",
+      "retryCondition": "no_retry_needed",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "accepted_auto_evidence_request_fixture",
+        "source_policy_allows_fixture_connector"
+      ],
+      "allowedDownstreamOutputs": [
+        "evidence_source_set"
+      ],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Use fixture replay for policy-bound auto evidence; do not treat it as production live gathering."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-004",
+      "sourceKind": "manual_upload",
+      "outcomeRowId": "privateadapteroutcomerow-004",
+      "outcomeClass": "planned_runtime",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "bridgeStatus": "runtime_not_implemented",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "currentCommand": "none",
+      "retryCondition": "after_runtime_available",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "future_manual_upload_runtime",
+        "caller_approval"
+      ],
+      "allowedDownstreamOutputs": [],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a checked manual-upload runtime; do not ingest uploads through the current bridge."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-005",
+      "sourceKind": "private_api",
+      "outcomeRowId": "privateadapteroutcomerow-005",
+      "outcomeClass": "credential_missing",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "bridgeStatus": "credential_runtime_missing",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "currentCommand": "none",
+      "retryCondition": "after_runtime_available",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "future_private_api_runtime",
+        "credential_safe_runtime",
+        "caller_approval"
+      ],
+      "allowedDownstreamOutputs": [],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a credential-safe private API runtime; do not request secrets in OPE artifacts."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-006",
+      "sourceKind": "private_database",
+      "outcomeRowId": "privateadapteroutcomerow-006",
+      "outcomeClass": "credential_missing",
+      "setupOutcomeClass": "runtime_not_implemented",
+      "bridgeStatus": "credential_runtime_missing",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "currentCommand": "none",
+      "retryCondition": "after_runtime_available",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "future_private_database_runtime",
+        "credential_safe_runtime",
+        "caller_approval"
+      ],
+      "allowedDownstreamOutputs": [],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a credential-safe private database runtime; do not connect databases through this bridge."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-007",
+      "sourceKind": "unregistered_source",
+      "outcomeRowId": "privateadapteroutcomerow-007",
+      "outcomeClass": "unsupported_source",
+      "setupOutcomeClass": "unsupported_source",
+      "bridgeStatus": "unsupported_source",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "currentCommand": "none",
+      "retryCondition": "after_source_replaced",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "replacement_source_kind_declared_in_capability_contract"
+      ],
+      "allowedDownstreamOutputs": [],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Replace the unregistered source kind with a declared adapter before trying setup again."
+    },
+    {
+      "bridgeRowId": "privateadapterbridge-008",
+      "sourceKind": "unsafe_source",
+      "outcomeRowId": "privateadapteroutcomerow-008",
+      "outcomeClass": "rejected_unsafe_source",
+      "setupOutcomeClass": "rejected_source",
+      "bridgeStatus": "rejected_source",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "currentCommand": "none",
+      "retryCondition": "never_without_new_source",
+      "retryCommand": "none",
+      "requiredInputs": [
+        "safe_replacement_source"
+      ],
+      "allowedDownstreamOutputs": [],
+      "blockedOutputs": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "bridgeCreatesOutputs": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Reject unsafe source input and require a safe replacement before any setup step."
+    }
+  ],
+  "executionBoundary": {
+    "bridgeDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false,
+    "privateAdapterRuntimeImplemented": false,
+    "onlyRoutesToCheckedEntrypoints": true
+  },
+  "guards": [
+    {
+      "guardId": "privateadapterbridgeguard-001",
+      "name": "outcome_matrix_binding",
+      "rule": "Every bridge row must bind one private source adapter outcome row.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterbridgeguard-002",
+      "name": "checked_entrypoints_only",
+      "rule": "Runnable bridge commands must point only to checked local OPE commands.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterbridgeguard-003",
+      "name": "confirmation_before_handoff",
+      "rule": "Manual mapping rows require caller confirmation before source-handoff confirmation.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterbridgeguard-004",
+      "name": "planned_runtimes_non_generating",
+      "rule": "Manual upload, private API, and private database rows must stay non-generating.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterbridgeguard-005",
+      "name": "no_forecast_or_score_outputs",
+      "rule": "Bridge rows must not create forecast artifacts, forecast cards, scoring records, or credential records.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    },
+    {
+      "guardId": "privateadapterbridgeguard-006",
+      "name": "unsafe_sources_stop",
+      "rule": "Unsupported and unsafe sources must not enter source intake through the bridge.",
+      "checkedBy": [
+        "scripts/check_private_source_adapter_intake_bridge.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "This bridge routes agent next actions; it does not execute source intake by itself.",
+    "Only local-file source-builder and fixture auto-evidence commands are current runnable entrypoints.",
+    "Manual mapping requires caller confirmation before source-handoff confirmation.",
+    "Planned, unsupported, unsafe, and credential-missing rows remain non-generating."
+  ]
+}

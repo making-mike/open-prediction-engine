@@ -1,0 +1,68 @@
+{
+  "agentEnvelopeId": "agentenvelope-001",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "validation"
+  },
+  "operation": "forecast_request_validation",
+  "adapterRequest": {
+    "operation": "forecast_request_validation",
+    "inputRecordType": "forecast_request",
+    "inputRef": "forecastrequest-007",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Validate an agent-submitted forecast request without executing it."
+  },
+  "recordBinding": {
+    "requestId": "forecastrequest-007",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": "sourcepolicy-019",
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "accepted",
+    "approvalStatus": "not_required",
+    "dataMode": "auto",
+    "planStatus": null,
+    "executionMode": null,
+    "sourceMode": null,
+    "forecastStatus": null,
+    "resolutionStatus": null,
+    "scoreStatus": null,
+    "qualityClaimStatus": null
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "requestId": "forecastrequest-007",
+    "decisionStatus": "accepted",
+    "executionAllowed": true,
+    "effectfulGeneration": false,
+    "reasonCodes": [],
+    "reasons": [],
+    "auditLog": {
+      "requestId": "forecastrequest-007",
+      "decisionStatus": "accepted",
+      "requestedAction": "generate_forecast",
+      "dataMode": "auto",
+      "sourcePolicyId": "sourcepolicy-019",
+      "questionHash": "sha256-86d6fabde1a76351e16096ed6211a61646bf244f1c8a32b5800047208c51301c",
+      "rawQuestionLogged": false,
+      "maxCostUsd": 0,
+      "timeoutSeconds": 60
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Validation does not execute forecast generation or live evidence fetching."
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "historyId": "history-601",
+  "questionId": "question-601",
+  "entries": [
+    {
+      "forecastId": "forecast-601",
+      "forecastedAt": "2026-06-02T10:00:00Z",
+      "state": "superseded",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-600",
+        "version": "historical-frequency-auto-evidence-fixture-v0"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.22
+      },
+      "rationaleSummary": "Historical-frequency baseline generated before the auto-evidence model forecast."
+    },
+    {
+      "forecastId": "forecast-602",
+      "forecastedAt": "2026-06-02T10:00:00Z",
+      "state": "active",
+      "sourceClass": "model",
+      "model": {
+        "modelId": "model-601",
+        "version": "weather-logistics-auto-evidence-fixture-v0",
+        "configurationHash": "sha256-auto-evidence-model-001"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.41
+      },
+      "supersedesForecastId": "forecast-601",
+      "rationaleSummary": "Auto-evidence fixture replay uses the declared source policy to gather weather evidence, then raises the baseline when forecast precipitation crosses the heavy-rain threshold.",
+      "evidencePacketId": "evidence-601"
+    }
+  ],
+  "createdAt": "2026-06-02T10:00:00Z",
+  "updatedAt": "2026-06-02T10:00:00Z"
+}

@@ -1,0 +1,26 @@
+{
+  "historyId": "history-901",
+  "questionId": "question-901",
+  "entries": [
+    {
+      "forecastId": "forecast-901",
+      "forecastedAt": "2026-06-02T10:30:00Z",
+      "state": "active",
+      "sourceClass": "model",
+      "model": {
+        "modelId": "model-101",
+        "version": "weather-logistics-fixture-loop-v0",
+        "trainingCutoff": "2026-05-30T00:00:00Z",
+        "configurationHash": "sha256-fixture-loop-model-001"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.4113
+      },
+      "rationaleSummary": "Setup-aware execution selected a deterministic statistical method because the setup benchmark gate approved fixture execution with clean comparable benchmark evidence; quality claims remain blocked.",
+      "evidencePacketId": "evidence-901"
+    }
+  ],
+  "createdAt": "2026-06-02T10:30:00Z",
+  "updatedAt": "2026-06-02T10:30:00Z"
+}

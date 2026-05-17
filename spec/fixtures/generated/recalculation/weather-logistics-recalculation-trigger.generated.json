@@ -1,0 +1,31 @@
+{
+  "recalculationTriggerId": "recalculationtrigger-001",
+  "createdAt": "2026-06-02T18:05:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "questionId": "question-601",
+  "previousForecastId": "forecast-602",
+  "previousEvidencePacketId": "evidence-601",
+  "triggerType": "api_event",
+  "triggerStatus": "accepted",
+  "sourceRole": "forecast_input",
+  "forecastCloseTime": "2026-06-03T00:00:00Z",
+  "receivedAt": "2026-06-02T18:00:00Z",
+  "availableBeforeForecastClose": true,
+  "postOutcomeEvidence": false,
+  "changedSourceRefs": [
+    {
+      "sourceId": "source-801",
+      "name": "Updated Open-Meteo weather forecast for Warsaw",
+      "sourceType": "public_dataset",
+      "uri": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&daily=precipitation_sum&timezone=Europe%2FWarsaw&precipitation_unit=mm&start_date=2026-06-03&end_date=2026-06-03",
+      "retrievedAt": "2026-06-02T18:00:00Z",
+      "contentHash": "sha256-updated-weather-source-801"
+    }
+  ],
+  "triggerReason": "Updated forecast-time precipitation evidence arrived before the forecast close time.",
+  "guardrailReasons": [
+    "pre_close_forecast_input",
+    "append_history_required"
+  ]
+}

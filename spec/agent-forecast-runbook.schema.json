@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-forecast-runbook.schema.json",
+  "title": "Agent Forecast Runbook",
+  "description": "Machine-readable caller workflow for local OPE forecast-run use by agents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentForecastRunbookId",
+    "generatedAt",
+    "domain",
+    "runtimeStatus",
+    "entrypoints",
+    "workflow",
+    "outcomePlaybooks",
+    "readSurfaceChoices",
+    "guards",
+    "exampleSequence",
+    "warnings"
+  ],
+  "properties": {
+    "agentForecastRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["local_fixture_safe"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cliCommand",
+        "mcpTool",
+        "summarySchema",
+        "intakeMatrixSchema",
+        "runbookSchema"
+      ],
+      "properties": {
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "mcpTool": {
+          "type": "string",
+          "const": "ope_forecast_run"
+        },
+        "summarySchema": {
+          "type": "string",
+          "const": "spec/forecast-run-summary.schema.json"
+        },
+        "intakeMatrixSchema": {
+          "type": "string",
+          "const": "spec/forecast-run-intake-matrix.schema.json"
+        },
+        "runbookSchema": {
+          "type": "string",
+          "const": "spec/agent-forecast-runbook.schema.json"
+        }
+      }
+    },
+    "workflow": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 9,
+      "items": { "$ref": "#/$defs/workflowStep" }
+    },
+    "outcomePlaybooks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/outcomePlaybook" }
+    },
+    "readSurfaceChoices": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/readSurfaceChoice" }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "exampleSequence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requestFixture", "forecastId", "questionId", "commands", "mcpTools"],
+      "properties": {
+        "requestFixture": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "commands": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/exampleCommand" }
+        },
+        "mcpTools": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 240
+    },
+    "nextActionLabel": {
+      "type": "string",
+      "enum": [
+        "inspect_decision",
+        "run_forecast",
+        "read_forecast_card",
+        "read_evidence_trace",
+        "read_lifecycle_bundle",
+        "check_resolution_status",
+        "read_scoring_summary",
+        "revise_request",
+        "request_approval",
+        "stop_terminal",
+        "use_supported_fixture_or_wait",
+        "increase_max_bytes_or_read_smaller_output"
+      ]
+    },
+    "outcomeClass": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "rejected",
+        "blocked",
+        "canceled",
+        "unsupported_fixture_path",
+        "response_too_large"
+      ]
+    },
+    "runStatus": {
+      "type": "string",
+      "enum": ["completed", "blocked", "rejected", "canceled", "failed"]
+    },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["accepted", "blocked", "rejected", "canceled"]
+    },
+    "retryPolicy": {
+      "type": "string",
+      "enum": [
+        "not_needed",
+        "approval_then_retry",
+        "revise_request_then_retry",
+        "stop_terminal",
+        "supported_fixture_or_runtime_expansion_required",
+        "increase_max_bytes_or_read_smaller_output"
+      ]
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "order",
+        "name",
+        "purpose",
+        "cliCommand",
+        "mcpTool",
+        "expectedSchema",
+        "sideEffectLevel",
+        "nextActionLabel",
+        "stopCondition"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "mcpTool": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 120
+            },
+            { "type": "null" }
+          ]
+        },
+        "expectedSchema": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "sideEffectLevel": {
+          "type": "string",
+          "enum": ["validation_only", "fixture_dry_run", "read_only", "status_read", "scoring_read"]
+        },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "outcomePlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomeClass",
+        "runStatus",
+        "decisionStatus",
+        "retryPolicy",
+        "nextActionLabel",
+        "summaryPath",
+        "mcpTool",
+        "mcpIsError",
+        "generatesForecastOutputs",
+        "mustNotBindForecastOutputs",
+        "agentInstruction"
+      ],
+      "properties": {
+        "outcomeClass": { "$ref": "#/$defs/outcomeClass" },
+        "runStatus": { "$ref": "#/$defs/runStatus" },
+        "decisionStatus": { "$ref": "#/$defs/decisionStatus" },
+        "retryPolicy": { "$ref": "#/$defs/retryPolicy" },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "summaryPath": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "mcpTool": {
+          "type": "string",
+          "const": "ope_forecast_run"
+        },
+        "mcpIsError": { "type": "boolean" },
+        "generatesForecastOutputs": { "type": "boolean" },
+        "mustNotBindForecastOutputs": { "type": "boolean" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "readSurfaceChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "whenToUse",
+        "cliCommand",
+        "mcpTool",
+        "requires",
+        "expectedSchema",
+        "agentRule"
+      ],
+      "properties": {
+        "operation": {
+          "type": "string",
+            "enum": ["forecast_card", "evidence_trace", "lifecycle_bundle", "resolution_status", "scoring_summary"]
+        },
+        "whenToUse": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "mcpTool": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "requires": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "expectedSchema": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "agentRule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    "exampleCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "command", "expectedSignal"],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "command": { "$ref": "#/$defs/command" },
+        "expectedSignal": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    }
+  }
+}

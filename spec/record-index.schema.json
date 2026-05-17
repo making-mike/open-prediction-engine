@@ -32,7 +32,15 @@
         "properties": {
           "recordType": {
             "type": "string",
-            "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+            "enum": [
+              "evidence-source-set",
+              "evidence-trace",
+              "forecast-artifact",
+              "forecast-bundle",
+              "forecast-card",
+              "source-connector-results",
+              "track-record"
+            ]
           },
           "count": {
             "type": "integer",
@@ -47,7 +55,15 @@
               "properties": {
                 "recordType": {
                   "type": "string",
-                  "enum": ["forecast-artifact", "forecast-bundle", "forecast-card", "track-record"]
+                  "enum": [
+                    "evidence-source-set",
+                    "evidence-trace",
+                    "forecast-artifact",
+                    "forecast-bundle",
+                    "forecast-card",
+                    "source-connector-results",
+                    "track-record"
+                  ]
                 },
                 "recordId": { "$ref": "common.schema.json#/$defs/id" },
                 "questionId": { "$ref": "common.schema.json#/$defs/id" },

@@ -1,0 +1,102 @@
+{
+  "sourceManifestBuildId": "sourcemanifestbuild-103",
+  "generatedAt": "2026-06-06T17:30:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "buildStatus": "draft_ready",
+  "forecastGenerationAllowed": false,
+  "canEnterSourceIntake": true,
+  "confirmationRequired": true,
+  "inputFiles": [
+    {
+      "fileId": "localfile-001",
+      "localPath": "spec/fixtures/local-source-files/weather-forecast.json",
+      "sourceRole": "weather_forecast",
+      "fileFormat": "json",
+      "inspectionStatus": "inspected",
+      "byteSize": 153,
+      "rowCount": 1,
+      "contentHash": "dc74ecbb77717ddfda3f5da0a4f7eae106a874c5da2daacbfb94ecdcf5af134b",
+      "detectedFields": [
+        "city",
+        "date",
+        "loaded_at",
+        "rain_mm",
+        "source_status"
+      ],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": false,
+        "availableBeforeForecastClose": true
+      },
+      "reasonCodes": []
+    },
+    {
+      "fileId": "localfile-002",
+      "localPath": "spec/fixtures/local-source-files/tiny-history.csv",
+      "sourceRole": "historical_baseline",
+      "fileFormat": "csv",
+      "inspectionStatus": "inspected",
+      "byteSize": 216,
+      "rowCount": 6,
+      "contentHash": "7ab11502dfe1f27df690ab802db5cbfb5d407fd77308a5ac13c820aea7fd79e9",
+      "detectedFields": [
+        "service_date",
+        "geography",
+        "disrupted",
+        "precipitation_mm"
+      ],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": false,
+        "availableBeforeForecastClose": true
+      },
+      "reasonCodes": []
+    },
+    {
+      "fileId": "localfile-003",
+      "localPath": "spec/fixtures/local-source-files/outcome.csv",
+      "sourceRole": "declared_operations_outcome",
+      "fileFormat": "csv",
+      "inspectionStatus": "inspected",
+      "byteSize": 43,
+      "rowCount": 1,
+      "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39",
+      "detectedFields": [
+        "date",
+        "city",
+        "disrupted"
+      ],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": false,
+        "availableBeforeForecastClose": false
+      },
+      "reasonCodes": []
+    }
+  ],
+  "draftArtifacts": {
+    "sourceManifestId": "sourcemanifestdraft-103",
+    "fieldMappingId": "fieldmappingdraft-103",
+    "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest.json",
+    "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-field-mapping.json"
+  },
+  "requiredActions": [
+    "Confirm proposed agent-inferred mappings before source intake can allow forecast execution."
+  ],
+  "warnings": [
+    "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+  ]
+}

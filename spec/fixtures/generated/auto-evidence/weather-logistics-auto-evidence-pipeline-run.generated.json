@@ -1,0 +1,30 @@
+{
+  "pipelineRunId": "pipelinerun-601",
+  "requestId": "forecastrequest-007",
+  "decisionStatus": "accepted",
+  "executionStatus": "generated_fixture",
+  "executionMode": "fixture_dry_run",
+  "effectfulGeneration": false,
+  "generatedAt": "2026-06-02T10:02:00Z",
+  "controls": {
+    "requestValidated": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "modelClass": "deterministic_fixture",
+    "sourceMode": "auto_evidence_fixture_replay"
+  },
+  "outputs": {
+    "questionId": "question-601",
+    "forecastId": "forecast-602",
+    "evidencePacketId": "evidence-601",
+    "historyId": "history-601",
+    "forecastArtifactPath": "spec/fixtures/generated/auto-evidence/weather-logistics-auto-evidence-artifact.generated.json",
+    "evidencePlanId": "evidenceplan-019",
+    "evidenceSourceSetId": "evidencesourceset-019",
+    "sourcePolicyId": "sourcepolicy-019"
+  },
+  "notes": [
+    "Auto-evidence fixture replay only; no live source fetch.",
+    "Resolution and scoring are separate lifecycle steps handled by the matching outcome resolver."
+  ]
+}

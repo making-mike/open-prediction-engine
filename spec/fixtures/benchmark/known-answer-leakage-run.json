@@ -1,0 +1,36 @@
+{
+  "benchmarkRunId": "benchmarkrun-004",
+  "startedAt": "2026-06-02T10:05:00Z",
+  "endedAt": "2026-06-02T10:10:00Z",
+  "status": "invalidated",
+  "questionIds": ["question-101"],
+  "methodId": "method-201",
+  "model": {
+    "modelId": "model-201",
+    "version": "model-assisted-weather-logistics-fixture-v0",
+    "trainingCutoff": "2026-05-30T00:00:00Z",
+    "configurationHash": "sha256-model-assisted-method-001"
+  },
+  "sourcePolicyId": "sourcepolicy-001",
+  "retrievalWindow": {
+    "startsAt": "2026-06-01T00:00:00Z",
+    "endsAt": "2026-06-02T10:00:00Z"
+  },
+  "sourceFetches": [
+    {
+      "sourceId": "source-102",
+      "name": "Warsaw weather forecast fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-forecast-2026-06-03.json",
+      "retrievedAt": "2026-06-02T09:30:00Z",
+      "contentHash": "sha256-weather-forecast-source-101"
+    }
+  ],
+  "leakageControls": {
+    "knownAnswerExcluded": false,
+    "postOutcomeDataBlocked": true,
+    "sourceContaminationBlocked": true,
+    "sourceTimestampsRecorded": true,
+    "auditNotes": "Intentionally contaminated fixture: model-assisted run is labeled as having known-answer exposure."
+  }
+}

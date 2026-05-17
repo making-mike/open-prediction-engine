@@ -1,0 +1,47 @@
+{
+  "sourceManifestBuildId": "sourcemanifestbuild-004",
+  "generatedAt": "2026-06-06T17:30:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "buildStatus": "rejected",
+  "forecastGenerationAllowed": false,
+  "canEnterSourceIntake": false,
+  "confirmationRequired": false,
+  "inputFiles": [
+    {
+      "fileId": "localfile-001",
+      "localPath": "spec/fixtures/local-source-files/oversized.csv",
+      "sourceRole": "historical_baseline",
+      "fileFormat": "csv",
+      "inspectionStatus": "rejected",
+      "byteSize": 2283,
+      "rowCount": null,
+      "contentHash": "9c46a40404317535499608e57e5b1dd610e188ab2ac74db42ad7129d973114ca",
+      "detectedFields": [],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": false,
+        "availableBeforeForecastClose": true
+      },
+      "reasonCodes": [
+        "file_too_large"
+      ]
+    }
+  ],
+  "draftArtifacts": {
+    "sourceManifestId": null,
+    "fieldMappingId": null,
+    "sourceManifestPath": null,
+    "fieldMappingPath": null
+  },
+  "requiredActions": [
+    "Remove rejected files or provide caller-approved supported CSV/JSON sources."
+  ],
+  "warnings": [
+    "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+  ]
+}

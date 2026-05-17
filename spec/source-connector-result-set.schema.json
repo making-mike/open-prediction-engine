@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-connector-result-set.schema.json",
+  "title": "Source Connector Result Set",
+  "description": "Connector result records that separate raw metadata, normalized fields, unavailable evidence, diagnostics, and provenance for committed fixture replay and ignored local live captures.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceConnectorResultSetId",
+    "generatedAt",
+    "requestId",
+    "evidencePlanId",
+    "sourcePolicyId",
+    "domain",
+    "executionMode",
+    "connectorResults",
+    "controls",
+    "warnings"
+  ],
+  "properties": {
+    "sourceConnectorResultSetId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "evidencePlanId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "executionMode": {
+      "type": "string",
+      "enum": ["fixture_replay", "integration_live_fetch"]
+    },
+    "connectorResults": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/connectorResult" }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "networkAccess",
+        "liveFetch",
+        "effectfulGeneration",
+        "credentialUsed",
+        "promptVisibleCredentialAccepted"
+      ],
+      "properties": {
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" },
+        "credentialUsed": { "type": "boolean" },
+        "promptVisibleCredentialAccepted": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        { "type": "null" }
+      ]
+    },
+    "nullableTimestamp": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/timestamp" },
+        { "type": "null" }
+      ]
+    },
+    "sourceClass": {
+      "type": "string",
+      "enum": [
+        "official",
+        "public_dataset",
+        "internal_dataset",
+        "human_judgment",
+        "model_output",
+        "market_price",
+        "aggregate",
+        "other"
+      ]
+    },
+    "sourceRole": {
+      "type": "string",
+      "enum": [
+        "forecast_input",
+        "baseline_input",
+        "resolution_primary",
+        "resolution_support",
+        "unsupported"
+      ]
+    },
+    "connectorResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectorResultId",
+        "connectorKey",
+        "sourceClass",
+        "sourceRole",
+        "resultStatus",
+        "plannedIntentIds",
+        "rawSourceMetadata",
+        "normalizedFields",
+        "unavailableEvidence",
+        "retrievalDiagnostics",
+        "provenance",
+        "controls"
+      ],
+      "properties": {
+        "connectorResultId": { "$ref": "common.schema.json#/$defs/id" },
+        "connectorKey": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "sourceClass": { "$ref": "#/$defs/sourceClass" },
+        "sourceRole": { "$ref": "#/$defs/sourceRole" },
+        "resultStatus": {
+          "type": "string",
+          "enum": [
+            "succeeded_fixture_replay",
+            "succeeded_live_fetch",
+            "failed_sanitized",
+            "skipped_resolution_only",
+            "unsupported",
+            "unavailable"
+          ]
+        },
+        "plannedIntentIds": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "rawSourceMetadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "fixturePath", "sourceUri", "contentHash", "rawPreviewStored"],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["fixture_replay", "live_fetch", "not_fetched", "unsupported"]
+            },
+            "fixturePath": { "$ref": "#/$defs/nullableString" },
+            "sourceUri": {
+              "oneOf": [
+                { "$ref": "common.schema.json#/$defs/uri" },
+                { "type": "null" }
+              ]
+            },
+            "contentHash": { "$ref": "#/$defs/nullableString" },
+            "rawPreviewStored": { "type": "boolean" }
+          }
+        },
+        "normalizedFields": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "null" }
+          ]
+        },
+        "unavailableEvidence": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "reason", "agentNextAction"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 120
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 240
+              },
+              "agentNextAction": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 240
+              }
+            }
+          }
+        },
+        "retrievalDiagnostics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["diagnosticLevel", "publicMessage", "rawDiagnosticStored", "rawStackTraceExposed"],
+          "properties": {
+            "diagnosticLevel": {
+              "type": "string",
+              "enum": ["none", "sanitized"]
+            },
+            "publicMessage": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            },
+            "rawDiagnosticStored": { "type": "boolean" },
+            "rawStackTraceExposed": { "type": "boolean" }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceRef",
+            "retrievedAt",
+            "storesContentHash",
+            "allEvidenceClaimed"
+          ],
+          "properties": {
+            "sourceRef": {
+              "oneOf": [
+                { "$ref": "common.schema.json#/$defs/sourceRef" },
+                { "type": "null" }
+              ]
+            },
+            "retrievedAt": { "$ref": "#/$defs/nullableTimestamp" },
+            "storesContentHash": { "type": "boolean" },
+            "allEvidenceClaimed": { "type": "boolean" }
+          }
+        },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "networkAccess",
+            "liveFetch",
+            "effectfulGeneration",
+            "credentialUsed",
+            "promptVisibleCredentialAccepted"
+          ],
+          "properties": {
+            "networkAccess": { "type": "boolean" },
+            "liveFetch": { "type": "boolean" },
+            "effectfulGeneration": { "type": "boolean" },
+            "credentialUsed": { "type": "boolean" },
+            "promptVisibleCredentialAccepted": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

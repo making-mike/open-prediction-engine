@@ -1,0 +1,69 @@
+{
+  "evidencePacketId": "evidence-701",
+  "forecastId": "forecast-702",
+  "questionId": "question-701",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T10:00:00Z",
+  "model": {
+    "modelId": "model-700",
+    "version": "historical-frequency-only-fixture-v0",
+    "configurationHash": "sha256-historical-baseline-model-001"
+  },
+  "inputSourceClasses": [
+    "internal_dataset"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "source-103",
+      "name": "Warsaw weather logistics baseline fixture",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/source/warsaw-weather-logistics-baseline.json",
+      "retrievedAt": "2026-06-01T11:30:00Z",
+      "contentHash": "sha256-baseline-source-101"
+    }
+  ],
+  "featureSnapshotRef": "https://example.test/fixtures/generated/historical-baseline/weather-logistics-historical-baseline-feature-snapshot.generated.json",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "calibrationBand": {
+    "lower": 0.12,
+    "upper": 0.32,
+    "coverage": 0.8,
+    "sampleSize": 64
+  },
+  "rationaleSummary": "Historical-only forecast uses the committed comparable service-day disruption frequency and does not call a weather forecast API.",
+  "keyFactors": [
+    "historical disruption days 14",
+    "comparable service days 64",
+    "baseline disruption rate 0.22",
+    "threshold bucket daily_precipitation_gte_20mm",
+    "source policy sourcepolicy-701",
+    "no current weather forecast signal used"
+  ],
+  "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+  "resolutionSource": {
+    "sourceId": "source-402",
+    "name": "Declared Warsaw operations event source",
+    "sourceType": "internal_dataset"
+  },
+  "fallbackResolutionSources": [
+    {
+      "sourceId": "source-403",
+      "name": "Open-Meteo weather observation for Warsaw",
+      "sourceType": "public_dataset"
+    }
+  ],
+  "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+}

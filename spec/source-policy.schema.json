@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-policy.schema.json",
+  "title": "Source Policy",
+  "description": "Policy boundary for caller-provided, hybrid, or auto evidence gathering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourcePolicyId",
+    "allowedSourceClasses",
+    "allowedConnectors",
+    "allowNetworkAccess",
+    "maxNetworkCalls",
+    "maxCostUsd",
+    "freshness",
+    "approvalRequired",
+    "retention"
+  ],
+  "properties": {
+    "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "allowedSourceClasses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "enum": [
+          "official",
+          "public_dataset",
+          "internal_dataset",
+          "human_judgment",
+          "model_output",
+          "market_price",
+          "aggregate",
+          "other"
+        ]
+      }
+    },
+    "allowedConnectors": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "enum": [
+          "committed_fixture",
+          "declared_operations_fixture",
+          "manual_upload",
+          "open_meteo_weather",
+          "web_search"
+        ]
+      }
+    },
+    "allowNetworkAccess": { "type": "boolean" },
+    "maxNetworkCalls": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "maxCostUsd": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 25
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxSourceAgeHours", "requireRetrievedAt"],
+      "properties": {
+        "maxSourceAgeHours": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8760
+        },
+        "requireRetrievedAt": { "type": "boolean" }
+      }
+    },
+    "retrievalWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startsAt", "endsAt"],
+      "properties": {
+        "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "endsAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "approvalRequired": { "type": "boolean" },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rawSourceRetention", "storeContentHashes"],
+      "properties": {
+        "rawSourceRetention": {
+          "type": "string",
+          "enum": ["none", "fixture_only", "metadata_only", "full"]
+        },
+        "storeContentHashes": { "type": "boolean" }
+      }
+    }
+  }
+}

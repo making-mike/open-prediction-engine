@@ -1,0 +1,42 @@
+{
+  "sourceIntakeHandoffId": "sourceintakehandoff-006",
+  "generatedAt": "2026-06-06T18:10:00Z",
+  "case": "oversized",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestBuildId": "sourcemanifestbuild-004",
+  "handoffStatus": "blocked_by_builder_rejection",
+  "nextAction": "replace_rejected_sources",
+  "canEnterSourceIntake": false,
+  "forecastGenerationAllowed": false,
+  "sourceManifestId": null,
+  "fieldMappingId": null,
+  "sourceIntakeReportId": null,
+  "sourceIntakeStatus": null,
+  "mappingSummary": {
+    "totalMappings": 0,
+    "proposedMappingCount": 0,
+    "confirmedMappingCount": 0,
+    "agentInferredMappingCount": 0,
+    "requiresConfirmation": false
+  },
+  "builderRejectionSummary": {
+    "rejectedInputCount": 1,
+    "reasonCodes": [
+      "file_too_large"
+    ]
+  },
+  "draftArtifacts": {
+    "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-oversized-source-manifest-build.generated.json",
+    "sourceManifestPath": null,
+    "fieldMappingPath": null,
+    "sourceIntakeReportPath": null
+  },
+  "requiredActions": [
+    "Replace rejected builder inputs before source intake: file_too_large."
+  ],
+  "warnings": [
+    "Source-builder handoffs do not create forecast artifacts.",
+    "Setup method gates are still required after accepted source intake."
+  ]
+}

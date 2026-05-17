@@ -1,0 +1,122 @@
+{
+  "forecastRunIntakeMatrixId": "forecastrunmatrix-001",
+  "generatedAt": "2026-06-06T13:15:00Z",
+  "domain": "weather-logistics",
+  "supportedDefaultRequestId": "forecastrequest-007",
+  "summarySchema": "spec/forecast-run-summary.schema.json",
+  "outcomes": [
+    {
+      "outcomeClass": "accepted",
+      "requestFixture": "spec/fixtures/requests/auto-weather-logistics-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-agent-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-001",
+      "runStatus": "completed",
+      "decisionStatus": "accepted",
+      "errorCode": null,
+      "generatesForecastOutputs": true,
+      "terminal": false,
+      "retryPolicy": "not_needed",
+      "agentNextAction": "Use forecastCard for compact action context or lifecycleBundle for audit context.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": false,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    },
+    {
+      "outcomeClass": "rejected",
+      "requestFixture": "spec/fixtures/requests/unresolvable-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-rejected-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-002",
+      "runStatus": "rejected",
+      "decisionStatus": "rejected",
+      "errorCode": "unsupported_geography",
+      "generatesForecastOutputs": false,
+      "terminal": true,
+      "retryPolicy": "revise_request_then_retry",
+      "agentNextAction": "Revise the geography, question text, or source policy before retrying.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": true,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    },
+    {
+      "outcomeClass": "blocked",
+      "requestFixture": "spec/fixtures/requests/approval-required-sensitive-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-blocked-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-003",
+      "runStatus": "blocked",
+      "decisionStatus": "blocked",
+      "errorCode": "approval_required",
+      "generatesForecastOutputs": false,
+      "terminal": false,
+      "retryPolicy": "approval_then_retry",
+      "agentNextAction": "Request explicit approval before retrying the forecast run.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": true,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    },
+    {
+      "outcomeClass": "canceled",
+      "requestFixture": "spec/fixtures/requests/canceled-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-canceled-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-004",
+      "runStatus": "canceled",
+      "decisionStatus": "canceled",
+      "errorCode": "canceled",
+      "generatesForecastOutputs": false,
+      "terminal": true,
+      "retryPolicy": "stop_terminal",
+      "agentNextAction": "Stop; the caller canceled the request before execution.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": true,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    },
+    {
+      "outcomeClass": "unsupported_fixture_path",
+      "requestFixture": "spec/fixtures/requests/generate-weather-logistics-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-unsupported-fixture-path-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-005",
+      "runStatus": "failed",
+      "decisionStatus": "accepted",
+      "errorCode": "unsupported_fixture_path",
+      "generatesForecastOutputs": false,
+      "terminal": true,
+      "retryPolicy": "supported_fixture_or_runtime_expansion_required",
+      "agentNextAction": "Use the supported auto-evidence fixture request or wait for broader runtime support.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": true,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    },
+    {
+      "outcomeClass": "response_too_large",
+      "requestFixture": "spec/fixtures/requests/auto-weather-logistics-request.json",
+      "summaryPath": "spec/fixtures/generated/forecast-run/weather-logistics-response-too-large-forecast-run.generated.json",
+      "forecastRunSummaryId": "forecastrun-006",
+      "runStatus": "failed",
+      "decisionStatus": "accepted",
+      "errorCode": "response_too_large",
+      "generatesForecastOutputs": false,
+      "terminal": false,
+      "retryPolicy": "increase_max_bytes_or_read_smaller_output",
+      "agentNextAction": "Retry with a larger maxBytes limit or read smaller operation-specific outputs.",
+      "mcpExpectation": {
+        "toolName": "ope_forecast_run",
+        "isError": true,
+        "structuredSchema": "spec/forecast-run-summary.schema.json"
+      }
+    }
+  ],
+  "warnings": [
+    "Only the accepted default auto-evidence fixture path generates forecast outputs.",
+    "Blocked, rejected, canceled, unsupported, and oversized outcomes must not bind forecast IDs.",
+    "The matrix is local and fixture-safe; it is not a hosted service or live-fetch workflow."
+  ]
+}

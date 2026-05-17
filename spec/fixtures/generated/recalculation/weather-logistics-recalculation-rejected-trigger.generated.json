@@ -1,0 +1,32 @@
+{
+  "recalculationTriggerId": "recalculationtrigger-002",
+  "createdAt": "2026-06-04T10:05:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "questionId": "question-601",
+  "previousForecastId": "forecast-801",
+  "previousEvidencePacketId": "evidence-801",
+  "triggerType": "agent_submitted_evidence",
+  "triggerStatus": "rejected",
+  "sourceRole": "resolution_primary",
+  "forecastCloseTime": "2026-06-03T00:00:00Z",
+  "receivedAt": "2026-06-04T10:00:00Z",
+  "availableBeforeForecastClose": false,
+  "postOutcomeEvidence": true,
+  "changedSourceRefs": [
+    {
+      "sourceId": "source-402",
+      "name": "Declared Warsaw operations event source",
+      "sourceType": "internal_dataset",
+      "uri": "https://example.test/fixtures/live/declared-warsaw-operations-outcome.json",
+      "retrievedAt": "2026-06-04T10:00:00Z",
+      "contentHash": "sha256-declared-outcome-source-402"
+    }
+  ],
+  "triggerReason": "Post-outcome resolution evidence cannot alter forecast-time probabilities.",
+  "guardrailReasons": [
+    "post_outcome_evidence",
+    "received_after_forecast_close",
+    "resolution_source_not_forecast_input"
+  ]
+}

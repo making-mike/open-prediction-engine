@@ -1,0 +1,41 @@
+{
+  "sourceIntakeHandoffId": "sourceintakehandoff-001",
+  "generatedAt": "2026-06-06T18:10:00Z",
+  "case": "unconfirmed_builder_draft",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestBuildId": "sourcemanifestbuild-001",
+  "handoffStatus": "needs_mapping_confirmation",
+  "nextAction": "ask_mapping_confirmation",
+  "canEnterSourceIntake": true,
+  "forecastGenerationAllowed": false,
+  "sourceManifestId": "sourcemanifestdraft-001",
+  "fieldMappingId": "fieldmappingdraft-001",
+  "sourceIntakeReportId": "sourceintakereport-101",
+  "sourceIntakeStatus": "needs_confirmation",
+  "mappingSummary": {
+    "totalMappings": 13,
+    "proposedMappingCount": 10,
+    "confirmedMappingCount": 3,
+    "agentInferredMappingCount": 10,
+    "requiresConfirmation": true
+  },
+  "builderRejectionSummary": {
+    "rejectedInputCount": 0,
+    "reasonCodes": []
+  },
+  "draftArtifacts": {
+    "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-unconfirmed-builder-draft-source-manifest-build.generated.json",
+    "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-unconfirmed-builder-draft-source-manifest.json",
+    "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-unconfirmed-builder-draft-field-mapping.json",
+    "sourceIntakeReportPath": "spec/fixtures/generated/source-handoff/weather-logistics-unconfirmed-builder-draft-source-intake-report.generated.json"
+  },
+  "requiredActions": [
+    "Ask the caller to confirm proposed field and alias mappings before forecast execution."
+  ],
+  "warnings": [
+    "Source-builder handoffs do not create forecast artifacts.",
+    "Setup method gates are still required after accepted source intake.",
+    "Source intake reports do not produce forecast artifacts."
+  ]
+}

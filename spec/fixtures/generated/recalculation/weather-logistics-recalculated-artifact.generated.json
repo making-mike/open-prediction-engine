@@ -1,0 +1,45 @@
+{
+  "forecastId": "forecast-801",
+  "questionId": "question-601",
+  "questionStatus": "open",
+  "domain": "weather-logistics",
+  "horizon": {
+    "startsAt": "2026-06-03T00:00:00Z",
+    "endsAt": "2026-06-03T23:59:59Z",
+    "label": "1-day"
+  },
+  "forecastedAt": "2026-06-02T18:20:00Z",
+  "closedAt": "2026-06-03T00:00:00Z",
+  "outputType": "binary",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.57
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.22
+  },
+  "model": {
+    "modelId": "model-801",
+    "version": "weather-logistics-auto-evidence-recalculation-fixture-v1",
+    "configurationHash": "sha256-recalculation-model-001"
+  },
+  "evidencePacketId": "evidence-801",
+  "resolutionPlan": {
+    "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+    "resolutionAuthority": "OPE prototype resolver",
+    "primaryResolutionSource": {
+      "sourceId": "source-402",
+      "name": "Declared Warsaw operations event source",
+      "sourceType": "internal_dataset"
+    },
+    "fallbackResolutionSources": [
+      {
+        "sourceId": "source-403",
+        "name": "Open-Meteo weather observation for Warsaw",
+        "sourceType": "public_dataset"
+      }
+    ],
+    "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+  }
+}

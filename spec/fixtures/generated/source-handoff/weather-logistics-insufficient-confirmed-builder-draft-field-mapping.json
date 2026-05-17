@@ -1,0 +1,188 @@
+{
+  "fieldMappingId": "fieldmappingdraft-103",
+  "createdAt": "2026-06-02T10:15:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifestdraft-103",
+  "mappings": [
+    {
+      "mappingId": "draftmapping-001",
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "sourceField": "city",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-002",
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "sourceField": "date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-003",
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "sourceField": "loaded_at",
+      "targetField": "retrieved_at",
+      "targetFieldType": "date_time",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-004",
+      "sourceId": "localsource-001",
+      "sourceRole": "weather_forecast",
+      "sourceField": "rain_mm",
+      "targetField": "forecast_daily_precipitation_mm",
+      "targetFieldType": "number",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-005",
+      "sourceId": "localsource-002",
+      "sourceRole": "historical_baseline",
+      "sourceField": "service_date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "registry_backed",
+      "mappingStatus": "confirmed",
+      "confidence": 0.98,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Registry-backed local field match."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-006",
+      "sourceId": "localsource-002",
+      "sourceRole": "historical_baseline",
+      "sourceField": "geography",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "registry_backed",
+      "mappingStatus": "confirmed",
+      "confidence": 0.98,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Registry-backed local field match."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-007",
+      "sourceId": "localsource-002",
+      "sourceRole": "historical_baseline",
+      "sourceField": "disrupted",
+      "targetField": "disruption_observed",
+      "targetFieldType": "boolean",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-008",
+      "sourceId": "localsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller-provided mapping hint."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-009",
+      "sourceId": "localsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "city",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    },
+    {
+      "mappingId": "draftmapping-010",
+      "sourceId": "localsource-003",
+      "sourceRole": "declared_operations_outcome",
+      "sourceField": "disrupted",
+      "targetField": "disruption_observed",
+      "targetFieldType": "boolean",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Caller confirmed the builder-proposed mapping before source intake."
+      ]
+    }
+  ],
+  "aliasMappings": [
+    {
+      "aliasMappingId": "draftaliasmapping-001",
+      "entityType": "geography",
+      "sourceValue": "Warsaw",
+      "canonicalValue": "warsaw",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "requiresConfirmation": false
+    },
+    {
+      "aliasMappingId": "draftaliasmapping-002",
+      "entityType": "geography",
+      "sourceValue": "Warsaw",
+      "canonicalValue": "warsaw",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "requiresConfirmation": false
+    },
+    {
+      "aliasMappingId": "draftaliasmapping-003",
+      "entityType": "geography",
+      "sourceValue": "Warsaw",
+      "canonicalValue": "warsaw",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "requiresConfirmation": false
+    }
+  ]
+}

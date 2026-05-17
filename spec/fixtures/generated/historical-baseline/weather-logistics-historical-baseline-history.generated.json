@@ -1,0 +1,25 @@
+{
+  "historyId": "history-701",
+  "questionId": "question-701",
+  "entries": [
+    {
+      "forecastId": "forecast-702",
+      "forecastedAt": "2026-06-02T10:00:00Z",
+      "state": "active",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-700",
+        "version": "historical-frequency-only-fixture-v0",
+        "configurationHash": "sha256-historical-baseline-model-001"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.22
+      },
+      "rationaleSummary": "Historical-only forecast uses the committed comparable service-day disruption frequency and does not call a weather forecast API.",
+      "evidencePacketId": "evidence-701"
+    }
+  ],
+  "createdAt": "2026-06-02T10:00:00Z",
+  "updatedAt": "2026-06-02T10:00:00Z"
+}

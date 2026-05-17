@@ -4,6 +4,15 @@ Status: first controlled weather connector policy.
 
 Normal repository checks must not make live network calls. Live source access is opt-in and must write only normalized records unless a caller explicitly chooses to retain raw responses outside committed fixtures.
 
+The current opt-in readiness gate is:
+
+```bash
+python3 scripts/ope.py live-readiness --live --service-date YYYY-MM-DD
+python3 scripts/ope.py live-readiness --live --save-local --service-date YYYY-MM-DD
+```
+
+This command is integration-scoped and not part of normal release checks.
+
 ## Allow-Listed Weather Source
 
 Provider: Open-Meteo Weather Forecast API
@@ -36,6 +45,12 @@ Allowed request shape:
 - `end_date={service_date}`
 
 The connector must reject non-allow-listed locations and must not accept arbitrary endpoint URLs.
+
+## Execution Modes
+
+- `fixture_replay`: normal-check mode using committed fixtures; no network access.
+- `integration_live_fetch`: explicit developer-run readiness mode; one allow-listed Open-Meteo call, 20-second timeout, sanitized diagnostics, metadata-only retention, optional ignored local save.
+- `hosted_live_fetch`: future service runtime mode; not implemented.
 
 ## Retention
 

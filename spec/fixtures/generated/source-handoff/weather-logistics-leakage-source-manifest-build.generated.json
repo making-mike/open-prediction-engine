@@ -1,0 +1,52 @@
+{
+  "sourceManifestBuildId": "sourcemanifestbuild-005",
+  "generatedAt": "2026-06-06T17:30:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "buildStatus": "rejected",
+  "forecastGenerationAllowed": false,
+  "canEnterSourceIntake": false,
+  "confirmationRequired": false,
+  "inputFiles": [
+    {
+      "fileId": "localfile-001",
+      "localPath": "spec/fixtures/local-source-files/post-outcome-leakage.csv",
+      "sourceRole": "weather_forecast",
+      "fileFormat": "csv",
+      "inspectionStatus": "rejected",
+      "byteSize": 97,
+      "rowCount": null,
+      "contentHash": "cbdaf953ea98b76f733459ebf8d2b900c0378a6a212808ea5932b515765231ea",
+      "detectedFields": [
+        "service_date",
+        "geography",
+        "actual_disruption",
+        "resolved_at"
+      ],
+      "privacyFlags": {
+        "containsSecrets": false,
+        "containsPersonalData": false,
+        "approvalRequired": false
+      },
+      "leakageFlags": {
+        "hasPostOutcomeIndicators": true,
+        "availableBeforeForecastClose": true
+      },
+      "reasonCodes": [
+        "post_outcome_leakage_indicator"
+      ]
+    }
+  ],
+  "draftArtifacts": {
+    "sourceManifestId": null,
+    "fieldMappingId": null,
+    "sourceManifestPath": null,
+    "fieldMappingPath": null
+  },
+  "requiredActions": [
+    "Remove rejected files or provide caller-approved supported CSV/JSON sources."
+  ],
+  "warnings": [
+    "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+  ]
+}

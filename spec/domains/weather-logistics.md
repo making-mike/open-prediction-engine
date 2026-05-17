@@ -95,6 +95,8 @@ The first baseline is a historical-frequency baseline:
 P(disruption | geography, service-day seasonality, weather-threshold bucket)
 ```
 
+When a caller restricts OPE to historical data only, this baseline is the forecast. OPE must not apply forecast-time weather API adjustments unless the source policy explicitly allows those evidence sources.
+
 Fixture data may use a fixed baseline probability, but live data must record:
 
 - lookback window

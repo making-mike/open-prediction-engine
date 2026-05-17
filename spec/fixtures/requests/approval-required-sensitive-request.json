@@ -9,6 +9,24 @@
   "outputType": "binary",
   "horizonLabel": "1-day",
   "requestedAction": "generate_forecast",
+  "dataMode": "provided",
+  "sourcePolicy": {
+    "sourcePolicyId": "sourcepolicy-001",
+    "allowedSourceClasses": ["internal_dataset", "public_dataset"],
+    "allowedConnectors": ["committed_fixture"],
+    "allowNetworkAccess": false,
+    "maxNetworkCalls": 0,
+    "maxCostUsd": 0,
+    "freshness": {
+      "maxSourceAgeHours": 72,
+      "requireRetrievedAt": true
+    },
+    "approvalRequired": false,
+    "retention": {
+      "rawSourceRetention": "fixture_only",
+      "storeContentHashes": true
+    }
+  },
   "riskReview": {
     "highImpact": false,
     "paid": false,

@@ -1,0 +1,80 @@
+{
+  "fieldMappingId": "fieldmapping-004",
+  "createdAt": "2026-06-02T10:00:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-004",
+  "mappings": [
+    {
+      "mappingId": "mapping-027",
+      "sourceId": "manifestsource-009",
+      "sourceRole": "weather_forecast",
+      "sourceField": "disruption_observed",
+      "targetField": "forecast_daily_precipitation_mm",
+      "targetFieldType": "number",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "rejected",
+      "confidence": 0.1,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Post-outcome field cannot be mapped to forecast-time weather evidence."
+      ]
+    },
+    {
+      "mappingId": "mapping-028",
+      "sourceId": "manifestsource-010",
+      "sourceRole": "historical_baseline",
+      "sourceField": "service_date",
+      "targetField": "service_date",
+      "targetFieldType": "date",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Mapping supplied for deterministic fixture intake."
+      ]
+    },
+    {
+      "mappingId": "mapping-029",
+      "sourceId": "manifestsource-010",
+      "sourceRole": "historical_baseline",
+      "sourceField": "geography",
+      "targetField": "geography",
+      "targetFieldType": "string",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Mapping supplied for deterministic fixture intake."
+      ]
+    },
+    {
+      "mappingId": "mapping-030",
+      "sourceId": "manifestsource-010",
+      "sourceRole": "historical_baseline",
+      "sourceField": "disruption_observed",
+      "targetField": "disruption_observed",
+      "targetFieldType": "boolean",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "confidence": 1.0,
+      "requiresConfirmation": false,
+      "validationNotes": [
+        "Mapping supplied for deterministic fixture intake."
+      ]
+    }
+  ],
+  "aliasMappings": [
+    {
+      "aliasMappingId": "aliasmapping-004",
+      "entityType": "geography",
+      "sourceValue": "Warsaw",
+      "canonicalValue": "warsaw",
+      "mappingOrigin": "user_provided",
+      "mappingStatus": "confirmed",
+      "requiresConfirmation": false
+    }
+  ]
+}

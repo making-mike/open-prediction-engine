@@ -1,0 +1,241 @@
+{
+  "methodRegistryId": "methodregistry-001",
+  "generatedAt": "2026-06-06T12:00:00Z",
+  "domain": "weather-logistics",
+  "methods": [
+    {
+      "methodId": "method-100",
+      "methodClass": "baseline",
+      "status": "enabled",
+      "model": {
+        "modelId": "model-100",
+        "version": "historical-frequency-fixture-v0",
+        "trainingCutoff": "2026-05-31T23:59:59Z",
+        "configurationHash": "sha256-baseline-method-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["internal_dataset"],
+        "requiredConnectors": ["committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": false,
+        "requiresTrainingData": false
+      },
+      "uncertaintyMethod": {
+        "method": "historical-frequency",
+        "description": "Uses historical comparable service-day frequency as the reference probability."
+      },
+      "knownLimitations": [
+        "Does not use current weather forecast evidence.",
+        "Only valid for the weather-logistics fixture wedge."
+      ],
+      "benchmarkStatus": {
+        "status": "not_required",
+        "qualityClaimStatus": "baseline_reference"
+      }
+    },
+    {
+      "methodId": "method-101",
+      "methodClass": "deterministic_statistical",
+      "status": "enabled",
+      "model": {
+        "modelId": "model-101",
+        "version": "weather-logistics-fixture-loop-v0",
+        "trainingCutoff": "2026-05-30T00:00:00Z",
+        "configurationHash": "sha256-fixture-loop-model-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["internal_dataset"],
+        "requiredConnectors": ["committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": true,
+        "requiresTrainingData": false
+      },
+      "uncertaintyMethod": {
+        "method": "calibration-band",
+        "description": "Uses a fixed calibration band around the fixture model probability until enough outcomes resolve."
+      },
+      "knownLimitations": [
+        "Benchmarked on one fixture outcome only.",
+        "Does not support live calibration claims."
+      ],
+      "benchmarkStatus": {
+        "status": "benchmarked",
+        "qualityClaimStatus": "not_enough_comparable_benchmarks",
+        "comparableBenchmarkRunIds": ["benchmarkrun-003", "benchmarkrun-001"],
+        "baselineMethodId": "method-100",
+        "baselineBenchmarkRunId": "benchmarkrun-003",
+        "candidateBenchmarkRunId": "benchmarkrun-001",
+        "sameSourcePolicy": true,
+        "sameRetrievalWindow": true,
+        "leakageValidated": true,
+        "sampleSize": 1,
+        "baselineLift": 0.2603
+      }
+    },
+    {
+      "methodId": "method-201",
+      "methodClass": "model_assisted",
+      "status": "proposed",
+      "model": {
+        "modelId": "model-201",
+        "version": "model-assisted-weather-logistics-fixture-v0",
+        "trainingCutoff": "2026-05-30T00:00:00Z",
+        "configurationHash": "sha256-model-assisted-method-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["public_dataset", "internal_dataset", "model_output"],
+        "requiredConnectors": ["open_meteo_weather", "committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": true,
+        "requiresTrainingData": true
+      },
+      "uncertaintyMethod": {
+        "method": "not-enabled",
+        "description": "Requires benchmark and leakage evidence before selection."
+      },
+      "knownLimitations": [
+        "Not enabled for production selection.",
+        "Requires temporal leakage and known-answer controls before quality claims."
+      ],
+      "benchmarkStatus": {
+        "status": "not_benchmarked",
+        "qualityClaimStatus": "not_enabled"
+      }
+    },
+    {
+      "methodId": "method-301",
+      "methodClass": "retrieval_assisted",
+      "status": "proposed",
+      "model": {
+        "modelId": "model-301",
+        "version": "retrieval-assisted-weather-logistics-fixture-v0",
+        "configurationHash": "sha256-retrieval-assisted-method-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["public_dataset", "internal_dataset"],
+        "requiredConnectors": ["open_meteo_weather", "committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": true,
+        "requiresTrainingData": false
+      },
+      "uncertaintyMethod": {
+        "method": "not-enabled",
+        "description": "Requires retrieval benchmark evidence before selection."
+      },
+      "knownLimitations": [
+        "Broad web search is not enabled.",
+        "Retrieval quality is limited to allow-listed fixture connectors."
+      ],
+      "benchmarkStatus": {
+        "status": "not_benchmarked",
+        "qualityClaimStatus": "not_enabled"
+      }
+    },
+    {
+      "methodId": "method-401",
+      "methodClass": "ensemble",
+      "status": "proposed",
+      "model": {
+        "modelId": "model-401",
+        "version": "ensemble-weather-logistics-fixture-v0",
+        "configurationHash": "sha256-ensemble-method-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["aggregate", "model_output", "internal_dataset"],
+        "requiredConnectors": ["committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": true,
+        "requiresTrainingData": false
+      },
+      "uncertaintyMethod": {
+        "method": "weighted-mixture",
+        "description": "Would combine independently benchmarked component methods when enough evidence exists."
+      },
+      "knownLimitations": [
+        "Not enabled until component methods have comparable benchmark evidence.",
+        "Dependency assumptions must be reviewed before selection."
+      ],
+      "benchmarkStatus": {
+        "status": "not_benchmarked",
+        "qualityClaimStatus": "not_enabled"
+      }
+    },
+    {
+      "methodId": "method-501",
+      "methodClass": "external_reference",
+      "status": "proposed",
+      "model": {
+        "modelId": "model-501",
+        "version": "external-reference-weather-logistics-fixture-v0",
+        "configurationHash": "sha256-external-reference-method-001"
+      },
+      "compatibleDomains": [
+        {
+          "domain": "weather-logistics",
+          "horizonBuckets": ["1-day"],
+          "outputTypes": ["binary"]
+        }
+      ],
+      "inputs": {
+        "inputSourceClasses": ["other", "public_dataset"],
+        "requiredConnectors": ["committed_fixture"],
+        "usesRetrievedEvidence": true,
+        "requiresBaseline": true,
+        "requiresTrainingData": false
+      },
+      "uncertaintyMethod": {
+        "method": "not-enabled",
+        "description": "External references require source-policy and benchmark checks before selection."
+      },
+      "knownLimitations": [
+        "No external reference provider is currently enabled.",
+        "External forecasts must not bypass OPE provenance and resolution contracts."
+      ],
+      "benchmarkStatus": {
+        "status": "not_benchmarked",
+        "qualityClaimStatus": "not_enabled"
+      }
+    }
+  ],
+  "selectionPolicy": {
+    "defaultMethodId": "method-100",
+    "fallbackMethodId": "method-100",
+    "minimumComparableBenchmarks": 30,
+    "insufficientEvidenceRule": "Use the baseline method when an enabled non-baseline method lacks enough comparable benchmark evidence or fails leakage controls."
+  }
+}

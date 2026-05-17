@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/setup-forecast-run.schema.json",
+  "title": "Setup Forecast Run",
+  "description": "Setup-aware forecast execution summary that binds domain setup, source intake, method decision, and generated forecast outputs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "setupForecastRunId",
+    "generatedAt",
+    "case",
+    "domainSetupId",
+    "domain",
+    "sourceManifestId",
+    "fieldMappingId",
+    "sourceIntakeReportId",
+    "sourceIntakeHandoffId",
+    "sourceHandoffMethodGateId",
+    "setupMethodDecisionId",
+    "setupBenchmarkGateId",
+    "intakeStatus",
+    "methodDecisionStatus",
+    "selectedMethodClass",
+    "selectedForecastMode",
+    "runStatus",
+    "executionMode",
+    "sourceMode",
+    "controls",
+    "recordBinding",
+    "outputs",
+    "blockedReasons",
+    "nextActions",
+    "warnings"
+  ],
+  "properties": {
+    "setupForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "case": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "accepted_partial",
+        "needs_confirmation",
+        "rejected",
+        "unconfirmed_builder_draft",
+        "confirmed_builder_draft",
+        "insufficient_confirmed_builder_draft",
+        "contains_secret",
+        "unsupported_format",
+        "oversized",
+        "leakage"
+      ]
+    },
+    "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "sourceManifestId": { "$ref": "#/$defs/nullableId" },
+    "fieldMappingId": { "$ref": "#/$defs/nullableId" },
+    "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+    "sourceIntakeHandoffId": { "$ref": "#/$defs/nullableId" },
+    "sourceHandoffMethodGateId": { "$ref": "#/$defs/nullableId" },
+    "setupMethodDecisionId": { "$ref": "#/$defs/nullableId" },
+    "setupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+    "intakeStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["accepted", "accepted_partial", "needs_confirmation", "rejected"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "methodDecisionStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["baseline_selected", "method_selected", "needs_confirmation", "rejected"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "selectedMethodClass": {
+      "type": "string",
+      "enum": [
+        "historical_baseline",
+        "historical_conditioned_frequency",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "none"
+      ]
+    },
+    "selectedForecastMode": {
+      "type": "string",
+      "enum": [
+        "baseline_only",
+        "historical_conditioned",
+        "deterministic_statistical",
+        "model_assisted",
+        "external_reference",
+        "ensemble",
+        "blocked"
+      ]
+    },
+    "runStatus": {
+      "type": "string",
+      "enum": ["generated", "blocked"]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["fixture_dry_run", "not_started"]
+    },
+    "sourceMode": {
+      "type": "string",
+      "enum": ["source_intake_fixture", "source_handoff_fixture", "none"]
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceIntakeValidated",
+        "methodDecisionValidated",
+        "networkAccess",
+        "liveFetch",
+        "effectfulGeneration",
+        "localLiveDraftConsumed",
+        "forecastArtifactsCreated"
+      ],
+      "properties": {
+        "sourceIntakeValidated": { "type": "boolean" },
+        "methodDecisionValidated": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "effectfulGeneration": { "type": "boolean" },
+        "localLiveDraftConsumed": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" }
+      }
+    },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionId",
+        "forecastId",
+        "evidencePacketId",
+        "historyId",
+        "forecastCardId",
+        "forecastBundleId"
+      ],
+      "properties": {
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "evidencePacketId": { "$ref": "#/$defs/nullableId" },
+        "historyId": { "$ref": "#/$defs/nullableId" },
+        "forecastCardId": { "$ref": "#/$defs/nullableId" },
+        "forecastBundleId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionPath",
+        "featureSnapshotPath",
+        "evidencePacketPath",
+        "forecastArtifactPath",
+        "forecastHistoryPath"
+      ],
+      "properties": {
+        "questionPath": { "$ref": "#/$defs/nullablePath" },
+        "featureSnapshotPath": { "$ref": "#/$defs/nullablePath" },
+        "evidencePacketPath": { "$ref": "#/$defs/nullablePath" },
+        "forecastArtifactPath": { "$ref": "#/$defs/nullablePath" },
+        "forecastHistoryPath": { "$ref": "#/$defs/nullablePath" }
+      }
+    },
+    "blockedReasons": { "$ref": "#/$defs/reasonCodes" },
+    "nextActions": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullablePath": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        { "type": "null" }
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    }
+  }
+}

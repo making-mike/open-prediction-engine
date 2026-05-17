@@ -1,0 +1,493 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-adapter-protocol-map.schema.json",
+  "title": "Agent Adapter Protocol Map",
+  "description": "Machine-readable mapping from the local OPE agent dispatcher to local MCP stdio and future HTTP and queue adapters.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolMapId",
+    "generatedAt",
+    "adapterContract",
+    "operations",
+    "exitCodeMapping",
+    "transportBoundaries",
+    "decisionExamples",
+    "warnings"
+  ],
+  "properties": {
+    "protocolMapId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "adapterContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatcherCommand",
+        "mcpCommand",
+        "mcpProtocolVersion",
+        "envelopeSchema",
+        "runtimeStatus",
+        "localDispatcherImplemented",
+        "protocolRuntimeImplemented",
+        "mcpStdioScaffoldImplemented",
+        "httpRuntimeImplemented",
+        "queueRuntimeImplemented"
+      ],
+      "properties": {
+        "dispatcherCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "mcpCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "mcpProtocolVersion": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 40
+        },
+        "envelopeSchema": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "runtimeStatus": {
+          "type": "string",
+          "enum": ["mapping_only_no_protocol_runtime", "local_mcp_stdio_scaffold"]
+        },
+        "localDispatcherImplemented": { "type": "boolean" },
+        "protocolRuntimeImplemented": { "type": "boolean" },
+        "mcpStdioScaffoldImplemented": { "type": "boolean" },
+        "httpRuntimeImplemented": { "type": "boolean" },
+        "queueRuntimeImplemented": { "type": "boolean" }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/operationMap" }
+    },
+    "exitCodeMapping": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/exitCodeMap" }
+    },
+    "transportBoundaries": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/transportBoundary" }
+    },
+    "decisionExamples": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/decisionExample" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "operationName": {
+      "type": "string",
+      "enum": [
+        "forecast_request_validation",
+        "evidence_plan",
+        "evidence_trace",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "inputRecordType": {
+      "type": "string",
+      "enum": [
+        "forecast_request",
+        "evidence_gathering_plan",
+        "evidence_trace",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "sideEffectLevel": {
+      "type": "string",
+      "enum": [
+        "validation_only",
+        "dry_run_generation",
+        "read_only",
+        "status_read",
+        "scoring_read"
+      ]
+    },
+    "fieldMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "required", "type", "source", "notes"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "required": { "type": "boolean" },
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "source": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        }
+      }
+    },
+    "statusMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["httpStatus", "envelopeExitCode", "meaning"],
+      "properties": {
+        "httpStatus": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "envelopeExitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        }
+      }
+    },
+    "mcpMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implemented",
+        "toolName",
+        "argumentFields",
+        "returns",
+        "approvalGate",
+        "credentialBoundary"
+      ],
+      "properties": {
+        "implemented": { "type": "boolean" },
+        "toolName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "argumentFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/fieldMap" }
+        },
+        "returns": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "approvalGate": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        },
+        "credentialBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        }
+      }
+    },
+    "httpMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implemented",
+        "method",
+        "path",
+        "argumentFields",
+        "statusMapping",
+        "approvalGate",
+        "credentialBoundary"
+      ],
+      "properties": {
+        "implemented": { "type": "boolean" },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "argumentFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/fieldMap" }
+        },
+        "statusMapping": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/statusMap" }
+        },
+        "approvalGate": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        },
+        "credentialBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        }
+      }
+    },
+    "queueMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implemented",
+        "requestMessageType",
+        "resultMessageType",
+        "correlationKeys",
+        "approvalGate",
+        "credentialBoundary"
+      ],
+      "properties": {
+        "implemented": { "type": "boolean" },
+        "requestMessageType": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "resultMessageType": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "correlationKeys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          }
+        },
+        "approvalGate": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        },
+        "credentialBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        }
+      }
+    },
+    "operationMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "inputRecordType",
+        "sideEffectLevel",
+        "requiresApproval",
+        "inputFields",
+        "outputEnvelopeSchema",
+        "localCli",
+        "mcp",
+        "http",
+        "queue",
+        "usageGuidance",
+        "warnings"
+      ],
+      "properties": {
+        "operation": { "$ref": "#/$defs/operationName" },
+        "inputRecordType": { "$ref": "#/$defs/inputRecordType" },
+        "sideEffectLevel": { "$ref": "#/$defs/sideEffectLevel" },
+        "requiresApproval": { "type": "boolean" },
+        "inputFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/fieldMap" }
+        },
+        "outputEnvelopeSchema": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "localCli": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["implemented", "command", "exitCodeSource"],
+          "properties": {
+            "implemented": { "type": "boolean" },
+            "command": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 240
+            },
+            "exitCodeSource": {
+              "type": "string",
+              "enum": ["agentEnvelope.exitCode"]
+            }
+          }
+        },
+        "mcp": { "$ref": "#/$defs/mcpMap" },
+        "http": { "$ref": "#/$defs/httpMap" },
+        "queue": { "$ref": "#/$defs/queueMap" },
+        "usageGuidance": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "warnings": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "exitCodeMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exitCode", "status", "errorCodes", "meaning"],
+      "properties": {
+        "exitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ok", "error"]
+        },
+        "errorCodes": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 220
+        }
+      }
+    },
+    "transportBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transport",
+        "implemented",
+        "boundary",
+        "approvalGate",
+        "credentialBoundary"
+      ],
+      "properties": {
+        "transport": {
+          "type": "string",
+          "enum": ["local_cli", "mcp", "http", "queue"]
+        },
+        "implemented": { "type": "boolean" },
+        "boundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "approvalGate": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "credentialBoundary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "decisionExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "situation",
+        "preferredOperation",
+        "reason",
+        "requiredSignals",
+        "downstreamRule"
+      ],
+      "properties": {
+        "situation": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        "preferredOperation": { "$ref": "#/$defs/operationName" },
+        "reason": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "requiredSignals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          }
+        },
+        "downstreamRule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    }
+  }
+}

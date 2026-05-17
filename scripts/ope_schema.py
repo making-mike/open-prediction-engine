@@ -225,6 +225,46 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return None
     if "benchmark" in parts:
         return spec_root / "benchmark-run.schema.json"
+    if name.endswith("-method-registry.json"):
+        return spec_root / "method-registry.schema.json"
+    if name.endswith("-method-comparison.generated.json"):
+        return spec_root / "method-comparison.schema.json"
+    if name.endswith("-method-selection.generated.json"):
+        return spec_root / "method-selection.schema.json"
+    if name.endswith("-source-connector-registry.generated.json"):
+        return spec_root / "source-connector-registry.schema.json"
+    if name.endswith("-source-connector-results.generated.json"):
+        return spec_root / "source-connector-result-set.schema.json"
+    if name.endswith("-live-readiness.generated.json"):
+        return spec_root / "live-connector-readiness.schema.json"
+    if name.endswith("-domain-setup.generated.json"):
+        return spec_root / "domain-setup.schema.json"
+    if name.endswith("-source-manifest-build.generated.json"):
+        return spec_root / "source-manifest-build.schema.json"
+    if name.endswith("-source-intake-handoff.generated.json"):
+        return spec_root / "source-intake-handoff.schema.json"
+    if name.endswith("-source-handoff-method-gate.generated.json"):
+        return spec_root / "source-handoff-method-gate.schema.json"
+    if name.endswith("-source-manifest.json"):
+        return spec_root / "source-manifest.schema.json"
+    if name.endswith("-field-mapping.json"):
+        return spec_root / "field-mapping.schema.json"
+    if name.endswith("-source-intake-report.generated.json"):
+        return spec_root / "source-intake-report.schema.json"
+    if name.endswith("-setup-benchmark-gate.generated.json"):
+        return spec_root / "setup-benchmark-gate.schema.json"
+    if name.endswith("-setup-method-decision.generated.json"):
+        return spec_root / "setup-method-decision.schema.json"
+    if name.endswith("-setup-forecast-run.generated.json"):
+        return spec_root / "setup-forecast-run.schema.json"
+    if name.endswith("-recalculation-trigger.generated.json") or name.endswith("-recalculation-rejected-trigger.generated.json"):
+        return spec_root / "recalculation-trigger.schema.json"
+    if name.endswith("-recalculation-run.generated.json") or name.endswith("-recalculation-rejected-run.generated.json"):
+        return spec_root / "recalculation-run.schema.json"
+    if name.endswith("-envelope.generated.json"):
+        return spec_root / "agent-envelope.schema.json"
+    if name.endswith("-protocol-map.generated.json"):
+        return spec_root / "agent-adapter-protocol-map.schema.json"
     if "requests" in parts:
         return spec_root / "forecast-request.schema.json"
     if name.endswith("-question.json") or name.endswith("-question.generated.json"):
@@ -233,6 +273,10 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "forecast-history.schema.json"
     if name.endswith("-evidence.json") or name.endswith("-evidence.generated.json"):
         return spec_root / "evidence-packet.schema.json"
+    if name.endswith("-evidence-plan.generated.json"):
+        return spec_root / "evidence-gathering-plan.schema.json"
+    if name.endswith("-source-set.generated.json"):
+        return spec_root / "evidence-source-set.schema.json"
     if name.endswith("-artifact.json") or name.endswith("-artifact.generated.json"):
         return spec_root / "forecast-artifact.schema.json"
     if name.endswith("-resolution.json") or name.endswith("-resolution.generated.json"):
@@ -245,6 +289,22 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "calibration-summary.schema.json"
     if name.endswith("-pipeline-run.generated.json"):
         return spec_root / "pipeline-run.schema.json"
+    if name.endswith("-source-handoff-setup-runbook.generated.json"):
+        return spec_root / "source-handoff-setup-runbook.schema.json"
+    if name.endswith("-private-setup-workflow.generated.json"):
+        return spec_root / "private-setup-workflow.schema.json"
+    if name.endswith("-private-source-adapter-capabilities.generated.json"):
+        return spec_root / "private-source-adapter-capability.schema.json"
+    if name.endswith("-private-source-adapter-outcome-matrix.generated.json"):
+        return spec_root / "private-source-adapter-outcome-matrix.schema.json"
+    if name.endswith("-private-source-adapter-intake-bridge.generated.json"):
+        return spec_root / "private-source-adapter-intake-bridge.schema.json"
+    if name.endswith("-forecast-runbook.generated.json"):
+        return spec_root / "agent-forecast-runbook.schema.json"
+    if name.endswith("-forecast-run.generated.json"):
+        return spec_root / "forecast-run-summary.schema.json"
+    if name.endswith("-intake-matrix.generated.json"):
+        return spec_root / "forecast-run-intake-matrix.schema.json"
     if name == "record-index.generated.json":
         return spec_root / "record-index.schema.json"
     if name == "release-manifest.generated.json":

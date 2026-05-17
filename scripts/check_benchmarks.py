@@ -12,8 +12,16 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 BENCHMARKS = ROOT / "spec" / "fixtures" / "benchmark"
 FIXTURE_LOOP = ROOT / "spec" / "fixtures" / "generated" / "fixture-loop"
-VALID_BENCHMARKS = ["clean-pre-outcome-run.json"]
-INVALID_BENCHMARKS = ["post-outcome-leakage-run.json"]
+VALID_BENCHMARKS = [
+    "baseline-clean-pre-outcome-run.json",
+    "clean-pre-outcome-run.json",
+]
+INVALID_BENCHMARKS = [
+    "known-answer-leakage-run.json",
+    "post-outcome-leakage-run.json",
+    "source-contamination-run.json",
+    "temporal-leakage-run.json",
+]
 
 
 def load_json(path: Path) -> Any:
@@ -52,6 +60,7 @@ def validate_benchmark_run(run: dict[str, Any], questions: dict[str, dict[str, A
     for control_name in [
         "knownAnswerExcluded",
         "postOutcomeDataBlocked",
+        "sourceContaminationBlocked",
         "sourceTimestampsRecorded",
     ]:
         if controls[control_name] is not True:

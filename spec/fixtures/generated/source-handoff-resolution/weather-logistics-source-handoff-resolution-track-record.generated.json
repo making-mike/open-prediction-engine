@@ -1,0 +1,33 @@
+{
+  "trackRecordReportId": "trackrecord-1102",
+  "generatedAt": "2026-06-04T12:35:00Z",
+  "coveragePeriod": {
+    "startsAt": "2026-06-02T10:45:00Z",
+    "endsAt": "2026-06-04T12:30:00Z"
+  },
+  "domain": "weather-logistics",
+  "horizonBucket": "1-day",
+  "outputType": "binary",
+  "counts": {
+    "nForecasts": 1,
+    "nResolved": 1,
+    "nAmbiguous": 0,
+    "nAnnulled": 0
+  },
+  "summary": {
+    "primaryScoringRule": "brier",
+    "primaryScore": 0.126025,
+    "baselineScore": 0.390625,
+    "baselineLift": 0.2646,
+    "calibrationError": 0.355,
+    "lastUpdated": "2026-06-04T12:35:00Z"
+  },
+  "scoreHistogram": [
+    {
+      "lower": 0,
+      "upper": 0.5,
+      "count": 1
+    }
+  ],
+  "slices": []
+}
