@@ -57,6 +57,17 @@ Read-only access includes forecast artifacts, track records, synthetic forecast 
 - Add or update fixtures when changing schemas, scoring, lifecycle behavior, request intake, or read access.
 - Prefer small, deterministic scripts over long-running services until the runtime decision changes.
 
+## Commit Rules
+
+- Commit only coherent, reviewable slices of work.
+- Do not mix unrelated fixes, formatting churn, generated outputs, or exploratory edits in one commit.
+- Before staging, inspect `git status` and the relevant `git diff`; stage only files that belong to the current change.
+- Include required schemas, fixtures, generated reports, docs, roadmap updates, and decision-log entries with the behavior that requires them.
+- Run `python3 scripts/run_checks.py` and `python3 scripts/ope.py check` before committing. Run the release-readiness commands too when the change affects release surfaces, public claims, schemas, generated records, or CI.
+- If a check cannot be run, say which one and why in the handoff or pull request notes.
+- Use a concise imperative commit subject that names the changed contract, behavior, or documentation surface.
+- Never commit raw live fetches, credentials, private source data, local `.ope/live/` drafts, or artifacts that overstate implemented behavior.
+
 ## Generated Fixtures
 
 Refresh generated reports only when source fixtures or scoring logic intentionally changes:

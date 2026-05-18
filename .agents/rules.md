@@ -148,7 +148,20 @@ Before starting a new milestone, do a broader consistency review of the current 
 - Verify that completed roadmap items are genuinely implemented and tested.
 - Capture any gaps either as immediate fixes or as explicit roadmap follow-ups.
 
-## 12. Keep Adjacent-Standard Claims Exact
+## 12. Commit Deliberately
+
+Commits should be small, reviewable snapshots of completed work.
+
+- Do not create a commit unless the user explicitly asks for one or the current task clearly includes publishing or committing the work.
+- Commit one coherent implementation slice at a time; do not mix unrelated fixes, formatting churn, generated output, or exploratory edits into the same commit.
+- Before staging, inspect `git status` and the relevant `git diff` so unrelated local changes, user work, ignored live captures, secrets, and scratch files are not staged accidentally.
+- Include required schema, fixture, generated report, documentation, roadmap, and decision-log updates in the same commit as the behavior that requires them.
+- Run the normal checks before committing. If a broader release check is relevant, run it too; if a check cannot be run, note that explicitly in the handoff.
+- Resolve review findings before committing unless they are explicitly rejected with rationale or captured as roadmap follow-ups.
+- Use a concise imperative commit subject that names the changed contract, behavior, or documentation surface.
+- Never commit raw live fetches, credentials, private source data, local-only `.ope/live/` drafts, or artifacts that would make public claims stronger than the checked implementation supports.
+
+## 13. Keep Adjacent-Standard Claims Exact
 
 Agent-facing projects often touch adjacent standards such as agent-discovery protocols, tool protocols, payment rails, DID, OAuth, OpenAPI, and sector compliance frameworks.
 
@@ -158,13 +171,13 @@ Agent-facing projects often touch adjacent standards such as agent-discovery pro
 - Treat payment metadata as compatibility hooks unless settlement, authorization, and audit behavior are implemented and tested.
 - Treat compliance metadata as policy input, not as a legal guarantee.
 
-## 13. Transfer This Rule Set Deliberately
+## 14. Transfer This Rule Set Deliberately
 
 When creating a new repository with the same assumptions:
 
 - copy `.agents/` and root `AGENTS.md`
 - replace the project purpose, non-goals, normative docs, commands, and release checks
 - reset or archive `.agents/decisions.md`
-- keep the review, decision logging, security, contract-first, and evidence-first rules
+- keep the review, commit, decision logging, security, contract-first, and evidence-first rules
 - remove OPE-only forecast, scoring, calibration, and engine details unless the new project actually implements them
 - add one initial decision explaining adoption of the transferred baseline and any deviations

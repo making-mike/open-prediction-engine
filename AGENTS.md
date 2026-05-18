@@ -73,7 +73,7 @@ Expected project documents as implementation lands:
 
 The `.agents/` directory is maintained as a reusable baseline for protocol-first, schema-first, agent-facing infrastructure repositories.
 
-For OPE, keep the reusable contract-first, security, review, and decision-logging rules, but replace source-project assumptions with OPE-specific boundaries:
+For OPE, keep the reusable contract-first, security, review, commit, and decision-logging rules, but replace source-project assumptions with OPE-specific boundaries:
 
 - engine-owned forecast generation, provenance, resolution, scoring, and calibration
 - question governance and forecast histories before track-record claims
@@ -378,6 +378,17 @@ Still needed before any hosted or service release:
 - Ignored `.ope/live/` captures are development drafts only. They must not enter public read indexes, release checks, track records, calibration, or forecast artifacts until a future explicit forecast command consumes and binds them.
 - Treat paid, effectful, or privacy-sensitive forecast requests as approval-gated actions.
 - Preserve request/result binding across the full lifecycle: caller identity, forecast question, domain, horizon, model version, evidence packet, resolution record, score, and terminal status must not drift apart.
+
+## Commit Rules
+
+- Commit only when the user explicitly asks for a commit or the task clearly includes publishing the work.
+- Keep each commit to one coherent, reviewable slice.
+- Before staging, inspect `git status` and relevant `git diff`; stage only files that belong to the current change.
+- Include required schemas, fixtures, generated reports, docs, roadmap updates, and decision-log entries with the behavior that requires them.
+- Run `python3 scripts/run_checks.py` and `python3 scripts/ope.py check` before committing. Run release-readiness checks when the change touches release surfaces, public claims, schemas, generated records, or CI.
+- If a check cannot be run, say which one and why in the handoff or pull request notes.
+- Use a concise imperative commit subject that names the changed contract, behavior, or documentation surface.
+- Never commit raw live fetches, credentials, private source data, local `.ope/live/` drafts, unrelated local changes, or artifacts that overstate implemented behavior.
 
 ## Release Expectations
 
