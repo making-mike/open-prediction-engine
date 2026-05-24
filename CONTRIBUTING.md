@@ -33,9 +33,9 @@ python3 scripts/release_check.py
 python3 scripts/ope.py release-check
 ```
 
-The current checks are dependency-free. They parse JSON, validate schema-bound fixtures, smoke-test the reusable contract validator, regenerate fixture reports in check mode, verify scoring semantics, check the fixture evidence loop, resolve the fixture-mode live outcome, check historical-only baseline forecasting, check setup benchmark gates, check setup-aware deterministic and baseline forecast execution, check explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflow boundaries, private source adapter capability declarations, outcome matrix, and intake bridge, check append-only recalculation history and post-outcome evidence rejection, check and resolve the local forecast pipeline scaffold, check source connector boundaries, check the live connector readiness gate without network access, check ignored local live-capture workspace guardrails, check domain setup records and candidate claim boundaries, check local source manifest builder boundaries, check source-builder to source-intake handoff boundaries, check source-handoff method-gate boundaries, check source manifest and field mapping intake boundaries, check setup-aware method decisions, check agent adapter envelope examples, the local agent-call dispatcher, the local forecast-run summary, intake matrix, and runbook, the local MCP stdio adapter scaffold, and the protocol mapping for future adapters, check the release manifest and CI workflow, run benchmark anti-leakage checks, validate read-only record access and read-surface contracts, validate controlled request intake, and run hardening guardrails.
+The current checks are dependency-free. They parse JSON, validate schema-bound fixtures, smoke-test the reusable contract validator, regenerate fixture reports in check mode, verify scoring semantics, check the fixture evidence loop, resolve the fixture-mode live outcome, check historical-only baseline forecasting, check setup benchmark gates, check setup-aware deterministic and baseline forecast execution, check explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflow boundaries, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, and private setup adapter-chain runbook guidance and conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelopes, and source-kind selection examples, check append-only recalculation history and post-outcome evidence rejection, check and resolve the local forecast pipeline scaffold, check source connector boundaries, check the live connector readiness gate without network access, check ignored local live-capture workspace guardrails, check domain setup records and candidate claim boundaries, check local source manifest builder boundaries, check source-builder to source-intake handoff boundaries, check source-handoff method-gate boundaries, check source manifest and field mapping intake boundaries, check setup-aware method decisions, check agent adapter envelope examples including private setup bundle, adapter-chain runbook, source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local forecast-run summary, intake matrix, and runbook, the local MCP stdio adapter scaffold, and the protocol mapping for future adapters, check the release manifest and CI workflow, run benchmark anti-leakage checks, validate read-only record access and read-surface contracts, validate controlled request intake, and run hardening guardrails.
 
-Read-only access includes forecast artifacts, track records, synthetic forecast bundles, compact forecast cards, transport-neutral agent envelope examples, the forecast-run summary, intake matrix, and runbook, the adapter protocol map, local MCP tool results, and one-operation agent-call responses assembled from existing public generated records.
+Read-only access includes forecast artifacts, track records, synthetic forecast bundles, compact forecast cards, private setup agent bundles, adapter-chain runbook envelopes, private source adapter guidance envelopes, transport-neutral agent envelope examples, the forecast-run summary, intake matrix, and runbook, the adapter protocol map, local MCP tool results, and one-operation agent-call responses assembled from existing public generated records.
 
 ## Development Rules
 
@@ -51,9 +51,21 @@ Read-only access includes forecast artifacts, track records, synthetic forecast 
 - Treat source-handoff resolution as fixture scoring only; one resolved handoff forecast is not a quality or calibration claim.
 - Treat source-handoff setup runbooks as checked local guidance, not broad private source ingestion support.
 - Treat private setup workflows as contracts; generic manual upload, private API, and database runtimes remain unimplemented until a future runtime lands.
+- Treat private setup requests as setup-intent classification only; they must not read private data, execute source commands, or create forecast and scoring artifacts.
+- Treat private setup first-action dispatch as a compact non-executing read surface; it may name a checked command but must not run source-builder, source-handoff, gather-evidence, forecast execution, or scoring.
+- Treat private setup first-action runbooks as guidance only; they must not execute named commands or move planned, unsafe, unknown, or approval-missing sources into intake.
+- Treat private setup agent bundles as read-only joins over request, action, and runbook records; they must not create artifacts or weaken source-intake, forecast, or scoring gates.
+- Treat private setup adapter-chain runbooks as guidance only; they may name adapter operations and readback order, but must not execute adapter calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
+- Treat private setup adapter-runbook envelopes as read-only guidance; they may expose the checked operation sequence through agent-call or MCP, but must not execute adapter calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
+- Treat private setup adapter conformance matrices as examples over checked envelopes only; they must not execute adapter calls, read private data, or create source, forecast, resolution, scoring, live-fetch, credential, or hosted-runtime artifacts.
+- Treat private setup adapter conformance summaries as compact read-only guidance over checked matrices; they must not embed full envelopes or execute adapter calls, read private data, or create source, forecast, resolution, scoring, live-fetch, credential, or hosted-runtime artifacts.
 - Treat private source adapter capabilities as declarations only; they must not imply live fetching, credential access, or arbitrary private schema parsing.
 - Treat private source adapter outcome matrices as next-action guidance only; they must not create source, forecast, score, or credential artifacts.
 - Treat private source adapter bridges as routing guidance only; they must not execute source reads or create forecast and scoring artifacts.
+- Treat private source adapter guidance envelopes as read-only joins over capability, outcome, and bridge records; they must not execute source reads, adapter calls, source-manifest creation, forecasts, scoring, live fetching, credential handling, or hosted runtime work.
+- Treat private source-kind selection examples as non-executing guidance; they may point to the next setup path, but must not run commands, create manifests, forecasts, scores, credentials, live fetches, or hosted runtime work.
+- Treat private source-kind selection envelopes as read-only exposure of those examples; optional source-kind queries may return one selected recommendation, but they must not execute source-builder, source-handoff, fixture evidence, forecast execution, scoring, source reads, credentials, live fetches, or hosted runtime work.
+- Treat private source-kind query matrices as adapter conformance examples only; they must not create source-intake evidence, forecast artifacts, scoring records, credentials, live fetches, or execution logs.
 - Add or update fixtures when changing schemas, scoring, lifecycle behavior, request intake, or read access.
 - Prefer small, deterministic scripts over long-running services until the runtime decision changes.
 
@@ -97,9 +109,18 @@ python3 scripts/run_source_handoff_forecast.py --write
 python3 scripts/resolve_source_handoff_outcome.py --write
 python3 scripts/generate_source_handoff_setup_runbook.py --write
 python3 scripts/generate_private_setup_workflow.py --write
+python3 scripts/generate_private_setup_requests.py --write
+python3 scripts/generate_private_setup_first_actions.py --write
+python3 scripts/generate_private_setup_first_action_runbook.py --write
+python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write
+python3 scripts/generate_private_source_kind_selection_examples.py --write
+python3 scripts/generate_private_source_kind_query_matrix.py --write
 python3 scripts/generate_recalculation_history.py --write
 python3 scripts/run_agent_forecast.py --write
 python3 scripts/generate_forecast_run_intake_matrix.py --write

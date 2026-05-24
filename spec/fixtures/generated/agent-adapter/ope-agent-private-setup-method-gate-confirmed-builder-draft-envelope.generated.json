@@ -1,0 +1,415 @@
+{
+  "agentEnvelopeId": "agentenvelope-025",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_method_gate",
+  "adapterRequest": {
+    "operation": "private_setup_method_gate",
+    "inputRecordType": "source_handoff_method_gate",
+    "inputRef": "sourcehandoffmethodgate-002",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read setup benchmark and method-gate guidance without executing forecasts."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "await_explicit_setup_forecast_execution",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": "method_selected",
+    "executionMode": "method_gate_guidance",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "methodGateAdapterResultId": "methodgateadapterresult-002",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "methodGateCase": "confirmed_builder_draft",
+    "sourceHandoffMethodGate": {
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+      "generatedAt": "2026-06-06T18:35:00Z",
+      "case": "confirmed_builder_draft",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceIntakeHandoffId": "sourceintakehandoff-002",
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "setupBenchmarkGateId": "setupbenchmarkgate-102",
+      "setupMethodDecisionId": "setupmethoddecision-102",
+      "handoffStatus": "ready_for_method_gating",
+      "handoffNextAction": "proceed_to_method_gating",
+      "methodGateStatus": "method_selected",
+      "nextAction": "await_explicit_setup_forecast_execution",
+      "sourceIntakeStatus": "accepted",
+      "selectedMethodClass": "deterministic_statistical",
+      "selectedForecastMode": "deterministic_statistical",
+      "forecastArtifactsCreated": false,
+      "eligibilitySummary": {
+        "benchmarkGateStatus": "approved_provisional",
+        "benchmarkExecutionAllowed": true,
+        "methodDecisionStatus": "method_selected",
+        "baselineFinalEligibilityStatus": "eligible",
+        "deterministicFinalEligibilityStatus": "eligible",
+        "qualityClaimAllowed": false
+      },
+      "requiredActions": [
+        "Method gate passed; run an explicit setup forecast execution step before any forecast artifact is created."
+      ],
+      "warnings": [
+        "Source-handoff method gates do not create forecast artifacts.",
+        "Accepted method decisions still require an explicit setup forecast execution step.",
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake.",
+        "Source intake reports do not produce forecast artifacts.",
+        "Setup method decisions do not create forecast artifacts.",
+        "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+        "Candidate eligibility is scoped to this domain setup and source intake report."
+      ]
+    },
+    "sourceIntakeHandoff": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-002",
+      "generatedAt": "2026-06-06T18:10:00Z",
+      "case": "confirmed_builder_draft",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestBuildId": "sourcemanifestbuild-001",
+      "handoffStatus": "ready_for_method_gating",
+      "nextAction": "proceed_to_method_gating",
+      "canEnterSourceIntake": true,
+      "forecastGenerationAllowed": true,
+      "sourceManifestId": "sourcemanifestdraft-001",
+      "fieldMappingId": "fieldmappingdraft-102",
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "sourceIntakeStatus": "accepted",
+      "mappingSummary": {
+        "totalMappings": 13,
+        "proposedMappingCount": 0,
+        "confirmedMappingCount": 13,
+        "agentInferredMappingCount": 0,
+        "requiresConfirmation": false
+      },
+      "builderRejectionSummary": {
+        "rejectedInputCount": 0,
+        "reasonCodes": []
+      },
+      "draftArtifacts": {
+        "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-confirmed-builder-draft-source-manifest-build.generated.json",
+        "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-confirmed-builder-draft-source-manifest.json",
+        "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-confirmed-builder-draft-field-mapping.json",
+        "sourceIntakeReportPath": "spec/fixtures/generated/source-handoff/weather-logistics-confirmed-builder-draft-source-intake-report.generated.json"
+      },
+      "requiredActions": [
+        "Pass the accepted source-intake report to setup benchmark and method gates."
+      ],
+      "warnings": [
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake.",
+        "Source intake reports do not produce forecast artifacts."
+      ]
+    },
+    "setupBenchmarkGate": {
+      "setupBenchmarkGateId": "setupbenchmarkgate-102",
+      "generatedAt": "2026-06-06T17:40:00Z",
+      "case": "confirmed_builder_draft",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "sourceManifestId": "sourcemanifestdraft-001",
+      "fieldMappingId": "fieldmappingdraft-102",
+      "methodClass": "deterministic_statistical",
+      "gateStatus": "approved_provisional",
+      "baselineMethodId": "method-100",
+      "candidateMethodId": "method-101",
+      "benchmarkEvidence": {
+        "methodRegistryId": "methodregistry-001",
+        "baselineBenchmarkRunId": "benchmarkrun-003",
+        "candidateBenchmarkRunId": "benchmarkrun-001",
+        "sourcePolicyId": "sourcepolicy-001",
+        "retrievalWindow": {
+          "startsAt": "2026-06-01T00:00:00Z",
+          "endsAt": "2026-06-02T10:00:00Z"
+        },
+        "questionSetSize": 1,
+        "qualityClaimStatus": "not_enough_comparable_benchmarks"
+      },
+      "sourceEligibility": {
+        "status": "eligible",
+        "requiredSourceRoles": [
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "usableSourceRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "missingSourceRoles": [],
+        "mappingConfirmationRequired": false
+      },
+      "antiLeakageControls": {
+        "sameQuestionSet": true,
+        "sameSourcePolicy": true,
+        "sameRetrievalWindow": true,
+        "leakageValidated": true,
+        "sourceTimestampsRecorded": true,
+        "resolutionSourcesExcluded": true,
+        "trainingCutoffBeforeRetrievalEnd": true
+      },
+      "metricThresholds": {
+        "sampleSize": 1,
+        "executionMinimumSampleSize": 1,
+        "qualityMinimumSampleSize": 30,
+        "baselineLift": 0.2603,
+        "minimumBaselineLift": 0.0,
+        "executionSampleThresholdMet": true,
+        "qualitySampleThresholdMet": false,
+        "baselineLiftPositive": true
+      },
+      "decision": {
+        "executionAllowed": true,
+        "strongerMethodAllowed": true,
+        "qualityClaimAllowed": false,
+        "benchmarkClaimAllowed": false,
+        "stateOfTheArtClaimAllowed": false
+      },
+      "reasonCodes": [
+        "baseline_lift_positive",
+        "execution_sample_threshold_met",
+        "quality_sample_threshold_not_met",
+        "setup_benchmark_approved_provisional"
+      ],
+      "warnings": [
+        "Setup benchmark gates may allow fixture execution without allowing quality claims.",
+        "Quality, calibration, production, and state-of-the-art claims remain blocked.",
+        "Gate status is scoped to this setup, source intake report, method class, and fixture benchmark evidence."
+      ],
+      "sourceIntakeHandoffId": "sourceintakehandoff-002"
+    },
+    "setupMethodDecision": {
+      "setupMethodDecisionId": "setupmethoddecision-102",
+      "generatedAt": "2026-06-06T17:05:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "sourceManifestId": "sourcemanifestdraft-001",
+      "fieldMappingId": "fieldmappingdraft-102",
+      "intakeStatus": "accepted",
+      "decisionStatus": "method_selected",
+      "selectedMethodClass": "deterministic_statistical",
+      "selectedForecastMode": "deterministic_statistical",
+      "selectedSetupBenchmarkGateId": "setupbenchmarkgate-102",
+      "setupPolicy": {
+        "baselineRequired": true,
+        "enabledMethodClasses": [
+          "historical_baseline",
+          "deterministic_statistical"
+        ],
+        "baselineComparisonRequired": true,
+        "leakageCheckRequired": true,
+        "methodDecisionRecordRequired": true
+      },
+      "sourceIntakeSummary": {
+        "canProduceForecast": true,
+        "forecastGenerationAllowed": true,
+        "usableSourceRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "missingRequiredRoles": [],
+        "rejectedSourceRoles": [],
+        "proposedMappingCount": 0,
+        "sourceRejectionReasonCodes": []
+      },
+      "methodCandidates": [
+        {
+          "methodClass": "historical_baseline",
+          "sourceEligibilityStatus": "eligible",
+          "benchmarkEligibilityStatus": "not_required",
+          "finalEligibilityStatus": "eligible",
+          "setupBenchmarkGateId": null,
+          "benchmarkQualityClaimStatus": null,
+          "requiredSourceRoles": [
+            "historical_baseline"
+          ],
+          "reasonCodes": [
+            "method_eligible_for_setup"
+          ]
+        },
+        {
+          "methodClass": "historical_conditioned_frequency",
+          "sourceEligibilityStatus": "rejected",
+          "benchmarkEligibilityStatus": "rejected",
+          "finalEligibilityStatus": "rejected",
+          "setupBenchmarkGateId": null,
+          "benchmarkQualityClaimStatus": null,
+          "requiredSourceRoles": [
+            "historical_baseline"
+          ],
+          "reasonCodes": [
+            "method_not_enabled_by_setup_policy"
+          ]
+        },
+        {
+          "methodClass": "deterministic_statistical",
+          "sourceEligibilityStatus": "eligible",
+          "benchmarkEligibilityStatus": "eligible",
+          "finalEligibilityStatus": "eligible",
+          "setupBenchmarkGateId": "setupbenchmarkgate-102",
+          "benchmarkQualityClaimStatus": "not_enough_comparable_benchmarks",
+          "requiredSourceRoles": [
+            "historical_baseline",
+            "weather_forecast"
+          ],
+          "reasonCodes": [
+            "baseline_lift_positive",
+            "execution_sample_threshold_met",
+            "method_eligible_for_setup",
+            "quality_sample_threshold_not_met",
+            "setup_benchmark_approved_provisional"
+          ]
+        },
+        {
+          "methodClass": "model_assisted",
+          "sourceEligibilityStatus": "rejected",
+          "benchmarkEligibilityStatus": "rejected",
+          "finalEligibilityStatus": "rejected",
+          "setupBenchmarkGateId": null,
+          "benchmarkQualityClaimStatus": null,
+          "requiredSourceRoles": [
+            "historical_baseline",
+            "weather_forecast"
+          ],
+          "reasonCodes": [
+            "method_not_enabled_by_setup_policy"
+          ]
+        },
+        {
+          "methodClass": "external_reference",
+          "sourceEligibilityStatus": "rejected",
+          "benchmarkEligibilityStatus": "rejected",
+          "finalEligibilityStatus": "rejected",
+          "setupBenchmarkGateId": null,
+          "benchmarkQualityClaimStatus": null,
+          "requiredSourceRoles": [
+            "weather_forecast"
+          ],
+          "reasonCodes": [
+            "method_not_enabled_by_setup_policy"
+          ]
+        },
+        {
+          "methodClass": "ensemble",
+          "sourceEligibilityStatus": "rejected",
+          "benchmarkEligibilityStatus": "rejected",
+          "finalEligibilityStatus": "rejected",
+          "setupBenchmarkGateId": null,
+          "benchmarkQualityClaimStatus": null,
+          "requiredSourceRoles": [
+            "historical_baseline",
+            "weather_forecast"
+          ],
+          "reasonCodes": [
+            "method_not_enabled_by_setup_policy"
+          ]
+        }
+      ],
+      "requiredActions": [],
+      "qualityClaimBoundary": {
+        "qualityClaimAllowed": false,
+        "benchmarkClaimAllowed": false,
+        "calibrationClaimAllowed": false,
+        "productionReadinessClaimAllowed": false,
+        "stateOfTheArtClaimAllowed": false,
+        "blockedClaims": [
+          "Live calibration claim",
+          "Production readiness claim",
+          "State-of-the-art performance claim",
+          "Universal domain coverage claim"
+        ]
+      },
+      "warnings": [
+        "Setup method decisions do not create forecast artifacts.",
+        "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+        "Candidate eligibility is scoped to this domain setup and source intake report."
+      ],
+      "sourceIntakeHandoffId": "sourceintakehandoff-002"
+    },
+    "bindingSummary": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-002",
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "setupBenchmarkGateId": "setupbenchmarkgate-102",
+      "setupMethodDecisionId": "setupmethoddecision-102",
+      "selectedSetupBenchmarkGateId": "setupbenchmarkgate-102",
+      "sourceManifestId": "sourcemanifestdraft-001",
+      "fieldMappingId": "fieldmappingdraft-102"
+    },
+    "methodGateSummary": {
+      "methodGateStatus": "method_selected",
+      "nextAction": "await_explicit_setup_forecast_execution",
+      "selectedMethodClass": "deterministic_statistical",
+      "selectedForecastMode": "deterministic_statistical",
+      "benchmarkGateStatus": "approved_provisional",
+      "benchmarkExecutionAllowed": true,
+      "methodDecisionStatus": "method_selected",
+      "qualityClaimAllowed": false
+    },
+    "adapterGuidance": {
+      "nextAction": "await_explicit_setup_forecast_execution",
+      "allowedNextEntrypoint": "setup_forecast_execution",
+      "canRecommendExplicitSetupForecastExecution": true,
+      "forecastExecutionAllowedByGate": true,
+      "selectedMethodClass": "deterministic_statistical",
+      "selectedForecastMode": "deterministic_statistical",
+      "requiresMappingConfirmation": false,
+      "requiresMoreData": false,
+      "requiresSourceReplacement": false,
+      "requiresMethodReview": false,
+      "adapterCreatesForecastArtifacts": false,
+      "scoringAllowed": false
+    },
+    "executionBoundary": {
+      "adapterDoesNotExecuteMethodGate": true,
+      "acceptsRawPrivateData": false,
+      "runsSuggestedCommand": false,
+      "createsPublicReadRecords": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "bypassesSetupBenchmarkOrMethodDecision": false,
+      "executesSetupForecast": false
+    },
+    "warnings": [
+      "Method-gate adapter output is next-action guidance and does not execute setup forecasts.",
+      "Explicit setup forecast execution is a separate step after benchmark and method decisions allow it.",
+      "Quality, calibration, production-readiness, and state-of-the-art claims remain blocked unless later evidence allows them."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Method-gate adapter output is next-action guidance and does not execute setup forecasts.",
+    "Explicit setup forecast execution is a separate step after benchmark and method decisions allow it.",
+    "Quality, calibration, production-readiness, and state-of-the-art claims remain blocked unless later evidence allows them."
+  ]
+}

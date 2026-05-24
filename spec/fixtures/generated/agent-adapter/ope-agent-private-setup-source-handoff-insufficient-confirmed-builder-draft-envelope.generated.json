@@ -1,0 +1,1024 @@
+{
+  "agentEnvelopeId": "agentenvelope-019",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_source_handoff",
+  "adapterRequest": {
+    "operation": "private_setup_source_handoff",
+    "inputRecordType": "source_intake_handoff",
+    "inputRef": "sourceintakehandoff-003",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read checked source-handoff next-action guidance without executing setup gates."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "collect_more_data",
+    "approvalStatus": "caller_confirmed_or_not_required",
+    "dataMode": "provided",
+    "planStatus": "needs_more_data",
+    "executionMode": "source_handoff_guidance",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "sourceHandoffAdapterResultId": "sourcehandoffadapterresult-003",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "sourceHandoffCase": "insufficient_confirmed_builder_draft",
+    "sourceIntakeHandoff": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-003",
+      "generatedAt": "2026-06-06T18:10:00Z",
+      "case": "insufficient_confirmed_builder_draft",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestBuildId": "sourcemanifestbuild-103",
+      "handoffStatus": "needs_more_data",
+      "nextAction": "collect_more_data",
+      "canEnterSourceIntake": true,
+      "forecastGenerationAllowed": false,
+      "sourceManifestId": "sourcemanifestdraft-103",
+      "fieldMappingId": "fieldmappingdraft-103",
+      "sourceIntakeReportId": "sourceintakereport-103",
+      "sourceIntakeStatus": "rejected",
+      "mappingSummary": {
+        "totalMappings": 13,
+        "proposedMappingCount": 0,
+        "confirmedMappingCount": 13,
+        "agentInferredMappingCount": 0,
+        "requiresConfirmation": false
+      },
+      "builderRejectionSummary": {
+        "rejectedInputCount": 0,
+        "reasonCodes": []
+      },
+      "draftArtifacts": {
+        "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest-build.generated.json",
+        "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest.json",
+        "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-field-mapping.json",
+        "sourceIntakeReportPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-intake-report.generated.json"
+      },
+      "requiredActions": [
+        "Collect enough comparable historical rows and positive outcomes before method gating."
+      ],
+      "warnings": [
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake.",
+        "Source intake reports do not produce forecast artifacts.",
+        "Rejected intake must not bind generated forecast outputs."
+      ]
+    },
+    "sourceManifestBuild": {
+      "sourceManifestBuildId": "sourcemanifestbuild-103",
+      "generatedAt": "2026-06-06T17:30:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "buildStatus": "draft_ready",
+      "forecastGenerationAllowed": false,
+      "canEnterSourceIntake": true,
+      "confirmationRequired": true,
+      "inputFiles": [
+        {
+          "fileId": "localfile-001",
+          "localPath": "spec/fixtures/local-source-files/weather-forecast.json",
+          "sourceRole": "weather_forecast",
+          "fileFormat": "json",
+          "inspectionStatus": "inspected",
+          "byteSize": 153,
+          "rowCount": 1,
+          "contentHash": "dc74ecbb77717ddfda3f5da0a4f7eae106a874c5da2daacbfb94ecdcf5af134b",
+          "detectedFields": [
+            "city",
+            "date",
+            "loaded_at",
+            "rain_mm",
+            "source_status"
+          ],
+          "privacyFlags": {
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false
+          },
+          "leakageFlags": {
+            "hasPostOutcomeIndicators": false,
+            "availableBeforeForecastClose": true
+          },
+          "reasonCodes": []
+        },
+        {
+          "fileId": "localfile-002",
+          "localPath": "spec/fixtures/local-source-files/tiny-history.csv",
+          "sourceRole": "historical_baseline",
+          "fileFormat": "csv",
+          "inspectionStatus": "inspected",
+          "byteSize": 216,
+          "rowCount": 6,
+          "contentHash": "7ab11502dfe1f27df690ab802db5cbfb5d407fd77308a5ac13c820aea7fd79e9",
+          "detectedFields": [
+            "service_date",
+            "geography",
+            "disrupted",
+            "precipitation_mm"
+          ],
+          "privacyFlags": {
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false
+          },
+          "leakageFlags": {
+            "hasPostOutcomeIndicators": false,
+            "availableBeforeForecastClose": true
+          },
+          "reasonCodes": []
+        },
+        {
+          "fileId": "localfile-003",
+          "localPath": "spec/fixtures/local-source-files/outcome.csv",
+          "sourceRole": "declared_operations_outcome",
+          "fileFormat": "csv",
+          "inspectionStatus": "inspected",
+          "byteSize": 43,
+          "rowCount": 1,
+          "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39",
+          "detectedFields": [
+            "date",
+            "city",
+            "disrupted"
+          ],
+          "privacyFlags": {
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false
+          },
+          "leakageFlags": {
+            "hasPostOutcomeIndicators": false,
+            "availableBeforeForecastClose": false
+          },
+          "reasonCodes": []
+        }
+      ],
+      "draftArtifacts": {
+        "sourceManifestId": "sourcemanifestdraft-103",
+        "fieldMappingId": "fieldmappingdraft-103",
+        "sourceManifestPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-source-manifest.json",
+        "fieldMappingPath": "spec/fixtures/generated/source-handoff/weather-logistics-insufficient-confirmed-builder-draft-field-mapping.json"
+      },
+      "requiredActions": [
+        "Confirm proposed agent-inferred mappings before source intake can allow forecast execution."
+      ],
+      "warnings": [
+        "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+      ]
+    },
+    "sourceManifest": {
+      "sourceManifestId": "sourcemanifestdraft-103",
+      "createdAt": "2026-06-02T10:15:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "forecastParameters": {
+        "questionTemplateId": "template-001",
+        "horizonLabel": "1-day",
+        "forecastCloseTime": "2026-06-02T12:00:00Z",
+        "geography": "Warsaw",
+        "serviceDate": "2026-06-03",
+        "assetIdentifier": null,
+        "location": null,
+        "targetWindow": null
+      },
+      "sources": [
+        {
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "displayName": "Weather Forecast",
+          "connectorType": "local_file",
+          "sourceClass": "public_dataset",
+          "sourceRef": "local://spec/fixtures/local-source-files/weather-forecast.json",
+          "contentHash": "dc74ecbb77717ddfda3f5da0a4f7eae106a874c5da2daacbfb94ecdcf5af134b",
+          "rowCount": 1,
+          "positiveOutcomeCount": null,
+          "retrieval": {
+            "retrievedAt": "2026-06-02T09:30:00Z",
+            "availableBeforeForecastClose": true,
+            "maxSourceAgeHours": 24
+          },
+          "coverage": {
+            "geographies": [
+              "warsaw"
+            ],
+            "serviceDateStart": "2026-06-03",
+            "serviceDateEnd": "2026-06-03",
+            "entityIdentifiers": []
+          },
+          "privacy": {
+            "privacyClass": "public",
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false,
+            "rawRetention": "metadata_only"
+          },
+          "fieldInventory": [
+            {
+              "fieldName": "city",
+              "observedType": "categorical",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "date",
+              "observedType": "date",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "loaded_at",
+              "observedType": "date_time",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "rain_mm",
+              "observedType": "integer",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "source_status",
+              "observedType": "categorical",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            }
+          ],
+          "featureSummary": {
+            "numericValues": [
+              {
+                "fieldName": "forecast_daily_precipitation_mm",
+                "value": 24.0,
+                "unit": "mm"
+              }
+            ],
+            "categoricalValues": [
+              {
+                "fieldName": "source_status",
+                "value": "current"
+              }
+            ]
+          }
+        },
+        {
+          "sourceId": "localsource-002",
+          "sourceRole": "historical_baseline",
+          "displayName": "Historical Baseline",
+          "connectorType": "local_file",
+          "sourceClass": "internal_dataset",
+          "sourceRef": "local://spec/fixtures/local-source-files/tiny-history.csv",
+          "contentHash": "7ab11502dfe1f27df690ab802db5cbfb5d407fd77308a5ac13c820aea7fd79e9",
+          "rowCount": 6,
+          "positiveOutcomeCount": 3,
+          "retrieval": {
+            "retrievedAt": "2026-06-02T10:15:00Z",
+            "availableBeforeForecastClose": true,
+            "maxSourceAgeHours": 8760
+          },
+          "coverage": {
+            "geographies": [
+              "warsaw"
+            ],
+            "serviceDateStart": "2026-05-27",
+            "serviceDateEnd": "2026-06-01",
+            "entityIdentifiers": []
+          },
+          "privacy": {
+            "privacyClass": "internal",
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false,
+            "rawRetention": "metadata_only"
+          },
+          "fieldInventory": [
+            {
+              "fieldName": "service_date",
+              "observedType": "date",
+              "sampleCount": 6,
+              "nonNullCount": 6,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "geography",
+              "observedType": "categorical",
+              "sampleCount": 6,
+              "nonNullCount": 6,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "disrupted",
+              "observedType": "boolean",
+              "sampleCount": 6,
+              "nonNullCount": 6,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "precipitation_mm",
+              "observedType": "number",
+              "sampleCount": 6,
+              "nonNullCount": 6,
+              "exampleValuesStored": false
+            }
+          ],
+          "featureSummary": {
+            "numericValues": [
+              {
+                "fieldName": "precipitation_mm",
+                "value": 17.2,
+                "unit": "mm"
+              }
+            ],
+            "categoricalValues": []
+          }
+        },
+        {
+          "sourceId": "localsource-003",
+          "sourceRole": "declared_operations_outcome",
+          "displayName": "Declared Operations Outcome",
+          "connectorType": "local_file",
+          "sourceClass": "internal_dataset",
+          "sourceRef": "local://spec/fixtures/local-source-files/outcome.csv",
+          "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39",
+          "rowCount": 1,
+          "positiveOutcomeCount": 1,
+          "retrieval": {
+            "retrievedAt": null,
+            "availableBeforeForecastClose": false,
+            "maxSourceAgeHours": 8760
+          },
+          "coverage": {
+            "geographies": [
+              "warsaw"
+            ],
+            "serviceDateStart": "2026-06-03",
+            "serviceDateEnd": "2026-06-03",
+            "entityIdentifiers": []
+          },
+          "privacy": {
+            "privacyClass": "internal",
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false,
+            "rawRetention": "metadata_only"
+          },
+          "fieldInventory": [
+            {
+              "fieldName": "date",
+              "observedType": "date",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "city",
+              "observedType": "categorical",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            },
+            {
+              "fieldName": "disrupted",
+              "observedType": "boolean",
+              "sampleCount": 1,
+              "nonNullCount": 1,
+              "exampleValuesStored": false
+            }
+          ]
+        }
+      ]
+    },
+    "fieldMapping": {
+      "fieldMappingId": "fieldmappingdraft-103",
+      "createdAt": "2026-06-02T10:15:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestId": "sourcemanifestdraft-103",
+      "mappings": [
+        {
+          "mappingId": "draftmapping-001",
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "sourceField": "city",
+          "targetField": "geography",
+          "targetFieldType": "string",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-002",
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "sourceField": "date",
+          "targetField": "service_date",
+          "targetFieldType": "date",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-003",
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "sourceField": "loaded_at",
+          "targetField": "retrieved_at",
+          "targetFieldType": "date_time",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-004",
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "sourceField": "rain_mm",
+          "targetField": "forecast_daily_precipitation_mm",
+          "targetFieldType": "number",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-005",
+          "sourceId": "localsource-002",
+          "sourceRole": "historical_baseline",
+          "sourceField": "service_date",
+          "targetField": "service_date",
+          "targetFieldType": "date",
+          "mappingOrigin": "registry_backed",
+          "mappingStatus": "confirmed",
+          "confidence": 0.98,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Registry-backed local field match."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-006",
+          "sourceId": "localsource-002",
+          "sourceRole": "historical_baseline",
+          "sourceField": "geography",
+          "targetField": "geography",
+          "targetFieldType": "string",
+          "mappingOrigin": "registry_backed",
+          "mappingStatus": "confirmed",
+          "confidence": 0.98,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Registry-backed local field match."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-007",
+          "sourceId": "localsource-002",
+          "sourceRole": "historical_baseline",
+          "sourceField": "disrupted",
+          "targetField": "disruption_observed",
+          "targetFieldType": "boolean",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-008",
+          "sourceId": "localsource-003",
+          "sourceRole": "declared_operations_outcome",
+          "sourceField": "date",
+          "targetField": "service_date",
+          "targetFieldType": "date",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller-provided mapping hint."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-009",
+          "sourceId": "localsource-003",
+          "sourceRole": "declared_operations_outcome",
+          "sourceField": "city",
+          "targetField": "geography",
+          "targetFieldType": "string",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        },
+        {
+          "mappingId": "draftmapping-010",
+          "sourceId": "localsource-003",
+          "sourceRole": "declared_operations_outcome",
+          "sourceField": "disrupted",
+          "targetField": "disruption_observed",
+          "targetFieldType": "boolean",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "confidence": 1.0,
+          "requiresConfirmation": false,
+          "validationNotes": [
+            "Caller confirmed the builder-proposed mapping before source intake."
+          ]
+        }
+      ],
+      "aliasMappings": [
+        {
+          "aliasMappingId": "draftaliasmapping-001",
+          "entityType": "geography",
+          "sourceValue": "Warsaw",
+          "canonicalValue": "warsaw",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "requiresConfirmation": false
+        },
+        {
+          "aliasMappingId": "draftaliasmapping-002",
+          "entityType": "geography",
+          "sourceValue": "Warsaw",
+          "canonicalValue": "warsaw",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "requiresConfirmation": false
+        },
+        {
+          "aliasMappingId": "draftaliasmapping-003",
+          "entityType": "geography",
+          "sourceValue": "Warsaw",
+          "canonicalValue": "warsaw",
+          "mappingOrigin": "user_provided",
+          "mappingStatus": "confirmed",
+          "requiresConfirmation": false
+        }
+      ]
+    },
+    "sourceIntakeReport": {
+      "sourceIntakeReportId": "sourceintakereport-103",
+      "generatedAt": "2026-06-06T16:20:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestId": "sourcemanifestdraft-103",
+      "fieldMappingId": "fieldmappingdraft-103",
+      "intakeStatus": "rejected",
+      "canProduceForecast": false,
+      "forecastGenerationAllowed": false,
+      "roleCoverage": [
+        {
+          "sourceRole": "weather_forecast",
+          "requiredForForecast": true,
+          "status": "present",
+          "sourceIds": [
+            "localsource-001"
+          ]
+        },
+        {
+          "sourceRole": "historical_baseline",
+          "requiredForForecast": true,
+          "status": "rejected",
+          "sourceIds": [
+            "localsource-002"
+          ]
+        },
+        {
+          "sourceRole": "declared_operations_outcome",
+          "requiredForForecast": false,
+          "status": "present",
+          "sourceIds": [
+            "localsource-003"
+          ]
+        }
+      ],
+      "sourceDecisions": [
+        {
+          "sourceId": "localsource-001",
+          "sourceRole": "weather_forecast",
+          "decision": "usable",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "available_before_forecast_close",
+            "entity_scope_matches",
+            "no_post_outcome_evidence_detected",
+            "not_baseline_source",
+            "privacy_boundary_ok",
+            "source_fresh_enough",
+            "types_compatible"
+          ],
+          "checks": {
+            "requiredFields": {
+              "status": "passed",
+              "reasonCodes": [
+                "all_required_fields_mapped"
+              ]
+            },
+            "typeParsing": {
+              "status": "passed",
+              "reasonCodes": [
+                "types_compatible"
+              ]
+            },
+            "entityMatch": {
+              "status": "passed",
+              "reasonCodes": [
+                "entity_scope_matches"
+              ]
+            },
+            "timestampAvailability": {
+              "status": "passed",
+              "reasonCodes": [
+                "available_before_forecast_close"
+              ]
+            },
+            "sourceFreshness": {
+              "status": "passed",
+              "reasonCodes": [
+                "source_fresh_enough"
+              ]
+            },
+            "leakageRisk": {
+              "status": "passed",
+              "reasonCodes": [
+                "no_post_outcome_evidence_detected"
+              ]
+            },
+            "sampleSize": {
+              "status": "not_applicable",
+              "reasonCodes": [
+                "not_baseline_source"
+              ]
+            },
+            "privacy": {
+              "status": "passed",
+              "reasonCodes": [
+                "privacy_boundary_ok"
+              ]
+            }
+          }
+        },
+        {
+          "sourceId": "localsource-002",
+          "sourceRole": "historical_baseline",
+          "decision": "rejected",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "available_before_forecast_close",
+            "entity_scope_matches",
+            "insufficient_comparable_rows",
+            "no_post_outcome_evidence_detected",
+            "privacy_boundary_ok",
+            "source_fresh_enough",
+            "types_compatible"
+          ],
+          "checks": {
+            "requiredFields": {
+              "status": "passed",
+              "reasonCodes": [
+                "all_required_fields_mapped"
+              ]
+            },
+            "typeParsing": {
+              "status": "passed",
+              "reasonCodes": [
+                "types_compatible"
+              ]
+            },
+            "entityMatch": {
+              "status": "passed",
+              "reasonCodes": [
+                "entity_scope_matches"
+              ]
+            },
+            "timestampAvailability": {
+              "status": "passed",
+              "reasonCodes": [
+                "available_before_forecast_close"
+              ]
+            },
+            "sourceFreshness": {
+              "status": "passed",
+              "reasonCodes": [
+                "source_fresh_enough"
+              ]
+            },
+            "leakageRisk": {
+              "status": "passed",
+              "reasonCodes": [
+                "no_post_outcome_evidence_detected"
+              ]
+            },
+            "sampleSize": {
+              "status": "failed",
+              "reasonCodes": [
+                "insufficient_comparable_rows"
+              ]
+            },
+            "privacy": {
+              "status": "passed",
+              "reasonCodes": [
+                "privacy_boundary_ok"
+              ]
+            }
+          }
+        },
+        {
+          "sourceId": "localsource-003",
+          "sourceRole": "declared_operations_outcome",
+          "decision": "usable",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "entity_scope_matches",
+            "not_baseline_source",
+            "privacy_boundary_ok",
+            "resolution_role_not_forecast_time",
+            "source_role_resolution_only",
+            "types_compatible"
+          ],
+          "checks": {
+            "requiredFields": {
+              "status": "passed",
+              "reasonCodes": [
+                "all_required_fields_mapped"
+              ]
+            },
+            "typeParsing": {
+              "status": "passed",
+              "reasonCodes": [
+                "types_compatible"
+              ]
+            },
+            "entityMatch": {
+              "status": "passed",
+              "reasonCodes": [
+                "entity_scope_matches"
+              ]
+            },
+            "timestampAvailability": {
+              "status": "not_applicable",
+              "reasonCodes": [
+                "resolution_role_not_forecast_time"
+              ]
+            },
+            "sourceFreshness": {
+              "status": "not_applicable",
+              "reasonCodes": [
+                "resolution_role_not_forecast_time"
+              ]
+            },
+            "leakageRisk": {
+              "status": "not_applicable",
+              "reasonCodes": [
+                "source_role_resolution_only"
+              ]
+            },
+            "sampleSize": {
+              "status": "not_applicable",
+              "reasonCodes": [
+                "not_baseline_source"
+              ]
+            },
+            "privacy": {
+              "status": "passed",
+              "reasonCodes": [
+                "privacy_boundary_ok"
+              ]
+            }
+          }
+        }
+      ],
+      "mappingDecisions": [
+        {
+          "mappingId": "draftmapping-001",
+          "sourceId": "localsource-001",
+          "targetField": "geography",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-002",
+          "sourceId": "localsource-001",
+          "targetField": "service_date",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-003",
+          "sourceId": "localsource-001",
+          "targetField": "retrieved_at",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-004",
+          "sourceId": "localsource-001",
+          "targetField": "forecast_daily_precipitation_mm",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-005",
+          "sourceId": "localsource-002",
+          "targetField": "service_date",
+          "decision": "accepted",
+          "mappingOrigin": "registry_backed",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-006",
+          "sourceId": "localsource-002",
+          "targetField": "geography",
+          "decision": "accepted",
+          "mappingOrigin": "registry_backed",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-007",
+          "sourceId": "localsource-002",
+          "targetField": "disruption_observed",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-008",
+          "sourceId": "localsource-003",
+          "targetField": "service_date",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-009",
+          "sourceId": "localsource-003",
+          "targetField": "geography",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        },
+        {
+          "mappingId": "draftmapping-010",
+          "sourceId": "localsource-003",
+          "targetField": "disruption_observed",
+          "decision": "accepted",
+          "mappingOrigin": "user_provided",
+          "requiresConfirmation": false,
+          "reasonCodes": [
+            "mapping_confirmed"
+          ]
+        }
+      ],
+      "methodEligibility": [
+        {
+          "methodClass": "historical_baseline",
+          "eligible": false,
+          "reasonCodes": [
+            "missing_usable_historical_baseline",
+            "source_rejected"
+          ]
+        },
+        {
+          "methodClass": "deterministic_statistical",
+          "eligible": false,
+          "reasonCodes": [
+            "missing_usable_historical_baseline",
+            "source_rejected"
+          ]
+        }
+      ],
+      "requiredActions": [
+        "Remove or replace rejected source localsource-002 for role historical_baseline."
+      ],
+      "warnings": [
+        "Source intake reports do not produce forecast artifacts.",
+        "Rejected intake must not bind generated forecast outputs."
+      ]
+    },
+    "bindingSummary": {
+      "sourceManifestBuildId": "sourcemanifestbuild-103",
+      "sourceManifestId": "sourcemanifestdraft-103",
+      "fieldMappingId": "fieldmappingdraft-103",
+      "sourceIntakeHandoffId": "sourceintakehandoff-003",
+      "sourceIntakeReportId": "sourceintakereport-103"
+    },
+    "mappingConfirmation": {
+      "required": false,
+      "proposedMappingCount": 0,
+      "confirmedMappingCount": 13,
+      "agentInferredMappingCount": 0,
+      "confirmationStatus": "confirmed_or_not_required"
+    },
+    "adapterGuidance": {
+      "nextAction": "collect_more_data",
+      "allowedNextEntrypoint": "source_builder",
+      "canProceedToMethodGating": false,
+      "requiresMappingConfirmation": false,
+      "requiresMoreData": true,
+      "requiresSourceReplacement": false,
+      "forecastExecutionAllowed": false,
+      "scoringAllowed": false
+    },
+    "executionBoundary": {
+      "adapterDoesNotExecuteSourceHandoff": true,
+      "acceptsRawPrivateData": false,
+      "runsSuggestedCommand": false,
+      "createsPublicReadRecords": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "bypassesSetupBenchmarkOrMethodGate": false
+    },
+    "warnings": [
+      "Source-handoff adapter output is next-action guidance and does not execute source intake or forecasts.",
+      "Only confirmed accepted handoffs may proceed toward setup benchmark and method gates.",
+      "Setup benchmark and method decisions are still required before any forecast artifacts are created."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Source-handoff adapter output is next-action guidance and does not execute source intake or forecasts.",
+    "Only confirmed accepted handoffs may proceed toward setup benchmark and method gates.",
+    "Setup benchmark and method decisions are still required before any forecast artifacts are created."
+  ]
+}

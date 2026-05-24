@@ -634,7 +634,7 @@
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
         "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
       },
-      "usageGuidance": "Use first for compact downstream decisions that need probability, baseline, status, and warnings.",
+      "usageGuidance": "Use first for compact downstream decisions that need probability, baseline, status, warnings, and setup bindings, including generated private setup forecasts.",
       "warnings": [
         "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
         "HTTP and queue mappings are not implemented runtimes."
@@ -801,7 +801,1405 @@
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
         "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
       },
-      "usageGuidance": "Use when the caller needs audit context, provenance, evidence, history, resolution, and scoring records.",
+      "usageGuidance": "Use when the caller needs audit context, provenance, evidence, history, setup bindings, resolution, and scoring records for normal or setup-generated forecasts.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_bundle",
+      "inputRecordType": "private_setup_agent_bundle",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "privateSetupRequestId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --private-setup-request-id",
+          "notes": "Private setup request ID to read as a guidance bundle; defaults to the checked local-file fixture."
+        },
+        {
+          "name": "privateSetupCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --private-setup-case",
+          "notes": "Optional checked bad-request example case: unknown_source_kind or missing_approval."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_bundle",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to read as a guidance bundle; defaults to the checked local-file fixture."
+          },
+          {
+            "name": "privateSetupCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --private-setup-case",
+            "notes": "Optional checked bad-request example case: unknown_source_kind or missing_approval."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup bundle reads accept no credentials in prompt-visible arguments and return only guidance records."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-bundle",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to read as a guidance bundle; defaults to the checked local-file fixture."
+          },
+          {
+            "name": "privateSetupCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --private-setup-case",
+            "notes": "Optional checked bad-request example case: unknown_source_kind or missing_approval."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup bundle reads accept no credentials in prompt-visible arguments and return only guidance records."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_bundle.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup bundle reads accept no credentials in prompt-visible arguments and return only guidance records."
+      },
+      "usageGuidance": "Use when an agent needs setup guidance for a private setup request without executing source setup.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_adapter_runbook",
+      "inputRecordType": "private_setup_adapter_chain_runbook",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_adapter_runbook",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter-runbook reads accept no credentials in prompt-visible arguments and return only checked operation-sequence guidance."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-adapter-runbook",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter-runbook reads accept no credentials in prompt-visible arguments and return only checked operation-sequence guidance."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_adapter_runbook.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter-runbook reads accept no credentials in prompt-visible arguments and return only checked operation-sequence guidance."
+      },
+      "usageGuidance": "Use when an agent needs the checked private setup adapter operation sequence and readback path without executing adapter calls.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_adapter_conformance_summary",
+      "inputRecordType": "private_setup_adapter_conformance_summary",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_adapter_conformance_summary",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_adapter_conformance_summary",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter conformance-summary reads accept no credentials in prompt-visible arguments and return only compact checked conformance guidance."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-adapter-conformance-summary",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter conformance-summary reads accept no credentials in prompt-visible arguments and return only compact checked conformance guidance."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_adapter_conformance_summary.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private setup adapter conformance-summary reads accept no credentials in prompt-visible arguments and return only compact checked conformance guidance."
+      },
+      "usageGuidance": "Use when an agent needs compact private setup adapter conformance status without loading the full embedded-envelope matrix.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_source_adapter_guidance",
+      "inputRecordType": "private_source_adapter_capability",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_source_adapter_guidance",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_source_adapter_guidance",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source adapter guidance accepts no credentials in prompt-visible arguments and returns only capability, outcome, and routing guidance records."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-source-adapter-guidance",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source adapter guidance accepts no credentials in prompt-visible arguments and returns only capability, outcome, and routing guidance records."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_source_adapter_guidance.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source adapter guidance accepts no credentials in prompt-visible arguments and returns only capability, outcome, and routing guidance records."
+      },
+      "usageGuidance": "Use when an agent needs private source adapter capability, outcome, and intake-bridge guidance without executing source reads.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_source_kind_selection",
+      "inputRecordType": "private_source_kind_selection_examples",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "sourceKind",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --source-kind",
+          "notes": "Optional source kind to return one selected example; unknown values return a sanitized bad_request envelope."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_source_kind_selection",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_source_kind_selection",
+        "argumentFields": [
+          {
+            "name": "sourceKind",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-kind",
+            "notes": "Optional source kind to return one selected example; unknown values return a sanitized bad_request envelope."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source-kind selection accepts no credentials in prompt-visible arguments and returns only checked selection examples."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-source-kind-selection",
+        "argumentFields": [
+          {
+            "name": "sourceKind",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-kind",
+            "notes": "Optional source kind to return one selected example; unknown values return a sanitized bad_request envelope."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source-kind selection accepts no credentials in prompt-visible arguments and returns only checked selection examples."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_source_kind_selection.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Private source-kind selection accepts no credentials in prompt-visible arguments and returns only checked selection examples."
+      },
+      "usageGuidance": "Use when an agent needs checked source-kind path selection examples without executing source setup, fixture evidence, forecast execution, or scoring.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_source_builder",
+      "inputRecordType": "source_manifest_build",
+      "sideEffectLevel": "dry_run_generation",
+      "requiresApproval": true,
+      "inputFields": [
+        {
+          "name": "privateSetupRequestId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --private-setup-request-id",
+          "notes": "Private setup request ID to bind to the source-builder adapter result."
+        },
+        {
+          "name": "sourceBuilderCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --source-builder-case",
+          "notes": "Optional checked source-builder fixture case for local adapter verification."
+        },
+        {
+          "name": "sourceBuilderInputs",
+          "required": false,
+          "type": "string-list",
+          "source": "agent-call --source-builder-input",
+          "notes": "Caller-approved local source_role=path inputs; adapters must not discover files implicitly."
+        },
+        {
+          "name": "mappingHints",
+          "required": false,
+          "type": "string-list",
+          "source": "agent-call --source-builder-mapping-hint",
+          "notes": "Caller-provided source_role.source_field=target_field hints; inferred mappings still require confirmation."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_source_builder",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the source-builder adapter result."
+          },
+          {
+            "name": "sourceBuilderCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-builder-case",
+            "notes": "Optional checked source-builder fixture case for local adapter verification."
+          },
+          {
+            "name": "sourceBuilderInputs",
+            "required": false,
+            "type": "string-list",
+            "source": "agent-call --source-builder-input",
+            "notes": "Caller-approved local source_role=path inputs; adapters must not discover files implicitly."
+          },
+          {
+            "name": "mappingHints",
+            "required": false,
+            "type": "string-list",
+            "source": "agent-call --source-builder-mapping-hint",
+            "notes": "Caller-provided source_role.source_field=target_field hints; inferred mappings still require confirmation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Source-builder adapter inputs must be explicit caller-approved paths; it must not discover or read private files implicitly.",
+        "credentialBoundary": "Source-builder adapter arguments may include caller-approved paths and mapping hints, but never credentials or tokens."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-source-builder",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the source-builder adapter result."
+          },
+          {
+            "name": "sourceBuilderCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-builder-case",
+            "notes": "Optional checked source-builder fixture case for local adapter verification."
+          },
+          {
+            "name": "sourceBuilderInputs",
+            "required": false,
+            "type": "string-list",
+            "source": "agent-call --source-builder-input",
+            "notes": "Caller-approved local source_role=path inputs; adapters must not discover files implicitly."
+          },
+          {
+            "name": "mappingHints",
+            "required": false,
+            "type": "string-list",
+            "source": "agent-call --source-builder-mapping-hint",
+            "notes": "Caller-provided source_role.source_field=target_field hints; inferred mappings still require confirmation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Source-builder adapter inputs must be explicit caller-approved paths; it must not discover or read private files implicitly.",
+        "credentialBoundary": "Source-builder adapter arguments may include caller-approved paths and mapping hints, but never credentials or tokens."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_source_builder.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Source-builder adapter inputs must be explicit caller-approved paths; it must not discover or read private files implicitly.",
+        "credentialBoundary": "Source-builder adapter arguments may include caller-approved paths and mapping hints, but never credentials or tokens."
+      },
+      "usageGuidance": "Use after local-file setup guidance to inspect caller-approved CSV/JSON files and draft setup records.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_source_handoff",
+      "inputRecordType": "source_intake_handoff",
+      "sideEffectLevel": "dry_run_generation",
+      "requiresApproval": true,
+      "inputFields": [
+        {
+          "name": "privateSetupRequestId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --private-setup-request-id",
+          "notes": "Private setup request ID to bind to the source-handoff adapter result."
+        },
+        {
+          "name": "sourceHandoffCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --source-handoff-case",
+          "notes": "Checked source-handoff fixture case; adapters must not accept raw private data in this operation."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_source_handoff",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the source-handoff adapter result."
+          },
+          {
+            "name": "sourceHandoffCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-handoff-case",
+            "notes": "Checked source-handoff fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Source-handoff adapter cases must preserve caller confirmation gates before routing to setup method gates.",
+        "credentialBoundary": "Source-handoff adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-source-handoff",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the source-handoff adapter result."
+          },
+          {
+            "name": "sourceHandoffCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --source-handoff-case",
+            "notes": "Checked source-handoff fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Source-handoff adapter cases must preserve caller confirmation gates before routing to setup method gates.",
+        "credentialBoundary": "Source-handoff adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_source_handoff.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Source-handoff adapter cases must preserve caller confirmation gates before routing to setup method gates.",
+        "credentialBoundary": "Source-handoff adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "usageGuidance": "Use after source-builder guidance to inspect checked source-handoff next actions and confirmation gates.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_method_gate",
+      "inputRecordType": "source_handoff_method_gate",
+      "sideEffectLevel": "dry_run_generation",
+      "requiresApproval": true,
+      "inputFields": [
+        {
+          "name": "privateSetupRequestId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --private-setup-request-id",
+          "notes": "Private setup request ID to bind to the method-gate adapter result."
+        },
+        {
+          "name": "methodGateCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --method-gate-case",
+          "notes": "Checked source-handoff method-gate fixture case; adapters must not accept raw private data in this operation."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_method_gate --private-setup-request-id privatesetuprequest-001 --method-gate-case confirmed_builder_draft",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_method_gate",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the method-gate adapter result."
+          },
+          {
+            "name": "methodGateCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --method-gate-case",
+            "notes": "Checked source-handoff method-gate fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Method-gate adapter cases must preserve setup benchmark and method-decision gates before recommending explicit forecast execution.",
+        "credentialBoundary": "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-method-gate",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the method-gate adapter result."
+          },
+          {
+            "name": "methodGateCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --method-gate-case",
+            "notes": "Checked source-handoff method-gate fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Method-gate adapter cases must preserve setup benchmark and method-decision gates before recommending explicit forecast execution.",
+        "credentialBoundary": "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_method_gate.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Method-gate adapter cases must preserve setup benchmark and method-decision gates before recommending explicit forecast execution.",
+        "credentialBoundary": "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "usageGuidance": "Use after confirmed source-handoff guidance to inspect setup benchmark and method-decision readiness.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "private_setup_forecast_execution",
+      "inputRecordType": "setup_forecast_run",
+      "sideEffectLevel": "forecast_execution",
+      "requiresApproval": true,
+      "inputFields": [
+        {
+          "name": "privateSetupRequestId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --private-setup-request-id",
+          "notes": "Private setup request ID to bind to the forecast-execution adapter result."
+        },
+        {
+          "name": "forecastExecutionCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --forecast-execution-case",
+          "notes": "Checked source-handoff forecast-execution fixture case; adapters must not accept raw private data in this operation."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation private_setup_forecast_execution --private-setup-request-id privatesetuprequest-001 --forecast-execution-case confirmed_builder_draft",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_private_setup_forecast_execution",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the forecast-execution adapter result."
+          },
+          {
+            "name": "forecastExecutionCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --forecast-execution-case",
+            "notes": "Checked source-handoff forecast-execution fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Forecast-execution adapter calls must require method-gate permission and remain blocked for unconfirmed, insufficient, rejected, or leakage cases.",
+        "credentialBoundary": "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/private-setup-forecast-execution",
+        "argumentFields": [
+          {
+            "name": "privateSetupRequestId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --private-setup-request-id",
+            "notes": "Private setup request ID to bind to the forecast-execution adapter result."
+          },
+          {
+            "name": "forecastExecutionCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --forecast-execution-case",
+            "notes": "Checked source-handoff forecast-execution fixture case; adapters must not accept raw private data in this operation."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Forecast-execution adapter calls must require method-gate permission and remain blocked for unconfirmed, insufficient, rejected, or leakage cases.",
+        "credentialBoundary": "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.private_setup_forecast_execution.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Forecast-execution adapter calls must require method-gate permission and remain blocked for unconfirmed, insufficient, rejected, or leakage cases.",
+        "credentialBoundary": "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+      },
+      "usageGuidance": "Use only after method-gate readiness to run checked setup forecast execution and return artifacts for allowed cases; read generated forecasts through normal read operations.",
       "warnings": [
         "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
         "HTTP and queue mappings are not implemented runtimes."
@@ -968,7 +2366,7 @@
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
         "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
       },
-      "usageGuidance": "Use when an agent needs to decide whether to wait, resolve, score, or treat a forecast as provisional.",
+      "usageGuidance": "Use when an agent needs to decide whether a normal or setup-generated forecast is resolved, pending, ambiguous, or annulled.",
       "warnings": [
         "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
         "HTTP and queue mappings are not implemented runtimes."
@@ -1135,7 +2533,7 @@
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
         "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
       },
-      "usageGuidance": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting.",
+      "usageGuidance": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting on a normal or setup-generated forecast.",
       "warnings": [
         "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
         "HTTP and queue mappings are not implemented runtimes."
@@ -1264,6 +2662,117 @@
         "scoringReport"
       ],
       "downstreamRule": "Use the bundle for audit context, not as a separate source of forecast semantics."
+    },
+    {
+      "situation": "The agent needs to understand the first safe setup action for a private setup request.",
+      "preferredOperation": "private_setup_bundle",
+      "reason": "The bundle joins request, first-action, and runbook guidance without executing source setup.",
+      "requiredSignals": [
+        "requestId",
+        "sourceKind",
+        "actionStatus",
+        "nextActionLabel",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use the bundle as setup guidance only; do not treat it as a forecast or source-intake artifact."
+    },
+    {
+      "situation": "The agent needs the full private setup adapter sequence before calling setup operations.",
+      "preferredOperation": "private_setup_adapter_runbook",
+      "reason": "The runbook lists setup guidance, source-builder, source-handoff, method-gate, forecast execution, and normal readback order.",
+      "requiredSignals": [
+        "operationSequence",
+        "branchPlaybooks",
+        "executionBoundary",
+        "warnings"
+      ],
+      "downstreamRule": "Use the runbook as read-only guidance; it must not execute adapter calls or create source, forecast, resolution, or scoring artifacts."
+    },
+    {
+      "situation": "The agent needs compact private setup adapter conformance status before deciding which adapter operation to call.",
+      "preferredOperation": "private_setup_adapter_conformance_summary",
+      "reason": "The summary records phase counts, operation coverage, artifact boundaries, sanitized-error coverage, and the full matrix pointer without embedding every envelope.",
+      "requiredSignals": [
+        "caseTotals",
+        "operationSummaries",
+        "artifactBoundary",
+        "readSurface",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use the summary for routine conformance checks; load the full matrix only when implementing or debugging adapter behavior."
+    },
+    {
+      "situation": "The agent needs to know which private source kinds OPE can currently route before setup.",
+      "preferredOperation": "private_source_adapter_guidance",
+      "reason": "The guidance joins capability declarations, outcome classes, and intake-bridge routing without executing source reads.",
+      "requiredSignals": [
+        "sourceKindSummary",
+        "capability",
+        "outcomeMatrix",
+        "intakeBridge",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use this as source-kind guidance only; planned private API, database, and upload paths remain non-executing."
+    },
+    {
+      "situation": "The agent needs to choose the next private source-kind path before lower-level setup calls.",
+      "preferredOperation": "private_source_kind_selection",
+      "reason": "The examples bind source adapter guidance, first actions, and the adapter-chain runbook into source-kind-specific next actions.",
+      "requiredSignals": [
+        "selectionExamples",
+        "recommendation.immediateAction",
+        "adapterChainBinding",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use these examples as read-only path selection; do not execute source setup, fixture evidence, forecasts, or scoring from this operation."
+    },
+    {
+      "situation": "The private setup bundle says caller-approved local files are the next setup step.",
+      "preferredOperation": "private_setup_source_builder",
+      "reason": "The adapter inspects explicit CSV/JSON paths and returns draft manifest and mapping guidance.",
+      "requiredSignals": [
+        "buildStatus",
+        "inputFiles",
+        "draftArtifacts",
+        "confirmationRequired"
+      ],
+      "downstreamRule": "Do not forecast from drafts until source intake, method gates, and benchmark decisions pass."
+    },
+    {
+      "situation": "The agent needs to continue from source-builder guidance into source-handoff next actions.",
+      "preferredOperation": "private_setup_source_handoff",
+      "reason": "The adapter returns checked handoff status, mapping confirmation, intake binding, and method-gate readiness.",
+      "requiredSignals": [
+        "handoffStatus",
+        "nextAction",
+        "sourceIntakeReportId",
+        "requiresMappingConfirmation"
+      ],
+      "downstreamRule": "Only confirmed accepted handoffs may proceed to setup benchmark and method gates; the adapter itself does not forecast."
+    },
+    {
+      "situation": "The agent needs to know whether a confirmed private setup may run explicit forecast execution.",
+      "preferredOperation": "private_setup_method_gate",
+      "reason": "The adapter returns setup benchmark, method decision, selected method, and explicit forecast-execution readiness.",
+      "requiredSignals": [
+        "methodGateStatus",
+        "setupBenchmarkGateId",
+        "setupMethodDecisionId",
+        "canRecommendExplicitSetupForecastExecution"
+      ],
+      "downstreamRule": "Run setup forecast execution only when the method gate recommends it; the adapter itself does not create forecasts."
+    },
+    {
+      "situation": "The agent has method-gate permission and needs the setup forecast artifacts.",
+      "preferredOperation": "private_setup_forecast_execution",
+      "reason": "The adapter returns a setup forecast run plus forecast artifacts only for the allowed confirmed handoff.",
+      "requiredSignals": [
+        "runStatus",
+        "setupForecastRunId",
+        "forecastArtifactsCreated",
+        "forecastId"
+      ],
+      "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API."
     },
     {
       "situation": "The agent needs to know whether a forecast has resolved before scoring or waiting.",

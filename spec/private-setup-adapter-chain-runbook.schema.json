@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-adapter-chain-runbook.schema.json",
+  "title": "Private Setup Adapter Chain Runbook",
+  "description": "Machine-readable guidance for agents moving through the private setup adapter operation chain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupAdapterChainRunbookId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "entrypoints",
+    "sourcePath",
+    "operationSequence",
+    "branchPlaybooks",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupAdapterChainRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "private_setup_local_file_adapter_chain"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["runbook_guidance_only"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookCommand",
+        "adapterDispatcherCommand",
+        "protocolMapFixture",
+        "runbookSchema"
+      ],
+      "properties": {
+        "runbookCommand": { "$ref": "#/$defs/command" },
+        "adapterDispatcherCommand": { "$ref": "#/$defs/command" },
+        "protocolMapFixture": { "$ref": "#/$defs/path" },
+        "runbookSchema": {
+          "type": "string",
+          "const": "spec/private-setup-adapter-chain-runbook.schema.json"
+        }
+      }
+    },
+    "sourcePath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupRequestId",
+        "privateSetupAgentBundleId",
+        "sourceKind",
+        "dataMode",
+        "approvalStatus",
+        "allowLiveFetch",
+        "allowCredentialUse"
+      ],
+      "properties": {
+        "privateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupAgentBundleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": {
+          "type": "string",
+          "const": "local_file"
+        },
+        "dataMode": {
+          "type": "string",
+          "const": "provided"
+        },
+        "approvalStatus": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "allowLiveFetch": { "type": "boolean" },
+        "allowCredentialUse": { "type": "boolean" }
+      }
+    },
+    "operationSequence": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": { "$ref": "#/$defs/operationStep" }
+    },
+    "branchPlaybooks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/branchPlaybook" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "guards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 280
+      }
+    }
+  },
+  "$defs": {
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 420
+    },
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "private_setup_bundle",
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "setup_guidance",
+        "source_builder",
+        "source_handoff",
+        "method_gate",
+        "forecast_execution",
+        "forecast_readback"
+      ]
+    },
+    "sideEffectLevel": {
+      "type": "string",
+      "enum": [
+        "read_only",
+        "dry_run_generation",
+        "forecast_execution",
+        "status_read",
+        "scoring_read"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "ask_mapping_confirmation",
+        "collect_more_data",
+        "replace_rejected_sources",
+        "run_source_handoff",
+        "run_method_gate",
+        "run_forecast_execution",
+        "read_forecast_card",
+        "read_lifecycle_bundle",
+        "check_resolution_status",
+        "read_scoring_summary",
+        "stop"
+      ]
+    },
+    "inputField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "source"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "source": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        }
+      }
+    },
+    "operationStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookStepId",
+        "order",
+        "phase",
+        "operation",
+        "cliCommand",
+        "mcpTool",
+        "requiredInputs",
+        "expectedEnvelopeStatus",
+        "expectedPayloadStatusField",
+        "expectedPayloadStatusValue",
+        "allowedNextOperations",
+        "nextAction",
+        "stopCondition",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "sideEffectLevel"
+      ],
+      "properties": {
+        "runbookStepId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "phase": { "$ref": "#/$defs/phase" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "cliCommand": { "$ref": "#/$defs/command" },
+        "mcpTool": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "requiredInputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/inputField" }
+        },
+        "expectedEnvelopeStatus": {
+          "type": "string",
+          "const": "ok"
+        },
+        "expectedPayloadStatusField": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "expectedPayloadStatusValue": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "allowedNextOperations": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/operation" }
+        },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 280
+        },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "sideEffectLevel": { "$ref": "#/$defs/sideEffectLevel" }
+      }
+    },
+    "branchPlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branchId",
+        "branchName",
+        "triggerOperation",
+        "triggerCase",
+        "triggerStatusField",
+        "triggerStatus",
+        "nextAction",
+        "allowedNextOperation",
+        "forecastArtifactsAllowed",
+        "scoringAllowed",
+        "stopCondition",
+        "agentInstruction"
+      ],
+      "properties": {
+        "branchId": { "$ref": "common.schema.json#/$defs/id" },
+        "branchName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "triggerOperation": { "$ref": "#/$defs/operation" },
+        "triggerCase": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "triggerStatusField": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "triggerStatus": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "allowedNextOperation": {
+          "oneOf": [
+            { "$ref": "#/$defs/operation" },
+            { "type": "null" }
+          ]
+        },
+        "forecastArtifactsAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 280
+        },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookDoesNotExecute",
+        "runsAdapterCalls",
+        "readsPrivateData",
+        "createsSourceManifests",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime",
+        "normalChecksOffline"
+      ],
+      "properties": {
+        "runbookDoesNotExecute": { "type": "boolean" },
+        "runsAdapterCalls": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsHostedRuntime": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/path" }
+        }
+      }
+    }
+  }
+}

@@ -13,6 +13,7 @@ from typing import Any, TextIO
 from agent_adapter_dispatcher import (
     DEFAULT_CALLER_INTENT,
     DEFAULT_FORECAST_ID,
+    DEFAULT_PRIVATE_SETUP_REQUEST_ID,
     DEFAULT_QUESTION_ID,
     output_envelope,
 )
@@ -87,6 +88,14 @@ def schema_for_field(item: dict[str, Any]) -> dict[str, Any]:
         base.update({"type": "integer", "minimum": 1})
     elif value_type == "id":
         base.update({"type": "string", "minLength": 1, "maxLength": 120})
+    elif value_type == "string-list":
+        base.update(
+            {
+                "type": "array",
+                "maxItems": 24,
+                "items": {"type": "string", "minLength": 1, "maxLength": 260},
+            }
+        )
     elif value_type == "path-or-json-object":
         base.update(
             {
@@ -252,11 +261,51 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
     if not isinstance(forecast_id, str) or not isinstance(question_id, str):
         raise McpProtocolError(JSONRPC_INVALID_PARAMS, "forecastId and questionId must be strings.")
 
+    private_setup_request_id = arguments.get("privateSetupRequestId", DEFAULT_PRIVATE_SETUP_REQUEST_ID)
+    private_setup_case = arguments.get("privateSetupCase")
+    if not isinstance(private_setup_request_id, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "privateSetupRequestId must be a string.")
+    if private_setup_case is not None and not isinstance(private_setup_case, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "privateSetupCase must be a string.")
+
+    source_kind = arguments.get("sourceKind")
+    if source_kind is not None and not isinstance(source_kind, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "sourceKind must be a string.")
+
+    source_builder_case = arguments.get("sourceBuilderCase", "local_draft")
+    if not isinstance(source_builder_case, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "sourceBuilderCase must be a string.")
+    source_handoff_case = arguments.get("sourceHandoffCase", "unconfirmed_builder_draft")
+    if not isinstance(source_handoff_case, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "sourceHandoffCase must be a string.")
+    method_gate_case = arguments.get("methodGateCase", "unconfirmed_builder_draft")
+    if not isinstance(method_gate_case, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "methodGateCase must be a string.")
+    forecast_execution_case = arguments.get("forecastExecutionCase", "unconfirmed_builder_draft")
+    if not isinstance(forecast_execution_case, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "forecastExecutionCase must be a string.")
+
+    source_builder_inputs = arguments.get("sourceBuilderInputs", [])
+    mapping_hints = arguments.get("mappingHints", [])
+    if not isinstance(source_builder_inputs, list) or not all(isinstance(item, str) for item in source_builder_inputs):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "sourceBuilderInputs must be an array of strings.")
+    if not isinstance(mapping_hints, list) or not all(isinstance(item, str) for item in mapping_hints):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "mappingHints must be an array of strings.")
+
     args = argparse.Namespace(
         operation=operation,
         request=request_path,
         forecast_id=forecast_id,
         question_id=question_id,
+        private_setup_request_id=private_setup_request_id,
+        private_setup_case=private_setup_case,
+        source_kind=source_kind,
+        source_builder_case=source_builder_case,
+        source_builder_inputs=source_builder_inputs,
+        source_builder_mapping_hints=mapping_hints,
+        source_handoff_case=source_handoff_case,
+        method_gate_case=method_gate_case,
+        forecast_execution_case=forecast_execution_case,
         max_bytes=max_bytes,
         caller_intent=caller_intent,
     )

@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-first-action-runbook.schema.json",
+  "title": "Private Setup First Action Runbook",
+  "description": "Machine-readable agent runbook for private setup first-action dispatcher outcomes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupFirstActionRunbookId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "entrypoints",
+    "statusCoverage",
+    "casePlaybooks",
+    "badRequestPlaybooks",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupFirstActionRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["runbook_guidance_only"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestSetCommand",
+        "firstActionsCommand",
+        "singleActionCommand",
+        "runbookCommand",
+        "runbookSchema"
+      ],
+      "properties": {
+        "requestSetCommand": { "$ref": "#/$defs/command" },
+        "firstActionsCommand": { "$ref": "#/$defs/command" },
+        "singleActionCommand": { "$ref": "#/$defs/command" },
+        "runbookCommand": { "$ref": "#/$defs/command" },
+        "runbookSchema": {
+          "type": "string",
+          "const": "spec/private-setup-first-action-runbook.schema.json"
+        }
+      }
+    },
+    "statusCoverage": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/actionStatus" }
+    },
+    "casePlaybooks": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/casePlaybook" }
+    },
+    "badRequestPlaybooks": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/badRequestPlaybook" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "guards": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "sourceKind": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": [
+        "ready_to_run_checked_command",
+        "confirmation_required",
+        "fixture_ready",
+        "runtime_not_implemented",
+        "source_replacement_required",
+        "rejected_unsafe_source",
+        "bad_request"
+      ]
+    },
+    "allowedEntrypoint": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff_confirmation",
+        "auto_evidence_fixture",
+        "no_current_entrypoint"
+      ]
+    },
+    "nextActionLabel": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "ask_mapping_confirmation",
+        "run_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop_unsafe_source",
+        "fix_bad_request"
+      ]
+    },
+    "expectedOutputClass": {
+      "type": "string",
+      "enum": [
+        "source_manifest_build",
+        "source_intake_handoff",
+        "evidence_source_set",
+        "none"
+      ]
+    },
+    "blockedOutput": {
+      "type": "string",
+      "enum": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ]
+    },
+    "errorCode": {
+      "type": "string",
+      "enum": [
+        "unknown_source_kind",
+        "missing_approval",
+        "bad_request"
+      ]
+    },
+    "casePlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookRowId",
+        "sourceKind",
+        "actionStatus",
+        "boundPrivateSetupFirstActionId",
+        "boundPrivateSetupRequestId",
+        "actionFixturePath",
+        "allowedEntrypoint",
+        "commandToRun",
+        "nextActionLabel",
+        "expectedOutputClass",
+        "requiresCallerConfirmation",
+        "mayEnterSourceIntakeAfterRequiredAction",
+        "forecastExecutionAllowed",
+        "scoringAllowed",
+        "stopCondition",
+        "blockedOutputs",
+        "agentInstruction"
+      ],
+      "properties": {
+        "runbookRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "actionStatus": { "$ref": "#/$defs/actionStatus" },
+        "boundPrivateSetupFirstActionId": { "$ref": "common.schema.json#/$defs/id" },
+        "boundPrivateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "actionFixturePath": { "$ref": "#/$defs/path" },
+        "allowedEntrypoint": { "$ref": "#/$defs/allowedEntrypoint" },
+        "commandToRun": { "$ref": "#/$defs/command" },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "expectedOutputClass": { "$ref": "#/$defs/expectedOutputClass" },
+        "requiresCallerConfirmation": { "type": "boolean" },
+        "mayEnterSourceIntakeAfterRequiredAction": { "type": "boolean" },
+        "forecastExecutionAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "blockedOutputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/blockedOutput" }
+        },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "badRequestPlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookRowId",
+        "errorCode",
+        "actionStatus",
+        "sourceKindPattern",
+        "nextActionLabel",
+        "allowedEntrypoint",
+        "commandToRun",
+        "expectedOutputClass",
+        "mayEnterSourceIntakeAfterRequiredAction",
+        "forecastExecutionAllowed",
+        "scoringAllowed",
+        "stopCondition",
+        "blockedOutputs",
+        "agentInstruction"
+      ],
+      "properties": {
+        "runbookRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "errorCode": { "$ref": "#/$defs/errorCode" },
+        "actionStatus": {
+          "type": "string",
+          "const": "bad_request"
+        },
+        "sourceKindPattern": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "allowedEntrypoint": {
+          "type": "string",
+          "const": "no_current_entrypoint"
+        },
+        "commandToRun": {
+          "type": "string",
+          "const": "none"
+        },
+        "expectedOutputClass": {
+          "type": "string",
+          "const": "none"
+        },
+        "mayEnterSourceIntakeAfterRequiredAction": { "type": "boolean" },
+        "forecastExecutionAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "blockedOutputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/blockedOutput" }
+        },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookDoesNotExecute",
+        "normalChecksOffline",
+        "readsPrivateData",
+        "runsSuggestedCommand",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials"
+      ],
+      "properties": {
+        "runbookDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsSuggestedCommand": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/path" }
+        }
+      }
+    }
+  }
+}

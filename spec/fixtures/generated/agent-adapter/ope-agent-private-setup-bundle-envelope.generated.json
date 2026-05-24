@@ -1,0 +1,134 @@
+{
+  "agentEnvelopeId": "agentenvelope-009",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "private_setup_bundle",
+  "adapterRequest": {
+    "operation": "private_setup_bundle",
+    "inputRecordType": "private_setup_agent_bundle",
+    "inputRef": "privatesetupagentbundle-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read private setup guidance without executing source setup."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "run_source_builder",
+    "approvalStatus": "not_required",
+    "dataMode": "provided",
+    "planStatus": "bundle_guidance_only",
+    "executionMode": null,
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "privateSetupAgentBundleId": "privatesetupagentbundle-001",
+    "generatedAt": "2026-06-07T10:40:00Z",
+    "scope": "domain_agnostic",
+    "runtimeStatus": "bundle_guidance_only",
+    "bundleKind": "known_request",
+    "sourceKind": "local_file",
+    "requestSummary": {
+      "privateSetupRequestSetId": "privatesetuprequestset-001",
+      "privateSetupRequestId": "privatesetuprequest-001",
+      "requestRowId": "privatesetuprequestrow-001",
+      "setupMode": "new_setup",
+      "selectedSourceKind": "local_file",
+      "forecastQuestionText": "Estimate a future operational probability from caller-approved local file sources.",
+      "outputType": "binary",
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "local_file"
+        ],
+        "approvalStatus": "not_required",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      }
+    },
+    "actionSummary": {
+      "privateSetupFirstActionId": "privatesetupfirstaction-001",
+      "actionStatus": "ready_to_run_checked_command",
+      "routeDecision": "run_source_builder",
+      "allowedEntrypoint": "source_builder",
+      "commandToRun": "python3 scripts/ope.py source-builder",
+      "requiredCallerAction": "provide caller-approved local file paths",
+      "errorCode": "none",
+      "exitCode": 0
+    },
+    "runbookGuidance": {
+      "privateSetupFirstActionRunbookId": "privatesetupactionrunbook-001",
+      "runbookRowId": "privatesetupactionrunbookrow-001",
+      "nextActionLabel": "run_source_builder",
+      "expectedOutputClass": "source_manifest_build",
+      "requiresCallerConfirmation": false,
+      "mayEnterSourceIntakeAfterRequiredAction": true,
+      "forecastExecutionAllowed": false,
+      "scoringAllowed": false,
+      "blockedOutputs": [
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ],
+      "stopCondition": "Stop before source intake until source-builder drafts are reviewed and handed off.",
+      "agentInstruction": "Run source-builder only for caller-approved local files, then route drafts through source-handoff."
+    },
+    "claimBoundary": {
+      "bundleDoesNotPredict": true,
+      "qualityClaimAllowed": false,
+      "forecastExecutionAllowed": false,
+      "scoringAllowed": false,
+      "reasonCodes": [
+        "setup_guidance_only",
+        "forecast_requires_later_gates",
+        "quality_claim_requires_resolved_samples"
+      ]
+    },
+    "executionBoundary": {
+      "bundleDoesNotExecute": true,
+      "normalChecksOffline": true,
+      "readsPrivateData": false,
+      "runsSuggestedCommand": false,
+      "createsSourceManifests": false,
+      "createsFieldMappings": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "storesCredentials": false
+    },
+    "warnings": [
+      "This bundle joins setup guidance records; it does not execute the suggested command.",
+      "Source intake, forecast execution, resolution, and scoring remain separate explicit steps.",
+      "The bundle does not predict, score, fetch live data, or store credentials."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "This bundle joins setup guidance records; it does not execute the suggested command.",
+    "Source intake, forecast execution, resolution, and scoring remain separate explicit steps.",
+    "The bundle does not predict, score, fetch live data, or store credentials.",
+    "The adapter envelope is read-only and does not execute the suggested setup command."
+  ]
+}

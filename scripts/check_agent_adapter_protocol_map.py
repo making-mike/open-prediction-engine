@@ -73,8 +73,158 @@ def main() -> None:
         evidence_plan["sideEffectLevel"] == "dry_run_generation",
         "evidence plan should be dry-run generation, not live fetching",
     )
-    for operation in ["evidence_trace", "forecast_card", "lifecycle_bundle", "resolution_status", "scoring_summary"]:
+    for operation in [
+        "evidence_trace",
+        "forecast_card",
+        "lifecycle_bundle",
+        "private_setup_bundle",
+        "private_setup_adapter_runbook",
+        "private_setup_adapter_conformance_summary",
+        "private_source_adapter_guidance",
+        "private_source_kind_selection",
+        "resolution_status",
+        "scoring_summary",
+    ]:
         require(operations[operation]["requiresApproval"] is False, f"{operation} should be read/status-only")
+    adapter_runbook = operations["private_setup_adapter_runbook"]
+    require(
+        adapter_runbook["sideEffectLevel"] == "read_only",
+        "adapter-runbook operation should be read-only guidance",
+    )
+    require(
+        adapter_runbook["inputRecordType"] == "private_setup_adapter_chain_runbook",
+        "adapter-runbook operation should return the checked runbook record type",
+    )
+    require(
+        len(adapter_runbook["inputFields"]) == 2,
+        "adapter-runbook operation should expose only maxBytes and callerIntent",
+    )
+    require(
+        "without executing adapter calls" in adapter_runbook["usageGuidance"],
+        "adapter-runbook guidance should preserve the non-execution boundary",
+    )
+    adapter_conformance_summary = operations["private_setup_adapter_conformance_summary"]
+    require(
+        adapter_conformance_summary["sideEffectLevel"] == "read_only",
+        "adapter conformance summary should be read-only",
+    )
+    require(
+        adapter_conformance_summary["inputRecordType"] == "private_setup_adapter_conformance_summary",
+        "adapter conformance summary should bind compact summary records",
+    )
+    require(
+        len(adapter_conformance_summary["inputFields"]) == 2,
+        "adapter conformance summary should expose only maxBytes and callerIntent",
+    )
+    require(
+        "without loading the full embedded-envelope matrix" in adapter_conformance_summary["usageGuidance"],
+        "adapter conformance summary guidance should preserve the compact boundary",
+    )
+    source_guidance = operations["private_source_adapter_guidance"]
+    require(
+        source_guidance["sideEffectLevel"] == "read_only",
+        "private source adapter guidance should be read-only",
+    )
+    require(
+        source_guidance["inputRecordType"] == "private_source_adapter_capability",
+        "private source adapter guidance should bind capability records",
+    )
+    require(
+        len(source_guidance["inputFields"]) == 2,
+        "private source adapter guidance should expose only maxBytes and callerIntent",
+    )
+    require(
+        "without executing source reads" in source_guidance["usageGuidance"],
+        "private source adapter guidance should preserve the non-execution boundary",
+    )
+    source_selection = operations["private_source_kind_selection"]
+    require(
+        source_selection["sideEffectLevel"] == "read_only",
+        "private source-kind selection should be read-only",
+    )
+    require(
+        source_selection["inputRecordType"] == "private_source_kind_selection_examples",
+        "private source-kind selection should bind selection example records",
+    )
+    require(
+        len(source_selection["inputFields"]) == 3,
+        "private source-kind selection should expose sourceKind plus maxBytes and callerIntent",
+    )
+    source_selection_fields = {item["name"]: item for item in source_selection["inputFields"]}
+    require(
+        source_selection_fields["sourceKind"]["type"] == "string",
+        "private source-kind selection sourceKind should be a string query argument",
+    )
+    require(
+        "selected example" in source_selection_fields["sourceKind"]["notes"],
+        "private source-kind selection sourceKind notes should describe the compact selected response",
+    )
+    require(
+        "without executing source setup" in source_selection["usageGuidance"],
+        "private source-kind selection should preserve the non-execution boundary",
+    )
+    source_builder = operations["private_setup_source_builder"]
+    require(source_builder["requiresApproval"] is True, "source-builder adapter should require caller-approved paths")
+    require(
+        source_builder["sideEffectLevel"] == "dry_run_generation",
+        "source-builder adapter should be draft generation, not forecast execution",
+    )
+    source_builder_fields = {item["name"]: item for item in source_builder["inputFields"]}
+    require("sourceBuilderInputs" in source_builder_fields, "source-builder adapter should expose explicit source inputs")
+    require(
+        source_builder_fields["sourceBuilderInputs"]["type"] == "string-list",
+        "source-builder inputs should be an explicit list of approved paths",
+    )
+    source_handoff = operations["private_setup_source_handoff"]
+    require(source_handoff["requiresApproval"] is True, "source-handoff adapter should preserve confirmation gates")
+    require(
+        source_handoff["sideEffectLevel"] == "dry_run_generation",
+        "source-handoff adapter should be next-action guidance, not forecast execution",
+    )
+    source_handoff_fields = {item["name"]: item for item in source_handoff["inputFields"]}
+    require("sourceHandoffCase" in source_handoff_fields, "source-handoff adapter should expose checked handoff cases")
+    require(
+        "raw private data" in source_handoff_fields["sourceHandoffCase"]["notes"],
+        "source-handoff case notes should prohibit raw private data",
+    )
+    method_gate = operations["private_setup_method_gate"]
+    require(method_gate["requiresApproval"] is True, "method-gate adapter should preserve benchmark and method gates")
+    require(
+        method_gate["sideEffectLevel"] == "dry_run_generation",
+        "method-gate adapter should be next-action guidance, not forecast execution",
+    )
+    method_gate_fields = {item["name"]: item for item in method_gate["inputFields"]}
+    require("methodGateCase" in method_gate_fields, "method-gate adapter should expose checked method-gate cases")
+    require(
+        "raw private data" in method_gate_fields["methodGateCase"]["notes"],
+        "method-gate case notes should prohibit raw private data",
+    )
+    forecast_execution = operations["private_setup_forecast_execution"]
+    require(
+        forecast_execution["requiresApproval"] is True,
+        "forecast-execution adapter should preserve explicit execution approval",
+    )
+    require(
+        forecast_execution["sideEffectLevel"] == "forecast_execution",
+        "forecast-execution adapter should be labeled as forecast execution",
+    )
+    forecast_execution_fields = {item["name"]: item for item in forecast_execution["inputFields"]}
+    require(
+        "forecastExecutionCase" in forecast_execution_fields,
+        "forecast-execution adapter should expose checked execution cases",
+    )
+    require(
+        "raw private data" in forecast_execution_fields["forecastExecutionCase"]["notes"],
+        "forecast-execution case notes should prohibit raw private data",
+    )
+    require(
+        "normal read operations" in forecast_execution["usageGuidance"],
+        "forecast-execution guidance should route generated forecasts to normal reads",
+    )
+    require(
+        "generated private setup forecasts" in operations["forecast_card"]["usageGuidance"],
+        "forecast-card guidance should cover setup-generated readback",
+    )
 
     exit_codes = {item["exitCode"]: item for item in protocol_map["exitCodeMapping"]}
     require(set(exit_codes) == {0, 1, 2, 3, 4, 5}, "exit code mapping should cover 0 through 5")
@@ -90,8 +240,32 @@ def main() -> None:
         require("credential" in transports[transport]["credentialBoundary"].lower(), f"{transport} should define credentials")
 
     examples = {item["preferredOperation"] for item in protocol_map["decisionExamples"]}
-    for operation in ["evidence_trace", "forecast_card", "lifecycle_bundle", "resolution_status", "scoring_summary"]:
+    for operation in [
+        "evidence_trace",
+        "forecast_card",
+        "lifecycle_bundle",
+        "private_setup_bundle",
+        "private_setup_adapter_runbook",
+        "private_setup_adapter_conformance_summary",
+        "private_source_adapter_guidance",
+        "private_source_kind_selection",
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
+        "resolution_status",
+        "scoring_summary",
+    ]:
         require(operation in examples, f"decision examples should explain when to use {operation}")
+    forecast_execution_examples = [
+        item
+        for item in protocol_map["decisionExamples"]
+        if item["preferredOperation"] == "private_setup_forecast_execution"
+    ]
+    require(
+        any("private setup read API" in item["downstreamRule"] for item in forecast_execution_examples),
+        "forecast-execution decision example should reject a private setup read API",
+    )
 
     warnings = " ".join(protocol_map["warnings"]).lower()
     require("http and queue" in warnings and "not implemented" in warnings, "warnings should state HTTP and queue are not implemented")

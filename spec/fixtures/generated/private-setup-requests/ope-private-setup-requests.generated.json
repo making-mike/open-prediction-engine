@@ -1,0 +1,426 @@
+{
+  "privateSetupRequestSetId": "privatesetuprequestset-001",
+  "generatedAt": "2026-06-07T09:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "request_contract_only",
+  "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+  "boundPrivateSourceAdapterOutcomeMatrixId": "privateadapteroutcomematrix-001",
+  "boundPrivateSourceAdapterCapabilityId": "privatesourceadaptercapability-001",
+  "boundPrivateSetupWorkflowId": "privatesetupworkflow-001",
+  "boundPrivateSourceAdapterIntakeBridgePath": "spec/fixtures/generated/private-source-adapters/ope-private-source-adapter-intake-bridge.generated.json",
+  "requestRows": [
+    {
+      "requestRowId": "privatesetuprequestrow-001",
+      "privateSetupRequestId": "privatesetuprequest-001",
+      "setupMode": "new_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved local file sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "local_file"
+        ],
+        "approvalStatus": "not_required",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "local_file",
+      "setupRequestStatus": "accepted_current_entrypoint",
+      "routeDecision": "run_source_builder",
+      "boundBridgeRowId": "privateadapterbridge-001",
+      "boundOutcomeRowId": "privateadapteroutcomerow-001",
+      "allowedEntrypoint": "source_builder",
+      "commandToRun": "python3 scripts/ope.py source-builder",
+      "requiredCallerAction": "provide caller-approved local file paths",
+      "blockedOutputs": [
+        "credential_record",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Run source-builder only for caller-approved local files; continue to handoff before intake or forecasting."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-002",
+      "privateSetupRequestId": "privatesetuprequest-002",
+      "setupMode": "extend_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved manual mapping sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "manual_mapping"
+        ],
+        "approvalStatus": "requested",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "manual_mapping",
+      "setupRequestStatus": "needs_confirmation",
+      "routeDecision": "request_mapping_confirmation",
+      "boundBridgeRowId": "privateadapterbridge-002",
+      "boundOutcomeRowId": "privateadapteroutcomerow-002",
+      "allowedEntrypoint": "source_handoff_confirmation",
+      "commandToRun": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+      "requiredCallerAction": "confirm source roles, field mappings, and aliases",
+      "blockedOutputs": [
+        "credential_record",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Ask the caller to confirm mappings, then run source-handoff confirmation before method gates."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-003",
+      "privateSetupRequestId": "privatesetuprequest-003",
+      "setupMode": "extend_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved auto evidence connector sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "auto",
+        "allowedSourceKinds": [
+          "auto_evidence_connector"
+        ],
+        "approvalStatus": "not_required",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "auto_evidence_connector",
+      "setupRequestStatus": "fixture_ready",
+      "routeDecision": "use_fixture_evidence",
+      "boundBridgeRowId": "privateadapterbridge-003",
+      "boundOutcomeRowId": "privateadapteroutcomerow-003",
+      "allowedEntrypoint": "auto_evidence_fixture",
+      "commandToRun": "python3 scripts/ope.py gather-evidence",
+      "requiredCallerAction": "provide an accepted auto-evidence fixture request",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Use fixture replay for policy-bound auto evidence; do not treat it as production live gathering."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-004",
+      "privateSetupRequestId": "privatesetuprequest-004",
+      "setupMode": "new_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved manual upload sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "manual_upload"
+        ],
+        "approvalStatus": "confirmed",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "manual_upload",
+      "setupRequestStatus": "wait_for_runtime",
+      "routeDecision": "wait_for_runtime",
+      "boundBridgeRowId": "privateadapterbridge-004",
+      "boundOutcomeRowId": "privateadapteroutcomerow-004",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "commandToRun": "none",
+      "requiredCallerAction": "wait for a checked runtime before retrying",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_intake_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a checked manual-upload runtime; do not ingest uploads through the current bridge."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-005",
+      "privateSetupRequestId": "privatesetuprequest-005",
+      "setupMode": "new_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved private api sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "private_api"
+        ],
+        "approvalStatus": "confirmed",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "private_api",
+      "setupRequestStatus": "wait_for_runtime",
+      "routeDecision": "wait_for_runtime",
+      "boundBridgeRowId": "privateadapterbridge-005",
+      "boundOutcomeRowId": "privateadapteroutcomerow-005",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "commandToRun": "none",
+      "requiredCallerAction": "wait for a checked runtime before retrying",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_intake_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a credential-safe private API runtime; do not request secrets in OPE artifacts."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-006",
+      "privateSetupRequestId": "privatesetuprequest-006",
+      "setupMode": "new_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved private database sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "private_database"
+        ],
+        "approvalStatus": "confirmed",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "private_database",
+      "setupRequestStatus": "wait_for_runtime",
+      "routeDecision": "wait_for_runtime",
+      "boundBridgeRowId": "privateadapterbridge-006",
+      "boundOutcomeRowId": "privateadapteroutcomerow-006",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "commandToRun": "none",
+      "requiredCallerAction": "wait for a checked runtime before retrying",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_intake_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Wait for a credential-safe private database runtime; do not connect databases through this bridge."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-007",
+      "privateSetupRequestId": "privatesetuprequest-007",
+      "setupMode": "reuse_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved unregistered source sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "unregistered_source"
+        ],
+        "approvalStatus": "not_required",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "unregistered_source",
+      "setupRequestStatus": "replace_source",
+      "routeDecision": "replace_source",
+      "boundBridgeRowId": "privateadapterbridge-007",
+      "boundOutcomeRowId": "privateadapteroutcomerow-007",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "commandToRun": "none",
+      "requiredCallerAction": "replace the source kind with a declared adapter",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_intake_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Replace the unregistered source kind with a declared adapter before trying setup again."
+    },
+    {
+      "requestRowId": "privatesetuprequestrow-008",
+      "privateSetupRequestId": "privatesetuprequest-008",
+      "setupMode": "new_setup",
+      "forecastIntent": {
+        "questionText": "Estimate a future operational probability from caller-approved unsafe source sources.",
+        "outputType": "binary",
+        "horizonLabel": "caller_declared",
+        "resolutionNeeded": true
+      },
+      "sourcePolicy": {
+        "dataMode": "provided",
+        "allowedSourceKinds": [
+          "unsafe_source"
+        ],
+        "approvalStatus": "rejected",
+        "allowLiveFetch": false,
+        "allowCredentialUse": false
+      },
+      "selectedSourceKind": "unsafe_source",
+      "setupRequestStatus": "rejected",
+      "routeDecision": "stop",
+      "boundBridgeRowId": "privateadapterbridge-008",
+      "boundOutcomeRowId": "privateadapteroutcomerow-008",
+      "allowedEntrypoint": "no_current_entrypoint",
+      "commandToRun": "none",
+      "requiredCallerAction": "remove unsafe source input and provide a safe replacement",
+      "blockedOutputs": [
+        "credential_record",
+        "field_mapping",
+        "forecast_artifact",
+        "forecast_card",
+        "live_fetch_result",
+        "scoring_report",
+        "source_intake_report",
+        "source_manifest"
+      ],
+      "createsOutputs": false,
+      "canReadPrivateData": false,
+      "canCreateForecastArtifacts": false,
+      "canCreateScoringRecords": false,
+      "canStoreCredentials": false,
+      "agentInstruction": "Reject unsafe source input and require a safe replacement before any setup step."
+    }
+  ],
+  "executionBoundary": {
+    "requestSetDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false,
+    "routesOnlyThroughAdapterBridge": true
+  },
+  "guards": [
+    {
+      "guardId": "privatesetuprequestguard-001",
+      "name": "bridge_binding",
+      "rule": "Every private setup request row must bind one private source adapter bridge row.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    },
+    {
+      "guardId": "privatesetuprequestguard-002",
+      "name": "request_before_source_read",
+      "rule": "Request classification must not read private data or execute source commands.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    },
+    {
+      "guardId": "privatesetuprequestguard-003",
+      "name": "approval_before_mapping",
+      "rule": "Manual mapping requests must require caller confirmation before source-handoff.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    },
+    {
+      "guardId": "privatesetuprequestguard-004",
+      "name": "planned_runtimes_wait",
+      "rule": "Manual upload, private API, and private database requests must wait for future runtimes.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    },
+    {
+      "guardId": "privatesetuprequestguard-005",
+      "name": "no_forecast_or_score_outputs",
+      "rule": "Private setup request classification must not create forecast artifacts or scoring records.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    },
+    {
+      "guardId": "privatesetuprequestguard-006",
+      "name": "unsafe_sources_stop",
+      "rule": "Unsafe and unregistered sources must not enter source intake through request classification.",
+      "checkedBy": [
+        "scripts/check_private_setup_requests.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "Private setup requests classify setup intent before any source read.",
+    "Routes are guidance into checked local entrypoints, not execution.",
+    "Forecast artifacts and scoring records require later source intake, method gates, forecast execution, and resolution.",
+    "Private API, database, and manual upload runtimes remain planned-only."
+  ]
+}

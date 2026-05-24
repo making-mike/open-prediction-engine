@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-request.schema.json",
+  "title": "Private Setup Request",
+  "description": "Agent-facing private setup request examples and checked routing decisions before source reads.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupRequestSetId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "boundPrivateSourceAdapterIntakeBridgeId",
+    "boundPrivateSourceAdapterOutcomeMatrixId",
+    "boundPrivateSourceAdapterCapabilityId",
+    "boundPrivateSetupWorkflowId",
+    "boundPrivateSourceAdapterIntakeBridgePath",
+    "requestRows",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupRequestSetId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["request_contract_only"]
+    },
+    "boundPrivateSourceAdapterIntakeBridgeId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterOutcomeMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterCapabilityId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+    "boundPrivateSourceAdapterIntakeBridgePath": { "$ref": "#/$defs/path" },
+    "requestRows": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/requestRow" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestSetDoesNotExecute",
+        "normalChecksOffline",
+        "readsPrivateData",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials",
+        "routesOnlyThroughAdapterBridge"
+      ],
+      "properties": {
+        "requestSetDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "routesOnlyThroughAdapterBridge": { "type": "boolean" }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 260
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "manual_upload",
+        "auto_evidence_connector",
+        "private_api",
+        "private_database",
+        "unregistered_source",
+        "unsafe_source"
+      ]
+    },
+    "setupMode": {
+      "type": "string",
+      "enum": ["new_setup", "extend_setup", "reuse_setup"]
+    },
+    "dataMode": {
+      "type": "string",
+      "enum": ["provided", "auto", "hybrid"]
+    },
+    "approvalStatus": {
+      "type": "string",
+      "enum": ["not_required", "requested", "confirmed", "rejected"]
+    },
+    "requestStatus": {
+      "type": "string",
+      "enum": [
+        "accepted_current_entrypoint",
+        "needs_confirmation",
+        "fixture_ready",
+        "wait_for_runtime",
+        "replace_source",
+        "rejected"
+      ]
+    },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "request_mapping_confirmation",
+        "use_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop"
+      ]
+    },
+    "forecastIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["questionText", "outputType", "horizonLabel", "resolutionNeeded"],
+      "properties": {
+        "questionText": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 280
+        },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "horizonLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "resolutionNeeded": { "type": "boolean" }
+      }
+    },
+    "sourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataMode", "allowedSourceKinds", "approvalStatus", "allowLiveFetch", "allowCredentialUse"],
+      "properties": {
+        "dataMode": { "$ref": "#/$defs/dataMode" },
+        "allowedSourceKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/sourceKind" }
+        },
+        "approvalStatus": { "$ref": "#/$defs/approvalStatus" },
+        "allowLiveFetch": { "type": "boolean" },
+        "allowCredentialUse": { "type": "boolean" }
+      }
+    },
+    "requestRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestRowId",
+        "privateSetupRequestId",
+        "setupMode",
+        "forecastIntent",
+        "sourcePolicy",
+        "selectedSourceKind",
+        "setupRequestStatus",
+        "routeDecision",
+        "boundBridgeRowId",
+        "boundOutcomeRowId",
+        "allowedEntrypoint",
+        "commandToRun",
+        "requiredCallerAction",
+        "blockedOutputs",
+        "createsOutputs",
+        "canReadPrivateData",
+        "canCreateForecastArtifacts",
+        "canCreateScoringRecords",
+        "canStoreCredentials",
+        "agentInstruction"
+      ],
+      "properties": {
+        "requestRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "setupMode": { "$ref": "#/$defs/setupMode" },
+        "forecastIntent": { "$ref": "#/$defs/forecastIntent" },
+        "sourcePolicy": { "$ref": "#/$defs/sourcePolicy" },
+        "selectedSourceKind": { "$ref": "#/$defs/sourceKind" },
+        "setupRequestStatus": { "$ref": "#/$defs/requestStatus" },
+        "routeDecision": { "$ref": "#/$defs/routeDecision" },
+        "boundBridgeRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "boundOutcomeRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "allowedEntrypoint": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "commandToRun": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "requiredCallerAction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "blockedOutputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "createsOutputs": { "type": "boolean" },
+        "canReadPrivateData": { "type": "boolean" },
+        "canCreateForecastArtifacts": { "type": "boolean" },
+        "canCreateScoringRecords": { "type": "boolean" },
+        "canStoreCredentials": { "type": "boolean" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

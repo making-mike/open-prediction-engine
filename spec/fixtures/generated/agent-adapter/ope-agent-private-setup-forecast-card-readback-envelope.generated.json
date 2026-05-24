@@ -1,0 +1,146 @@
+{
+  "agentEnvelopeId": "agentenvelope-038",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "forecast_card",
+  "adapterRequest": {
+    "operation": "forecast_card",
+    "inputRecordType": "forecast_card",
+    "inputRef": "forecast-1102",
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "maxBytes": 65536,
+    "callerIntent": "Read the generated private setup forecast card after checked forecast execution."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": "resolution-1102",
+    "scoringReportId": "scoring-1102"
+  },
+  "state": {
+    "decisionStatus": "generated",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "source_handoff_fixture",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "recordType": "forecast-card",
+    "recordId": "forecast-1102",
+    "access": {
+      "mode": "read_only_file",
+      "maxRecordsPerRequest": 1
+    },
+    "record": {
+      "cardId": "forecastcard-forecast-1102",
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+      "domain": "weather-logistics",
+      "horizon": {
+        "startsAt": "2026-06-03T00:00:00Z",
+        "endsAt": "2026-06-03T23:59:59Z",
+        "label": "1-day"
+      },
+      "status": "resolved",
+      "forecastedAt": "2026-06-02T10:45:00Z",
+      "closedAt": "2026-06-02T12:00:00Z",
+      "scheduledResolutionAt": "2026-06-04T12:00:00Z",
+      "forecast": {
+        "outputType": "binary",
+        "probability": 0.645
+      },
+      "baseline": {
+        "outputType": "binary",
+        "probability": 0.375
+      },
+      "model": {
+        "modelId": "model-101",
+        "version": "weather-logistics-fixture-loop-v0"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolvedAt": "2026-06-04T12:30:00Z",
+        "resolvedOutcome": {
+          "outputType": "binary",
+          "value": true
+        }
+      },
+      "score": {
+        "scoreStatus": "scored",
+        "scoringRule": "brier",
+        "primaryScore": 0.126025,
+        "baselineScore": 0.390625,
+        "baselineLift": 0.2646,
+        "generatedAt": "2026-06-04T12:35:00Z"
+      },
+      "qualityClaim": {
+        "status": "not_enough_resolved_source_handoff_outcomes",
+        "minimumSampleSize": 30,
+        "resolvedComparableOutcomes": 1,
+        "sampleSize": 1,
+        "trackRecordReportId": "trackrecord-1102"
+      },
+      "requestBinding": {
+        "pipelineRunId": null,
+        "requestId": null,
+        "effectfulGeneration": null,
+        "executionMode": null,
+        "sourceMode": null,
+        "evidencePlanId": null,
+        "evidenceSourceSetId": null,
+        "sourcePolicyId": null
+      },
+      "setupBinding": {
+        "setupForecastRunId": "setupforecastrun-1102",
+        "domainSetupId": "domainsetup-001",
+        "sourceManifestId": "sourcemanifestdraft-001",
+        "fieldMappingId": "fieldmappingdraft-102",
+        "sourceIntakeReportId": "sourceintakereport-102",
+        "sourceIntakeHandoffId": "sourceintakehandoff-002",
+        "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+        "setupMethodDecisionId": "setupmethoddecision-102",
+        "setupBenchmarkGateId": "setupbenchmarkgate-102",
+        "runStatus": "generated",
+        "selectedMethodClass": "deterministic_statistical",
+        "selectedForecastMode": "deterministic_statistical"
+      },
+      "warnings": [
+        "Fixture-mode record; do not generalize to live performance.",
+        "Calibration and quality claims require the declared minimum comparable resolved outcomes."
+      ],
+      "links": {
+        "forecastBundle": "forecastbundle-forecast-1102",
+        "evidenceTrace": null,
+        "forecastArtifact": "forecast-1102",
+        "evidencePacket": "evidence-1102",
+        "resolutionRecord": "resolution-1102",
+        "scoringReport": "scoring-1102",
+        "trackRecordReport": "trackrecord-1102"
+      }
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Fixture-mode record; do not generalize to live performance.",
+    "Calibration and quality claims require the declared minimum comparable resolved outcomes."
+  ]
+}

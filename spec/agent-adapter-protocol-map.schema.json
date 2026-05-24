@@ -67,8 +67,8 @@
     },
     "operations": {
       "type": "array",
-      "minItems": 7,
-      "maxItems": 7,
+      "minItems": 16,
+      "maxItems": 16,
       "items": { "$ref": "#/$defs/operationMap" }
     },
     "exitCodeMapping": {
@@ -86,7 +86,7 @@
     "decisionExamples": {
       "type": "array",
       "minItems": 4,
-      "maxItems": 8,
+      "maxItems": 14,
       "items": { "$ref": "#/$defs/decisionExample" }
     },
     "warnings": {
@@ -109,6 +109,15 @@
         "evidence_trace",
         "forecast_card",
         "lifecycle_bundle",
+        "private_setup_bundle",
+        "private_setup_adapter_runbook",
+        "private_setup_adapter_conformance_summary",
+        "private_source_adapter_guidance",
+        "private_source_kind_selection",
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
         "resolution_status",
         "scoring_summary"
       ]
@@ -121,6 +130,15 @@
         "evidence_trace",
         "forecast_card",
         "lifecycle_bundle",
+        "private_setup_agent_bundle",
+        "private_setup_adapter_chain_runbook",
+        "private_setup_adapter_conformance_summary",
+        "private_source_adapter_capability",
+        "private_source_kind_selection_examples",
+        "source_manifest_build",
+        "source_intake_handoff",
+        "source_handoff_method_gate",
+        "setup_forecast_run",
         "resolution_status",
         "scoring_summary"
       ]
@@ -130,6 +148,7 @@
       "enum": [
         "validation_only",
         "dry_run_generation",
+        "forecast_execution",
         "read_only",
         "status_read",
         "scoring_read"

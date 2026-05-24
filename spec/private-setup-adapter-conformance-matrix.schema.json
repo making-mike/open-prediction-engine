@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-adapter-conformance-matrix.schema.json",
+  "title": "Private Setup Adapter Conformance Matrix",
+  "description": "Checked conformance examples for private setup adapter operations and generated forecast readback envelopes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupAdapterConformanceMatrixId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "operationCases",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupAdapterConformanceMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["adapter_conformance_examples_only"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentEnvelopeSchema",
+        "protocolMapId",
+        "privateSetupAdapterChainRunbookId",
+        "generatedForecastId",
+        "generatedQuestionId"
+      ],
+      "properties": {
+        "agentEnvelopeSchema": {
+          "type": "string",
+          "const": "spec/agent-envelope.schema.json"
+        },
+        "protocolMapId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupAdapterChainRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+        "generatedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "generatedQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "operationCases": {
+      "type": "array",
+      "minItems": 31,
+      "maxItems": 31,
+      "items": { "$ref": "#/$defs/operationCase" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matrixDoesNotExecute",
+        "usesExistingGeneratedEnvelopes",
+        "readsPrivateData",
+        "runsCommands",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "resolvesOutcomes",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime"
+      ],
+      "properties": {
+        "matrixDoesNotExecute": { "type": "boolean" },
+        "usesExistingGeneratedEnvelopes": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsCommands": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "resolvesOutcomes": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsHostedRuntime": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 180
+        },
+        { "type": "null" }
+      ]
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff",
+        "method_gate",
+        "forecast_execution",
+        "forecast_readback"
+      ]
+    },
+    "payloadShape": {
+      "type": "string",
+      "enum": [
+        "source_builder_result",
+        "source_handoff_result",
+        "method_gate_result",
+        "forecast_execution_result",
+        "forecast_card_readback",
+        "lifecycle_bundle_readback",
+        "resolution_status_readback",
+        "scoring_summary_readback",
+        "sanitized_error"
+      ]
+    },
+    "operationCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationCaseId",
+        "phase",
+        "operation",
+        "adapterCase",
+        "envelopeFilename",
+        "agentCallCommand",
+        "expectedStatus",
+        "expectedExitCode",
+        "expectedErrorCode",
+        "payloadShape",
+        "payloadStatus",
+        "nextAction",
+        "forecastArtifactsCreated",
+        "publicReadRecordsCreated",
+        "scoringRecordsCreated",
+        "resolutionCreated",
+        "qualityClaimAllowed",
+        "envelope"
+      ],
+      "properties": {
+        "operationCaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "phase": { "$ref": "#/$defs/phase" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "adapterCase": { "$ref": "#/$defs/nullableString" },
+        "envelopeFilename": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        "agentCallCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "expectedStatus": {
+          "type": "string",
+          "enum": ["ok", "error"]
+        },
+        "expectedExitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "expectedErrorCode": { "$ref": "#/$defs/nullableString" },
+        "payloadShape": { "$ref": "#/$defs/payloadShape" },
+        "payloadStatus": { "$ref": "#/$defs/nullableString" },
+        "nextAction": { "$ref": "#/$defs/nullableString" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "publicReadRecordsCreated": { "type": "boolean" },
+        "scoringRecordsCreated": { "type": "boolean" },
+        "resolutionCreated": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "envelope": { "$ref": "agent-envelope.schema.json" }
+      }
+    }
+  }
+}

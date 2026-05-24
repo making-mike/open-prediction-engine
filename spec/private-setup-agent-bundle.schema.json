@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-agent-bundle.schema.json",
+  "title": "Private Setup Agent Bundle",
+  "description": "Compact agent-facing bundle joining a private setup request, first action, and runbook guidance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupAgentBundleId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bundleKind",
+    "sourceKind",
+    "requestSummary",
+    "actionSummary",
+    "runbookGuidance",
+    "claimBoundary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupAgentBundleId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["bundle_guidance_only"]
+    },
+    "bundleKind": {
+      "type": "string",
+      "enum": ["known_request", "bad_request_example"]
+    },
+    "sourceKind": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "requestSummary": { "$ref": "#/$defs/requestSummary" },
+    "actionSummary": { "$ref": "#/$defs/actionSummary" },
+    "runbookGuidance": { "$ref": "#/$defs/runbookGuidance" },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "command": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "setupMode": {
+      "type": "string",
+      "enum": ["new_setup", "extend_setup", "reuse_setup", "unknown"]
+    },
+    "dataMode": {
+      "type": "string",
+      "enum": ["provided", "auto", "hybrid", "unknown"]
+    },
+    "approvalStatus": {
+      "type": "string",
+      "enum": ["not_required", "requested", "confirmed", "rejected", "unknown"]
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": [
+        "ready_to_run_checked_command",
+        "confirmation_required",
+        "fixture_ready",
+        "runtime_not_implemented",
+        "source_replacement_required",
+        "rejected_unsafe_source",
+        "bad_request"
+      ]
+    },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "request_mapping_confirmation",
+        "use_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop",
+        "reject_bad_request"
+      ]
+    },
+    "allowedEntrypoint": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff_confirmation",
+        "auto_evidence_fixture",
+        "no_current_entrypoint"
+      ]
+    },
+    "errorCode": {
+      "type": "string",
+      "enum": [
+        "none",
+        "confirmation_required",
+        "runtime_not_implemented",
+        "unsupported_source",
+        "rejected_unsafe_source",
+        "unknown_source_kind",
+        "missing_approval",
+        "bad_request"
+      ]
+    },
+    "nextActionLabel": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "ask_mapping_confirmation",
+        "run_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop_unsafe_source",
+        "fix_bad_request"
+      ]
+    },
+    "expectedOutputClass": {
+      "type": "string",
+      "enum": [
+        "source_manifest_build",
+        "source_intake_handoff",
+        "evidence_source_set",
+        "none"
+      ]
+    },
+    "blockedOutput": {
+      "type": "string",
+      "enum": [
+        "source_manifest",
+        "field_mapping",
+        "source_intake_report",
+        "forecast_artifact",
+        "forecast_card",
+        "scoring_report",
+        "credential_record",
+        "live_fetch_result"
+      ]
+    },
+    "requestSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupRequestSetId",
+        "privateSetupRequestId",
+        "requestRowId",
+        "setupMode",
+        "selectedSourceKind",
+        "forecastQuestionText",
+        "outputType",
+        "sourcePolicy"
+      ],
+      "properties": {
+        "privateSetupRequestSetId": { "$ref": "#/$defs/nullableId" },
+        "privateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestRowId": { "$ref": "#/$defs/nullableId" },
+        "setupMode": { "$ref": "#/$defs/setupMode" },
+        "selectedSourceKind": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "forecastQuestionText": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 280
+        },
+        "outputType": {
+          "type": "string",
+          "enum": ["binary", "categorical", "numeric", "distribution", "unknown"]
+        },
+        "sourcePolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dataMode", "approvalStatus", "allowedSourceKinds", "allowLiveFetch", "allowCredentialUse"],
+          "properties": {
+            "dataMode": { "$ref": "#/$defs/dataMode" },
+            "approvalStatus": { "$ref": "#/$defs/approvalStatus" },
+            "allowedSourceKinds": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 12,
+              "items": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 80
+              }
+            },
+            "allowLiveFetch": { "type": "boolean" },
+            "allowCredentialUse": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "actionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupFirstActionId",
+        "actionStatus",
+        "routeDecision",
+        "allowedEntrypoint",
+        "commandToRun",
+        "requiredCallerAction",
+        "errorCode",
+        "exitCode"
+      ],
+      "properties": {
+        "privateSetupFirstActionId": { "$ref": "common.schema.json#/$defs/id" },
+        "actionStatus": { "$ref": "#/$defs/actionStatus" },
+        "routeDecision": { "$ref": "#/$defs/routeDecision" },
+        "allowedEntrypoint": { "$ref": "#/$defs/allowedEntrypoint" },
+        "commandToRun": { "$ref": "#/$defs/command" },
+        "requiredCallerAction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "errorCode": { "$ref": "#/$defs/errorCode" },
+        "exitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        }
+      }
+    },
+    "runbookGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupFirstActionRunbookId",
+        "runbookRowId",
+        "nextActionLabel",
+        "expectedOutputClass",
+        "requiresCallerConfirmation",
+        "mayEnterSourceIntakeAfterRequiredAction",
+        "forecastExecutionAllowed",
+        "scoringAllowed",
+        "blockedOutputs",
+        "stopCondition",
+        "agentInstruction"
+      ],
+      "properties": {
+        "privateSetupFirstActionRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+        "runbookRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextActionLabel": { "$ref": "#/$defs/nextActionLabel" },
+        "expectedOutputClass": { "$ref": "#/$defs/expectedOutputClass" },
+        "requiresCallerConfirmation": { "type": "boolean" },
+        "mayEnterSourceIntakeAfterRequiredAction": { "type": "boolean" },
+        "forecastExecutionAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "blockedOutputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/blockedOutput" }
+        },
+        "stopCondition": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundleDoesNotPredict",
+        "qualityClaimAllowed",
+        "forecastExecutionAllowed",
+        "scoringAllowed",
+        "reasonCodes"
+      ],
+      "properties": {
+        "bundleDoesNotPredict": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "forecastExecutionAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundleDoesNotExecute",
+        "normalChecksOffline",
+        "readsPrivateData",
+        "runsSuggestedCommand",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials"
+      ],
+      "properties": {
+        "bundleDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsSuggestedCommand": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    }
+  }
+}

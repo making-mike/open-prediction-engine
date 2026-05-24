@@ -12,17 +12,47 @@ from build_agent_adapter_fixtures import (
     EXIT_CODES,
     SCHEMA,
     AgentAdapterError,
+    FORECAST_EXECUTION_CASES,
     binding_from_card,
     binding_from_trace,
     envelope,
+    forecast_execution_result_payload,
+    load_private_setup_adapter_conformance_summary,
+    load_private_setup_adapter_runbook,
+    load_private_source_kind_selection_examples,
     nullable_binding,
     nullable_state,
+    private_source_adapter_guidance_payload as build_private_source_adapter_guidance_payload,
     render_json,
+    SOURCE_BUILDER_CASES,
+    SOURCE_HANDOFF_CASES,
+    METHOD_GATE_CASES,
+    method_gate_result_payload,
+    source_builder_result_payload,
+    source_handoff_result_payload,
+    state_from_method_gate_payload,
+    state_from_forecast_execution_payload,
+    state_from_private_setup_adapter_conformance_summary,
+    state_from_private_setup_adapter_runbook,
+    state_from_private_source_adapter_guidance,
+    state_from_private_source_kind_selection,
+    state_from_source_builder_payload,
+    state_from_source_handoff_payload,
     state_from_card,
     validate_envelope_semantics,
 )
+from build_source_manifest import SourceBuildError
+from generate_source_intake_handoff import SourceIntakeHandoffError
+from generate_source_handoff_method_gate import SourceHandoffMethodGateError
 from ope_schema import validate_record
 from plan_auto_evidence import DEFAULT_REQUEST, EvidencePlanError, build_plan
+from run_source_handoff_forecast import SourceHandoffForecastError
+from generate_private_setup_agent_bundles import (
+    BAD_REQUEST_CASES,
+    PrivateSetupAgentBundleError,
+    bundle_by_case,
+    bundle_by_request_id,
+)
 from read_ope_record import DEFAULT_MAX_BYTES, PublicError, read_record
 from validate_forecast_request import load_json, validate_request
 
@@ -30,6 +60,7 @@ from validate_forecast_request import load_json, validate_request
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FORECAST_ID = "forecast-602"
 DEFAULT_QUESTION_ID = "question-601"
+DEFAULT_PRIVATE_SETUP_REQUEST_ID = "privatesetuprequest-001"
 DEFAULT_CALLER_INTENT = "Call one local OPE agent adapter operation."
 CAPABILITY_BY_OPERATION = {
     "forecast_request_validation": "validation",
@@ -37,6 +68,15 @@ CAPABILITY_BY_OPERATION = {
     "evidence_trace": "read_only",
     "forecast_card": "read_only",
     "lifecycle_bundle": "read_only",
+    "private_setup_bundle": "read_only",
+    "private_setup_adapter_runbook": "read_only",
+    "private_setup_adapter_conformance_summary": "read_only",
+    "private_source_adapter_guidance": "read_only",
+    "private_source_kind_selection": "read_only",
+    "private_setup_source_builder": "dry_run_generation",
+    "private_setup_source_handoff": "dry_run_generation",
+    "private_setup_method_gate": "dry_run_generation",
+    "private_setup_forecast_execution": "forecast_execution",
     "resolution_status": "resolution_check",
     "scoring_summary": "scoring_read",
 }
@@ -46,6 +86,15 @@ INPUT_TYPE_BY_OPERATION = {
     "evidence_trace": "evidence_trace",
     "forecast_card": "forecast_card",
     "lifecycle_bundle": "lifecycle_bundle",
+    "private_setup_bundle": "private_setup_agent_bundle",
+    "private_setup_adapter_runbook": "private_setup_adapter_chain_runbook",
+    "private_setup_adapter_conformance_summary": "private_setup_adapter_conformance_summary",
+    "private_source_adapter_guidance": "private_source_adapter_capability",
+    "private_source_kind_selection": "private_source_kind_selection_examples",
+    "private_setup_source_builder": "source_manifest_build",
+    "private_setup_source_handoff": "source_intake_handoff",
+    "private_setup_method_gate": "source_handoff_method_gate",
+    "private_setup_forecast_execution": "setup_forecast_run",
     "resolution_status": "resolution_status",
     "scoring_summary": "scoring_summary",
 }
@@ -101,7 +150,53 @@ def input_ref_for(args: argparse.Namespace) -> str:
         return resolution_payload(args.forecast_id, args.question_id)["resolutionRecordId"]
     if args.operation == "scoring_summary":
         return scoring_payload(args.forecast_id, args.question_id)["scoringReportId"]
+    if args.operation == "private_setup_bundle":
+        bundle = private_setup_bundle(args.private_setup_request_id, args.private_setup_case)
+        return bundle["privateSetupAgentBundleId"]
+    if args.operation == "private_setup_adapter_runbook":
+        runbook = load_private_setup_adapter_runbook()
+        return runbook["privateSetupAdapterChainRunbookId"]
+    if args.operation == "private_setup_adapter_conformance_summary":
+        summary = load_private_setup_adapter_conformance_summary()
+        return summary["privateSetupAdapterConformanceSummaryId"]
+    if args.operation == "private_source_adapter_guidance":
+        guidance = build_private_source_adapter_guidance_payload()
+        return guidance["bindingSummary"]["privateSourceAdapterCapabilityId"]
+    if args.operation == "private_source_kind_selection":
+        examples = load_private_source_kind_selection_examples()
+        return examples["privateSourceKindSelectionExamplesId"]
+    if args.operation == "private_setup_source_builder":
+        payload = source_builder_payload(args)
+        return payload["sourceManifestBuild"]["sourceManifestBuildId"]
+    if args.operation == "private_setup_source_handoff":
+        payload = source_handoff_payload(args)
+        return payload["sourceIntakeHandoff"]["sourceIntakeHandoffId"]
+    if args.operation == "private_setup_method_gate":
+        payload = method_gate_payload(args)
+        return payload["sourceHandoffMethodGate"]["sourceHandoffMethodGateId"]
+    if args.operation == "private_setup_forecast_execution":
+        payload = forecast_execution_payload(args)
+        return payload["setupForecastRun"]["setupForecastRunId"]
     raise AgentCallError("bad_request", "Unsupported agent operation.")
+
+
+def valid_max_bytes(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 1
+
+
+def safe_max_bytes(value: Any) -> int | None:
+    return value if valid_max_bytes(value) else None
+
+
+def ensure_valid_adapter_request(args: argparse.Namespace) -> None:
+    if not valid_max_bytes(args.max_bytes):
+        raise AgentCallError("bad_request", "maxBytes must be a positive integer.")
+
+
+def safe_caller_intent(value: Any) -> str:
+    if isinstance(value, str) and 3 <= len(value) <= 200:
+        return value
+    return DEFAULT_CALLER_INTENT
 
 
 def read_card_and_bundle(forecast_id: str, question_id: str | None) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -200,6 +295,20 @@ def resolution_payload(forecast_id: str, question_id: str | None) -> dict[str, A
     outcome_summary = records["outcomeSummary"]
     if resolution is None:
         raise AgentCallError("not_found", "Resolution record was not found.")
+    quality_claim = {
+        "publicationStatus": outcome_summary.get("publicationStatus") if outcome_summary else None,
+        "qualityClaimStatus": outcome_summary.get("qualityClaimStatus") if outcome_summary else None,
+        "minimumCalibrationSampleSize": outcome_summary.get("minimumCalibrationSampleSize") if outcome_summary else None,
+    }
+    if outcome_summary:
+        for key in [
+            "resolvedComparableAutoEvidenceOutcomes",
+            "resolvedComparablePipelineOutcomes",
+            "resolvedComparableLiveOutcomes",
+            "resolvedComparableSourceHandoffOutcomes",
+        ]:
+            if key in outcome_summary:
+                quality_claim[key] = outcome_summary[key]
     return {
         "forecastId": forecast_id,
         "questionId": bundle_response["record"]["questionId"],
@@ -208,14 +317,7 @@ def resolution_payload(forecast_id: str, question_id: str | None) -> dict[str, A
         "resolvedAt": resolution.get("resolvedAt"),
         "resolvedOutcome": resolution.get("resolvedOutcome"),
         "resolutionSource": resolution.get("resolutionSource"),
-        "qualityClaim": {
-            "publicationStatus": outcome_summary.get("publicationStatus") if outcome_summary else None,
-            "qualityClaimStatus": outcome_summary.get("qualityClaimStatus") if outcome_summary else None,
-            "minimumCalibrationSampleSize": outcome_summary.get("minimumCalibrationSampleSize") if outcome_summary else None,
-            "resolvedComparableAutoEvidenceOutcomes": outcome_summary.get("resolvedComparableAutoEvidenceOutcomes")
-            if outcome_summary
-            else None,
-        },
+        "qualityClaim": quality_claim,
     }
 
 
@@ -264,6 +366,256 @@ def scoring_summary_payload(forecast_id: str, question_id: str | None) -> tuple[
     )
 
 
+def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, Any]:
+    if bundle_case and bundle_case not in BAD_REQUEST_CASES:
+        raise AgentCallError(
+            "bad_request",
+            "Private setup case must be unknown_source_kind or missing_approval.",
+            binding=nullable_binding(requestId=request_id),
+        )
+    try:
+        if bundle_case:
+            return bundle_by_case(bundle_case)
+        return bundle_by_request_id(request_id)
+    except PrivateSetupAgentBundleError as exc:
+        raise AgentCallError(
+            "not_found",
+            "Private setup agent bundle was not found.",
+            binding=nullable_binding(requestId=request_id),
+        ) from exc
+
+
+def private_setup_bundle_payload(
+    request_id: str,
+    bundle_case: str | None,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    bundle = private_setup_bundle(request_id, bundle_case)
+    request_summary = bundle["requestSummary"]
+    action_summary = bundle["actionSummary"]
+    source_policy = request_summary["sourcePolicy"]
+    binding = nullable_binding(requestId=request_summary["privateSetupRequestId"])
+    state = nullable_state(
+        decisionStatus=action_summary["routeDecision"],
+        approvalStatus=source_policy["approvalStatus"],
+        dataMode=source_policy["dataMode"],
+        planStatus=bundle["runtimeStatus"],
+        sourceMode=bundle["sourceKind"],
+        forecastStatus="not_created",
+        resolutionStatus="not_started",
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *bundle["warnings"],
+        "The adapter envelope is read-only and does not execute the suggested setup command.",
+    ]
+    return bundle, binding, state, warnings
+
+
+def private_setup_adapter_runbook_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    runbook = load_private_setup_adapter_runbook()
+    source_path = runbook["sourcePath"]
+    binding = nullable_binding(requestId=source_path["privateSetupRequestId"])
+    state = state_from_private_setup_adapter_runbook(runbook)
+    warnings = [
+        *runbook["warnings"],
+        "The adapter envelope is read-only and does not execute the operation sequence.",
+    ]
+    return runbook, binding, state, warnings
+
+
+def private_setup_adapter_conformance_summary_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    summary = load_private_setup_adapter_conformance_summary()
+    binding = nullable_binding(
+        questionId=summary["bindings"]["generatedQuestionId"],
+        forecastId=summary["bindings"]["generatedForecastId"],
+    )
+    state = state_from_private_setup_adapter_conformance_summary(summary)
+    warnings = [
+        *summary["warnings"],
+        "The adapter envelope is read-only and does not execute adapter calls or create forecast artifacts.",
+    ]
+    return summary, binding, state, warnings
+
+
+def private_source_adapter_guidance_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    guidance = build_private_source_adapter_guidance_payload()
+    binding = nullable_binding()
+    state = state_from_private_source_adapter_guidance(guidance)
+    return guidance, binding, state, guidance["warnings"]
+
+
+def selected_source_kind_payload(examples: dict[str, Any], source_kind: str) -> dict[str, Any]:
+    rows = {item["sourceKind"]: item for item in examples["selectionExamples"]}
+    if source_kind not in rows:
+        raise AgentCallError(
+            "bad_request",
+            "Unsupported private source kind selection.",
+            state=state_from_private_source_kind_selection(examples, source_kind),
+        )
+    return {
+        "privateSourceKindSelectionExamplesId": examples["privateSourceKindSelectionExamplesId"],
+        "generatedAt": examples["generatedAt"],
+        "scope": examples["scope"],
+        "runtimeStatus": "selected_example_only",
+        "requestedSourceKind": source_kind,
+        "availableSourceKinds": list(rows),
+        "bindings": examples["bindings"],
+        "selectedExample": rows[source_kind],
+        "executionBoundary": examples["executionBoundary"],
+        "warnings": [
+            "This selected recommendation is read-only guidance and does not execute the recommended path.",
+            "Forecast artifacts and scoring records still require explicit later gates.",
+        ],
+    }
+
+
+def private_source_kind_selection_payload(
+    source_kind: str | None,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    examples = load_private_source_kind_selection_examples()
+    binding = nullable_binding()
+    if source_kind:
+        payload = selected_source_kind_payload(examples, source_kind)
+        state = state_from_private_source_kind_selection(examples, source_kind)
+        state["planStatus"] = payload["runtimeStatus"]
+        warnings = [
+            *payload["warnings"],
+            "The adapter envelope is read-only and does not execute source setup, fixture evidence, forecast execution, or scoring.",
+        ]
+        return payload, binding, state, warnings
+
+    state = state_from_private_source_kind_selection(examples)
+    warnings = [
+        *examples["warnings"],
+        "The adapter envelope is read-only and does not execute source setup, fixture evidence, forecast execution, or scoring.",
+    ]
+    return examples, binding, state, warnings
+
+
+def source_builder_payload(args: argparse.Namespace) -> dict[str, Any]:
+    if args.source_builder_inputs and args.source_builder_case != "local_draft":
+        raise AgentCallError(
+            "bad_request",
+            "Provide either --source-builder-case or explicit --source-builder-input values, not both.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        )
+    try:
+        return source_builder_result_payload(
+            private_setup_request_id=args.private_setup_request_id,
+            source_builder_case=args.source_builder_case,
+            source_builder_inputs=args.source_builder_inputs,
+            mapping_hints=args.source_builder_mapping_hints,
+        )
+    except SourceBuildError as exc:
+        raise AgentCallError(
+            "validation_failed",
+            "Source-builder input could not be parsed or validated.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        ) from exc
+
+
+def private_setup_source_builder_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = source_builder_payload(args)
+    return (
+        payload,
+        nullable_binding(requestId=payload["privateSetupRequestId"]),
+        state_from_source_builder_payload(payload),
+        payload["warnings"],
+    )
+
+
+def source_handoff_payload(args: argparse.Namespace) -> dict[str, Any]:
+    try:
+        return source_handoff_result_payload(
+            private_setup_request_id=args.private_setup_request_id,
+            source_handoff_case=args.source_handoff_case,
+        )
+    except SourceIntakeHandoffError as exc:
+        raise AgentCallError(
+            "validation_failed",
+            "Source-handoff case could not be parsed or validated.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        ) from exc
+
+
+def private_setup_source_handoff_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = source_handoff_payload(args)
+    return (
+        payload,
+        nullable_binding(requestId=payload["privateSetupRequestId"]),
+        state_from_source_handoff_payload(payload),
+        payload["warnings"],
+    )
+
+
+def method_gate_payload(args: argparse.Namespace) -> dict[str, Any]:
+    try:
+        return method_gate_result_payload(
+            private_setup_request_id=args.private_setup_request_id,
+            method_gate_case=args.method_gate_case,
+        )
+    except SourceHandoffMethodGateError as exc:
+        raise AgentCallError(
+            "validation_failed",
+            "Method-gate case could not be parsed or validated.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        ) from exc
+
+
+def private_setup_method_gate_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = method_gate_payload(args)
+    return (
+        payload,
+        nullable_binding(requestId=payload["privateSetupRequestId"]),
+        state_from_method_gate_payload(payload),
+        payload["warnings"],
+    )
+
+
+def forecast_execution_payload(args: argparse.Namespace) -> dict[str, Any]:
+    try:
+        return forecast_execution_result_payload(
+            private_setup_request_id=args.private_setup_request_id,
+            forecast_execution_case=args.forecast_execution_case,
+        )
+    except SourceHandoffForecastError as exc:
+        raise AgentCallError(
+            "validation_failed",
+            "Forecast-execution case could not be parsed or validated.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        ) from exc
+    except SourceHandoffMethodGateError as exc:
+        raise AgentCallError(
+            "validation_failed",
+            "Forecast-execution method gate could not be parsed or validated.",
+            binding=nullable_binding(requestId=args.private_setup_request_id),
+        ) from exc
+
+
+def private_setup_forecast_execution_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = forecast_execution_payload(args)
+    run = payload["setupForecastRun"]
+    return (
+        payload,
+        nullable_binding(
+            requestId=payload["privateSetupRequestId"],
+            questionId=run["recordBinding"]["questionId"],
+            forecastId=run["recordBinding"]["forecastId"],
+        ),
+        state_from_forecast_execution_payload(payload),
+        payload["warnings"],
+    )
+
+
 def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
     if args.operation == "forecast_request_validation":
         payload, binding, state, warnings = request_validation_payload(args.request)
@@ -286,6 +638,33 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "scoring_summary":
         payload, binding, state, warnings = scoring_summary_payload(args.forecast_id, args.question_id)
         return payload["scoringReportId"], payload, binding, state, warnings
+    if args.operation == "private_setup_bundle":
+        payload, binding, state, warnings = private_setup_bundle_payload(args.private_setup_request_id, args.private_setup_case)
+        return payload["privateSetupAgentBundleId"], payload, binding, state, warnings
+    if args.operation == "private_setup_adapter_runbook":
+        payload, binding, state, warnings = private_setup_adapter_runbook_payload()
+        return payload["privateSetupAdapterChainRunbookId"], payload, binding, state, warnings
+    if args.operation == "private_setup_adapter_conformance_summary":
+        payload, binding, state, warnings = private_setup_adapter_conformance_summary_payload()
+        return payload["privateSetupAdapterConformanceSummaryId"], payload, binding, state, warnings
+    if args.operation == "private_source_adapter_guidance":
+        payload, binding, state, warnings = private_source_adapter_guidance_payload()
+        return payload["bindingSummary"]["privateSourceAdapterCapabilityId"], payload, binding, state, warnings
+    if args.operation == "private_source_kind_selection":
+        payload, binding, state, warnings = private_source_kind_selection_payload(args.source_kind)
+        return payload["privateSourceKindSelectionExamplesId"], payload, binding, state, warnings
+    if args.operation == "private_setup_source_builder":
+        payload, binding, state, warnings = private_setup_source_builder_payload(args)
+        return payload["sourceManifestBuild"]["sourceManifestBuildId"], payload, binding, state, warnings
+    if args.operation == "private_setup_source_handoff":
+        payload, binding, state, warnings = private_setup_source_handoff_payload(args)
+        return payload["sourceIntakeHandoff"]["sourceIntakeHandoffId"], payload, binding, state, warnings
+    if args.operation == "private_setup_method_gate":
+        payload, binding, state, warnings = private_setup_method_gate_payload(args)
+        return payload["sourceHandoffMethodGate"]["sourceHandoffMethodGateId"], payload, binding, state, warnings
+    if args.operation == "private_setup_forecast_execution":
+        payload, binding, state, warnings = private_setup_forecast_execution_payload(args)
+        return payload["setupForecastRun"]["setupForecastRunId"], payload, binding, state, warnings
     raise AgentCallError("bad_request", "Unsupported agent operation.")
 
 
@@ -303,6 +682,7 @@ def output_envelope(args: argparse.Namespace) -> dict[str, Any]:
     question_id = args.question_id if args.operation in FORECAST_BOUND_OPERATIONS else None
     forecast_id = args.forecast_id if args.operation in FORECAST_BOUND_OPERATIONS else None
     try:
+        ensure_valid_adapter_request(args)
         input_ref, payload, binding, state, warnings = operation_payload(args)
         item = envelope(
             "agentenvelope-101",
@@ -313,7 +693,7 @@ def output_envelope(args: argparse.Namespace) -> dict[str, Any]:
             payload,
             question_id=question_id,
             forecast_id=forecast_id,
-            caller_intent=args.caller_intent,
+            caller_intent=safe_caller_intent(args.caller_intent),
             record_binding=binding,
             state=state,
             max_bytes=args.max_bytes,
@@ -337,10 +717,10 @@ def output_envelope(args: argparse.Namespace) -> dict[str, Any]:
             None,
             question_id=question_id,
             forecast_id=forecast_id,
-            caller_intent=args.caller_intent,
+            caller_intent=safe_caller_intent(args.caller_intent),
             record_binding=binding,
             state=state,
-            max_bytes=args.max_bytes,
+            max_bytes=safe_max_bytes(args.max_bytes),
             status="error",
             error={
                 "code": code,
@@ -356,6 +736,24 @@ def output_envelope(args: argparse.Namespace) -> dict[str, Any]:
 def safe_input_ref(args: argparse.Namespace) -> str:
     if args.operation in FORECAST_BOUND_OPERATIONS:
         return args.forecast_id
+    if args.operation == "private_setup_bundle":
+        return args.private_setup_request_id
+    if args.operation == "private_setup_adapter_runbook":
+        return "privatesetupadapterchainrunbook-001"
+    if args.operation == "private_setup_adapter_conformance_summary":
+        return "privatesetupadapterconformancesummary-001"
+    if args.operation == "private_source_adapter_guidance":
+        return "privatesourceadaptercapability-001"
+    if args.operation == "private_source_kind_selection":
+        return "privatesourcekindselectionexamples-001"
+    if args.operation == "private_setup_source_builder":
+        return "sourcemanifestbuild-000"
+    if args.operation == "private_setup_source_handoff":
+        return "sourceintakehandoff-000"
+    if args.operation == "private_setup_method_gate":
+        return "sourcehandoffmethodgate-000"
+    if args.operation == "private_setup_forecast_execution":
+        return "setupforecastrun-000"
     try:
         return input_ref_for(args)
     except Exception:
@@ -395,6 +793,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--request", type=Path, default=DEFAULT_REQUEST)
     parser.add_argument("--forecast-id", default=DEFAULT_FORECAST_ID)
     parser.add_argument("--question-id", default=DEFAULT_QUESTION_ID)
+    parser.add_argument("--private-setup-request-id", default=DEFAULT_PRIVATE_SETUP_REQUEST_ID)
+    parser.add_argument("--private-setup-case", choices=BAD_REQUEST_CASES)
+    parser.add_argument("--source-builder-case", choices=SOURCE_BUILDER_CASES, default="local_draft")
+    parser.add_argument("--source-builder-input", action="append", default=[], dest="source_builder_inputs")
+    parser.add_argument("--source-builder-mapping-hint", action="append", default=[], dest="source_builder_mapping_hints")
+    parser.add_argument("--source-kind")
+    parser.add_argument("--source-handoff-case", choices=SOURCE_HANDOFF_CASES, default="unconfirmed_builder_draft")
+    parser.add_argument("--method-gate-case", choices=METHOD_GATE_CASES, default="unconfirmed_builder_draft")
+    parser.add_argument("--forecast-execution-case", choices=FORECAST_EXECUTION_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
     parser.add_argument("--caller-intent", default=DEFAULT_CALLER_INTENT)
     return parser

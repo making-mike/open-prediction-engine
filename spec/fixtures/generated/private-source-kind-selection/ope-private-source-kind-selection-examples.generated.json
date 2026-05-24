@@ -1,0 +1,366 @@
+{
+  "privateSourceKindSelectionExamplesId": "privatesourcekindselectionexamples-001",
+  "generatedAt": "2026-06-07T11:35:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "selection_examples_only",
+  "bindings": {
+    "agentEnvelopeId": "agentenvelope-043",
+    "privateSourceAdapterGuidanceId": "privatesourceadapterguidance-001",
+    "privateSourceAdapterCapabilityId": "privatesourceadaptercapability-001",
+    "privateSourceAdapterOutcomeMatrixId": "privateadapteroutcomematrix-001",
+    "privateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupAdapterChainRunbookId": "privatesetupadapterchainrunbook-001"
+  },
+  "selectionExamples": [
+    {
+      "selectionExampleId": "sourcekindselectionexample-001",
+      "sourceKind": "local_file",
+      "guidanceBinding": {
+        "sourceKind": "local_file",
+        "outcomeClass": "available_fixture",
+        "setupOutcomeClass": "setup_ready",
+        "allowedEntrypoint": "source_builder",
+        "currentCommand": "python3 scripts/ope.py source-builder",
+        "agentNextAction": "run_source_builder"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-001",
+        "privateSetupRequestId": "privatesetuprequest-001",
+        "actionStatus": "ready_to_run_checked_command",
+        "routeDecision": "run_source_builder",
+        "allowedEntrypoint": "source_builder",
+        "commandToRun": "python3 scripts/ope.py source-builder"
+      },
+      "adapterChainBinding": {
+        "applicability": "current_local_file_chain",
+        "runbookStepId": "adapterchainstep-002",
+        "branchId": null,
+        "nextOperationAfterPrerequisites": "private_setup_source_builder",
+        "adapterCommandAfterPrerequisites": "python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft"
+      },
+      "recommendation": {
+        "immediateAction": "call_source_builder_adapter",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": false,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Call the source-builder adapter only for caller-approved CSV/JSON files, then continue through handoff and method gates."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-002",
+      "sourceKind": "manual_mapping",
+      "guidanceBinding": {
+        "sourceKind": "manual_mapping",
+        "outcomeClass": "approval_required_fixture",
+        "setupOutcomeClass": "needs_confirmation",
+        "allowedEntrypoint": "source_handoff_confirmation",
+        "currentCommand": "none",
+        "agentNextAction": "request_mapping_confirmation"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-002",
+        "privateSetupRequestId": "privatesetuprequest-002",
+        "actionStatus": "confirmation_required",
+        "routeDecision": "request_mapping_confirmation",
+        "allowedEntrypoint": "source_handoff_confirmation",
+        "commandToRun": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft"
+      },
+      "adapterChainBinding": {
+        "applicability": "mapping_confirmation_branch",
+        "runbookStepId": "adapterchainstep-003",
+        "branchId": "adapterchainbranch-001",
+        "nextOperationAfterPrerequisites": "private_setup_source_handoff",
+        "adapterCommandAfterPrerequisites": "python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft"
+      },
+      "recommendation": {
+        "immediateAction": "request_mapping_confirmation",
+        "requiresCallerConfirmation": true,
+        "requiresFutureRuntime": false,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Ask the caller to confirm proposed mappings before using source-handoff confirmation."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-003",
+      "sourceKind": "manual_upload",
+      "guidanceBinding": {
+        "sourceKind": "manual_upload",
+        "outcomeClass": "planned_runtime",
+        "setupOutcomeClass": "runtime_not_implemented",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "currentCommand": "none",
+        "agentNextAction": "wait_for_runtime"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-004",
+        "privateSetupRequestId": "privatesetuprequest-004",
+        "actionStatus": "runtime_not_implemented",
+        "routeDecision": "wait_for_runtime",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "commandToRun": "none"
+      },
+      "adapterChainBinding": {
+        "applicability": "planned_runtime_blocked",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "none"
+      },
+      "recommendation": {
+        "immediateAction": "wait_for_runtime",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": true,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Wait for an explicit checked runtime before asking OPE to ingest this source kind."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-004",
+      "sourceKind": "auto_evidence_connector",
+      "guidanceBinding": {
+        "sourceKind": "auto_evidence_connector",
+        "outcomeClass": "available_fixture",
+        "setupOutcomeClass": "setup_ready",
+        "allowedEntrypoint": "auto_evidence_fixture",
+        "currentCommand": "python3 scripts/ope.py gather-evidence",
+        "agentNextAction": "use_auto_evidence_fixture"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-003",
+        "privateSetupRequestId": "privatesetuprequest-003",
+        "actionStatus": "fixture_ready",
+        "routeDecision": "use_fixture_evidence",
+        "allowedEntrypoint": "auto_evidence_fixture",
+        "commandToRun": "python3 scripts/ope.py gather-evidence"
+      },
+      "adapterChainBinding": {
+        "applicability": "outside_current_adapter_chain",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "python3 scripts/ope.py gather-evidence"
+      },
+      "recommendation": {
+        "immediateAction": "call_fixture_evidence",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": false,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Use policy-bound fixture evidence only; do not treat it as production live evidence gathering."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-005",
+      "sourceKind": "private_api",
+      "guidanceBinding": {
+        "sourceKind": "private_api",
+        "outcomeClass": "credential_missing",
+        "setupOutcomeClass": "runtime_not_implemented",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "currentCommand": "none",
+        "agentNextAction": "request_credentials_after_runtime"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-005",
+        "privateSetupRequestId": "privatesetuprequest-005",
+        "actionStatus": "runtime_not_implemented",
+        "routeDecision": "wait_for_runtime",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "commandToRun": "none"
+      },
+      "adapterChainBinding": {
+        "applicability": "planned_runtime_blocked",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "none"
+      },
+      "recommendation": {
+        "immediateAction": "wait_for_runtime",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": true,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Wait for an explicit checked runtime before asking OPE to ingest this source kind."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-006",
+      "sourceKind": "private_database",
+      "guidanceBinding": {
+        "sourceKind": "private_database",
+        "outcomeClass": "credential_missing",
+        "setupOutcomeClass": "runtime_not_implemented",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "currentCommand": "none",
+        "agentNextAction": "request_credentials_after_runtime"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-006",
+        "privateSetupRequestId": "privatesetuprequest-006",
+        "actionStatus": "runtime_not_implemented",
+        "routeDecision": "wait_for_runtime",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "commandToRun": "none"
+      },
+      "adapterChainBinding": {
+        "applicability": "planned_runtime_blocked",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "none"
+      },
+      "recommendation": {
+        "immediateAction": "wait_for_runtime",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": true,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Wait for an explicit checked runtime before asking OPE to ingest this source kind."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-007",
+      "sourceKind": "unregistered_source",
+      "guidanceBinding": {
+        "sourceKind": "unregistered_source",
+        "outcomeClass": "unsupported_source",
+        "setupOutcomeClass": "unsupported_source",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "currentCommand": "none",
+        "agentNextAction": "replace_source"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-007",
+        "privateSetupRequestId": "privatesetuprequest-007",
+        "actionStatus": "source_replacement_required",
+        "routeDecision": "replace_source",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "commandToRun": "none"
+      },
+      "adapterChainBinding": {
+        "applicability": "source_replacement_stop",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "none"
+      },
+      "recommendation": {
+        "immediateAction": "replace_source",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": false,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Replace the source kind with one declared in the private source adapter capability contract."
+      }
+    },
+    {
+      "selectionExampleId": "sourcekindselectionexample-008",
+      "sourceKind": "unsafe_source",
+      "guidanceBinding": {
+        "sourceKind": "unsafe_source",
+        "outcomeClass": "rejected_unsafe_source",
+        "setupOutcomeClass": "rejected_source",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "currentCommand": "none",
+        "agentNextAction": "reject_source"
+      },
+      "firstActionBinding": {
+        "privateSetupFirstActionId": "privatesetupfirstaction-008",
+        "privateSetupRequestId": "privatesetuprequest-008",
+        "actionStatus": "rejected_unsafe_source",
+        "routeDecision": "stop",
+        "allowedEntrypoint": "no_current_entrypoint",
+        "commandToRun": "none"
+      },
+      "adapterChainBinding": {
+        "applicability": "unsafe_source_stop",
+        "runbookStepId": null,
+        "branchId": null,
+        "nextOperationAfterPrerequisites": null,
+        "adapterCommandAfterPrerequisites": "none"
+      },
+      "recommendation": {
+        "immediateAction": "reject_source",
+        "requiresCallerConfirmation": false,
+        "requiresFutureRuntime": false,
+        "stopBeforeForecast": true,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "agentInstruction": "Reject unsafe source input and keep it out of setup, intake, forecasts, and scoring."
+      }
+    }
+  ],
+  "executionBoundary": {
+    "examplesDoNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsCommands": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "createsHostedRuntime": false
+  },
+  "guards": [
+    {
+      "guardId": "sourcekindselectionguard-001",
+      "name": "guidance_binding",
+      "rule": "Every selection example must bind one source-kind summary from the private source adapter guidance envelope.",
+      "checkedBy": [
+        "scripts/check_private_source_kind_selection_examples.py"
+      ]
+    },
+    {
+      "guardId": "sourcekindselectionguard-002",
+      "name": "first_action_binding",
+      "rule": "Every selection example must bind the matching private setup first-action result.",
+      "checkedBy": [
+        "scripts/check_private_source_kind_selection_examples.py"
+      ]
+    },
+    {
+      "guardId": "sourcekindselectionguard-003",
+      "name": "adapter_chain_binding",
+      "rule": "Examples must point to the adapter-chain runbook when the current local-file chain applies and mark other source kinds as outside or blocked.",
+      "checkedBy": [
+        "scripts/check_private_source_kind_selection_examples.py"
+      ]
+    },
+    {
+      "guardId": "sourcekindselectionguard-004",
+      "name": "non_generating_examples",
+      "rule": "Selection examples must not execute commands, read private data, create manifests, forecasts, scores, credentials, live fetches, or hosted runtime surfaces.",
+      "checkedBy": [
+        "scripts/check_private_source_kind_selection_examples.py"
+      ]
+    },
+    {
+      "guardId": "sourcekindselectionguard-005",
+      "name": "planned_and_unsafe_stop_paths",
+      "rule": "Planned runtimes, unsupported sources, and unsafe sources must remain stop or replacement guidance before any forecast path.",
+      "checkedBy": [
+        "scripts/check_private_source_kind_selection_examples.py"
+      ]
+    }
+  ],
+  "warnings": [
+    "These examples help agents choose a next setup path; they do not execute the chosen path.",
+    "Forecast artifacts and scoring records still require source intake, method gates, explicit forecast execution, resolution, and scoring.",
+    "Manual upload, private API, and private database source kinds remain planned-only until checked runtimes exist.",
+    "Unsafe and unregistered sources must not enter setup, source intake, forecasts, or scoring."
+  ]
+}

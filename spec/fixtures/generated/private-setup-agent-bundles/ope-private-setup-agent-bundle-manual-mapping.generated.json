@@ -1,0 +1,84 @@
+{
+  "privateSetupAgentBundleId": "privatesetupagentbundle-002",
+  "generatedAt": "2026-06-07T10:40:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "bundle_guidance_only",
+  "bundleKind": "known_request",
+  "sourceKind": "manual_mapping",
+  "requestSummary": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-002",
+    "requestRowId": "privatesetuprequestrow-002",
+    "setupMode": "extend_setup",
+    "selectedSourceKind": "manual_mapping",
+    "forecastQuestionText": "Estimate a future operational probability from caller-approved manual mapping sources.",
+    "outputType": "binary",
+    "sourcePolicy": {
+      "dataMode": "provided",
+      "allowedSourceKinds": [
+        "manual_mapping"
+      ],
+      "approvalStatus": "requested",
+      "allowLiveFetch": false,
+      "allowCredentialUse": false
+    }
+  },
+  "actionSummary": {
+    "privateSetupFirstActionId": "privatesetupfirstaction-002",
+    "actionStatus": "confirmation_required",
+    "routeDecision": "request_mapping_confirmation",
+    "allowedEntrypoint": "source_handoff_confirmation",
+    "commandToRun": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+    "requiredCallerAction": "confirm source roles, field mappings, and aliases",
+    "errorCode": "confirmation_required",
+    "exitCode": 0
+  },
+  "runbookGuidance": {
+    "privateSetupFirstActionRunbookId": "privatesetupactionrunbook-001",
+    "runbookRowId": "privatesetupactionrunbookrow-002",
+    "nextActionLabel": "ask_mapping_confirmation",
+    "expectedOutputClass": "source_intake_handoff",
+    "requiresCallerConfirmation": true,
+    "mayEnterSourceIntakeAfterRequiredAction": true,
+    "forecastExecutionAllowed": false,
+    "scoringAllowed": false,
+    "blockedOutputs": [
+      "source_manifest",
+      "forecast_artifact",
+      "forecast_card",
+      "scoring_report",
+      "credential_record",
+      "live_fetch_result"
+    ],
+    "stopCondition": "Stop until the caller confirms source roles, field mappings, and aliases.",
+    "agentInstruction": "Ask for caller confirmation before running the source-handoff confirmation command."
+  },
+  "claimBoundary": {
+    "bundleDoesNotPredict": true,
+    "qualityClaimAllowed": false,
+    "forecastExecutionAllowed": false,
+    "scoringAllowed": false,
+    "reasonCodes": [
+      "setup_guidance_only",
+      "forecast_requires_later_gates",
+      "quality_claim_requires_resolved_samples",
+      "caller_confirmation_required"
+    ]
+  },
+  "executionBoundary": {
+    "bundleDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This bundle joins setup guidance records; it does not execute the suggested command.",
+    "Source intake, forecast execution, resolution, and scoring remain separate explicit steps.",
+    "The bundle does not predict, score, fetch live data, or store credentials."
+  ]
+}

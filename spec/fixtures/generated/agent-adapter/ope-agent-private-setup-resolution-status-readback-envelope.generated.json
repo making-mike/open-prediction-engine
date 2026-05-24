@@ -1,0 +1,73 @@
+{
+  "agentEnvelopeId": "agentenvelope-040",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "resolution_check"
+  },
+  "operation": "resolution_status",
+  "adapterRequest": {
+    "operation": "resolution_status",
+    "inputRecordType": "resolution_status",
+    "inputRef": "resolution-1102",
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "maxBytes": 65536,
+    "callerIntent": "Read the generated private setup forecast resolution status after outcome resolution."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": "resolution-1102",
+    "scoringReportId": "scoring-1102"
+  },
+  "state": {
+    "decisionStatus": "generated",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "source_handoff_fixture",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "resolutionRecordId": "resolution-1102",
+    "resolutionStatus": "resolved",
+    "resolvedAt": "2026-06-04T12:30:00Z",
+    "resolvedOutcome": {
+      "outputType": "binary",
+      "value": true
+    },
+    "resolutionSource": {
+      "sourceId": "localsource-003",
+      "name": "Declared Operations Outcome",
+      "sourceType": "internal_dataset",
+      "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+      "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+    },
+    "qualityClaim": {
+      "publicationStatus": "provisional",
+      "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes",
+      "minimumCalibrationSampleSize": 30,
+      "resolvedComparableSourceHandoffOutcomes": 1
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Resolution is fixture-mode and should not be treated as a production live-source workflow."
+  ]
+}

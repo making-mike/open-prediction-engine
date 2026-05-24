@@ -1266,3 +1266,572 @@ OPE should be flexible about private setup sources while remaining precise about
 - Normal checks and CLI smoke tests verify outcome-matrix binding, checked entrypoints, caller confirmation before source-handoff, planned-runtime blocking, unsupported and unsafe source stops, and no source, forecast, score, live-fetch, or credential artifact creation.
 - The bridge remains routing guidance only. Forecast artifacts and scoring records still require source intake, method gates, and explicit forecast execution.
 - The next milestone should define the private setup request contract that starts this routing flow from one agent-facing setup-intent record.
+
+## DEC-048: Add Private Setup Request Contract
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The private setup workflow, adapter capability contract, outcome matrix, and intake bridge make setup routing explicit, but an agent still needs a single setup-intent surface to start from. Without a request contract, callers must reverse-engineer several lower-level records before knowing whether to run source-builder, ask for confirmation, use fixture evidence, wait for runtime, replace a source, or stop.
+
+### Decision
+
+Add `private-setup-request.schema.json`, `scripts/generate_private_setup_requests.py`, `scripts/check_private_setup_requests.py`, and `python3 scripts/ope.py private-setup-requests`.
+
+The request set binds to `privateadapterintakebridge-001`, `privateadapteroutcomematrix-001`, `privatesourceadaptercapability-001`, and `privatesetupworkflow-001`. It includes request rows for:
+
+- `local_file` routed to source-builder
+- `manual_mapping` routed to caller confirmation and source-handoff confirmation
+- `auto_evidence_connector` routed to fixture evidence gathering
+- `manual_upload`, `private_api`, and `private_database` routed to wait-for-runtime outcomes
+- `unregistered_source` routed to replacement
+- `unsafe_source` routed to stop
+
+### Rationale
+
+OPE should be easy for agents to start, but the first setup step must remain explicit and non-effectful. A setup request contract turns forecast intent, setup mode, source policy, selected source kind, and approval state into a safe first action without reading private data or creating downstream artifacts.
+
+### Consequences
+
+- `spec/private-setup-request.md` documents the request contract boundary.
+- `spec/fixtures/generated/private-setup-requests/ope-private-setup-requests.generated.json` is schema-bound and checked.
+- Normal checks and CLI smoke tests verify bridge binding, local-file source-builder routing, manual mapping confirmation, fixture auto-evidence routing, planned-runtime waits, unsupported-source replacement, unsafe-source stops, and no private reads, source outputs, forecast artifacts, scoring records, live fetches, or credential records.
+- Request classification remains routing guidance only. It does not execute source reads, source-builder, source-handoff, fixture gathering, forecast execution, resolution, or scoring.
+- The next milestone should expose a compact first-action dispatcher over this request contract.
+
+## DEC-049: Add Private Setup First-Action Dispatcher
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The private setup request contract gives agents a request set, but a caller often needs a compact answer for one setup request: what should happen first, whether a checked command can be run, and why the request may be blocked. Agents should not need to read the full request set or infer error handling from lower-level setup contracts.
+
+### Decision
+
+Add `private-setup-first-action.schema.json`, `scripts/private_setup_action_dispatcher.py`, `scripts/generate_private_setup_first_actions.py`, `scripts/check_private_setup_first_actions.py`, and CLI commands:
+
+- `python3 scripts/ope.py private-setup-actions`
+- `python3 scripts/ope.py private-setup-action --request-id privatesetuprequest-001`
+- `python3 scripts/ope.py private-setup-action --input path/to/request.json`
+
+The dispatcher accepts one generated request ID or one request-shaped JSON object. It returns a schema-bound action with request and bridge bindings, source policy, action status, route decision, suggested checked command, required caller action, sanitized error, exit code, and execution boundary.
+
+### Rationale
+
+OPE should be easy for agents to call without weakening the setup gates. A first-action dispatcher gives agents a direct next step while preserving the rule that OPE does not read private data, run source-builder or source-handoff, gather fixture evidence, forecast, score, or store credentials merely because a request was classified.
+
+### Consequences
+
+- `spec/private-setup-first-action.md` documents the dispatcher boundary.
+- `spec/fixtures/generated/private-setup-actions/` contains schema-bound action fixtures for every current private setup request outcome.
+- Normal checks and CLI smoke tests verify generated request binding, local-file command suggestions, manual mapping confirmation, fixture auto-evidence routing, planned-runtime waits, unsupported-source replacement, unsafe-source rejection, sanitized unknown-source and missing-approval errors, and no private reads, command execution, forecast artifacts, scoring records, or credential storage.
+- The dispatcher remains a non-executing read surface. It may name checked local commands, but it does not run them.
+- The next milestone should add a checked runbook that maps first-action statuses to next safe caller-visible steps.
+
+## DEC-050: Add Private Setup First-Action Runbook
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The first-action dispatcher gives agents a compact action for one private setup request. Agents still need a deterministic interpretation of each action status: which step is safe next, whether caller confirmation is required, what output class to expect, and where execution must stop.
+
+### Decision
+
+Add `private-setup-first-action-runbook.schema.json`, `scripts/generate_private_setup_first_action_runbook.py`, `scripts/check_private_setup_first_action_runbook.py`, and `python3 scripts/ope.py private-setup-action-runbook`.
+
+The runbook binds every generated first-action fixture and covers bad-request classes for unknown source kinds and missing approvals. It maps:
+
+- `ready_to_run_checked_command` to source-builder guidance
+- `confirmation_required` to caller mapping confirmation
+- `fixture_ready` to fixture evidence guidance
+- `runtime_not_implemented` to wait-for-runtime guidance
+- `source_replacement_required` to source replacement
+- `rejected_unsafe_source` to stop
+- `bad_request` to sanitized request repair guidance
+
+### Rationale
+
+OPE should be agent-accessible without encouraging agents to improvise around setup gates. A checked runbook turns first-action statuses into stable next-step guidance while preserving the distinction between guidance, source intake, forecast execution, resolution, and scoring.
+
+### Consequences
+
+- `spec/private-setup-first-action-runbook.md` documents the runbook boundary.
+- `spec/fixtures/generated/private-setup-actions/ope-private-setup-first-action-runbook.generated.json` is schema-bound and checked.
+- Normal checks and CLI smoke tests verify first-action binding, full status coverage, planned-runtime blocking, source-intake blocking for unsafe/unknown/missing-approval cases, bad-request playbooks, and no command execution, forecast artifacts, scoring records, or credential storage.
+- The runbook remains guidance only. It may name commands, but it does not run them or create downstream artifacts.
+- The next milestone should expose a compact private setup agent bundle that joins request, first-action, and runbook guidance for one request ID.
+
+## DEC-051: Add Private Setup Agent Bundles
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+Private setup request rows, first-action dispatcher results, and runbook guidance are each useful, but an agent asking "what should I do next for this setup request?" should not have to join those records manually. The next surface should preserve all bindings and guardrails while giving one compact response per request.
+
+### Decision
+
+Add `private-setup-agent-bundle.schema.json`, `scripts/generate_private_setup_agent_bundles.py`, `scripts/check_private_setup_agent_bundles.py`, and CLI commands:
+
+- `python3 scripts/ope.py private-setup-bundles`
+- `python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001`
+- `python3 scripts/ope.py private-setup-bundle --case unknown_source_kind`
+- `python3 scripts/ope.py private-setup-bundle --case missing_approval`
+
+The bundle joins request summary, first-action summary, runbook guidance, claim boundary, and execution boundary. It includes checked examples for all eight current source kinds plus sanitized bad-request examples for unknown source kind and missing approval.
+
+### Rationale
+
+OPE is intended to be agent-native. A joined bundle reduces agent-side bookkeeping while preserving the strict lifecycle separation between setup guidance, source intake, forecast execution, resolution, and scoring.
+
+### Consequences
+
+- `spec/private-setup-agent-bundle.md` documents the bundle boundary.
+- `spec/fixtures/generated/private-setup-agent-bundles/` contains schema-bound bundle fixtures.
+- Normal checks and CLI smoke tests verify request/action/runbook binding, bad-request examples, planned-runtime blocking, source-intake blocking, claim boundaries, and no source, forecast, score, live-fetch, or credential artifact creation.
+- Bundles remain read-only guidance. They do not execute suggested commands or create downstream artifacts.
+- The next milestone should expose bundle reads through the existing transport-neutral agent envelope pattern.
+
+## DEC-052: Expose Private Setup Bundles Through Agent Envelopes
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+Private setup agent bundles give a compact read surface, but agents using the transport-neutral adapter still had to call lower-level bundle commands. To keep OPE agent-native, setup guidance should be available through the same envelope, exit-code, sanitized-error, and MCP mapping pattern as forecast cards, evidence traces, lifecycle bundles, resolution status, and scoring summaries.
+
+### Decision
+
+Add `private_setup_bundle` to the local agent adapter operation set, the agent envelope schema, the protocol-map schema, the local dispatcher, generated envelope fixtures, local MCP stdio tool map, and CLI smoke checks.
+
+The operation reads a private setup bundle by request ID or a checked bad-request case. Successful calls return the private setup agent bundle as the envelope payload. Missing bundle reads return a sanitized `not_found` envelope with exit code 4.
+
+### Rationale
+
+Agents should be able to ask OPE for private setup guidance without learning separate CLI surfaces or bypassing setup gates. Reusing the existing envelope contract keeps status handling, max-byte limits, read-only boundaries, and future MCP/HTTP/queue adapter mappings coherent.
+
+### Consequences
+
+- `spec/fixtures/generated/agent-adapter/` now includes success and sanitized-error private setup bundle envelope examples.
+- `python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001` returns a schema-bound envelope.
+- The local MCP stdio scaffold exposes `ope_private_setup_bundle`.
+- Normal checks verify request binding, bad-request bundle reads, sanitized missing-bundle errors, protocol-map coverage, MCP tool exposure, and no source setup command execution.
+- The operation remains guidance-only. It does not read private source data, run source-builder, create source manifests, forecast, score, fetch live data, or store credentials.
+- The next milestone should let agents continue from local-file setup guidance into a caller-approved source-builder adapter path without weakening intake, method, benchmark, forecast, or scoring gates.
+
+## DEC-053: Expose Local-File Source Builder Through Agent Envelopes
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+After `private_setup_bundle`, the local-file setup path still required agents to call the lower-level source-builder CLI directly. That made the agent-facing path uneven: setup guidance was envelope-shaped, but the next draft-manifest step was not. The source-builder also has important boundaries that should be preserved at the adapter layer: explicit caller-approved files only, small CSV/JSON parsing, secret/oversize/leakage rejection, proposed inferred mappings, and no forecast artifacts.
+
+### Decision
+
+Add `private_setup_source_builder` to the local agent adapter operation set, agent envelope schema, protocol-map schema, local dispatcher, local MCP stdio scaffold, generated envelope fixtures, and CLI smoke checks.
+
+The operation supports checked fixture cases and explicit caller-approved `source_role=path` inputs with optional mapping hints. Successful calls return one envelope containing `sourceManifestBuild` plus draft `sourceManifest` and `fieldMapping` objects when inspection succeeds. Rejected source inputs return ok envelopes with rejected build payloads. Malformed source-builder arguments return sanitized `validation_failed` envelopes.
+
+### Rationale
+
+OPE should let agents continue through private setup without improvising lower-level commands or weakening safety gates. The source-builder adapter turns local-file inspection into a transport-neutral, schema-bound step while preserving that drafts are not forecasts and inferred mappings are not verified facts.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft` returns a schema-bound envelope.
+- The local MCP stdio scaffold exposes `ope_private_setup_source_builder`.
+- Generated adapter fixtures cover draft-ready local files, secret rejection, unsupported-format rejection, oversized-file rejection, leakage rejection, and sanitized malformed-input errors.
+- Normal checks verify caller-approved file inputs, proposed inferred mappings, rejected draft behavior, protocol-map coverage, MCP tool exposure, and no forecast, score, live-fetch, credential, or public read-record creation.
+- The operation may draft source manifests and mappings, but it does not enter source intake, select methods, run forecasts, resolve outcomes, score forecasts, or store credentials.
+- The next milestone should expose source-handoff next actions through agent envelopes so confirmed drafts can proceed toward method gates without bypassing confirmation or benchmark controls.
+
+## DEC-054: Expose Source-Handoff Next Actions Through Agent Envelopes
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+After `private_setup_source_builder`, agents could get draft source manifests and mappings through the adapter, but still had to call lower-level source-handoff surfaces to learn whether mappings needed confirmation, data was insufficient, rejected sources had to be replaced, or a confirmed handoff could proceed toward setup method gates.
+
+### Decision
+
+Add `private_setup_source_handoff` to the local agent adapter operation set, agent envelope schema, protocol-map schema, local dispatcher, local MCP stdio scaffold, generated envelope fixtures, and CLI smoke checks.
+
+The operation reads checked source-handoff fixture cases and returns one envelope containing `sourceIntakeHandoff`, source-builder and source-intake bindings, mapping confirmation state, method-gate readiness, and execution boundaries. It covers unconfirmed, confirmed, insufficient-data, secret, unsupported, oversized, and leakage cases.
+
+### Rationale
+
+OPE should let agents continue through private setup through one transport-neutral surface while preserving confirmation-before-intake and benchmark-before-forecast rules. The handoff adapter makes the next action explicit without letting agents treat draft or blocked source records as forecast inputs.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft` returns a schema-bound envelope.
+- The local MCP stdio scaffold exposes `ope_private_setup_source_handoff`.
+- Generated adapter fixtures cover confirmed, unconfirmed, insufficient-data, and rejected source-handoff cases.
+- Normal checks verify mapping confirmation, source-builder/source-intake binding, method-gate readiness only for the confirmed accepted handoff, protocol-map coverage, MCP tool exposure, and no forecast, score, live-fetch, credential, or public read-record creation.
+- The operation may guide agents toward setup method gates, but it does not run source intake, select methods, run forecasts, resolve outcomes, score forecasts, or store credentials.
+- The next milestone should expose setup method-gate guidance through agent envelopes so confirmed handoffs can reach benchmark and method decisions without bypassing explicit forecast execution.
+
+## DEC-055: Expose Setup Method Gates Through Agent Envelopes
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+After `private_setup_source_handoff`, agents could inspect mapping confirmation and source-handoff next actions through the adapter, but still had to call lower-level method-gate surfaces to learn whether setup benchmark and method decisions allowed explicit forecast execution.
+
+### Decision
+
+Add `private_setup_method_gate` to the local agent adapter operation set, agent envelope schema, protocol-map schema, local dispatcher, local MCP stdio scaffold, generated envelope fixtures, and CLI smoke checks.
+
+The operation reads checked source-handoff method-gate cases and returns one envelope containing `sourceHandoffMethodGate`, `sourceIntakeHandoff`, optional `setupBenchmarkGate`, optional `setupMethodDecision`, binding summaries, method-gate status, selected method, and explicit setup forecast-execution readiness.
+
+### Rationale
+
+OPE should make the private setup lifecycle easy for agents to follow while preserving every gate. Method-gate guidance is the last non-forecast step before explicit forecast execution, so the adapter must make "allowed to run a forecast next" visible without creating the forecast itself.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_setup_method_gate --private-setup-request-id privatesetuprequest-001 --method-gate-case confirmed_builder_draft` returns a schema-bound envelope.
+- The local MCP stdio scaffold exposes `ope_private_setup_method_gate`.
+- Generated adapter fixtures cover confirmed, unconfirmed, insufficient-data, and rejected method-gate cases.
+- Normal checks verify source-handoff, source-intake, setup benchmark, and method-decision binding; explicit setup forecast recommendation only for the confirmed accepted handoff; protocol-map coverage; MCP tool exposure; and no forecast, score, live-fetch, credential, or public read-record creation.
+- The operation may recommend explicit setup forecast execution when the checked benchmark and method decision allow it, but it does not run forecasts, resolve outcomes, score forecasts, fetch live data, or store credentials.
+- The next milestone should expose the explicit setup forecast execution step through agent envelopes while keeping blocked method-gate cases non-generating.
+
+## DEC-056: Expose Private Setup Forecast Execution Through Agent Envelopes
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+After `private_setup_method_gate`, agents could see that a confirmed handoff was allowed to run explicit setup forecast execution, but still needed lower-level source-handoff forecast commands to create or inspect the actual setup forecast run and generated forecast artifacts.
+
+### Decision
+
+Add `private_setup_forecast_execution` to the local agent adapter operation set, agent envelope schema, protocol-map schema, local dispatcher, local MCP stdio scaffold, generated envelope fixtures, and CLI smoke checks.
+
+The operation reads checked source-handoff forecast execution cases and returns one envelope containing `setupForecastRun`, source-handoff and method-decision bindings, optional forecast artifacts, a binding summary, adapter guidance, and execution boundaries. It generates artifacts only for `confirmed_builder_draft`; unconfirmed, insufficient-data, rejected-source, and leakage cases remain blocked with null forecast bindings.
+
+### Rationale
+
+OPE's private setup path should let agents move from setup guidance to a forecast without improvising commands or bypassing gates. This operation is the first adapter step in the private setup chain that may return forecast artifacts, so it must make the allowed case explicit and preserve source intake, benchmark, method decision, and method-gate boundaries.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_setup_forecast_execution --private-setup-request-id privatesetuprequest-001 --forecast-execution-case confirmed_builder_draft` returns a schema-bound envelope for `setupforecastrun-1102` and `forecast-1102`.
+- The local MCP stdio scaffold exposes `ope_private_setup_forecast_execution`.
+- Generated adapter fixtures cover confirmed, unconfirmed, insufficient-data, and rejected forecast-execution cases.
+- Normal checks verify `forecast-1102` artifact binding only for the confirmed case, blocked cases with null forecast IDs, protocol-map coverage, MCP tool exposure, and no raw private data, credential, resolution, scoring, or live-fetch side effects.
+- The operation may return fixture forecast artifacts, but it does not resolve outcomes, score forecasts, claim calibration, fetch live data, store credentials, or create forecasts from blocked setup cases.
+- The next milestone should add private setup forecast readback examples through the existing forecast card, lifecycle bundle, resolution status, and scoring summary adapter operations.
+
+## DEC-057: Read Generated Private Setup Forecasts Through Existing Adapter Operations
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+After `private_setup_forecast_execution`, the confirmed checked handoff can return `setupforecastrun-1102` and `forecast-1102`. Agents then need a clear way to continue into normal forecast reads without guessing whether private setup forecasts require a separate read API.
+
+### Decision
+
+Add generated adapter envelope examples for reading `forecast-1102` through the existing `forecast_card`, `lifecycle_bundle`, `resolution_status`, and `scoring_summary` operations. Update dispatcher, CLI, protocol-map, and agent-adapter guidance so generated setup forecasts are read with the returned `forecastId` and `questionId`.
+
+Do not add a private setup forecast read API. Normal read operations must preserve setup forecast run, source-handoff, method-gate, benchmark, method-decision, resolution, scoring, and quality-claim bindings.
+
+### Rationale
+
+OPE's adapter surface should stay small and predictable for agents. A generated private setup forecast is still an OPE forecast record, so a separate read API would duplicate semantics and increase the chance of binding drift.
+
+### Consequences
+
+- `spec/fixtures/generated/agent-adapter/` includes readback envelopes for `forecast-1102` card, lifecycle bundle, resolution status, and scoring summary.
+- `python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102` returns the setup-bound forecast card.
+- Dispatcher and CLI checks verify setup forecast run, source-handoff, method-gate, resolution, scoring, and source-handoff outcome sample-count bindings.
+- Quality and calibration claims remain blocked by the source-handoff sample-size boundary.
+- The next milestone should reduce repeated fixture construction cost in the now-larger adapter check suite without changing adapter semantics.
+
+## DEC-058: Cache Adapter Fixture Forecast Execution Inputs
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The private setup adapter suite now emits source-builder, source-handoff, method-gate, forecast-execution, and readback envelopes. Forecast-execution envelope generation repeatedly rebuilt the same source-handoff forecast output set once per checked execution case, which made the expanded local checks slower without adding coverage.
+
+### Decision
+
+Cache source-handoff forecast output construction inside `scripts/build_agent_adapter_fixtures.py` for the lifetime of the process. Add an invariant check that verifies adapter fixture generation reuses the cached output set across forecast-execution cases.
+
+Also factor the private setup forecast readback calls in dispatcher and CLI smoke checks through small helpers while preserving the same explicit assertions for setup run, source-handoff, resolution, scoring, and quality-claim bindings.
+
+### Rationale
+
+This is a maintenance and performance cleanup, not a contract change. Reusing deterministic fixture outputs keeps checks faster and easier to read while preserving the same generated envelope contents and guardrails.
+
+### Consequences
+
+- Agent adapter fixture generation builds source-handoff forecast outputs once per process instead of once per forecast-execution case.
+- `scripts/check_agent_adapter.py` guards that cache reuse remains in place.
+- Dispatcher and CLI smoke checks keep the same readback coverage with less duplicated setup call assembly.
+- No schema, generated fixture, adapter operation, readback payload, claim boundary, hosted API, or production runtime semantics changed.
+- The next milestone should add a checked adapter-chain runbook so agents can inspect the complete private setup operation sequence before executing it.
+
+## DEC-059: Add a Private Setup Adapter Chain Runbook
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The private setup adapter path now has several checked operations: setup bundle, source-builder, source-handoff, method-gate, forecast execution, and normal forecast readback. Agents can call each step, but without a single checked chain record they still have to infer the intended order, branch handling, stop conditions, and readback path from separate contracts.
+
+### Decision
+
+Add `private-setup-adapter-chain-runbook.schema.json`, `spec/private-setup-adapter-chain-runbook.md`, `scripts/generate_private_setup_adapter_chain_runbook.py`, `scripts/check_private_setup_adapter_chain_runbook.py`, and `python3 scripts/ope.py private-setup-adapter-runbook`.
+
+The generated runbook lists the local-file private setup adapter sequence from `private_setup_bundle` through `private_setup_forecast_execution`, then routes generated forecasts into the existing `forecast_card`, `lifecycle_bundle`, `resolution_status`, and `scoring_summary` operations. It also includes branch playbooks for mapping confirmation, confirmed handoff, insufficient data, rejected sources, and generated forecast readback.
+
+### Rationale
+
+OPE should be easy for agents to follow without letting them improvise around gates. A checked adapter-chain runbook makes the happy path and stop paths inspectable while preserving that the runbook is guidance only, not an execution surface.
+
+### Consequences
+
+- `spec/fixtures/generated/private-setup-adapter-chain/ope-private-setup-adapter-chain-runbook.generated.json` is schema-bound and checked.
+- `python3 scripts/ope.py private-setup-adapter-runbook` returns the runbook without executing adapter calls.
+- Normal checks verify sequence order, expected status values, branch playbooks, readback routing, and non-execution boundaries.
+- The runbook does not create source, forecast, resolution, scoring, credential, hosted API, or production runtime artifacts.
+- The next milestone should expose the runbook through the transport-neutral agent adapter and local MCP scaffold.
+
+## DEC-060: Expose the Adapter Chain Runbook Through Agent Adapter
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The checked private setup adapter-chain runbook exists as a local CLI/generated artifact, but agents using OPE through the transport-neutral adapter still had to know the lower-level `private-setup-adapter-runbook` command. That made the agent-facing setup path less consistent than forecast cards, lifecycle bundles, private setup bundles, and other envelope reads.
+
+### Decision
+
+Add `private_setup_adapter_runbook` to the agent adapter operation set, the agent envelope schema, the protocol-map schema, the local dispatcher, generated envelope fixtures, local MCP stdio scaffold, and CLI smoke checks.
+
+The operation returns the generated private setup adapter-chain runbook in an agent envelope. It is read-only guidance: it may expose operation order, branch playbooks, stop conditions, and normal readback routing, but it must not execute adapter calls or create source, forecast, resolution, scoring, live-fetch, credential, hosted-service, or production-runtime artifacts.
+
+### Rationale
+
+Agents should be able to ask OPE for the full setup adapter sequence through one predictable envelope surface before choosing which operation to call next. Reusing the existing adapter contract keeps status handling, exit codes, max-byte limits, MCP mapping, and future HTTP/queue mapping coherent.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook` returns a schema-bound envelope for `privatesetupadapterchainrunbook-001`.
+- The local MCP stdio scaffold exposes `ope_private_setup_adapter_runbook`.
+- The protocol map now contains thirteen envelope-returning adapter operations plus the separate forecast-run tool.
+- Normal checks verify request binding, operation sequence, branch stop conditions, normal readback routing, protocol-map coverage, MCP tool exposure, and no adapter-call execution.
+- The next milestone should expose private source adapter capability and outcome guidance through the same read-only envelope pattern.
+
+## DEC-061: Expose Private Source Adapter Guidance Through Agent Adapter
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+OPE now has checked private source adapter capability declarations, an outcome matrix, and an intake bridge. Agents could inspect these lower-level records, but they still lacked one transport-neutral read for deciding whether a source kind is available, approval-gated, planned-only, unsupported, unsafe, or credential-runtime-blocked before choosing a setup path.
+
+### Decision
+
+Add `private_source_adapter_guidance` to the agent adapter operation set, the agent envelope schema, the protocol-map schema, the local dispatcher, generated envelope fixtures, local MCP stdio scaffold, and CLI smoke checks.
+
+The operation returns a read-only guidance payload that joins capability, outcome, and intake-bridge records with a compact source-kind summary. It may route an agent toward source-builder, source-handoff confirmation, fixture evidence, wait, replace, or stop guidance, but it must not execute source reads, adapter calls, source-manifest creation, forecasts, scoring, live fetching, credential handling, hosted-service work, or production runtime behavior.
+
+### Rationale
+
+Agents need flexibility when a private setup can start from files, manual mappings, future uploads, private APIs, databases, or policy-bound evidence. A single checked guidance envelope makes that flexibility inspectable without turning source-kind advice into execution.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_source_adapter_guidance` returns a schema-bound envelope for `privatesourceadaptercapability-001`.
+- The local MCP stdio scaffold exposes `ope_private_source_adapter_guidance`.
+- The protocol map now contains fourteen envelope-returning adapter operations plus the separate forecast-run tool.
+- Normal checks verify capability/outcome/bridge bindings, source-kind routing, planned-runtime boundaries, unsupported and unsafe stop paths, protocol-map coverage, MCP tool exposure, and no source reads or artifact creation.
+- The next milestone should add compact private source-kind selection examples so agents can choose the next setup operation without inferring from the full guidance payload.
+
+## DEC-062: Add Private Source-Kind Selection Examples
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The private source adapter guidance envelope tells agents which source kinds are available, approval-gated, planned-only, unsupported, unsafe, or credential-runtime-blocked. The payload is intentionally complete, but agents still benefit from compact examples that map each source kind to the next safe path without inferring from capability, outcome, bridge, first-action, and adapter-chain records separately.
+
+### Decision
+
+Add `private-source-kind-selection-examples.schema.json`, `spec/private-source-kind-selection-examples.md`, `scripts/generate_private_source_kind_selection_examples.py`, `scripts/check_private_source_kind_selection_examples.py`, and `python3 scripts/ope.py private-source-kind-selection`.
+
+The generated examples bind the private source adapter guidance envelope, private setup first-action records, and the private setup adapter-chain runbook. They cover local files, manual mappings, fixture auto-evidence, manual uploads, private APIs, private databases, unregistered sources, and unsafe sources. Each example recommends one of: call source-builder adapter, request mapping confirmation, call fixture evidence, wait for runtime, replace source, or reject source.
+
+### Rationale
+
+OPE should be flexible about private setup inputs while strict about execution gates. Compact source-kind examples make agent choice easier without letting examples become source reads, adapter calls, source manifests, forecasts, scores, credentials, live fetches, hosted-service work, or production runtime behavior.
+
+### Consequences
+
+- `python3 scripts/ope.py private-source-kind-selection` returns a schema-bound non-executing guidance record.
+- Normal checks verify guidance-envelope, first-action, and adapter-chain bindings.
+- Local-file examples route to `private_setup_source_builder`; manual-mapping examples require confirmation before source-handoff; fixture auto-evidence stays outside the local-file adapter chain.
+- Manual upload, private API, and private database examples wait for future runtimes; unregistered and unsafe sources stop before source intake.
+- The next milestone should expose these examples through the transport-neutral agent adapter and local MCP scaffold.
+
+## DEC-063: Expose Private Source-Kind Selection Through Agent Adapter
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+OPE has checked private source-kind selection examples that bind source adapter guidance, first-action records, and the private setup adapter-chain runbook. Agents could read those examples through a lower-level local command, but not yet through the same transport-neutral envelope and MCP tool surface used for forecast cards, setup bundles, adapter runbooks, and private source adapter guidance.
+
+### Decision
+
+Add `private_source_kind_selection` to the agent adapter operation set, the agent envelope schema, the protocol-map schema, the local dispatcher, generated envelope fixtures, local MCP stdio scaffold, and CLI smoke checks.
+
+The operation returns the generated source-kind selection examples as read-only path guidance. It may recommend source-builder, mapping confirmation, fixture evidence, wait, replace, or reject paths, but it must not execute source-builder, source-handoff, fixture evidence, forecast execution, scoring, source reads, credentials, live fetches, hosted-service work, or production runtime behavior.
+
+### Rationale
+
+Agents should be able to ask OPE which private source-kind path to choose through one stable adapter operation before deciding whether to call lower-level setup operations. Returning the checked examples through the envelope keeps status handling, exit codes, MCP mapping, future HTTP/queue mapping, and non-execution boundaries consistent with the rest of the agent-facing surface.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_source_kind_selection` returns a schema-bound envelope for `privatesourcekindselectionexamples-001`.
+- The local MCP stdio scaffold exposes `ope_private_source_kind_selection`.
+- The protocol map now contains fifteen envelope-returning adapter operations plus the separate forecast-run tool.
+- Normal checks verify guidance, first-action, adapter-chain bindings, source-kind recommendations, protocol-map coverage, MCP tool exposure, and no command execution or artifact creation.
+- The next milestone should add an optional source-kind query argument so agents can request one recommendation without parsing the full example set.
+
+## DEC-064: Add Source-Kind Selection Query Argument
+
+- Date: 2026-05-18
+- Status: Accepted
+
+### Context
+
+The `private_source_kind_selection` adapter operation exposed the full checked selection examples through CLI and MCP. That kept behavior transparent, but an agent that already knows the candidate source kind still had to parse the full list before deciding the next path.
+
+### Decision
+
+Add optional `sourceKind` support to `private_source_kind_selection` across the local dispatcher, `python3 scripts/ope.py agent-call`, MCP argument normalization, and the generated protocol map.
+
+When omitted, the operation still returns the full checked examples record. When provided, it returns a compact selected-example payload with `runtimeStatus: selected_example_only`, `requestedSourceKind`, `availableSourceKinds`, and one `selectedExample`. Unknown source kinds return a sanitized `bad_request` envelope with `payload: null`.
+
+### Rationale
+
+OPE should be easy for agents to call in small, deterministic steps. A single-source-kind query lets callers ask for the one path they need while preserving the same checked guidance source, exit-code semantics, and non-execution boundary as the full examples record.
+
+### Consequences
+
+- `python3 scripts/ope.py agent-call --operation private_source_kind_selection --source-kind private_api` returns the private API recommendation without returning the full examples list.
+- The local MCP tool accepts optional `sourceKind` and returns the same selected envelope.
+- Unknown source kinds return `bad_request` without raw diagnostics, source reads, setup execution, forecasts, scoring, credentials, live fetches, or hosted runtime work.
+- Normal checks verify default full-list behavior, selected private API behavior, unknown-source error behavior, protocol-map field exposure, MCP parity, and read-only guidance boundaries.
+- The next milestone should add a generated query fixture matrix so adapter implementers can inspect checked selected and unsupported examples directly.
+
+## DEC-065: Add Private Source-Kind Query Matrix
+
+- Date: 2026-05-19
+- Status: Accepted
+
+### Context
+
+The source-kind selection operation can now return the full examples record, one selected source-kind recommendation, or a sanitized unsupported-source error. Those behaviors were covered by smoke tests, but future adapter work benefits from a generated conformance fixture that records the exact response shapes.
+
+### Decision
+
+Add `private-source-kind-query-matrix.schema.json`, `spec/private-source-kind-query-matrix.md`, `scripts/generate_private_source_kind_query_matrix.py`, `scripts/check_private_source_kind_query_matrix.py`, and `python3 scripts/ope.py private-source-kind-query-matrix`.
+
+The matrix stores one full-list adapter envelope, selected envelopes for all checked source kinds, and one unsupported `spreadsheet_macro` bad-request envelope. Each row records expected status, exit code, payload shape, immediate action, selected example ID, and non-execution boundaries.
+
+### Rationale
+
+OPE should make adapter behavior inspectable without requiring agents or implementers to re-run ad hoc calls. A matrix gives future MCP, HTTP, and queue adapters a compact reference while preserving that source-kind selection is recommendation-only.
+
+### Consequences
+
+- `python3 scripts/ope.py private-source-kind-query-matrix` returns a schema-bound conformance record.
+- Normal checks validate the matrix against `agent-envelope.schema.json` and the existing source-kind selection examples.
+- The matrix covers default full-list, every supported selected source kind, and an unsupported bad-request case.
+- The matrix does not execute source-builder, source-handoff, fixture evidence, forecast execution, scoring, source reads, credential handling, live fetching, or hosted runtime work.
+- The next milestone should add a broader private setup adapter conformance matrix across source-builder, source-handoff, method-gate, forecast-execution, and readback cases.
+
+## DEC-066: Add Private Setup Adapter Conformance Matrix
+
+- Date: 2026-05-19
+- Status: Accepted
+
+### Context
+
+Private setup now has generated agent-envelope examples for local-file source-builder, source-handoff, method-gate, forecast-execution, and generated forecast readback operations. Those examples are individually checked, but agents and future adapter implementers need one place to compare expected response shape, status, exit code, next action, and artifact-creation boundaries across the whole setup chain.
+
+### Decision
+
+Add `private-setup-adapter-conformance-matrix.schema.json`, `spec/private-setup-adapter-conformance-matrix.md`, `scripts/generate_private_setup_adapter_conformance_matrix.py`, `scripts/check_private_setup_adapter_conformance_matrix.py`, and `python3 scripts/ope.py private-setup-adapter-conformance`.
+
+The matrix embeds the existing generated envelopes for 31 checked cases: source-builder happy/rejected/error cases, source-handoff cases, method-gate cases, forecast-execution cases, and normal forecast card, lifecycle bundle, resolution status, and scoring summary readbacks for `forecast-1102`.
+
+### Rationale
+
+OPE should let agents and adapter authors inspect private setup adapter behavior without inventing side effects or manually stitching many generated envelope files together. A schema-bound matrix gives a stable conformance reference while preserving that only the confirmed forecast-execution case references generated forecast artifacts, and the matrix itself creates nothing.
+
+### Consequences
+
+- `python3 scripts/ope.py private-setup-adapter-conformance` returns a schema-bound conformance matrix.
+- Normal checks validate phase counts, payload shapes, sanitized validation errors, artifact-creation permissions, normal forecast readback routing, and non-execution boundaries.
+- The matrix may record that referenced generated envelopes created fixture forecast artifacts, but the matrix itself does not execute adapter calls, read private data, create source manifests, create forecasts, resolve outcomes, score forecasts, fetch live data, store credentials, or create hosted runtime state.
+- The next milestone should add a compact agent-readable conformance read surface so normal `agent-call` and MCP callers do not need to load the full embedded-envelope matrix.
+
+## DEC-067: Add Compact Private Setup Adapter Conformance Summary
+
+- Date: 2026-05-19
+- Status: Accepted
+
+### Context
+
+The full private setup adapter conformance matrix is useful implementation evidence, but it embeds many generated envelopes. Routine agents need to know operation coverage, phase counts, readback support, sanitized-error coverage, and artifact boundaries without loading that heavier matrix by default.
+
+### Decision
+
+Add `private-setup-adapter-conformance-summary.schema.json`, `spec/private-setup-adapter-conformance-summary.md`, `scripts/generate_private_setup_adapter_conformance_summary.py`, `scripts/check_private_setup_adapter_conformance_summary.py`, and `python3 scripts/ope.py private-setup-adapter-conformance-summary`.
+
+Expose the summary through the existing agent adapter surface as `private_setup_adapter_conformance_summary` and through the local MCP stdio scaffold as `ope_private_setup_adapter_conformance_summary`. The summary references the full matrix path and ID, records compact counts and boundaries, and does not embed the full envelope rows.
+
+### Rationale
+
+OPE should be agent-native without making every normal read carry implementation-sized evidence. A compact conformance summary gives agents a small first read surface while preserving the full matrix for implementers who need exact case-by-case envelopes.
+
+### Consequences
+
+- `python3 scripts/ope.py private-setup-adapter-conformance-summary` returns a schema-bound compact summary.
+- `python3 scripts/ope.py agent-call --operation private_setup_adapter_conformance_summary` returns the same summary in a transport-neutral envelope.
+- The local MCP stdio scaffold exposes `ope_private_setup_adapter_conformance_summary`.
+- The protocol map now contains sixteen envelope-returning adapter operations plus the separate forecast-run tool.
+- The summary is read-only and must not execute adapter calls, read private data, create source manifests, create forecasts, resolve outcomes, score forecasts, fetch live data, store credentials, or create hosted runtime state.
+- The next milestone should add explicit size-budget checks for compact read surfaces so future generated evidence cannot silently become default agent payload.

@@ -1,0 +1,57 @@
+{
+  "privateSetupFirstActionId": "privatesetupfirstaction-001",
+  "generatedAt": "2026-06-07T10:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "dispatcher_result_only",
+  "requestBinding": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "requestRowId": "privatesetuprequestrow-001",
+    "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "boundBridgeRowId": "privateadapterbridge-001",
+    "boundOutcomeRowId": "privateadapteroutcomerow-001"
+  },
+  "setupMode": "new_setup",
+  "sourceKind": "local_file",
+  "sourcePolicy": {
+    "dataMode": "provided",
+    "allowedSourceKinds": [
+      "local_file"
+    ],
+    "approvalStatus": "not_required",
+    "allowLiveFetch": false,
+    "allowCredentialUse": false
+  },
+  "forecastIntent": {
+    "questionText": "Estimate a future operational probability from caller-approved local file sources.",
+    "outputType": "binary",
+    "horizonLabel": "caller_declared",
+    "resolutionNeeded": true
+  },
+  "actionStatus": "ready_to_run_checked_command",
+  "routeDecision": "run_source_builder",
+  "allowedEntrypoint": "source_builder",
+  "commandToRun": "python3 scripts/ope.py source-builder",
+  "requiredCallerAction": "provide caller-approved local file paths",
+  "error": {
+    "code": "none",
+    "message": "Ready to run the checked local source-builder command."
+  },
+  "exitCode": 0,
+  "executionBoundary": {
+    "dispatcherDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This dispatcher returns the first safe action only; it does not run the suggested command.",
+    "Forecast artifacts and scoring records require later intake, method, forecast, resolution, and scoring steps.",
+    "Commands named in this response are checked local entrypoints, not hidden side effects."
+  ]
+}

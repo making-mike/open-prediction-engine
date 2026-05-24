@@ -1,0 +1,193 @@
+{
+  "agentEnvelopeId": "agentenvelope-023",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_source_handoff",
+  "adapterRequest": {
+    "operation": "private_setup_source_handoff",
+    "inputRecordType": "source_intake_handoff",
+    "inputRef": "sourceintakehandoff-007",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read checked source-handoff next-action guidance without executing setup gates."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "replace_rejected_sources",
+    "approvalStatus": "caller_confirmed_or_not_required",
+    "dataMode": "provided",
+    "planStatus": "blocked_by_builder_rejection",
+    "executionMode": "source_handoff_guidance",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "sourceHandoffAdapterResultId": "sourcehandoffadapterresult-007",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "sourceHandoffCase": "leakage",
+    "sourceIntakeHandoff": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-007",
+      "generatedAt": "2026-06-06T18:10:00Z",
+      "case": "leakage",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestBuildId": "sourcemanifestbuild-005",
+      "handoffStatus": "blocked_by_builder_rejection",
+      "nextAction": "replace_rejected_sources",
+      "canEnterSourceIntake": false,
+      "forecastGenerationAllowed": false,
+      "sourceManifestId": null,
+      "fieldMappingId": null,
+      "sourceIntakeReportId": null,
+      "sourceIntakeStatus": null,
+      "mappingSummary": {
+        "totalMappings": 0,
+        "proposedMappingCount": 0,
+        "confirmedMappingCount": 0,
+        "agentInferredMappingCount": 0,
+        "requiresConfirmation": false
+      },
+      "builderRejectionSummary": {
+        "rejectedInputCount": 1,
+        "reasonCodes": [
+          "post_outcome_leakage_indicator"
+        ]
+      },
+      "draftArtifacts": {
+        "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-leakage-source-manifest-build.generated.json",
+        "sourceManifestPath": null,
+        "fieldMappingPath": null,
+        "sourceIntakeReportPath": null
+      },
+      "requiredActions": [
+        "Replace rejected builder inputs before source intake: post_outcome_leakage_indicator."
+      ],
+      "warnings": [
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake."
+      ]
+    },
+    "sourceManifestBuild": {
+      "sourceManifestBuildId": "sourcemanifestbuild-005",
+      "generatedAt": "2026-06-06T17:30:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "buildStatus": "rejected",
+      "forecastGenerationAllowed": false,
+      "canEnterSourceIntake": false,
+      "confirmationRequired": false,
+      "inputFiles": [
+        {
+          "fileId": "localfile-001",
+          "localPath": "spec/fixtures/local-source-files/post-outcome-leakage.csv",
+          "sourceRole": "weather_forecast",
+          "fileFormat": "csv",
+          "inspectionStatus": "rejected",
+          "byteSize": 97,
+          "rowCount": null,
+          "contentHash": "cbdaf953ea98b76f733459ebf8d2b900c0378a6a212808ea5932b515765231ea",
+          "detectedFields": [
+            "service_date",
+            "geography",
+            "actual_disruption",
+            "resolved_at"
+          ],
+          "privacyFlags": {
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false
+          },
+          "leakageFlags": {
+            "hasPostOutcomeIndicators": true,
+            "availableBeforeForecastClose": true
+          },
+          "reasonCodes": [
+            "post_outcome_leakage_indicator"
+          ]
+        }
+      ],
+      "draftArtifacts": {
+        "sourceManifestId": null,
+        "fieldMappingId": null,
+        "sourceManifestPath": null,
+        "fieldMappingPath": null
+      },
+      "requiredActions": [
+        "Remove rejected files or provide caller-approved supported CSV/JSON sources."
+      ],
+      "warnings": [
+        "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+      ]
+    },
+    "sourceManifest": null,
+    "fieldMapping": null,
+    "sourceIntakeReport": null,
+    "bindingSummary": {
+      "sourceManifestBuildId": "sourcemanifestbuild-005",
+      "sourceManifestId": null,
+      "fieldMappingId": null,
+      "sourceIntakeHandoffId": "sourceintakehandoff-007",
+      "sourceIntakeReportId": null
+    },
+    "mappingConfirmation": {
+      "required": false,
+      "proposedMappingCount": 0,
+      "confirmedMappingCount": 0,
+      "agentInferredMappingCount": 0,
+      "confirmationStatus": "confirmed_or_not_required"
+    },
+    "adapterGuidance": {
+      "nextAction": "replace_rejected_sources",
+      "allowedNextEntrypoint": "source_builder",
+      "canProceedToMethodGating": false,
+      "requiresMappingConfirmation": false,
+      "requiresMoreData": false,
+      "requiresSourceReplacement": true,
+      "forecastExecutionAllowed": false,
+      "scoringAllowed": false
+    },
+    "executionBoundary": {
+      "adapterDoesNotExecuteSourceHandoff": true,
+      "acceptsRawPrivateData": false,
+      "runsSuggestedCommand": false,
+      "createsPublicReadRecords": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "bypassesSetupBenchmarkOrMethodGate": false
+    },
+    "warnings": [
+      "Source-handoff adapter output is next-action guidance and does not execute source intake or forecasts.",
+      "Only confirmed accepted handoffs may proceed toward setup benchmark and method gates.",
+      "Setup benchmark and method decisions are still required before any forecast artifacts are created."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Source-handoff adapter output is next-action guidance and does not execute source intake or forecasts.",
+    "Only confirmed accepted handoffs may proceed toward setup benchmark and method gates.",
+    "Setup benchmark and method decisions are still required before any forecast artifacts are created."
+  ]
+}

@@ -11,7 +11,7 @@ The envelope schema is `spec/agent-envelope.schema.json`. Generated examples liv
 Each envelope carries:
 
 - adapter identity: local CLI and local MCP stdio now, future HTTP/queue surfaces later
-- operation: forecast request validation, evidence plan, evidence trace, forecast card, lifecycle bundle, resolution status, or scoring summary
+- operation: forecast request validation, evidence plan, evidence trace, forecast card, lifecycle bundle, private setup bundle, private setup adapter runbook, private source adapter guidance, private source-kind selection, private setup source-builder, private setup source-handoff, private setup method-gate, private setup forecast execution, resolution status, or scoring summary
 - input reference and record binding fields
 - lifecycle state fields that agents can read without parsing every nested record
 - status and standardized exit code
@@ -61,6 +61,14 @@ The schema enforces the basic status shape: successful envelopes use `status: ok
 | Read evidence trace | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Read forecast card | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Read lifecycle bundle | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Read private setup bundle | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Read private setup adapter runbook | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Read private source adapter guidance | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Read private source-kind selection | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Draft local-file source setup | Implemented, caller-approved files only | Implemented as stdio tool | Future approval-gated wrapper | Future controlled draft task |
+| Read source-handoff next actions | Implemented, checked handoff cases only | Implemented as stdio tool | Future confirmation-gated wrapper | Future controlled handoff task |
+| Read setup method-gate guidance | Implemented, checked method-gate cases only | Implemented as stdio tool | Future benchmark-gated wrapper | Future controlled method-gate task |
+| Run setup forecast execution | Implemented, checked fixture cases only | Implemented as stdio tool | Future approval-gated wrapper | Future controlled forecast task |
 | Read resolution status | Implemented through envelope fixture | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Read scoring summary | Implemented through envelope fixture | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Live fetch | Not implemented for production | Must be approval and source-policy gated | Must be approval and source-policy gated | Must be approval and source-policy gated |
@@ -100,6 +108,117 @@ python3 scripts/ope.py agent-call \
 ```
 
 The dispatcher returns exactly one `agent-envelope.schema.json` response and exits with the envelope's `exitCode`. Error cases such as missing records, binding mismatches, approval-required requests, and response-size limits return sanitized error envelopes on stdout.
+
+For private setup guidance, an agent can read the bundle through the same envelope contract:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_bundle \
+  --private-setup-request-id privatesetuprequest-001
+```
+
+The payload is the private setup agent bundle. It remains guidance-only: it does not read private source files, run source-builder, fetch live data, create forecast artifacts, score outcomes, or store credentials.
+
+For the full private setup adapter sequence, an agent can read the checked adapter-chain runbook through the envelope surface:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_adapter_runbook
+```
+
+The payload is the generated private setup adapter-chain runbook. It lists operation order, branch playbooks, stop conditions, and normal forecast readback routing, but it does not execute adapter calls, read private sources, create forecast artifacts, resolve outcomes, score forecasts, fetch live data, or store credentials.
+
+For compact adapter conformance status, an agent can read the summary before loading the full embedded-envelope matrix:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_adapter_conformance_summary
+```
+
+The payload is the compact private setup adapter conformance summary. It references the full matrix, records phase counts, operation coverage, artifact boundaries, sanitized-error coverage, and read-surface details, but it does not embed every envelope or execute adapter calls.
+
+Before choosing a source-kind path, an agent can read private source adapter guidance through the same envelope surface:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_source_adapter_guidance
+```
+
+The payload joins the private source adapter capability declaration, outcome matrix, and intake bridge. It summarizes which source kinds are available, approval-gated, planned-only, unsupported, or unsafe, but it does not execute source reads, adapter calls, manifest creation, forecast creation, scoring, live fetching, credential handling, or hosted runtime work.
+
+For compact next-path examples, an agent can read private source-kind selection through the same envelope surface:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_source_kind_selection
+```
+
+The payload returns the checked source-kind selection examples. It binds source adapter guidance, private setup first actions, and the adapter-chain runbook, but it does not execute source-builder, source-handoff, fixture evidence, forecast execution, scoring, live fetching, credential handling, or hosted runtime work.
+
+To avoid parsing the full examples list, the agent may ask for one selected recommendation:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_source_kind_selection \
+  --source-kind private_api
+```
+
+That response returns `runtimeStatus: selected_example_only`, `requestedSourceKind`, `availableSourceKinds`, and one `selectedExample`. Unknown source kinds return a sanitized `bad_request` envelope with `payload: null`.
+
+For local-file setup, the agent can ask the adapter to inspect only caller-approved files or a checked fixture case:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_source_builder \
+  --private-setup-request-id privatesetuprequest-001 \
+  --source-builder-case local_draft
+```
+
+The payload includes `sourceManifestBuild`, and when inspection succeeds, draft `sourceManifest` and `fieldMapping` objects. Rejected inputs such as secrets, unsupported formats, oversized files, or leakage indicators return an ok envelope with a rejected build payload, not forecast artifacts. Malformed adapter inputs return sanitized errors.
+
+After source-builder guidance, the agent can inspect checked source-handoff next actions:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_source_handoff \
+  --private-setup-request-id privatesetuprequest-001 \
+  --source-handoff-case confirmed_builder_draft
+```
+
+The payload includes `sourceIntakeHandoff`, source-builder and source-intake bindings, mapping confirmation state, and method-gate readiness. Only the confirmed accepted handoff may proceed toward setup benchmark and method gates. The adapter still does not run source intake, create forecasts, score outcomes, fetch live data, or store credentials.
+
+After a confirmed source-handoff, the agent can inspect setup benchmark and method-decision guidance:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_method_gate \
+  --private-setup-request-id privatesetuprequest-001 \
+  --method-gate-case confirmed_builder_draft
+```
+
+The payload includes `sourceHandoffMethodGate`, `setupBenchmarkGate`, `setupMethodDecision`, and a compact `adapterGuidance` object. It may recommend explicit setup forecast execution only when the checked benchmark and method decision allow it. The adapter still does not create forecast artifacts, score outcomes, fetch live data, or store credentials.
+
+When method gates allow execution, the agent can run the checked setup forecast execution step through the same envelope surface:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation private_setup_forecast_execution \
+  --private-setup-request-id privatesetuprequest-001 \
+  --forecast-execution-case confirmed_builder_draft
+```
+
+The payload includes `setupForecastRun`, source-handoff/method-decision bindings, and forecast artifacts only for the confirmed handoff case. Blocked cases return `runStatus: blocked`, null forecast IDs, and next-action guidance. The operation does not resolve outcomes, score forecasts, fetch live data, accept raw private data, or store credentials.
+
+After a generated setup forecast, agents read the returned forecast through the normal forecast operations:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation forecast_card \
+  --forecast-id forecast-1102 \
+  --question-id question-1102
+```
+
+The same `forecastId` and `questionId` may be used with `lifecycle_bundle`, `resolution_status`, and `scoring_summary`. Those reads preserve setup forecast run, source-handoff, benchmark, method-decision, resolution, scoring, and quality-claim bindings without adding a private setup read API.
 
 If `forecast_request_validation` returns `decisionStatus: accepted`, the agent can inspect the dry-run plan:
 

@@ -1,0 +1,186 @@
+{
+  "agentEnvelopeId": "agentenvelope-028",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_method_gate",
+  "adapterRequest": {
+    "operation": "private_setup_method_gate",
+    "inputRecordType": "source_handoff_method_gate",
+    "inputRef": "sourcehandoffmethodgate-005",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read setup benchmark and method-gate guidance without executing forecasts."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "replace_rejected_sources",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": "not_entered_source_intake",
+    "executionMode": "method_gate_guidance",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "methodGateAdapterResultId": "methodgateadapterresult-005",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "methodGateCase": "unsupported_format",
+    "sourceHandoffMethodGate": {
+      "sourceHandoffMethodGateId": "sourcehandoffmethodgate-005",
+      "generatedAt": "2026-06-06T18:35:00Z",
+      "case": "unsupported_format",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceIntakeHandoffId": "sourceintakehandoff-005",
+      "sourceIntakeReportId": null,
+      "setupBenchmarkGateId": null,
+      "setupMethodDecisionId": null,
+      "handoffStatus": "blocked_by_builder_rejection",
+      "handoffNextAction": "replace_rejected_sources",
+      "methodGateStatus": "not_entered_source_intake",
+      "nextAction": "replace_rejected_sources",
+      "sourceIntakeStatus": null,
+      "selectedMethodClass": "none",
+      "selectedForecastMode": "blocked",
+      "forecastArtifactsCreated": false,
+      "eligibilitySummary": {
+        "benchmarkGateStatus": null,
+        "benchmarkExecutionAllowed": null,
+        "methodDecisionStatus": null,
+        "baselineFinalEligibilityStatus": null,
+        "deterministicFinalEligibilityStatus": null,
+        "qualityClaimAllowed": null
+      },
+      "requiredActions": [
+        "Replace rejected builder inputs before source intake: unsupported_format."
+      ],
+      "warnings": [
+        "Source-handoff method gates do not create forecast artifacts.",
+        "Accepted method decisions still require an explicit setup forecast execution step.",
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake."
+      ]
+    },
+    "sourceIntakeHandoff": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-005",
+      "generatedAt": "2026-06-06T18:10:00Z",
+      "case": "unsupported_format",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "sourceManifestBuildId": "sourcemanifestbuild-003",
+      "handoffStatus": "blocked_by_builder_rejection",
+      "nextAction": "replace_rejected_sources",
+      "canEnterSourceIntake": false,
+      "forecastGenerationAllowed": false,
+      "sourceManifestId": null,
+      "fieldMappingId": null,
+      "sourceIntakeReportId": null,
+      "sourceIntakeStatus": null,
+      "mappingSummary": {
+        "totalMappings": 0,
+        "proposedMappingCount": 0,
+        "confirmedMappingCount": 0,
+        "agentInferredMappingCount": 0,
+        "requiresConfirmation": false
+      },
+      "builderRejectionSummary": {
+        "rejectedInputCount": 1,
+        "reasonCodes": [
+          "unsupported_format"
+        ]
+      },
+      "draftArtifacts": {
+        "sourceManifestBuildPath": "spec/fixtures/generated/source-handoff/weather-logistics-unsupported-format-source-manifest-build.generated.json",
+        "sourceManifestPath": null,
+        "fieldMappingPath": null,
+        "sourceIntakeReportPath": null
+      },
+      "requiredActions": [
+        "Replace rejected builder inputs before source intake: unsupported_format."
+      ],
+      "warnings": [
+        "Source-builder handoffs do not create forecast artifacts.",
+        "Setup method gates are still required after accepted source intake."
+      ]
+    },
+    "setupBenchmarkGate": null,
+    "setupMethodDecision": null,
+    "bindingSummary": {
+      "sourceIntakeHandoffId": "sourceintakehandoff-005",
+      "sourceIntakeReportId": null,
+      "setupBenchmarkGateId": null,
+      "setupMethodDecisionId": null,
+      "selectedSetupBenchmarkGateId": null,
+      "sourceManifestId": null,
+      "fieldMappingId": null
+    },
+    "methodGateSummary": {
+      "methodGateStatus": "not_entered_source_intake",
+      "nextAction": "replace_rejected_sources",
+      "selectedMethodClass": "none",
+      "selectedForecastMode": "blocked",
+      "benchmarkGateStatus": null,
+      "benchmarkExecutionAllowed": null,
+      "methodDecisionStatus": null,
+      "qualityClaimAllowed": null
+    },
+    "adapterGuidance": {
+      "nextAction": "replace_rejected_sources",
+      "allowedNextEntrypoint": "source_builder",
+      "canRecommendExplicitSetupForecastExecution": false,
+      "forecastExecutionAllowedByGate": false,
+      "selectedMethodClass": "none",
+      "selectedForecastMode": "blocked",
+      "requiresMappingConfirmation": false,
+      "requiresMoreData": false,
+      "requiresSourceReplacement": true,
+      "requiresMethodReview": false,
+      "adapterCreatesForecastArtifacts": false,
+      "scoringAllowed": false
+    },
+    "executionBoundary": {
+      "adapterDoesNotExecuteMethodGate": true,
+      "acceptsRawPrivateData": false,
+      "runsSuggestedCommand": false,
+      "createsPublicReadRecords": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "bypassesSetupBenchmarkOrMethodDecision": false,
+      "executesSetupForecast": false
+    },
+    "warnings": [
+      "Method-gate adapter output is next-action guidance and does not execute setup forecasts.",
+      "Explicit setup forecast execution is a separate step after benchmark and method decisions allow it.",
+      "Quality, calibration, production-readiness, and state-of-the-art claims remain blocked unless later evidence allows them."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Method-gate adapter output is next-action guidance and does not execute setup forecasts.",
+    "Explicit setup forecast execution is a separate step after benchmark and method decisions allow it.",
+    "Quality, calibration, production-readiness, and state-of-the-art claims remain blocked unless later evidence allows them."
+  ]
+}

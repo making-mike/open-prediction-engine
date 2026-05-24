@@ -1,0 +1,57 @@
+{
+  "privateSetupFirstActionId": "privatesetupfirstaction-007",
+  "generatedAt": "2026-06-07T10:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "dispatcher_result_only",
+  "requestBinding": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-007",
+    "requestRowId": "privatesetuprequestrow-007",
+    "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "boundBridgeRowId": "privateadapterbridge-007",
+    "boundOutcomeRowId": "privateadapteroutcomerow-007"
+  },
+  "setupMode": "reuse_setup",
+  "sourceKind": "unregistered_source",
+  "sourcePolicy": {
+    "dataMode": "provided",
+    "allowedSourceKinds": [
+      "unregistered_source"
+    ],
+    "approvalStatus": "not_required",
+    "allowLiveFetch": false,
+    "allowCredentialUse": false
+  },
+  "forecastIntent": {
+    "questionText": "Estimate a future operational probability from caller-approved unregistered source sources.",
+    "outputType": "binary",
+    "horizonLabel": "caller_declared",
+    "resolutionNeeded": true
+  },
+  "actionStatus": "source_replacement_required",
+  "routeDecision": "replace_source",
+  "allowedEntrypoint": "no_current_entrypoint",
+  "commandToRun": "none",
+  "requiredCallerAction": "replace the source kind with a declared adapter",
+  "error": {
+    "code": "unsupported_source",
+    "message": "The requested source kind is not declared in current capabilities."
+  },
+  "exitCode": 0,
+  "executionBoundary": {
+    "dispatcherDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This dispatcher returns the first safe action only; it does not run the suggested command.",
+    "Forecast artifacts and scoring records require later intake, method, forecast, resolution, and scoring steps.",
+    "Commands named in this response are checked local entrypoints, not hidden side effects."
+  ]
+}

@@ -24,7 +24,7 @@ This does not mean unbounded crawling or claiming access to all internet knowled
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, private source adapter capabilities and outcomes, forecast cards, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a fixture-only evidence loop for resolved, ambiguous, and annulled weather-logistics cases
@@ -33,9 +33,9 @@ The repository currently contains:
 - a schema-bound weather-logistics method registry that separates enabled baseline/deterministic methods from proposed stronger methods
 - a generated method-comparison report that checks each non-baseline method against the baseline when comparable benchmark evidence exists
 - a generated method-selection record that explains baseline fallback when comparable method evidence is insufficient
-- a schema-bound agent adapter envelope contract with local examples for request validation, evidence planning, evidence-trace reads, card reads, bundle reads, resolution status, scoring summary, and sanitized errors
+- a schema-bound agent adapter envelope contract with local examples for request validation, evidence planning, evidence-trace reads, card reads, bundle reads, private setup bundle reads, private setup adapter-chain runbook reads, private setup conformance-summary reads, private source adapter guidance reads, private source-kind selection reads, local-file source-builder drafts, source-handoff next actions, method-gate guidance, forecast-execution runs, generated private setup forecast readbacks, resolution status, scoring summary, and sanitized errors
 - a local single-operation `agent-call` dispatcher that returns one schema-bound envelope with standardized exit codes
-- a local MCP stdio scaffold that exposes the seven agent adapter operations as tools and returns the same schema-bound envelopes
+- a local MCP stdio scaffold that exposes the sixteen agent adapter operations as tools and returns the same schema-bound envelopes
 - a local fixture-safe `forecast-run` orchestrator that returns one bound forecast-run summary for agents
 - a checked forecast-run intake matrix covering accepted, rejected, blocked, canceled, unsupported-fixture-path, and response-too-large outcomes
 - a checked agent forecast runbook that maps forecast-run outcomes to safe next actions and read surfaces
@@ -68,6 +68,24 @@ The repository currently contains:
 - a checked private source adapter capability contract that declares local-file, manual-mapping, auto-evidence, manual-upload, private-API, and private-database boundaries without executing planned adapters
 - a checked private source adapter outcome matrix that turns adapter states into safe agent next actions before setup execution
 - a checked private source adapter bridge that routes adapter outcomes to source-builder, source-handoff confirmation, fixture evidence, wait, replace, or stop actions without creating forecast records
+- checked private source-kind selection examples that bind guidance, first-action records, and adapter-chain runbook steps so agents can choose the next setup path without executing it
+- a checked private source-kind query matrix that records full-list, selected source-kind, and unsupported source-kind adapter responses without executing selected paths
+- a checked private setup adapter conformance matrix that covers source-builder, source-handoff, method-gate, forecast-execution, and generated forecast readback envelopes without executing adapter calls
+- a checked compact private setup adapter conformance summary that agents can read before loading the full embedded-envelope matrix
+- a checked private setup request contract that starts setup routing from one agent-facing setup-intent record without reading private data
+- a checked private setup first-action dispatcher that accepts one request ID or request JSON and returns the first safe non-executing action
+- a checked private setup first-action runbook that maps each first-action status to the next safe caller-visible step
+- a checked private setup agent bundle that joins request, first-action, and runbook guidance into one read-only response
+- a checked private setup bundle adapter operation that returns the same guidance through the transport-neutral agent envelope and local MCP scaffold without executing setup commands
+- a checked private setup source-builder adapter operation that inspects only caller-approved local CSV/JSON files and returns draft manifest/mapping guidance without creating forecast or score records
+- a checked private setup source-handoff adapter operation that returns source-handoff confirmation and method-gate readiness guidance without creating forecast or score records
+- a checked private setup method-gate adapter operation that returns setup benchmark and method-decision guidance without creating forecast or score records
+- a checked private setup forecast-execution adapter operation that returns `setupforecastrun-1102` and forecast artifacts only for the confirmed handoff while keeping blocked cases non-generating
+- checked private setup forecast readback adapter examples that read `forecast-1102` through normal card, bundle, resolution, and scoring operations without adding a private read API
+- a checked private setup adapter-chain runbook that lists the local-file setup operation sequence, branch playbooks, and normal readback path without executing adapter calls
+- a checked private setup adapter-chain runbook adapter operation that returns that sequence guidance through the transport-neutral envelope and local MCP scaffold without executing adapter calls
+- a checked private source adapter guidance adapter operation that joins capability, outcome, and intake-bridge guidance through the transport-neutral envelope and local MCP scaffold without executing source reads
+- a checked private source-kind selection adapter operation that returns compact source-kind path examples, or one selected source-kind recommendation, through the same envelope and MCP surfaces without executing the selected path
 - source manifest and field mapping intake fixtures that classify data as accepted, accepted-partial, needs-confirmation, or rejected before forecasting
 - setup-specific benchmark gates that allow deterministic fixture execution only when source intake, benchmark binding, anti-leakage controls, and execution thresholds pass
 - setup-aware method decisions that select a benchmark-gated deterministic method, fall back to baseline, block unconfirmed mappings, or reject unusable intake before forecast artifacts are created
@@ -183,12 +201,30 @@ python3 scripts/generate_source_handoff_setup_runbook.py --check
 python3 scripts/check_source_handoff_setup_runbook.py
 python3 scripts/generate_private_setup_workflow.py --check
 python3 scripts/check_private_setup_workflow.py
+python3 scripts/generate_private_setup_requests.py --check
+python3 scripts/check_private_setup_requests.py
+python3 scripts/generate_private_setup_first_actions.py --check
+python3 scripts/check_private_setup_first_actions.py
+python3 scripts/generate_private_setup_first_action_runbook.py --check
+python3 scripts/check_private_setup_first_action_runbook.py
+python3 scripts/generate_private_setup_agent_bundles.py --check
+python3 scripts/check_private_setup_agent_bundles.py
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
+python3 scripts/check_private_setup_adapter_chain_runbook.py
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
+python3 scripts/check_private_setup_adapter_conformance_matrix.py
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --check
+python3 scripts/check_private_setup_adapter_conformance_summary.py
 python3 scripts/generate_private_source_adapter_capabilities.py --check
 python3 scripts/check_private_source_adapter_capabilities.py
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --check
 python3 scripts/check_private_source_adapter_outcome_matrix.py
 python3 scripts/generate_private_source_adapter_intake_bridge.py --check
 python3 scripts/check_private_source_adapter_intake_bridge.py
+python3 scripts/generate_private_source_kind_selection_examples.py --check
+python3 scripts/check_private_source_kind_selection_examples.py
+python3 scripts/generate_private_source_kind_query_matrix.py --check
+python3 scripts/check_private_source_kind_query_matrix.py
 python3 scripts/generate_recalculation_history.py --check
 python3 scripts/check_recalculation_history.py
 python3 scripts/run_auto_evidence_forecast.py
@@ -374,6 +410,17 @@ python3 scripts/ope.py private-setup-workflow
 python3 scripts/ope.py private-source-adapters
 python3 scripts/ope.py private-source-adapter-outcomes
 python3 scripts/ope.py private-source-adapter-bridge
+python3 scripts/ope.py private-source-kind-selection
+python3 scripts/ope.py private-source-kind-query-matrix
+python3 scripts/ope.py private-setup-requests
+python3 scripts/ope.py private-setup-actions
+python3 scripts/ope.py private-setup-action --request-id privatesetuprequest-001
+python3 scripts/ope.py private-setup-action-runbook
+python3 scripts/ope.py private-setup-bundles
+python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
+python3 scripts/ope.py private-setup-adapter-runbook
+python3 scripts/ope.py private-setup-adapter-conformance
+python3 scripts/ope.py private-setup-adapter-conformance-summary
 python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102
 ```
 
@@ -420,6 +467,19 @@ python3 scripts/ope.py agent-envelopes
 python3 scripts/ope.py agent-protocol-map
 python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601
 python3 scripts/ope.py agent-call --operation evidence_trace --forecast-id forecast-602 --question-id question-601
+python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001
+python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook
+python3 scripts/ope.py agent-call --operation private_source_adapter_guidance
+python3 scripts/ope.py agent-call --operation private_source_kind_selection
+python3 scripts/ope.py agent-call --operation private_source_kind_selection --source-kind private_api
+python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft
+python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation private_setup_method_gate --private-setup-request-id privatesetuprequest-001 --method-gate-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation private_setup_forecast_execution --private-setup-request-id privatesetuprequest-001 --forecast-execution-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102
 python3 scripts/ope.py read --record-type forecast-card --id forecast-602 --question-id question-601
 ```
 
@@ -493,9 +553,18 @@ python3 scripts/run_source_handoff_forecast.py --write
 python3 scripts/resolve_source_handoff_outcome.py --write
 python3 scripts/generate_source_handoff_setup_runbook.py --write
 python3 scripts/generate_private_setup_workflow.py --write
+python3 scripts/generate_private_setup_requests.py --write
+python3 scripts/generate_private_setup_first_actions.py --write
+python3 scripts/generate_private_setup_first_action_runbook.py --write
+python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write
+python3 scripts/generate_private_source_kind_selection_examples.py --write
+python3 scripts/generate_private_source_kind_query_matrix.py --write
 python3 scripts/generate_recalculation_history.py --write
 python3 scripts/run_agent_forecast.py --write
 python3 scripts/generate_forecast_run_intake_matrix.py --write

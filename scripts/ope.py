@@ -13,7 +13,31 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(command: list[str]) -> None:
-    subprocess.run(command, cwd=ROOT, check=True)
+    if sys.stdout.isatty():
+        subprocess.run(command, cwd=ROOT, check=True)
+        return
+    run_forwarding_output(command, check=True)
+
+
+def run_forwarding_output(command: list[str], *, check: bool) -> int:
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    if completed.stdout:
+        sys.stdout.write(completed.stdout)
+    if completed.stderr:
+        sys.stderr.write(completed.stderr)
+    if check and completed.returncode != 0:
+        raise subprocess.CalledProcessError(
+            completed.returncode,
+            command,
+            output=completed.stdout,
+            stderr=completed.stderr,
+        )
+    return completed.returncode
 
 
 def cmd_check(_args: argparse.Namespace) -> None:
@@ -52,6 +76,15 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     private_source_adapters_command = [sys.executable, "scripts/generate_private_source_adapter_capabilities.py"]
     private_source_adapter_outcomes_command = [sys.executable, "scripts/generate_private_source_adapter_outcome_matrix.py"]
     private_source_adapter_bridge_command = [sys.executable, "scripts/generate_private_source_adapter_intake_bridge.py"]
+    private_source_kind_selection_command = [sys.executable, "scripts/generate_private_source_kind_selection_examples.py"]
+    private_setup_requests_command = [sys.executable, "scripts/generate_private_setup_requests.py"]
+    private_setup_actions_command = [sys.executable, "scripts/generate_private_setup_first_actions.py"]
+    private_setup_action_runbook_command = [sys.executable, "scripts/generate_private_setup_first_action_runbook.py"]
+    private_setup_agent_bundles_command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
+    private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
+    private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
+    private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
+    private_source_kind_query_matrix_command = [sys.executable, "scripts/generate_private_source_kind_query_matrix.py"]
     recalculation_command = [sys.executable, "scripts/generate_recalculation_history.py"]
     forecast_run_command = [sys.executable, "scripts/run_agent_forecast.py"]
     forecast_run_matrix_command = [sys.executable, "scripts/generate_forecast_run_intake_matrix.py"]
@@ -90,6 +123,15 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_source_adapters_command.append("--write")
         private_source_adapter_outcomes_command.append("--write")
         private_source_adapter_bridge_command.append("--write")
+        private_source_kind_selection_command.append("--write")
+        private_setup_requests_command.append("--write")
+        private_setup_actions_command.append("--write")
+        private_setup_action_runbook_command.append("--write")
+        private_setup_agent_bundles_command.append("--write")
+        private_setup_adapter_runbook_command.append("--write")
+        private_setup_adapter_conformance_command.append("--write")
+        private_setup_adapter_conformance_summary_command.append("--write")
+        private_source_kind_query_matrix_command.append("--write")
         recalculation_command.append("--write")
         forecast_run_command.append("--write")
         forecast_run_matrix_command.append("--write")
@@ -121,6 +163,15 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_source_adapters_command.append("--check")
         private_source_adapter_outcomes_command.append("--check")
         private_source_adapter_bridge_command.append("--check")
+        private_source_kind_selection_command.append("--check")
+        private_setup_requests_command.append("--check")
+        private_setup_actions_command.append("--check")
+        private_setup_action_runbook_command.append("--check")
+        private_setup_agent_bundles_command.append("--check")
+        private_setup_adapter_runbook_command.append("--check")
+        private_setup_adapter_conformance_command.append("--check")
+        private_setup_adapter_conformance_summary_command.append("--check")
+        private_source_kind_query_matrix_command.append("--check")
         recalculation_command.append("--check")
         forecast_run_command.append("--check")
         forecast_run_matrix_command.append("--check")
@@ -154,6 +205,15 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(private_source_adapters_command)
     run(private_source_adapter_outcomes_command)
     run(private_source_adapter_bridge_command)
+    run(private_setup_requests_command)
+    run(private_setup_actions_command)
+    run(private_setup_action_runbook_command)
+    run(private_setup_agent_bundles_command)
+    run(private_setup_adapter_runbook_command)
+    run(private_setup_adapter_conformance_command)
+    run(private_setup_adapter_conformance_summary_command)
+    run(private_source_kind_selection_command)
+    run(private_source_kind_query_matrix_command)
     run(recalculation_command)
     run(forecast_run_command)
     run(forecast_run_matrix_command)
@@ -538,6 +598,105 @@ def cmd_private_source_adapter_bridge(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_private_source_kind_selection(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_source_kind_selection_examples.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_source_kind_query_matrix(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_source_kind_query_matrix.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_requests(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_requests.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_actions(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_first_actions.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_action(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/private_setup_action_dispatcher.py"]
+    if args.request_id:
+        command.extend(["--request-id", args.request_id])
+    if args.input:
+        command.extend(["--input", args.input])
+    raise SystemExit(run_forwarding_output(command, check=False))
+
+
+def cmd_private_setup_action_runbook(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_first_action_runbook.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_bundles(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_adapter_runbook(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_adapter_conformance(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_adapter_conformance_summary(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_bundle(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
+    if args.request_id:
+        command.extend(["--request-id", args.request_id])
+    if args.case:
+        command.extend(["--case", args.case])
+    run(command)
+
+
 def cmd_agent_call(args: argparse.Namespace) -> None:
     command = [
         sys.executable,
@@ -555,12 +714,29 @@ def cmd_agent_call(args: argparse.Namespace) -> None:
         "--caller-intent",
         args.caller_intent,
     ]
-    completed = subprocess.run(command, cwd=ROOT)
-    raise SystemExit(completed.returncode)
+    if args.private_setup_request_id:
+        command.extend(["--private-setup-request-id", args.private_setup_request_id])
+    if args.private_setup_case:
+        command.extend(["--private-setup-case", args.private_setup_case])
+    if args.source_builder_case:
+        command.extend(["--source-builder-case", args.source_builder_case])
+    for item in args.source_builder_input or []:
+        command.extend(["--source-builder-input", item])
+    for item in args.source_builder_mapping_hint or []:
+        command.extend(["--source-builder-mapping-hint", item])
+    if args.source_kind:
+        command.extend(["--source-kind", args.source_kind])
+    if args.source_handoff_case:
+        command.extend(["--source-handoff-case", args.source_handoff_case])
+    if args.method_gate_case:
+        command.extend(["--method-gate-case", args.method_gate_case])
+    if args.forecast_execution_case:
+        command.extend(["--forecast-execution-case", args.forecast_execution_case])
+    raise SystemExit(run_forwarding_output(command, check=False))
 
 
 def cmd_mcp_stdio(_args: argparse.Namespace) -> None:
-    run([sys.executable, "scripts/ope_mcp_stdio.py"])
+    subprocess.run([sys.executable, "scripts/ope_mcp_stdio.py"], cwd=ROOT, check=True)
 
 
 def cmd_validate(args: argparse.Namespace) -> None:
@@ -1079,6 +1255,170 @@ def build_parser() -> argparse.ArgumentParser:
     )
     private_source_adapter_bridge.set_defaults(func=cmd_private_source_adapter_bridge)
 
+    private_source_kind_selection = subparsers.add_parser(
+        "private-source-kind-selection",
+        help="check, refresh, or print private source-kind selection examples",
+    )
+    private_source_kind_selection.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private source-kind selection examples",
+    )
+    private_source_kind_selection.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private source-kind selection examples",
+    )
+    private_source_kind_selection.set_defaults(func=cmd_private_source_kind_selection)
+
+    private_source_kind_query_matrix = subparsers.add_parser(
+        "private-source-kind-query-matrix",
+        help="check, refresh, or print private source-kind adapter query examples",
+    )
+    private_source_kind_query_matrix.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private source-kind query matrix",
+    )
+    private_source_kind_query_matrix.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private source-kind query matrix",
+    )
+    private_source_kind_query_matrix.set_defaults(func=cmd_private_source_kind_query_matrix)
+
+    private_setup_requests = subparsers.add_parser(
+        "private-setup-requests",
+        help="check, refresh, or print private setup request routing decisions",
+    )
+    private_setup_requests.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup request drift",
+    )
+    private_setup_requests.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup requests",
+    )
+    private_setup_requests.set_defaults(func=cmd_private_setup_requests)
+
+    private_setup_actions = subparsers.add_parser(
+        "private-setup-actions",
+        help="check, refresh, or print generated private setup first-action fixtures",
+    )
+    private_setup_actions.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup first-action drift",
+    )
+    private_setup_actions.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup first actions",
+    )
+    private_setup_actions.set_defaults(func=cmd_private_setup_actions)
+
+    private_setup_action = subparsers.add_parser(
+        "private-setup-action",
+        help="return the first safe action for one private setup request without execution",
+    )
+    private_setup_action.add_argument("--request-id", help="generated private setup request id")
+    private_setup_action.add_argument("--input", help="JSON object containing one private setup request")
+    private_setup_action.set_defaults(func=cmd_private_setup_action)
+
+    private_setup_action_runbook = subparsers.add_parser(
+        "private-setup-action-runbook",
+        help="check, refresh, or print first-action runbook guidance for private setup",
+    )
+    private_setup_action_runbook.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup first-action runbook drift",
+    )
+    private_setup_action_runbook.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup first-action runbook",
+    )
+    private_setup_action_runbook.set_defaults(func=cmd_private_setup_action_runbook)
+
+    private_setup_bundles = subparsers.add_parser(
+        "private-setup-bundles",
+        help="check, refresh, or print generated private setup agent bundles",
+    )
+    private_setup_bundles.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup agent bundle drift",
+    )
+    private_setup_bundles.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup agent bundles",
+    )
+    private_setup_bundles.set_defaults(func=cmd_private_setup_bundles)
+
+    private_setup_adapter_runbook = subparsers.add_parser(
+        "private-setup-adapter-runbook",
+        help="check, refresh, or print adapter-chain runbook guidance for private setup",
+    )
+    private_setup_adapter_runbook.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup adapter-chain runbook drift",
+    )
+    private_setup_adapter_runbook.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup adapter-chain runbook",
+    )
+    private_setup_adapter_runbook.set_defaults(func=cmd_private_setup_adapter_runbook)
+
+    private_setup_adapter_conformance = subparsers.add_parser(
+        "private-setup-adapter-conformance",
+        help="check, refresh, or print private setup adapter conformance examples",
+    )
+    private_setup_adapter_conformance.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup adapter conformance matrix",
+    )
+    private_setup_adapter_conformance.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup adapter conformance matrix",
+    )
+    private_setup_adapter_conformance.set_defaults(func=cmd_private_setup_adapter_conformance)
+
+    private_setup_adapter_conformance_summary = subparsers.add_parser(
+        "private-setup-adapter-conformance-summary",
+        help="check, refresh, or print compact private setup adapter conformance summary",
+    )
+    private_setup_adapter_conformance_summary.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup adapter conformance summary",
+    )
+    private_setup_adapter_conformance_summary.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup adapter conformance summary",
+    )
+    private_setup_adapter_conformance_summary.set_defaults(func=cmd_private_setup_adapter_conformance_summary)
+
+    private_setup_bundle = subparsers.add_parser(
+        "private-setup-bundle",
+        help="print one private setup agent bundle by request id or bad-request case",
+    )
+    private_setup_bundle.add_argument("--request-id", help="private setup request id")
+    private_setup_bundle.add_argument(
+        "--case",
+        choices=["unknown_source_kind", "missing_approval"],
+        help="bad-request example case",
+    )
+    private_setup_bundle.set_defaults(func=cmd_private_setup_bundle)
+
     agent_call = subparsers.add_parser(
         "agent-call",
         help="run one local agent adapter operation and return one envelope",
@@ -1091,6 +1431,15 @@ def build_parser() -> argparse.ArgumentParser:
             "evidence_trace",
             "forecast_card",
             "lifecycle_bundle",
+            "private_setup_bundle",
+            "private_setup_adapter_runbook",
+            "private_setup_adapter_conformance_summary",
+            "private_source_adapter_guidance",
+            "private_source_kind_selection",
+            "private_setup_source_builder",
+            "private_setup_source_handoff",
+            "private_setup_method_gate",
+            "private_setup_forecast_execution",
             "resolution_status",
             "scoring_summary",
         ],
@@ -1099,6 +1448,68 @@ def build_parser() -> argparse.ArgumentParser:
     agent_call.add_argument("--request", default="spec/fixtures/requests/auto-weather-logistics-request.json")
     agent_call.add_argument("--forecast-id", default="forecast-602")
     agent_call.add_argument("--question-id", default="question-601")
+    agent_call.add_argument("--private-setup-request-id")
+    agent_call.add_argument(
+        "--private-setup-case",
+        choices=["unknown_source_kind", "missing_approval"],
+    )
+    agent_call.add_argument(
+        "--source-builder-case",
+        choices=["local_draft", "contains_secret", "unsupported_format", "oversized", "leakage"],
+    )
+    agent_call.add_argument(
+        "--source-builder-input",
+        action="append",
+        help="caller-approved local source_role=path input for private setup source-builder adapter",
+    )
+    agent_call.add_argument(
+        "--source-builder-mapping-hint",
+        action="append",
+        help="caller-provided source_role.source_field=target_field mapping hint",
+    )
+    agent_call.add_argument(
+        "--source-kind",
+        help="optional source kind for private_source_kind_selection selected-example reads",
+    )
+    agent_call.add_argument(
+        "--source-handoff-case",
+        choices=[
+            "unconfirmed_builder_draft",
+            "confirmed_builder_draft",
+            "insufficient_confirmed_builder_draft",
+            "contains_secret",
+            "unsupported_format",
+            "oversized",
+            "leakage",
+        ],
+        help="checked source-handoff fixture case for private setup source-handoff adapter",
+    )
+    agent_call.add_argument(
+        "--method-gate-case",
+        choices=[
+            "unconfirmed_builder_draft",
+            "confirmed_builder_draft",
+            "insufficient_confirmed_builder_draft",
+            "contains_secret",
+            "unsupported_format",
+            "oversized",
+            "leakage",
+        ],
+        help="checked source-handoff method-gate fixture case for private setup method-gate adapter",
+    )
+    agent_call.add_argument(
+        "--forecast-execution-case",
+        choices=[
+            "unconfirmed_builder_draft",
+            "confirmed_builder_draft",
+            "insufficient_confirmed_builder_draft",
+            "contains_secret",
+            "unsupported_format",
+            "oversized",
+            "leakage",
+        ],
+        help="checked source-handoff forecast-execution fixture case for private setup forecast adapter",
+    )
     agent_call.add_argument("--max-bytes", type=int, default=65536)
     agent_call.add_argument("--caller-intent", default="Call one local OPE agent adapter operation.")
     agent_call.set_defaults(func=cmd_agent_call)

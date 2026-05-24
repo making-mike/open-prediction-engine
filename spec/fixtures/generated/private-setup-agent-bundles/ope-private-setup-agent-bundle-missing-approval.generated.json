@@ -1,0 +1,86 @@
+{
+  "privateSetupAgentBundleId": "privatesetupagentbundle-010",
+  "generatedAt": "2026-06-07T10:40:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "bundle_guidance_only",
+  "bundleKind": "bad_request_example",
+  "sourceKind": "private_api",
+  "requestSummary": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-991",
+    "requestRowId": "privatesetuprequestrow-991",
+    "setupMode": "new_setup",
+    "selectedSourceKind": "private_api",
+    "forecastQuestionText": "Estimate a future operational probability from caller-approved private api sources.",
+    "outputType": "binary",
+    "sourcePolicy": {
+      "dataMode": "provided",
+      "allowedSourceKinds": [
+        "private_api"
+      ],
+      "approvalStatus": "requested",
+      "allowLiveFetch": false,
+      "allowCredentialUse": true
+    }
+  },
+  "actionSummary": {
+    "privateSetupFirstActionId": "privatesetupfirstaction-991",
+    "actionStatus": "bad_request",
+    "routeDecision": "reject_bad_request",
+    "allowedEntrypoint": "no_current_entrypoint",
+    "commandToRun": "none",
+    "requiredCallerAction": "confirm caller approval and retry the private setup request",
+    "errorCode": "missing_approval",
+    "exitCode": 2
+  },
+  "runbookGuidance": {
+    "privateSetupFirstActionRunbookId": "privatesetupactionrunbook-001",
+    "runbookRowId": "privatesetupactionbadrequestrow-002",
+    "nextActionLabel": "fix_bad_request",
+    "expectedOutputClass": "none",
+    "requiresCallerConfirmation": false,
+    "mayEnterSourceIntakeAfterRequiredAction": false,
+    "forecastExecutionAllowed": false,
+    "scoringAllowed": false,
+    "blockedOutputs": [
+      "source_manifest",
+      "field_mapping",
+      "source_intake_report",
+      "forecast_artifact",
+      "forecast_card",
+      "scoring_report",
+      "credential_record",
+      "live_fetch_result"
+    ],
+    "stopCondition": "Stop until caller approval and source policy are explicit and confirmed.",
+    "agentInstruction": "Ask for explicit approval; never put credentials or private source details into artifacts."
+  },
+  "claimBoundary": {
+    "bundleDoesNotPredict": true,
+    "qualityClaimAllowed": false,
+    "forecastExecutionAllowed": false,
+    "scoringAllowed": false,
+    "reasonCodes": [
+      "setup_guidance_only",
+      "forecast_requires_later_gates",
+      "quality_claim_requires_resolved_samples",
+      "source_not_eligible_for_intake"
+    ]
+  },
+  "executionBoundary": {
+    "bundleDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This bundle joins setup guidance records; it does not execute the suggested command.",
+    "Source intake, forecast execution, resolution, and scoring remain separate explicit steps.",
+    "The bundle does not predict, score, fetch live data, or store credentials."
+  ]
+}

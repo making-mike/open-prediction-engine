@@ -1,0 +1,129 @@
+{
+  "agentEnvelopeId": "agentenvelope-013",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_source_builder",
+  "adapterRequest": {
+    "operation": "private_setup_source_builder",
+    "inputRecordType": "source_manifest_build",
+    "inputRef": "sourcemanifestbuild-003",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Inspect caller-approved local files and draft source setup guidance."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "replace_rejected_sources",
+    "approvalStatus": "caller_approved_inputs",
+    "dataMode": "provided",
+    "planStatus": "rejected",
+    "executionMode": "draft_generation",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "sourceBuilderAdapterResultId": "sourcebuilderadapterresult-003",
+    "privateSetupRequestId": "privatesetuprequest-001",
+    "inputMode": "checked_fixture_case",
+    "sourceBuilderCase": "unsupported_format",
+    "sourceManifestBuild": {
+      "sourceManifestBuildId": "sourcemanifestbuild-003",
+      "generatedAt": "2026-06-06T17:30:00Z",
+      "domainSetupId": "domainsetup-001",
+      "domain": "weather-logistics",
+      "buildStatus": "rejected",
+      "forecastGenerationAllowed": false,
+      "canEnterSourceIntake": false,
+      "confirmationRequired": false,
+      "inputFiles": [
+        {
+          "fileId": "localfile-001",
+          "localPath": "spec/fixtures/local-source-files/unsupported.txt",
+          "sourceRole": "historical_baseline",
+          "fileFormat": "unsupported",
+          "inspectionStatus": "rejected",
+          "byteSize": 88,
+          "rowCount": null,
+          "contentHash": "856b0e92fc865851da4a399269e42a17dd131a3b1d5e835e4ae1553fda7e6e5a",
+          "detectedFields": [],
+          "privacyFlags": {
+            "containsSecrets": false,
+            "containsPersonalData": false,
+            "approvalRequired": false
+          },
+          "leakageFlags": {
+            "hasPostOutcomeIndicators": false,
+            "availableBeforeForecastClose": true
+          },
+          "reasonCodes": [
+            "unsupported_format"
+          ]
+        }
+      ],
+      "draftArtifacts": {
+        "sourceManifestId": null,
+        "fieldMappingId": null,
+        "sourceManifestPath": null,
+        "fieldMappingPath": null
+      },
+      "requiredActions": [
+        "Remove rejected files or provide caller-approved supported CSV/JSON sources."
+      ],
+      "warnings": [
+        "Local builder drafts are not public read surfaces and do not authorize forecast execution."
+      ]
+    },
+    "sourceManifest": null,
+    "fieldMapping": null,
+    "adapterGuidance": {
+      "nextAction": "replace_rejected_sources",
+      "allowedNextEntrypoint": "no_current_entrypoint",
+      "requiresMappingConfirmation": false,
+      "mayEnterSourceIntakeAfterConfirmation": false,
+      "forecastExecutionAllowed": false,
+      "scoringAllowed": false
+    },
+    "executionBoundary": {
+      "adapterDoesNotExecuteSourceSetup": true,
+      "readsOnlyCallerApprovedFiles": true,
+      "runsSuggestedCommand": false,
+      "createsPublicReadRecords": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false
+    },
+    "warnings": [
+      "Source-builder adapter output is draft guidance and does not authorize forecast execution.",
+      "Agent-inferred mappings remain proposed until deterministic validation or caller confirmation accepts them.",
+      "Rejected source-builder inputs must be replaced before source intake, method gates, forecasts, or scoring."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Source-builder adapter output is draft guidance and does not authorize forecast execution.",
+    "Agent-inferred mappings remain proposed until deterministic validation or caller confirmation accepts them.",
+    "Rejected source-builder inputs must be replaced before source intake, method gates, forecasts, or scoring."
+  ]
+}

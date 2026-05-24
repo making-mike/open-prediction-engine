@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-first-action.schema.json",
+  "title": "Private Setup First Action",
+  "description": "Compact dispatcher result for the first safe action from one private setup request.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupFirstActionId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "requestBinding",
+    "setupMode",
+    "sourceKind",
+    "sourcePolicy",
+    "forecastIntent",
+    "actionStatus",
+    "routeDecision",
+    "allowedEntrypoint",
+    "commandToRun",
+    "requiredCallerAction",
+    "error",
+    "exitCode",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupFirstActionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["dispatcher_result_only"]
+    },
+    "requestBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupRequestSetId",
+        "privateSetupRequestId",
+        "requestRowId",
+        "boundPrivateSourceAdapterIntakeBridgeId",
+        "boundBridgeRowId",
+        "boundOutcomeRowId"
+      ],
+      "properties": {
+        "privateSetupRequestSetId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "privateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestRowId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "boundPrivateSourceAdapterIntakeBridgeId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "boundBridgeRowId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "boundOutcomeRowId": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "setupMode": {
+      "type": "string",
+      "enum": ["new_setup", "extend_setup", "reuse_setup", "unknown"]
+    },
+    "sourceKind": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "sourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataMode", "allowedSourceKinds", "approvalStatus", "allowLiveFetch", "allowCredentialUse"],
+      "properties": {
+        "dataMode": {
+          "type": "string",
+          "enum": ["provided", "auto", "hybrid", "unknown"]
+        },
+        "allowedSourceKinds": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_required", "requested", "confirmed", "rejected", "unknown"]
+        },
+        "allowLiveFetch": { "type": "boolean" },
+        "allowCredentialUse": { "type": "boolean" }
+      }
+    },
+    "forecastIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["questionText", "outputType", "horizonLabel", "resolutionNeeded"],
+      "properties": {
+        "questionText": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 280
+        },
+        "outputType": {
+          "type": "string",
+          "enum": ["binary", "categorical", "numeric", "distribution", "unknown"]
+        },
+        "horizonLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "resolutionNeeded": { "type": "boolean" }
+      }
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": [
+        "ready_to_run_checked_command",
+        "confirmation_required",
+        "fixture_ready",
+        "runtime_not_implemented",
+        "source_replacement_required",
+        "rejected_unsafe_source",
+        "bad_request"
+      ]
+    },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "request_mapping_confirmation",
+        "use_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop",
+        "reject_bad_request"
+      ]
+    },
+    "allowedEntrypoint": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff_confirmation",
+        "auto_evidence_fixture",
+        "no_current_entrypoint"
+      ]
+    },
+    "commandToRun": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 360
+    },
+    "requiredCallerAction": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "none",
+            "confirmation_required",
+            "runtime_not_implemented",
+            "unsupported_source",
+            "rejected_unsafe_source",
+            "unknown_source_kind",
+            "missing_approval",
+            "bad_request"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        }
+      }
+    },
+    "exitCode": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatcherDoesNotExecute",
+        "normalChecksOffline",
+        "readsPrivateData",
+        "runsSuggestedCommand",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials"
+      ],
+      "properties": {
+        "dispatcherDoesNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsSuggestedCommand": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  }
+}

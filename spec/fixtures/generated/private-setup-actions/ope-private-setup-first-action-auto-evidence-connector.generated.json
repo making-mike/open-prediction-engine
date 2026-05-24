@@ -1,0 +1,57 @@
+{
+  "privateSetupFirstActionId": "privatesetupfirstaction-003",
+  "generatedAt": "2026-06-07T10:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "dispatcher_result_only",
+  "requestBinding": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-003",
+    "requestRowId": "privatesetuprequestrow-003",
+    "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "boundBridgeRowId": "privateadapterbridge-003",
+    "boundOutcomeRowId": "privateadapteroutcomerow-003"
+  },
+  "setupMode": "extend_setup",
+  "sourceKind": "auto_evidence_connector",
+  "sourcePolicy": {
+    "dataMode": "auto",
+    "allowedSourceKinds": [
+      "auto_evidence_connector"
+    ],
+    "approvalStatus": "not_required",
+    "allowLiveFetch": false,
+    "allowCredentialUse": false
+  },
+  "forecastIntent": {
+    "questionText": "Estimate a future operational probability from caller-approved auto evidence connector sources.",
+    "outputType": "binary",
+    "horizonLabel": "caller_declared",
+    "resolutionNeeded": true
+  },
+  "actionStatus": "fixture_ready",
+  "routeDecision": "use_fixture_evidence",
+  "allowedEntrypoint": "auto_evidence_fixture",
+  "commandToRun": "python3 scripts/ope.py gather-evidence",
+  "requiredCallerAction": "provide an accepted auto-evidence fixture request",
+  "error": {
+    "code": "none",
+    "message": "Ready to run fixture-mode policy-bound evidence gathering."
+  },
+  "exitCode": 0,
+  "executionBoundary": {
+    "dispatcherDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This dispatcher returns the first safe action only; it does not run the suggested command.",
+    "Forecast artifacts and scoring records require later intake, method, forecast, resolution, and scoring steps.",
+    "Commands named in this response are checked local entrypoints, not hidden side effects."
+  ]
+}

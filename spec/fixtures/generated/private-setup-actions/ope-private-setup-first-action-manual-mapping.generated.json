@@ -1,0 +1,57 @@
+{
+  "privateSetupFirstActionId": "privatesetupfirstaction-002",
+  "generatedAt": "2026-06-07T10:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "dispatcher_result_only",
+  "requestBinding": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-002",
+    "requestRowId": "privatesetuprequestrow-002",
+    "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "boundBridgeRowId": "privateadapterbridge-002",
+    "boundOutcomeRowId": "privateadapteroutcomerow-002"
+  },
+  "setupMode": "extend_setup",
+  "sourceKind": "manual_mapping",
+  "sourcePolicy": {
+    "dataMode": "provided",
+    "allowedSourceKinds": [
+      "manual_mapping"
+    ],
+    "approvalStatus": "requested",
+    "allowLiveFetch": false,
+    "allowCredentialUse": false
+  },
+  "forecastIntent": {
+    "questionText": "Estimate a future operational probability from caller-approved manual mapping sources.",
+    "outputType": "binary",
+    "horizonLabel": "caller_declared",
+    "resolutionNeeded": true
+  },
+  "actionStatus": "confirmation_required",
+  "routeDecision": "request_mapping_confirmation",
+  "allowedEntrypoint": "source_handoff_confirmation",
+  "commandToRun": "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+  "requiredCallerAction": "confirm source roles, field mappings, and aliases",
+  "error": {
+    "code": "confirmation_required",
+    "message": "Caller confirmation is required before source handoff."
+  },
+  "exitCode": 0,
+  "executionBoundary": {
+    "dispatcherDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This dispatcher returns the first safe action only; it does not run the suggested command.",
+    "Forecast artifacts and scoring records require later intake, method, forecast, resolution, and scoring steps.",
+    "Commands named in this response are checked local entrypoints, not hidden side effects."
+  ]
+}

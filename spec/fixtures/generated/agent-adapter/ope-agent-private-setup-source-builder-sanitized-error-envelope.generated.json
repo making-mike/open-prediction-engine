@@ -1,0 +1,54 @@
+{
+  "agentEnvelopeId": "agentenvelope-016",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "dry_run_generation"
+  },
+  "operation": "private_setup_source_builder",
+  "adapterRequest": {
+    "operation": "private_setup_source_builder",
+    "inputRecordType": "source_manifest_build",
+    "inputRef": "sourcemanifestbuild-000",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Inspect malformed source-builder input to demonstrate sanitized errors."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": null,
+    "approvalStatus": null,
+    "dataMode": null,
+    "planStatus": null,
+    "executionMode": null,
+    "sourceMode": null,
+    "forecastStatus": null,
+    "resolutionStatus": null,
+    "scoreStatus": null,
+    "qualityClaimStatus": null
+  },
+  "status": "error",
+  "exitCode": 2,
+  "payload": null,
+  "error": {
+    "code": "validation_failed",
+    "message": "Source-builder input could not be parsed or validated.",
+    "retryable": false
+  },
+  "warnings": [
+    "Error payloads are sanitized and must not expose local absolute paths or raw diagnostics."
+  ]
+}

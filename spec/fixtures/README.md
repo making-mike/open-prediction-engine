@@ -46,9 +46,18 @@ python3 scripts/run_source_handoff_forecast.py --write
 python3 scripts/resolve_source_handoff_outcome.py --write
 python3 scripts/generate_source_handoff_setup_runbook.py --write
 python3 scripts/generate_private_setup_workflow.py --write
+python3 scripts/generate_private_setup_requests.py --write
+python3 scripts/generate_private_setup_first_actions.py --write
+python3 scripts/generate_private_setup_first_action_runbook.py --write
+python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write
+python3 scripts/generate_private_source_kind_selection_examples.py --write
+python3 scripts/generate_private_source_kind_query_matrix.py --write
 python3 scripts/generate_recalculation_history.py --write
 python3 scripts/run_agent_forecast.py --write
 python3 scripts/generate_forecast_run_intake_matrix.py --write
@@ -103,11 +112,29 @@ The source handoff setup runbook generator emits a checked agent workflow under 
 
 The private setup workflow generator emits a checked domain-agnostic workflow contract under `generated/private-setup-workflow/` and preserves generic manual upload/private API/database runtimes as planned-only surfaces.
 
+The private setup request generator emits checked request-routing examples under `generated/private-setup-requests/` and keeps setup intent classification non-executing.
+
+The private setup first-action generator emits checked dispatcher examples under `generated/private-setup-actions/` and keeps each response non-executing even when it names a checked local command.
+
+The private setup first-action runbook generator emits checked guidance under `generated/private-setup-actions/` and keeps planned, unknown, unsafe, and approval-missing sources out of source intake.
+
+The private setup agent bundle generator emits checked request/action/runbook joins under `generated/private-setup-agent-bundles/` and keeps every bundle read-only and non-generating.
+
+The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
+
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.
 
 The private source adapter outcome generator emits a checked next-action matrix under `generated/private-source-adapters/` and keeps planned, unsupported, unsafe, and credential-missing cases non-generating.
 
 The private source adapter bridge generator emits a checked intake bridge under `generated/private-source-adapters/` and routes only to source-builder, source-handoff confirmation, fixture evidence, or no current entrypoint.
+
+The private source adapter guidance envelope joins the capability, outcome, and bridge records under `generated/agent-adapter/` without executing source reads or creating manifests, forecasts, scores, credentials, live fetches, or hosted runtime work.
+
+The private setup adapter conformance matrix embeds checked source-builder, source-handoff, method-gate, forecast-execution, and generated forecast readback envelopes under `generated/private-setup-adapter-conformance/` as conformance evidence only.
+
+The private setup adapter conformance summary emits a compact read surface under `generated/private-setup-adapter-conformance/` for routine agents that need counts and boundaries without the full embedded-envelope matrix.
+
+The private source-kind selection generator emits checked next-path examples under `generated/private-source-kind-selection/` and keeps every example non-executing and non-generating. The query-matrix generator in the same directory records full-list, selected, and unsupported adapter responses as conformance fixtures, not execution evidence.
 
 The recalculation history generator emits trigger, run, evidence, artifact, feature snapshot, and appended forecast-history records under `generated/recalculation/`.
 
@@ -129,6 +156,6 @@ The historical-only baseline generator emits checked no-API forecast records und
 
 The forecast-run generators emit a checked run summary, intake matrix, and agent runbook under `generated/forecast-run/`.
 
-The agent-adapter fixture and protocol-map generators emit checked transport-neutral envelopes and adapter mapping records under `generated/agent-adapter/` for request validation, evidence planning, card reads, bundle reads, resolution status, scoring summary, sanitized error behavior, local MCP stdio, and future adapters.
+The agent-adapter fixture and protocol-map generators emit checked transport-neutral envelopes and adapter mapping records under `generated/agent-adapter/` for request validation, evidence planning, card reads, lifecycle bundle reads, private setup bundle reads, private setup adapter-chain runbook reads, private source adapter guidance, local-file source-builder draft guidance, source-handoff next-action guidance, method-gate guidance, checked forecast execution, generated private setup forecast readback, resolution status, scoring summary, sanitized error behavior, local MCP stdio, and future adapters.
 
 Aggregate fixtures are included in `valid/` for dependency and source-correlation hardening checks.

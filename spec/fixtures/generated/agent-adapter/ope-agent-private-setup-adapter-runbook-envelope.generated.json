@@ -1,0 +1,488 @@
+{
+  "agentEnvelopeId": "agentenvelope-042",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "private_setup_adapter_runbook",
+  "adapterRequest": {
+    "operation": "private_setup_adapter_runbook",
+    "inputRecordType": "private_setup_adapter_chain_runbook",
+    "inputRef": "privatesetupadapterchainrunbook-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read the private setup adapter-chain runbook without executing adapter calls."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-001",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "adapter_chain_guidance",
+    "approvalStatus": "not_required",
+    "dataMode": "provided",
+    "planStatus": "runbook_guidance_only",
+    "executionMode": "read_only_guidance",
+    "sourceMode": "local_file",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "privateSetupAdapterChainRunbookId": "privatesetupadapterchainrunbook-001",
+    "generatedAt": "2026-06-07T11:10:00Z",
+    "scope": "private_setup_local_file_adapter_chain",
+    "runtimeStatus": "runbook_guidance_only",
+    "entrypoints": {
+      "runbookCommand": "python3 scripts/ope.py private-setup-adapter-runbook",
+      "adapterDispatcherCommand": "python3 scripts/ope.py agent-call",
+      "protocolMapFixture": "spec/fixtures/generated/agent-adapter/ope-agent-adapter-protocol-map.generated.json",
+      "runbookSchema": "spec/private-setup-adapter-chain-runbook.schema.json"
+    },
+    "sourcePath": {
+      "privateSetupRequestId": "privatesetuprequest-001",
+      "privateSetupAgentBundleId": "privatesetupagentbundle-001",
+      "sourceKind": "local_file",
+      "dataMode": "provided",
+      "approvalStatus": "not_required",
+      "allowLiveFetch": false,
+      "allowCredentialUse": false
+    },
+    "operationSequence": [
+      {
+        "runbookStepId": "adapterchainstep-001",
+        "order": 1,
+        "phase": "setup_guidance",
+        "operation": "private_setup_bundle",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001",
+        "mcpTool": "ope_private_setup_bundle",
+        "requiredInputs": [
+          {
+            "name": "privateSetupRequestId",
+            "value": "privatesetuprequest-001",
+            "source": "caller setup request"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.actionSummary.actionStatus",
+        "expectedPayloadStatusValue": "ready_to_run_checked_command",
+        "allowedNextOperations": [
+          "private_setup_source_builder"
+        ],
+        "nextAction": "run_source_builder",
+        "stopCondition": "Stop if the bundle does not route local files to source-builder guidance.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "read_only"
+      },
+      {
+        "runbookStepId": "adapterchainstep-002",
+        "order": 2,
+        "phase": "source_builder",
+        "operation": "private_setup_source_builder",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft",
+        "mcpTool": "ope_private_setup_source_builder",
+        "requiredInputs": [
+          {
+            "name": "privateSetupRequestId",
+            "value": "privatesetuprequest-001",
+            "source": "private setup bundle"
+          },
+          {
+            "name": "sourceBuilderCase",
+            "value": "local_draft",
+            "source": "checked local fixture case"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.sourceManifestBuild.buildStatus",
+        "expectedPayloadStatusValue": "draft_ready",
+        "allowedNextOperations": [
+          "private_setup_source_handoff"
+        ],
+        "nextAction": "run_source_handoff",
+        "stopCondition": "Stop until caller-reviewed mappings are ready for source-handoff guidance.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "dry_run_generation"
+      },
+      {
+        "runbookStepId": "adapterchainstep-003",
+        "order": 3,
+        "phase": "source_handoff",
+        "operation": "private_setup_source_handoff",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft",
+        "mcpTool": "ope_private_setup_source_handoff",
+        "requiredInputs": [
+          {
+            "name": "privateSetupRequestId",
+            "value": "privatesetuprequest-001",
+            "source": "private setup bundle"
+          },
+          {
+            "name": "sourceHandoffCase",
+            "value": "confirmed_builder_draft",
+            "source": "caller-confirmed source-builder draft"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.sourceIntakeHandoff.handoffStatus",
+        "expectedPayloadStatusValue": "ready_for_method_gating",
+        "allowedNextOperations": [
+          "private_setup_method_gate"
+        ],
+        "nextAction": "run_method_gate",
+        "stopCondition": "Stop unless the handoff is ready for method gating.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "dry_run_generation"
+      },
+      {
+        "runbookStepId": "adapterchainstep-004",
+        "order": 4,
+        "phase": "method_gate",
+        "operation": "private_setup_method_gate",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation private_setup_method_gate --private-setup-request-id privatesetuprequest-001 --method-gate-case confirmed_builder_draft",
+        "mcpTool": "ope_private_setup_method_gate",
+        "requiredInputs": [
+          {
+            "name": "privateSetupRequestId",
+            "value": "privatesetuprequest-001",
+            "source": "private setup bundle"
+          },
+          {
+            "name": "methodGateCase",
+            "value": "confirmed_builder_draft",
+            "source": "ready source-handoff fixture"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.sourceHandoffMethodGate.methodGateStatus",
+        "expectedPayloadStatusValue": "method_selected",
+        "allowedNextOperations": [
+          "private_setup_forecast_execution"
+        ],
+        "nextAction": "run_forecast_execution",
+        "stopCondition": "Stop unless method gates explicitly allow setup forecast execution.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "dry_run_generation"
+      },
+      {
+        "runbookStepId": "adapterchainstep-005",
+        "order": 5,
+        "phase": "forecast_execution",
+        "operation": "private_setup_forecast_execution",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation private_setup_forecast_execution --private-setup-request-id privatesetuprequest-001 --forecast-execution-case confirmed_builder_draft",
+        "mcpTool": "ope_private_setup_forecast_execution",
+        "requiredInputs": [
+          {
+            "name": "privateSetupRequestId",
+            "value": "privatesetuprequest-001",
+            "source": "private setup bundle"
+          },
+          {
+            "name": "forecastExecutionCase",
+            "value": "confirmed_builder_draft",
+            "source": "method-gate allowed fixture"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.setupForecastRun.runStatus",
+        "expectedPayloadStatusValue": "generated",
+        "allowedNextOperations": [
+          "forecast_card"
+        ],
+        "nextAction": "read_forecast_card",
+        "stopCondition": "Stop before readback if no forecastId and questionId are generated.",
+        "createsForecastArtifacts": true,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "forecast_execution"
+      },
+      {
+        "runbookStepId": "adapterchainstep-006",
+        "order": 6,
+        "phase": "forecast_readback",
+        "operation": "forecast_card",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+        "mcpTool": "ope_forecast_card",
+        "requiredInputs": [
+          {
+            "name": "forecastId",
+            "value": "forecast-1102",
+            "source": "setup forecast execution result"
+          },
+          {
+            "name": "questionId",
+            "value": "question-1102",
+            "source": "setup forecast execution result"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.record.status",
+        "expectedPayloadStatusValue": "resolved",
+        "allowedNextOperations": [
+          "lifecycle_bundle"
+        ],
+        "nextAction": "read_lifecycle_bundle",
+        "stopCondition": "Stop if the card does not preserve setup forecast run and source-handoff bindings.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "read_only"
+      },
+      {
+        "runbookStepId": "adapterchainstep-007",
+        "order": 7,
+        "phase": "forecast_readback",
+        "operation": "lifecycle_bundle",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-1102 --question-id question-1102",
+        "mcpTool": "ope_lifecycle_bundle",
+        "requiredInputs": [
+          {
+            "name": "forecastId",
+            "value": "forecast-1102",
+            "source": "setup forecast execution result"
+          },
+          {
+            "name": "questionId",
+            "value": "question-1102",
+            "source": "setup forecast execution result"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.record.includedRecords.setupForecastRun",
+        "expectedPayloadStatusValue": "setupforecastrun-1102",
+        "allowedNextOperations": [
+          "resolution_status"
+        ],
+        "nextAction": "check_resolution_status",
+        "stopCondition": "Use the bundle for audit context, not as a new forecast source.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "read_only"
+      },
+      {
+        "runbookStepId": "adapterchainstep-008",
+        "order": 8,
+        "phase": "forecast_readback",
+        "operation": "resolution_status",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-1102 --question-id question-1102",
+        "mcpTool": "ope_resolution_status",
+        "requiredInputs": [
+          {
+            "name": "forecastId",
+            "value": "forecast-1102",
+            "source": "setup forecast execution result"
+          },
+          {
+            "name": "questionId",
+            "value": "question-1102",
+            "source": "setup forecast execution result"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.resolutionStatus",
+        "expectedPayloadStatusValue": "resolved",
+        "allowedNextOperations": [
+          "scoring_summary"
+        ],
+        "nextAction": "read_scoring_summary",
+        "stopCondition": "Do not score unresolved, ambiguous, annulled, or unscorable outcomes as normal.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "status_read"
+      },
+      {
+        "runbookStepId": "adapterchainstep-009",
+        "order": 9,
+        "phase": "forecast_readback",
+        "operation": "scoring_summary",
+        "cliCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
+        "mcpTool": "ope_scoring_summary",
+        "requiredInputs": [
+          {
+            "name": "forecastId",
+            "value": "forecast-1102",
+            "source": "setup forecast execution result"
+          },
+          {
+            "name": "questionId",
+            "value": "question-1102",
+            "source": "setup forecast execution result"
+          }
+        ],
+        "expectedEnvelopeStatus": "ok",
+        "expectedPayloadStatusField": "payload.scoreStatus",
+        "expectedPayloadStatusValue": "scored",
+        "allowedNextOperations": [],
+        "nextAction": "stop",
+        "stopCondition": "Stop before quality claims because source-handoff sample size remains below threshold.",
+        "createsForecastArtifacts": false,
+        "createsScoringRecords": false,
+        "sideEffectLevel": "scoring_read"
+      }
+    ],
+    "branchPlaybooks": [
+      {
+        "branchId": "adapterchainbranch-001",
+        "branchName": "mapping_confirmation_required",
+        "triggerOperation": "private_setup_source_handoff",
+        "triggerCase": "unconfirmed_builder_draft",
+        "triggerStatusField": "payload.sourceIntakeHandoff.handoffStatus",
+        "triggerStatus": "needs_mapping_confirmation",
+        "nextAction": "ask_mapping_confirmation",
+        "allowedNextOperation": null,
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "stopCondition": "Stop until the caller confirms inferred mappings and aliases.",
+        "agentInstruction": "Ask for confirmation; do not proceed to method gates or forecasts from proposed mappings."
+      },
+      {
+        "branchId": "adapterchainbranch-002",
+        "branchName": "confirmed_handoff_ready",
+        "triggerOperation": "private_setup_source_handoff",
+        "triggerCase": "confirmed_builder_draft",
+        "triggerStatusField": "payload.sourceIntakeHandoff.handoffStatus",
+        "triggerStatus": "ready_for_method_gating",
+        "nextAction": "run_method_gate",
+        "allowedNextOperation": "private_setup_method_gate",
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "stopCondition": "Proceed only to method gates; source-handoff itself does not forecast.",
+        "agentInstruction": "Carry source-intake, field-mapping, and handoff IDs into method-gate guidance."
+      },
+      {
+        "branchId": "adapterchainbranch-003",
+        "branchName": "insufficient_data",
+        "triggerOperation": "private_setup_source_handoff",
+        "triggerCase": "insufficient_confirmed_builder_draft",
+        "triggerStatusField": "payload.sourceIntakeHandoff.handoffStatus",
+        "triggerStatus": "needs_more_data",
+        "nextAction": "collect_more_data",
+        "allowedNextOperation": "private_setup_source_builder",
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "stopCondition": "Stop until the caller supplies enough usable forecast-time and outcome rows.",
+        "agentInstruction": "Return to source-builder guidance after adding data; do not force a method gate."
+      },
+      {
+        "branchId": "adapterchainbranch-004",
+        "branchName": "rejected_source",
+        "triggerOperation": "private_setup_source_builder",
+        "triggerCase": "contains_secret",
+        "triggerStatusField": "payload.sourceManifestBuild.buildStatus",
+        "triggerStatus": "rejected",
+        "nextAction": "replace_rejected_sources",
+        "allowedNextOperation": "private_setup_source_builder",
+        "forecastArtifactsAllowed": false,
+        "scoringAllowed": false,
+        "stopCondition": "Stop until rejected, secret-bearing, oversized, unsupported, or leakage sources are replaced.",
+        "agentInstruction": "Do not pass rejected builder outputs to source-handoff, method gates, forecasts, or scoring."
+      },
+      {
+        "branchId": "adapterchainbranch-005",
+        "branchName": "generated_forecast_readback",
+        "triggerOperation": "private_setup_forecast_execution",
+        "triggerCase": "confirmed_builder_draft",
+        "triggerStatusField": "payload.setupForecastRun.runStatus",
+        "triggerStatus": "generated",
+        "nextAction": "read_forecast_card",
+        "allowedNextOperation": "forecast_card",
+        "forecastArtifactsAllowed": true,
+        "scoringAllowed": false,
+        "stopCondition": "Read generated forecasts through normal read operations before any downstream use.",
+        "agentInstruction": "Use forecast-1102 and question-1102 with card, bundle, resolution, and scoring reads."
+      }
+    ],
+    "executionBoundary": {
+      "runbookDoesNotExecute": true,
+      "runsAdapterCalls": false,
+      "readsPrivateData": false,
+      "createsSourceManifests": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "createsHostedRuntime": false,
+      "normalChecksOffline": true
+    },
+    "guards": [
+      {
+        "guardId": "adapterchainguard-001",
+        "name": "operation_binding",
+        "rule": "Every step must bind an existing protocol-map operation and MCP tool.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      },
+      {
+        "guardId": "adapterchainguard-002",
+        "name": "local_file_path_only",
+        "rule": "The current adapter chain runbook covers only the checked local-file private setup path.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      },
+      {
+        "guardId": "adapterchainguard-003",
+        "name": "confirmation_before_method_gate",
+        "rule": "Unconfirmed source-handoff cases must stop for caller mapping confirmation before method gates.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      },
+      {
+        "guardId": "adapterchainguard-004",
+        "name": "blocked_cases_do_not_forecast",
+        "rule": "Insufficient-data and rejected-source branches must not allow forecast artifacts or scoring.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      },
+      {
+        "guardId": "adapterchainguard-005",
+        "name": "normal_readback_operations",
+        "rule": "Generated setup forecasts must use normal readback operations instead of a private read API.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      },
+      {
+        "guardId": "adapterchainguard-006",
+        "name": "guidance_only_boundary",
+        "rule": "The runbook may name adapter calls but must not execute them or create records.",
+        "checkedBy": [
+          "scripts/check_private_setup_adapter_chain_runbook.py"
+        ]
+      }
+    ],
+    "warnings": [
+      "This runbook is guidance over adapter operations; it does not execute adapter calls.",
+      "Mapping confirmation, insufficient data, and rejected source cases stop before method gates or forecast artifacts.",
+      "Generated setup forecasts are read through normal forecast readback operations, not a private setup read API.",
+      "The runbook does not imply hosted service, production adapter runtime, live fetching, credential handling, calibration, or quality claims."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "This runbook is guidance over adapter operations; it does not execute adapter calls.",
+    "Mapping confirmation, insufficient data, and rejected source cases stop before method gates or forecast artifacts.",
+    "Generated setup forecasts are read through normal forecast readback operations, not a private setup read API.",
+    "The runbook does not imply hosted service, production adapter runtime, live fetching, credential handling, calibration, or quality claims.",
+    "The adapter envelope is read-only and does not execute the operation sequence."
+  ]
+}

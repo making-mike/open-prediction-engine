@@ -231,6 +231,58 @@ python3 scripts/ope.py private-setup-workflow --check
 python3 scripts/check_private_setup_workflow.py
 ```
 
+Validate private setup request routing:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-requests/ope-private-setup-requests.generated.json \
+  --schema spec/private-setup-request.schema.json
+python3 scripts/ope.py private-setup-requests --check
+python3 scripts/check_private_setup_requests.py
+```
+
+Validate private setup first-action dispatch:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-actions/ope-private-setup-first-action-local-file.generated.json \
+  --schema spec/private-setup-first-action.schema.json
+python3 scripts/ope.py private-setup-actions --check
+python3 scripts/ope.py private-setup-action --request-id privatesetuprequest-001
+python3 scripts/check_private_setup_first_actions.py
+```
+
+Validate private setup first-action runbook guidance:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-actions/ope-private-setup-first-action-runbook.generated.json \
+  --schema spec/private-setup-first-action-runbook.schema.json
+python3 scripts/ope.py private-setup-action-runbook --check
+python3 scripts/check_private_setup_first_action_runbook.py
+```
+
+Validate private setup agent bundles:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-agent-bundles/ope-private-setup-agent-bundle-local-file.generated.json \
+  --schema spec/private-setup-agent-bundle.schema.json
+python3 scripts/ope.py private-setup-bundles --check
+python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
+python3 scripts/check_private_setup_agent_bundles.py
+```
+
+Validate private setup adapter-chain runbook guidance:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-adapter-chain/ope-private-setup-adapter-chain-runbook.generated.json \
+  --schema spec/private-setup-adapter-chain-runbook.schema.json
+python3 scripts/ope.py private-setup-adapter-runbook --check
+python3 scripts/check_private_setup_adapter_chain_runbook.py
+```
+
 Validate private source adapter capabilities:
 
 ```bash
@@ -259,6 +311,68 @@ python3 scripts/validate_contract_record.py \
   --schema spec/private-source-adapter-intake-bridge.schema.json
 python3 scripts/ope.py private-source-adapter-bridge --check
 python3 scripts/check_private_source_adapter_intake_bridge.py
+```
+
+Validate the private source adapter guidance envelope:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/agent-adapter/ope-agent-private-source-adapter-guidance-envelope.generated.json \
+  --schema spec/agent-envelope.schema.json
+python3 scripts/ope.py agent-call --operation private_source_adapter_guidance
+python3 scripts/check_agent_adapter.py
+```
+
+Validate private source-kind selection examples:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-source-kind-selection/ope-private-source-kind-selection-examples.generated.json \
+  --schema spec/private-source-kind-selection-examples.schema.json
+python3 scripts/ope.py private-source-kind-selection --check
+python3 scripts/check_private_source_kind_selection_examples.py
+```
+
+Validate the private source-kind selection adapter envelope:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/agent-adapter/ope-agent-private-source-kind-selection-envelope.generated.json \
+  --schema spec/agent-envelope.schema.json
+python3 scripts/ope.py agent-call --operation private_source_kind_selection
+python3 scripts/ope.py agent-call --operation private_source_kind_selection --source-kind private_api
+python3 scripts/check_agent_adapter.py
+```
+
+Validate the private source-kind query matrix:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-source-kind-selection/ope-private-source-kind-query-matrix.generated.json \
+  --schema spec/private-source-kind-query-matrix.schema.json
+python3 scripts/ope.py private-source-kind-query-matrix --check
+python3 scripts/check_private_source_kind_query_matrix.py
+```
+
+Validate the private setup adapter conformance matrix:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-matrix.generated.json \
+  --schema spec/private-setup-adapter-conformance-matrix.schema.json
+python3 scripts/ope.py private-setup-adapter-conformance --check
+python3 scripts/check_private_setup_adapter_conformance_matrix.py
+```
+
+Validate the compact private setup adapter conformance summary:
+
+```bash
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-summary.generated.json \
+  --schema spec/private-setup-adapter-conformance-summary.schema.json
+python3 scripts/ope.py private-setup-adapter-conformance-summary --check
+python3 scripts/check_private_setup_adapter_conformance_summary.py
+python3 scripts/ope.py agent-call --operation private_setup_adapter_conformance_summary
 ```
 
 Validate recalculation history records:
@@ -314,7 +428,11 @@ Validate the agent adapter envelope contract:
 python3 scripts/validate_contract_record.py \
   --input spec/fixtures/generated/agent-adapter/ope-agent-forecast-card-envelope.generated.json \
   --schema spec/agent-envelope.schema.json
+python3 scripts/validate_contract_record.py \
+  --input spec/fixtures/generated/agent-adapter/ope-agent-private-setup-adapter-runbook-envelope.generated.json \
+  --schema spec/agent-envelope.schema.json
 python3 scripts/build_agent_adapter_fixtures.py --check
+python3 scripts/check_agent_adapter.py
 python3 scripts/check_agent_adapter_dispatcher.py
 ```
 

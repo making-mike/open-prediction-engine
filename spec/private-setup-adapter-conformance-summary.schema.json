@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-adapter-conformance-summary.schema.json",
+  "title": "Private Setup Adapter Conformance Summary",
+  "description": "Compact read surface summarizing checked private setup adapter conformance without embedding full envelopes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupAdapterConformanceSummaryId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "caseTotals",
+    "phaseSummaries",
+    "operationSummaries",
+    "artifactBoundary",
+    "sanitizedErrorCoverage",
+    "readSurface",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupAdapterConformanceSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["compact_adapter_conformance_summary"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupAdapterConformanceMatrixId",
+        "privateSetupAdapterConformanceMatrixPath",
+        "agentEnvelopeSchema",
+        "protocolMapId",
+        "generatedForecastId",
+        "generatedQuestionId"
+      ],
+      "properties": {
+        "privateSetupAdapterConformanceMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupAdapterConformanceMatrixPath": {
+          "type": "string",
+          "const": "spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-matrix.generated.json"
+        },
+        "agentEnvelopeSchema": {
+          "type": "string",
+          "const": "spec/agent-envelope.schema.json"
+        },
+        "protocolMapId": { "$ref": "common.schema.json#/$defs/id" },
+        "generatedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "generatedQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "caseTotals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalCases",
+        "successCases",
+        "errorCases",
+        "artifactGeneratingCases",
+        "publicReadRecordGeneratingCases",
+        "blockedForecastExecutionCases",
+        "readbackCases"
+      ],
+      "properties": {
+        "totalCases": { "type": "integer", "const": 31 },
+        "successCases": { "type": "integer", "const": 30 },
+        "errorCases": { "type": "integer", "const": 1 },
+        "artifactGeneratingCases": { "type": "integer", "const": 1 },
+        "publicReadRecordGeneratingCases": { "type": "integer", "const": 1 },
+        "blockedForecastExecutionCases": { "type": "integer", "const": 6 },
+        "readbackCases": { "type": "integer", "const": 4 }
+      }
+    },
+    "phaseSummaries": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/phaseSummary" }
+    },
+    "operationSummaries": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/operationSummary" }
+    },
+    "artifactBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactCreationAllowedOnlyFor",
+        "generatedForecastId",
+        "generatedQuestionId",
+        "normalReadbackOperations",
+        "qualityClaimAllowed",
+        "matrixCreatesArtifacts"
+      ],
+      "properties": {
+        "artifactCreationAllowedOnlyFor": {
+          "type": "string",
+          "const": "private_setup_forecast_execution:confirmed_builder_draft"
+        },
+        "generatedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "generatedQuestionId": { "$ref": "common.schema.json#/$defs/id" },
+        "normalReadbackOperations": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/readbackOperation" }
+        },
+        "qualityClaimAllowed": { "type": "boolean", "const": false },
+        "matrixCreatesArtifacts": { "type": "boolean", "const": false }
+      }
+    },
+    "sanitizedErrorCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "covered",
+        "errorCases",
+        "operations",
+        "errorCodes"
+      ],
+      "properties": {
+        "covered": { "type": "boolean" },
+        "errorCases": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/operation" }
+        },
+        "errorCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "enum": ["validation_failed"]
+          }
+        }
+      }
+    },
+    "readSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compactSummaryDoesNotEmbedEnvelopes",
+        "fullMatrixForImplementers",
+        "agentOperation",
+        "mcpTool",
+        "recommendedForRoutineAgents"
+      ],
+      "properties": {
+        "compactSummaryDoesNotEmbedEnvelopes": { "type": "boolean", "const": true },
+        "fullMatrixForImplementers": {
+          "type": "string",
+          "const": "spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-matrix.generated.json"
+        },
+        "agentOperation": {
+          "type": "string",
+          "const": "private_setup_adapter_conformance_summary"
+        },
+        "mcpTool": {
+          "type": "string",
+          "const": "ope_private_setup_adapter_conformance_summary"
+        },
+        "recommendedForRoutineAgents": { "type": "boolean", "const": true }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summaryDoesNotExecute",
+        "summaryDoesNotEmbedEnvelopes",
+        "readsPrivateData",
+        "runsCommands",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "resolvesOutcomes",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime"
+      ],
+      "properties": {
+        "summaryDoesNotExecute": { "type": "boolean" },
+        "summaryDoesNotEmbedEnvelopes": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsCommands": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "resolvesOutcomes": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsHostedRuntime": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff",
+        "method_gate",
+        "forecast_execution",
+        "forecast_readback"
+      ]
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "readbackOperation": {
+      "type": "string",
+      "enum": [
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ]
+    },
+    "payloadShape": {
+      "type": "string",
+      "enum": [
+        "source_builder_result",
+        "source_handoff_result",
+        "method_gate_result",
+        "forecast_execution_result",
+        "forecast_card_readback",
+        "lifecycle_bundle_readback",
+        "resolution_status_readback",
+        "scoring_summary_readback",
+        "sanitized_error"
+      ]
+    },
+    "phaseSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "caseCount",
+        "successCases",
+        "errorCases",
+        "artifactGeneratingCases",
+        "allowedNextActions"
+      ],
+      "properties": {
+        "phase": { "$ref": "#/$defs/phase" },
+        "caseCount": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "successCases": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "errorCases": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "artifactGeneratingCases": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "allowedNextActions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "operationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "phase",
+        "caseCount",
+        "payloadShapes",
+        "canCreateForecastArtifacts",
+        "usesNormalForecastReadSurface"
+      ],
+      "properties": {
+        "operation": { "$ref": "#/$defs/operation" },
+        "phase": { "$ref": "#/$defs/phase" },
+        "caseCount": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "payloadShapes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/payloadShape" }
+        },
+        "canCreateForecastArtifacts": { "type": "boolean" },
+        "usesNormalForecastReadSurface": { "type": "boolean" }
+      }
+    }
+  }
+}

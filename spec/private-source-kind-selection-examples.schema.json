@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-source-kind-selection-examples.schema.json",
+  "title": "Private Source Kind Selection Examples",
+  "description": "Checked examples that help agents choose the next private setup path from source-kind guidance without executing source reads.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSourceKindSelectionExamplesId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "selectionExamples",
+    "executionBoundary",
+    "guards",
+    "warnings"
+  ],
+  "properties": {
+    "privateSourceKindSelectionExamplesId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["selection_examples_only"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentEnvelopeId",
+        "privateSourceAdapterGuidanceId",
+        "privateSourceAdapterCapabilityId",
+        "privateSourceAdapterOutcomeMatrixId",
+        "privateSourceAdapterIntakeBridgeId",
+        "privateSetupRequestSetId",
+        "privateSetupAdapterChainRunbookId"
+      ],
+      "properties": {
+        "agentEnvelopeId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSourceAdapterGuidanceId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSourceAdapterCapabilityId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSourceAdapterOutcomeMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSourceAdapterIntakeBridgeId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupRequestSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupAdapterChainRunbookId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "selectionExamples": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/selectionExample" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "examplesDoNotExecute",
+        "normalChecksOffline",
+        "readsPrivateData",
+        "runsCommands",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime"
+      ],
+      "properties": {
+        "examplesDoNotExecute": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsCommands": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsHostedRuntime": { "type": "boolean" }
+      }
+    },
+    "guards": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/guard" }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "manual_upload",
+        "auto_evidence_connector",
+        "private_api",
+        "private_database",
+        "unregistered_source",
+        "unsafe_source"
+      ]
+    },
+    "entrypoint": {
+      "type": "string",
+      "enum": [
+        "source_builder",
+        "source_handoff_confirmation",
+        "auto_evidence_fixture",
+        "no_current_entrypoint"
+      ]
+    },
+    "immediateAction": {
+      "type": "string",
+      "enum": [
+        "call_source_builder_adapter",
+        "request_mapping_confirmation",
+        "call_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "reject_source"
+      ]
+    },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "run_source_builder",
+        "request_mapping_confirmation",
+        "use_fixture_evidence",
+        "wait_for_runtime",
+        "replace_source",
+        "stop"
+      ]
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": [
+        "ready_to_run_checked_command",
+        "confirmation_required",
+        "fixture_ready",
+        "runtime_not_implemented",
+        "source_replacement_required",
+        "rejected_unsafe_source"
+      ]
+    },
+    "chainApplicability": {
+      "type": "string",
+      "enum": [
+        "current_local_file_chain",
+        "mapping_confirmation_branch",
+        "outside_current_adapter_chain",
+        "planned_runtime_blocked",
+        "source_replacement_stop",
+        "unsafe_source_stop"
+      ]
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableOperation": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "private_setup_source_builder",
+            "private_setup_source_handoff"
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "guidanceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKind",
+        "outcomeClass",
+        "setupOutcomeClass",
+        "allowedEntrypoint",
+        "currentCommand",
+        "agentNextAction"
+      ],
+      "properties": {
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "outcomeClass": {
+          "type": "string",
+          "enum": [
+            "available_fixture",
+            "approval_required_fixture",
+            "planned_runtime",
+            "unsupported_source",
+            "credential_missing",
+            "rejected_unsafe_source"
+          ]
+        },
+        "setupOutcomeClass": {
+          "type": "string",
+          "enum": [
+            "setup_ready",
+            "needs_confirmation",
+            "runtime_not_implemented",
+            "unsupported_source",
+            "rejected_source"
+          ]
+        },
+        "allowedEntrypoint": { "$ref": "#/$defs/entrypoint" },
+        "currentCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        },
+        "agentNextAction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        }
+      }
+    },
+    "firstActionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupFirstActionId",
+        "privateSetupRequestId",
+        "actionStatus",
+        "routeDecision",
+        "allowedEntrypoint",
+        "commandToRun"
+      ],
+      "properties": {
+        "privateSetupFirstActionId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "actionStatus": { "$ref": "#/$defs/actionStatus" },
+        "routeDecision": { "$ref": "#/$defs/routeDecision" },
+        "allowedEntrypoint": { "$ref": "#/$defs/entrypoint" },
+        "commandToRun": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        }
+      }
+    },
+    "adapterChainBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicability",
+        "runbookStepId",
+        "branchId",
+        "nextOperationAfterPrerequisites",
+        "adapterCommandAfterPrerequisites"
+      ],
+      "properties": {
+        "applicability": { "$ref": "#/$defs/chainApplicability" },
+        "runbookStepId": { "$ref": "#/$defs/nullableId" },
+        "branchId": { "$ref": "#/$defs/nullableId" },
+        "nextOperationAfterPrerequisites": { "$ref": "#/$defs/nullableOperation" },
+        "adapterCommandAfterPrerequisites": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 420
+        }
+      }
+    },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "immediateAction",
+        "requiresCallerConfirmation",
+        "requiresFutureRuntime",
+        "stopBeforeForecast",
+        "forecastArtifactsAllowed",
+        "scoringAllowed",
+        "agentInstruction"
+      ],
+      "properties": {
+        "immediateAction": { "$ref": "#/$defs/immediateAction" },
+        "requiresCallerConfirmation": { "type": "boolean" },
+        "requiresFutureRuntime": { "type": "boolean" },
+        "stopBeforeForecast": { "type": "boolean" },
+        "forecastArtifactsAllowed": { "type": "boolean" },
+        "scoringAllowed": { "type": "boolean" },
+        "agentInstruction": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        }
+      }
+    },
+    "selectionExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selectionExampleId",
+        "sourceKind",
+        "guidanceBinding",
+        "firstActionBinding",
+        "adapterChainBinding",
+        "recommendation"
+      ],
+      "properties": {
+        "selectionExampleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "guidanceBinding": { "$ref": "#/$defs/guidanceBinding" },
+        "firstActionBinding": { "$ref": "#/$defs/firstActionBinding" },
+        "adapterChainBinding": { "$ref": "#/$defs/adapterChainBinding" },
+        "recommendation": { "$ref": "#/$defs/recommendation" }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "name", "rule", "checkedBy"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        },
+        "checkedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}

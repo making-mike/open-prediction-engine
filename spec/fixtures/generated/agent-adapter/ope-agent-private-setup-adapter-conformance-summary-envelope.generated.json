@@ -1,0 +1,273 @@
+{
+  "agentEnvelopeId": "agentenvelope-045",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "private_setup_adapter_conformance_summary",
+  "adapterRequest": {
+    "operation": "private_setup_adapter_conformance_summary",
+    "inputRecordType": "private_setup_adapter_conformance_summary",
+    "inputRef": "privatesetupadapterconformancesummary-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read compact private setup adapter conformance guidance without loading full envelopes."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "adapter_conformance_summary",
+    "approvalStatus": "not_required",
+    "dataMode": "generated_fixture",
+    "planStatus": "compact_adapter_conformance_summary",
+    "executionMode": "read_only_guidance",
+    "sourceMode": "private_setup_adapter_conformance",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_started",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "privateSetupAdapterConformanceSummaryId": "privatesetupadapterconformancesummary-001",
+    "generatedAt": "2026-06-07T13:15:00Z",
+    "scope": "domain_agnostic",
+    "runtimeStatus": "compact_adapter_conformance_summary",
+    "bindings": {
+      "privateSetupAdapterConformanceMatrixId": "privatesetupadapterconformancematrix-001",
+      "privateSetupAdapterConformanceMatrixPath": "spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-matrix.generated.json",
+      "agentEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "protocolMapId": "protocolmap-001",
+      "generatedForecastId": "forecast-1102",
+      "generatedQuestionId": "question-1102"
+    },
+    "caseTotals": {
+      "totalCases": 31,
+      "successCases": 30,
+      "errorCases": 1,
+      "artifactGeneratingCases": 1,
+      "publicReadRecordGeneratingCases": 1,
+      "blockedForecastExecutionCases": 6,
+      "readbackCases": 4
+    },
+    "phaseSummaries": [
+      {
+        "phase": "source_builder",
+        "caseCount": 6,
+        "successCases": 5,
+        "errorCases": 1,
+        "artifactGeneratingCases": 0,
+        "allowedNextActions": [
+          "review_and_confirm_mappings",
+          "replace_rejected_sources",
+          "fix_source_builder_input"
+        ]
+      },
+      {
+        "phase": "source_handoff",
+        "caseCount": 7,
+        "successCases": 7,
+        "errorCases": 0,
+        "artifactGeneratingCases": 0,
+        "allowedNextActions": [
+          "ask_mapping_confirmation",
+          "run_setup_method_gate",
+          "collect_more_data",
+          "replace_rejected_sources"
+        ]
+      },
+      {
+        "phase": "method_gate",
+        "caseCount": 7,
+        "successCases": 7,
+        "errorCases": 0,
+        "artifactGeneratingCases": 0,
+        "allowedNextActions": [
+          "ask_mapping_confirmation",
+          "await_explicit_setup_forecast_execution",
+          "collect_more_data",
+          "replace_rejected_sources"
+        ]
+      },
+      {
+        "phase": "forecast_execution",
+        "caseCount": 7,
+        "successCases": 7,
+        "errorCases": 0,
+        "artifactGeneratingCases": 1,
+        "allowedNextActions": [
+          "ask_mapping_confirmation",
+          "read_forecast_card",
+          "collect_more_data",
+          "replace_rejected_sources"
+        ]
+      },
+      {
+        "phase": "forecast_readback",
+        "caseCount": 4,
+        "successCases": 4,
+        "errorCases": 0,
+        "artifactGeneratingCases": 0,
+        "allowedNextActions": [
+          "inspect_forecast_card",
+          "inspect_lifecycle_bundle",
+          "inspect_resolution_status",
+          "inspect_scoring_summary"
+        ]
+      }
+    ],
+    "operationSummaries": [
+      {
+        "operation": "private_setup_source_builder",
+        "phase": "source_builder",
+        "caseCount": 6,
+        "payloadShapes": [
+          "source_builder_result",
+          "sanitized_error"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": false
+      },
+      {
+        "operation": "private_setup_source_handoff",
+        "phase": "source_handoff",
+        "caseCount": 7,
+        "payloadShapes": [
+          "source_handoff_result"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": false
+      },
+      {
+        "operation": "private_setup_method_gate",
+        "phase": "method_gate",
+        "caseCount": 7,
+        "payloadShapes": [
+          "method_gate_result"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": false
+      },
+      {
+        "operation": "private_setup_forecast_execution",
+        "phase": "forecast_execution",
+        "caseCount": 7,
+        "payloadShapes": [
+          "forecast_execution_result"
+        ],
+        "canCreateForecastArtifacts": true,
+        "usesNormalForecastReadSurface": false
+      },
+      {
+        "operation": "forecast_card",
+        "phase": "forecast_readback",
+        "caseCount": 1,
+        "payloadShapes": [
+          "forecast_card_readback"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": true
+      },
+      {
+        "operation": "lifecycle_bundle",
+        "phase": "forecast_readback",
+        "caseCount": 1,
+        "payloadShapes": [
+          "lifecycle_bundle_readback"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": true
+      },
+      {
+        "operation": "resolution_status",
+        "phase": "forecast_readback",
+        "caseCount": 1,
+        "payloadShapes": [
+          "resolution_status_readback"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": true
+      },
+      {
+        "operation": "scoring_summary",
+        "phase": "forecast_readback",
+        "caseCount": 1,
+        "payloadShapes": [
+          "scoring_summary_readback"
+        ],
+        "canCreateForecastArtifacts": false,
+        "usesNormalForecastReadSurface": true
+      }
+    ],
+    "artifactBoundary": {
+      "artifactCreationAllowedOnlyFor": "private_setup_forecast_execution:confirmed_builder_draft",
+      "generatedForecastId": "forecast-1102",
+      "generatedQuestionId": "question-1102",
+      "normalReadbackOperations": [
+        "forecast_card",
+        "lifecycle_bundle",
+        "resolution_status",
+        "scoring_summary"
+      ],
+      "qualityClaimAllowed": false,
+      "matrixCreatesArtifacts": false
+    },
+    "sanitizedErrorCoverage": {
+      "covered": true,
+      "errorCases": 1,
+      "operations": [
+        "private_setup_source_builder"
+      ],
+      "errorCodes": [
+        "validation_failed"
+      ]
+    },
+    "readSurface": {
+      "compactSummaryDoesNotEmbedEnvelopes": true,
+      "fullMatrixForImplementers": "spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-matrix.generated.json",
+      "agentOperation": "private_setup_adapter_conformance_summary",
+      "mcpTool": "ope_private_setup_adapter_conformance_summary",
+      "recommendedForRoutineAgents": true
+    },
+    "executionBoundary": {
+      "summaryDoesNotExecute": true,
+      "summaryDoesNotEmbedEnvelopes": true,
+      "readsPrivateData": false,
+      "runsCommands": false,
+      "createsSourceManifests": false,
+      "createsFieldMappings": false,
+      "createsForecastArtifacts": false,
+      "createsScoringRecords": false,
+      "resolvesOutcomes": false,
+      "fetchesLiveData": false,
+      "storesCredentials": false,
+      "createsHostedRuntime": false
+    },
+    "warnings": [
+      "This summary is read-only conformance guidance and does not execute adapter calls.",
+      "Routine agents should use this compact summary before loading the full embedded-envelope matrix.",
+      "Only the confirmed forecast-execution case in the referenced matrix points to generated fixture forecast artifacts."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "This summary is read-only conformance guidance and does not execute adapter calls.",
+    "Routine agents should use this compact summary before loading the full embedded-envelope matrix.",
+    "Only the confirmed forecast-execution case in the referenced matrix points to generated fixture forecast artifacts.",
+    "The adapter envelope is read-only and does not execute adapter calls or create forecast artifacts."
+  ]
+}

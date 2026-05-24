@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-source-kind-query-matrix.schema.json",
+  "title": "Private Source Kind Query Matrix",
+  "description": "Checked adapter-query examples for full-list, selected source-kind, and unsupported private source-kind selection responses.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSourceKindQueryMatrixId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "queryCases",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSourceKindQueryMatrixId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["adapter_query_examples_only"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSourceKindSelectionExamplesId",
+        "agentEnvelopeSchema",
+        "protocolMapId"
+      ],
+      "properties": {
+        "privateSourceKindSelectionExamplesId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentEnvelopeSchema": {
+          "type": "string",
+          "const": "spec/agent-envelope.schema.json"
+        },
+        "protocolMapId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "queryCases": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/queryCase" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matrixDoesNotExecute",
+        "usesAdapterEnvelopeOnly",
+        "readsPrivateData",
+        "runsCommands",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime"
+      ],
+      "properties": {
+        "matrixDoesNotExecute": { "type": "boolean" },
+        "usesAdapterEnvelopeOnly": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "runsCommands": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsHostedRuntime": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        { "type": "null" }
+      ]
+    },
+    "nullableErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["bad_request"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "nullableAction": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "call_source_builder_adapter",
+            "request_mapping_confirmation",
+            "call_fixture_evidence",
+            "wait_for_runtime",
+            "replace_source",
+            "reject_source"
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "queryMode": {
+      "type": "string",
+      "enum": [
+        "full_list",
+        "selected_source_kind",
+        "unsupported_source_kind"
+      ]
+    },
+    "payloadShape": {
+      "type": "string",
+      "enum": [
+        "full_examples",
+        "selected_example_only",
+        "sanitized_error"
+      ]
+    },
+    "queryCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queryCaseId",
+        "queryMode",
+        "sourceKind",
+        "agentCallCommand",
+        "mcpTool",
+        "expectedStatus",
+        "expectedExitCode",
+        "expectedErrorCode",
+        "payloadShape",
+        "expectedImmediateAction",
+        "selectedExampleId",
+        "envelope"
+      ],
+      "properties": {
+        "queryCaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "queryMode": { "$ref": "#/$defs/queryMode" },
+        "sourceKind": { "$ref": "#/$defs/nullableString" },
+        "agentCallCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "mcpTool": {
+          "type": "string",
+          "const": "ope_private_source_kind_selection"
+        },
+        "expectedStatus": {
+          "type": "string",
+          "enum": ["ok", "error"]
+        },
+        "expectedExitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "expectedErrorCode": { "$ref": "#/$defs/nullableErrorCode" },
+        "payloadShape": { "$ref": "#/$defs/payloadShape" },
+        "expectedImmediateAction": { "$ref": "#/$defs/nullableAction" },
+        "selectedExampleId": { "$ref": "#/$defs/nullableString" },
+        "envelope": { "$ref": "agent-envelope.schema.json" }
+      }
+    }
+  }
+}

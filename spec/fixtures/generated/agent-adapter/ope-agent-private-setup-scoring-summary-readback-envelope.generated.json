@@ -1,0 +1,68 @@
+{
+  "agentEnvelopeId": "agentenvelope-041",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "scoring_read"
+  },
+  "operation": "scoring_summary",
+  "adapterRequest": {
+    "operation": "scoring_summary",
+    "inputRecordType": "scoring_summary",
+    "inputRef": "scoring-1102",
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "maxBytes": 65536,
+    "callerIntent": "Read the generated private setup forecast score while preserving sample-size limits."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": "resolution-1102",
+    "scoringReportId": "scoring-1102"
+  },
+  "state": {
+    "decisionStatus": "generated",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "source_handoff_fixture",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "scoringReportId": "scoring-1102",
+    "scoreStatus": "scored",
+    "scoringRule": "brier",
+    "primaryScore": 0.126025,
+    "baselineScore": 0.390625,
+    "baselineLift": 0.2646,
+    "higherIsBetter": false,
+    "generatedAt": "2026-06-04T12:35:00Z",
+    "qualityClaim": {
+      "status": "not_enough_resolved_source_handoff_outcomes",
+      "minimumSampleSize": 30,
+      "resolvedComparableOutcomes": 1,
+      "sampleSize": 1,
+      "trackRecordReportId": "trackrecord-1102"
+    }
+  },
+  "error": null,
+  "warnings": [
+    "A single scored fixture outcome is not enough for a live calibration or quality claim."
+  ]
+}

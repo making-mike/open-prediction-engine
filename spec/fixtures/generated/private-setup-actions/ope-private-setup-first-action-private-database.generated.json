@@ -1,0 +1,57 @@
+{
+  "privateSetupFirstActionId": "privatesetupfirstaction-006",
+  "generatedAt": "2026-06-07T10:00:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "dispatcher_result_only",
+  "requestBinding": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupRequestId": "privatesetuprequest-006",
+    "requestRowId": "privatesetuprequestrow-006",
+    "boundPrivateSourceAdapterIntakeBridgeId": "privateadapterintakebridge-001",
+    "boundBridgeRowId": "privateadapterbridge-006",
+    "boundOutcomeRowId": "privateadapteroutcomerow-006"
+  },
+  "setupMode": "new_setup",
+  "sourceKind": "private_database",
+  "sourcePolicy": {
+    "dataMode": "provided",
+    "allowedSourceKinds": [
+      "private_database"
+    ],
+    "approvalStatus": "confirmed",
+    "allowLiveFetch": false,
+    "allowCredentialUse": false
+  },
+  "forecastIntent": {
+    "questionText": "Estimate a future operational probability from caller-approved private database sources.",
+    "outputType": "binary",
+    "horizonLabel": "caller_declared",
+    "resolutionNeeded": true
+  },
+  "actionStatus": "runtime_not_implemented",
+  "routeDecision": "wait_for_runtime",
+  "allowedEntrypoint": "no_current_entrypoint",
+  "commandToRun": "none",
+  "requiredCallerAction": "wait for a checked runtime before retrying",
+  "error": {
+    "code": "runtime_not_implemented",
+    "message": "The requested source kind needs a future checked runtime."
+  },
+  "exitCode": 0,
+  "executionBoundary": {
+    "dispatcherDoesNotExecute": true,
+    "normalChecksOffline": true,
+    "readsPrivateData": false,
+    "runsSuggestedCommand": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This dispatcher returns the first safe action only; it does not run the suggested command.",
+    "Forecast artifacts and scoring records require later intake, method, forecast, resolution, and scoring steps.",
+    "Commands named in this response are checked local entrypoints, not hidden side effects."
+  ]
+}

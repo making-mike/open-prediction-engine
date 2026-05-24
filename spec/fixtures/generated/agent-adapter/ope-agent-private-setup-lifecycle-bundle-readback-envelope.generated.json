@@ -1,0 +1,496 @@
+{
+  "agentEnvelopeId": "agentenvelope-039",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "lifecycle_bundle",
+  "adapterRequest": {
+    "operation": "lifecycle_bundle",
+    "inputRecordType": "lifecycle_bundle",
+    "inputRef": "forecast-1102",
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "maxBytes": 65536,
+    "callerIntent": "Inspect the generated private setup forecast lifecycle bundle and setup bindings."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1102",
+    "forecastId": "forecast-1102",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": "resolution-1102",
+    "scoringReportId": "scoring-1102"
+  },
+  "state": {
+    "decisionStatus": "generated",
+    "approvalStatus": "method_gate_checked",
+    "dataMode": "provided",
+    "planStatus": null,
+    "executionMode": "fixture_dry_run",
+    "sourceMode": "source_handoff_fixture",
+    "forecastStatus": "resolved",
+    "resolutionStatus": "resolved",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "recordType": "forecast-bundle",
+    "recordId": "forecast-1102",
+    "access": {
+      "mode": "read_only_file",
+      "maxRecordsPerRequest": 1
+    },
+    "record": {
+      "bundleId": "forecastbundle-forecast-1102",
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "domain": "weather-logistics",
+      "status": "resolved",
+      "includedRecords": {
+        "forecastArtifact": "forecast-1102",
+        "evidencePacket": "evidence-1102",
+        "forecastQuestion": "question-1102",
+        "forecastHistory": "history-1102",
+        "resolutionRecord": "resolution-1102",
+        "scoringReport": "scoring-1102",
+        "calibrationSummary": "calibration-1102",
+        "trackRecordReport": "trackrecord-1102",
+        "outcomeSummary": "resolution-1102",
+        "pipelineRun": null,
+        "setupForecastRun": "setupforecastrun-1102"
+      },
+      "records": {
+        "forecastArtifact": {
+          "forecastId": "forecast-1102",
+          "questionId": "question-1102",
+          "questionStatus": "open",
+          "domain": "weather-logistics",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "forecastedAt": "2026-06-02T10:45:00Z",
+          "closedAt": "2026-06-02T12:00:00Z",
+          "outputType": "binary",
+          "forecastOutput": {
+            "outputType": "binary",
+            "probability": 0.645
+          },
+          "baselineForecast": {
+            "outputType": "binary",
+            "probability": 0.375
+          },
+          "model": {
+            "modelId": "model-101",
+            "version": "weather-logistics-fixture-loop-v0",
+            "trainingCutoff": "2026-05-30T00:00:00Z",
+            "configurationHash": "sha256-fixture-loop-model-001"
+          },
+          "evidencePacketId": "evidence-1102",
+          "resolutionPlan": {
+            "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+            "resolutionAuthority": "OPE prototype resolver",
+            "primaryResolutionSource": {
+              "sourceId": "localsource-003",
+              "name": "Declared Operations Outcome",
+              "sourceType": "internal_dataset",
+              "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+              "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+            },
+            "fallbackResolutionSources": [],
+            "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+          }
+        },
+        "evidencePacket": {
+          "evidencePacketId": "evidence-1102",
+          "forecastId": "forecast-1102",
+          "questionId": "question-1102",
+          "questionStatus": "open",
+          "domain": "weather-logistics",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "forecastedAt": "2026-06-02T10:45:00Z",
+          "model": {
+            "modelId": "model-101",
+            "version": "weather-logistics-fixture-loop-v0",
+            "trainingCutoff": "2026-05-30T00:00:00Z",
+            "configurationHash": "sha256-fixture-loop-model-001"
+          },
+          "inputSourceClasses": [
+            "internal_dataset",
+            "public_dataset"
+          ],
+          "provenanceReferences": [
+            {
+              "sourceId": "localsource-002",
+              "name": "Historical Baseline",
+              "sourceType": "internal_dataset",
+              "uri": "local://spec/fixtures/local-source-files/history.csv",
+              "retrievedAt": "2026-06-02T10:15:00Z",
+              "contentHash": "c4da4005a77e6f20ab1beb0cbb7d99929436f51a1ffd6d5962c51c598a4bf829"
+            },
+            {
+              "sourceId": "localsource-001",
+              "name": "Weather Forecast",
+              "sourceType": "public_dataset",
+              "uri": "local://spec/fixtures/local-source-files/weather-forecast.json",
+              "retrievedAt": "2026-06-02T09:30:00Z",
+              "contentHash": "dc74ecbb77717ddfda3f5da0a4f7eae106a874c5da2daacbfb94ecdcf5af134b"
+            }
+          ],
+          "featureSnapshotRef": "https://example.test/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-feature-snapshot.generated.json",
+          "forecastOutput": {
+            "outputType": "binary",
+            "probability": 0.645
+          },
+          "baselineForecast": {
+            "outputType": "binary",
+            "probability": 0.375
+          },
+          "calibrationBand": {
+            "lower": 0.545,
+            "upper": 0.745,
+            "coverage": 0.8,
+            "sampleSize": 30
+          },
+          "rationaleSummary": "Explicit handoff-bound execution selected the benchmark-gated setup method; quality claims remain blocked.",
+          "keyFactors": [
+            "source intake handoff sourceintakehandoff-002",
+            "source handoff method gate sourcehandoffmethodgate-002",
+            "source intake report sourceintakereport-102",
+            "setup method decision setupmethoddecision-102",
+            "selected method deterministic_statistical",
+            "historical disruption days 11",
+            "comparable service days 30",
+            "setup benchmark gate setupbenchmarkgate-102",
+            "forecast precipitation 24 mm",
+            "explicit source-handoff setup execution"
+          ],
+          "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+          "resolutionSource": {
+            "sourceId": "localsource-003",
+            "name": "Declared Operations Outcome",
+            "sourceType": "internal_dataset",
+            "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+            "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+          },
+          "fallbackResolutionSources": [],
+          "scheduledResolutionAt": "2026-06-04T12:00:00Z"
+        },
+        "forecastQuestion": {
+          "questionId": "question-1102",
+          "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+          "background": "Generated by explicit source-handoff setup forecast execution after accepted source intake and method gating.",
+          "domain": "weather-logistics",
+          "outputType": "binary",
+          "status": "resolved",
+          "openAt": "2026-06-02T10:45:00Z",
+          "closeAt": "2026-06-02T12:00:00Z",
+          "resolveAt": "2026-06-04T12:00:00Z",
+          "horizon": {
+            "startsAt": "2026-06-03T00:00:00Z",
+            "endsAt": "2026-06-03T23:59:59Z",
+            "label": "1-day"
+          },
+          "resolutionCriteria": "Resolve Yes if the declared operations source reports at least one weather-coded delivery disruption in Warsaw on 2026-06-03 and the declared weather observation source records daily precipitation of at least 20 millimeters. Resolve No otherwise.",
+          "resolutionAuthority": "OPE prototype resolver",
+          "resolutionMode": "automated_measurement",
+          "primaryResolutionSource": {
+            "sourceId": "localsource-003",
+            "name": "Declared Operations Outcome",
+            "sourceType": "internal_dataset",
+            "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+            "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+          },
+          "fallbackResolutionSources": [],
+          "validOutcomeSpace": {
+            "description": "Binary outcome: Yes if declared operations outcome says disruption_observed is true; No otherwise.",
+            "labels": [
+              "yes",
+              "no"
+            ]
+          },
+          "clarificationHistory": [],
+          "incentiveRiskReview": {
+            "riskLevel": "minimal",
+            "notes": "Handoff-bound fixture forecast with no network access, live fetch, local live draft, or private-source runtime."
+          },
+          "createdAt": "2026-06-02T10:45:00Z",
+          "updatedAt": "2026-06-04T12:30:00Z"
+        },
+        "forecastHistory": {
+          "historyId": "history-1102",
+          "questionId": "question-1102",
+          "entries": [
+            {
+              "forecastId": "forecast-1102",
+              "forecastedAt": "2026-06-02T10:45:00Z",
+              "state": "active",
+              "sourceClass": "model",
+              "model": {
+                "modelId": "model-101",
+                "version": "weather-logistics-fixture-loop-v0",
+                "trainingCutoff": "2026-05-30T00:00:00Z",
+                "configurationHash": "sha256-fixture-loop-model-001"
+              },
+              "forecastOutput": {
+                "outputType": "binary",
+                "probability": 0.645
+              },
+              "rationaleSummary": "Explicit handoff-bound execution selected the benchmark-gated setup method; quality claims remain blocked.",
+              "evidencePacketId": "evidence-1102"
+            }
+          ],
+          "createdAt": "2026-06-02T10:45:00Z",
+          "updatedAt": "2026-06-02T10:45:00Z"
+        },
+        "resolutionRecord": {
+          "resolutionRecordId": "resolution-1102",
+          "questionId": "question-1102",
+          "status": "resolved",
+          "resolvedAt": "2026-06-04T12:30:00Z",
+          "resolutionSource": {
+            "sourceId": "localsource-003",
+            "name": "Declared Operations Outcome",
+            "sourceType": "internal_dataset",
+            "uri": "local://spec/fixtures/local-source-files/outcome.csv",
+            "contentHash": "b9a5b82bf397e746a9169341a5e134642ea216be3f16bc61b3eac02f1ead9d39"
+          },
+          "resolutionAuthority": "OPE prototype resolver",
+          "resolvedOutcome": {
+            "outputType": "binary",
+            "value": true
+          },
+          "supportingEvidence": [
+            "local://spec/fixtures/local-source-files/outcome.csv"
+          ]
+        },
+        "scoringReport": {
+          "scoringReportId": "scoring-1102",
+          "questionId": "question-1102",
+          "forecastId": "forecast-1102",
+          "historyId": "history-1102",
+          "resolutionRecordId": "resolution-1102",
+          "scoreStatus": "scored",
+          "scoringRule": "brier",
+          "primaryScore": 0.126025,
+          "higherIsBetter": false,
+          "timeWeighting": {
+            "method": "latest_only",
+            "totalWeight": 1
+          },
+          "baselineScore": 0.390625,
+          "baselineLift": 0.2646,
+          "generatedAt": "2026-06-04T12:35:00Z"
+        },
+        "calibrationSummary": {
+          "calibrationSummaryId": "calibration-1102",
+          "generatedAt": "2026-06-04T12:35:00Z",
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "coveragePeriod": {
+            "startsAt": "2026-06-02T10:45:00Z",
+            "endsAt": "2026-06-04T12:30:00Z"
+          },
+          "sampleSize": 1,
+          "expectedCalibrationError": 0.355,
+          "buckets": [
+            {
+              "lowerProbability": 0.0,
+              "upperProbability": 0.1,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.1,
+              "upperProbability": 0.2,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.2,
+              "upperProbability": 0.3,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.3,
+              "upperProbability": 0.4,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.4,
+              "upperProbability": 0.5,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.5,
+              "upperProbability": 0.6,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.6,
+              "upperProbability": 0.7,
+              "count": 1,
+              "meanForecastProbability": 0.645,
+              "observedFrequency": 1.0
+            },
+            {
+              "lowerProbability": 0.7,
+              "upperProbability": 0.8,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.8,
+              "upperProbability": 0.9,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            },
+            {
+              "lowerProbability": 0.9,
+              "upperProbability": 1.0,
+              "count": 0,
+              "meanForecastProbability": 0.0,
+              "observedFrequency": 0.0
+            }
+          ]
+        },
+        "trackRecordReport": {
+          "trackRecordReportId": "trackrecord-1102",
+          "generatedAt": "2026-06-04T12:35:00Z",
+          "coveragePeriod": {
+            "startsAt": "2026-06-02T10:45:00Z",
+            "endsAt": "2026-06-04T12:30:00Z"
+          },
+          "domain": "weather-logistics",
+          "horizonBucket": "1-day",
+          "outputType": "binary",
+          "counts": {
+            "nForecasts": 1,
+            "nResolved": 1,
+            "nAmbiguous": 0,
+            "nAnnulled": 0
+          },
+          "summary": {
+            "primaryScoringRule": "brier",
+            "primaryScore": 0.126025,
+            "baselineScore": 0.390625,
+            "baselineLift": 0.2646,
+            "calibrationError": 0.355,
+            "lastUpdated": "2026-06-04T12:35:00Z"
+          },
+          "scoreHistogram": [
+            {
+              "lower": 0,
+              "upper": 0.5,
+              "count": 1
+            }
+          ],
+          "slices": []
+        },
+        "outcomeSummary": {
+          "publicationStatus": "provisional",
+          "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes",
+          "minimumCalibrationSampleSize": 30,
+          "resolvedComparableSourceHandoffOutcomes": 1,
+          "setupForecastRunId": "setupforecastrun-1102",
+          "sourceIntakeHandoffId": "sourceintakehandoff-002",
+          "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+          "sourceIntakeReportId": "sourceintakereport-102",
+          "setupMethodDecisionId": "setupmethoddecision-102",
+          "setupBenchmarkGateId": "setupbenchmarkgate-102",
+          "questionId": "question-1102",
+          "forecastId": "forecast-1102",
+          "evidencePacketId": "evidence-1102",
+          "resolutionRecordId": "resolution-1102",
+          "forecastArtifactPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-artifact.generated.json",
+          "generatedAt": "2026-06-04T12:35:00Z"
+        },
+        "pipelineRun": null,
+        "setupForecastRun": {
+          "setupForecastRunId": "setupforecastrun-1102",
+          "generatedAt": "2026-06-06T19:05:00Z",
+          "case": "confirmed_builder_draft",
+          "domainSetupId": "domainsetup-001",
+          "domain": "weather-logistics",
+          "sourceManifestId": "sourcemanifestdraft-001",
+          "fieldMappingId": "fieldmappingdraft-102",
+          "sourceIntakeReportId": "sourceintakereport-102",
+          "sourceIntakeHandoffId": "sourceintakehandoff-002",
+          "sourceHandoffMethodGateId": "sourcehandoffmethodgate-002",
+          "setupMethodDecisionId": "setupmethoddecision-102",
+          "setupBenchmarkGateId": "setupbenchmarkgate-102",
+          "intakeStatus": "accepted",
+          "methodDecisionStatus": "method_selected",
+          "selectedMethodClass": "deterministic_statistical",
+          "selectedForecastMode": "deterministic_statistical",
+          "runStatus": "generated",
+          "executionMode": "fixture_dry_run",
+          "sourceMode": "source_handoff_fixture",
+          "controls": {
+            "sourceIntakeValidated": true,
+            "methodDecisionValidated": true,
+            "networkAccess": false,
+            "liveFetch": false,
+            "effectfulGeneration": false,
+            "localLiveDraftConsumed": false,
+            "forecastArtifactsCreated": true
+          },
+          "recordBinding": {
+            "questionId": "question-1102",
+            "forecastId": "forecast-1102",
+            "evidencePacketId": "evidence-1102",
+            "historyId": "history-1102",
+            "forecastCardId": "forecastcard-forecast-1102",
+            "forecastBundleId": "forecastbundle-forecast-1102"
+          },
+          "outputs": {
+            "questionPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-question.generated.json",
+            "featureSnapshotPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-feature-snapshot.generated.json",
+            "evidencePacketPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-evidence.generated.json",
+            "forecastArtifactPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-artifact.generated.json",
+            "forecastHistoryPath": "spec/fixtures/generated/source-handoff-forecast/weather-logistics-confirmed-builder-draft-source-handoff-history.generated.json"
+          },
+          "blockedReasons": [],
+          "nextActions": [],
+          "warnings": [
+            "Source-handoff setup forecast execution is fixture-mode only.",
+            "Execution requires a prior source-intake handoff, source-handoff method gate, setup benchmark gate, and setup method decision.",
+            "Generated forecast uses a handoff-bound deterministic method; quality claims remain blocked."
+          ]
+        }
+      }
+    }
+  },
+  "error": null,
+  "warnings": [
+    "Bundle read is local and read-only; it does not mutate forecast lifecycle records.",
+    "Full bundles are larger than forecast cards and may include detailed provenance records."
+  ]
+}

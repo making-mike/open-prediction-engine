@@ -33,6 +33,7 @@ SECRET_PATTERNS = [
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----"),
     re.compile(r"xox[baprs]-[A-Za-z0-9-]{20,}"),
 ]
+SCAN_SUFFIXES = {".csv", ".json", ".md", ".py", ".toml", ".txt", ".yaml", ".yml"}
 
 
 def iter_text_files(paths: Iterable[Path]) -> Iterable[Path]:
@@ -43,7 +44,7 @@ def iter_text_files(paths: Iterable[Path]) -> Iterable[Path]:
             yield path
             continue
         for child in sorted(path.rglob("*")):
-            if child.is_file() and child.suffix in {".md", ".json", ".py", ".toml", ".yaml", ".yml"}:
+            if child.is_file() and child.suffix in SCAN_SUFFIXES:
                 yield child
 
 

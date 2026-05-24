@@ -27,6 +27,29 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def run_cli_unchecked(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, "scripts/ope.py", *args],
+        cwd=ROOT,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+
+def agent_call_setup_readback(operation: str) -> dict[str, object]:
+    result = run_cli(
+        "agent-call",
+        "--operation",
+        operation,
+        "--forecast-id",
+        "forecast-1102",
+        "--question-id",
+        "question-1102",
+    )
+    return json.loads(result.stdout)
+
+
 def main() -> None:
     run_cli("generate-fixtures")
     run_cli("resolve-live")
@@ -54,6 +77,15 @@ def main() -> None:
     run_cli("private-source-adapters", "--check")
     run_cli("private-source-adapter-outcomes", "--check")
     run_cli("private-source-adapter-bridge", "--check")
+    run_cli("private-setup-requests", "--check")
+    run_cli("private-setup-actions", "--check")
+    run_cli("private-setup-action-runbook", "--check")
+    run_cli("private-setup-bundles", "--check")
+    run_cli("private-setup-adapter-runbook", "--check")
+    run_cli("private-setup-adapter-conformance", "--check")
+    run_cli("private-setup-adapter-conformance-summary", "--check")
+    run_cli("private-source-kind-selection", "--check")
+    run_cli("private-source-kind-query-matrix", "--check")
     run_cli("recalculation", "--check")
     run_cli("forecast-run", "--check")
     run_cli("forecast-run-matrix", "--check")
@@ -735,21 +767,387 @@ def main() -> None:
     if bridge_boundary["bridgeDoesNotExecute"] is not True or bridge_boundary["onlyRoutesToCheckedEntrypoints"] is not True:
         raise AssertionError("CLI private-source-adapter-bridge should stay non-executing and route checked entrypoints")
 
+    private_setup_requests = run_cli("private-setup-requests")
+    private_setup_requests_payload = json.loads(private_setup_requests.stdout)
+    if private_setup_requests_payload["boundPrivateSourceAdapterIntakeBridgeId"] != "privateadapterintakebridge-001":
+        raise AssertionError("CLI private-setup-requests should bind adapter bridge")
+    request_rows = {
+        item["selectedSourceKind"]: item
+        for item in private_setup_requests_payload["requestRows"]
+    }
+    if set(request_rows) != set(bridge_rows):
+        raise AssertionError("CLI private-setup-requests should cover every bridge source kind")
+    if request_rows["local_file"]["routeDecision"] != "run_source_builder":
+        raise AssertionError("CLI private-setup-requests should route local files to source-builder")
+    if request_rows["manual_mapping"]["routeDecision"] != "request_mapping_confirmation":
+        raise AssertionError("CLI private-setup-requests should require mapping confirmation")
+    if request_rows["auto_evidence_connector"]["routeDecision"] != "use_fixture_evidence":
+        raise AssertionError("CLI private-setup-requests should route auto evidence to fixture evidence")
+    for source_kind in ("manual_upload", "private_api", "private_database"):
+        if request_rows[source_kind]["routeDecision"] != "wait_for_runtime":
+            raise AssertionError(f"CLI private-setup-requests should wait for {source_kind} runtime")
+    if request_rows["unregistered_source"]["routeDecision"] != "replace_source":
+        raise AssertionError("CLI private-setup-requests should replace unregistered sources")
+    if request_rows["unsafe_source"]["routeDecision"] != "stop":
+        raise AssertionError("CLI private-setup-requests should stop unsafe sources")
+    for row in request_rows.values():
+        if row["createsOutputs"] or row["canReadPrivateData"] or row["canCreateForecastArtifacts"] or row["canCreateScoringRecords"]:
+            raise AssertionError("CLI private-setup-requests should not read, forecast, score, or create outputs")
+    request_boundary = private_setup_requests_payload["executionBoundary"]
+    if request_boundary["requestSetDoesNotExecute"] is not True or request_boundary["routesOnlyThroughAdapterBridge"] is not True:
+        raise AssertionError("CLI private-setup-requests should stay non-executing and bridge-routed")
+
+    private_setup_actions = run_cli("private-setup-actions")
+    private_setup_actions_payload = json.loads(private_setup_actions.stdout)
+    if private_setup_actions_payload["count"] != 8:
+        raise AssertionError("CLI private-setup-actions should expose eight first-action fixtures")
+    action_rows = {
+        item["sourceKind"]: item
+        for item in private_setup_actions_payload["actions"]
+    }
+    if set(action_rows) != set(request_rows):
+        raise AssertionError("CLI private-setup-actions should cover every request source kind")
+    if action_rows["local_file"]["actionStatus"] != "ready_to_run_checked_command":
+        raise AssertionError("CLI private-setup-actions should make local files ready for source-builder")
+    if action_rows["manual_mapping"]["actionStatus"] != "confirmation_required":
+        raise AssertionError("CLI private-setup-actions should require manual mapping confirmation")
+    if action_rows["auto_evidence_connector"]["actionStatus"] != "fixture_ready":
+        raise AssertionError("CLI private-setup-actions should make auto evidence fixture-ready")
+    for source_kind in ("manual_upload", "private_api", "private_database"):
+        if action_rows[source_kind]["actionStatus"] != "runtime_not_implemented":
+            raise AssertionError(f"CLI private-setup-actions should wait for {source_kind} runtime")
+    if action_rows["unregistered_source"]["actionStatus"] != "source_replacement_required":
+        raise AssertionError("CLI private-setup-actions should ask for unregistered source replacement")
+    if action_rows["unsafe_source"]["actionStatus"] != "rejected_unsafe_source":
+        raise AssertionError("CLI private-setup-actions should reject unsafe sources")
+    for row in action_rows.values():
+        boundary = row["executionBoundary"]
+        if boundary["dispatcherDoesNotExecute"] is not True or boundary["runsSuggestedCommand"] is not False:
+            raise AssertionError("CLI private-setup-actions should stay non-executing")
+        if boundary["createsForecastArtifacts"] or boundary["createsScoringRecords"] or boundary["storesCredentials"]:
+            raise AssertionError("CLI private-setup-actions should not forecast, score, or store credentials")
+
+    private_setup_action = run_cli("private-setup-action", "--request-id", "privatesetuprequest-001")
+    private_setup_action_payload = json.loads(private_setup_action.stdout)
+    if private_setup_action_payload["sourceKind"] != "local_file":
+        raise AssertionError("CLI private-setup-action should dispatch request id to local file")
+    if private_setup_action_payload["commandToRun"] != "python3 scripts/ope.py source-builder":
+        raise AssertionError("CLI private-setup-action should expose checked source-builder command")
+    private_api_action = run_cli("private-setup-action", "--request-id", "privatesetuprequest-005")
+    private_api_action_payload = json.loads(private_api_action.stdout)
+    if private_api_action_payload["actionStatus"] != "runtime_not_implemented":
+        raise AssertionError("CLI private-setup-action should keep private API runtime planned-only")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        unknown_request = Path(tmp) / "unknown-private-setup-request.json"
+        unknown_request.write_text(
+            json.dumps(
+                {
+                    "privateSetupRequestId": "privatesetuprequest-990",
+                    "selectedSourceKind": "spreadsheet_macro",
+                    "sourcePolicy": {
+                        "dataMode": "provided",
+                        "allowedSourceKinds": ["spreadsheet_macro"],
+                        "approvalStatus": "confirmed",
+                        "allowLiveFetch": False,
+                        "allowCredentialUse": False,
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        unknown_action = subprocess.run(
+            [sys.executable, "scripts/ope.py", "private-setup-action", "--input", str(unknown_request)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        if unknown_action.returncode != 2:
+            raise AssertionError("CLI private-setup-action unknown source should exit 2")
+        unknown_payload = json.loads(unknown_action.stdout)
+        if unknown_payload["error"]["code"] != "unknown_source_kind":
+            raise AssertionError("CLI private-setup-action should sanitize unknown source kind")
+        if unknown_payload["executionBoundary"]["runsSuggestedCommand"] is not False:
+            raise AssertionError("CLI private-setup-action unknown source should not execute")
+
+    private_setup_action_runbook = run_cli("private-setup-action-runbook")
+    private_setup_action_runbook_payload = json.loads(private_setup_action_runbook.stdout)
+    if private_setup_action_runbook_payload["runtimeStatus"] != "runbook_guidance_only":
+        raise AssertionError("CLI private-setup-action-runbook should be guidance-only")
+    expected_action_statuses = {
+        "ready_to_run_checked_command",
+        "confirmation_required",
+        "fixture_ready",
+        "runtime_not_implemented",
+        "source_replacement_required",
+        "rejected_unsafe_source",
+        "bad_request",
+    }
+    if set(private_setup_action_runbook_payload["statusCoverage"]) != expected_action_statuses:
+        raise AssertionError("CLI private-setup-action-runbook should cover every first-action status")
+    runbook_rows = {
+        item["sourceKind"]: item
+        for item in private_setup_action_runbook_payload["casePlaybooks"]
+    }
+    if set(runbook_rows) != set(action_rows):
+        raise AssertionError("CLI private-setup-action-runbook should bind every action fixture")
+    if runbook_rows["local_file"]["nextActionLabel"] != "run_source_builder":
+        raise AssertionError("CLI private-setup-action-runbook should route local files to source-builder")
+    if runbook_rows["local_file"]["expectedOutputClass"] != "source_manifest_build":
+        raise AssertionError("CLI private-setup-action-runbook should expect local source manifest build")
+    if runbook_rows["manual_mapping"]["nextActionLabel"] != "ask_mapping_confirmation":
+        raise AssertionError("CLI private-setup-action-runbook should ask mapping confirmation")
+    if runbook_rows["manual_mapping"]["requiresCallerConfirmation"] is not True:
+        raise AssertionError("CLI private-setup-action-runbook should preserve manual confirmation")
+    if runbook_rows["auto_evidence_connector"]["nextActionLabel"] != "run_fixture_evidence":
+        raise AssertionError("CLI private-setup-action-runbook should route auto evidence to fixture evidence")
+    for source_kind in ("manual_upload", "private_api", "private_database"):
+        if runbook_rows[source_kind]["nextActionLabel"] != "wait_for_runtime":
+            raise AssertionError(f"CLI private-setup-action-runbook should wait for {source_kind} runtime")
+        if runbook_rows[source_kind]["mayEnterSourceIntakeAfterRequiredAction"] is not False:
+            raise AssertionError(f"CLI private-setup-action-runbook should keep {source_kind} out of source intake")
+    if runbook_rows["unregistered_source"]["nextActionLabel"] != "replace_source":
+        raise AssertionError("CLI private-setup-action-runbook should ask for source replacement")
+    if runbook_rows["unsafe_source"]["nextActionLabel"] != "stop_unsafe_source":
+        raise AssertionError("CLI private-setup-action-runbook should stop unsafe sources")
+    bad_request_rows = {
+        item["errorCode"]: item
+        for item in private_setup_action_runbook_payload["badRequestPlaybooks"]
+    }
+    if {"unknown_source_kind", "missing_approval"} - set(bad_request_rows):
+        raise AssertionError("CLI private-setup-action-runbook should cover bad request classes")
+    for row in list(runbook_rows.values()) + list(bad_request_rows.values()):
+        if row["forecastExecutionAllowed"] or row["scoringAllowed"]:
+            raise AssertionError("CLI private-setup-action-runbook should not allow forecast or scoring")
+        if row["nextActionLabel"] in {"wait_for_runtime", "replace_source", "stop_unsafe_source", "fix_bad_request"}:
+            if row["mayEnterSourceIntakeAfterRequiredAction"]:
+                raise AssertionError("CLI private-setup-action-runbook should keep blocked rows out of source intake")
+    runbook_boundary = private_setup_action_runbook_payload["executionBoundary"]
+    if runbook_boundary["runbookDoesNotExecute"] is not True or runbook_boundary["runsSuggestedCommand"] is not False:
+        raise AssertionError("CLI private-setup-action-runbook should stay non-executing")
+
+    private_setup_bundles = run_cli("private-setup-bundles")
+    private_setup_bundles_payload = json.loads(private_setup_bundles.stdout)
+    if private_setup_bundles_payload["count"] != 10:
+        raise AssertionError("CLI private-setup-bundles should expose eight known and two bad-request bundles")
+    bundle_rows = {
+        item["sourceKind"]: item
+        for item in private_setup_bundles_payload["bundles"]
+        if item["bundleKind"] == "known_request"
+    }
+    bad_bundle_rows = {
+        item["actionSummary"]["errorCode"]: item
+        for item in private_setup_bundles_payload["bundles"]
+        if item["bundleKind"] == "bad_request_example"
+    }
+    if set(bundle_rows) != set(request_rows):
+        raise AssertionError("CLI private-setup-bundles should cover every request source kind")
+    if {"unknown_source_kind", "missing_approval"} - set(bad_bundle_rows):
+        raise AssertionError("CLI private-setup-bundles should include bad-request examples")
+    if bundle_rows["local_file"]["runbookGuidance"]["nextActionLabel"] != "run_source_builder":
+        raise AssertionError("CLI private-setup-bundles should route local file to source-builder")
+    if bundle_rows["manual_mapping"]["runbookGuidance"]["requiresCallerConfirmation"] is not True:
+        raise AssertionError("CLI private-setup-bundles should preserve mapping confirmation")
+    if bundle_rows["auto_evidence_connector"]["runbookGuidance"]["expectedOutputClass"] != "evidence_source_set":
+        raise AssertionError("CLI private-setup-bundles should expose auto evidence source-set output")
+    for source_kind in ("manual_upload", "private_api", "private_database"):
+        bundle = bundle_rows[source_kind]
+        if bundle["runbookGuidance"]["nextActionLabel"] != "wait_for_runtime":
+            raise AssertionError(f"CLI private-setup-bundles should wait for {source_kind} runtime")
+        if bundle["runbookGuidance"]["mayEnterSourceIntakeAfterRequiredAction"] is not False:
+            raise AssertionError(f"CLI private-setup-bundles should keep {source_kind} out of source intake")
+    if bundle_rows["unsafe_source"]["runbookGuidance"]["nextActionLabel"] != "stop_unsafe_source":
+        raise AssertionError("CLI private-setup-bundles should stop unsafe sources")
+    for bundle in private_setup_bundles_payload["bundles"]:
+        if bundle["claimBoundary"]["bundleDoesNotPredict"] is not True:
+            raise AssertionError("CLI private-setup-bundles should not predict")
+        if bundle["claimBoundary"]["forecastExecutionAllowed"] or bundle["claimBoundary"]["scoringAllowed"]:
+            raise AssertionError("CLI private-setup-bundles should block forecast and scoring claims")
+        if bundle["executionBoundary"]["bundleDoesNotExecute"] is not True:
+            raise AssertionError("CLI private-setup-bundles should stay non-executing")
+        if bundle["executionBoundary"]["runsSuggestedCommand"] is not False:
+            raise AssertionError("CLI private-setup-bundles should not run suggested commands")
+
+    private_setup_bundle = run_cli("private-setup-bundle", "--request-id", "privatesetuprequest-001")
+    private_setup_bundle_payload = json.loads(private_setup_bundle.stdout)
+    if private_setup_bundle_payload["sourceKind"] != "local_file":
+        raise AssertionError("CLI private-setup-bundle should return local file by request id")
+    unknown_bundle = run_cli("private-setup-bundle", "--case", "unknown_source_kind")
+    unknown_bundle_payload = json.loads(unknown_bundle.stdout)
+    if unknown_bundle_payload["actionSummary"]["errorCode"] != "unknown_source_kind":
+        raise AssertionError("CLI private-setup-bundle should expose unknown source bad-request bundle")
+
+    adapter_runbook = run_cli("private-setup-adapter-runbook")
+    adapter_runbook_payload = json.loads(adapter_runbook.stdout)
+    sequence_ops = [item["operation"] for item in adapter_runbook_payload["operationSequence"]]
+    if sequence_ops[:5] != [
+        "private_setup_bundle",
+        "private_setup_source_builder",
+        "private_setup_source_handoff",
+        "private_setup_method_gate",
+        "private_setup_forecast_execution",
+    ]:
+        raise AssertionError("CLI private-setup-adapter-runbook should expose setup adapter sequence")
+    if sequence_ops[-4:] != ["forecast_card", "lifecycle_bundle", "resolution_status", "scoring_summary"]:
+        raise AssertionError("CLI private-setup-adapter-runbook should route generated forecasts to normal readbacks")
+    adapter_branches = {item["branchName"]: item for item in adapter_runbook_payload["branchPlaybooks"]}
+    if adapter_branches["mapping_confirmation_required"]["allowedNextOperation"] is not None:
+        raise AssertionError("CLI private-setup-adapter-runbook should stop unconfirmed mappings")
+    if adapter_branches["generated_forecast_readback"]["allowedNextOperation"] != "forecast_card":
+        raise AssertionError("CLI private-setup-adapter-runbook should route generated forecasts to forecast_card")
+    if adapter_runbook_payload["executionBoundary"]["runbookDoesNotExecute"] is not True:
+        raise AssertionError("CLI private-setup-adapter-runbook should remain guidance-only")
+    if adapter_runbook_payload["executionBoundary"]["runsAdapterCalls"] is not False:
+        raise AssertionError("CLI private-setup-adapter-runbook should not run adapter calls")
+
+    adapter_conformance = run_cli("private-setup-adapter-conformance")
+    adapter_conformance_payload = json.loads(adapter_conformance.stdout)
+    if adapter_conformance_payload["runtimeStatus"] != "adapter_conformance_examples_only":
+        raise AssertionError("CLI private-setup-adapter-conformance should expose conformance examples")
+    conformance_cases = adapter_conformance_payload["operationCases"]
+    if len(conformance_cases) != 31:
+        raise AssertionError("CLI private-setup-adapter-conformance should cover 31 operation cases")
+    conformance_phase_counts: dict[str, int] = {}
+    for case in conformance_cases:
+        conformance_phase_counts[case["phase"]] = conformance_phase_counts.get(case["phase"], 0) + 1
+    if conformance_phase_counts != {
+        "source_builder": 6,
+        "source_handoff": 7,
+        "method_gate": 7,
+        "forecast_execution": 7,
+        "forecast_readback": 4,
+    }:
+        raise AssertionError("CLI private-setup-adapter-conformance phase counts drifted")
+    conformance_by_case = {case["adapterCase"]: case for case in conformance_cases}
+    if conformance_by_case["malformed_input"]["expectedErrorCode"] != "validation_failed":
+        raise AssertionError("CLI private-setup-adapter-conformance should include sanitized validation error")
+    confirmed_forecast = [
+        case for case in conformance_cases
+        if case["operation"] == "private_setup_forecast_execution"
+        and case["adapterCase"] == "confirmed_builder_draft"
+    ][0]
+    if confirmed_forecast["forecastArtifactsCreated"] is not True:
+        raise AssertionError("CLI private-setup-adapter-conformance should mark confirmed execution as artifact-generating")
+    if confirmed_forecast["nextAction"] != "read_forecast_card":
+        raise AssertionError("CLI private-setup-adapter-conformance should route generated forecasts to forecast-card readback")
+    readback_operations = {
+        case["operation"]
+        for case in conformance_cases
+        if case["phase"] == "forecast_readback"
+    }
+    if readback_operations != {"forecast_card", "lifecycle_bundle", "resolution_status", "scoring_summary"}:
+        raise AssertionError("CLI private-setup-adapter-conformance should include normal forecast readbacks")
+    if adapter_conformance_payload["executionBoundary"]["runsCommands"] is not False:
+        raise AssertionError("CLI private-setup-adapter-conformance should not run commands")
+    if adapter_conformance_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI private-setup-adapter-conformance should not create forecast artifacts")
+
+    adapter_conformance_summary = run_cli("private-setup-adapter-conformance-summary")
+    adapter_conformance_summary_payload = json.loads(adapter_conformance_summary.stdout)
+    if adapter_conformance_summary_payload["runtimeStatus"] != "compact_adapter_conformance_summary":
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should expose compact conformance status")
+    if adapter_conformance_summary_payload["caseTotals"]["totalCases"] != 31:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should preserve total conformance cases")
+    if adapter_conformance_summary_payload["bindings"]["privateSetupAdapterConformanceMatrixId"] != "privatesetupadapterconformancematrix-001":
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should bind the full matrix")
+    if adapter_conformance_summary_payload["readSurface"]["compactSummaryDoesNotEmbedEnvelopes"] is not True:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should not embed envelopes")
+    if adapter_conformance_summary_payload["readSurface"]["agentOperation"] != "private_setup_adapter_conformance_summary":
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should name the agent operation")
+    if adapter_conformance_summary_payload["executionBoundary"]["summaryDoesNotExecute"] is not True:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should not execute")
+    if adapter_conformance_summary_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary should not create forecast artifacts")
+
+    source_kind_selection = run_cli("private-source-kind-selection")
+    source_kind_selection_payload = json.loads(source_kind_selection.stdout)
+    source_kind_examples = {
+        item["sourceKind"]: item for item in source_kind_selection_payload["selectionExamples"]
+    }
+    if len(source_kind_examples) != 8:
+        raise AssertionError("CLI private-source-kind-selection should cover eight source kinds")
+    if source_kind_examples["local_file"]["recommendation"]["immediateAction"] != "call_source_builder_adapter":
+        raise AssertionError("CLI private-source-kind-selection should route local files to source-builder adapter")
+    if source_kind_examples["manual_mapping"]["recommendation"]["requiresCallerConfirmation"] is not True:
+        raise AssertionError("CLI private-source-kind-selection should require manual mapping confirmation")
+    if source_kind_examples["auto_evidence_connector"]["recommendation"]["immediateAction"] != "call_fixture_evidence":
+        raise AssertionError("CLI private-source-kind-selection should route auto evidence to fixture evidence")
+    for source_kind in ["manual_upload", "private_api", "private_database"]:
+        if source_kind_examples[source_kind]["recommendation"]["immediateAction"] != "wait_for_runtime":
+            raise AssertionError(f"CLI private-source-kind-selection should keep {source_kind} planned-only")
+    if source_kind_examples["unregistered_source"]["recommendation"]["immediateAction"] != "replace_source":
+        raise AssertionError("CLI private-source-kind-selection should replace unregistered sources")
+    if source_kind_examples["unsafe_source"]["recommendation"]["immediateAction"] != "reject_source":
+        raise AssertionError("CLI private-source-kind-selection should reject unsafe sources")
+    if source_kind_selection_payload["executionBoundary"]["examplesDoNotExecute"] is not True:
+        raise AssertionError("CLI private-source-kind-selection should remain guidance-only")
+    if source_kind_selection_payload["executionBoundary"]["runsCommands"] is not False:
+        raise AssertionError("CLI private-source-kind-selection should not run commands")
+
+    source_kind_query_matrix = run_cli("private-source-kind-query-matrix")
+    source_kind_query_matrix_payload = json.loads(source_kind_query_matrix.stdout)
+    if source_kind_query_matrix_payload["runtimeStatus"] != "adapter_query_examples_only":
+        raise AssertionError("CLI private-source-kind-query-matrix should expose adapter query examples")
+    query_cases = source_kind_query_matrix_payload["queryCases"]
+    if len(query_cases) != 10:
+        raise AssertionError("CLI private-source-kind-query-matrix should cover full, selected, and unsupported queries")
+    if query_cases[0]["payloadShape"] != "full_examples":
+        raise AssertionError("CLI private-source-kind-query-matrix should include the full-list response")
+    selected_query_cases = {
+        item["sourceKind"]: item
+        for item in query_cases
+        if item["queryMode"] == "selected_source_kind"
+    }
+    if selected_query_cases["private_api"]["payloadShape"] != "selected_example_only":
+        raise AssertionError("CLI private-source-kind-query-matrix should include compact selected private API response")
+    if selected_query_cases["private_api"]["expectedImmediateAction"] != "wait_for_runtime":
+        raise AssertionError("CLI private-source-kind-query-matrix should keep private API planned-only")
+    if "selectionExamples" in selected_query_cases["private_api"]["envelope"]["payload"]:
+        raise AssertionError("CLI private-source-kind-query-matrix selected response should omit full examples")
+    unsupported_query = query_cases[-1]
+    if unsupported_query["expectedErrorCode"] != "bad_request" or unsupported_query["envelope"]["payload"] is not None:
+        raise AssertionError("CLI private-source-kind-query-matrix should include a sanitized unsupported-source error")
+    if source_kind_query_matrix_payload["executionBoundary"]["runsCommands"] is not False:
+        raise AssertionError("CLI private-source-kind-query-matrix should not run commands")
+
     agent_envelopes = run_cli("agent-envelopes")
     agent_envelopes_payload = json.loads(agent_envelopes.stdout)
-    if agent_envelopes_payload["count"] != 8:
-        raise AssertionError("CLI agent-envelopes should return seven success envelopes and one error envelope")
+    if agent_envelopes_payload["count"] != 45:
+        raise AssertionError("CLI agent-envelopes should return forty-two success envelopes and three error envelopes")
     success_operations = {
         item["operation"]
         for item in agent_envelopes_payload["envelopes"]
         if item["status"] == "ok"
     }
-    if "forecast_card" not in success_operations or "evidence_trace" not in success_operations or "scoring_summary" not in success_operations:
-        raise AssertionError("CLI agent-envelopes should expose card, evidence trace, and scoring operations")
+    if (
+        "forecast_card" not in success_operations
+        or "evidence_trace" not in success_operations
+        or "scoring_summary" not in success_operations
+        or "private_setup_bundle" not in success_operations
+        or "private_setup_adapter_runbook" not in success_operations
+        or "private_setup_adapter_conformance_summary" not in success_operations
+        or "private_source_adapter_guidance" not in success_operations
+        or "private_source_kind_selection" not in success_operations
+        or "private_setup_source_builder" not in success_operations
+        or "private_setup_source_handoff" not in success_operations
+        or "private_setup_method_gate" not in success_operations
+        or "private_setup_forecast_execution" not in success_operations
+    ):
+        raise AssertionError("CLI agent-envelopes should expose card, evidence trace, scoring, and private setup operations")
+    readback_cards = [
+        item for item in agent_envelopes_payload["envelopes"]
+        if item["status"] == "ok"
+        and item["operation"] == "forecast_card"
+        and item["recordBinding"]["forecastId"] == "forecast-1102"
+    ]
+    if len(readback_cards) != 1:
+        raise AssertionError("CLI agent-envelopes should include a private setup forecast-card readback example")
+    if readback_cards[0]["payload"]["record"]["setupBinding"]["setupForecastRunId"] != "setupforecastrun-1102":
+        raise AssertionError("CLI agent-envelopes should preserve setup forecast run binding in readback")
 
     agent_protocol_map = run_cli("agent-protocol-map")
     agent_protocol_map_payload = json.loads(agent_protocol_map.stdout)
-    if len(agent_protocol_map_payload["operations"]) != 7:
+    if len(agent_protocol_map_payload["operations"]) != 16:
         raise AssertionError("CLI agent-protocol-map should expose every agent operation")
     protocol_runtime = agent_protocol_map_payload["adapterContract"]["protocolRuntimeImplemented"]
     if protocol_runtime is not True:
@@ -759,6 +1157,21 @@ def main() -> None:
         raise AssertionError("CLI agent-protocol-map should mark local MCP stdio as implemented")
     if transports["http"]["implemented"] is not False or transports["queue"]["implemented"] is not False:
         raise AssertionError("CLI agent-protocol-map should keep HTTP and queue mapping-only")
+    protocol_operations = {
+        item["operation"]: item
+        for item in agent_protocol_map_payload["operations"]
+    }
+    source_selection_fields = {
+        item["name"]: item
+        for item in protocol_operations["private_source_kind_selection"]["inputFields"]
+    }
+    if source_selection_fields["sourceKind"]["type"] != "string":
+        raise AssertionError("CLI agent-protocol-map should expose sourceKind for selected source-kind queries")
+    conformance_summary_operation = protocol_operations["private_setup_adapter_conformance_summary"]
+    if conformance_summary_operation["inputRecordType"] != "private_setup_adapter_conformance_summary":
+        raise AssertionError("CLI agent-protocol-map should expose the conformance summary input type")
+    if conformance_summary_operation["sideEffectLevel"] != "read_only":
+        raise AssertionError("CLI agent-protocol-map should keep conformance summary read-only")
 
     agent_call = run_cli(
         "agent-call",
@@ -787,6 +1200,313 @@ def main() -> None:
     trace_call_payload = json.loads(trace_call.stdout)
     if trace_call_payload["payload"]["record"]["recordBinding"]["evidenceSourceSetId"] != "evidencesourceset-019":
         raise AssertionError("CLI evidence-trace agent-call should bind the source set")
+
+    private_setup_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_bundle",
+        "--private-setup-request-id",
+        "privatesetuprequest-001",
+    )
+    private_setup_call_payload = json.loads(private_setup_call.stdout)
+    if private_setup_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-bundle agent-call should return an ok envelope")
+    if private_setup_call_payload["recordBinding"]["requestId"] != "privatesetuprequest-001":
+        raise AssertionError("CLI private-setup-bundle agent-call should preserve request binding")
+    if private_setup_call_payload["payload"]["executionBoundary"]["runsSuggestedCommand"] is not False:
+        raise AssertionError("CLI private-setup-bundle agent-call should not execute setup commands")
+
+    adapter_runbook_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_adapter_runbook",
+    )
+    adapter_runbook_call_payload = json.loads(adapter_runbook_call.stdout)
+    if adapter_runbook_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-adapter-runbook agent-call should return an ok envelope")
+    adapter_runbook_call_record = adapter_runbook_call_payload["payload"]
+    if adapter_runbook_call_record["privateSetupAdapterChainRunbookId"] != "privatesetupadapterchainrunbook-001":
+        raise AssertionError("CLI private-setup-adapter-runbook should return the checked runbook")
+    if adapter_runbook_call_record["executionBoundary"]["runsAdapterCalls"] is not False:
+        raise AssertionError("CLI private-setup-adapter-runbook should not execute adapter calls")
+    if adapter_runbook_call_record["operationSequence"][-4]["operation"] != "forecast_card":
+        raise AssertionError("CLI private-setup-adapter-runbook should route generated forecasts to forecast_card")
+
+    adapter_conformance_summary_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_adapter_conformance_summary",
+    )
+    adapter_conformance_summary_call_payload = json.loads(adapter_conformance_summary_call.stdout)
+    if adapter_conformance_summary_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should return an ok envelope")
+    adapter_conformance_summary_call_record = adapter_conformance_summary_call_payload["payload"]
+    if adapter_conformance_summary_call_record["caseTotals"]["totalCases"] != 31:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should return case totals")
+    if adapter_conformance_summary_call_record["readSurface"]["compactSummaryDoesNotEmbedEnvelopes"] is not True:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should return compact summary")
+    if adapter_conformance_summary_call_record["executionBoundary"]["summaryDoesNotExecute"] is not True:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should not execute")
+    if adapter_conformance_summary_call_record["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should not create forecast artifacts")
+
+    source_guidance_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_source_adapter_guidance",
+    )
+    source_guidance_call_payload = json.loads(source_guidance_call.stdout)
+    if source_guidance_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-source-adapter-guidance agent-call should return an ok envelope")
+    source_guidance_record = source_guidance_call_payload["payload"]
+    if source_guidance_record["bindingSummary"]["privateSourceAdapterCapabilityId"] != "privatesourceadaptercapability-001":
+        raise AssertionError("CLI private-source-adapter-guidance should bind capabilities")
+    source_guidance_summary = {item["sourceKind"]: item for item in source_guidance_record["sourceKindSummary"]}
+    if source_guidance_summary["local_file"]["allowedEntrypoint"] != "source_builder":
+        raise AssertionError("CLI private-source-adapter-guidance should route local files to source-builder")
+    if source_guidance_summary["private_api"]["allowedEntrypoint"] != "no_current_entrypoint":
+        raise AssertionError("CLI private-source-adapter-guidance should keep private API planned-only")
+    if source_guidance_record["executionBoundary"]["runsAdapterCalls"] is not False:
+        raise AssertionError("CLI private-source-adapter-guidance should not execute adapter calls")
+    if source_guidance_record["executionBoundary"]["createsSourceManifests"] is not False:
+        raise AssertionError("CLI private-source-adapter-guidance should not create source manifests")
+
+    source_kind_selection_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_source_kind_selection",
+    )
+    source_kind_selection_call_payload = json.loads(source_kind_selection_call.stdout)
+    if source_kind_selection_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-source-kind-selection agent-call should return an ok envelope")
+    source_kind_selection_record = source_kind_selection_call_payload["payload"]
+    if source_kind_selection_record["privateSourceKindSelectionExamplesId"] != "privatesourcekindselectionexamples-001":
+        raise AssertionError("CLI private-source-kind-selection should return the checked examples")
+    source_kind_selection_rows = {
+        item["sourceKind"]: item
+        for item in source_kind_selection_record["selectionExamples"]
+    }
+    if source_kind_selection_rows["local_file"]["recommendation"]["immediateAction"] != "call_source_builder_adapter":
+        raise AssertionError("CLI private-source-kind-selection should route local files to source-builder")
+    if source_kind_selection_rows["manual_mapping"]["recommendation"]["requiresCallerConfirmation"] is not True:
+        raise AssertionError("CLI private-source-kind-selection should require mapping confirmation")
+    if source_kind_selection_rows["private_database"]["recommendation"]["immediateAction"] != "wait_for_runtime":
+        raise AssertionError("CLI private-source-kind-selection should keep private database planned-only")
+    if source_kind_selection_record["executionBoundary"]["examplesDoNotExecute"] is not True:
+        raise AssertionError("CLI private-source-kind-selection should stay guidance-only")
+    if source_kind_selection_record["executionBoundary"]["runsCommands"] is not False:
+        raise AssertionError("CLI private-source-kind-selection should not execute commands")
+
+    selected_source_kind_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_source_kind_selection",
+        "--source-kind",
+        "private_api",
+    )
+    selected_source_kind_payload = json.loads(selected_source_kind_call.stdout)
+    if selected_source_kind_payload["status"] != "ok":
+        raise AssertionError("CLI selected source-kind agent-call should return an ok envelope")
+    selected_source_kind_record = selected_source_kind_payload["payload"]
+    if selected_source_kind_record["runtimeStatus"] != "selected_example_only":
+        raise AssertionError("CLI selected source-kind agent-call should return a compact selected payload")
+    if selected_source_kind_record["requestedSourceKind"] != "private_api":
+        raise AssertionError("CLI selected source-kind agent-call should echo the selected source kind")
+    if "selectionExamples" in selected_source_kind_record:
+        raise AssertionError("CLI selected source-kind agent-call should not return the full examples list")
+    if selected_source_kind_record["selectedExample"]["sourceKind"] != "private_api":
+        raise AssertionError("CLI selected source-kind agent-call should include the private API example")
+    if selected_source_kind_record["selectedExample"]["recommendation"]["immediateAction"] != "wait_for_runtime":
+        raise AssertionError("CLI selected source-kind agent-call should keep private API planned-only")
+    if selected_source_kind_payload["state"]["sourceMode"] != "private_api":
+        raise AssertionError("CLI selected source-kind agent-call should preserve source mode")
+    if selected_source_kind_record["executionBoundary"]["runsCommands"] is not False:
+        raise AssertionError("CLI selected source-kind agent-call should not run commands")
+
+    unknown_source_kind_call = run_cli_unchecked(
+        "agent-call",
+        "--operation",
+        "private_source_kind_selection",
+        "--source-kind",
+        "spreadsheet_macro",
+    )
+    if unknown_source_kind_call.returncode != 2:
+        raise AssertionError("CLI unknown source-kind agent-call should return exit code 2")
+    unknown_source_kind_payload = json.loads(unknown_source_kind_call.stdout)
+    if unknown_source_kind_payload["status"] != "error":
+        raise AssertionError("CLI unknown source-kind agent-call should return an error envelope")
+    if unknown_source_kind_payload["error"]["code"] != "bad_request":
+        raise AssertionError("CLI unknown source-kind agent-call should return a bad_request code")
+    if unknown_source_kind_payload["payload"] is not None:
+        raise AssertionError("CLI unknown source-kind agent-call should not include a payload")
+    if "/Users/" in unknown_source_kind_call.stdout or "Traceback" in unknown_source_kind_call.stderr:
+        raise AssertionError("CLI unknown source-kind agent-call should keep diagnostics sanitized")
+
+    source_builder_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_source_builder",
+        "--private-setup-request-id",
+        "privatesetuprequest-001",
+        "--source-builder-case",
+        "local_draft",
+    )
+    source_builder_call_payload = json.loads(source_builder_call.stdout)
+    if source_builder_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-source-builder agent-call should return an ok envelope")
+    source_builder_result = source_builder_call_payload["payload"]
+    if source_builder_result["sourceManifestBuild"]["buildStatus"] != "draft_ready":
+        raise AssertionError("CLI private-setup-source-builder should produce draft-ready guidance")
+    if source_builder_result["sourceManifestBuild"]["forecastGenerationAllowed"] is not False:
+        raise AssertionError("CLI private-setup-source-builder should keep forecast generation blocked")
+    if source_builder_result["fieldMapping"] is None:
+        raise AssertionError("CLI private-setup-source-builder should include draft field mapping")
+    if source_builder_result["executionBoundary"]["readsOnlyCallerApprovedFiles"] is not True:
+        raise AssertionError("CLI private-setup-source-builder should only read caller-approved files")
+    if source_builder_result["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI private-setup-source-builder should not create forecast artifacts")
+
+    rejected_source_builder_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_source_builder",
+        "--source-builder-case",
+        "leakage",
+    )
+    rejected_source_builder_payload = json.loads(rejected_source_builder_call.stdout)
+    if rejected_source_builder_payload["payload"]["sourceManifestBuild"]["buildStatus"] != "rejected":
+        raise AssertionError("CLI private-setup-source-builder should expose rejected cases in the payload")
+    if rejected_source_builder_payload["payload"]["sourceManifest"] is not None:
+        raise AssertionError("CLI private-setup-source-builder rejected cases should not include draft manifests")
+
+    source_handoff_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_source_handoff",
+        "--private-setup-request-id",
+        "privatesetuprequest-001",
+        "--source-handoff-case",
+        "confirmed_builder_draft",
+    )
+    source_handoff_call_payload = json.loads(source_handoff_call.stdout)
+    if source_handoff_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-source-handoff agent-call should return an ok envelope")
+    source_handoff_result = source_handoff_call_payload["payload"]
+    if source_handoff_result["sourceIntakeHandoff"]["handoffStatus"] != "ready_for_method_gating":
+        raise AssertionError("CLI private-setup-source-handoff should expose confirmed handoff readiness")
+    if source_handoff_result["adapterGuidance"]["canProceedToMethodGating"] is not True:
+        raise AssertionError("CLI private-setup-source-handoff should route confirmed cases toward method gates")
+    if source_handoff_result["adapterGuidance"]["forecastExecutionAllowed"] is not False:
+        raise AssertionError("CLI private-setup-source-handoff should not directly allow forecast execution")
+    if source_handoff_result["bindingSummary"]["sourceIntakeReportId"] != "sourceintakereport-102":
+        raise AssertionError("CLI private-setup-source-handoff should preserve source-intake report binding")
+
+    blocked_source_handoff_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_source_handoff",
+        "--source-handoff-case",
+        "unconfirmed_builder_draft",
+    )
+    blocked_source_handoff_payload = json.loads(blocked_source_handoff_call.stdout)
+    if blocked_source_handoff_payload["payload"]["mappingConfirmation"]["required"] is not True:
+        raise AssertionError("CLI private-setup-source-handoff should preserve mapping confirmation gates")
+    if blocked_source_handoff_payload["payload"]["adapterGuidance"]["canProceedToMethodGating"] is not False:
+        raise AssertionError("CLI private-setup-source-handoff should block unconfirmed handoffs before method gates")
+
+    method_gate_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_method_gate",
+        "--private-setup-request-id",
+        "privatesetuprequest-001",
+        "--method-gate-case",
+        "confirmed_builder_draft",
+    )
+    method_gate_call_payload = json.loads(method_gate_call.stdout)
+    if method_gate_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-method-gate agent-call should return an ok envelope")
+    method_gate_result = method_gate_call_payload["payload"]
+    if method_gate_result["sourceHandoffMethodGate"]["methodGateStatus"] != "method_selected":
+        raise AssertionError("CLI private-setup-method-gate should expose selected method")
+    if method_gate_result["setupBenchmarkGate"]["decision"]["executionAllowed"] is not True:
+        raise AssertionError("CLI private-setup-method-gate should preserve benchmark execution permission")
+    if method_gate_result["setupMethodDecision"]["decisionStatus"] != "method_selected":
+        raise AssertionError("CLI private-setup-method-gate should preserve method decision")
+    if method_gate_result["adapterGuidance"]["canRecommendExplicitSetupForecastExecution"] is not True:
+        raise AssertionError("CLI private-setup-method-gate should recommend explicit setup forecast execution")
+    if method_gate_result["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI private-setup-method-gate should not create forecast artifacts")
+
+    blocked_method_gate_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_method_gate",
+        "--method-gate-case",
+        "unconfirmed_builder_draft",
+    )
+    blocked_method_gate_payload = json.loads(blocked_method_gate_call.stdout)
+    if blocked_method_gate_payload["payload"]["adapterGuidance"]["requiresMappingConfirmation"] is not True:
+        raise AssertionError("CLI private-setup-method-gate should preserve mapping confirmation gates")
+    if blocked_method_gate_payload["payload"]["adapterGuidance"]["canRecommendExplicitSetupForecastExecution"] is not False:
+        raise AssertionError("CLI private-setup-method-gate should block unconfirmed cases before forecast execution")
+
+    forecast_execution_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_forecast_execution",
+        "--private-setup-request-id",
+        "privatesetuprequest-001",
+        "--forecast-execution-case",
+        "confirmed_builder_draft",
+    )
+    forecast_execution_call_payload = json.loads(forecast_execution_call.stdout)
+    if forecast_execution_call_payload["status"] != "ok":
+        raise AssertionError("CLI private-setup-forecast-execution agent-call should return an ok envelope")
+    forecast_execution_result = forecast_execution_call_payload["payload"]
+    if forecast_execution_result["setupForecastRun"]["runStatus"] != "generated":
+        raise AssertionError("CLI private-setup-forecast-execution should generate the confirmed run")
+    if forecast_execution_result["bindingSummary"]["forecastId"] != "forecast-1102":
+        raise AssertionError("CLI private-setup-forecast-execution should bind forecast-1102")
+    if forecast_execution_result["forecastArtifacts"]["forecastArtifact"]["forecastId"] != "forecast-1102":
+        raise AssertionError("CLI private-setup-forecast-execution should return the forecast artifact")
+    if forecast_execution_result["executionBoundary"]["createsScoringRecords"] is not False:
+        raise AssertionError("CLI private-setup-forecast-execution should not create scoring records")
+
+    blocked_forecast_execution_call = run_cli(
+        "agent-call",
+        "--operation",
+        "private_setup_forecast_execution",
+        "--forecast-execution-case",
+        "unconfirmed_builder_draft",
+    )
+    blocked_forecast_execution_payload = json.loads(blocked_forecast_execution_call.stdout)
+    if blocked_forecast_execution_payload["payload"]["adapterGuidance"]["requiresMappingConfirmation"] is not True:
+        raise AssertionError("CLI private-setup-forecast-execution should preserve mapping confirmation gates")
+    if blocked_forecast_execution_payload["payload"]["bindingSummary"]["forecastId"] is not None:
+        raise AssertionError("CLI private-setup-forecast-execution should block unconfirmed cases before artifacts")
+
+    setup_card_payload = agent_call_setup_readback("forecast_card")
+    if setup_card_payload["payload"]["record"]["setupBinding"]["setupForecastRunId"] != "setupforecastrun-1102":
+        raise AssertionError("CLI forecast-card readback should expose private setup forecast run binding")
+    if setup_card_payload["payload"]["record"]["qualityClaim"]["status"] != "not_enough_resolved_source_handoff_outcomes":
+        raise AssertionError("CLI forecast-card readback should keep source-handoff quality claims blocked")
+
+    setup_bundle_payload = agent_call_setup_readback("lifecycle_bundle")
+    if setup_bundle_payload["payload"]["record"]["includedRecords"]["setupForecastRun"] != "setupforecastrun-1102":
+        raise AssertionError("CLI lifecycle-bundle readback should include setup forecast run")
+
+    setup_resolution_payload = agent_call_setup_readback("resolution_status")
+    if setup_resolution_payload["payload"]["resolutionRecordId"] != "resolution-1102":
+        raise AssertionError("CLI resolution-status readback should bind resolution-1102")
+    if setup_resolution_payload["payload"]["qualityClaim"]["resolvedComparableSourceHandoffOutcomes"] != 1:
+        raise AssertionError("CLI resolution-status readback should expose source-handoff sample count")
+
+    setup_scoring_payload = agent_call_setup_readback("scoring_summary")
+    if setup_scoring_payload["payload"]["scoringReportId"] != "scoring-1102":
+        raise AssertionError("CLI scoring-summary readback should bind scoring-1102")
+    if setup_scoring_payload["payload"]["qualityClaim"]["status"] != "not_enough_resolved_source_handoff_outcomes":
+        raise AssertionError("CLI scoring-summary readback should keep quality claims blocked")
 
     validated = run_cli(
         "validate",

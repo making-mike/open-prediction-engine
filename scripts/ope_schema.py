@@ -299,6 +299,24 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "private-source-adapter-outcome-matrix.schema.json"
     if name.endswith("-private-source-adapter-intake-bridge.generated.json"):
         return spec_root / "private-source-adapter-intake-bridge.schema.json"
+    if name.endswith("-private-source-kind-selection-examples.generated.json"):
+        return spec_root / "private-source-kind-selection-examples.schema.json"
+    if name.endswith("-private-source-kind-query-matrix.generated.json"):
+        return spec_root / "private-source-kind-query-matrix.schema.json"
+    if name.endswith("-private-setup-requests.generated.json"):
+        return spec_root / "private-setup-request.schema.json"
+    if name.endswith("-private-setup-first-action-runbook.generated.json"):
+        return spec_root / "private-setup-first-action-runbook.schema.json"
+    if name.endswith("-private-setup-adapter-chain-runbook.generated.json"):
+        return spec_root / "private-setup-adapter-chain-runbook.schema.json"
+    if name.endswith("-private-setup-adapter-conformance-matrix.generated.json"):
+        return spec_root / "private-setup-adapter-conformance-matrix.schema.json"
+    if name.endswith("-private-setup-adapter-conformance-summary.generated.json"):
+        return spec_root / "private-setup-adapter-conformance-summary.schema.json"
+    if "-private-setup-first-action-" in name and name.endswith(".generated.json"):
+        return spec_root / "private-setup-first-action.schema.json"
+    if "-private-setup-agent-bundle-" in name and name.endswith(".generated.json"):
+        return spec_root / "private-setup-agent-bundle.schema.json"
     if name.endswith("-forecast-runbook.generated.json"):
         return spec_root / "agent-forecast-runbook.schema.json"
     if name.endswith("-forecast-run.generated.json"):

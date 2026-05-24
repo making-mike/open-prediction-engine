@@ -26,6 +26,15 @@ OPERATIONS = [
     "evidence_trace",
     "forecast_card",
     "lifecycle_bundle",
+    "private_setup_bundle",
+    "private_setup_adapter_runbook",
+    "private_setup_adapter_conformance_summary",
+    "private_source_adapter_guidance",
+    "private_source_kind_selection",
+    "private_setup_source_builder",
+    "private_setup_source_handoff",
+    "private_setup_method_gate",
+    "private_setup_forecast_execution",
     "resolution_status",
     "scoring_summary",
 ]
@@ -36,6 +45,15 @@ INPUT_RECORD_TYPES = {
     "evidence_trace": "evidence_trace",
     "forecast_card": "forecast_card",
     "lifecycle_bundle": "lifecycle_bundle",
+    "private_setup_bundle": "private_setup_agent_bundle",
+    "private_setup_adapter_runbook": "private_setup_adapter_chain_runbook",
+    "private_setup_adapter_conformance_summary": "private_setup_adapter_conformance_summary",
+    "private_source_adapter_guidance": "private_source_adapter_capability",
+    "private_source_kind_selection": "private_source_kind_selection_examples",
+    "private_setup_source_builder": "source_manifest_build",
+    "private_setup_source_handoff": "source_intake_handoff",
+    "private_setup_method_gate": "source_handoff_method_gate",
+    "private_setup_forecast_execution": "setup_forecast_run",
     "resolution_status": "resolution_status",
     "scoring_summary": "scoring_summary",
 }
@@ -46,6 +64,15 @@ SIDE_EFFECT_LEVELS = {
     "evidence_trace": "read_only",
     "forecast_card": "read_only",
     "lifecycle_bundle": "read_only",
+    "private_setup_bundle": "read_only",
+    "private_setup_adapter_runbook": "read_only",
+    "private_setup_adapter_conformance_summary": "read_only",
+    "private_source_adapter_guidance": "read_only",
+    "private_source_kind_selection": "read_only",
+    "private_setup_source_builder": "dry_run_generation",
+    "private_setup_source_handoff": "dry_run_generation",
+    "private_setup_method_gate": "dry_run_generation",
+    "private_setup_forecast_execution": "forecast_execution",
     "resolution_status": "status_read",
     "scoring_summary": "scoring_read",
 }
@@ -54,10 +81,19 @@ USAGE_GUIDANCE = {
     "forecast_request_validation": "Use before any forecast execution, live fetch, paid action, or privacy-sensitive action.",
     "evidence_plan": "Use after an accepted request to inspect source policy, planned connectors, and approval boundaries.",
     "evidence_trace": "Use when the caller needs connector-bound source provenance without raw fixture contents.",
-    "forecast_card": "Use first for compact downstream decisions that need probability, baseline, status, and warnings.",
-    "lifecycle_bundle": "Use when the caller needs audit context, provenance, evidence, history, resolution, and scoring records.",
-    "resolution_status": "Use when an agent needs to decide whether to wait, resolve, score, or treat a forecast as provisional.",
-    "scoring_summary": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting.",
+    "forecast_card": "Use first for compact downstream decisions that need probability, baseline, status, warnings, and setup bindings, including generated private setup forecasts.",
+    "lifecycle_bundle": "Use when the caller needs audit context, provenance, evidence, history, setup bindings, resolution, and scoring records for normal or setup-generated forecasts.",
+    "private_setup_bundle": "Use when an agent needs setup guidance for a private setup request without executing source setup.",
+    "private_setup_adapter_runbook": "Use when an agent needs the checked private setup adapter operation sequence and readback path without executing adapter calls.",
+    "private_setup_adapter_conformance_summary": "Use when an agent needs compact private setup adapter conformance status without loading the full embedded-envelope matrix.",
+    "private_source_adapter_guidance": "Use when an agent needs private source adapter capability, outcome, and intake-bridge guidance without executing source reads.",
+    "private_source_kind_selection": "Use when an agent needs checked source-kind path selection examples without executing source setup, fixture evidence, forecast execution, or scoring.",
+    "private_setup_source_builder": "Use after local-file setup guidance to inspect caller-approved CSV/JSON files and draft setup records.",
+    "private_setup_source_handoff": "Use after source-builder guidance to inspect checked source-handoff next actions and confirmation gates.",
+    "private_setup_method_gate": "Use after confirmed source-handoff guidance to inspect setup benchmark and method-decision readiness.",
+    "private_setup_forecast_execution": "Use only after method-gate readiness to run checked setup forecast execution and return artifacts for allowed cases; read generated forecasts through normal read operations.",
+    "resolution_status": "Use when an agent needs to decide whether a normal or setup-generated forecast is resolved, pending, ambiguous, or annulled.",
+    "scoring_summary": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting on a normal or setup-generated forecast.",
 }
 
 HTTP_PATHS = {
@@ -66,6 +102,15 @@ HTTP_PATHS = {
     "evidence_trace": "/agent/evidence-trace",
     "forecast_card": "/agent/forecast-card",
     "lifecycle_bundle": "/agent/lifecycle-bundle",
+    "private_setup_bundle": "/agent/private-setup-bundle",
+    "private_setup_adapter_runbook": "/agent/private-setup-adapter-runbook",
+    "private_setup_adapter_conformance_summary": "/agent/private-setup-adapter-conformance-summary",
+    "private_source_adapter_guidance": "/agent/private-source-adapter-guidance",
+    "private_source_kind_selection": "/agent/private-source-kind-selection",
+    "private_setup_source_builder": "/agent/private-setup-source-builder",
+    "private_setup_source_handoff": "/agent/private-setup-source-handoff",
+    "private_setup_method_gate": "/agent/private-setup-method-gate",
+    "private_setup_forecast_execution": "/agent/private-setup-forecast-execution",
     "resolution_status": "/agent/resolution-status",
     "scoring_summary": "/agent/scoring-summary",
 }
@@ -134,6 +179,133 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
             ),
             *common,
         ]
+    if operation == "private_setup_bundle":
+        return [
+            field(
+                "privateSetupRequestId",
+                False,
+                "id",
+                "agent-call --private-setup-request-id",
+                "Private setup request ID to read as a guidance bundle; defaults to the checked local-file fixture.",
+            ),
+            field(
+                "privateSetupCase",
+                False,
+                "string",
+                "agent-call --private-setup-case",
+                "Optional checked bad-request example case: unknown_source_kind or missing_approval.",
+            ),
+            *common,
+        ]
+    if operation == "private_setup_adapter_runbook":
+        return [
+            *common,
+        ]
+    if operation == "private_setup_adapter_conformance_summary":
+        return [
+            *common,
+        ]
+    if operation == "private_source_adapter_guidance":
+        return [
+            *common,
+        ]
+    if operation == "private_source_kind_selection":
+        return [
+            field(
+                "sourceKind",
+                False,
+                "string",
+                "agent-call --source-kind",
+                "Optional source kind to return one selected example; unknown values return a sanitized bad_request envelope.",
+            ),
+            *common,
+        ]
+    if operation == "private_setup_source_builder":
+        return [
+            field(
+                "privateSetupRequestId",
+                False,
+                "id",
+                "agent-call --private-setup-request-id",
+                "Private setup request ID to bind to the source-builder adapter result.",
+            ),
+            field(
+                "sourceBuilderCase",
+                False,
+                "string",
+                "agent-call --source-builder-case",
+                "Optional checked source-builder fixture case for local adapter verification.",
+            ),
+            field(
+                "sourceBuilderInputs",
+                False,
+                "string-list",
+                "agent-call --source-builder-input",
+                "Caller-approved local source_role=path inputs; adapters must not discover files implicitly.",
+            ),
+            field(
+                "mappingHints",
+                False,
+                "string-list",
+                "agent-call --source-builder-mapping-hint",
+                "Caller-provided source_role.source_field=target_field hints; inferred mappings still require confirmation.",
+            ),
+            *common,
+        ]
+    if operation == "private_setup_source_handoff":
+        return [
+            field(
+                "privateSetupRequestId",
+                False,
+                "id",
+                "agent-call --private-setup-request-id",
+                "Private setup request ID to bind to the source-handoff adapter result.",
+            ),
+            field(
+                "sourceHandoffCase",
+                False,
+                "string",
+                "agent-call --source-handoff-case",
+                "Checked source-handoff fixture case; adapters must not accept raw private data in this operation.",
+            ),
+            *common,
+        ]
+    if operation == "private_setup_method_gate":
+        return [
+            field(
+                "privateSetupRequestId",
+                False,
+                "id",
+                "agent-call --private-setup-request-id",
+                "Private setup request ID to bind to the method-gate adapter result.",
+            ),
+            field(
+                "methodGateCase",
+                False,
+                "string",
+                "agent-call --method-gate-case",
+                "Checked source-handoff method-gate fixture case; adapters must not accept raw private data in this operation.",
+            ),
+            *common,
+        ]
+    if operation == "private_setup_forecast_execution":
+        return [
+            field(
+                "privateSetupRequestId",
+                False,
+                "id",
+                "agent-call --private-setup-request-id",
+                "Private setup request ID to bind to the forecast-execution adapter result.",
+            ),
+            field(
+                "forecastExecutionCase",
+                False,
+                "string",
+                "agent-call --forecast-execution-case",
+                "Checked source-handoff forecast-execution fixture case; adapters must not accept raw private data in this operation.",
+            ),
+            *common,
+        ]
     return [
         field(
             "forecastId",
@@ -159,6 +331,60 @@ def cli_command(operation: str) -> str:
             "python3 scripts/ope.py agent-call "
             f"--operation {operation} "
             "--request spec/fixtures/requests/auto-weather-logistics-request.json"
+        )
+    if operation == "private_setup_bundle":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_bundle "
+            "--private-setup-request-id privatesetuprequest-001"
+        )
+    if operation == "private_setup_adapter_runbook":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_adapter_runbook"
+        )
+    if operation == "private_setup_adapter_conformance_summary":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_adapter_conformance_summary"
+        )
+    if operation == "private_source_adapter_guidance":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_source_adapter_guidance"
+        )
+    if operation == "private_source_kind_selection":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_source_kind_selection"
+        )
+    if operation == "private_setup_source_builder":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_source_builder "
+            "--private-setup-request-id privatesetuprequest-001 "
+            "--source-builder-case local_draft"
+        )
+    if operation == "private_setup_source_handoff":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_source_handoff "
+            "--private-setup-request-id privatesetuprequest-001 "
+            "--source-handoff-case confirmed_builder_draft"
+        )
+    if operation == "private_setup_method_gate":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_method_gate "
+            "--private-setup-request-id privatesetuprequest-001 "
+            "--method-gate-case confirmed_builder_draft"
+        )
+    if operation == "private_setup_forecast_execution":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation private_setup_forecast_execution "
+            "--private-setup-request-id privatesetuprequest-001 "
+            "--forecast-execution-case confirmed_builder_draft"
         )
     return (
         "python3 scripts/ope.py agent-call "
@@ -187,14 +413,51 @@ def status_mapping() -> list[dict[str, Any]]:
 
 
 def approval_gate(operation: str) -> str:
-    if operation in {"forecast_request_validation", "forecast_card", "lifecycle_bundle", "resolution_status", "scoring_summary"}:
+    if operation in {
+        "forecast_request_validation",
+        "forecast_card",
+        "lifecycle_bundle",
+        "private_setup_bundle",
+        "private_setup_adapter_runbook",
+        "private_setup_adapter_conformance_summary",
+        "private_source_adapter_guidance",
+        "private_source_kind_selection",
+        "resolution_status",
+        "scoring_summary",
+    }:
         return "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive."
+    if operation == "private_setup_source_builder":
+        return "Source-builder adapter inputs must be explicit caller-approved paths; it must not discover or read private files implicitly."
+    if operation == "private_setup_source_handoff":
+        return "Source-handoff adapter cases must preserve caller confirmation gates before routing to setup method gates."
+    if operation == "private_setup_method_gate":
+        return "Method-gate adapter cases must preserve setup benchmark and method-decision gates before recommending explicit forecast execution."
+    if operation == "private_setup_forecast_execution":
+        return "Forecast-execution adapter calls must require method-gate permission and remain blocked for unconfirmed, insufficient, rejected, or leakage cases."
     return "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access."
 
 
 def credential_boundary(operation: str) -> str:
     if operation == "evidence_plan":
         return "Connector credentials stay server-side and must never appear in prompt-visible arguments or returned records."
+    if operation == "private_setup_bundle":
+        return "Private setup bundle reads accept no credentials in prompt-visible arguments and return only guidance records."
+    if operation == "private_setup_adapter_runbook":
+        return "Private setup adapter-runbook reads accept no credentials in prompt-visible arguments and return only checked operation-sequence guidance."
+    if operation == "private_setup_adapter_conformance_summary":
+        return "Private setup adapter conformance-summary reads accept no credentials in prompt-visible arguments and return only compact checked conformance guidance."
+    if operation == "private_source_adapter_guidance":
+        return "Private source adapter guidance accepts no credentials in prompt-visible arguments and returns only capability, outcome, and routing guidance records."
+    if operation == "private_source_kind_selection":
+        return "Private source-kind selection accepts no credentials in prompt-visible arguments and returns only checked selection examples."
+    if operation == "private_setup_source_builder":
+        return "Source-builder adapter arguments may include caller-approved paths and mapping hints, but never credentials or tokens."
+    if operation == "private_setup_source_handoff":
+        return "Source-handoff adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+    if operation == "private_setup_method_gate":
+        return "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+    if operation == "private_setup_forecast_execution":
+        return "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
     return "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
 
 
@@ -204,7 +467,13 @@ def operation_map(operation: str) -> dict[str, Any]:
         "operation": operation,
         "inputRecordType": INPUT_RECORD_TYPES[operation],
         "sideEffectLevel": SIDE_EFFECT_LEVELS[operation],
-        "requiresApproval": operation == "evidence_plan",
+        "requiresApproval": operation in {
+            "evidence_plan",
+            "private_setup_source_builder",
+            "private_setup_source_handoff",
+            "private_setup_method_gate",
+            "private_setup_forecast_execution",
+        },
         "inputFields": fields,
         "outputEnvelopeSchema": ENVELOPE_SCHEMA,
         "localCli": {
@@ -331,6 +600,69 @@ def decision_examples() -> list[dict[str, Any]]:
             "reason": "The bundle contains bound lifecycle records, evidence, history, resolution, and scoring context.",
             "requiredSignals": ["requestId", "sourcePolicyId", "evidencePacket", "forecastHistory", "scoringReport"],
             "downstreamRule": "Use the bundle for audit context, not as a separate source of forecast semantics.",
+        },
+        {
+            "situation": "The agent needs to understand the first safe setup action for a private setup request.",
+            "preferredOperation": "private_setup_bundle",
+            "reason": "The bundle joins request, first-action, and runbook guidance without executing source setup.",
+            "requiredSignals": ["requestId", "sourceKind", "actionStatus", "nextActionLabel", "executionBoundary"],
+            "downstreamRule": "Use the bundle as setup guidance only; do not treat it as a forecast or source-intake artifact.",
+        },
+        {
+            "situation": "The agent needs the full private setup adapter sequence before calling setup operations.",
+            "preferredOperation": "private_setup_adapter_runbook",
+            "reason": "The runbook lists setup guidance, source-builder, source-handoff, method-gate, forecast execution, and normal readback order.",
+            "requiredSignals": ["operationSequence", "branchPlaybooks", "executionBoundary", "warnings"],
+            "downstreamRule": "Use the runbook as read-only guidance; it must not execute adapter calls or create source, forecast, resolution, or scoring artifacts.",
+        },
+        {
+            "situation": "The agent needs compact private setup adapter conformance status before deciding which adapter operation to call.",
+            "preferredOperation": "private_setup_adapter_conformance_summary",
+            "reason": "The summary records phase counts, operation coverage, artifact boundaries, sanitized-error coverage, and the full matrix pointer without embedding every envelope.",
+            "requiredSignals": ["caseTotals", "operationSummaries", "artifactBoundary", "readSurface", "executionBoundary"],
+            "downstreamRule": "Use the summary for routine conformance checks; load the full matrix only when implementing or debugging adapter behavior.",
+        },
+        {
+            "situation": "The agent needs to know which private source kinds OPE can currently route before setup.",
+            "preferredOperation": "private_source_adapter_guidance",
+            "reason": "The guidance joins capability declarations, outcome classes, and intake-bridge routing without executing source reads.",
+            "requiredSignals": ["sourceKindSummary", "capability", "outcomeMatrix", "intakeBridge", "executionBoundary"],
+            "downstreamRule": "Use this as source-kind guidance only; planned private API, database, and upload paths remain non-executing.",
+        },
+        {
+            "situation": "The agent needs to choose the next private source-kind path before lower-level setup calls.",
+            "preferredOperation": "private_source_kind_selection",
+            "reason": "The examples bind source adapter guidance, first actions, and the adapter-chain runbook into source-kind-specific next actions.",
+            "requiredSignals": ["selectionExamples", "recommendation.immediateAction", "adapterChainBinding", "executionBoundary"],
+            "downstreamRule": "Use these examples as read-only path selection; do not execute source setup, fixture evidence, forecasts, or scoring from this operation.",
+        },
+        {
+            "situation": "The private setup bundle says caller-approved local files are the next setup step.",
+            "preferredOperation": "private_setup_source_builder",
+            "reason": "The adapter inspects explicit CSV/JSON paths and returns draft manifest and mapping guidance.",
+            "requiredSignals": ["buildStatus", "inputFiles", "draftArtifacts", "confirmationRequired"],
+            "downstreamRule": "Do not forecast from drafts until source intake, method gates, and benchmark decisions pass.",
+        },
+        {
+            "situation": "The agent needs to continue from source-builder guidance into source-handoff next actions.",
+            "preferredOperation": "private_setup_source_handoff",
+            "reason": "The adapter returns checked handoff status, mapping confirmation, intake binding, and method-gate readiness.",
+            "requiredSignals": ["handoffStatus", "nextAction", "sourceIntakeReportId", "requiresMappingConfirmation"],
+            "downstreamRule": "Only confirmed accepted handoffs may proceed to setup benchmark and method gates; the adapter itself does not forecast.",
+        },
+        {
+            "situation": "The agent needs to know whether a confirmed private setup may run explicit forecast execution.",
+            "preferredOperation": "private_setup_method_gate",
+            "reason": "The adapter returns setup benchmark, method decision, selected method, and explicit forecast-execution readiness.",
+            "requiredSignals": ["methodGateStatus", "setupBenchmarkGateId", "setupMethodDecisionId", "canRecommendExplicitSetupForecastExecution"],
+            "downstreamRule": "Run setup forecast execution only when the method gate recommends it; the adapter itself does not create forecasts.",
+        },
+        {
+            "situation": "The agent has method-gate permission and needs the setup forecast artifacts.",
+            "preferredOperation": "private_setup_forecast_execution",
+            "reason": "The adapter returns a setup forecast run plus forecast artifacts only for the allowed confirmed handoff.",
+            "requiredSignals": ["runStatus", "setupForecastRunId", "forecastArtifactsCreated", "forecastId"],
+            "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API.",
         },
         {
             "situation": "The agent needs to know whether a forecast has resolved before scoring or waiting.",

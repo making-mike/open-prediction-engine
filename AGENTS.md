@@ -47,9 +47,18 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/source-handoff-resolution.md`: fixture-mode resolution and scoring for the source-handoff forecast.
 - `spec/source-handoff-setup-runbook.md`: checked agent workflow from source-builder handoff to resolved forecast read surfaces.
 - `spec/private-setup-workflow.md`: domain-agnostic private setup workflow and source-runtime boundary.
+- `spec/private-setup-request.md`: checked private setup request routing contract.
+- `spec/private-setup-first-action.md`: checked private setup first-action dispatcher boundary.
+- `spec/private-setup-first-action-runbook.md`: checked private setup first-action runbook boundary.
+- `spec/private-setup-agent-bundle.md`: checked private setup agent bundle boundary.
+- `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
+- `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
+- `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
 - `spec/private-source-adapters.md`: checked private source adapter capability declarations and non-execution boundary.
 - `spec/private-source-adapter-outcomes.md`: checked outcome matrix for private source adapter next actions.
 - `spec/private-source-adapter-bridge.md`: checked bridge from adapter outcomes to allowed source-intake entrypoints.
+- `spec/private-source-kind-selection-examples.md`: checked examples for choosing private setup source-kind paths without execution.
+- `spec/private-source-kind-query-matrix.md`: checked adapter query matrix for full-list, selected, and unsupported source-kind selection responses.
 - `spec/recalculation-history.md`: append-only recalculation trigger, run, and history boundary.
 - `spec/evidence-trace.schema.json`: compact read-only trace linking forecasts to evidence and connector records.
 - `spec/method-registry.md`: supported method registry, benchmark binding, and method-selection boundary.
@@ -169,12 +178,30 @@ python3 scripts/generate_source_handoff_setup_runbook.py --check
 python3 scripts/check_source_handoff_setup_runbook.py
 python3 scripts/generate_private_setup_workflow.py --check
 python3 scripts/check_private_setup_workflow.py
+python3 scripts/generate_private_setup_requests.py --check
+python3 scripts/check_private_setup_requests.py
+python3 scripts/generate_private_setup_first_actions.py --check
+python3 scripts/check_private_setup_first_actions.py
+python3 scripts/generate_private_setup_first_action_runbook.py --check
+python3 scripts/check_private_setup_first_action_runbook.py
+python3 scripts/generate_private_setup_agent_bundles.py --check
+python3 scripts/check_private_setup_agent_bundles.py
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
+python3 scripts/check_private_setup_adapter_chain_runbook.py
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
+python3 scripts/check_private_setup_adapter_conformance_matrix.py
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --check
+python3 scripts/check_private_setup_adapter_conformance_summary.py
 python3 scripts/generate_private_source_adapter_capabilities.py --check
 python3 scripts/check_private_source_adapter_capabilities.py
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --check
 python3 scripts/check_private_source_adapter_outcome_matrix.py
 python3 scripts/generate_private_source_adapter_intake_bridge.py --check
 python3 scripts/check_private_source_adapter_intake_bridge.py
+python3 scripts/generate_private_source_kind_selection_examples.py --check
+python3 scripts/check_private_source_kind_selection_examples.py
+python3 scripts/generate_private_source_kind_query_matrix.py --check
+python3 scripts/check_private_source_kind_query_matrix.py
 python3 scripts/generate_recalculation_history.py --check
 python3 scripts/check_recalculation_history.py
 python3 scripts/run_auto_evidence_forecast.py
@@ -200,7 +227,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private source adapter capability declarations, outcome matrix, and intake bridge, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -255,6 +282,17 @@ python3 scripts/ope.py private-setup-workflow
 python3 scripts/ope.py private-source-adapters
 python3 scripts/ope.py private-source-adapter-outcomes
 python3 scripts/ope.py private-source-adapter-bridge
+python3 scripts/ope.py private-setup-requests
+python3 scripts/ope.py private-setup-actions
+python3 scripts/ope.py private-setup-action --request-id privatesetuprequest-001
+python3 scripts/ope.py private-setup-action-runbook
+python3 scripts/ope.py private-setup-bundles
+python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
+python3 scripts/ope.py private-setup-adapter-runbook
+python3 scripts/ope.py private-setup-adapter-conformance
+python3 scripts/ope.py private-setup-adapter-conformance-summary
+python3 scripts/ope.py private-source-kind-selection
+python3 scripts/ope.py private-source-kind-query-matrix
 python3 scripts/ope.py auto-forecast
 python3 scripts/ope.py resolve-auto-evidence
 python3 scripts/ope.py historical-forecast
@@ -268,6 +306,19 @@ python3 scripts/ope.py forecast-runbook
 python3 scripts/ope.py agent-envelopes
 python3 scripts/ope.py agent-protocol-map
 python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601
+python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001
+python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook
+python3 scripts/ope.py agent-call --operation private_source_adapter_guidance
+python3 scripts/ope.py agent-call --operation private_source_kind_selection
+python3 scripts/ope.py agent-call --operation private_source_kind_selection --source-kind private_api
+python3 scripts/ope.py agent-call --operation private_setup_source_builder --private-setup-request-id privatesetuprequest-001 --source-builder-case local_draft
+python3 scripts/ope.py agent-call --operation private_setup_source_handoff --private-setup-request-id privatesetuprequest-001 --source-handoff-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation private_setup_method_gate --private-setup-request-id privatesetuprequest-001 --method-gate-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation private_setup_forecast_execution --private-setup-request-id privatesetuprequest-001 --forecast-execution-case confirmed_builder_draft
+python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102
 python3 scripts/ope.py pipeline
 python3 scripts/ope.py resolve-pipeline
 python3 scripts/ope.py manifest
@@ -313,9 +364,18 @@ python3 scripts/run_source_handoff_forecast.py --write
 python3 scripts/resolve_source_handoff_outcome.py --write
 python3 scripts/generate_source_handoff_setup_runbook.py --write
 python3 scripts/generate_private_setup_workflow.py --write
+python3 scripts/generate_private_setup_requests.py --write
+python3 scripts/generate_private_setup_first_actions.py --write
+python3 scripts/generate_private_setup_first_action_runbook.py --write
+python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
+python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
+python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write
+python3 scripts/generate_private_source_kind_selection_examples.py --write
+python3 scripts/generate_private_source_kind_query_matrix.py --write
 python3 scripts/generate_recalculation_history.py --write
 python3 scripts/run_agent_forecast.py --write
 python3 scripts/generate_forecast_run_intake_matrix.py --write
@@ -353,6 +413,18 @@ Still needed before any hosted or service release:
 - Treat private source adapter capability records as declarations, not source execution. They must not imply credential access, live fetching, arbitrary parsing, or forecast evidence creation.
 - Treat private source adapter outcome matrices as next-action guidance only. They must not create source manifests, forecast artifacts, scoring records, or credential records.
 - Treat private source adapter bridges as routing guidance only. They may point to checked local commands, but they must not execute source reads or produce forecast and scoring artifacts.
+- Treat private source adapter guidance envelopes as read-only joins over capability, outcome, and bridge records. They must not execute source reads, adapter calls, manifest creation, forecast creation, scoring, credential handling, live fetching, or hosted runtime work.
+- Treat private source-kind selection examples as guidance only. They may recommend source-builder, mapping confirmation, fixture evidence, wait, replace, or stop paths, but they must not run commands or create source, forecast, scoring, credential, live-fetch, or hosted-runtime artifacts.
+- Treat private source-kind selection envelopes as read-only exposure of those examples through `agent-call` or MCP. Optional source-kind queries may return one selected recommendation, but they must not execute source-builder, source-handoff, fixture evidence, forecast execution, scoring, source reads, credentials, live fetches, or hosted runtime work.
+- Treat private source-kind query matrices as adapter conformance examples only. They may store checked full-list, selected, and unsupported envelopes, but they must not be treated as source-intake evidence, forecast artifacts, scoring records, or execution logs.
+- Treat private setup requests as setup-intent classification only. They must not read private data, execute source commands, or produce forecast and scoring artifacts.
+- Treat private setup first-action dispatch as a non-executing read surface. It may name checked local commands, but it must not run source-builder, source-handoff, gather-evidence, forecast execution, resolution, or scoring.
+- Treat private setup first-action runbooks as non-executing guidance. They may explain next steps, but planned, unsafe, unknown, and approval-missing sources must not enter source intake through the runbook.
+- Treat private setup agent bundles as read-only joins over request, action, and runbook records. They must not create source, forecast, scoring, live-fetch, or credential artifacts.
+- Treat private setup adapter-chain runbooks as non-executing guidance. They may name adapter operations and readback order, but they must not execute calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
+- Treat private setup adapter-runbook envelopes as read-only guidance. They may expose the checked operation sequence through agent-call or MCP, but they must not execute adapter calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
+- Treat private setup adapter conformance matrices as examples over checked envelopes only. They must not execute adapter calls, read private data, or create source, forecast, resolution, scoring, live-fetch, credential, or hosted-runtime artifacts.
+- Treat private setup adapter conformance summaries as compact read-only guidance over the checked matrix. They must not embed full envelopes or execute adapter calls, read private data, or create source, forecast, resolution, scoring, live-fetch, credential, or hosted-runtime artifacts.
 - Keep agent-inferred field or alias mappings as proposals until deterministic validation or user confirmation accepts them.
 - Treat setup benchmark gates as execution gates, not quality claims. A stronger method needs confirmed source roles, clean anti-leakage controls, positive baseline lift, and explicit sample-size boundaries.
 - Treat setup method decisions as method-policy explanations, not forecast outputs. A stronger method needs confirmed source roles and a setup-specific benchmark gate.

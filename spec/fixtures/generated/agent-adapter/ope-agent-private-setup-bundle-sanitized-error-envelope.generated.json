@@ -1,0 +1,54 @@
+{
+  "agentEnvelopeId": "agentenvelope-010",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "private_setup_bundle",
+  "adapterRequest": {
+    "operation": "private_setup_bundle",
+    "inputRecordType": "private_setup_agent_bundle",
+    "inputRef": "privatesetuprequest-999",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read a private setup bundle that does not exist to demonstrate sanitized errors."
+  },
+  "recordBinding": {
+    "requestId": "privatesetuprequest-999",
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": null,
+    "approvalStatus": null,
+    "dataMode": null,
+    "planStatus": null,
+    "executionMode": null,
+    "sourceMode": null,
+    "forecastStatus": null,
+    "resolutionStatus": null,
+    "scoreStatus": null,
+    "qualityClaimStatus": null
+  },
+  "status": "error",
+  "exitCode": 4,
+  "payload": null,
+  "error": {
+    "code": "not_found",
+    "message": "Private setup agent bundle was not found.",
+    "retryable": false
+  },
+  "warnings": [
+    "Error payloads are sanitized and must not expose local absolute paths or raw diagnostics."
+  ]
+}
