@@ -24,9 +24,10 @@ This does not mean unbounded crawling or claiming access to all internet knowled
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
+- a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
 - a fixture-only evidence loop for resolved, ambiguous, and annulled weather-logistics cases
 - dependency-free scoring checks for Brier, log loss, interval score, pinball loss, calibration buckets, baseline lift, and track-record summaries
 - anti-leakage benchmark fixtures that distinguish clean pre-outcome runs from contaminated runs
@@ -59,6 +60,12 @@ The repository currently contains:
 - an ignored local live capture workspace under `.ope/live/` for sanitized opt-in connector results and evidence source-set drafts
 - a domain-agnostic setup contract with a fixture-ready weather-logistics reference setup and a candidate seaport berth-availability private setup
 - a local source manifest builder that inspects small caller-approved CSV/JSON files, drafts manifest/mapping records, and rejects secrets, unsupported formats, oversized files, and leakage indicators before source intake
+- a checked source adapter output contract that lets external agent-built connectors hand OPE a sanitized source manifest and field mapping without living in core or creating forecast records
+- a checked HSL GTFS-RT transit API connector that can capture TripUpdates, derive delay rows through an opt-in static GTFS schedule join, and keep normal checks offline
+- a checked transit-delay forward-run workflow that records a forecast before the service window, resolves from declared outcome rows, scores against baseline, and exposes opt-in local live forecast/resolve phases under `.ope/live/transit-forward-run/`
+- a checked transit forward-run resolver-agent command that scans pending local states, classifies due/not-due/already-resolved runs, and can explicitly execute due resolver commands
+- a checked resolution job registry that gives agents read-only next-action guidance before resolver execution
+- a checked foreground terminal resolution scheduler that agents can start locally to poll resolution jobs and optionally execute due checked resolvers without Trigger.dev, cron, or OS scheduler files
 - a checked source-builder to source-intake handoff that tells agents to confirm mappings, collect more data, replace rejected sources, or proceed to setup method gates
 - a checked source-handoff method gate that routes confirmed builder handoffs into setup benchmark and method decisions without creating forecast artifacts
 - explicit source-handoff forecast execution that turns the confirmed handoff method decision into `forecast-1102` while keeping all blocked handoff cases non-generating
@@ -118,6 +125,134 @@ This domain was chosen because it has frequent outcomes, clear resolution paths,
 
 See `spec/domains/weather-logistics.md` for the domain contract.
 
+## Public Beta Candidate Wedge
+
+The first public beta candidate is weather-conditioned public transport delay risk.
+
+The initial question shape is:
+
+```text
+Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
+```
+
+This wedge now has a local custom-file prototype, a checked forward-run workflow, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+
+Run the checked fixture path:
+
+```bash
+python3 scripts/ope.py transit-delay-forecast
+python3 scripts/ope.py transit-delay-forward-run
+python3 scripts/ope.py resolution-jobs
+python3 scripts/ope.py resolution-scheduler
+python3 scripts/ope.py resolve-due-forward-runs
+```
+
+Run with your own files:
+
+```bash
+python3 scripts/ope.py transit-delay-forecast \
+  --weather-forecast path/to/weather.json \
+  --historical-delays path/to/history.csv \
+  --trip-updates path/to/trip-updates.csv
+```
+
+This is still not a calibrated quality claim. One forward run proves the mechanics, not prediction quality. The next beta step is to repeat the live forward-run loop across enough comparable service windows to earn any calibration claim.
+
+Start an explicit local live forward forecast:
+
+```bash
+python3 scripts/ope.py transit-delay-forward-run \
+  --phase forecast \
+  --service-date YYYY-MM-DD \
+  --service-window morning_peak \
+  --live-weather
+```
+
+Resolve it after the service window with the saved state:
+
+```bash
+python3 scripts/ope.py transit-delay-forward-run \
+  --phase resolve \
+  --run-state .ope/live/transit-forward-run/.../forward-run-state.json \
+  --download-static-gtfs
+```
+
+Scan saved live forward runs without executing anything:
+
+```bash
+python3 scripts/ope.py resolution-jobs --live
+python3 scripts/ope.py resolve-due-forward-runs --live
+```
+
+Run a local foreground scheduler without executing anything:
+
+```bash
+python3 scripts/ope.py resolution-scheduler \
+  --live \
+  --watch \
+  --poll-seconds 60
+```
+
+Execute due saved forward runs:
+
+```bash
+python3 scripts/ope.py resolve-due-forward-runs \
+  --live \
+  --execute \
+  --download-static-gtfs
+```
+
+Run the local scheduler and let it execute due saved forward runs:
+
+```bash
+python3 scripts/ope.py resolution-scheduler \
+  --live \
+  --watch \
+  --execute \
+  --download-static-gtfs \
+  --poll-seconds 60
+```
+
+The scheduler writes ignored JSONL logs under `.ope/live/resolution-scheduler/`. It is a foreground terminal loop, not Trigger.dev, cron, `launchd`, or a hosted worker.
+
+Watch mode prints readable status lines in a human terminal and JSONL when stdout is captured. Agents can force machine-readable output with `--output-format jsonl`.
+
+Inspect the connector contract without network access:
+
+```bash
+python3 scripts/ope.py transit-api-connector
+python3 scripts/ope.py transit-api-connector --check
+```
+
+Run an explicit local live capture:
+
+```bash
+python3 scripts/ope.py transit-api-connector --live --save-local --service-window morning_peak
+```
+
+Run an explicit local live capture with static schedule join:
+
+```bash
+python3 scripts/ope.py transit-api-connector \
+  --live \
+  --schedule-join \
+  --download-static-gtfs \
+  --save-local \
+  --service-window morning_peak
+```
+
+Live captures are local handoff artifacts under `.ope/live/transit-api/`; they are not committed fixtures or calibration evidence by themselves.
+
+See `spec/domains/weather-transit-delays.md` for the beta wedge contract.
+
+External connector handoff shape:
+
+```bash
+python3 scripts/ope.py source-adapter-output
+```
+
+This shows the contract an agent-built connector should produce before OPE source intake.
+
 ## Repository Map
 
 - `AGENTS.md`: working guide for coding agents.
@@ -176,11 +311,23 @@ python3 scripts/generate_source_connectors.py --check
 python3 scripts/check_source_connectors.py
 python3 scripts/generate_live_connector_readiness.py --check
 python3 scripts/check_live_connector_readiness.py
+python3 scripts/connect_transit_api.py --check
+python3 scripts/check_transit_api_connector.py
 python3 scripts/check_live_capture_workspace.py
 python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
+python3 scripts/run_transit_delay_forward.py --check
+python3 scripts/check_transit_delay_forward.py
+python3 scripts/resolve_due_transit_forward_runs.py --check
+python3 scripts/check_transit_forward_resolver.py
+python3 scripts/generate_resolution_jobs.py --check
+python3 scripts/check_resolution_jobs.py
+python3 scripts/run_resolution_scheduler.py --check
+python3 scripts/check_resolution_scheduler.py
 python3 scripts/build_source_manifest.py --check
 python3 scripts/check_source_manifest_builder.py
+python3 scripts/generate_source_adapter_output.py --check
+python3 scripts/check_source_adapter_output.py
 python3 scripts/generate_source_intake_handoff.py --check
 python3 scripts/check_source_intake_handoff.py
 python3 scripts/generate_source_handoff_method_gate.py --check
@@ -329,6 +476,15 @@ python3 scripts/ope.py live-readiness
 python3 scripts/ope.py live-readiness --check
 ```
 
+Inspect the public transport API connector without network access, or run an explicit local capture:
+
+```bash
+python3 scripts/ope.py transit-api-connector
+python3 scripts/ope.py transit-api-connector --check
+python3 scripts/ope.py transit-api-connector --live --save-local --service-window morning_peak
+python3 scripts/ope.py transit-api-connector --live --schedule-join --download-static-gtfs --save-local --service-window morning_peak
+```
+
 Inspect domain setup records:
 
 ```bash
@@ -357,6 +513,12 @@ python3 scripts/ope.py source-builder \
   --input historical_baseline=spec/fixtures/local-source-files/history.csv \
   --input declared_operations_outcome=spec/fixtures/local-source-files/outcome.csv \
   --mapping-hint declared_operations_outcome.date=service_date
+```
+
+Inspect external connector handoff output:
+
+```bash
+python3 scripts/ope.py source-adapter-output
 ```
 
 Inspect source-builder to source-intake handoffs:
@@ -536,8 +698,10 @@ python3 scripts/plan_auto_evidence.py --write
 python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
+python3 scripts/connect_transit_api.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
+python3 scripts/generate_source_adapter_output.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write

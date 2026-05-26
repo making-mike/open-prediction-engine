@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 57,
+    "schemaFileCount": 63,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -69,11 +69,14 @@
       "spec/recalculation-trigger.schema.json",
       "spec/record-index.schema.json",
       "spec/release-manifest.schema.json",
+      "spec/resolution-job-registry.schema.json",
       "spec/resolution-record.schema.json",
+      "spec/resolution-scheduler-run.schema.json",
       "spec/scoring-report.schema.json",
       "spec/setup-benchmark-gate.schema.json",
       "spec/setup-forecast-run.schema.json",
       "spec/setup-method-decision.schema.json",
+      "spec/source-adapter-output.schema.json",
       "spec/source-connector-registry.schema.json",
       "spec/source-connector-result-set.schema.json",
       "spec/source-handoff-method-gate.schema.json",
@@ -83,7 +86,10 @@
       "spec/source-manifest-build.schema.json",
       "spec/source-manifest.schema.json",
       "spec/source-policy.schema.json",
-      "spec/track-record-report.schema.json"
+      "spec/track-record-report.schema.json",
+      "spec/transit-api-connector.schema.json",
+      "spec/transit-delay-forward-run.schema.json",
+      "spec/transit-forward-run-resolver.schema.json"
     ]
   },
   "readSurfaces": [
@@ -97,15 +103,15 @@
     },
     {
       "recordType": "forecast-artifact",
-      "count": 11
+      "count": 12
     },
     {
       "recordType": "forecast-bundle",
-      "count": 11
+      "count": 12
     },
     {
       "recordType": "forecast-card",
-      "count": 11
+      "count": 12
     },
     {
       "recordType": "source-connector-results",
@@ -132,6 +138,8 @@
     "production_live_data_workflow",
     "production_auto_evidence_fetching",
     "production_forecast_use_of_live_connector_results",
+    "hosted_scheduler_runtime",
+    "os_scheduler_installation",
     "public_forecast_use_of_local_live_drafts",
     "public_forecast_use_of_unapproved_source_builder_drafts",
     "public_forecast_use_of_unapproved_source_handoff_drafts",

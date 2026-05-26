@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/resolution-scheduler-run.schema.json",
+  "title": "Resolution Scheduler Run",
+  "description": "Local terminal scheduler run over resolution jobs and checked resolver execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolutionSchedulerRunId",
+    "generatedAt",
+    "schedulerMode",
+    "executionMode",
+    "pollSeconds",
+    "tickCount",
+    "ticks",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "resolutionSchedulerRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "schedulerMode": {
+      "type": "string",
+      "enum": ["fixture_once", "live_once", "live_watch"]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["dry_run", "execute"]
+    },
+    "pollSeconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tickCount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ticks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tickNumber",
+          "startedAt",
+          "tickStatus",
+          "jobSummary",
+          "resolverSummary",
+          "actions",
+          "nextPollSeconds"
+        ],
+        "properties": {
+          "tickNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "startedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+          "tickStatus": {
+            "type": "string",
+            "enum": ["idle", "waiting", "due_pending", "executed", "failed"]
+          },
+          "jobSummary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["jobCount", "pendingDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
+            "properties": {
+              "jobCount": { "type": "integer", "minimum": 0 },
+              "pendingDueCount": { "type": "integer", "minimum": 0 },
+              "pendingNotDueCount": { "type": "integer", "minimum": 0 },
+              "alreadyResolvedCount": { "type": "integer", "minimum": 0 },
+              "invalidCount": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "resolverSummary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ranResolver", "executedCount", "failedCount"],
+            "properties": {
+              "ranResolver": { "type": "boolean" },
+              "executedCount": { "type": "integer", "minimum": 0 },
+              "failedCount": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "actions": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resolutionJobId", "jobStatus", "schedulerAction", "statePath"],
+              "properties": {
+                "resolutionJobId": { "$ref": "common.schema.json#/$defs/id" },
+                "jobStatus": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "schedulerAction": {
+                  "type": "string",
+                  "enum": [
+                    "wait_until_due",
+                    "resolver_execute_requested",
+                    "due_waiting_for_execute_flag",
+                    "skip_already_resolved",
+                    "inspect_invalid_state"
+                  ]
+                },
+                "statePath": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            }
+          },
+          "nextPollSeconds": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksUseLiveNetwork",
+        "watchRequiresExplicitFlag",
+        "executeRequiresExplicitFlag",
+        "hostedSchedulerCreated",
+        "osSchedulerCreated",
+        "calibrationClaimAllowed"
+      ],
+      "properties": {
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "watchRequiresExplicitFlag": { "type": "boolean" },
+        "executeRequiresExplicitFlag": { "type": "boolean" },
+        "hostedSchedulerCreated": { "type": "boolean" },
+        "osSchedulerCreated": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

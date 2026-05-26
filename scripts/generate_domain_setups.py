@@ -19,10 +19,12 @@ GENERATED_AT = "2026-06-06T15:10:00Z"
 
 WEATHER_DOMAIN = "weather-logistics"
 SEAPORT_DOMAIN = "seaport-berth-availability"
+TRANSIT_DOMAIN = "weather-transit-delays"
 
 SETUP_PATHS = {
     WEATHER_DOMAIN: GENERATED / "weather-logistics-domain-setup.generated.json",
     SEAPORT_DOMAIN: GENERATED / "seaport-berth-availability-domain-setup.generated.json",
+    TRANSIT_DOMAIN: GENERATED / "weather-transit-delays-domain-setup.generated.json",
 }
 
 
@@ -520,10 +522,252 @@ def build_seaport_setup() -> dict[str, Any]:
     }
 
 
+def build_transit_setup() -> dict[str, Any]:
+    return {
+        "domainSetupId": "domainsetup-003",
+        "generatedAt": GENERATED_AT,
+        "domain": TRANSIT_DOMAIN,
+        "displayName": "Weather Transit Delays Local Prototype Setup",
+        "setupKind": "reference_setup",
+        "maturityStatus": "fixture_ready",
+        "domainPurpose": (
+            "Forecast whether a declared public transport network exceeds a delay threshold during a service "
+            "window, using local forecast-time weather files and historical transit delay outcomes."
+        ),
+        "questionTemplates": [
+            {
+                "templateId": "template-003",
+                "template": (
+                    "Will {transit_network} in {geography} exceed the beta delay threshold during "
+                    "{service_window} on {service_date}?"
+                ),
+                "outputType": "binary",
+                "horizonLabels": ["same-day-morning-peak", "1-day"],
+                "requiredParameters": ["transit_network", "geography", "service_window", "service_date"],
+                "resolvabilityRules": [
+                    "The transit network, geography, service window, and service date must be fixed before forecast close.",
+                    "The late observation threshold and event threshold must be declared before forecast close.",
+                    "Outcome rows from the target service window must be excluded from forecast-time evidence.",
+                ],
+            }
+        ],
+        "sourceRoles": [
+            {
+                "roleId": "sourcerole-010",
+                "roleKey": "weather_forecast",
+                "displayName": "Forecast-Time Weather Evidence",
+                "timing": "forecast_time",
+                "purpose": "Provides weather features available before forecast close for the target geography and window.",
+                "requiredFields": [
+                    field("geography", "string", ["forecast"], ["Must match the requested geography."]),
+                    field("service_date", "date", ["forecast"], ["Must match the requested service date."]),
+                    field("retrieved_at", "date_time", ["forecast"], ["Must be before forecast close."]),
+                    field(
+                        "forecast_precipitation_mm",
+                        "number",
+                        ["forecast", "classification"],
+                        ["Use non-negative millimeter values for the service window or day."],
+                    ),
+                ],
+                "optionalFields": [
+                    field("forecast_snowfall_mm", "number", ["classification"], ["Use non-negative millimeter values."]),
+                    field("forecast_wind_gust_kmh", "number", ["classification"], ["Use non-negative km/h values."]),
+                    field("temperature_c", "number", ["classification"], ["Use degrees Celsius."]),
+                ],
+                "allowedSourceClasses": ["official", "public_dataset"],
+                "forecastTimeAllowed": True,
+            },
+            {
+                "roleId": "sourcerole-011",
+                "roleKey": "historical_delay_baseline",
+                "displayName": "Historical Transit Delay Outcomes",
+                "timing": "baseline",
+                "purpose": "Provides comparable prior delay-threshold outcomes for baseline frequency.",
+                "requiredFields": [
+                    field("service_date", "date", ["baseline"], ["Must predate the target forecast close."]),
+                    field("transit_network", "string", ["baseline"], ["Must map to the requested transit network."]),
+                    field("service_window", "categorical", ["baseline"], ["Must map to the requested service window."]),
+                    field("delay_event", "boolean", ["baseline", "scoring"], ["Must resolve to true or false."]),
+                ],
+                "optionalFields": [
+                    field(
+                        "late_observation_ratio",
+                        "number",
+                        ["baseline", "classification"],
+                        ["Use values between 0 and 1 when direct event flags are absent."],
+                    )
+                ],
+                "allowedSourceClasses": ["public_dataset", "internal_dataset"],
+                "forecastTimeAllowed": True,
+            },
+            {
+                "roleId": "sourcerole-012",
+                "roleKey": "transit_schedule",
+                "displayName": "Transit Schedule Context",
+                "timing": "supporting",
+                "purpose": "Provides optional static schedule or route context for later connector-backed delay reconstruction.",
+                "requiredFields": [
+                    field("transit_network", "string", ["classification"], ["Must map to the requested network."]),
+                    field("service_date", "date", ["classification"], ["Must cover the target service date."]),
+                    field("service_window", "categorical", ["classification"], ["Must cover the target service window."]),
+                ],
+                "optionalFields": [
+                    field("route_id", "id", ["classification"], ["Use stable public route identifiers when available."])
+                ],
+                "allowedSourceClasses": ["official", "public_dataset"],
+                "forecastTimeAllowed": True,
+            },
+            {
+                "roleId": "sourcerole-013",
+                "roleKey": "transit_delay_outcome",
+                "displayName": "Transit Delay Outcome",
+                "timing": "resolution",
+                "purpose": "Provides post-window trip-stop delay observations for resolving the threshold event.",
+                "requiredFields": [
+                    field("service_date", "date", ["resolution"], ["Must match the forecast service date."]),
+                    field("transit_network", "string", ["resolution"], ["Must match the forecast transit network."]),
+                    field("service_window", "categorical", ["resolution"], ["Must match the forecast service window."]),
+                    field("delay_seconds", "number", ["resolution", "scoring"], ["Use signed delay seconds from the outcome feed."]),
+                ],
+                "optionalFields": [
+                    field("trip_id", "id", ["resolution"], ["Use public trip identifiers when available."]),
+                    field("stop_id", "id", ["resolution"], ["Use public stop identifiers when available."]),
+                ],
+                "allowedSourceClasses": ["official", "public_dataset"],
+                "forecastTimeAllowed": False,
+            },
+        ],
+        "entityRequirements": [
+            {
+                "entityType": "geography",
+                "canonicalField": "geography",
+                "aliasPolicy": "user_provided_registry",
+                "required": True,
+            },
+            {
+                "entityType": "transit_network",
+                "canonicalField": "transit_network",
+                "aliasPolicy": "user_provided_registry",
+                "required": True,
+            },
+        ],
+        "resolutionPolicy": {
+            "primarySourceRole": "transit_delay_outcome",
+            "fallbackSourceRoles": [],
+            "yesOutcomeDefinition": "Coverage checks pass and the late-observation ratio meets or exceeds the declared threshold.",
+            "noOutcomeDefinition": "Coverage checks pass and the late-observation ratio is below the declared threshold.",
+            "ambiguousIf": [
+                "The outcome feed has too few eligible observations.",
+                "Outcome rows cannot be mapped to the declared network, geography, service date, or service window.",
+            ],
+            "annulledIf": [
+                "The transit service window was invalid before forecast close.",
+                "The service was suspended before forecast close for an explicitly predeclared incomparable reason.",
+            ],
+            "resolutionTiming": "Resolve after the service window closes and outcome rows are collected.",
+            "scoringRule": "brier",
+        },
+        "scoringPolicy": {
+            "primaryScoringRule": "brier",
+            "baselineComparisonRequired": True,
+            "excludeAmbiguousOutcomes": True,
+            "excludeAnnulledOutcomes": True,
+            "reportingSlices": [
+                "domain",
+                "domain_setup",
+                "horizon",
+                "output_type",
+                "resolution_source",
+                "source_policy",
+                "method_class",
+                "coverage_period",
+                "sample_size",
+            ],
+            "minimumResolvedForecastsForQualityClaim": 100,
+        },
+        "baselinePolicy": {
+            "baselineRequired": True,
+            "allowedBaselineMethods": ["historical_frequency", "conditioned_historical_frequency"],
+            "minimumComparableRows": 30,
+            "minimumPositiveOutcomes": 1,
+            "fallbackWhenInsufficientData": "needs_more_data",
+        },
+        "methodPolicy": {
+            "enabledMethodClasses": ["historical_baseline", "deterministic_statistical"],
+            "selectionRule": (
+                "Start with a smoothed historical delay-event baseline and allow only transparent local beta "
+                "weather adjustments until comparable transit-delay benchmarks exist."
+            ),
+            "baselineComparisonRequired": True,
+            "leakageCheckRequired": True,
+            "methodDecisionRecordRequired": True,
+        },
+        "recalculationPolicy": {
+            "supported": True,
+            "triggerTypes": ["source_file_changed", "schedule", "agent_submitted_evidence", "manual"],
+            "appendHistoryRequired": True,
+            "postOutcomeEvidenceAllowed": False,
+        },
+        "localImplementation": {
+            "forecastRunnable": True,
+            "generatedForecastRecords": True,
+            "cliForecastCommand": "python3 scripts/ope.py transit-delay-forecast",
+            "readSurfaceAvailable": False,
+            "implementationNotes": (
+                "Local custom-file prototype emits schema-bound question, evidence, artifact, history, resolution, "
+                "and scoring records, but it is not a live connector or calibrated production workflow."
+            ),
+        },
+        "claimPolicy": {
+            "allowedClaims": [
+                "Local custom-file prototype can run a weather-transit-delay forecast from checked fixture inputs.",
+                "Forecast, resolution, and scoring artifacts preserve baseline comparison and leakage boundaries.",
+            ],
+            "blockedClaims": [
+                "Live transit connector claim",
+                "Calibrated forecast quality claim",
+                "Production readiness claim",
+                "State-of-the-art performance claim",
+                "Universal transit-agency coverage claim",
+            ],
+            "minimumResolvedForecastsForCalibration": 100,
+            "qualityClaimAllowed": False,
+            "benchmarkClaimAllowed": False,
+            "calibrationClaimAllowed": False,
+            "productionReadinessClaimAllowed": False,
+            "stateOfTheArtClaimAllowed": False,
+            "universalDomainClaimAllowed": False,
+        },
+        "agentSetupGuidance": {
+            "setupQuestions": [
+                "Which public transit network, geography, service window, and date should be forecast?",
+                "Which local weather forecast and historical delay files are approved for forecast-time use?",
+                "Which trip-update or equivalent delay outcome file will resolve the threshold event after the window?",
+            ],
+            "requiredBeforeForecast": [
+                "A weather forecast file retrieved before forecast close.",
+                "A historical delay file with comparable delay-event outcomes.",
+                "A declared late-seconds threshold, event-ratio threshold, and minimum observation count.",
+            ],
+            "safeFailureModes": [
+                "Reject weather rows retrieved after forecast close.",
+                "Block or mark ambiguous outcomes when delay coverage is too sparse.",
+                "Do not include target-window delay rows in forecast-time provenance.",
+            ],
+        },
+        "warnings": [
+            "Local custom-file prototype is not a live connector runtime.",
+            "Weather adjustment is transparent beta logic, not a calibrated causal claim.",
+            "No calibration, production, or universal transit-agency claim is allowed for this setup.",
+        ],
+    }
+
+
 def build_setups() -> dict[str, dict[str, Any]]:
     setups = {
         WEATHER_DOMAIN: build_weather_setup(),
         SEAPORT_DOMAIN: build_seaport_setup(),
+        TRANSIT_DOMAIN: build_transit_setup(),
     }
     for domain, setup in setups.items():
         errors = validate_record(setup, SCHEMA)
@@ -576,7 +820,7 @@ def check_setups(setups: dict[str, dict[str, Any]]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--setup", choices=[WEATHER_DOMAIN, SEAPORT_DOMAIN], help="print one setup record")
+    parser.add_argument("--setup", choices=[WEATHER_DOMAIN, SEAPORT_DOMAIN, TRANSIT_DOMAIN], help="print one setup record")
     parser.add_argument("--check", action="store_true", help="check generated setup drift")
     parser.add_argument("--write", action="store_true", help="write generated setup records")
     args = parser.parse_args()

@@ -111,6 +111,8 @@ def build_manifest() -> dict[str, Any]:
             "production_live_data_workflow",
             "production_auto_evidence_fetching",
             "production_forecast_use_of_live_connector_results",
+            "hosted_scheduler_runtime",
+            "os_scheduler_installation",
             "public_forecast_use_of_local_live_drafts",
             "public_forecast_use_of_unapproved_source_builder_drafts",
             "public_forecast_use_of_unapproved_source_handoff_drafts",

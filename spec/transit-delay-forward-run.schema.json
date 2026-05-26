@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-delay-forward-run.schema.json",
+  "title": "Transit Delay Forward Run",
+  "description": "Checked forward-run summary for weather-transit-delay forecast, capture, resolution, and scoring.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "forwardRunId",
+    "generatedAt",
+    "domain",
+    "runMode",
+    "runStatus",
+    "forecastStage",
+    "claimBoundary",
+    "artifacts",
+    "nextAction",
+    "warnings"
+  ],
+  "properties": {
+    "forwardRunId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "const": "weather-transit-delays" },
+    "runMode": {
+      "type": "string",
+      "enum": ["fixture_replay", "live_forecast", "live_resolution", "live_full"]
+    },
+    "runStatus": {
+      "type": "string",
+      "enum": ["forecast_recorded", "resolved", "scored", "ambiguous", "blocked"]
+    },
+    "forecastStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "questionId",
+        "forecastedAt",
+        "closeAt",
+        "resolveAt",
+        "horizon",
+        "network",
+        "geography",
+        "serviceDate",
+        "serviceWindow",
+        "probability",
+        "baselineProbability",
+        "weatherSourceRef",
+        "historySourceRef"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "closeAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "resolveAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+        "network": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "geography": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "serviceDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "serviceWindow": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "baselineProbability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "weatherSourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "historySourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    },
+    "captureStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "decodedCsvPath",
+        "sourceAdapterOutputPath",
+        "delayDerivation",
+        "rowCount",
+        "matchedTripUpdateCount",
+        "unmatchedTripUpdateCount"
+      ],
+      "properties": {
+        "providerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "decodedCsvPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "sourceAdapterOutputPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "delayDerivation": {
+          "type": "string",
+          "enum": ["explicit_gtfs_rt_delay", "static_gtfs_schedule_join", "fixture_rows"]
+        },
+        "rowCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "matchedTripUpdateCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unmatchedTripUpdateCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "resolutionStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "observationCount", "lateCount", "lateRatio"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["resolved", "ambiguous"]
+        },
+        "observationCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lateCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lateRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "outcomeLabel": {
+          "type": "string",
+          "enum": ["yes", "no", "unknown"]
+        }
+      }
+    },
+    "scoreStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scoreStatus"],
+      "properties": {
+        "scoreStatus": {
+          "type": "string",
+          "enum": ["scored", "excluded"]
+        },
+        "primaryScore": {
+          "type": "number",
+          "minimum": 0
+        },
+        "baselineScore": {
+          "type": "number",
+          "minimum": 0
+        },
+        "baselineLift": { "type": "number" }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "normalChecksUseLiveNetwork",
+        "resolvedComparableOutcomes"
+      ],
+      "properties": {
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "resolvedComparableOutcomes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forecastDirectory"],
+      "properties": {
+        "forecastDirectory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "resolvedDirectory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "runStatePath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    },
+    "nextAction": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 300
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

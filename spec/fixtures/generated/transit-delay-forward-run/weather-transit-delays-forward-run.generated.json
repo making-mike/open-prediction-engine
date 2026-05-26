@@ -1,0 +1,64 @@
+{
+  "forwardRunId": "transitdelayforwardrun-001",
+  "generatedAt": "2026-06-10T08:15:00Z",
+  "domain": "weather-transit-delays",
+  "runMode": "fixture_replay",
+  "runStatus": "scored",
+  "forecastStage": {
+    "forecastId": "forecast-1201",
+    "questionId": "question-1201",
+    "forecastedAt": "2026-06-10T02:00:00Z",
+    "closeAt": "2026-06-10T02:30:00Z",
+    "resolveAt": "2026-06-10T08:00:00Z",
+    "horizon": {
+      "startsAt": "2026-06-10T03:00:00Z",
+      "endsAt": "2026-06-10T07:00:00Z",
+      "label": "same-day-morning-peak"
+    },
+    "network": "hsl-surface",
+    "geography": "helsinki",
+    "serviceDate": "2026-06-10",
+    "serviceWindow": "morning_peak",
+    "probability": 0.33,
+    "baselineProbability": 0.25,
+    "weatherSourceRef": "spec/fixtures/local-source-files/transit-weather-forecast.json",
+    "historySourceRef": "spec/fixtures/local-source-files/transit-delay-history.csv"
+  },
+  "claimBoundary": {
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "normalChecksUseLiveNetwork": false,
+    "resolvedComparableOutcomes": 1
+  },
+  "artifacts": {
+    "forecastDirectory": "spec/fixtures/generated/transit-delay-forecast",
+    "resolvedDirectory": "spec/fixtures/generated/transit-delay-forecast"
+  },
+  "nextAction": "append more comparable forward runs before any calibration claim",
+  "warnings": [
+    "One forward run is not enough for calibration or public quality claims.",
+    "Transit delay outcome rows are resolution evidence, not forecast-time evidence."
+  ],
+  "captureStage": {
+    "providerId": "fixture_rows",
+    "decodedCsvPath": "spec/fixtures/local-source-files/transit-trip-updates.csv",
+    "sourceAdapterOutputPath": "spec/fixtures/local-source-files/transit-trip-updates.csv",
+    "delayDerivation": "fixture_rows",
+    "rowCount": 22,
+    "matchedTripUpdateCount": 0,
+    "unmatchedTripUpdateCount": 0
+  },
+  "resolutionStage": {
+    "status": "resolved",
+    "observationCount": 22,
+    "lateCount": 5,
+    "lateRatio": 0.2273,
+    "outcomeLabel": "yes"
+  },
+  "scoreStage": {
+    "scoreStatus": "scored",
+    "primaryScore": 0.4489,
+    "baselineScore": 0.5625,
+    "baselineLift": 0.1136
+  }
+}

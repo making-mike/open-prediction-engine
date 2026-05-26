@@ -1,0 +1,26 @@
+{
+  "historyId": "history-1201",
+  "questionId": "question-1201",
+  "entries": [
+    {
+      "forecastId": "forecast-1201",
+      "forecastedAt": "2026-06-10T02:00:00Z",
+      "state": "active",
+      "sourceClass": "model",
+      "model": {
+        "modelId": "model-1201",
+        "version": "weather-transit-delay-local-baseline-v0",
+        "trainingCutoff": "2026-06-10T02:30:00Z",
+        "configurationHash": "sha256-transit-delay-local-baseline-v0"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.33
+      },
+      "rationaleSummary": "Local beta method starts from a Laplace-smoothed historical delay-event frequency and applies a transparent weather stress adjustment. It is runnable for custom local files but is not calibrated.",
+      "evidencePacketId": "evidence-1201"
+    }
+  ],
+  "createdAt": "2026-06-10T02:00:00Z",
+  "updatedAt": "2026-06-10T02:00:00Z"
+}

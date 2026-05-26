@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-api-connector.schema.json",
+  "title": "Transit API Connector",
+  "description": "Fixture-safe public transport API connector contract for GTFS-RT TripUpdates capture and decoded delay rows.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitApiConnectorId",
+    "generatedAt",
+    "provider",
+    "connectorStatus",
+    "api",
+    "decoder",
+    "outputMapping",
+    "sourceAdapterBoundary",
+    "liveBoundary",
+    "checks",
+    "warnings"
+  ],
+  "properties": {
+    "transitApiConnectorId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerId", "displayName", "network", "geography"],
+      "properties": {
+        "providerId": {
+          "type": "string",
+          "enum": ["hsl_gtfs_rt_trip_updates"]
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "network": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "geography": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "connectorStatus": {
+      "type": "string",
+      "enum": ["offline_ready", "live_capture_available", "blocked"]
+    },
+    "api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoint",
+        "method",
+        "requiresCredentials",
+        "requestParametersSupported",
+        "responseFormat",
+        "updateIntervalSeconds",
+        "sourceDocumentation",
+        "companionStaticGtfsPackage"
+      ],
+      "properties": {
+        "endpoint": { "$ref": "common.schema.json#/$defs/uri" },
+        "method": { "const": "GET" },
+        "requiresCredentials": { "type": "boolean" },
+        "requestParametersSupported": { "type": "boolean" },
+        "responseFormat": { "const": "gtfs_rt_protobuf" },
+        "updateIntervalSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "sourceDocumentation": { "$ref": "common.schema.json#/$defs/uri" },
+        "companionStaticGtfsPackage": { "$ref": "common.schema.json#/$defs/uri" }
+      }
+    },
+    "decoder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decoderStatus",
+        "dependencyPolicy",
+        "scheduleJoinStatus",
+        "scheduleJoinMatchKeys",
+        "decodedFields",
+        "unsupportedFields"
+      ],
+      "properties": {
+        "decoderStatus": {
+          "type": "string",
+          "enum": ["minimal_delay_decoder_checked", "not_implemented"]
+        },
+        "dependencyPolicy": {
+          "type": "string",
+          "enum": ["python_standard_library_only"]
+        },
+        "scheduleJoinStatus": {
+          "type": "string",
+          "enum": ["implemented_opt_in"]
+        },
+        "scheduleJoinMatchKeys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "decodedFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "unsupportedFields": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "outputMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decodedCsvColumns", "opeSourceRole", "compatibleCommand"],
+      "properties": {
+        "decodedCsvColumns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        },
+        "opeSourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "compatibleCommand": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 360
+        }
+      }
+    },
+    "sourceAdapterBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canProduceSourceAdapterOutput",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "storesCredentials",
+        "rawRowsIncludedInGeneratedFixtures"
+      ],
+      "properties": {
+        "canProduceSourceAdapterOutput": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "rawRowsIncludedInGeneratedFixtures": { "type": "boolean" }
+      }
+    },
+    "liveBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksOffline",
+        "liveFetchRequiresExplicitFlag",
+        "localCaptureWorkspace",
+        "liveCapturesCommitted"
+      ],
+      "properties": {
+        "normalChecksOffline": { "type": "boolean" },
+        "liveFetchRequiresExplicitFlag": { "type": "boolean" },
+        "localCaptureWorkspace": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "liveCapturesCommitted": { "type": "boolean" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["checkId", "status", "description"],
+        "properties": {
+          "checkId": { "$ref": "common.schema.json#/$defs/id" },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "not_run_in_normal_checks"]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

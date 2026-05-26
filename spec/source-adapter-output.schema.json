@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-adapter-output.schema.json",
+  "title": "Source Adapter Output",
+  "description": "Portable output contract for external source connectors prepared by agents before OPE source intake.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceAdapterOutputId",
+    "generatedAt",
+    "outputStatus",
+    "adapter",
+    "execution",
+    "domainBinding",
+    "sourceManifest",
+    "fieldMapping",
+    "handoffBoundary",
+    "provenanceSummary",
+    "controls",
+    "nextAction",
+    "warnings"
+  ],
+  "properties": {
+    "sourceAdapterOutputId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "outputStatus": {
+      "type": "string",
+      "enum": ["intake_ready", "needs_confirmation", "rejected", "runtime_not_implemented"]
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterId",
+        "displayName",
+        "adapterVersion",
+        "implementationLocation",
+        "sourceKind",
+        "ownsForecastSemantics"
+      ],
+      "properties": {
+        "adapterId": { "$ref": "common.schema.json#/$defs/id" },
+        "displayName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "adapterVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "implementationLocation": {
+          "type": "string",
+          "enum": ["external_agent", "ope_core_fixture"]
+        },
+        "sourceKind": {
+          "type": "string",
+          "enum": [
+            "local_file",
+            "manual_upload",
+            "public_api",
+            "private_api",
+            "private_database",
+            "saas",
+            "mcp_tool",
+            "agent_extraction"
+          ]
+        },
+        "ownsForecastSemantics": { "type": "boolean" }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterRunId",
+        "executionMode",
+        "startedAt",
+        "completedAt",
+        "normalChecksOffline",
+        "liveFetchPerformed",
+        "credentialsUsed",
+        "credentialsStored"
+      ],
+      "properties": {
+        "adapterRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "executionMode": {
+          "type": "string",
+          "enum": ["fixture_replay", "caller_approved_local", "external_runtime_capture", "planned_runtime"]
+        },
+        "startedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "completedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "normalChecksOffline": { "type": "boolean" },
+        "liveFetchPerformed": { "type": "boolean" },
+        "credentialsUsed": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" }
+      }
+    },
+    "domainBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domainSetupId",
+        "domain",
+        "questionTemplateId",
+        "sourceRoles"
+      ],
+      "properties": {
+        "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "questionTemplateId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+          }
+        }
+      }
+    },
+    "sourceManifest": { "$ref": "source-manifest.schema.json" },
+    "fieldMapping": { "$ref": "field-mapping.schema.json" },
+    "handoffBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canEnterSourceIntake",
+        "sourceIntakeRequired",
+        "mappingConfirmationRequired",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "allowedNextCommands"
+      ],
+      "properties": {
+        "canEnterSourceIntake": { "type": "boolean" },
+        "sourceIntakeRequired": { "type": "boolean" },
+        "mappingConfirmationRequired": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "allowedNextCommands": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "provenanceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceCount",
+        "rowCount",
+        "contentHashesStored",
+        "rawRowsIncluded",
+        "allEvidenceClaimed",
+        "diagnostics"
+      ],
+      "properties": {
+        "sourceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "rowCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "contentHashesStored": { "type": "boolean" },
+        "rawRowsIncluded": { "type": "boolean" },
+        "allEvidenceClaimed": { "type": "boolean" },
+        "diagnostics": {
+          "type": "array",
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnly",
+        "forecastGenerationAllowed",
+        "forecastArtifactsCreated",
+        "sourceIntakeAlreadyRun",
+        "credentialStorageImplemented",
+        "promptVisibleCredentialsAccepted",
+        "rawPrivateRowsStored",
+        "sanitizedErrorsOnly"
+      ],
+      "properties": {
+        "readOnly": { "type": "boolean" },
+        "forecastGenerationAllowed": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "sourceIntakeAlreadyRun": { "type": "boolean" },
+        "credentialStorageImplemented": { "type": "boolean" },
+        "promptVisibleCredentialsAccepted": { "type": "boolean" },
+        "rawPrivateRowsStored": { "type": "boolean" },
+        "sanitizedErrorsOnly": { "type": "boolean" }
+      }
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "run_source_intake",
+        "ask_mapping_confirmation",
+        "replace_source",
+        "wait_for_runtime"
+      ]
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diagnosticId", "level", "message", "rawDetailIncluded"],
+      "properties": {
+        "diagnosticId": { "$ref": "common.schema.json#/$defs/id" },
+        "level": {
+          "type": "string",
+          "enum": ["info", "warning", "error"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "rawDetailIncluded": { "type": "boolean" }
+      }
+    }
+  }
+}

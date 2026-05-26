@@ -1,0 +1,716 @@
+{
+  "sourceAdapterOutputId": "sourceadapteroutput-1201",
+  "generatedAt": "2026-06-10T02:05:00Z",
+  "outputStatus": "intake_ready",
+  "adapter": {
+    "adapterId": "sourceadapter-1201",
+    "displayName": "Weather transit delay external adapter fixture",
+    "adapterVersion": "external-handoff-v0",
+    "implementationLocation": "external_agent",
+    "sourceKind": "agent_extraction",
+    "ownsForecastSemantics": false
+  },
+  "execution": {
+    "adapterRunId": "adapterrun-1201",
+    "executionMode": "fixture_replay",
+    "startedAt": "2026-06-10T02:05:00Z",
+    "completedAt": "2026-06-10T02:05:00Z",
+    "normalChecksOffline": true,
+    "liveFetchPerformed": false,
+    "credentialsUsed": false,
+    "credentialsStored": false
+  },
+  "domainBinding": {
+    "domainSetupId": "domainsetup-003",
+    "domain": "weather-transit-delays",
+    "questionTemplateId": "template-003",
+    "sourceRoles": [
+      "weather_forecast",
+      "historical_delay_baseline",
+      "transit_delay_outcome"
+    ]
+  },
+  "sourceManifest": {
+    "sourceManifestId": "sourcemanifest-1201",
+    "createdAt": "2026-06-10T02:05:00Z",
+    "domainSetupId": "domainsetup-003",
+    "domain": "weather-transit-delays",
+    "forecastParameters": {
+      "questionTemplateId": "template-003",
+      "horizonLabel": "same-day-morning-peak",
+      "forecastCloseTime": "2026-06-10T02:30:00Z",
+      "geography": "helsinki",
+      "serviceDate": "2026-06-10",
+      "assetIdentifier": "hsl-surface",
+      "location": "helsinki",
+      "targetWindow": "morning_peak"
+    },
+    "sources": [
+      {
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "displayName": "Transit weather forecast adapter output",
+        "connectorType": "agent_extraction",
+        "sourceClass": "public_dataset",
+        "sourceRef": "local://spec/fixtures/local-source-files/transit-weather-forecast.json",
+        "contentHash": "adb1b8319ae335c8f846137864d2cb44f97360819a54a05cc56c965ff2ad60fe",
+        "rowCount": 1,
+        "positiveOutcomeCount": null,
+        "retrieval": {
+          "retrievedAt": "2026-06-10T02:00:00Z",
+          "availableBeforeForecastClose": true,
+          "maxSourceAgeHours": 6
+        },
+        "coverage": {
+          "geographies": [
+            "helsinki"
+          ],
+          "serviceDateStart": "2026-06-10",
+          "serviceDateEnd": "2026-06-10",
+          "entityIdentifiers": [
+            "hsl-surface"
+          ]
+        },
+        "privacy": {
+          "privacyClass": "public",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "network",
+            "observedType": "string",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "geography",
+            "observedType": "string",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "service_date",
+            "observedType": "date",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "service_window",
+            "observedType": "categorical",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "retrieved_at",
+            "observedType": "date_time",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "forecast_precipitation_mm",
+            "observedType": "number",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "forecast_snowfall_mm",
+            "observedType": "number",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "forecast_wind_gust_kmh",
+            "observedType": "number",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "temperature_c",
+            "observedType": "number",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "source_status",
+            "observedType": "categorical",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          }
+        ],
+        "featureSummary": {
+          "numericValues": [
+            {
+              "fieldName": "forecast_precipitation_mm",
+              "value": 8.5,
+              "unit": "mm"
+            },
+            {
+              "fieldName": "forecast_snowfall_mm",
+              "value": 0.0,
+              "unit": "mm"
+            },
+            {
+              "fieldName": "forecast_wind_gust_kmh",
+              "value": 42.0,
+              "unit": "kmh"
+            }
+          ],
+          "categoricalValues": [
+            {
+              "fieldName": "service_window",
+              "value": "morning_peak"
+            },
+            {
+              "fieldName": "source_status",
+              "value": "fixture"
+            }
+          ]
+        }
+      },
+      {
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "displayName": "Historical transit delay adapter output",
+        "connectorType": "agent_extraction",
+        "sourceClass": "public_dataset",
+        "sourceRef": "local://spec/fixtures/local-source-files/transit-delay-history.csv",
+        "contentHash": "6e7e339a0dd78925072cc0052f057f8168b34667f9331d658683ae30f3bbf4f4",
+        "rowCount": 30,
+        "positiveOutcomeCount": 7,
+        "retrieval": {
+          "retrievedAt": "2026-06-10T02:05:00Z",
+          "availableBeforeForecastClose": true,
+          "maxSourceAgeHours": 8760
+        },
+        "coverage": {
+          "geographies": [
+            "helsinki"
+          ],
+          "serviceDateStart": "2026-05-01",
+          "serviceDateEnd": "2026-05-30",
+          "entityIdentifiers": [
+            "hsl-surface"
+          ]
+        },
+        "privacy": {
+          "privacyClass": "public",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "service_date",
+            "observedType": "date",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "network",
+            "observedType": "string",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "geography",
+            "observedType": "string",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "service_window",
+            "observedType": "categorical",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "late_observation_ratio",
+            "observedType": "number",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "delay_event",
+            "observedType": "boolean",
+            "sampleCount": 30,
+            "nonNullCount": 30,
+            "exampleValuesStored": false
+          }
+        ],
+        "featureSummary": {
+          "numericValues": [
+            {
+              "fieldName": "late_observation_ratio",
+              "value": 0.23,
+              "unit": "ratio"
+            }
+          ],
+          "categoricalValues": [
+            {
+              "fieldName": "service_window",
+              "value": "morning_peak"
+            }
+          ]
+        }
+      },
+      {
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "displayName": "Transit delay outcome adapter output",
+        "connectorType": "agent_extraction",
+        "sourceClass": "public_dataset",
+        "sourceRef": "local://spec/fixtures/local-source-files/transit-trip-updates.csv",
+        "contentHash": "63c2ad9699e27b7f03c5eb9777b049602c9df5998bb0bdc404697a87e2a65cd3",
+        "rowCount": 22,
+        "positiveOutcomeCount": 5,
+        "retrieval": {
+          "retrievedAt": "2026-06-10T08:15:00Z",
+          "availableBeforeForecastClose": false,
+          "maxSourceAgeHours": 24
+        },
+        "coverage": {
+          "geographies": [
+            "helsinki"
+          ],
+          "serviceDateStart": "2026-06-10",
+          "serviceDateEnd": "2026-06-10",
+          "entityIdentifiers": [
+            "hsl-surface"
+          ]
+        },
+        "privacy": {
+          "privacyClass": "public",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "service_date",
+            "observedType": "date",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "network",
+            "observedType": "string",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "geography",
+            "observedType": "string",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "service_window",
+            "observedType": "categorical",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "captured_at",
+            "observedType": "date_time",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "trip_id",
+            "observedType": "id",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "stop_id",
+            "observedType": "id",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "delay_seconds",
+            "observedType": "number",
+            "sampleCount": 22,
+            "nonNullCount": 22,
+            "exampleValuesStored": false
+          }
+        ],
+        "featureSummary": {
+          "numericValues": [
+            {
+              "fieldName": "delay_seconds",
+              "value": 300.0,
+              "unit": "seconds"
+            }
+          ],
+          "categoricalValues": [
+            {
+              "fieldName": "service_window",
+              "value": "morning_peak"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "fieldMapping": {
+    "fieldMappingId": "fieldmapping-1201",
+    "createdAt": "2026-06-10T02:05:00Z",
+    "domainSetupId": "domainsetup-003",
+    "domain": "weather-transit-delays",
+    "sourceManifestId": "sourcemanifest-1201",
+    "mappings": [
+      {
+        "mappingId": "mapping-120101",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "geography",
+        "targetField": "geography",
+        "targetFieldType": "string",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120102",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "service_date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120103",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "service_window",
+        "targetField": "service_window",
+        "targetFieldType": "categorical",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120104",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "retrieved_at",
+        "targetField": "retrieved_at",
+        "targetFieldType": "date_time",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120105",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "forecast_precipitation_mm",
+        "targetField": "forecast_precipitation_mm",
+        "targetFieldType": "number",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120106",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "forecast_snowfall_mm",
+        "targetField": "forecast_snowfall_mm",
+        "targetFieldType": "number",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120107",
+        "sourceId": "source-1201",
+        "sourceRole": "weather_forecast",
+        "sourceField": "forecast_wind_gust_kmh",
+        "targetField": "forecast_wind_gust_kmh",
+        "targetFieldType": "number",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120108",
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "sourceField": "network",
+        "targetField": "transit_network",
+        "targetFieldType": "string",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120109",
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "sourceField": "service_date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120110",
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "sourceField": "service_window",
+        "targetField": "service_window",
+        "targetFieldType": "categorical",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120111",
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "sourceField": "late_observation_ratio",
+        "targetField": "late_observation_ratio",
+        "targetFieldType": "number",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120112",
+        "sourceId": "source-1202",
+        "sourceRole": "historical_delay_baseline",
+        "sourceField": "delay_event",
+        "targetField": "delay_event",
+        "targetFieldType": "boolean",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120113",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "network",
+        "targetField": "transit_network",
+        "targetFieldType": "string",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120114",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "service_date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120115",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "service_window",
+        "targetField": "service_window",
+        "targetFieldType": "categorical",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120116",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "delay_seconds",
+        "targetField": "delay_seconds",
+        "targetFieldType": "number",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120117",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "trip_id",
+        "targetField": "trip_id",
+        "targetFieldType": "id",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      },
+      {
+        "mappingId": "mapping-120118",
+        "sourceId": "source-1203",
+        "sourceRole": "transit_delay_outcome",
+        "sourceField": "stop_id",
+        "targetField": "stop_id",
+        "targetFieldType": "id",
+        "mappingOrigin": "deterministic_exact_match",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Fixture mapping is explicit and confirmed for the adapter-output handoff."
+        ]
+      }
+    ],
+    "aliasMappings": [
+      {
+        "aliasMappingId": "aliasmapping-1201",
+        "entityType": "transit_network",
+        "sourceValue": "hsl-surface",
+        "canonicalValue": "hsl-surface",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "requiresConfirmation": false
+      }
+    ]
+  },
+  "handoffBoundary": {
+    "canEnterSourceIntake": true,
+    "sourceIntakeRequired": true,
+    "mappingConfirmationRequired": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "allowedNextCommands": [
+      "python3 scripts/ope.py source-intake --case accepted",
+      "python3 scripts/ope.py source-handoff --case confirmed_builder_draft"
+    ]
+  },
+  "provenanceSummary": {
+    "sourceCount": 3,
+    "rowCount": 53,
+    "contentHashesStored": true,
+    "rawRowsIncluded": false,
+    "allEvidenceClaimed": false,
+    "diagnostics": [
+      {
+        "diagnosticId": "diagnostic-1201",
+        "level": "info",
+        "message": "Fixture adapter emitted sanitized source metadata and confirmed mappings.",
+        "rawDetailIncluded": false
+      }
+    ]
+  },
+  "controls": {
+    "readOnly": true,
+    "forecastGenerationAllowed": false,
+    "forecastArtifactsCreated": false,
+    "sourceIntakeAlreadyRun": false,
+    "credentialStorageImplemented": false,
+    "promptVisibleCredentialsAccepted": false,
+    "rawPrivateRowsStored": false,
+    "sanitizedErrorsOnly": true
+  },
+  "nextAction": "run_source_intake",
+  "warnings": [
+    "External adapter output is a handoff into source intake, not a forecast.",
+    "Resolution rows are declared for outcome use and are not forecast-time evidence.",
+    "The adapter does not store credentials or raw private rows.",
+    "No live connector, calibration, or production quality claim is implied."
+  ]
+}

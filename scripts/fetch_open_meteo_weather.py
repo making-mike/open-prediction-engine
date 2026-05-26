@@ -29,6 +29,13 @@ ALLOWLISTED_LOCATIONS = {
         "longitude": 21.0122,
         "timezone": "Europe/Warsaw",
         "sourceId": "source-401",
+    },
+    "helsinki": {
+        "name": "Helsinki",
+        "latitude": 60.1699,
+        "longitude": 24.9384,
+        "timezone": "Europe/Helsinki",
+        "sourceId": "source-402",
     }
 }
 

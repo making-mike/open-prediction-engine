@@ -1,0 +1,22 @@
+{
+  "resolutionRecordId": "resolution-1201",
+  "questionId": "question-1201",
+  "status": "resolved",
+  "resolvedAt": "2026-06-10T08:15:00Z",
+  "resolutionSource": {
+    "sourceId": "source-1203",
+    "name": "Transit Delay Outcome File",
+    "sourceType": "public_dataset",
+    "uri": "local://spec/fixtures/local-source-files/transit-trip-updates.csv",
+    "contentHash": "63c2ad9699e27b7f03c5eb9777b049602c9df5998bb0bdc404697a87e2a65cd3",
+    "retrievedAt": "2026-06-10T08:15:00Z"
+  },
+  "resolutionAuthority": "OPE local transit delay resolver",
+  "resolvedOutcome": {
+    "outputType": "binary",
+    "value": true
+  },
+  "supportingEvidence": [
+    "local://spec/fixtures/local-source-files/transit-trip-updates.csv"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "transitApiConnectorId": "transitapiconnector-001",
+  "generatedAt": "2026-06-10T02:10:00Z",
+  "provider": {
+    "providerId": "hsl_gtfs_rt_trip_updates",
+    "displayName": "HSL GTFS-RT TripUpdates",
+    "network": "hsl-surface",
+    "geography": "helsinki"
+  },
+  "connectorStatus": "offline_ready",
+  "api": {
+    "endpoint": "https://realtime.hsl.fi/realtime/trip-updates/v2/hsl",
+    "method": "GET",
+    "requiresCredentials": false,
+    "requestParametersSupported": false,
+    "responseFormat": "gtfs_rt_protobuf",
+    "updateIntervalSeconds": 15,
+    "sourceDocumentation": "https://hsldevcom.github.io/gtfs_rt/",
+    "companionStaticGtfsPackage": "https://infopalvelut.storage.hsldev.com/gtfs/hsl.zip"
+  },
+  "decoder": {
+    "decoderStatus": "minimal_delay_decoder_checked",
+    "dependencyPolicy": "python_standard_library_only",
+    "scheduleJoinStatus": "implemented_opt_in",
+    "scheduleJoinMatchKeys": [
+      "route_id",
+      "direction_id",
+      "start_time",
+      "start_date",
+      "stop_id"
+    ],
+    "decodedFields": [
+      "service_date",
+      "network",
+      "geography",
+      "service_window",
+      "captured_at",
+      "trip_id",
+      "stop_id",
+      "delay_seconds"
+    ],
+    "unsupportedFields": [
+      "route_filtering",
+      "stop_filtering",
+      "vehicle_position_matching",
+      "service_alert_reasoning"
+    ]
+  },
+  "outputMapping": {
+    "decodedCsvColumns": [
+      "service_date",
+      "network",
+      "geography",
+      "service_window",
+      "captured_at",
+      "trip_id",
+      "stop_id",
+      "delay_seconds"
+    ],
+    "opeSourceRole": "transit_delay_outcome",
+    "compatibleCommand": "python3 scripts/ope.py transit-delay-forecast --trip-updates .ope/live/transit-api/<capture>.csv"
+  },
+  "sourceAdapterBoundary": {
+    "canProduceSourceAdapterOutput": true,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false,
+    "rawRowsIncludedInGeneratedFixtures": false
+  },
+  "liveBoundary": {
+    "normalChecksOffline": true,
+    "liveFetchRequiresExplicitFlag": true,
+    "localCaptureWorkspace": ".ope/live/transit-api",
+    "liveCapturesCommitted": false
+  },
+  "checks": [
+    {
+      "checkId": "transitapicheck-001",
+      "status": "passed",
+      "description": "Synthetic GTFS-RT protobuf fixtures decode explicit and schedule-joined delay rows."
+    },
+    {
+      "checkId": "transitapicheck-002",
+      "status": "passed",
+      "description": "Connector contract keeps normal repository checks offline."
+    },
+    {
+      "checkId": "transitapicheck-003",
+      "status": "not_run_in_normal_checks",
+      "description": "Live HSL fetch is available only with --live and optional --save-local."
+    }
+  ],
+  "warnings": [
+    "Live HSL capture is opt-in and writes only to the ignored local workspace.",
+    "The stdlib decoder can derive delay rows through an opt-in static GTFS schedule join.",
+    "HSL TripUpdates can provide predicted stop times without explicit delay fields; deriving delay seconds then requires --schedule-join and the companion static GTFS package.",
+    "Decoded live rows are source handoff inputs, not forecast or quality claims."
+  ]
+}

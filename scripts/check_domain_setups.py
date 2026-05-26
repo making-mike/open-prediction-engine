@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from generate_domain_setups import SEAPORT_DOMAIN, WEATHER_DOMAIN, build_setups
+from generate_domain_setups import SEAPORT_DOMAIN, TRANSIT_DOMAIN, WEATHER_DOMAIN, build_setups
 
 
 def require(condition: bool, message: str) -> None:
@@ -119,9 +119,40 @@ def assert_candidate_private_setup(setup: dict[str, Any]) -> None:
     )
 
 
+def assert_transit_reference(setup: dict[str, Any]) -> None:
+    require(setup["setupKind"] == "reference_setup", "transit setup should be a reference setup")
+    require(setup["maturityStatus"] == "fixture_ready", "transit setup should be fixture-ready")
+    implementation = setup["localImplementation"]
+    require(implementation["forecastRunnable"] is True, "transit setup should expose a local runnable command")
+    require("transit-delay-forecast" in implementation["cliForecastCommand"], "transit setup should expose transit CLI")
+
+    roles = source_roles(setup)
+    expected_roles = {
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_schedule",
+        "transit_delay_outcome",
+    }
+    require(expected_roles.issubset(roles), "transit setup should bind weather, baseline, schedule, and outcome roles")
+    require(roles["weather_forecast"]["timing"] == "forecast_time", "transit weather should be forecast-time")
+    require(roles["historical_delay_baseline"]["timing"] == "baseline", "transit history should be baseline")
+    require(roles["transit_delay_outcome"]["forecastTimeAllowed"] is False, "transit outcome must be resolution-only")
+    require(
+        setup["claimPolicy"]["calibrationClaimAllowed"] is False,
+        "transit setup should not claim calibration",
+    )
+    require(
+        setup["claimPolicy"]["productionReadinessClaimAllowed"] is False,
+        "transit setup should not claim production readiness",
+    )
+
+
 def main() -> None:
     setups = build_setups()
-    require(set(setups) == {WEATHER_DOMAIN, SEAPORT_DOMAIN}, "should build weather and seaport setup fixtures")
+    require(
+        set(setups) == {WEATHER_DOMAIN, SEAPORT_DOMAIN, TRANSIT_DOMAIN},
+        "should build weather, seaport, and transit setup fixtures",
+    )
     require(
         setups[WEATHER_DOMAIN]["domain"] != setups[SEAPORT_DOMAIN]["domain"],
         "setup fixtures should cover distinct domains",
@@ -130,6 +161,7 @@ def main() -> None:
         assert_common_setup_rules(setup)
     assert_weather_reference(setups[WEATHER_DOMAIN])
     assert_candidate_private_setup(setups[SEAPORT_DOMAIN])
+    assert_transit_reference(setups[TRANSIT_DOMAIN])
     print("checked domain setup semantics")
 
 

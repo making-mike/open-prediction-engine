@@ -1,0 +1,92 @@
+{
+  "transitForwardRunResolverId": "transitforwardrunresolver-001",
+  "generatedAt": "2026-06-10T08:30:00Z",
+  "runMode": "fixture_scan",
+  "executionMode": "dry_run",
+  "workspace": "fixture://transit-forward-run-resolver",
+  "now": "2026-06-10T08:30:00Z",
+  "scanSummary": {
+    "scannedCount": 3,
+    "dueCount": 1,
+    "notDueCount": 1,
+    "alreadyResolvedCount": 1,
+    "invalidCount": 0,
+    "executedCount": 0,
+    "failedCount": 0
+  },
+  "runDecisions": [
+    {
+      "runStatus": "forecast_recorded",
+      "resolveAt": "2026-06-10T08:00:00Z",
+      "forecastId": "forecast-1201",
+      "questionId": "question-1201",
+      "serviceDate": "2026-06-10",
+      "serviceWindow": "morning_peak",
+      "statePath": ".ope/live/transit-forward-run/fixture-due/forward-run-state.json",
+      "decision": "due_pending",
+      "due": true,
+      "command": "python3 scripts/ope.py transit-delay-forward-run --phase resolve --run-state .ope/live/transit-forward-run/fixture-due/forward-run-state.json",
+      "executionResult": {
+        "status": "not_run",
+        "exitCode": 0
+      },
+      "notes": [
+        "dry-run only; pass --execute to run the checked resolver command"
+      ]
+    },
+    {
+      "runStatus": "forecast_recorded",
+      "resolveAt": "2026-06-11T08:00:00Z",
+      "forecastId": "forecast-1201",
+      "questionId": "question-1201",
+      "serviceDate": "2026-06-11",
+      "serviceWindow": "morning_peak",
+      "statePath": ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json",
+      "decision": "not_due",
+      "due": false,
+      "command": "python3 scripts/ope.py transit-delay-forward-run --phase resolve --run-state .ope/live/transit-forward-run/fixture-not-due/forward-run-state.json",
+      "executionResult": {
+        "status": "not_run",
+        "exitCode": 0
+      },
+      "notes": [
+        "resolveAt 2026-06-11T08:00:00Z is still in the future"
+      ]
+    },
+    {
+      "runStatus": "scored",
+      "resolveAt": "2026-06-09T08:00:00Z",
+      "forecastId": "forecast-1201",
+      "questionId": "question-1201",
+      "serviceDate": "2026-06-09",
+      "serviceWindow": "morning_peak",
+      "statePath": ".ope/live/transit-forward-run/fixture-scored/forward-run-state.json",
+      "decision": "already_resolved",
+      "due": true,
+      "command": "python3 scripts/ope.py transit-delay-forward-run --phase resolve --run-state .ope/live/transit-forward-run/fixture-scored/forward-run-state.json",
+      "executionResult": {
+        "status": "not_run",
+        "exitCode": 0
+      },
+      "notes": [
+        "run status is scored; resolver will not execute it again"
+      ]
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksUseLiveNetwork": false,
+    "liveScanRequiresExplicitFlag": true,
+    "executeRequiresExplicitFlag": true,
+    "resolverCommandsExecuted": false,
+    "sourceFetchPerformed": false,
+    "resolvedArtifactsCreated": false,
+    "hostedSchedulerCreated": false,
+    "calibrationClaimAllowed": false
+  },
+  "warnings": [
+    "Default and check modes are offline fixture scans; live workspace scanning requires --live.",
+    "Dry-run decisions do not fetch outcome sources or create resolution records.",
+    "Executing a due run calls the checked transit-delay-forward-run resolver and may fetch HSL TripUpdates.",
+    "Resolved runs still do not create a calibration claim by themselves."
+  ]
+}

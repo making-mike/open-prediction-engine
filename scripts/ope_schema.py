@@ -237,10 +237,22 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "source-connector-result-set.schema.json"
     if name.endswith("-live-readiness.generated.json"):
         return spec_root / "live-connector-readiness.schema.json"
+    if name.endswith("-transit-api-connector.generated.json"):
+        return spec_root / "transit-api-connector.schema.json"
+    if name.endswith("-transit-delay-forward-run.generated.json"):
+        return spec_root / "transit-delay-forward-run.schema.json"
+    if name.endswith("resolve-due-forward-runs.generated.json"):
+        return spec_root / "transit-forward-run-resolver.schema.json"
+    if name.endswith("resolution-jobs.generated.json"):
+        return spec_root / "resolution-job-registry.schema.json"
+    if name.endswith("resolution-scheduler-run.generated.json"):
+        return spec_root / "resolution-scheduler-run.schema.json"
     if name.endswith("-domain-setup.generated.json"):
         return spec_root / "domain-setup.schema.json"
     if name.endswith("-source-manifest-build.generated.json"):
         return spec_root / "source-manifest-build.schema.json"
+    if name.endswith("-source-adapter-output.generated.json"):
+        return spec_root / "source-adapter-output.schema.json"
     if name.endswith("-source-intake-handoff.generated.json"):
         return spec_root / "source-intake-handoff.schema.json"
     if name.endswith("-source-handoff-method-gate.generated.json"):

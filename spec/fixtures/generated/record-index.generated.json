@@ -34,7 +34,7 @@
     },
     {
       "recordType": "forecast-artifact",
-      "count": 11,
+      "count": 12,
       "records": [
         {
           "recordType": "forecast-artifact",
@@ -123,12 +123,20 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-artifact",
+          "recordId": "forecast-1201",
+          "questionId": "question-1201",
+          "domain": "weather-transit-delays",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-10T02:00:00Z"
         }
       ]
     },
     {
       "recordType": "forecast-bundle",
-      "count": 11,
+      "count": 12,
       "records": [
         {
           "recordType": "forecast-bundle",
@@ -217,12 +225,20 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-bundle",
+          "recordId": "forecast-1201",
+          "questionId": "question-1201",
+          "domain": "weather-transit-delays",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-10T02:00:00Z"
         }
       ]
     },
     {
       "recordType": "forecast-card",
-      "count": 11,
+      "count": 12,
       "records": [
         {
           "recordType": "forecast-card",
@@ -311,6 +327,14 @@
           "domain": "weather-logistics",
           "outputType": "binary",
           "forecastedAt": "2026-06-02T10:30:00Z"
+        },
+        {
+          "recordType": "forecast-card",
+          "recordId": "forecast-1201",
+          "questionId": "question-1201",
+          "domain": "weather-transit-delays",
+          "outputType": "binary",
+          "forecastedAt": "2026-06-10T02:00:00Z"
         }
       ]
     },

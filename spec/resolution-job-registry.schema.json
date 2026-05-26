@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/resolution-job-registry.schema.json",
+  "title": "Resolution Job Registry",
+  "description": "Agent-facing registry of pending or completed resolution jobs derived from OPE forecast state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolutionJobRegistryId",
+    "generatedAt",
+    "registryMode",
+    "domain",
+    "sourceBinding",
+    "jobs",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "resolutionJobRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "registryMode": {
+      "type": "string",
+      "enum": ["fixture_registry", "live_registry"]
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceKind", "workspace", "resolverOperation", "stateFilesCommitted"],
+      "properties": {
+        "sourceKind": {
+          "type": "string",
+          "enum": ["forward_run_state"]
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "resolverOperation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "stateFilesCommitted": { "type": "boolean" }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "resolutionJobId",
+          "jobStatus",
+          "due",
+          "target",
+          "agentAction",
+          "claimBoundary"
+        ],
+        "properties": {
+          "resolutionJobId": { "$ref": "common.schema.json#/$defs/id" },
+          "jobStatus": {
+            "type": "string",
+            "enum": ["pending_due", "pending_not_due", "already_resolved", "invalid_state"]
+          },
+          "due": { "type": "boolean" },
+          "target": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "forwardRunId",
+              "forecastId",
+              "questionId",
+              "runStatus",
+              "statePath",
+              "resolveAt",
+              "serviceDate",
+              "serviceWindow"
+            ],
+            "properties": {
+              "forwardRunId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "forecastId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "questionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "runStatus": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "statePath": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "resolveAt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "serviceDate": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "serviceWindow": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            }
+          },
+          "agentAction": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["recommendedAction", "reason", "commands"],
+            "properties": {
+              "recommendedAction": {
+                "type": "string",
+                "enum": ["wait", "call_resolver_execute", "read_resolved_outputs", "inspect_invalid_state"]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 240
+              },
+              "commands": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 6,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 700
+                }
+              }
+            }
+          },
+          "claimBoundary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "createsForecastArtifacts",
+              "createsResolutionArtifacts",
+              "normalChecksUseLiveNetwork",
+              "calibrationClaimAllowed"
+            ],
+            "properties": {
+              "createsForecastArtifacts": { "type": "boolean" },
+              "createsResolutionArtifacts": { "type": "boolean" },
+              "normalChecksUseLiveNetwork": { "type": "boolean" },
+              "calibrationClaimAllowed": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jobCount", "pendingDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
+      "properties": {
+        "jobCount": { "type": "integer", "minimum": 0 },
+        "pendingDueCount": { "type": "integer", "minimum": 0 },
+        "pendingNotDueCount": { "type": "integer", "minimum": 0 },
+        "alreadyResolvedCount": { "type": "integer", "minimum": 0 },
+        "invalidCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registryExecutesResolvers",
+        "liveScanRequiresExplicitFlag",
+        "executeRequiresResolveDueCommand",
+        "hostedSchedulerCreated",
+        "calibrationClaimAllowed"
+      ],
+      "properties": {
+        "registryExecutesResolvers": { "type": "boolean" },
+        "liveScanRequiresExplicitFlag": { "type": "boolean" },
+        "executeRequiresResolveDueCommand": { "type": "boolean" },
+        "hostedSchedulerCreated": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  }
+}

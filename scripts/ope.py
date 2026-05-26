@@ -56,9 +56,16 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     auto_evidence_gather_command = [sys.executable, "scripts/gather_auto_evidence.py"]
     source_connectors_command = [sys.executable, "scripts/generate_source_connectors.py"]
     live_readiness_command = [sys.executable, "scripts/generate_live_connector_readiness.py"]
+    transit_api_connector_command = [sys.executable, "scripts/connect_transit_api.py"]
     domain_setups_command = [sys.executable, "scripts/generate_domain_setups.py"]
+    transit_delay_forecast_command = [sys.executable, "scripts/run_transit_delay_forecast.py"]
+    transit_delay_forward_command = [sys.executable, "scripts/run_transit_delay_forward.py"]
+    transit_forward_resolver_command = [sys.executable, "scripts/resolve_due_transit_forward_runs.py"]
+    resolution_jobs_command = [sys.executable, "scripts/generate_resolution_jobs.py"]
+    resolution_scheduler_command = [sys.executable, "scripts/run_resolution_scheduler.py"]
     source_intake_command = [sys.executable, "scripts/generate_source_intake.py"]
     source_builder_command = [sys.executable, "scripts/build_source_manifest.py"]
+    source_adapter_output_command = [sys.executable, "scripts/generate_source_adapter_output.py"]
     source_handoff_command = [sys.executable, "scripts/generate_source_intake_handoff.py"]
     source_handoff_method_command = [sys.executable, "scripts/generate_source_handoff_method_gate.py"]
     auto_evidence_forecast_command = [sys.executable, "scripts/run_auto_evidence_forecast.py"]
@@ -103,9 +110,16 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         auto_evidence_gather_command.append("--write")
         source_connectors_command.append("--write")
         live_readiness_command.append("--write")
+        transit_api_connector_command.append("--write")
         domain_setups_command.append("--write")
+        transit_delay_forecast_command.append("--write")
+        transit_delay_forward_command.append("--write")
+        transit_forward_resolver_command.append("--write")
+        resolution_jobs_command.append("--write")
+        resolution_scheduler_command.append("--write")
         source_intake_command.append("--write")
         source_builder_command.append("--write")
+        source_adapter_output_command.append("--write")
         source_handoff_command.append("--write")
         source_handoff_method_command.append("--write")
         auto_evidence_forecast_command.append("--write")
@@ -147,9 +161,16 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         auto_evidence_gather_command.append("--check")
         source_connectors_command.append("--check")
         live_readiness_command.append("--check")
+        transit_api_connector_command.append("--check")
         domain_setups_command.append("--check")
+        transit_delay_forecast_command.append("--check")
+        transit_delay_forward_command.append("--check")
+        transit_forward_resolver_command.append("--check")
+        resolution_jobs_command.append("--check")
+        resolution_scheduler_command.append("--check")
         source_intake_command.append("--check")
         source_builder_command.append("--check")
+        source_adapter_output_command.append("--check")
         source_handoff_command.append("--check")
         source_handoff_method_command.append("--check")
         method_comparison_command.append("--check")
@@ -185,9 +206,16 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(auto_evidence_gather_command)
     run(source_connectors_command)
     run(live_readiness_command)
+    run(transit_api_connector_command)
     run(domain_setups_command)
+    run(transit_delay_forecast_command)
+    run(transit_delay_forward_command)
+    run(transit_forward_resolver_command)
+    run(resolution_jobs_command)
+    run(resolution_scheduler_command)
     run(source_intake_command)
     run(source_builder_command)
+    run(source_adapter_output_command)
     run(source_handoff_command)
     run(source_handoff_method_command)
     run(auto_evidence_forecast_command)
@@ -325,6 +353,47 @@ def cmd_live_readiness(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_transit_api_connector(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/connect_transit_api.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    if args.live:
+        command.append("--live")
+    if args.save_local:
+        command.append("--save-local")
+    if args.input_protobuf:
+        command.extend(["--input-protobuf", args.input_protobuf])
+    if args.schedule_join:
+        command.append("--schedule-join")
+    if args.static_gtfs:
+        command.extend(["--static-gtfs", args.static_gtfs])
+    if args.download_static_gtfs:
+        command.append("--download-static-gtfs")
+    if args.workspace:
+        command.extend(["--workspace", args.workspace])
+    if args.timeout is not None:
+        command.extend(["--timeout", str(args.timeout)])
+    if args.max_bytes is not None:
+        command.extend(["--max-bytes", str(args.max_bytes)])
+    if args.static_gtfs_max_bytes is not None:
+        command.extend(["--static-gtfs-max-bytes", str(args.static_gtfs_max_bytes)])
+    if args.network:
+        command.extend(["--network", args.network])
+    if args.geography:
+        command.extend(["--geography", args.geography])
+    if args.service_window:
+        command.extend(["--service-window", args.service_window])
+    if args.service_date:
+        command.extend(["--service-date", args.service_date])
+    if args.forecast_close_time:
+        command.extend(["--forecast-close-time", args.forecast_close_time])
+    if args.late_seconds is not None:
+        command.extend(["--late-seconds", str(args.late_seconds)])
+    run(command)
+
+
 def cmd_live_capture(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/live_capture_workspace.py", "--input", args.input]
     if args.request:
@@ -344,6 +413,209 @@ def cmd_domain_setups(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_domain_setups.py"]
     if args.setup:
         command.extend(["--setup", args.setup])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_delay_forecast(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/run_transit_delay_forecast.py"]
+    if args.weather_forecast:
+        command.extend(["--weather-forecast", args.weather_forecast])
+    if args.historical_delays:
+        command.extend(["--historical-delays", args.historical_delays])
+    if args.trip_updates:
+        command.extend(["--trip-updates", args.trip_updates])
+    if args.unresolved:
+        command.append("--unresolved")
+    if args.network:
+        command.extend(["--network", args.network])
+    if args.geography:
+        command.extend(["--geography", args.geography])
+    if args.service_window:
+        command.extend(["--service-window", args.service_window])
+    if args.service_date:
+        command.extend(["--service-date", args.service_date])
+    if args.late_seconds is not None:
+        command.extend(["--late-seconds", str(args.late_seconds)])
+    if args.event_threshold is not None:
+        command.extend(["--event-threshold", str(args.event_threshold)])
+    if args.min_observations is not None:
+        command.extend(["--min-observations", str(args.min_observations)])
+    if args.generated_at:
+        command.extend(["--generated-at", args.generated_at])
+    if args.forecasted_at:
+        command.extend(["--forecasted-at", args.forecasted_at])
+    if args.forecast_close_time:
+        command.extend(["--forecast-close-time", args.forecast_close_time])
+    if args.horizon_start:
+        command.extend(["--horizon-start", args.horizon_start])
+    if args.horizon_end:
+        command.extend(["--horizon-end", args.horizon_end])
+    if args.resolve_at:
+        command.extend(["--resolve-at", args.resolve_at])
+    if args.output_dir:
+        command.extend(["--output-dir", args.output_dir])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_delay_forward_run(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/run_transit_delay_forward.py"]
+    if args.phase:
+        command.extend(["--phase", args.phase])
+    if args.run_dir:
+        command.extend(["--run-dir", args.run_dir])
+    if args.run_state:
+        command.extend(["--run-state", args.run_state])
+    if args.weather_forecast:
+        command.extend(["--weather-forecast", args.weather_forecast])
+    if args.historical_delays:
+        command.extend(["--historical-delays", args.historical_delays])
+    if args.trip_updates:
+        command.extend(["--trip-updates", args.trip_updates])
+    if args.live_weather:
+        command.append("--live-weather")
+    if args.input_protobuf:
+        command.extend(["--input-protobuf", args.input_protobuf])
+    if args.static_gtfs:
+        command.extend(["--static-gtfs", args.static_gtfs])
+    if args.download_static_gtfs:
+        command.append("--download-static-gtfs")
+    if args.timeout is not None:
+        command.extend(["--timeout", str(args.timeout)])
+    if args.max_bytes is not None:
+        command.extend(["--max-bytes", str(args.max_bytes)])
+    if args.static_gtfs_max_bytes is not None:
+        command.extend(["--static-gtfs-max-bytes", str(args.static_gtfs_max_bytes)])
+    if args.network:
+        command.extend(["--network", args.network])
+    if args.geography:
+        command.extend(["--geography", args.geography])
+    if args.service_window:
+        command.extend(["--service-window", args.service_window])
+    if args.service_date:
+        command.extend(["--service-date", args.service_date])
+    if args.late_seconds is not None:
+        command.extend(["--late-seconds", str(args.late_seconds)])
+    if args.event_threshold is not None:
+        command.extend(["--event-threshold", str(args.event_threshold)])
+    if args.min_observations is not None:
+        command.extend(["--min-observations", str(args.min_observations)])
+    if args.generated_at:
+        command.extend(["--generated-at", args.generated_at])
+    if args.forecasted_at:
+        command.extend(["--forecasted-at", args.forecasted_at])
+    if args.forecast_close_time:
+        command.extend(["--forecast-close-time", args.forecast_close_time])
+    if args.horizon_start:
+        command.extend(["--horizon-start", args.horizon_start])
+    if args.horizon_end:
+        command.extend(["--horizon-end", args.horizon_end])
+    if args.resolve_at:
+        command.extend(["--resolve-at", args.resolve_at])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_resolve_due_forward_runs(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/resolve_due_transit_forward_runs.py"]
+    if args.live:
+        command.append("--live")
+    if args.execute:
+        command.append("--execute")
+    if args.workspace:
+        command.extend(["--workspace", args.workspace])
+    for run_state in args.run_state or []:
+        command.extend(["--run-state", run_state])
+    if args.now:
+        command.extend(["--now", args.now])
+    if args.limit is not None:
+        command.extend(["--limit", str(args.limit)])
+    if args.trip_updates:
+        command.extend(["--trip-updates", args.trip_updates])
+    if args.input_protobuf:
+        command.extend(["--input-protobuf", args.input_protobuf])
+    if args.static_gtfs:
+        command.extend(["--static-gtfs", args.static_gtfs])
+    if args.download_static_gtfs:
+        command.append("--download-static-gtfs")
+    if args.timeout is not None:
+        command.extend(["--timeout", str(args.timeout)])
+    if args.max_bytes is not None:
+        command.extend(["--max-bytes", str(args.max_bytes)])
+    if args.static_gtfs_max_bytes is not None:
+        command.extend(["--static-gtfs-max-bytes", str(args.static_gtfs_max_bytes)])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_resolution_jobs(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_resolution_jobs.py"]
+    if args.live:
+        command.append("--live")
+    if args.workspace:
+        command.extend(["--workspace", args.workspace])
+    for run_state in args.run_state or []:
+        command.extend(["--run-state", run_state])
+    if args.now:
+        command.extend(["--now", args.now])
+    if args.limit is not None:
+        command.extend(["--limit", str(args.limit)])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_resolution_scheduler(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/run_resolution_scheduler.py"]
+    if args.live:
+        command.append("--live")
+    if args.watch:
+        command.append("--watch")
+    if args.execute:
+        command.append("--execute")
+    if args.workspace:
+        command.extend(["--workspace", args.workspace])
+    for run_state in args.run_state or []:
+        command.extend(["--run-state", run_state])
+    if args.limit is not None:
+        command.extend(["--limit", str(args.limit)])
+    if args.poll_seconds is not None:
+        command.extend(["--poll-seconds", str(args.poll_seconds)])
+    if args.max_ticks is not None:
+        command.extend(["--max-ticks", str(args.max_ticks)])
+    if args.log_file:
+        command.extend(["--log-file", args.log_file])
+    if args.output_format:
+        command.extend(["--output-format", args.output_format])
+    if args.trip_updates:
+        command.extend(["--trip-updates", args.trip_updates])
+    if args.input_protobuf:
+        command.extend(["--input-protobuf", args.input_protobuf])
+    if args.static_gtfs:
+        command.extend(["--static-gtfs", args.static_gtfs])
+    if args.download_static_gtfs:
+        command.append("--download-static-gtfs")
+    if args.timeout is not None:
+        command.extend(["--timeout", str(args.timeout)])
+    if args.max_bytes is not None:
+        command.extend(["--max-bytes", str(args.max_bytes)])
+    if args.static_gtfs_max_bytes is not None:
+        command.extend(["--static-gtfs-max-bytes", str(args.static_gtfs_max_bytes)])
     if args.check:
         command.append("--check")
     if args.write:
@@ -372,6 +644,15 @@ def cmd_source_builder(args: argparse.Namespace) -> None:
         command.extend(["--mapping-hint", item])
     if args.output_dir:
         command.extend(["--output-dir", args.output_dir])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_source_adapter_output(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_source_adapter_output.py"]
     if args.check:
         command.append("--check")
     if args.write:
@@ -914,6 +1195,30 @@ def build_parser() -> argparse.ArgumentParser:
     live_readiness.add_argument("--service-date")
     live_readiness.set_defaults(func=cmd_live_readiness)
 
+    transit_api_connector = subparsers.add_parser(
+        "transit-api-connector",
+        help="check, print, or explicitly run the HSL GTFS-RT transit API connector",
+    )
+    transit_api_connector.add_argument("--check", action="store_true", help="check generated connector drift")
+    transit_api_connector.add_argument("--write", action="store_true", help="refresh generated connector fixture")
+    transit_api_connector.add_argument("--live", action="store_true", help="perform an opt-in HSL GTFS-RT fetch")
+    transit_api_connector.add_argument("--save-local", action="store_true", help="save live capture under .ope/live")
+    transit_api_connector.add_argument("--input-protobuf", help="decode a local GTFS-RT protobuf capture")
+    transit_api_connector.add_argument("--schedule-join", action="store_true", help="join TripUpdates to static GTFS and derive delay seconds")
+    transit_api_connector.add_argument("--static-gtfs", help="path to an HSL static GTFS zip for --schedule-join")
+    transit_api_connector.add_argument("--download-static-gtfs", action="store_true", help="download HSL static GTFS into the ignored workspace cache")
+    transit_api_connector.add_argument("--workspace", help="ignored local live workspace")
+    transit_api_connector.add_argument("--timeout", type=int)
+    transit_api_connector.add_argument("--max-bytes", type=int)
+    transit_api_connector.add_argument("--static-gtfs-max-bytes", type=int)
+    transit_api_connector.add_argument("--network")
+    transit_api_connector.add_argument("--geography")
+    transit_api_connector.add_argument("--service-window")
+    transit_api_connector.add_argument("--service-date")
+    transit_api_connector.add_argument("--forecast-close-time")
+    transit_api_connector.add_argument("--late-seconds", type=int)
+    transit_api_connector.set_defaults(func=cmd_transit_api_connector)
+
     live_capture = subparsers.add_parser(
         "live-capture",
         help="validate or draft evidence from an ignored local live connector capture",
@@ -932,12 +1237,135 @@ def build_parser() -> argparse.ArgumentParser:
     )
     domain_setups.add_argument(
         "--setup",
-        choices=["weather-logistics", "seaport-berth-availability"],
+        choices=["weather-logistics", "seaport-berth-availability", "weather-transit-delays"],
         help="print one setup record",
     )
     domain_setups.add_argument("--check", action="store_true", help="check generated domain setup drift")
     domain_setups.add_argument("--write", action="store_true", help="refresh generated domain setup records")
     domain_setups.set_defaults(func=cmd_domain_setups)
+
+    transit_delay_forecast = subparsers.add_parser(
+        "transit-delay-forecast",
+        help="run a local weather-transit-delay forecast from approved CSV/JSON files",
+    )
+    transit_delay_forecast.add_argument("--weather-forecast", help="approved CSV/JSON weather forecast source")
+    transit_delay_forecast.add_argument("--historical-delays", help="approved CSV/JSON historical delay source")
+    transit_delay_forecast.add_argument("--trip-updates", help="approved CSV/JSON transit outcome rows")
+    transit_delay_forecast.add_argument("--unresolved", action="store_true", help="forecast without resolution/scoring")
+    transit_delay_forecast.add_argument("--network")
+    transit_delay_forecast.add_argument("--geography")
+    transit_delay_forecast.add_argument("--service-window")
+    transit_delay_forecast.add_argument("--service-date")
+    transit_delay_forecast.add_argument("--late-seconds", type=int)
+    transit_delay_forecast.add_argument("--event-threshold", type=float)
+    transit_delay_forecast.add_argument("--min-observations", type=int)
+    transit_delay_forecast.add_argument("--generated-at")
+    transit_delay_forecast.add_argument("--forecasted-at")
+    transit_delay_forecast.add_argument("--forecast-close-time")
+    transit_delay_forecast.add_argument("--horizon-start")
+    transit_delay_forecast.add_argument("--horizon-end")
+    transit_delay_forecast.add_argument("--resolve-at")
+    transit_delay_forecast.add_argument("--output-dir")
+    transit_delay_forecast.add_argument("--check", action="store_true", help="check generated transit forecast drift")
+    transit_delay_forecast.add_argument("--write", action="store_true", help="refresh generated transit forecast outputs")
+    transit_delay_forecast.set_defaults(func=cmd_transit_delay_forecast)
+
+    transit_delay_forward_run = subparsers.add_parser(
+        "transit-delay-forward-run",
+        help="run the weather-transit-delay forecast-to-resolution workflow",
+    )
+    transit_delay_forward_run.add_argument("--phase", choices=["fixture", "forecast", "resolve", "full"], default="fixture")
+    transit_delay_forward_run.add_argument("--run-dir", help="ignored local run directory for live phases")
+    transit_delay_forward_run.add_argument("--run-state", help="saved forward-run-state.json for resolve phase")
+    transit_delay_forward_run.add_argument("--weather-forecast", help="approved CSV/JSON weather forecast source")
+    transit_delay_forward_run.add_argument("--historical-delays", help="approved CSV/JSON historical delay source")
+    transit_delay_forward_run.add_argument("--trip-updates", help="approved CSV/JSON transit outcome rows")
+    transit_delay_forward_run.add_argument("--live-weather", action="store_true", help="fetch Open-Meteo Helsinki weather for live phases")
+    transit_delay_forward_run.add_argument("--input-protobuf", help="decode a local GTFS-RT protobuf capture for resolution")
+    transit_delay_forward_run.add_argument("--static-gtfs", help="path to an HSL static GTFS zip for resolution schedule join")
+    transit_delay_forward_run.add_argument("--download-static-gtfs", action="store_true", help="download HSL static GTFS into the ignored live workspace")
+    transit_delay_forward_run.add_argument("--timeout", type=int)
+    transit_delay_forward_run.add_argument("--max-bytes", type=int)
+    transit_delay_forward_run.add_argument("--static-gtfs-max-bytes", type=int)
+    transit_delay_forward_run.add_argument("--network")
+    transit_delay_forward_run.add_argument("--geography")
+    transit_delay_forward_run.add_argument("--service-window")
+    transit_delay_forward_run.add_argument("--service-date")
+    transit_delay_forward_run.add_argument("--late-seconds", type=int)
+    transit_delay_forward_run.add_argument("--event-threshold", type=float)
+    transit_delay_forward_run.add_argument("--min-observations", type=int)
+    transit_delay_forward_run.add_argument("--generated-at")
+    transit_delay_forward_run.add_argument("--forecasted-at")
+    transit_delay_forward_run.add_argument("--forecast-close-time")
+    transit_delay_forward_run.add_argument("--horizon-start")
+    transit_delay_forward_run.add_argument("--horizon-end")
+    transit_delay_forward_run.add_argument("--resolve-at")
+    transit_delay_forward_run.add_argument("--check", action="store_true", help="check generated forward-run fixture drift")
+    transit_delay_forward_run.add_argument("--write", action="store_true", help="refresh generated forward-run fixture")
+    transit_delay_forward_run.set_defaults(func=cmd_transit_delay_forward_run)
+
+    resolve_due_forward_runs = subparsers.add_parser(
+        "resolve-due-forward-runs",
+        help="scan and optionally resolve due weather-transit-delay forward runs",
+    )
+    resolve_due_forward_runs.add_argument("--live", action="store_true", help="scan ignored local live forward-run states")
+    resolve_due_forward_runs.add_argument("--execute", action="store_true", help="execute checked resolver commands for due live runs")
+    resolve_due_forward_runs.add_argument("--workspace", help="ignored local forward-run workspace")
+    resolve_due_forward_runs.add_argument("--run-state", action="append", help="specific forward-run-state.json to scan")
+    resolve_due_forward_runs.add_argument("--now", help="override current timestamp for deterministic scans")
+    resolve_due_forward_runs.add_argument("--limit", type=int)
+    resolve_due_forward_runs.add_argument("--trip-updates", help="approved CSV/JSON transit outcome rows for execution")
+    resolve_due_forward_runs.add_argument("--input-protobuf", help="decode a local GTFS-RT protobuf capture for execution")
+    resolve_due_forward_runs.add_argument("--static-gtfs", help="path to an HSL static GTFS zip for execution schedule join")
+    resolve_due_forward_runs.add_argument("--download-static-gtfs", action="store_true", help="download HSL static GTFS during execution")
+    resolve_due_forward_runs.add_argument("--timeout", type=int)
+    resolve_due_forward_runs.add_argument("--max-bytes", type=int)
+    resolve_due_forward_runs.add_argument("--static-gtfs-max-bytes", type=int)
+    resolve_due_forward_runs.add_argument("--check", action="store_true", help="check generated resolver fixture drift")
+    resolve_due_forward_runs.add_argument("--write", action="store_true", help="refresh generated resolver fixture")
+    resolve_due_forward_runs.set_defaults(func=cmd_resolve_due_forward_runs)
+
+    resolution_jobs = subparsers.add_parser(
+        "resolution-jobs",
+        help="inspect agent-facing resolution jobs without executing resolvers",
+    )
+    resolution_jobs.add_argument("--live", action="store_true", help="read ignored local forward-run state files")
+    resolution_jobs.add_argument("--workspace", help="ignored local forward-run workspace")
+    resolution_jobs.add_argument("--run-state", action="append", help="specific forward-run-state.json to inspect")
+    resolution_jobs.add_argument("--now", help="override current timestamp for deterministic scans")
+    resolution_jobs.add_argument("--limit", type=int)
+    resolution_jobs.add_argument("--check", action="store_true", help="check generated resolution-job fixture drift")
+    resolution_jobs.add_argument("--write", action="store_true", help="refresh generated resolution-job fixture")
+    resolution_jobs.set_defaults(func=cmd_resolution_jobs)
+
+    resolution_scheduler = subparsers.add_parser(
+        "resolution-scheduler",
+        help="run a foreground terminal scheduler for due resolution jobs",
+    )
+    resolution_scheduler.add_argument("--live", action="store_true", help="read ignored local resolution jobs")
+    resolution_scheduler.add_argument("--watch", action="store_true", help="keep polling in the foreground terminal")
+    resolution_scheduler.add_argument("--execute", action="store_true", help="execute due jobs through the checked resolver")
+    resolution_scheduler.add_argument("--workspace", help="ignored local forward-run workspace")
+    resolution_scheduler.add_argument("--run-state", action="append", help="specific forward-run-state.json to watch")
+    resolution_scheduler.add_argument("--limit", type=int)
+    resolution_scheduler.add_argument("--poll-seconds", type=int)
+    resolution_scheduler.add_argument("--max-ticks", type=int)
+    resolution_scheduler.add_argument("--log-file")
+    resolution_scheduler.add_argument(
+        "--output-format",
+        choices=["auto", "text", "jsonl"],
+        help="watch stdout format; auto uses text for terminals and jsonl when captured",
+    )
+    resolution_scheduler.add_argument("--trip-updates", help="approved CSV/JSON transit outcome rows for resolver execution")
+    resolution_scheduler.add_argument("--input-protobuf", help="decode a local GTFS-RT protobuf capture for resolver execution")
+    resolution_scheduler.add_argument("--static-gtfs", help="path to an HSL static GTFS zip for resolver execution")
+    resolution_scheduler.add_argument("--download-static-gtfs", action="store_true", help="download HSL static GTFS during resolver execution")
+    resolution_scheduler.add_argument("--timeout", type=int)
+    resolution_scheduler.add_argument("--max-bytes", type=int)
+    resolution_scheduler.add_argument("--static-gtfs-max-bytes", type=int)
+    resolution_scheduler.add_argument("--check", action="store_true", help="check generated scheduler fixture drift")
+    resolution_scheduler.add_argument("--write", action="store_true", help="refresh generated scheduler fixture")
+    resolution_scheduler.set_defaults(func=cmd_resolution_scheduler)
 
     source_intake = subparsers.add_parser(
         "source-intake",
@@ -975,6 +1403,14 @@ def build_parser() -> argparse.ArgumentParser:
     source_builder.add_argument("--check", action="store_true", help="check generated source-builder drift")
     source_builder.add_argument("--write", action="store_true", help="refresh generated source-builder fixtures")
     source_builder.set_defaults(func=cmd_source_builder)
+
+    source_adapter_output = subparsers.add_parser(
+        "source-adapter-output",
+        help="check, refresh, or print an external connector handoff into OPE source intake",
+    )
+    source_adapter_output.add_argument("--check", action="store_true", help="check generated source-adapter output drift")
+    source_adapter_output.add_argument("--write", action="store_true", help="refresh generated source-adapter output")
+    source_adapter_output.set_defaults(func=cmd_source_adapter_output)
 
     source_handoff = subparsers.add_parser(
         "source-handoff",

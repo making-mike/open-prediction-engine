@@ -1,0 +1,60 @@
+{
+  "runId": "transitdelayrun-1201",
+  "generatedAt": "2026-06-10T08:15:00Z",
+  "domain": "weather-transit-delays",
+  "runStatus": "completed",
+  "forecastId": "forecast-1201",
+  "questionId": "question-1201",
+  "forecast": {
+    "outputType": "binary",
+    "probability": 0.33
+  },
+  "baseline": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "sourceSummary": {
+    "historicalComparableWindows": 30,
+    "historicalPositiveOutcomes": 7,
+    "weatherRetrievedAt": "2026-06-10T02:00:00Z",
+    "forecastPrecipitationMm": 8.5,
+    "forecastSnowfallMm": 0.0,
+    "forecastWindGustKmh": 42.0
+  },
+  "resolution": {
+    "status": "resolved",
+    "observationCount": 22,
+    "lateCount": 5,
+    "lateRatio": 0.2273,
+    "outcome": true,
+    "reason": "coverage checks passed"
+  },
+  "score": {
+    "scoringReportId": "scoring-1201",
+    "questionId": "question-1201",
+    "forecastId": "forecast-1201",
+    "historyId": "history-1201",
+    "resolutionRecordId": "resolution-1201",
+    "scoreStatus": "scored",
+    "scoringRule": "brier",
+    "primaryScore": 0.4489,
+    "higherIsBetter": false,
+    "timeWeighting": {
+      "method": "latest_only",
+      "totalWeight": 1.0
+    },
+    "baselineScore": 0.5625,
+    "baselineLift": 0.1136,
+    "generatedAt": "2026-06-10T08:15:00Z"
+  },
+  "qualityClaim": {
+    "status": "not_enough_resolved_transit_delay_outcomes",
+    "minimumSampleSize": 100,
+    "resolvedComparableOutcomes": 1
+  },
+  "warnings": [
+    "Local custom-file prototype only; live connector outputs must be passed explicitly as approved files.",
+    "Weather adjustment is transparent beta logic, not a calibrated causal claim.",
+    "Resolution rows are excluded from forecast-time provenance."
+  ]
+}

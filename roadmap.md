@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-05-18
+Last updated: 2026-05-26
 
 ## Purpose
 
@@ -93,13 +93,23 @@ Done:
 - Checked private setup method-gate adapter envelopes now expose setup benchmark and method-decision guidance through the same agent adapter surface without creating forecast or score records.
 - Checked private setup forecast-execution adapter envelopes now create forecast artifacts only for the confirmed checked handoff and keep blocked cases non-generating.
 - Generated private setup forecast readback envelopes now read `forecast-1102` through normal card, bundle, resolution, and scoring adapter operations.
+- Weather-conditioned public transport delays selected as the public beta candidate wedge and documented in `spec/domains/weather-transit-delays.md`.
+- Local weather-transit-delay custom-file prototype now emits schema-bound forecast, resolution, and scoring records through `python3 scripts/ope.py transit-delay-forecast`.
+- Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
+- Opt-in HSL GTFS-RT transit API connector now captures TripUpdates, derives delay rows through a static GTFS schedule join, and writes source-adapter output through `python3 scripts/ope.py transit-api-connector --schedule-join`.
+- Weather-transit-delay forward-run workflow now records a pre-window forecast, preserves run state, resolves from declared transit outcome rows, scores against baseline, and exposes explicit local live forecast/resolve phases through `python3 scripts/ope.py transit-delay-forward-run`.
+- Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
+- Resolution job registry now gives agents read-only next-action guidance for pending, due, already-resolved, and invalid resolution states through `python3 scripts/ope.py resolution-jobs`.
+- Foreground terminal resolution scheduler now lets agents poll resolution jobs and optionally execute due checked resolvers locally through `python3 scripts/ope.py resolution-scheduler`, without Trigger.dev, cron, `launchd`, or hosted workers.
 
 Not started:
 
 - Arbitrary private API/database parsing beyond checked setup and local source-builder fixtures.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
+- Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
 - Forecast execution that consumes ignored local live drafts.
-- Watch or scheduler runtime beyond checked recalculation fixtures.
+- Hosted watch or scheduler runtime beyond the local foreground scheduler.
+- OS scheduler installation.
 - Production hosted, HTTP, or queue agent adapter runtime.
 - Hosted service runtime and network API.
 - Production forecast use of live connector results.
@@ -111,7 +121,7 @@ In progress:
 
 Next:
 
-- Milestone 59: Private Setup Forecast Execution Adapter Envelope.
+- Resolution Jobs Agent Adapter, Scheduler Readback, And Public Transport Calibration Corpus.
 
 ## Milestone 0: Project Baseline
 

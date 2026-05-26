@@ -1,0 +1,75 @@
+{
+  "evidencePacketId": "evidence-1201",
+  "forecastId": "forecast-1201",
+  "questionId": "question-1201",
+  "questionStatus": "open",
+  "domain": "weather-transit-delays",
+  "horizon": {
+    "startsAt": "2026-06-10T03:00:00Z",
+    "endsAt": "2026-06-10T07:00:00Z",
+    "label": "same-day-morning-peak"
+  },
+  "forecastedAt": "2026-06-10T02:00:00Z",
+  "model": {
+    "modelId": "model-1201",
+    "version": "weather-transit-delay-local-baseline-v0",
+    "trainingCutoff": "2026-06-10T02:30:00Z",
+    "configurationHash": "sha256-transit-delay-local-baseline-v0"
+  },
+  "inputSourceClasses": [
+    "public_dataset"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "source-1201",
+      "name": "Transit Weather Forecast File",
+      "sourceType": "public_dataset",
+      "uri": "local://spec/fixtures/local-source-files/transit-weather-forecast.json",
+      "contentHash": "adb1b8319ae335c8f846137864d2cb44f97360819a54a05cc56c965ff2ad60fe",
+      "retrievedAt": "2026-06-10T02:00:00Z"
+    },
+    {
+      "sourceId": "source-1202",
+      "name": "Historical Transit Delay File",
+      "sourceType": "public_dataset",
+      "uri": "local://spec/fixtures/local-source-files/transit-delay-history.csv",
+      "contentHash": "6e7e339a0dd78925072cc0052f057f8168b34667f9331d658683ae30f3bbf4f4",
+      "retrievedAt": "2026-06-10T02:00:00Z"
+    }
+  ],
+  "featureSnapshotRef": "https://example.test/fixtures/generated/transit-delay-forecast/weather-transit-delays-feature-snapshot.generated.json",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.33
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "calibrationBand": {
+    "lower": 0.18,
+    "upper": 0.48,
+    "coverage": 0.8,
+    "sampleSize": 30
+  },
+  "rationaleSummary": "Local beta method starts from a Laplace-smoothed historical delay-event frequency and applies a transparent weather stress adjustment. It is runnable for custom local files but is not calibrated.",
+  "keyFactors": [
+    "historical comparable windows 30",
+    "historical delay events 7",
+    "baseline probability 0.25",
+    "weather adjustment 0.08",
+    "forecast precipitation 8.5 mm",
+    "resolution source excluded from forecast-time evidence"
+  ],
+  "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-10 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
+  "resolutionSource": {
+    "sourceId": "source-1203",
+    "name": "Transit Delay Outcome File",
+    "sourceType": "public_dataset",
+    "uri": "local://spec/fixtures/local-source-files/transit-trip-updates.csv",
+    "contentHash": "63c2ad9699e27b7f03c5eb9777b049602c9df5998bb0bdc404697a87e2a65cd3",
+    "retrievedAt": "2026-06-10T08:15:00Z"
+  },
+  "fallbackResolutionSources": [],
+  "scheduledResolutionAt": "2026-06-10T08:00:00Z"
+}

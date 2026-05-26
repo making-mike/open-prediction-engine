@@ -57,9 +57,15 @@ def main() -> None:
     run_cli("gather-evidence")
     run_cli("source-connectors", "--check")
     run_cli("live-readiness", "--check")
+    run_cli("transit-api-connector", "--check")
     run_cli("domain-setups", "--check")
+    run_cli("transit-delay-forward-run", "--check")
+    run_cli("resolve-due-forward-runs", "--check")
+    run_cli("resolution-jobs", "--check")
+    run_cli("resolution-scheduler", "--check")
     run_cli("source-intake", "--check")
     run_cli("source-builder", "--check")
+    run_cli("source-adapter-output", "--check")
     run_cli("source-handoff", "--check")
     run_cli("source-handoff-method", "--check")
     run_cli("auto-forecast")
@@ -340,13 +346,15 @@ def main() -> None:
 
     domain_setups = run_cli("domain-setups")
     domain_setups_payload = json.loads(domain_setups.stdout)
-    if domain_setups_payload["count"] != 2:
-        raise AssertionError("CLI domain-setups should expose two setup records")
+    if domain_setups_payload["count"] != 3:
+        raise AssertionError("CLI domain-setups should expose three setup records")
     setup_summaries = {item["domain"]: item for item in domain_setups_payload["domainSetups"]}
     if setup_summaries["weather-logistics"]["maturityStatus"] != "fixture_ready":
         raise AssertionError("CLI domain-setups should expose weather-logistics as fixture-ready")
     if setup_summaries["seaport-berth-availability"]["maturityStatus"] != "candidate":
         raise AssertionError("CLI domain-setups should expose seaport setup as candidate")
+    if setup_summaries["weather-transit-delays"]["forecastRunnable"] is not True:
+        raise AssertionError("CLI domain-setups should expose transit delay setup as locally runnable")
 
     seaport_setup = run_cli("domain-setups", "--setup", "seaport-berth-availability")
     seaport_setup_payload = json.loads(seaport_setup.stdout)
@@ -356,6 +364,124 @@ def main() -> None:
         raise AssertionError("CLI candidate domain setup should block calibration claims")
     if seaport_setup_payload["claimPolicy"]["productionReadinessClaimAllowed"] is not False:
         raise AssertionError("CLI candidate domain setup should block production readiness claims")
+
+    transit_setup = run_cli("domain-setups", "--setup", "weather-transit-delays")
+    transit_setup_payload = json.loads(transit_setup.stdout)
+    if transit_setup_payload["localImplementation"]["forecastRunnable"] is not True:
+        raise AssertionError("CLI transit domain setup should expose local forecast runnable")
+    if transit_setup_payload["claimPolicy"]["calibrationClaimAllowed"] is not False:
+        raise AssertionError("CLI transit domain setup should block calibration claims")
+
+    transit_forecast = run_cli("transit-delay-forecast")
+    transit_forecast_payload = json.loads(transit_forecast.stdout)
+    if transit_forecast_payload["domain"] != "weather-transit-delays":
+        raise AssertionError("CLI transit-delay-forecast should return transit domain")
+    if transit_forecast_payload["forecast"]["probability"] <= transit_forecast_payload["baseline"]["probability"]:
+        raise AssertionError("CLI transit-delay-forecast fixture should lift above baseline")
+    if transit_forecast_payload["score"]["scoreStatus"] != "scored":
+        raise AssertionError("CLI transit-delay-forecast fixture should score resolved outcome")
+    if transit_forecast_payload["qualityClaim"]["status"] != "not_enough_resolved_transit_delay_outcomes":
+        raise AssertionError("CLI transit-delay-forecast should keep quality claim blocked")
+    transit_forecast_check = run_cli("transit-delay-forecast", "--check")
+    if "checked 7 transit delay forecast outputs" not in transit_forecast_check.stdout:
+        raise AssertionError("CLI transit-delay-forecast --check did not check generated outputs")
+
+    transit_forward = run_cli("transit-delay-forward-run")
+    transit_forward_payload = json.loads(transit_forward.stdout)
+    if transit_forward_payload["runMode"] != "fixture_replay":
+        raise AssertionError("CLI transit-delay-forward-run should default to fixture replay")
+    if transit_forward_payload["runStatus"] != "scored":
+        raise AssertionError("CLI transit-delay-forward-run fixture should score the outcome")
+    if transit_forward_payload["forecastStage"]["probability"] <= transit_forward_payload["forecastStage"]["baselineProbability"]:
+        raise AssertionError("CLI transit-delay-forward-run fixture should lift above baseline")
+    if transit_forward_payload["resolutionStage"]["status"] != "resolved":
+        raise AssertionError("CLI transit-delay-forward-run fixture should resolve the outcome")
+    if transit_forward_payload["scoreStage"]["scoreStatus"] != "scored":
+        raise AssertionError("CLI transit-delay-forward-run fixture should expose scoring")
+    if transit_forward_payload["claimBoundary"]["calibrationClaimAllowed"]:
+        raise AssertionError("CLI transit-delay-forward-run should keep calibration claims blocked")
+    transit_forward_check = run_cli("transit-delay-forward-run", "--check")
+    if "checked transit delay forward run" not in transit_forward_check.stdout:
+        raise AssertionError("CLI transit-delay-forward-run --check did not check generated output")
+
+    forward_resolver = run_cli("resolve-due-forward-runs")
+    forward_resolver_payload = json.loads(forward_resolver.stdout)
+    if forward_resolver_payload["runMode"] != "fixture_scan":
+        raise AssertionError("CLI resolve-due-forward-runs should default to fixture scan")
+    if forward_resolver_payload["executionMode"] != "dry_run":
+        raise AssertionError("CLI resolve-due-forward-runs should default to dry-run mode")
+    if forward_resolver_payload["scanSummary"]["dueCount"] != 1:
+        raise AssertionError("CLI resolve-due-forward-runs fixture should find one due run")
+    if forward_resolver_payload["scanSummary"]["executedCount"] != 0:
+        raise AssertionError("CLI resolve-due-forward-runs fixture should not execute runs")
+    if forward_resolver_payload["executionBoundary"]["sourceFetchPerformed"]:
+        raise AssertionError("CLI resolve-due-forward-runs fixture should not fetch sources")
+    forward_resolver_check = run_cli("resolve-due-forward-runs", "--check")
+    if "checked transit forward-run resolver" not in forward_resolver_check.stdout:
+        raise AssertionError("CLI resolve-due-forward-runs --check did not check generated output")
+
+    resolution_jobs = run_cli("resolution-jobs")
+    resolution_jobs_payload = json.loads(resolution_jobs.stdout)
+    if resolution_jobs_payload["registryMode"] != "fixture_registry":
+        raise AssertionError("CLI resolution-jobs should default to fixture registry")
+    if resolution_jobs_payload["summary"]["pendingDueCount"] != 1:
+        raise AssertionError("CLI resolution-jobs should expose one due fixture job")
+    if resolution_jobs_payload["executionBoundary"]["registryExecutesResolvers"]:
+        raise AssertionError("CLI resolution-jobs must not execute resolver commands")
+    due_jobs = [job for job in resolution_jobs_payload["jobs"] if job["jobStatus"] == "pending_due"]
+    if due_jobs[0]["agentAction"]["recommendedAction"] != "call_resolver_execute":
+        raise AssertionError("CLI resolution-jobs should route due jobs to resolver execution")
+    resolution_jobs_check = run_cli("resolution-jobs", "--check")
+    if "checked resolution jobs" not in resolution_jobs_check.stdout:
+        raise AssertionError("CLI resolution-jobs --check did not check generated output")
+
+    resolution_scheduler = run_cli("resolution-scheduler")
+    resolution_scheduler_payload = json.loads(resolution_scheduler.stdout)
+    if resolution_scheduler_payload["schedulerMode"] != "fixture_once":
+        raise AssertionError("CLI resolution-scheduler should default to one fixture tick")
+    if resolution_scheduler_payload["executionMode"] != "dry_run":
+        raise AssertionError("CLI resolution-scheduler should default to dry-run mode")
+    scheduler_tick = resolution_scheduler_payload["ticks"][0]
+    if scheduler_tick["jobSummary"]["pendingDueCount"] != 1:
+        raise AssertionError("CLI resolution-scheduler fixture should see one due job")
+    if scheduler_tick["tickStatus"] != "due_pending":
+        raise AssertionError("CLI resolution-scheduler fixture should wait for --execute")
+    if scheduler_tick["resolverSummary"]["ranResolver"]:
+        raise AssertionError("CLI resolution-scheduler dry-run should not run resolver execution")
+    scheduler_boundary = resolution_scheduler_payload["executionBoundary"]
+    if scheduler_boundary["hostedSchedulerCreated"] or scheduler_boundary["osSchedulerCreated"]:
+        raise AssertionError("CLI resolution-scheduler must not create hosted or OS schedulers")
+    resolution_scheduler_check = run_cli("resolution-scheduler", "--check")
+    if "checked resolution scheduler" not in resolution_scheduler_check.stdout:
+        raise AssertionError("CLI resolution-scheduler --check did not check generated output")
+
+    transit_api_connector = run_cli("transit-api-connector")
+    transit_api_connector_payload = json.loads(transit_api_connector.stdout)
+    if transit_api_connector_payload["provider"]["providerId"] != "hsl_gtfs_rt_trip_updates":
+        raise AssertionError("CLI transit-api-connector should expose HSL TripUpdates")
+    if transit_api_connector_payload["api"]["requiresCredentials"] is not False:
+        raise AssertionError("CLI transit-api-connector should not require credentials")
+    if transit_api_connector_payload["api"]["requestParametersSupported"] is not False:
+        raise AssertionError("CLI transit-api-connector should not claim request filtering")
+    if not transit_api_connector_payload["api"]["companionStaticGtfsPackage"].endswith("/gtfs/hsl.zip"):
+        raise AssertionError("CLI transit-api-connector should name companion static GTFS")
+    if transit_api_connector_payload["decoder"]["scheduleJoinStatus"] != "implemented_opt_in":
+        raise AssertionError("CLI transit-api-connector should expose opt-in schedule join")
+    if "start_time" not in transit_api_connector_payload["decoder"]["scheduleJoinMatchKeys"]:
+        raise AssertionError("CLI transit-api-connector should declare schedule join match keys")
+    if "delay_seconds" not in transit_api_connector_payload["decoder"]["decodedFields"]:
+        raise AssertionError("CLI transit-api-connector should decode delay seconds")
+    if transit_api_connector_payload["sourceAdapterBoundary"]["canProduceSourceAdapterOutput"] is not True:
+        raise AssertionError("CLI transit-api-connector should produce source adapter output")
+    if transit_api_connector_payload["sourceAdapterBoundary"]["createsForecastArtifacts"]:
+        raise AssertionError("CLI transit-api-connector must not create forecast artifacts")
+    if transit_api_connector_payload["sourceAdapterBoundary"]["createsScoringRecords"]:
+        raise AssertionError("CLI transit-api-connector must not create scoring records")
+    if transit_api_connector_payload["liveBoundary"]["normalChecksOffline"] is not True:
+        raise AssertionError("CLI transit-api-connector should keep normal checks offline")
+    transit_api_connector_check = run_cli("transit-api-connector", "--check")
+    if "checked transit API connector" not in transit_api_connector_check.stdout:
+        raise AssertionError("CLI transit-api-connector --check did not check generated output")
 
     source_intake = run_cli("source-intake")
     source_intake_payload = json.loads(source_intake.stdout)
@@ -403,6 +529,30 @@ def main() -> None:
         raise AssertionError("CLI source-builder should inspect JSON files")
     if not any(item["fileFormat"] == "csv" for item in source_builder_case_payload["inputFiles"]):
         raise AssertionError("CLI source-builder should inspect CSV files")
+
+    source_adapter_output = run_cli("source-adapter-output")
+    source_adapter_output_payload = json.loads(source_adapter_output.stdout)
+    if source_adapter_output_payload["outputStatus"] != "intake_ready":
+        raise AssertionError("CLI source-adapter-output should expose an intake-ready handoff")
+    if source_adapter_output_payload["adapter"]["implementationLocation"] != "external_agent":
+        raise AssertionError("CLI source-adapter-output should model an external connector")
+    if source_adapter_output_payload["controls"]["forecastArtifactsCreated"] is not False:
+        raise AssertionError("CLI source-adapter-output must not create forecast artifacts")
+    if source_adapter_output_payload["controls"]["sourceIntakeAlreadyRun"] is not False:
+        raise AssertionError("CLI source-adapter-output must precede source intake")
+    if source_adapter_output_payload["nextAction"] != "run_source_intake":
+        raise AssertionError("CLI source-adapter-output should route confirmed mappings to source intake")
+    adapter_roles = {
+        item["sourceRole"]
+        for item in source_adapter_output_payload["sourceManifest"]["sources"]
+    }
+    if "transit_delay_outcome" not in adapter_roles:
+        raise AssertionError("CLI source-adapter-output should preserve the transit outcome source role")
+    if source_adapter_output_payload["provenanceSummary"]["rawRowsIncluded"] is not False:
+        raise AssertionError("CLI source-adapter-output should not include raw rows")
+    source_adapter_output_check = run_cli("source-adapter-output", "--check")
+    if "checked source adapter output" not in source_adapter_output_check.stdout:
+        raise AssertionError("CLI source-adapter-output --check did not check generated output")
 
     source_handoff = run_cli("source-handoff")
     source_handoff_payload = json.loads(source_handoff.stdout)

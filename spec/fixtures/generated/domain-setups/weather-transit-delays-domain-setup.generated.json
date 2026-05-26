@@ -1,0 +1,449 @@
+{
+  "domainSetupId": "domainsetup-003",
+  "generatedAt": "2026-06-06T15:10:00Z",
+  "domain": "weather-transit-delays",
+  "displayName": "Weather Transit Delays Local Prototype Setup",
+  "setupKind": "reference_setup",
+  "maturityStatus": "fixture_ready",
+  "domainPurpose": "Forecast whether a declared public transport network exceeds a delay threshold during a service window, using local forecast-time weather files and historical transit delay outcomes.",
+  "questionTemplates": [
+    {
+      "templateId": "template-003",
+      "template": "Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?",
+      "outputType": "binary",
+      "horizonLabels": [
+        "same-day-morning-peak",
+        "1-day"
+      ],
+      "requiredParameters": [
+        "transit_network",
+        "geography",
+        "service_window",
+        "service_date"
+      ],
+      "resolvabilityRules": [
+        "The transit network, geography, service window, and service date must be fixed before forecast close.",
+        "The late observation threshold and event threshold must be declared before forecast close.",
+        "Outcome rows from the target service window must be excluded from forecast-time evidence."
+      ]
+    }
+  ],
+  "sourceRoles": [
+    {
+      "roleId": "sourcerole-010",
+      "roleKey": "weather_forecast",
+      "displayName": "Forecast-Time Weather Evidence",
+      "timing": "forecast_time",
+      "purpose": "Provides weather features available before forecast close for the target geography and window.",
+      "requiredFields": [
+        {
+          "fieldName": "geography",
+          "fieldType": "string",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must match the requested geography."
+          ]
+        },
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must match the requested service date."
+          ]
+        },
+        {
+          "fieldName": "retrieved_at",
+          "fieldType": "date_time",
+          "requiredFor": [
+            "forecast"
+          ],
+          "validationRules": [
+            "Must be before forecast close."
+          ]
+        },
+        {
+          "fieldName": "forecast_precipitation_mm",
+          "fieldType": "number",
+          "requiredFor": [
+            "forecast",
+            "classification"
+          ],
+          "validationRules": [
+            "Use non-negative millimeter values for the service window or day."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "forecast_snowfall_mm",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use non-negative millimeter values."
+          ]
+        },
+        {
+          "fieldName": "forecast_wind_gust_kmh",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use non-negative km/h values."
+          ]
+        },
+        {
+          "fieldName": "temperature_c",
+          "fieldType": "number",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use degrees Celsius."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "official",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-011",
+      "roleKey": "historical_delay_baseline",
+      "displayName": "Historical Transit Delay Outcomes",
+      "timing": "baseline",
+      "purpose": "Provides comparable prior delay-threshold outcomes for baseline frequency.",
+      "requiredFields": [
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must predate the target forecast close."
+          ]
+        },
+        {
+          "fieldName": "transit_network",
+          "fieldType": "string",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must map to the requested transit network."
+          ]
+        },
+        {
+          "fieldName": "service_window",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "baseline"
+          ],
+          "validationRules": [
+            "Must map to the requested service window."
+          ]
+        },
+        {
+          "fieldName": "delay_event",
+          "fieldType": "boolean",
+          "requiredFor": [
+            "baseline",
+            "scoring"
+          ],
+          "validationRules": [
+            "Must resolve to true or false."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "late_observation_ratio",
+          "fieldType": "number",
+          "requiredFor": [
+            "baseline",
+            "classification"
+          ],
+          "validationRules": [
+            "Use values between 0 and 1 when direct event flags are absent."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "public_dataset",
+        "internal_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-012",
+      "roleKey": "transit_schedule",
+      "displayName": "Transit Schedule Context",
+      "timing": "supporting",
+      "purpose": "Provides optional static schedule or route context for later connector-backed delay reconstruction.",
+      "requiredFields": [
+        {
+          "fieldName": "transit_network",
+          "fieldType": "string",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Must map to the requested network."
+          ]
+        },
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Must cover the target service date."
+          ]
+        },
+        {
+          "fieldName": "service_window",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Must cover the target service window."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "route_id",
+          "fieldType": "id",
+          "requiredFor": [
+            "classification"
+          ],
+          "validationRules": [
+            "Use stable public route identifiers when available."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "official",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": true
+    },
+    {
+      "roleId": "sourcerole-013",
+      "roleKey": "transit_delay_outcome",
+      "displayName": "Transit Delay Outcome",
+      "timing": "resolution",
+      "purpose": "Provides post-window trip-stop delay observations for resolving the threshold event.",
+      "requiredFields": [
+        {
+          "fieldName": "service_date",
+          "fieldType": "date",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecast service date."
+          ]
+        },
+        {
+          "fieldName": "transit_network",
+          "fieldType": "string",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecast transit network."
+          ]
+        },
+        {
+          "fieldName": "service_window",
+          "fieldType": "categorical",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Must match the forecast service window."
+          ]
+        },
+        {
+          "fieldName": "delay_seconds",
+          "fieldType": "number",
+          "requiredFor": [
+            "resolution",
+            "scoring"
+          ],
+          "validationRules": [
+            "Use signed delay seconds from the outcome feed."
+          ]
+        }
+      ],
+      "optionalFields": [
+        {
+          "fieldName": "trip_id",
+          "fieldType": "id",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Use public trip identifiers when available."
+          ]
+        },
+        {
+          "fieldName": "stop_id",
+          "fieldType": "id",
+          "requiredFor": [
+            "resolution"
+          ],
+          "validationRules": [
+            "Use public stop identifiers when available."
+          ]
+        }
+      ],
+      "allowedSourceClasses": [
+        "official",
+        "public_dataset"
+      ],
+      "forecastTimeAllowed": false
+    }
+  ],
+  "entityRequirements": [
+    {
+      "entityType": "geography",
+      "canonicalField": "geography",
+      "aliasPolicy": "user_provided_registry",
+      "required": true
+    },
+    {
+      "entityType": "transit_network",
+      "canonicalField": "transit_network",
+      "aliasPolicy": "user_provided_registry",
+      "required": true
+    }
+  ],
+  "resolutionPolicy": {
+    "primarySourceRole": "transit_delay_outcome",
+    "fallbackSourceRoles": [],
+    "yesOutcomeDefinition": "Coverage checks pass and the late-observation ratio meets or exceeds the declared threshold.",
+    "noOutcomeDefinition": "Coverage checks pass and the late-observation ratio is below the declared threshold.",
+    "ambiguousIf": [
+      "The outcome feed has too few eligible observations.",
+      "Outcome rows cannot be mapped to the declared network, geography, service date, or service window."
+    ],
+    "annulledIf": [
+      "The transit service window was invalid before forecast close.",
+      "The service was suspended before forecast close for an explicitly predeclared incomparable reason."
+    ],
+    "resolutionTiming": "Resolve after the service window closes and outcome rows are collected.",
+    "scoringRule": "brier"
+  },
+  "scoringPolicy": {
+    "primaryScoringRule": "brier",
+    "baselineComparisonRequired": true,
+    "excludeAmbiguousOutcomes": true,
+    "excludeAnnulledOutcomes": true,
+    "reportingSlices": [
+      "domain",
+      "domain_setup",
+      "horizon",
+      "output_type",
+      "resolution_source",
+      "source_policy",
+      "method_class",
+      "coverage_period",
+      "sample_size"
+    ],
+    "minimumResolvedForecastsForQualityClaim": 100
+  },
+  "baselinePolicy": {
+    "baselineRequired": true,
+    "allowedBaselineMethods": [
+      "historical_frequency",
+      "conditioned_historical_frequency"
+    ],
+    "minimumComparableRows": 30,
+    "minimumPositiveOutcomes": 1,
+    "fallbackWhenInsufficientData": "needs_more_data"
+  },
+  "methodPolicy": {
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "deterministic_statistical"
+    ],
+    "selectionRule": "Start with a smoothed historical delay-event baseline and allow only transparent local beta weather adjustments until comparable transit-delay benchmarks exist.",
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "recalculationPolicy": {
+    "supported": true,
+    "triggerTypes": [
+      "source_file_changed",
+      "schedule",
+      "agent_submitted_evidence",
+      "manual"
+    ],
+    "appendHistoryRequired": true,
+    "postOutcomeEvidenceAllowed": false
+  },
+  "localImplementation": {
+    "forecastRunnable": true,
+    "generatedForecastRecords": true,
+    "cliForecastCommand": "python3 scripts/ope.py transit-delay-forecast",
+    "readSurfaceAvailable": false,
+    "implementationNotes": "Local custom-file prototype emits schema-bound question, evidence, artifact, history, resolution, and scoring records, but it is not a live connector or calibrated production workflow."
+  },
+  "claimPolicy": {
+    "allowedClaims": [
+      "Local custom-file prototype can run a weather-transit-delay forecast from checked fixture inputs.",
+      "Forecast, resolution, and scoring artifacts preserve baseline comparison and leakage boundaries."
+    ],
+    "blockedClaims": [
+      "Live transit connector claim",
+      "Calibrated forecast quality claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal transit-agency coverage claim"
+    ],
+    "minimumResolvedForecastsForCalibration": 100,
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "universalDomainClaimAllowed": false
+  },
+  "agentSetupGuidance": {
+    "setupQuestions": [
+      "Which public transit network, geography, service window, and date should be forecast?",
+      "Which local weather forecast and historical delay files are approved for forecast-time use?",
+      "Which trip-update or equivalent delay outcome file will resolve the threshold event after the window?"
+    ],
+    "requiredBeforeForecast": [
+      "A weather forecast file retrieved before forecast close.",
+      "A historical delay file with comparable delay-event outcomes.",
+      "A declared late-seconds threshold, event-ratio threshold, and minimum observation count."
+    ],
+    "safeFailureModes": [
+      "Reject weather rows retrieved after forecast close.",
+      "Block or mark ambiguous outcomes when delay coverage is too sparse.",
+      "Do not include target-window delay rows in forecast-time provenance."
+    ]
+  },
+  "warnings": [
+    "Local custom-file prototype is not a live connector runtime.",
+    "Weather adjustment is transparent beta logic, not a calibrated causal claim.",
+    "No calibration, production, or universal transit-agency claim is allowed for this setup."
+  ]
+}
