@@ -27,6 +27,12 @@ class ResolutionSchedulerError(Exception):
     pass
 
 
+class SchedulerInterrupted(Exception):
+    def __init__(self, report: dict[str, Any] | None) -> None:
+        super().__init__("resolution scheduler interrupted")
+        self.report = report
+
+
 def render_json(data: Any) -> str:
     return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
@@ -84,6 +90,16 @@ def format_human_tick(report: dict[str, Any]) -> str:
         f"{tick['startedAt']} | {status_labels[tick['tickStatus']]} | "
         f"{', '.join(job_bits)} | {resolver_text} | {next_text}{action_hint}\n"
     )
+
+
+def format_human_shutdown(report: dict[str, Any] | None) -> str:
+    if report is None:
+        return "\nresolution scheduler stopped before first tick\n"
+    tick_line = format_human_tick(report).strip()
+    shutdown = report.get("shutdown", {})
+    log_file = shutdown.get("logFile")
+    log_text = f" | log: {log_file}" if log_file else ""
+    return f"\nresolution scheduler stopped | last tick: {tick_line}{log_text}\n"
 
 
 def workspace_path(path: Path) -> str:
@@ -175,7 +191,11 @@ def build_tick(args: argparse.Namespace, tick_number: int) -> dict[str, Any]:
     }
 
 
-def build_report(args: argparse.Namespace, ticks: list[dict[str, Any]]) -> dict[str, Any]:
+def build_report(
+    args: argparse.Namespace,
+    ticks: list[dict[str, Any]],
+    shutdown_reason: str | None = None,
+) -> dict[str, Any]:
     if not ticks:
         raise ResolutionSchedulerError("scheduler report requires at least one tick")
     report = {
@@ -202,6 +222,13 @@ def build_report(args: argparse.Namespace, ticks: list[dict[str, Any]]) -> dict[
             "Scheduler execution may resolve due runs, but it never creates calibration claims.",
         ],
     }
+    if shutdown_reason is not None:
+        report["shutdown"] = {
+            "shutdownReason": shutdown_reason,
+            "message": "resolution scheduler stopped by caller",
+            "lastTickNumber": ticks[-1]["tickNumber"],
+            "logFile": workspace_path(Path(args.log_file)),
+        }
     validate_report(report)
     return report
 
@@ -259,21 +286,32 @@ def run_scheduler(args: argparse.Namespace) -> dict[str, Any] | None:
     ticks: list[dict[str, Any]] = []
     max_ticks = args.max_ticks if args.max_ticks is not None else (None if args.watch else 1)
     output_format = resolved_output_format(args)
+    report: dict[str, Any] | None = None
     tick_number = 1
-    while True:
-        tick = build_tick(args, tick_number)
-        ticks.append(tick)
-        report = build_report(args, [tick] if args.watch and max_ticks is None else ticks)
-        if args.watch:
+    try:
+        while True:
+            tick = build_tick(args, tick_number)
+            ticks.append(tick)
+            report = build_report(args, [tick] if args.watch and max_ticks is None else ticks)
+            if args.watch:
+                append_log(Path(args.log_file), report)
+                sys.stdout.write(format_human_tick(report) if output_format == "text" else compact_json(report))
+                sys.stdout.flush()
+            if max_ticks is not None and tick_number >= max_ticks:
+                return report
+            if not args.watch:
+                return report
+            tick_number += 1
+            time.sleep(args.poll_seconds)
+    except KeyboardInterrupt as exc:
+        if args.watch and report is not None:
+            report = build_report(
+                args,
+                report["ticks"],
+                shutdown_reason="keyboard_interrupt",
+            )
             append_log(Path(args.log_file), report)
-            sys.stdout.write(format_human_tick(report) if output_format == "text" else compact_json(report))
-            sys.stdout.flush()
-        if max_ticks is not None and tick_number >= max_ticks:
-            return report
-        if not args.watch:
-            return report
-        tick_number += 1
-        time.sleep(args.poll_seconds)
+        raise SchedulerInterrupted(report) from exc
 
 
 def main() -> None:
@@ -321,6 +359,17 @@ def main() -> None:
         report = run_scheduler(args)
         if report is not None and not args.watch:
             sys.stdout.write(render_json(report))
+    except SchedulerInterrupted as exc:
+        output_format = resolved_output_format(args)
+        if args.watch:
+            if output_format == "jsonl" and exc.report is not None:
+                if sys.stdout.isatty():
+                    sys.stdout.write("\n")
+                sys.stdout.write(compact_json(exc.report))
+                sys.stdout.flush()
+            else:
+                print(format_human_shutdown(exc.report), file=sys.stderr, end="")
+        raise SystemExit(130)
     except (
         OSError,
         json.JSONDecodeError,

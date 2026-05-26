@@ -76,6 +76,8 @@ python3 scripts/ope.py resolution-scheduler \
   --output-format text
 ```
 
+When watch mode is stopped with `Ctrl+C`, the scheduler exits with code 130 and emits a clean shutdown summary instead of a Python traceback. JSONL mode emits one final schema-bound report with a `shutdown` object, including `shutdownReason`, `lastTickNumber`, and the scheduler log path. Text mode prints the same useful state as a short terminal line.
+
 ## Boundary
 
 Normal checks perform one offline fixture tick. Live watching requires `--live --watch`. Resolver execution additionally requires `--execute`.

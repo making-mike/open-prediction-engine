@@ -13,10 +13,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(command: list[str]) -> None:
-    if sys.stdout.isatty():
-        subprocess.run(command, cwd=ROOT, check=True)
-        return
-    run_forwarding_output(command, check=True)
+    try:
+        if sys.stdout.isatty():
+            completed = subprocess.run(command, cwd=ROOT, check=False)
+            if completed.returncode in (130, -2):
+                raise SystemExit(130)
+            completed.check_returncode()
+            return
+        run_forwarding_output(command, check=True)
+    except KeyboardInterrupt as exc:
+        raise SystemExit(130) from exc
+    except subprocess.CalledProcessError as exc:
+        if exc.returncode in (130, -2):
+            raise SystemExit(130) from exc
+        raise
 
 
 def run_forwarding_output(command: list[str], *, check: bool) -> int:
