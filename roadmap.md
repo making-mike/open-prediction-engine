@@ -99,6 +99,7 @@ Done:
 - Local weather-transit-delay custom-file prototype now emits schema-bound forecast, resolution, and scoring records through `python3 scripts/ope.py transit-delay-forecast`.
 - Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
 - Source adapter intake now validates external adapter outputs, routes accepted handoffs through source intake and method gates, and blocks unsafe connector outputs before intake through `python3 scripts/ope.py source-adapter-intake`.
+- Local private setup orchestrator summaries now join setup request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes for approved local-file and accepted source-adapter cases through `python3 scripts/ope.py private-setup-orchestrator`.
 - Opt-in HSL GTFS-RT transit API connector now captures TripUpdates, derives delay rows through a static GTFS schedule join, and writes source-adapter output through `python3 scripts/ope.py transit-api-connector --schedule-join`.
 - Weather-transit-delay forward-run workflow now records a pre-window forecast, preserves run state, resolves from declared transit outcome rows, scores against baseline, and exposes explicit local live forecast/resolve phases through `python3 scripts/ope.py transit-delay-forward-run`.
 - Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
@@ -129,9 +130,8 @@ In progress:
 
 Next:
 
-1. Milestone 79: Local Private Setup MVP Orchestrator.
-2. Milestone 80: MVP Release Surface And Claim Review.
-3. Later: source quality and richer data-source coverage.
+1. Milestone 80: MVP Release Surface And Claim Review.
+2. Later: source quality and richer data-source coverage.
 
 MVP path:
 
@@ -2373,22 +2373,33 @@ Completed outputs:
 
 ## Milestone 79: Local Private Setup MVP Orchestrator
 
-Status: Planned.
+Status: Accepted.
 
 Goal: provide one local agent-facing orchestration path from a private setup request to source intake, method decision, forecast execution, and normal readback for approved local or adapter-provided sources.
 
 Tasks:
 
-- [ ] Add a local orchestrator that chains existing checked setup phases only when each gate allows the next step.
-- [ ] Support local files and source-adapter outputs as MVP source kinds.
-- [ ] Keep private API, database, manual upload, and credentialed connectors planned-only unless represented through accepted adapter outputs.
-- [ ] Return one compact run summary with setup request, source intake, method decision, forecast IDs, card, bundle, resolution status, score status, and next action.
-- [ ] Add blocked summaries for missing approval, unconfirmed mappings, insufficient data, rejected sources, failed method gates, and response-too-large reads.
+- [x] Add a local orchestrator that chains existing checked setup phases only when each gate allows the next step.
+- [x] Support local files and source-adapter outputs as MVP source kinds.
+- [x] Keep private API, database, manual upload, and credentialed connectors planned-only unless represented through accepted adapter outputs.
+- [x] Return one compact run summary with setup request, source intake, method decision, forecast IDs, card, bundle, resolution status, score status, and next action.
+- [x] Add blocked summaries for missing approval, unconfirmed mappings, insufficient data, rejected sources, failed method gates, and response-too-large reads.
 
 Exit criteria:
 
 - Agents can run one local OPE setup workflow for approved source inputs without manually chaining every lower-level command.
 - The orchestrator cannot bypass source intake, mapping confirmation, benchmark gates, method decisions, or explicit forecast execution boundaries.
+
+Completed outputs:
+
+- `spec/private-setup-orchestrator.schema.json`
+- `spec/private-setup-orchestrator.md`
+- checked fixture under `spec/fixtures/generated/private-setup-orchestrator/`
+- `scripts/generate_private_setup_orchestrator.py`
+- `scripts/check_private_setup_orchestrator.py`
+- CLI command `python3 scripts/ope.py private-setup-orchestrator`
+- eight run summaries: local-file confirmed, source-adapter accepted, missing approval, unconfirmed mapping, insufficient data, rejected source, unsafe source, and response-too-large
+- schema-validation, run-check, CLI, docs, and release-manifest wiring for the local private setup MVP orchestrator summary
 
 ## Milestone 80: MVP Release Surface And Claim Review
 

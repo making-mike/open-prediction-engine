@@ -56,6 +56,7 @@ python3 scripts/generate_private_setup_requests.py --write
 python3 scripts/generate_private_setup_first_actions.py --write
 python3 scripts/generate_private_setup_first_action_runbook.py --write
 python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_orchestrator.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
@@ -129,6 +130,8 @@ The private setup first-action generator emits checked dispatcher examples under
 The private setup first-action runbook generator emits checked guidance under `generated/private-setup-actions/` and keeps planned, unknown, unsafe, and approval-missing sources out of source intake.
 
 The private setup agent bundle generator emits checked request/action/runbook joins under `generated/private-setup-agent-bundles/` and keeps every bundle read-only and non-generating.
+
+The private setup orchestrator generator emits a checked local orchestration summary under `generated/private-setup-orchestrator/`, joining request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes without executing commands or creating new artifacts.
 
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 

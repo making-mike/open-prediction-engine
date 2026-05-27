@@ -1898,3 +1898,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `source-adapter-intake` contract, generated conformance fixtures, CLI command, and checker for routing sanitized external connector outputs into source intake and method decisions.
 - **Why:** Agent-built connectors should be able to live outside OPE core while still handing OPE a standard manifest, mapping, provenance, and boundary record that OPE can accept, reject, or block without executing connector code.
 - **Alternatives rejected:** Moving connector implementations into OPE core for MVP, letting source-adapter outputs bypass source intake, or trying to repair unsafe credential/raw-row handoffs inside OPE.
+
+### DEC-077 — Add Local Private Setup Orchestrator Summary
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `private-setup-orchestrator` contract, generated summary fixture, CLI command, and checker that joins setup request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes over existing checked local records.
+- **Why:** Agents need one compact local MVP read surface for approved local-file and accepted source-adapter paths without manually chaining every lower-level command or losing the source-intake, benchmark, method-decision, and forecast-execution gates.
+- **Alternatives rejected:** Creating a runtime that executes private setup commands, letting adapter outputs produce forecasts directly, or hiding blocked paths such as missing approval, unconfirmed mappings, insufficient data, rejected sources, unsafe sources, and oversized readbacks.

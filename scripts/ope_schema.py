@@ -337,6 +337,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "private-setup-adapter-conformance-matrix.schema.json"
     if name.endswith("-private-setup-adapter-conformance-summary.generated.json"):
         return spec_root / "private-setup-adapter-conformance-summary.schema.json"
+    if name.endswith("-private-setup-orchestrator.generated.json"):
+        return spec_root / "private-setup-orchestrator.schema.json"
     if "-private-setup-first-action-" in name and name.endswith(".generated.json"):
         return spec_root / "private-setup-first-action.schema.json"
     if "-private-setup-agent-bundle-" in name and name.endswith(".generated.json"):

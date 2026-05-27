@@ -112,6 +112,22 @@ def main() -> None:
     run_cli("private-setup-actions", "--check")
     run_cli("private-setup-action-runbook", "--check")
     run_cli("private-setup-bundles", "--check")
+    private_setup_orchestrator = run_cli("private-setup-orchestrator")
+    private_setup_orchestrator_payload = json.loads(private_setup_orchestrator.stdout)
+    if private_setup_orchestrator_payload["runCount"] != 8:
+        raise AssertionError("CLI private-setup-orchestrator should expose eight runs")
+    orchestrator_cases = {
+        item["runCase"]: item for item in private_setup_orchestrator_payload["runs"]
+    }
+    if orchestrator_cases["local_file_confirmed"]["forecastId"] != "forecast-1102":
+        raise AssertionError("CLI private-setup-orchestrator should expose local-file forecast readback")
+    if orchestrator_cases["source_adapter_output_accepted"]["nextAction"] != "run_explicit_setup_forecast_execution":
+        raise AssertionError("CLI private-setup-orchestrator should route accepted adapter output to forecast execution")
+    if orchestrator_cases["unsafe_source"]["nextAction"] != "stop_unsafe_connector":
+        raise AssertionError("CLI private-setup-orchestrator should stop unsafe source output")
+    private_setup_orchestrator_check = run_cli("private-setup-orchestrator", "--check")
+    if "checked private setup orchestrator" not in private_setup_orchestrator_check.stdout:
+        raise AssertionError("CLI private-setup-orchestrator check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

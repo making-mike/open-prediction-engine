@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-setup-orchestrator.schema.json",
+  "title": "Private Setup Orchestrator",
+  "description": "Checked local orchestration summary over private setup request, source intake, method gate, forecast execution, and readback surfaces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateSetupOrchestratorId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "orchestratorRuns",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "privateSetupOrchestratorId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "domain_agnostic"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["checked_local_summary_only"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateSetupRequestSetId",
+        "privateSetupWorkflowId",
+        "sourceAdapterIntakeId",
+        "sourceHandoffForecastId",
+        "sourceHandoffQuestionId"
+      ],
+      "properties": {
+        "privateSetupRequestSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupWorkflowId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceAdapterIntakeId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceHandoffForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceHandoffQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "orchestratorRuns": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/orchestratorRun" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runCount",
+        "completedForecastReadbacks",
+        "readyForForecastExecution",
+        "blockedRuns",
+        "localFileSupported",
+        "sourceAdapterOutputSupported",
+        "plannedRuntimeRuns"
+      ],
+      "properties": {
+        "runCount": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "completedForecastReadbacks": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "readyForForecastExecution": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "blockedRuns": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "localFileSupported": { "type": "boolean" },
+        "sourceAdapterOutputSupported": { "type": "boolean" },
+        "plannedRuntimeRuns": { "type": "integer", "minimum": 0, "maximum": 20 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "orchestratorExecutesCommands",
+        "readsPrivateData",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "bypassesSourceIntake",
+        "bypassesMethodGate",
+        "usesExistingCheckedFixturesOnly"
+      ],
+      "properties": {
+        "orchestratorExecutesCommands": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsSourceManifests": { "type": "boolean" },
+        "createsFieldMappings": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "bypassesSourceIntake": { "type": "boolean" },
+        "bypassesMethodGate": { "type": "boolean" },
+        "usesExistingCheckedFixturesOnly": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 260
+      }
+    }
+  },
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        { "type": "null" }
+      ]
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "source_adapter_output",
+        "manual_mapping",
+        "manual_upload",
+        "private_api",
+        "private_database",
+        "unregistered_source",
+        "unsafe_source"
+      ]
+    },
+    "runCase": {
+      "type": "string",
+      "enum": [
+        "local_file_confirmed",
+        "source_adapter_output_accepted",
+        "missing_approval",
+        "unconfirmed_mapping",
+        "insufficient_data",
+        "rejected_source",
+        "unsafe_source",
+        "response_too_large"
+      ]
+    },
+    "orchestratorStatus": {
+      "type": "string",
+      "enum": [
+        "completed_forecast_readback",
+        "ready_for_forecast_execution",
+        "missing_approval",
+        "needs_confirmation",
+        "needs_more_data",
+        "rejected_source",
+        "blocked_unsafe",
+        "response_too_large"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "read_forecast_card",
+        "run_explicit_setup_forecast_execution",
+        "confirm_approval",
+        "confirm_mapping",
+        "collect_more_data",
+        "replace_source",
+        "stop_unsafe_connector",
+        "retry_with_smaller_readback"
+      ]
+    },
+    "orchestratorRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "orchestratorRunId",
+        "runCase",
+        "sourceKind",
+        "privateSetupRequestId",
+        "sourceAdapterOutputId",
+        "sourceAdapterIntakeCaseId",
+        "sourceIntakeReportId",
+        "sourceIntakeStatus",
+        "setupMethodDecisionId",
+        "setupBenchmarkGateId",
+        "setupForecastRunId",
+        "forecastId",
+        "questionId",
+        "forecastCardId",
+        "forecastBundleId",
+        "orchestratorStatus",
+        "nextAction",
+        "chain",
+        "readbackSummary",
+        "forecastArtifactsPresent",
+        "qualityClaimAllowed",
+        "blockedReasons",
+        "requiredActions"
+      ],
+      "properties": {
+        "orchestratorRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "runCase": { "$ref": "#/$defs/runCase" },
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "privateSetupRequestId": { "$ref": "#/$defs/nullableId" },
+        "sourceAdapterOutputId": { "$ref": "#/$defs/nullableId" },
+        "sourceAdapterIntakeCaseId": { "$ref": "#/$defs/nullableId" },
+        "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+        "sourceIntakeStatus": { "$ref": "#/$defs/nullableString" },
+        "setupMethodDecisionId": { "$ref": "#/$defs/nullableId" },
+        "setupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+        "setupForecastRunId": { "$ref": "#/$defs/nullableId" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "forecastCardId": { "$ref": "#/$defs/nullableId" },
+        "forecastBundleId": { "$ref": "#/$defs/nullableId" },
+        "orchestratorStatus": { "$ref": "#/$defs/orchestratorStatus" },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "chain": { "$ref": "#/$defs/chain" },
+        "readbackSummary": { "$ref": "#/$defs/readbackSummary" },
+        "forecastArtifactsPresent": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "blockedReasons": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          }
+        },
+        "requiredActions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 260
+          }
+        }
+      }
+    },
+    "chain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestClassified",
+        "firstActionRead",
+        "sourceIntakeValidated",
+        "methodDecisionValidated",
+        "forecastExecutionRun",
+        "normalReadbackRun"
+      ],
+      "properties": {
+        "requestClassified": { "type": "boolean" },
+        "firstActionRead": { "type": "boolean" },
+        "sourceIntakeValidated": { "type": "boolean" },
+        "methodDecisionValidated": { "type": "boolean" },
+        "forecastExecutionRun": { "type": "boolean" },
+        "normalReadbackRun": { "type": "boolean" }
+      }
+    },
+    "readbackSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastCardStatus",
+        "forecastBundleStatus",
+        "resolutionStatus",
+        "scoreStatus",
+        "qualityClaimStatus"
+      ],
+      "properties": {
+        "forecastCardStatus": { "$ref": "#/$defs/nullableString" },
+        "forecastBundleStatus": { "$ref": "#/$defs/nullableString" },
+        "resolutionStatus": { "$ref": "#/$defs/nullableString" },
+        "scoreStatus": { "$ref": "#/$defs/nullableString" },
+        "qualityClaimStatus": { "$ref": "#/$defs/nullableString" }
+      }
+    }
+  }
+}

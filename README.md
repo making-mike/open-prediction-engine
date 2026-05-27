@@ -24,7 +24,7 @@ This does not mean unbounded crawling or claiming access to all internet knowled
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, private setup requests, first actions, orchestrators, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
@@ -85,6 +85,7 @@ The repository currently contains:
 - a checked private setup first-action dispatcher that accepts one request ID or request JSON and returns the first safe non-executing action
 - a checked private setup first-action runbook that maps each first-action status to the next safe caller-visible step
 - a checked private setup agent bundle that joins request, first-action, and runbook guidance into one read-only response
+- a checked local private setup orchestrator summary that joins request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes without executing commands
 - a checked private setup bundle adapter operation that returns the same guidance through the transport-neutral agent envelope and local MCP scaffold without executing setup commands
 - a checked private setup source-builder adapter operation that inspects only caller-approved local CSV/JSON files and returns draft manifest/mapping guidance without creating forecast or score records
 - a checked private setup source-handoff adapter operation that returns source-handoff confirmation and method-gate readiness guidance without creating forecast or score records
@@ -385,6 +386,8 @@ python3 scripts/generate_private_setup_first_action_runbook.py --check
 python3 scripts/check_private_setup_first_action_runbook.py
 python3 scripts/generate_private_setup_agent_bundles.py --check
 python3 scripts/check_private_setup_agent_bundles.py
+python3 scripts/generate_private_setup_orchestrator.py --check
+python3 scripts/check_private_setup_orchestrator.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -611,6 +614,7 @@ python3 scripts/ope.py private-setup-action --request-id privatesetuprequest-001
 python3 scripts/ope.py private-setup-action-runbook
 python3 scripts/ope.py private-setup-bundles
 python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
+python3 scripts/ope.py private-setup-orchestrator
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -757,6 +761,7 @@ python3 scripts/generate_private_setup_requests.py --write
 python3 scripts/generate_private_setup_first_actions.py --write
 python3 scripts/generate_private_setup_first_action_runbook.py --write
 python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_orchestrator.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

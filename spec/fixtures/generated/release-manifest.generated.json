@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 69,
+    "schemaFileCount": 70,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -58,6 +58,7 @@
       "spec/private-setup-agent-bundle.schema.json",
       "spec/private-setup-first-action-runbook.schema.json",
       "spec/private-setup-first-action.schema.json",
+      "spec/private-setup-orchestrator.schema.json",
       "spec/private-setup-request.schema.json",
       "spec/private-setup-workflow.schema.json",
       "spec/private-source-adapter-capability.schema.json",
@@ -163,6 +164,12 @@
     "private_setup_first_action_execution",
     "private_setup_first_action_runbook_execution",
     "private_setup_agent_bundle_execution",
+    "private_setup_orchestrator_execution",
+    "private_setup_orchestrator_source_reads",
+    "private_setup_orchestrator_forecast_creation",
+    "private_setup_orchestrator_scoring_creation",
+    "private_setup_orchestrator_credential_storage",
+    "private_setup_orchestrator_live_fetch",
     "private_setup_source_builder_forecast_execution",
     "private_setup_source_builder_public_read_records",
     "private_setup_source_handoff_forecast_execution",

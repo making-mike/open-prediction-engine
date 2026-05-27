@@ -104,6 +104,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     private_setup_actions_command = [sys.executable, "scripts/generate_private_setup_first_actions.py"]
     private_setup_action_runbook_command = [sys.executable, "scripts/generate_private_setup_first_action_runbook.py"]
     private_setup_agent_bundles_command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
+    private_setup_orchestrator_command = [sys.executable, "scripts/generate_private_setup_orchestrator.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -164,6 +165,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_setup_actions_command.append("--write")
         private_setup_action_runbook_command.append("--write")
         private_setup_agent_bundles_command.append("--write")
+        private_setup_orchestrator_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -217,6 +219,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_setup_actions_command.append("--check")
         private_setup_action_runbook_command.append("--check")
         private_setup_agent_bundles_command.append("--check")
+        private_setup_orchestrator_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -271,6 +274,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(private_setup_actions_command)
     run(private_setup_action_runbook_command)
     run(private_setup_agent_bundles_command)
+    run(private_setup_orchestrator_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1025,6 +1029,17 @@ def cmd_private_setup_action_runbook(args: argparse.Namespace) -> None:
 
 def cmd_private_setup_bundles(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_setup_orchestrator(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_setup_orchestrator.py"]
+    if args.case:
+        command.extend(["--case", args.case])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1977,6 +1992,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated private setup agent bundles",
     )
     private_setup_bundles.set_defaults(func=cmd_private_setup_bundles)
+
+    private_setup_orchestrator = subparsers.add_parser(
+        "private-setup-orchestrator",
+        help="check, refresh, or print the local private setup orchestrator summary",
+    )
+    private_setup_orchestrator.add_argument(
+        "--case",
+        choices=[
+            "local_file_confirmed",
+            "source_adapter_output_accepted",
+            "missing_approval",
+            "unconfirmed_mapping",
+            "insufficient_data",
+            "rejected_source",
+            "unsafe_source",
+            "response_too_large",
+        ],
+        help="print one orchestrator run",
+    )
+    private_setup_orchestrator.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private setup orchestrator drift",
+    )
+    private_setup_orchestrator.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private setup orchestrator",
+    )
+    private_setup_orchestrator.set_defaults(func=cmd_private_setup_orchestrator)
 
     private_setup_adapter_runbook = subparsers.add_parser(
         "private-setup-adapter-runbook",
