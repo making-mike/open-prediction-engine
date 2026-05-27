@@ -1,0 +1,79 @@
+{
+  "setupBenchmarkGateId": "setupbenchmarkgate-1302",
+  "generatedAt": "2026-06-06T17:40:00Z",
+  "case": "needs_confirmation",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeReportId": "sourceintakereport-1302",
+  "sourceManifestId": "sourcemanifest-1302",
+  "fieldMappingId": "fieldmapping-1302",
+  "methodClass": "deterministic_statistical",
+  "gateStatus": "blocked",
+  "baselineMethodId": "method-100",
+  "candidateMethodId": "method-101",
+  "benchmarkEvidence": {
+    "methodRegistryId": "methodregistry-001",
+    "baselineBenchmarkRunId": "benchmarkrun-003",
+    "candidateBenchmarkRunId": "benchmarkrun-001",
+    "sourcePolicyId": "sourcepolicy-001",
+    "retrievalWindow": {
+      "startsAt": "2026-06-01T00:00:00Z",
+      "endsAt": "2026-06-02T10:00:00Z"
+    },
+    "questionSetSize": 1,
+    "qualityClaimStatus": "not_enough_comparable_benchmarks"
+  },
+  "sourceEligibility": {
+    "status": "needs_confirmation",
+    "requiredSourceRoles": [
+      "historical_baseline",
+      "weather_forecast"
+    ],
+    "usableSourceRoles": [],
+    "missingSourceRoles": [
+      "historical_baseline",
+      "weather_forecast"
+    ],
+    "mappingConfirmationRequired": true
+  },
+  "antiLeakageControls": {
+    "sameQuestionSet": true,
+    "sameSourcePolicy": true,
+    "sameRetrievalWindow": true,
+    "leakageValidated": true,
+    "sourceTimestampsRecorded": true,
+    "resolutionSourcesExcluded": true,
+    "trainingCutoffBeforeRetrievalEnd": true
+  },
+  "metricThresholds": {
+    "sampleSize": 1,
+    "executionMinimumSampleSize": 1,
+    "qualityMinimumSampleSize": 30,
+    "baselineLift": 0.2603,
+    "minimumBaselineLift": 0.0,
+    "executionSampleThresholdMet": true,
+    "qualitySampleThresholdMet": false,
+    "baselineLiftPositive": true
+  },
+  "decision": {
+    "executionAllowed": false,
+    "strongerMethodAllowed": false,
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false
+  },
+  "reasonCodes": [
+    "baseline_lift_positive",
+    "execution_sample_threshold_met",
+    "mapping_confirmation_required",
+    "missing_historical_baseline",
+    "missing_weather_forecast",
+    "quality_sample_threshold_not_met",
+    "source_intake_needs_confirmation"
+  ],
+  "warnings": [
+    "Setup benchmark gates may allow fixture execution without allowing quality claims.",
+    "Quality, calibration, production, and state-of-the-art claims remain blocked.",
+    "Gate status is scoped to this setup, source intake report, method class, and fixture benchmark evidence."
+  ]
+}

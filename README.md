@@ -24,7 +24,7 @@ This does not mean unbounded crawling or claiming access to all internet knowled
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
@@ -61,6 +61,7 @@ The repository currently contains:
 - a domain-agnostic setup contract with a fixture-ready weather-logistics reference setup and a candidate seaport berth-availability private setup
 - a local source manifest builder that inspects small caller-approved CSV/JSON files, drafts manifest/mapping records, and rejects secrets, unsupported formats, oversized files, and leakage indicators before source intake
 - a checked source adapter output contract that lets external agent-built connectors hand OPE a sanitized source manifest and field mapping without living in core or creating forecast records
+- a checked source adapter intake gate that validates external adapter outputs, routes accepted outputs through source intake and method gates, and blocks unsafe connector handoffs before intake
 - a checked HSL GTFS-RT transit API connector that can capture TripUpdates, derive delay rows through an opt-in static GTFS schedule join, and keep normal checks offline
 - a checked transit-delay forward-run workflow that records a forecast before the service window, resolves from declared outcome rows, scores against baseline, and exposes opt-in local live forecast/resolve phases under `.ope/live/transit-forward-run/`
 - a checked transit live evidence promotion gate that distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence while binding one sanitized promoted source set
@@ -264,9 +265,10 @@ External connector handoff shape:
 
 ```bash
 python3 scripts/ope.py source-adapter-output
+python3 scripts/ope.py source-adapter-intake
 ```
 
-This shows the contract an agent-built connector should produce before OPE source intake.
+This shows the contract an agent-built connector should produce before OPE source intake and the checked gate OPE uses to accept, reject, or block it.
 
 ## Repository Map
 
@@ -353,6 +355,8 @@ python3 scripts/build_source_manifest.py --check
 python3 scripts/check_source_manifest_builder.py
 python3 scripts/generate_source_adapter_output.py --check
 python3 scripts/check_source_adapter_output.py
+python3 scripts/generate_source_adapter_intake.py --check
+python3 scripts/check_source_adapter_intake.py
 python3 scripts/generate_source_intake_handoff.py --check
 python3 scripts/check_source_intake_handoff.py
 python3 scripts/generate_source_handoff_method_gate.py --check
@@ -544,6 +548,8 @@ Inspect external connector handoff output:
 
 ```bash
 python3 scripts/ope.py source-adapter-output
+python3 scripts/ope.py source-adapter-intake
+python3 scripts/ope.py source-adapter-intake --case unsafe
 ```
 
 Inspect source-builder to source-intake handoffs:
@@ -731,6 +737,7 @@ python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write
+python3 scripts/generate_source_adapter_intake.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write

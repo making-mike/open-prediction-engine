@@ -1891,3 +1891,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `transit-live-evidence-promotion` contract, generated promotion fixture, sanitized promoted source-set fixture, CLI command, and checker for promoting selected ignored live weather drafts into forecast-time evidence.
 - **Why:** OPE needs a narrow way to use approved local live captures without committing raw `.ope/live/` artifacts, weakening provenance, or letting post-close and resolution-only captures leak into forecast evidence.
 - **Alternatives rejected:** Reading `.ope/live/` during normal checks, committing raw live captures, treating HSL TripUpdates outcome rows as forecast-time evidence, or adding a production live connector runtime before the local policy gate is explicit.
+
+### DEC-076 — Add Source Adapter Intake Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `source-adapter-intake` contract, generated conformance fixtures, CLI command, and checker for routing sanitized external connector outputs into source intake and method decisions.
+- **Why:** Agent-built connectors should be able to live outside OPE core while still handing OPE a standard manifest, mapping, provenance, and boundary record that OPE can accept, reject, or block without executing connector code.
+- **Alternatives rejected:** Moving connector implementations into OPE core for MVP, letting source-adapter outputs bypass source intake, or trying to repair unsafe credential/raw-row handoffs inside OPE.

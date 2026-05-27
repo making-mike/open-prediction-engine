@@ -1,0 +1,323 @@
+{
+  "sourceAdapterIntakeId": "sourceadapterintake-1301",
+  "generatedAt": "2026-06-10T04:20:00Z",
+  "domain": "weather-logistics",
+  "intakeMode": "external_adapter_output_to_checked_intake",
+  "contractBindings": {
+    "sourceAdapterOutputSchema": "spec/source-adapter-output.schema.json",
+    "sourceManifestSchema": "spec/source-manifest.schema.json",
+    "fieldMappingSchema": "spec/field-mapping.schema.json",
+    "sourceIntakeReportSchema": "spec/source-intake-report.schema.json",
+    "setupBenchmarkGateSchema": "spec/setup-benchmark-gate.schema.json",
+    "setupMethodDecisionSchema": "spec/setup-method-decision.schema.json",
+    "existingTransitAdapterOutputPath": "spec/fixtures/generated/source-adapter-output/weather-transit-delays-source-adapter-output.generated.json"
+  },
+  "intakeCases": [
+    {
+      "caseId": "sourceadapterintakecase-1301",
+      "case": "accepted",
+      "sourceAdapterOutputId": "sourceadapteroutput-1301",
+      "sourceAdapterOutputPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-accepted-source-adapter-output.generated.json",
+      "outputStatus": "intake_ready",
+      "sourceKind": "agent_extraction",
+      "implementationLocation": "external_agent",
+      "executionMode": "external_runtime_capture",
+      "validationSummary": {
+        "sourceAdapterOutputSchemaValid": true,
+        "manifestValid": true,
+        "fieldMappingValid": true,
+        "provenanceSummaryValid": true,
+        "sourceRolesValid": true,
+        "freshnessValid": true,
+        "leakageStatus": "passed",
+        "credentialBoundaryStatus": "passed",
+        "rawRowsIncluded": false,
+        "allEvidenceClaimed": false
+      },
+      "intakeRoute": {
+        "canEnterSourceIntake": true,
+        "sourceIntakeReportId": "sourceintakereport-1301",
+        "sourceIntakeStatus": "accepted",
+        "adapterIntakeStatus": "accepted",
+        "nextAction": "proceed_to_method_gating"
+      },
+      "methodGateSummary": {
+        "setupBenchmarkGateId": "setupbenchmarkgate-1301",
+        "setupMethodDecisionId": "setupmethoddecision-1301",
+        "methodGateStatus": "method_selected",
+        "selectedMethodClass": "deterministic_statistical",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false
+      },
+      "generatedArtifacts": {
+        "sourceAdapterOutput": "spec/fixtures/generated/source-adapter-intake/weather-logistics-accepted-source-adapter-output.generated.json",
+        "sourceIntakeReport": "spec/fixtures/generated/source-adapter-intake/weather-logistics-accepted-source-intake-report.generated.json",
+        "setupBenchmarkGate": "spec/fixtures/generated/source-adapter-intake/weather-logistics-accepted-setup-benchmark-gate.generated.json",
+        "setupMethodDecision": "spec/fixtures/generated/source-adapter-intake/weather-logistics-accepted-setup-method-decision.generated.json"
+      },
+      "rejectionReasons": [],
+      "requiredActions": [
+        "Proceed to checked setup method gate before forecast execution."
+      ]
+    },
+    {
+      "caseId": "sourceadapterintakecase-1302",
+      "case": "needs_confirmation",
+      "sourceAdapterOutputId": "sourceadapteroutput-1302",
+      "sourceAdapterOutputPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-needs-confirmation-source-adapter-output.generated.json",
+      "outputStatus": "needs_confirmation",
+      "sourceKind": "agent_extraction",
+      "implementationLocation": "external_agent",
+      "executionMode": "external_runtime_capture",
+      "validationSummary": {
+        "sourceAdapterOutputSchemaValid": true,
+        "manifestValid": true,
+        "fieldMappingValid": true,
+        "provenanceSummaryValid": true,
+        "sourceRolesValid": true,
+        "freshnessValid": true,
+        "leakageStatus": "passed",
+        "credentialBoundaryStatus": "passed",
+        "rawRowsIncluded": false,
+        "allEvidenceClaimed": false
+      },
+      "intakeRoute": {
+        "canEnterSourceIntake": true,
+        "sourceIntakeReportId": "sourceintakereport-1302",
+        "sourceIntakeStatus": "needs_confirmation",
+        "adapterIntakeStatus": "needs_confirmation",
+        "nextAction": "ask_mapping_confirmation"
+      },
+      "methodGateSummary": {
+        "setupBenchmarkGateId": "setupbenchmarkgate-1302",
+        "setupMethodDecisionId": "setupmethoddecision-1302",
+        "methodGateStatus": "needs_mapping_confirmation",
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false
+      },
+      "generatedArtifacts": {
+        "sourceAdapterOutput": "spec/fixtures/generated/source-adapter-intake/weather-logistics-needs-confirmation-source-adapter-output.generated.json",
+        "sourceIntakeReport": "spec/fixtures/generated/source-adapter-intake/weather-logistics-needs-confirmation-source-intake-report.generated.json",
+        "setupBenchmarkGate": "spec/fixtures/generated/source-adapter-intake/weather-logistics-needs-confirmation-setup-benchmark-gate.generated.json",
+        "setupMethodDecision": "spec/fixtures/generated/source-adapter-intake/weather-logistics-needs-confirmation-setup-method-decision.generated.json"
+      },
+      "rejectionReasons": [
+        "agent_inferred_mapping",
+        "mapping_requires_confirmation"
+      ],
+      "requiredActions": [
+        "Confirm agent-inferred field and alias mappings before method selection."
+      ]
+    },
+    {
+      "caseId": "sourceadapterintakecase-1303",
+      "case": "insufficient_data",
+      "sourceAdapterOutputId": "sourceadapteroutput-1303",
+      "sourceAdapterOutputPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-insufficient-data-source-adapter-output.generated.json",
+      "outputStatus": "intake_ready",
+      "sourceKind": "agent_extraction",
+      "implementationLocation": "external_agent",
+      "executionMode": "external_runtime_capture",
+      "validationSummary": {
+        "sourceAdapterOutputSchemaValid": true,
+        "manifestValid": true,
+        "fieldMappingValid": true,
+        "provenanceSummaryValid": true,
+        "sourceRolesValid": true,
+        "freshnessValid": true,
+        "leakageStatus": "passed",
+        "credentialBoundaryStatus": "passed",
+        "rawRowsIncluded": false,
+        "allEvidenceClaimed": false
+      },
+      "intakeRoute": {
+        "canEnterSourceIntake": true,
+        "sourceIntakeReportId": "sourceintakereport-1303",
+        "sourceIntakeStatus": "rejected",
+        "adapterIntakeStatus": "insufficient_data",
+        "nextAction": "collect_more_data"
+      },
+      "methodGateSummary": {
+        "setupBenchmarkGateId": "setupbenchmarkgate-1303",
+        "setupMethodDecisionId": "setupmethoddecision-1303",
+        "methodGateStatus": "needs_more_data",
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false
+      },
+      "generatedArtifacts": {
+        "sourceAdapterOutput": "spec/fixtures/generated/source-adapter-intake/weather-logistics-insufficient-data-source-adapter-output.generated.json",
+        "sourceIntakeReport": "spec/fixtures/generated/source-adapter-intake/weather-logistics-insufficient-data-source-intake-report.generated.json",
+        "setupBenchmarkGate": "spec/fixtures/generated/source-adapter-intake/weather-logistics-insufficient-data-setup-benchmark-gate.generated.json",
+        "setupMethodDecision": "spec/fixtures/generated/source-adapter-intake/weather-logistics-insufficient-data-setup-method-decision.generated.json"
+      },
+      "rejectionReasons": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "no_post_outcome_evidence_detected",
+        "privacy_boundary_ok",
+        "source_fresh_enough",
+        "types_compatible"
+      ],
+      "requiredActions": [
+        "Collect more comparable historical rows and positive outcomes before method selection."
+      ]
+    },
+    {
+      "caseId": "sourceadapterintakecase-1304",
+      "case": "rejected",
+      "sourceAdapterOutputId": "sourceadapteroutput-1304",
+      "sourceAdapterOutputPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-rejected-source-adapter-output.generated.json",
+      "outputStatus": "rejected",
+      "sourceKind": "agent_extraction",
+      "implementationLocation": "external_agent",
+      "executionMode": "external_runtime_capture",
+      "validationSummary": {
+        "sourceAdapterOutputSchemaValid": true,
+        "manifestValid": true,
+        "fieldMappingValid": true,
+        "provenanceSummaryValid": true,
+        "sourceRolesValid": true,
+        "freshnessValid": false,
+        "leakageStatus": "failed",
+        "credentialBoundaryStatus": "passed",
+        "rawRowsIncluded": false,
+        "allEvidenceClaimed": false
+      },
+      "intakeRoute": {
+        "canEnterSourceIntake": true,
+        "sourceIntakeReportId": "sourceintakereport-1304",
+        "sourceIntakeStatus": "rejected",
+        "adapterIntakeStatus": "rejected",
+        "nextAction": "replace_source"
+      },
+      "methodGateSummary": {
+        "setupBenchmarkGateId": "setupbenchmarkgate-1304",
+        "setupMethodDecisionId": "setupmethoddecision-1304",
+        "methodGateStatus": "rejected",
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false
+      },
+      "generatedArtifacts": {
+        "sourceAdapterOutput": "spec/fixtures/generated/source-adapter-intake/weather-logistics-rejected-source-adapter-output.generated.json",
+        "sourceIntakeReport": "spec/fixtures/generated/source-adapter-intake/weather-logistics-rejected-source-intake-report.generated.json",
+        "setupBenchmarkGate": "spec/fixtures/generated/source-adapter-intake/weather-logistics-rejected-setup-benchmark-gate.generated.json",
+        "setupMethodDecision": "spec/fixtures/generated/source-adapter-intake/weather-logistics-rejected-setup-method-decision.generated.json"
+      },
+      "rejectionReasons": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "mapping_rejected",
+        "missing_required_fields",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ],
+      "requiredActions": [
+        "Declare how role declared_operations_outcome will be resolved later.",
+        "Remove or replace rejected source manifestsource-13041 for role weather_forecast.",
+        "Remove or replace rejected source manifestsource-13042 for role historical_baseline."
+      ]
+    },
+    {
+      "caseId": "sourceadapterintakecase-1305",
+      "case": "unsafe_blocked",
+      "sourceAdapterOutputId": "sourceadapteroutput-1305",
+      "sourceAdapterOutputPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-unsafe-source-adapter-output.generated.json",
+      "outputStatus": "rejected",
+      "sourceKind": "agent_extraction",
+      "implementationLocation": "external_agent",
+      "executionMode": "external_runtime_capture",
+      "validationSummary": {
+        "sourceAdapterOutputSchemaValid": true,
+        "manifestValid": true,
+        "fieldMappingValid": true,
+        "provenanceSummaryValid": true,
+        "sourceRolesValid": true,
+        "freshnessValid": true,
+        "leakageStatus": "blocked_before_intake",
+        "credentialBoundaryStatus": "blocked_before_intake",
+        "rawRowsIncluded": true,
+        "allEvidenceClaimed": false
+      },
+      "intakeRoute": {
+        "canEnterSourceIntake": false,
+        "sourceIntakeReportId": null,
+        "sourceIntakeStatus": null,
+        "adapterIntakeStatus": "unsafe_blocked",
+        "nextAction": "stop_unsafe_connector"
+      },
+      "methodGateSummary": {
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "methodGateStatus": "blocked_unsafe",
+        "selectedMethodClass": null,
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false
+      },
+      "generatedArtifacts": {
+        "sourceAdapterOutput": "spec/fixtures/generated/source-adapter-intake/weather-logistics-unsafe-source-adapter-output.generated.json",
+        "sourceIntakeReport": null,
+        "setupBenchmarkGate": null,
+        "setupMethodDecision": null
+      },
+      "rejectionReasons": [
+        "prompt_visible_credentials_not_allowed",
+        "raw_private_rows_not_allowed"
+      ],
+      "requiredActions": [
+        "Stop the connector handoff and replace the output with a sanitized source-adapter output."
+      ]
+    }
+  ],
+  "summary": {
+    "caseCount": 5,
+    "acceptedCount": 1,
+    "needsConfirmationCount": 1,
+    "insufficientDataCount": 1,
+    "rejectedCount": 1,
+    "unsafeBlockedCount": 1,
+    "sourceIntakeReportsGenerated": 4,
+    "methodDecisionsGenerated": 4
+  },
+  "claimBoundary": {
+    "executesConnector": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "acceptsPromptVisibleCredentials": false,
+    "acceptsRawPrivateRows": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "bypassesSourceIntake": false,
+    "bypassesMethodGate": false,
+    "claimsConnectorSafety": false
+  },
+  "readSurface": {
+    "command": "python3 scripts/ope.py source-adapter-intake",
+    "normalChecksOffline": true,
+    "mutatesExternalSystems": false,
+    "requiresCredentials": false,
+    "writesOnlyGeneratedFixtures": true
+  },
+  "warnings": [
+    "Source adapter intake validates sanitized connector handoffs; it does not execute connector code.",
+    "Unsafe adapter outputs are blocked before source intake and must not be repaired inside OPE core.",
+    "Accepted outputs still need setup benchmark and method decisions before forecast execution."
+  ]
+}

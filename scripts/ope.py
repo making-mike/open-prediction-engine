@@ -81,6 +81,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     source_intake_command = [sys.executable, "scripts/generate_source_intake.py"]
     source_builder_command = [sys.executable, "scripts/build_source_manifest.py"]
     source_adapter_output_command = [sys.executable, "scripts/generate_source_adapter_output.py"]
+    source_adapter_intake_command = [sys.executable, "scripts/generate_source_adapter_intake.py"]
     source_handoff_command = [sys.executable, "scripts/generate_source_intake_handoff.py"]
     source_handoff_method_command = [sys.executable, "scripts/generate_source_handoff_method_gate.py"]
     auto_evidence_forecast_command = [sys.executable, "scripts/run_auto_evidence_forecast.py"]
@@ -140,6 +141,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         source_intake_command.append("--write")
         source_builder_command.append("--write")
         source_adapter_output_command.append("--write")
+        source_adapter_intake_command.append("--write")
         source_handoff_command.append("--write")
         source_handoff_method_command.append("--write")
         auto_evidence_forecast_command.append("--write")
@@ -196,6 +198,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         source_intake_command.append("--check")
         source_builder_command.append("--check")
         source_adapter_output_command.append("--check")
+        source_adapter_intake_command.append("--check")
         source_handoff_command.append("--check")
         source_handoff_method_command.append("--check")
         method_comparison_command.append("--check")
@@ -246,6 +249,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(source_intake_command)
     run(source_builder_command)
     run(source_adapter_output_command)
+    run(source_adapter_intake_command)
     run(source_handoff_command)
     run(source_handoff_method_command)
     run(auto_evidence_forecast_command)
@@ -728,6 +732,17 @@ def cmd_source_builder(args: argparse.Namespace) -> None:
 
 def cmd_source_adapter_output(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_source_adapter_output.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_source_adapter_intake(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_source_adapter_intake.py"]
+    if args.case:
+        command.extend(["--case", args.case])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1566,6 +1581,19 @@ def build_parser() -> argparse.ArgumentParser:
     source_adapter_output.add_argument("--check", action="store_true", help="check generated source-adapter output drift")
     source_adapter_output.add_argument("--write", action="store_true", help="refresh generated source-adapter output")
     source_adapter_output.set_defaults(func=cmd_source_adapter_output)
+
+    source_adapter_intake = subparsers.add_parser(
+        "source-adapter-intake",
+        help="check, refresh, or print external source-adapter intake routing",
+    )
+    source_adapter_intake.add_argument(
+        "--case",
+        choices=["accepted", "needs_confirmation", "insufficient_data", "rejected", "unsafe"],
+        help="print one source adapter intake case",
+    )
+    source_adapter_intake.add_argument("--check", action="store_true", help="check generated source-adapter intake drift")
+    source_adapter_intake.add_argument("--write", action="store_true", help="refresh generated source-adapter intake fixtures")
+    source_adapter_intake.set_defaults(func=cmd_source_adapter_intake)
 
     source_handoff = subparsers.add_parser(
         "source-handoff",

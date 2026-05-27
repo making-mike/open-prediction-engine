@@ -263,6 +263,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "source-manifest-build.schema.json"
     if name.endswith("-source-adapter-output.generated.json"):
         return spec_root / "source-adapter-output.schema.json"
+    if name.endswith("-source-adapter-intake.generated.json"):
+        return spec_root / "source-adapter-intake.schema.json"
     if name.endswith("-source-intake-handoff.generated.json"):
         return spec_root / "source-intake-handoff.schema.json"
     if name.endswith("-source-handoff-method-gate.generated.json"):

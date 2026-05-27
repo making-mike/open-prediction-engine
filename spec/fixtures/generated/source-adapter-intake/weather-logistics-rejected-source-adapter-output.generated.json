@@ -1,0 +1,279 @@
+{
+  "sourceAdapterOutputId": "sourceadapteroutput-1304",
+  "generatedAt": "2026-06-10T04:20:00Z",
+  "outputStatus": "rejected",
+  "adapter": {
+    "adapterId": "sourceadapter-1304",
+    "displayName": "Weather logistics external adapter rejected fixture",
+    "adapterVersion": "external-intake-v0",
+    "implementationLocation": "external_agent",
+    "sourceKind": "agent_extraction",
+    "ownsForecastSemantics": false
+  },
+  "execution": {
+    "adapterRunId": "sourceadapterrun-1304",
+    "executionMode": "external_runtime_capture",
+    "startedAt": "2026-06-10T04:20:00Z",
+    "completedAt": "2026-06-10T04:20:00Z",
+    "normalChecksOffline": true,
+    "liveFetchPerformed": false,
+    "credentialsUsed": false,
+    "credentialsStored": false
+  },
+  "domainBinding": {
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "questionTemplateId": "template-001",
+    "sourceRoles": [
+      "weather_forecast",
+      "historical_baseline"
+    ]
+  },
+  "sourceManifest": {
+    "sourceManifestId": "sourcemanifest-1304",
+    "createdAt": "2026-06-02T10:00:00Z",
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "forecastParameters": {
+      "questionTemplateId": "template-001",
+      "horizonLabel": "1-day",
+      "forecastCloseTime": "2026-06-02T12:00:00Z",
+      "geography": "Warsaw",
+      "serviceDate": "2026-06-03",
+      "assetIdentifier": null,
+      "location": null,
+      "targetWindow": null
+    },
+    "sources": [
+      {
+        "sourceId": "manifestsource-13041",
+        "sourceRole": "weather_forecast",
+        "displayName": "Leaked Post-Outcome Operations Export",
+        "connectorType": "agent_extraction",
+        "sourceClass": "internal_dataset",
+        "sourceRef": "local://private/leaked-post-outcome-export.csv",
+        "contentHash": "hash-rejected-weather-001",
+        "rowCount": 1,
+        "positiveOutcomeCount": 1,
+        "retrieval": {
+          "retrievedAt": "2026-06-04T08:00:00Z",
+          "availableBeforeForecastClose": false,
+          "maxSourceAgeHours": 24
+        },
+        "coverage": {
+          "geographies": [
+            "warsaw"
+          ],
+          "serviceDateStart": "2026-06-03",
+          "serviceDateEnd": "2026-06-03",
+          "entityIdentifiers": []
+        },
+        "privacy": {
+          "privacyClass": "sensitive",
+          "containsSecrets": true,
+          "containsPersonalData": false,
+          "approvalRequired": true,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "service_date",
+            "observedType": "date",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "geography",
+            "observedType": "string",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "disruption_observed",
+            "observedType": "boolean",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          }
+        ]
+      },
+      {
+        "sourceId": "manifestsource-13042",
+        "sourceRole": "historical_baseline",
+        "displayName": "Tiny Historical Sample",
+        "connectorType": "agent_extraction",
+        "sourceClass": "internal_dataset",
+        "sourceRef": "local://fixtures/weather-logistics/tiny-history.csv",
+        "contentHash": "hash-rejected-history-001",
+        "rowCount": 5,
+        "positiveOutcomeCount": 0,
+        "retrieval": {
+          "retrievedAt": "2026-06-01T18:00:00Z",
+          "availableBeforeForecastClose": true,
+          "maxSourceAgeHours": 8760
+        },
+        "coverage": {
+          "geographies": [
+            "warsaw"
+          ],
+          "serviceDateStart": "2026-05-01",
+          "serviceDateEnd": "2026-06-01",
+          "entityIdentifiers": []
+        },
+        "privacy": {
+          "privacyClass": "internal",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "service_date",
+            "observedType": "date",
+            "sampleCount": 5,
+            "nonNullCount": 5,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "geography",
+            "observedType": "string",
+            "sampleCount": 5,
+            "nonNullCount": 5,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "disruption_observed",
+            "observedType": "boolean",
+            "sampleCount": 5,
+            "nonNullCount": 5,
+            "exampleValuesStored": false
+          }
+        ]
+      }
+    ]
+  },
+  "fieldMapping": {
+    "fieldMappingId": "fieldmapping-1304",
+    "createdAt": "2026-06-02T10:00:00Z",
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "sourceManifestId": "sourcemanifest-1304",
+    "mappings": [
+      {
+        "mappingId": "mapping-13041",
+        "sourceId": "manifestsource-13041",
+        "sourceRole": "weather_forecast",
+        "sourceField": "disruption_observed",
+        "targetField": "forecast_daily_precipitation_mm",
+        "targetFieldType": "number",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "rejected",
+        "confidence": 0.1,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Post-outcome field cannot be mapped to forecast-time weather evidence."
+        ]
+      },
+      {
+        "mappingId": "mapping-13042",
+        "sourceId": "manifestsource-13042",
+        "sourceRole": "historical_baseline",
+        "sourceField": "service_date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Mapping supplied for deterministic fixture intake."
+        ]
+      },
+      {
+        "mappingId": "mapping-13043",
+        "sourceId": "manifestsource-13042",
+        "sourceRole": "historical_baseline",
+        "sourceField": "geography",
+        "targetField": "geography",
+        "targetFieldType": "string",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Mapping supplied for deterministic fixture intake."
+        ]
+      },
+      {
+        "mappingId": "mapping-13044",
+        "sourceId": "manifestsource-13042",
+        "sourceRole": "historical_baseline",
+        "sourceField": "disruption_observed",
+        "targetField": "disruption_observed",
+        "targetFieldType": "boolean",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "confidence": 1.0,
+        "requiresConfirmation": false,
+        "validationNotes": [
+          "Mapping supplied for deterministic fixture intake."
+        ]
+      }
+    ],
+    "aliasMappings": [
+      {
+        "aliasMappingId": "aliasmapping-13041",
+        "entityType": "geography",
+        "sourceValue": "Warsaw",
+        "canonicalValue": "warsaw",
+        "mappingOrigin": "user_provided",
+        "mappingStatus": "confirmed",
+        "requiresConfirmation": false
+      }
+    ]
+  },
+  "handoffBoundary": {
+    "canEnterSourceIntake": true,
+    "sourceIntakeRequired": true,
+    "mappingConfirmationRequired": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "allowedNextCommands": [
+      "python3 scripts/ope.py source-adapter-intake --check",
+      "python3 scripts/ope.py source-intake --check"
+    ]
+  },
+  "provenanceSummary": {
+    "sourceCount": 2,
+    "rowCount": 6,
+    "contentHashesStored": true,
+    "rawRowsIncluded": false,
+    "allEvidenceClaimed": false,
+    "diagnostics": [
+      {
+        "diagnosticId": "sourceadapterdiagnostic-13041",
+        "level": "info",
+        "message": "External adapter output was normalized into OPE source manifest and field mapping contracts.",
+        "rawDetailIncluded": false
+      }
+    ]
+  },
+  "controls": {
+    "readOnly": true,
+    "forecastGenerationAllowed": false,
+    "forecastArtifactsCreated": false,
+    "sourceIntakeAlreadyRun": false,
+    "credentialStorageImplemented": false,
+    "promptVisibleCredentialsAccepted": false,
+    "rawPrivateRowsStored": false,
+    "sanitizedErrorsOnly": true
+  },
+  "nextAction": "replace_source",
+  "warnings": [
+    "Source adapter outputs do not create forecast artifacts or scoring records.",
+    "Connector execution, credentials, and live fetching stay outside OPE core for this MVP path."
+  ]
+}

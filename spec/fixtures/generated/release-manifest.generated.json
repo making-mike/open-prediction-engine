@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 68,
+    "schemaFileCount": 69,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -77,6 +77,7 @@
       "spec/setup-benchmark-gate.schema.json",
       "spec/setup-forecast-run.schema.json",
       "spec/setup-method-decision.schema.json",
+      "spec/source-adapter-intake.schema.json",
       "spec/source-adapter-output.schema.json",
       "spec/source-connector-registry.schema.json",
       "spec/source-connector-result-set.schema.json",
@@ -148,6 +149,11 @@
     "public_forecast_use_of_local_live_drafts",
     "public_forecast_use_of_unapproved_source_builder_drafts",
     "public_forecast_use_of_unapproved_source_handoff_drafts",
+    "source_adapter_intake_connector_execution",
+    "source_adapter_intake_live_fetch",
+    "source_adapter_intake_credential_storage",
+    "source_adapter_intake_raw_private_rows",
+    "source_adapter_intake_forecast_execution",
     "generic_private_api_database_runtime",
     "generic_manual_upload_runtime",
     "private_source_adapter_execution",

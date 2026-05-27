@@ -37,6 +37,8 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/live-capture-workspace.md`: ignored local workspace for sanitized opt-in live connector captures and source-set drafts.
 - `spec/domain-setup.md`: domain-agnostic setup contract, maturity labels, and candidate private setup guardrails.
 - `spec/source-manifest-builder.md`: local CSV/JSON inspection and draft manifest/mapping boundary before intake.
+- `spec/source-adapter-output.md`: checked external connector output handoff contract before source intake.
+- `spec/source-adapter-intake.md`: checked external connector intake path from sanitized adapter output to source intake and method gates.
 - `spec/source-intake-handoff.md`: checked handoff from builder drafts to source intake next actions.
 - `spec/source-handoff-method-gate.md`: checked bridge from source-intake handoffs to setup benchmark and method decisions.
 - `spec/source-intake.md`: bounded source manifest, field mapping, and pre-forecast usability report.
@@ -173,6 +175,10 @@ python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
 python3 scripts/build_source_manifest.py --check
 python3 scripts/check_source_manifest_builder.py
+python3 scripts/generate_source_adapter_output.py --check
+python3 scripts/check_source_adapter_output.py
+python3 scripts/generate_source_adapter_intake.py --check
+python3 scripts/check_source_adapter_intake.py
 python3 scripts/generate_source_intake_handoff.py --check
 python3 scripts/check_source_intake_handoff.py
 python3 scripts/generate_source_handoff_method_gate.py --check
@@ -244,7 +250,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit live evidence promotion, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-adapter outputs, source-adapter intake gates, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit live evidence promotion, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -290,6 +296,8 @@ python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py domain-setups
 python3 scripts/ope.py source-builder
+python3 scripts/ope.py source-adapter-output
+python3 scripts/ope.py source-adapter-intake
 python3 scripts/ope.py source-handoff
 python3 scripts/ope.py source-handoff-method
 python3 scripts/ope.py source-intake
@@ -378,6 +386,8 @@ python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
+python3 scripts/generate_source_adapter_output.py --write
+python3 scripts/generate_source_adapter_intake.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write
@@ -434,6 +444,7 @@ Still needed before any hosted or service release:
 - Treat candidate private domain setups as descriptive contracts until source manifests, field mappings, benchmarks, and resolved outcomes justify stronger labels.
 - Treat source intake as a pre-forecast gate. It may classify usable data and eligible methods, but it must not create forecast artifacts.
 - Treat source manifest builder outputs as drafts. Local file inspection can propose manifests and mappings, but it must not create public read records or forecast artifacts.
+- Treat source adapter intake as a non-executing handoff gate for sanitized external connector outputs. It may validate manifests, mappings, provenance, source roles, freshness, and leakage boundaries, but it must not execute connector code, read credentials, store raw private rows, create forecast artifacts, create scoring records, or bypass source intake and method gates.
 - Treat source intake handoffs as next-action guidance. They may route accepted intake toward method gates, but they must not bypass setup benchmark or method decisions.
 - Treat source-handoff method gates as method-selection guidance, not forecast outputs. Accepted cases still require explicit setup forecast execution.
 - Treat source-handoff forecast execution as the first artifact-generating handoff step. It must preserve handoff, source intake, benchmark, and method-decision bindings.

@@ -98,6 +98,7 @@ Done:
 - Weather-conditioned public transport delays selected as the public beta candidate wedge and documented in `spec/domains/weather-transit-delays.md`.
 - Local weather-transit-delay custom-file prototype now emits schema-bound forecast, resolution, and scoring records through `python3 scripts/ope.py transit-delay-forecast`.
 - Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
+- Source adapter intake now validates external adapter outputs, routes accepted handoffs through source intake and method gates, and blocks unsafe connector outputs before intake through `python3 scripts/ope.py source-adapter-intake`.
 - Opt-in HSL GTFS-RT transit API connector now captures TripUpdates, derives delay rows through a static GTFS schedule join, and writes source-adapter output through `python3 scripts/ope.py transit-api-connector --schedule-join`.
 - Weather-transit-delay forward-run workflow now records a pre-window forecast, preserves run state, resolves from declared transit outcome rows, scores against baseline, and exposes explicit local live forecast/resolve phases through `python3 scripts/ope.py transit-delay-forward-run`.
 - Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
@@ -128,8 +129,8 @@ In progress:
 
 Next:
 
-1. Milestone 77: Policy-Bound Live Evidence Promotion.
-2. Later: external connector intake MVP and local private setup orchestration.
+1. Milestone 79: Local Private Setup MVP Orchestrator.
+2. Milestone 80: MVP Release Surface And Claim Review.
 3. Later: source quality and richer data-source coverage.
 
 MVP path:
@@ -2341,22 +2342,34 @@ Completed outputs:
 
 ## Milestone 78: External Connector Intake MVP
 
-Status: Planned.
+Status: Accepted.
 
 Goal: make the external connector vision usable for MVP: agent-built connectors can live outside OPE core if they hand OPE a sanitized source-adapter output that passes source intake and method gates.
 
 Tasks:
 
-- [ ] Add a checked intake path from source-adapter output into source manifest builder/source intake without requiring connector code inside OPE core.
-- [ ] Validate adapter-provided manifests, mappings, provenance summaries, source roles, freshness, and leakage boundaries.
-- [ ] Route accepted adapter outputs to method gates and blocked outputs to explicit next actions.
-- [ ] Keep credentials, live fetching, connector execution, and arbitrary parsing outside OPE core for MVP.
-- [ ] Add adapter conformance examples for accepted, needs-confirmation, insufficient-data, rejected, and unsafe connector outputs.
+- [x] Add a checked intake path from source-adapter output into source manifest builder/source intake without requiring connector code inside OPE core.
+- [x] Validate adapter-provided manifests, mappings, provenance summaries, source roles, freshness, and leakage boundaries.
+- [x] Route accepted adapter outputs to method gates and blocked outputs to explicit next actions.
+- [x] Keep credentials, live fetching, connector execution, and arbitrary parsing outside OPE core for MVP.
+- [x] Add adapter conformance examples for accepted, needs-confirmation, insufficient-data, rejected, and unsafe connector outputs.
 
 Exit criteria:
 
 - Agents can prepare a custom connector outside OPE and hand OPE a standard source-adapter output for forecast setup.
 - OPE can accept or reject that output without taking responsibility for connector execution or credential handling.
+
+Completed outputs:
+
+- `spec/source-adapter-intake.schema.json`
+- `spec/source-adapter-intake.md`
+- checked fixtures under `spec/fixtures/generated/source-adapter-intake/`
+- `scripts/generate_source_adapter_intake.py`
+- `scripts/check_source_adapter_intake.py`
+- CLI command `python3 scripts/ope.py source-adapter-intake`
+- five conformance cases: accepted, needs-confirmation, insufficient-data, rejected, and unsafe-blocked
+- source-intake, setup-benchmark, and setup-method-decision bindings for all safe handoff cases
+- schema-validation, run-check, CLI, docs, and release-manifest wiring for the external connector intake boundary
 
 ## Milestone 79: Local Private Setup MVP Orchestrator
 

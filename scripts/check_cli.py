@@ -71,6 +71,26 @@ def main() -> None:
     run_cli("source-intake", "--check")
     run_cli("source-builder", "--check")
     run_cli("source-adapter-output", "--check")
+    source_adapter_intake = run_cli("source-adapter-intake")
+    source_adapter_intake_payload = json.loads(source_adapter_intake.stdout)
+    if source_adapter_intake_payload["caseCount"] != 5:
+        raise AssertionError("CLI source-adapter-intake should expose five conformance cases")
+    source_adapter_intake_cases = {
+        item["case"]: item for item in source_adapter_intake_payload["cases"]
+    }
+    if source_adapter_intake_cases["accepted"]["nextAction"] != "proceed_to_method_gating":
+        raise AssertionError("CLI source-adapter-intake should route accepted output to method gate")
+    if source_adapter_intake_cases["needs_confirmation"]["nextAction"] != "ask_mapping_confirmation":
+        raise AssertionError("CLI source-adapter-intake should route proposed mappings to confirmation")
+    if source_adapter_intake_cases["insufficient_data"]["nextAction"] != "collect_more_data":
+        raise AssertionError("CLI source-adapter-intake should route insufficient data to collection")
+    if source_adapter_intake_cases["rejected"]["nextAction"] != "replace_source":
+        raise AssertionError("CLI source-adapter-intake should route rejected output to replacement")
+    if source_adapter_intake_cases["unsafe_blocked"]["nextAction"] != "stop_unsafe_connector":
+        raise AssertionError("CLI source-adapter-intake should stop unsafe outputs")
+    source_adapter_intake_check = run_cli("source-adapter-intake", "--check")
+    if "checked source adapter intake fixtures" not in source_adapter_intake_check.stdout:
+        raise AssertionError("CLI source-adapter-intake check output drifted")
     run_cli("source-handoff", "--check")
     run_cli("source-handoff-method", "--check")
     run_cli("auto-forecast")

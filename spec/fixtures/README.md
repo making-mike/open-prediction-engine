@@ -36,6 +36,8 @@ python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
+python3 scripts/generate_source_adapter_output.py --write
+python3 scripts/generate_source_adapter_intake.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write
@@ -97,6 +99,8 @@ The transit forward-run corpus generator emits a checked corpus index under `gen
 The domain setup generator emits reference and candidate setup records under `generated/domain-setups/`.
 
 The source manifest builder inspects caller-approved local CSV/JSON files under `local-source-files/` and emits checked build results plus draft source manifest and field mapping files under `generated/source-builder/`. Rejected examples cover secrets, unsupported formats, oversized files, and post-outcome leakage indicators. Drafts are excluded from public read surfaces until source intake accepts them.
+
+The source adapter output generator emits a checked external connector handoff under `generated/source-adapter-output/`; the source adapter intake generator emits five checked external adapter conformance cases under `generated/source-adapter-intake/`, routing accepted, needs-confirmation, insufficient-data, rejected, and unsafe outputs without executing connector code or creating forecast records.
 
 The source intake handoff generator emits checked builder-to-intake handoff records under `generated/source-handoff/`, including unconfirmed, confirmed, insufficient-sample, and builder-rejected cases with deterministic next actions.
 

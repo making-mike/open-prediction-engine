@@ -62,6 +62,8 @@ def main() -> None:
     run([sys.executable, "scripts/check_source_manifest_builder.py"])
     run([sys.executable, "scripts/generate_source_adapter_output.py", "--check"])
     run([sys.executable, "scripts/check_source_adapter_output.py"])
+    run([sys.executable, "scripts/generate_source_adapter_intake.py", "--check"])
+    run([sys.executable, "scripts/check_source_adapter_intake.py"])
     run([sys.executable, "scripts/generate_source_intake_handoff.py", "--check"])
     run([sys.executable, "scripts/check_source_intake_handoff.py"])
     run([sys.executable, "scripts/generate_source_handoff_method_gate.py", "--check"])
