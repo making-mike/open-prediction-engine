@@ -2,7 +2,7 @@
 
 Status: checked foreground terminal scheduler.
 
-Last reviewed: 2026-05-26.
+Last reviewed: 2026-05-27.
 
 The resolution scheduler is the local "keep working later" loop for OPE agents. It polls the checked resolution job registry and, only when explicitly allowed, asks the checked resolver to execute due transit forward runs.
 
@@ -51,6 +51,16 @@ python3 scripts/ope.py resolution-scheduler \
 ```
 
 Every watch tick appends a JSONL record under `.ope/live/resolution-scheduler/scheduler-runs.jsonl`. The `.ope/live/` workspace is ignored, so local scheduling logs do not become public fixtures.
+
+Agents can read the latest checked scheduler status through the adapter without starting the scheduler:
+
+```bash
+python3 scripts/ope.py agent-call --operation resolution_scheduler_status
+```
+
+That readback includes the last tick, shutdown reason, scheduler log path, execution mode, compact queue-state readbacks, and next recommended action. It is read-only and cannot execute due jobs.
+
+Generated adapter error examples cover malformed scheduler logs and oversized scheduler readbacks. Those envelopes expose stable error codes and safe plan status only; they do not reveal absolute local paths, log contents, raw diagnostics, or stack traces.
 
 For a human terminal, watch mode prints one compact status line per tick:
 

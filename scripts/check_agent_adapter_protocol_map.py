@@ -82,6 +82,8 @@ def main() -> None:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "resolution_jobs",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary",
     ]:
@@ -225,6 +227,40 @@ def main() -> None:
         "generated private setup forecasts" in operations["forecast_card"]["usageGuidance"],
         "forecast-card guidance should cover setup-generated readback",
     )
+    resolution_jobs = operations["resolution_jobs"]
+    require(
+        resolution_jobs["sideEffectLevel"] == "read_only",
+        "resolution-jobs operation should be read-only",
+    )
+    require(
+        resolution_jobs["inputRecordType"] == "resolution_job_registry",
+        "resolution-jobs operation should bind registry records",
+    )
+    require(
+        len(resolution_jobs["inputFields"]) == 2,
+        "resolution-jobs operation should expose only maxBytes and callerIntent",
+    )
+    require(
+        "without reading local state files or executing resolvers" in resolution_jobs["usageGuidance"],
+        "resolution-jobs guidance should preserve readback and non-execution boundaries",
+    )
+    scheduler_status = operations["resolution_scheduler_status"]
+    require(
+        scheduler_status["sideEffectLevel"] == "read_only",
+        "resolution-scheduler-status operation should be read-only",
+    )
+    require(
+        scheduler_status["inputRecordType"] == "resolution_scheduler_status",
+        "resolution-scheduler-status operation should bind compact scheduler status records",
+    )
+    require(
+        len(scheduler_status["inputFields"]) == 2,
+        "resolution-scheduler-status operation should expose only maxBytes and callerIntent",
+    )
+    require(
+        "without starting a scheduler" in scheduler_status["usageGuidance"],
+        "resolution-scheduler-status guidance should preserve non-execution boundaries",
+    )
 
     exit_codes = {item["exitCode"]: item for item in protocol_map["exitCodeMapping"]}
     require(set(exit_codes) == {0, 1, 2, 3, 4, 5}, "exit code mapping should cover 0 through 5")
@@ -253,6 +289,8 @@ def main() -> None:
         "private_setup_source_handoff",
         "private_setup_method_gate",
         "private_setup_forecast_execution",
+        "resolution_jobs",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary",
     ]:

@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Purpose
 
@@ -93,6 +93,8 @@ Done:
 - Checked private setup method-gate adapter envelopes now expose setup benchmark and method-decision guidance through the same agent adapter surface without creating forecast or score records.
 - Checked private setup forecast-execution adapter envelopes now create forecast artifacts only for the confirmed checked handoff and keep blocked cases non-generating.
 - Generated private setup forecast readback envelopes now read `forecast-1102` through normal card, bundle, resolution, and scoring adapter operations.
+- Compact adapter conformance summaries now declare and enforce byte-size budgets, keep full matrices opt-in, and return sanitized `response_too_large` envelopes for undersized `maxBytes` reads.
+- Resolution job and scheduler status readbacks now expose read-only agent adapter and MCP surfaces, including sanitized error-envelope examples for missing workspaces, unreadable state files, malformed scheduler logs, and oversized readbacks.
 - Weather-conditioned public transport delays selected as the public beta candidate wedge and documented in `spec/domains/weather-transit-delays.md`.
 - Local weather-transit-delay custom-file prototype now emits schema-bound forecast, resolution, and scoring records through `python3 scripts/ope.py transit-delay-forecast`.
 - Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
@@ -101,6 +103,10 @@ Done:
 - Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
 - Resolution job registry now gives agents read-only next-action guidance for pending, due, already-resolved, and invalid resolution states through `python3 scripts/ope.py resolution-jobs`.
 - Foreground terminal resolution scheduler now lets agents poll resolution jobs and optionally execute due checked resolvers locally through `python3 scripts/ope.py resolution-scheduler`, without Trigger.dev, cron, `launchd`, or hosted workers.
+- Resolution runtime reliability now has a checked failure taxonomy, retry/next-action guidance, provenance ledger, and live-capture boundary through `python3 scripts/ope.py resolution-runtime-reliability`.
+- Public transport forward-run corpus now reports one comparable scored transit run, six exclusion examples, sample thresholds, and claim boundaries through `python3 scripts/ope.py transit-forward-run-corpus`.
+- Public transport baseline track-record gate now reports current Brier, baseline, lift, sample-size, and horizon/window coverage while blocking below-threshold calibration through `python3 scripts/ope.py transit-track-record-gate`.
+- Public transport method options now keep baseline-only execution as the default, record transparent weather adjustment as evidence-only, and keep richer methods proposed-only through `python3 scripts/ope.py transit-method-options`.
 
 Not started:
 
@@ -121,7 +127,14 @@ In progress:
 
 Next:
 
-- Resolution Jobs Agent Adapter, Scheduler Readback, And Public Transport Calibration Corpus.
+1. Milestone 77: Policy-Bound Live Evidence Promotion.
+2. Later: external connector intake MVP and local private setup orchestration.
+3. Later: source quality and richer data-source coverage.
+
+MVP path:
+
+- Milestones 72-80 define the minimum local, agent-native OPE product: connect approved or adapter-provided data, forecast before the outcome, preserve provenance, recalculate from pre-close evidence, resolve later, score against a baseline, and expose the whole loop through agent-readable surfaces.
+- Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
 
@@ -2112,22 +2125,261 @@ Completed outputs:
 
 ## Milestone 71: Adapter Read Surface Size Guard
 
-Status: Planned.
+Status: Accepted.
 
 Goal: keep routine agent adapter reads compact and predictable as conformance fixtures grow, so agents can rely on small guidance surfaces before loading heavyweight implementation evidence.
 
 Tasks:
 
-- [ ] Add explicit byte-size and payload-shape checks for the compact conformance summary envelope versus the full private setup adapter conformance matrix.
-- [ ] Document when agents should use the compact summary, full matrix, and generated envelope fixtures.
-- [ ] Add CLI and adapter checks that preserve `maxBytes` behavior for compact summary reads and return sanitized size-limit errors when callers request oversized responses.
-- [ ] Update release and hardening checks so future adapter read surfaces cannot silently embed large matrices by default.
+- [x] Add explicit byte-size and payload-shape checks for the compact conformance summary envelope versus the full private setup adapter conformance matrix.
+- [x] Document when agents should use the compact summary, full matrix, and generated envelope fixtures.
+- [x] Add CLI and adapter checks that preserve `maxBytes` behavior for compact summary reads and return sanitized size-limit errors when callers request oversized responses.
+- [x] Update release and hardening checks so future adapter read surfaces cannot silently embed large matrices by default.
 
 Exit criteria:
 
 - Routine agents have a checked compact read path with a documented size budget.
 - Implementers can still inspect the full matrix, but full conformance evidence is opt-in rather than the default agent-call path.
 - Size guard failures remain sanitized and do not execute setup calls, source reads, forecasts, resolution, or scoring.
+
+Completed outputs:
+
+- `sizeBudget` in `spec/private-setup-adapter-conformance-summary.schema.json`
+- compact summary payload budget, compact agent-envelope budget, and full matrix reference budget in `spec/fixtures/generated/private-setup-adapter-conformance/ope-private-setup-adapter-conformance-summary.generated.json`
+- adapter envelope fixture refresh for `private_setup_adapter_conformance_summary`
+- checks for compact payload shape, matrix-size contrast, declared `maxBytes` success, undersized `response_too_large`, and hardening guardrails
+- documentation in `spec/private-setup-adapter-conformance-summary.md`
+
+## Milestone 72: Resolution Runtime Reliability And Provenance
+
+Status: Accepted.
+
+Goal: make every transit forward-run, scheduler tick, resolver attempt, live capture, and shutdown inspectable, retryable, and provenance-bound before improving data-source quality or forecasting sophistication.
+
+Tasks:
+
+- [x] Add agent adapter and readback surfaces for resolution jobs and scheduler status.
+- [x] Add a runtime failure taxonomy covering source availability, empty sources, decode failures, schedule-join failures, coverage gaps, resolver failures, stale state, invalid state, network timeouts, and rate limits.
+- [x] Add planned retryability and next-action fields for runtime failures: `retryable`, `retryAfter`, `nextAction`, and sanitized diagnostics.
+- [x] Add a provenance ledger for forecast and resolution runtime actions, including command, timestamp, source provider, source role, forecast-time versus resolution-only classification, allowed artifact paths or hashes, and diagnostics.
+- [x] Preserve the boundary that outcome data is resolution-only and must not enter forecast-time provenance.
+- [x] Keep live captures local and opt-in until source policy, retention, freshness, and failure behavior are reliable.
+
+Exit criteria:
+
+- Agents can inspect pending jobs, last scheduler tick, last shutdown, due jobs, failed attempts, and recommended next action without reading internal files.
+- Every runtime failure has a sanitized category, retryability decision, and next action.
+- Runtime provenance is enough to explain what command ran, which source it touched, when it ran, what artifacts were produced, and whether the evidence was forecast-time or resolution-only.
+- HSL/source optimization, production live connector claims, richer methods, and calibration claims remain deferred until the current loop is reliable and auditable.
+
+Completed outputs:
+
+- `spec/resolution-runtime-reliability.schema.json`
+- `spec/resolution-runtime-reliability.md`
+- `scripts/generate_resolution_runtime_reliability.py`
+- `scripts/check_resolution_runtime_reliability.py`
+- checked fixture at `spec/fixtures/generated/resolution-runtime-reliability/resolution-runtime-reliability.generated.json`
+- CLI command `python3 scripts/ope.py resolution-runtime-reliability`
+- run-check, CLI, release-manifest, and schema-validation wiring for the new read model
+- provenance rows that keep resolution outcome evidence out of forecast-time provenance and keep live captures ignored/local
+
+## Milestone 73: Resolution Jobs Agent Adapter And Scheduler Readback
+
+Status: Accepted.
+
+Goal: expose resolution jobs, scheduler state, last tick, last shutdown, and retry guidance through the transport-neutral agent adapter and local MCP scaffold without forcing agents to inspect local files or terminal output.
+
+Tasks:
+
+- [x] Add read-only adapter operations for resolution job registry and scheduler status.
+- [x] Return compact payloads for pending, due, resolved, invalid, failed, and empty queues.
+- [x] Include last scheduler tick, last shutdown reason, log path, execution mode, and next recommended action.
+- [x] Add sanitized error envelopes for missing live workspace, unreadable state files, malformed scheduler logs, and oversized readbacks.
+- [x] Map the operations into the local MCP scaffold and protocol map while preserving local-only runtime claims.
+
+Exit criteria:
+
+- Agents can decide whether to wait, execute a resolver, inspect a failure, or read resolved outputs through `agent-call` or MCP.
+- Scheduler and resolution readback remain read-only and cannot execute resolvers, fetch live sources, create forecasts, or create scores.
+
+Completed outputs:
+
+- `resolution_jobs` agent adapter operation and `ope_resolution_jobs` MCP tool for the checked resolution job registry.
+- `resolution_scheduler_status` agent adapter operation and `ope_resolution_scheduler_status` MCP tool for the checked scheduler status readback.
+- compact scheduler payload fields for `lastTick`, `lastShutdown`, `logPath`, `executionMode`, `queueStatusReadbacks`, and `nextRecommendedAction`.
+- generated agent-envelope fixtures and protocol-map entries for the two read-only operations.
+- CLI, dispatcher, MCP, schema, and adapter invariant checks for read-only behavior and resolver non-execution.
+- generated sanitized error-envelope examples for missing live workspaces, unreadable state files, malformed scheduler logs, and oversized scheduler readbacks.
+
+## Milestone 74: Public Transport Forward-Run Corpus
+
+Status: Accepted.
+
+Goal: run and preserve repeated comparable HSL morning-peak forward predictions so OPE has real resolved examples before making method-quality or calibration claims.
+
+Tasks:
+
+- [x] Define the minimum comparable-window policy for the HSL public transport beta corpus.
+- [x] Add a local corpus index over forward-run states, forecast artifacts, resolution records, scoring reports, and excluded/ambiguous runs.
+- [x] Preserve one forecast-before-window, one resolution-after-window, and one score-against-baseline record per comparable run.
+- [x] Add exclusion reasons for ambiguous, annulled, low-coverage, invalid-window, feed-unavailable, and non-comparable runs.
+- [x] Add a checked read surface that reports corpus count, resolved count, excluded count, and claim boundary.
+
+Exit criteria:
+
+- OPE can show how many comparable public transport windows have been forecast, resolved, scored, or excluded.
+- The corpus is useful for baseline comparison but still blocks calibration claims until the declared sample threshold is met.
+
+Completed outputs:
+
+- `spec/transit-forward-run-corpus.schema.json`
+- `spec/transit-forward-run-corpus.md`
+- `scripts/generate_transit_forward_run_corpus.py`
+- `scripts/check_transit_forward_run_corpus.py`
+- checked fixture at `spec/fixtures/generated/transit-forward-run-corpus/transit-forward-run-corpus.generated.json`
+- CLI command `python3 scripts/ope.py transit-forward-run-corpus`
+- schema-validation, run-check, CLI, and release-manifest wiring for the corpus index
+- exclusion examples for `ambiguous`, `annulled`, `low_coverage`, `invalid_window`, `feed_unavailable`, and `non_comparable`
+
+## Milestone 75: Baseline Track Record And Calibration Gate
+
+Status: Accepted.
+
+Goal: turn the repeated forward-run corpus into a baseline-first track record that reports performance only when enough comparable outcomes exist.
+
+Tasks:
+
+- [x] Generate track-record summaries from the public transport forward-run corpus.
+- [x] Report Brier score, baseline score, baseline lift, resolved sample size, excluded sample size, and horizon/window coverage.
+- [x] Add calibration summaries only when the minimum comparable sample threshold is met.
+- [x] Keep below-threshold outputs explicit: `not_enough_resolved_comparable_outcomes`.
+- [x] Add checks that one-off forward runs cannot be treated as calibration evidence.
+
+Exit criteria:
+
+- Agents can inspect whether OPE has enough resolved outcomes to make any quality or calibration claim.
+- Public docs and release manifests continue to block live calibration claims until the corpus threshold is met.
+
+Completed outputs:
+
+- `spec/transit-baseline-track-record-gate.schema.json`
+- `spec/transit-baseline-track-record-gate.md`
+- `scripts/generate_transit_baseline_track_record_gate.py`
+- `scripts/check_transit_baseline_track_record_gate.py`
+- checked fixture at `spec/fixtures/generated/transit-baseline-track-record-gate/transit-baseline-track-record-gate.generated.json`
+- CLI command `python3 scripts/ope.py transit-track-record-gate`
+- Brier, baseline, lift, sample-size, and horizon/window coverage readback over the checked transit forward-run corpus
+- explicit below-threshold calibration gate with `calibrationSummary: null` and `not_enough_resolved_comparable_outcomes`
+- schema-validation, run-check, CLI, docs, and release-manifest wiring for the gate
+
+## Milestone 76: Forecasting Method Options For MVP
+
+Status: Accepted.
+
+Goal: define and compare the first MVP method choices after the baseline loop is reliable, while keeping richer methods disabled until benchmark and corpus evidence support them.
+
+Tasks:
+
+- [x] Keep baseline-only execution as the default method for early public transport corpus runs.
+- [x] Add a transparent deterministic weather-adjustment candidate only as benchmarked, claim-bounded method evidence.
+- [x] Add a historical-conditioned statistical method candidate once enough resolved corpus rows exist for weather, weekday, season, and service-window buckets.
+- [x] Extend method comparison to public transport delay runs without using same-window outcome data as forecast evidence.
+- [x] Keep trained ML, ensemble, retrieval-assisted, and external-reference methods proposed-only until clean benchmark evidence exists.
+
+Exit criteria:
+
+- OPE can explain why a public transport run stayed baseline-only or why a simple non-baseline method became eligible.
+- Any non-baseline public transport method must show comparable baseline lift and anti-leakage checks before selection.
+
+Completed outputs:
+
+- `spec/transit-method-options.schema.json`
+- `spec/transit-method-options.md`
+- `scripts/generate_transit_method_options.py`
+- `scripts/check_transit_method_options.py`
+- checked fixture at `spec/fixtures/generated/transit-method-options/transit-method-options.generated.json`
+- CLI command `python3 scripts/ope.py transit-method-options`
+- baseline-default selection readback with `transitmethod-100`
+- evidence-only transparent weather-adjustment method with Brier `0.4489`, baseline score `0.5625`, and lift `0.1136`
+- proposed-only historical-conditioned, trained ML, retrieval-assisted, ensemble, and external-reference method options
+- anti-leakage boundary that keeps same-window transit outcomes out of forecast-time method evidence
+- schema-validation, run-check, CLI, docs, and release-manifest wiring for the method-options gate
+
+## Milestone 77: Policy-Bound Live Evidence Promotion
+
+Status: Planned.
+
+Goal: allow selected ignored local live captures to become forecast-time evidence only through an explicit source policy, freshness check, leakage check, and provenance binding.
+
+Tasks:
+
+- [ ] Define the intake gate for promoting local live draft captures into forecast-time source sets.
+- [ ] Require source policy, capture timestamp, forecast close time, freshness, retention, and source role checks before promotion.
+- [ ] Reject post-close or resolution-only captures as forecast-time evidence.
+- [ ] Preserve raw local artifacts as ignored workspace files while binding sanitized normalized records into OPE artifacts.
+- [ ] Add readback that distinguishes committed fixtures, local live drafts, promoted forecast-time evidence, and resolution-only evidence.
+
+Exit criteria:
+
+- OPE can use approved live captures as forecast-time evidence without weakening provenance or leakage boundaries.
+- Live connector output remains non-production and local until a later runtime milestone explicitly changes that claim.
+
+## Milestone 78: External Connector Intake MVP
+
+Status: Planned.
+
+Goal: make the external connector vision usable for MVP: agent-built connectors can live outside OPE core if they hand OPE a sanitized source-adapter output that passes source intake and method gates.
+
+Tasks:
+
+- [ ] Add a checked intake path from source-adapter output into source manifest builder/source intake without requiring connector code inside OPE core.
+- [ ] Validate adapter-provided manifests, mappings, provenance summaries, source roles, freshness, and leakage boundaries.
+- [ ] Route accepted adapter outputs to method gates and blocked outputs to explicit next actions.
+- [ ] Keep credentials, live fetching, connector execution, and arbitrary parsing outside OPE core for MVP.
+- [ ] Add adapter conformance examples for accepted, needs-confirmation, insufficient-data, rejected, and unsafe connector outputs.
+
+Exit criteria:
+
+- Agents can prepare a custom connector outside OPE and hand OPE a standard source-adapter output for forecast setup.
+- OPE can accept or reject that output without taking responsibility for connector execution or credential handling.
+
+## Milestone 79: Local Private Setup MVP Orchestrator
+
+Status: Planned.
+
+Goal: provide one local agent-facing orchestration path from a private setup request to source intake, method decision, forecast execution, and normal readback for approved local or adapter-provided sources.
+
+Tasks:
+
+- [ ] Add a local orchestrator that chains existing checked setup phases only when each gate allows the next step.
+- [ ] Support local files and source-adapter outputs as MVP source kinds.
+- [ ] Keep private API, database, manual upload, and credentialed connectors planned-only unless represented through accepted adapter outputs.
+- [ ] Return one compact run summary with setup request, source intake, method decision, forecast IDs, card, bundle, resolution status, score status, and next action.
+- [ ] Add blocked summaries for missing approval, unconfirmed mappings, insufficient data, rejected sources, failed method gates, and response-too-large reads.
+
+Exit criteria:
+
+- Agents can run one local OPE setup workflow for approved source inputs without manually chaining every lower-level command.
+- The orchestrator cannot bypass source intake, mapping confirmation, benchmark gates, method decisions, or explicit forecast execution boundaries.
+
+## Milestone 80: MVP Release Surface And Claim Review
+
+Status: Planned.
+
+Goal: package the local MVP as a clear agent-native release surface with repeatable checks, examples, docs, and honest claim boundaries.
+
+Tasks:
+
+- [ ] Add a compact MVP runbook covering setup, forecast, recalculation, resolution, scoring, corpus readback, and failure recovery.
+- [ ] Add a release manifest section that labels the MVP local runtime surface and lists non-goals.
+- [ ] Add end-to-end smoke checks for the MVP happy path and representative blocked/failure paths.
+- [ ] Document minimum machine-readable interfaces for CLI, agent-call, and MCP use.
+- [ ] Keep HTTP, queue, hosted service, arbitrary private API/database parsing, broad provider optimization, and live calibration claims out of MVP.
+
+Exit criteria:
+
+- A developer or agent can install the repo, run the local MVP loop, inspect forecast artifacts, resolve outcomes, score them, and understand exactly what is and is not claimed.
+- The MVP is release-checkable without live network dependency in normal checks.
 
 ## Open Decisions
 

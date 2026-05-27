@@ -1,8 +1,8 @@
 # Weather Transit Delays Public Beta Wedge
 
-Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, foreground terminal scheduler, and local resolver-agent scan implemented.
+Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, checked corpus index, checked baseline track-record gate, checked MVP method options, foreground terminal scheduler, and local resolver-agent scan implemented.
 
-Last reviewed: 2026-05-26.
+Last reviewed: 2026-05-27.
 
 This note defines the next OPE wedge for making a real, checkable prediction loop from public source data. It is a domain contract and implementation target, not a live performance claim.
 
@@ -33,6 +33,9 @@ Initial maturity:
 - `fixture_ready`
 - runnable from approved local CSV/JSON files through `python3 scripts/ope.py transit-delay-forecast`
 - checked forward-run fixture and opt-in local live phases through `python3 scripts/ope.py transit-delay-forward-run`
+- checked forward-run corpus counts and exclusions through `python3 scripts/ope.py transit-forward-run-corpus`
+- checked baseline track-record and calibration gate through `python3 scripts/ope.py transit-track-record-gate`
+- checked MVP method options and baseline-default boundary through `python3 scripts/ope.py transit-method-options`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -195,6 +198,30 @@ python3 scripts/ope.py transit-delay-forward-run
 
 It binds the forecast, later outcome capture or approved trip-update rows, resolution, scoring, and claim boundary into one summary under `spec/fixtures/generated/transit-delay-forward-run/`.
 
+The checked corpus index is:
+
+```bash
+python3 scripts/ope.py transit-forward-run-corpus
+```
+
+It reports one comparable scored fixture row, exclusion examples for ambiguous, annulled, low-coverage, invalid-window, feed-unavailable, and non-comparable runs, and sample-size thresholds before any baseline track-record or calibration claim.
+
+The checked track-record and calibration gate is:
+
+```bash
+python3 scripts/ope.py transit-track-record-gate
+```
+
+It reports the current Brier score, baseline score, baseline lift, resolved and excluded sample sizes, and horizon/window coverage. It keeps `not_enough_resolved_comparable_outcomes` explicit and withholds calibration summaries until the declared threshold is met.
+
+The checked MVP method-options surface is:
+
+```bash
+python3 scripts/ope.py transit-method-options
+```
+
+It keeps the historical-frequency baseline as the default, records the transparent weather-adjustment method as evidence-only with one fixture comparison, and keeps historical-conditioned, trained ML, retrieval-assisted, ensemble, and external-reference methods proposed-only until clean benchmark evidence exists.
+
 Explicit live local phases are available, but they write ignored developer artifacts and do not change normal release checks:
 
 ```bash
@@ -236,11 +263,12 @@ Current local prototype:
 7. Done: add a local resolver-agent scan that finds due saved forward runs and can explicitly execute the checked resolver command.
 8. Done: add an agent-facing resolution job registry that tells agents whether to wait, execute the resolver, read resolved outputs, or inspect invalid state.
 9. Done: add a foreground terminal scheduler that agents can run locally to poll jobs and optionally execute due checked resolver commands.
+10. Done: add a checked corpus index with comparable and excluded forward-run rows plus claim boundaries.
 
 Next useful build:
 
 1. Run repeated comparable live forward windows and save their local state.
-2. Expose resolution job and scheduler readback through the agent adapter surface.
+2. Turn the corpus into a baseline-first track record only after the declared sample threshold is met.
 3. Add calibration summaries only after enough comparable resolved outcomes exist.
 
 The first public beta should not launch until OPE can repeat that loop without hand-editing forecast, outcome, or scoring records, and until the source coverage and retention policy for live captures is explicit.

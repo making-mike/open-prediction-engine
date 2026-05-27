@@ -17,6 +17,7 @@
     "artifactBoundary",
     "sanitizedErrorCoverage",
     "readSurface",
+    "sizeBudget",
     "executionBoundary",
     "warnings"
   ],
@@ -173,6 +174,42 @@
           "const": "ope_private_setup_adapter_conformance_summary"
         },
         "recommendedForRoutineAgents": { "type": "boolean", "const": true }
+      }
+    },
+    "sizeBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compactSummaryPayloadMaxBytes",
+        "compactAgentEnvelopeMaxBytes",
+        "fullMatrixReferenceMaxBytes",
+        "fullMatrixRequiresExplicitCommand",
+        "oversizedAdapterErrorCode",
+        "shapeGuards"
+      ],
+      "properties": {
+        "compactSummaryPayloadMaxBytes": { "type": "integer", "const": 12000 },
+        "compactAgentEnvelopeMaxBytes": { "type": "integer", "const": 16000 },
+        "fullMatrixReferenceMaxBytes": { "type": "integer", "const": 600000 },
+        "fullMatrixRequiresExplicitCommand": { "type": "boolean", "const": true },
+        "oversizedAdapterErrorCode": {
+          "type": "string",
+          "const": "response_too_large"
+        },
+        "shapeGuards": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "embedsEnvelopeRows",
+            "embedsOperationCases",
+            "matrixPathOnly"
+          ],
+          "properties": {
+            "embedsEnvelopeRows": { "type": "boolean", "const": false },
+            "embedsOperationCases": { "type": "boolean", "const": false },
+            "matrixPathOnly": { "type": "boolean", "const": true }
+          }
+        }
       }
     },
     "executionBoundary": {

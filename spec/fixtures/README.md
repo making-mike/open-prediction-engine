@@ -30,6 +30,9 @@ python3 scripts/plan_auto_evidence.py --write
 python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
+python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_baseline_track_record_gate.py --write
+python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_intake_handoff.py --write
@@ -87,6 +90,8 @@ The source connector generator emits a registry and result set under `generated/
 The live connector readiness generator emits an offline readiness record under `generated/live-readiness/`.
 
 Ignored local live captures and source-set drafts live under `.ope/live/`, not under `generated/`, and are excluded from fixture reports, public record indexes, track records, calibration, and release checks.
+
+The transit forward-run corpus generator emits a checked corpus index under `generated/transit-forward-run-corpus/` with one comparable scored run, exclusion examples, sample thresholds, and claim boundaries. The transit baseline track-record gate emits a checked read model under `generated/transit-baseline-track-record-gate/` with current Brier, baseline, lift, sample-size, horizon/window coverage, and below-threshold calibration status. The transit method options generator emits a checked read model under `generated/transit-method-options/` that keeps baseline-only execution as the default, records weather adjustment as evidence-only, and keeps richer methods proposed-only.
 
 The domain setup generator emits reference and candidate setup records under `generated/domain-setups/`.
 

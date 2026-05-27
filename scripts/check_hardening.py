@@ -157,6 +157,26 @@ def assert_claim_review_exists() -> None:
             raise AssertionError(f"claim review checklist missing {phrase!r}")
 
 
+def assert_adapter_read_surface_size_guards() -> None:
+    generated = ROOT / "spec" / "fixtures" / "generated" / "private-setup-adapter-conformance"
+    summary_path = generated / "ope-private-setup-adapter-conformance-summary.generated.json"
+    matrix_path = generated / "ope-private-setup-adapter-conformance-matrix.generated.json"
+    summary = load_json(summary_path)
+    budget = summary["sizeBudget"]
+    if "operationCases" in summary or "envelopes" in summary:
+        raise AssertionError("compact adapter conformance summary must not embed matrix rows or envelopes")
+    if summary_path.stat().st_size > budget["compactSummaryPayloadMaxBytes"]:
+        raise AssertionError("compact adapter conformance summary exceeds payload budget")
+    if matrix_path.stat().st_size <= summary_path.stat().st_size * 10:
+        raise AssertionError("full adapter conformance matrix should remain opt-in and much larger than summary")
+    if matrix_path.stat().st_size > budget["fullMatrixReferenceMaxBytes"]:
+        raise AssertionError("full adapter conformance matrix exceeds reference budget")
+    if budget["fullMatrixRequiresExplicitCommand"] is not True:
+        raise AssertionError("full adapter conformance matrix should require an explicit command")
+    if budget["oversizedAdapterErrorCode"] != "response_too_large":
+        raise AssertionError("adapter conformance summary must use the standard size-limit error code")
+
+
 def main() -> None:
     assert_no_secrets()
     assert_malformed_artifact_fails()
@@ -164,6 +184,7 @@ def main() -> None:
     assert_no_duplicate_records()
     assert_aggregate_dependency_review()
     assert_claim_review_exists()
+    assert_adapter_read_surface_size_guards()
     print("checked hardening guardrails")
 
 

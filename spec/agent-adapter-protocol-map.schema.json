@@ -67,8 +67,8 @@
     },
     "operations": {
       "type": "array",
-      "minItems": 16,
-      "maxItems": 16,
+      "minItems": 18,
+      "maxItems": 18,
       "items": { "$ref": "#/$defs/operationMap" }
     },
     "exitCodeMapping": {
@@ -86,7 +86,7 @@
     "decisionExamples": {
       "type": "array",
       "minItems": 4,
-      "maxItems": 14,
+      "maxItems": 16,
       "items": { "$ref": "#/$defs/decisionExample" }
     },
     "warnings": {
@@ -118,6 +118,8 @@
         "private_setup_source_handoff",
         "private_setup_method_gate",
         "private_setup_forecast_execution",
+        "resolution_jobs",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary"
       ]
@@ -139,6 +141,8 @@
         "source_intake_handoff",
         "source_handoff_method_gate",
         "setup_forecast_run",
+        "resolution_job_registry",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary"
       ]

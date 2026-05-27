@@ -70,6 +70,8 @@
         "private_setup_source_handoff",
         "private_setup_method_gate",
         "private_setup_forecast_execution",
+        "resolution_jobs",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary"
       ]
@@ -104,6 +106,8 @@
             "private_setup_source_handoff",
             "private_setup_method_gate",
             "private_setup_forecast_execution",
+            "resolution_jobs",
+            "resolution_scheduler_status",
             "resolution_status",
             "scoring_summary"
           ]
@@ -125,6 +129,8 @@
             "source_intake_handoff",
             "source_handoff_method_gate",
             "setup_forecast_run",
+            "resolution_job_registry",
+            "resolution_scheduler_status",
             "resolution_status",
             "scoring_summary"
           ]

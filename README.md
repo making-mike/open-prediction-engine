@@ -135,15 +135,19 @@ The initial question shape is:
 Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
 ```
 
-This wedge now has a local custom-file prototype, a checked forward-run workflow, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked baseline track-record and calibration gate, checked MVP method options, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
 
 Run the checked fixture path:
 
 ```bash
 python3 scripts/ope.py transit-delay-forecast
 python3 scripts/ope.py transit-delay-forward-run
+python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-track-record-gate
+python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py resolution-jobs
 python3 scripts/ope.py resolution-scheduler
+python3 scripts/ope.py resolution-runtime-reliability
 python3 scripts/ope.py resolve-due-forward-runs
 ```
 
@@ -156,7 +160,15 @@ python3 scripts/ope.py transit-delay-forecast \
   --trip-updates path/to/trip-updates.csv
 ```
 
-This is still not a calibrated quality claim. One forward run proves the mechanics, not prediction quality. The next beta step is to repeat the live forward-run loop across enough comparable service windows to earn any calibration claim.
+This is still not a calibrated quality claim. One forward run proves the mechanics, not prediction quality. The checked track-record gate keeps `not_enough_resolved_comparable_outcomes` explicit until the corpus reaches declared comparable-window thresholds.
+
+Inspect corpus counts and exclusion reasons:
+
+```bash
+python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-track-record-gate
+python3 scripts/ope.py transit-method-options
+```
 
 Start an explicit local live forward forecast:
 
@@ -318,12 +330,20 @@ python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
 python3 scripts/run_transit_delay_forward.py --check
 python3 scripts/check_transit_delay_forward.py
+python3 scripts/generate_transit_forward_run_corpus.py --check
+python3 scripts/check_transit_forward_run_corpus.py
+python3 scripts/generate_transit_baseline_track_record_gate.py --check
+python3 scripts/check_transit_baseline_track_record_gate.py
+python3 scripts/generate_transit_method_options.py --check
+python3 scripts/check_transit_method_options.py
 python3 scripts/resolve_due_transit_forward_runs.py --check
 python3 scripts/check_transit_forward_resolver.py
 python3 scripts/generate_resolution_jobs.py --check
 python3 scripts/check_resolution_jobs.py
 python3 scripts/run_resolution_scheduler.py --check
 python3 scripts/check_resolution_scheduler.py
+python3 scripts/generate_resolution_runtime_reliability.py --check
+python3 scripts/check_resolution_runtime_reliability.py
 python3 scripts/build_source_manifest.py --check
 python3 scripts/check_source_manifest_builder.py
 python3 scripts/generate_source_adapter_output.py --check
@@ -699,6 +719,9 @@ python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
 python3 scripts/connect_transit_api.py --write
+python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_baseline_track_record_gate.py --write
+python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write
@@ -724,6 +747,7 @@ python3 scripts/generate_private_setup_agent_bundles.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
+python3 scripts/generate_resolution_runtime_reliability.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write

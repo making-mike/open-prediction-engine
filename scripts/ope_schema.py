@@ -241,12 +241,20 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "transit-api-connector.schema.json"
     if name.endswith("-transit-delay-forward-run.generated.json"):
         return spec_root / "transit-delay-forward-run.schema.json"
+    if name.endswith("transit-forward-run-corpus.generated.json"):
+        return spec_root / "transit-forward-run-corpus.schema.json"
+    if name.endswith("transit-baseline-track-record-gate.generated.json"):
+        return spec_root / "transit-baseline-track-record-gate.schema.json"
+    if name.endswith("transit-method-options.generated.json"):
+        return spec_root / "transit-method-options.schema.json"
     if name.endswith("resolve-due-forward-runs.generated.json"):
         return spec_root / "transit-forward-run-resolver.schema.json"
     if name.endswith("resolution-jobs.generated.json"):
         return spec_root / "resolution-job-registry.schema.json"
     if name.endswith("resolution-scheduler-run.generated.json"):
         return spec_root / "resolution-scheduler-run.schema.json"
+    if name.endswith("resolution-runtime-reliability.generated.json"):
+        return spec_root / "resolution-runtime-reliability.schema.json"
     if name.endswith("-domain-setup.generated.json"):
         return spec_root / "domain-setup.schema.json"
     if name.endswith("-source-manifest-build.generated.json"):

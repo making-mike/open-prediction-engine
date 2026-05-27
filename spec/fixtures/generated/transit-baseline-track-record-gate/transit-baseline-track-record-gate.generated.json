@@ -1,0 +1,102 @@
+{
+  "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+  "generatedAt": "2026-05-27T14:00:00Z",
+  "domain": "weather-transit-delays",
+  "gateMode": "checked_fixture_gate",
+  "sourceCorpus": {
+    "transitForwardRunCorpusId": "transitforwardruncorpus-001",
+    "corpusPath": "spec/fixtures/generated/transit-forward-run-corpus/transit-forward-run-corpus.generated.json",
+    "corpusMode": "checked_fixture_index",
+    "policyId": "transitforwardruncorpuspolicy-001",
+    "sourceCommand": "python3 scripts/ope.py transit-forward-run-corpus"
+  },
+  "coverageSummary": {
+    "network": "hsl-surface",
+    "geography": "helsinki",
+    "serviceWindow": "morning_peak",
+    "horizonWindowCoverage": {
+      "horizonStartsAt": "2026-06-10T03:00:00Z",
+      "horizonEndsAt": "2026-06-10T07:00:00Z",
+      "comparableWindowCount": 1,
+      "excludedWindowCount": 6,
+      "comparableServiceDates": [
+        "2026-06-10"
+      ],
+      "excludedServiceDates": [
+        "2026-06-11",
+        "2026-06-12",
+        "2026-06-13",
+        "2026-06-14",
+        "2026-06-15",
+        "2026-06-16"
+      ]
+    }
+  },
+  "sampleSummary": {
+    "resolvedComparableSampleSize": 1,
+    "scoredSampleSize": 1,
+    "excludedSampleSize": 6,
+    "pendingSampleSize": 0,
+    "minimumComparableResolvedForTrackRecord": 30,
+    "minimumComparableResolvedForCalibration": 100,
+    "trackRecordStatus": "not_enough_resolved_comparable_outcomes",
+    "calibrationStatus": "not_enough_resolved_comparable_outcomes"
+  },
+  "trackRecordSummary": {
+    "summaryGenerated": true,
+    "status": "not_enough_resolved_comparable_outcomes",
+    "scoringRule": "brier",
+    "higherIsBetter": false,
+    "primaryScore": 0.4489,
+    "baselineScore": 0.5625,
+    "baselineLift": 0.1136,
+    "resolvedSampleSize": 1,
+    "excludedSampleSize": 6,
+    "scoreRows": [
+      {
+        "corpusRunId": "transitforwardruncorpusrun-001",
+        "forwardRunId": "transitdelayforwardrun-001",
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "serviceDate": "2026-06-10",
+        "outcomeLabel": "yes",
+        "primaryScore": 0.4489,
+        "baselineScore": 0.5625,
+        "baselineLift": 0.1136
+      }
+    ]
+  },
+  "calibrationGate": {
+    "summaryGenerated": false,
+    "status": "not_enough_resolved_comparable_outcomes",
+    "reasonCode": "not_enough_resolved_comparable_outcomes",
+    "minimumComparableResolved": 100,
+    "resolvedComparableSampleSize": 1,
+    "calibrationSummary": null
+  },
+  "claimBoundary": {
+    "qualityClaimAllowed": false,
+    "baselineTrackRecordAllowed": false,
+    "calibrationClaimAllowed": false,
+    "reasonCode": "not_enough_resolved_comparable_outcomes",
+    "oneOffForwardRunCanCreateCalibrationEvidence": false,
+    "normalChecksUseLiveNetwork": false,
+    "liveCapturesCommitted": false
+  },
+  "readSurface": {
+    "command": "python3 scripts/ope.py transit-track-record-gate",
+    "sourceCommand": "python3 scripts/ope.py transit-forward-run-corpus",
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "createsCalibrationSummariesBelowThreshold": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This gate reads the checked forward-run corpus and does not execute new forecasts, resolutions, or scores.",
+    "One comparable scored transit run is implementation evidence, not a baseline track record or calibration claim.",
+    "Calibration summaries are withheld until the declared comparable resolved sample threshold is met.",
+    "Excluded corpus rows are audit evidence and do not count toward resolved comparable samples."
+  ]
+}

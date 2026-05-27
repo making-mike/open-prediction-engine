@@ -63,6 +63,10 @@ def main() -> None:
     run_cli("resolve-due-forward-runs", "--check")
     run_cli("resolution-jobs", "--check")
     run_cli("resolution-scheduler", "--check")
+    run_cli("resolution-runtime-reliability", "--check")
+    run_cli("transit-forward-run-corpus", "--check")
+    run_cli("transit-track-record-gate", "--check")
+    run_cli("transit-method-options", "--check")
     run_cli("source-intake", "--check")
     run_cli("source-builder", "--check")
     run_cli("source-adapter-output", "--check")
@@ -454,6 +458,133 @@ def main() -> None:
     resolution_scheduler_check = run_cli("resolution-scheduler", "--check")
     if "checked resolution scheduler" not in resolution_scheduler_check.stdout:
         raise AssertionError("CLI resolution-scheduler --check did not check generated output")
+
+    runtime_reliability = run_cli("resolution-runtime-reliability")
+    runtime_reliability_payload = json.loads(runtime_reliability.stdout)
+    failure_classes = {item["failureClass"] for item in runtime_reliability_payload["failureTaxonomy"]}
+    if len(failure_classes) != 10 or "rate_limits" not in failure_classes:
+        raise AssertionError("CLI resolution-runtime-reliability should expose the checked failure taxonomy")
+    if any(item["rawDiagnosticsExposed"] for item in runtime_reliability_payload["failureTaxonomy"]):
+        raise AssertionError("CLI resolution-runtime-reliability should expose only sanitized failure diagnostics")
+    reliability_boundary = runtime_reliability_payload["executionBoundary"]
+    if not reliability_boundary["readModelDoesNotExecute"] or reliability_boundary["normalChecksUseLiveNetwork"]:
+        raise AssertionError("CLI resolution-runtime-reliability should remain a non-executing offline read model")
+    if reliability_boundary["usesPostCloseOutcomeAsForecastEvidence"]:
+        raise AssertionError("CLI resolution-runtime-reliability must block outcome-as-forecast provenance")
+    if runtime_reliability_payload["sourcePolicyBoundary"]["liveCaptureFilesCommitted"]:
+        raise AssertionError("CLI resolution-runtime-reliability should keep live captures local")
+    resolution_only_actions = [
+        item for item in runtime_reliability_payload["provenanceLedger"] if item["resolutionOnlyEvidence"]
+    ]
+    if not resolution_only_actions or any(item["forecastTimeEvidence"] for item in resolution_only_actions):
+        raise AssertionError("CLI resolution-runtime-reliability should separate resolution-only evidence")
+    runtime_reliability_check = run_cli("resolution-runtime-reliability", "--check")
+    if "checked resolution runtime reliability" not in runtime_reliability_check.stdout:
+        raise AssertionError("CLI resolution-runtime-reliability --check did not check generated output")
+
+    transit_corpus = run_cli("transit-forward-run-corpus")
+    transit_corpus_payload = json.loads(transit_corpus.stdout)
+    corpus_summary = transit_corpus_payload["summary"]
+    if corpus_summary["corpusCount"] != 7:
+        raise AssertionError("CLI transit-forward-run-corpus should expose seven fixture rows")
+    if corpus_summary["comparableResolvedCount"] != 1 or corpus_summary["excludedCount"] != 6:
+        raise AssertionError("CLI transit-forward-run-corpus should expose comparable and excluded counts")
+    exclusion_reasons = {item["exclusionReason"] for item in transit_corpus_payload["excludedRuns"]}
+    if exclusion_reasons != {"ambiguous", "annulled", "low_coverage", "invalid_window", "feed_unavailable", "non_comparable"}:
+        raise AssertionError("CLI transit-forward-run-corpus should expose all exclusion reasons")
+    comparable_run = transit_corpus_payload["comparableRuns"][0]
+    if not comparable_run["forecastBinding"]["forecastBeforeClose"]:
+        raise AssertionError("CLI transit-forward-run-corpus should preserve forecast-before-close timing")
+    if not comparable_run["resolutionBinding"]["resolvedAfterHorizon"]:
+        raise AssertionError("CLI transit-forward-run-corpus should preserve resolution-after-horizon timing")
+    if comparable_run["scoreBinding"]["baselineLift"] <= 0:
+        raise AssertionError("CLI transit-forward-run-corpus should bind score-against-baseline data")
+    corpus_boundary = transit_corpus_payload["claimBoundary"]
+    if corpus_boundary["calibrationClaimAllowed"] or corpus_boundary["baselineTrackRecordAllowed"]:
+        raise AssertionError("CLI transit-forward-run-corpus should block calibration and track-record claims")
+    if transit_corpus_payload["readSurface"]["fetchesLiveData"]:
+        raise AssertionError("CLI transit-forward-run-corpus read surface must not fetch live data")
+    transit_corpus_check = run_cli("transit-forward-run-corpus", "--check")
+    if "checked transit forward-run corpus" not in transit_corpus_check.stdout:
+        raise AssertionError("CLI transit-forward-run-corpus --check did not check generated output")
+
+    transit_track_gate = run_cli("transit-track-record-gate")
+    transit_track_gate_payload = json.loads(transit_track_gate.stdout)
+    gate_samples = transit_track_gate_payload["sampleSummary"]
+    if gate_samples["resolvedComparableSampleSize"] != 1 or gate_samples["excludedSampleSize"] != 6:
+        raise AssertionError("CLI transit-track-record-gate should expose resolved and excluded sample sizes")
+    if gate_samples["trackRecordStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("CLI transit-track-record-gate should keep track-record status below threshold")
+    if gate_samples["calibrationStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("CLI transit-track-record-gate should keep calibration status below threshold")
+    track_summary = transit_track_gate_payload["trackRecordSummary"]
+    if track_summary["primaryScore"] != 0.4489 or track_summary["baselineScore"] != 0.5625:
+        raise AssertionError("CLI transit-track-record-gate should expose Brier and baseline scores")
+    if track_summary["baselineLift"] != 0.1136:
+        raise AssertionError("CLI transit-track-record-gate should expose baseline lift")
+    if track_summary["resolvedSampleSize"] != 1 or track_summary["excludedSampleSize"] != 6:
+        raise AssertionError("CLI transit-track-record-gate should expose sample sizes in summary")
+    horizon_coverage = transit_track_gate_payload["coverageSummary"]["horizonWindowCoverage"]
+    if horizon_coverage["comparableWindowCount"] != 1 or horizon_coverage["excludedWindowCount"] != 6:
+        raise AssertionError("CLI transit-track-record-gate should expose horizon/window coverage")
+    calibration_gate = transit_track_gate_payload["calibrationGate"]
+    if calibration_gate["summaryGenerated"] or calibration_gate["calibrationSummary"] is not None:
+        raise AssertionError("CLI transit-track-record-gate should not generate below-threshold calibration")
+    gate_boundary = transit_track_gate_payload["claimBoundary"]
+    if (
+        gate_boundary["qualityClaimAllowed"]
+        or gate_boundary["baselineTrackRecordAllowed"]
+        or gate_boundary["calibrationClaimAllowed"]
+    ):
+        raise AssertionError("CLI transit-track-record-gate should block quality, track-record, and calibration claims")
+    if gate_boundary["oneOffForwardRunCanCreateCalibrationEvidence"]:
+        raise AssertionError("CLI transit-track-record-gate must reject one-off calibration evidence")
+    if transit_track_gate_payload["readSurface"]["fetchesLiveData"]:
+        raise AssertionError("CLI transit-track-record-gate read surface must not fetch live data")
+    transit_track_gate_check = run_cli("transit-track-record-gate", "--check")
+    if "checked transit baseline track-record gate" not in transit_track_gate_check.stdout:
+        raise AssertionError("CLI transit-track-record-gate --check did not check generated output")
+
+    transit_method_options = run_cli("transit-method-options")
+    transit_method_options_payload = json.loads(transit_method_options.stdout)
+    default_selection = transit_method_options_payload["defaultSelection"]
+    if not default_selection["baselineOnlyDefault"] or default_selection["selectedMethodId"] != "transitmethod-100":
+        raise AssertionError("CLI transit-method-options should keep baseline as default")
+    method_evidence = transit_method_options_payload["corpusEvidence"]
+    if method_evidence["resolvedComparableSampleSize"] != 1:
+        raise AssertionError("CLI transit-method-options should expose one comparable sample")
+    if method_evidence["minimumComparableResolvedForNonBaselineSelection"] != 30:
+        raise AssertionError("CLI transit-method-options should preserve non-baseline threshold")
+    method_options = {item["methodId"]: item for item in transit_method_options_payload["methodOptions"]}
+    weather_method = method_options["transitmethod-101"]
+    if weather_method["status"] != "evidence_only" or weather_method["selectionEligibility"] != "rejected":
+        raise AssertionError("CLI transit-method-options should keep weather adjustment evidence-only")
+    if weather_method["baselineLift"] != 0.1136:
+        raise AssertionError("CLI transit-method-options should expose weather-adjustment baseline lift")
+    if "resolved_comparable_sample_below_threshold" not in weather_method["rejectionReasons"]:
+        raise AssertionError("CLI transit-method-options should reject weather adjustment below threshold")
+    for method_id in ["transitmethod-201", "transitmethod-301", "transitmethod-401", "transitmethod-501", "transitmethod-601"]:
+        if method_options[method_id]["selectionEligibility"] != "proposed_only":
+            raise AssertionError("CLI transit-method-options should keep richer methods proposed-only")
+    method_comparison = transit_method_options_payload["methodComparison"]
+    if method_comparison["sameWindowOutcomeUsedAsForecastEvidence"]:
+        raise AssertionError("CLI transit-method-options must not use same-window outcomes as forecast evidence")
+    if method_comparison["bestCandidateBaselineLift"] != 0.1136:
+        raise AssertionError("CLI transit-method-options should expose method comparison lift")
+    method_boundary = transit_method_options_payload["claimBoundary"]
+    if (
+        method_boundary["nonBaselineSelectionAllowed"]
+        or method_boundary["trainedMlAllowed"]
+        or method_boundary["ensembleAllowed"]
+        or method_boundary["retrievalAssistedAllowed"]
+        or method_boundary["externalReferenceAllowed"]
+    ):
+        raise AssertionError("CLI transit-method-options should block non-baseline and richer method families")
+    if transit_method_options_payload["readSurface"]["selectsNonBaselineMethod"]:
+        raise AssertionError("CLI transit-method-options read surface must not select a non-baseline method")
+    transit_method_options_check = run_cli("transit-method-options", "--check")
+    if "checked transit method options" not in transit_method_options_check.stdout:
+        raise AssertionError("CLI transit-method-options --check did not check generated output")
 
     transit_api_connector = run_cli("transit-api-connector")
     transit_api_connector_payload = json.loads(transit_api_connector.stdout)
@@ -1262,8 +1393,8 @@ def main() -> None:
 
     agent_envelopes = run_cli("agent-envelopes")
     agent_envelopes_payload = json.loads(agent_envelopes.stdout)
-    if agent_envelopes_payload["count"] != 45:
-        raise AssertionError("CLI agent-envelopes should return forty-two success envelopes and three error envelopes")
+    if agent_envelopes_payload["count"] != 51:
+        raise AssertionError("CLI agent-envelopes should return forty-four success envelopes and seven error envelopes")
     success_operations = {
         item["operation"]
         for item in agent_envelopes_payload["envelopes"]
@@ -1282,6 +1413,8 @@ def main() -> None:
         or "private_setup_source_handoff" not in success_operations
         or "private_setup_method_gate" not in success_operations
         or "private_setup_forecast_execution" not in success_operations
+        or "resolution_jobs" not in success_operations
+        or "resolution_scheduler_status" not in success_operations
     ):
         raise AssertionError("CLI agent-envelopes should expose card, evidence trace, scoring, and private setup operations")
     readback_cards = [
@@ -1294,10 +1427,28 @@ def main() -> None:
         raise AssertionError("CLI agent-envelopes should include a private setup forecast-card readback example")
     if readback_cards[0]["payload"]["record"]["setupBinding"]["setupForecastRunId"] != "setupforecastrun-1102":
         raise AssertionError("CLI agent-envelopes should preserve setup forecast run binding in readback")
+    error_envelopes = [
+        item for item in agent_envelopes_payload["envelopes"]
+        if item["status"] == "error"
+    ]
+    error_cases = {
+        (item["operation"], item["adapterRequest"]["inputRef"], item["error"]["code"])
+        for item in error_envelopes
+    }
+    expected_resolution_errors = {
+        ("resolution_jobs", "resolutionjobregistry-998", "not_found"),
+        ("resolution_jobs", "resolutionjobregistry-997", "access_denied"),
+        ("resolution_scheduler_status", "resolutionschedulerstatus-998", "validation_failed"),
+        ("resolution_scheduler_status", "resolutionschedulerstatus-997", "response_too_large"),
+    }
+    if not expected_resolution_errors.issubset(error_cases):
+        raise AssertionError("CLI agent-envelopes should include sanitized resolution readback error examples")
+    if any(item["payload"] is not None for item in error_envelopes):
+        raise AssertionError("CLI agent-envelopes sanitized errors should not include payloads")
 
     agent_protocol_map = run_cli("agent-protocol-map")
     agent_protocol_map_payload = json.loads(agent_protocol_map.stdout)
-    if len(agent_protocol_map_payload["operations"]) != 16:
+    if len(agent_protocol_map_payload["operations"]) != 18:
         raise AssertionError("CLI agent-protocol-map should expose every agent operation")
     protocol_runtime = agent_protocol_map_payload["adapterContract"]["protocolRuntimeImplemented"]
     if protocol_runtime is not True:
@@ -1322,6 +1473,12 @@ def main() -> None:
         raise AssertionError("CLI agent-protocol-map should expose the conformance summary input type")
     if conformance_summary_operation["sideEffectLevel"] != "read_only":
         raise AssertionError("CLI agent-protocol-map should keep conformance summary read-only")
+    if protocol_operations["resolution_jobs"]["inputRecordType"] != "resolution_job_registry":
+        raise AssertionError("CLI agent-protocol-map should expose resolution job registry readbacks")
+    if protocol_operations["resolution_scheduler_status"]["inputRecordType"] != "resolution_scheduler_status":
+        raise AssertionError("CLI agent-protocol-map should expose scheduler status readbacks")
+    if protocol_operations["resolution_scheduler_status"]["sideEffectLevel"] != "read_only":
+        raise AssertionError("CLI agent-protocol-map should keep scheduler status read-only")
 
     agent_call = run_cli(
         "agent-call",
@@ -1399,6 +1556,38 @@ def main() -> None:
         raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should not execute")
     if adapter_conformance_summary_call_record["executionBoundary"]["createsForecastArtifacts"] is not False:
         raise AssertionError("CLI private-setup-adapter-conformance-summary agent-call should not create forecast artifacts")
+
+    resolution_jobs_call = run_cli(
+        "agent-call",
+        "--operation",
+        "resolution_jobs",
+    )
+    resolution_jobs_call_payload = json.loads(resolution_jobs_call.stdout)
+    if resolution_jobs_call_payload["status"] != "ok":
+        raise AssertionError("CLI resolution-jobs agent-call should return an ok envelope")
+    resolution_jobs_call_record = resolution_jobs_call_payload["payload"]
+    if resolution_jobs_call_record["summary"]["pendingDueCount"] != 1:
+        raise AssertionError("CLI resolution-jobs agent-call should expose due work")
+    if resolution_jobs_call_record["executionBoundary"]["registryExecutesResolvers"] is not False:
+        raise AssertionError("CLI resolution-jobs agent-call should not execute resolvers")
+
+    scheduler_status_call = run_cli(
+        "agent-call",
+        "--operation",
+        "resolution_scheduler_status",
+    )
+    scheduler_status_call_payload = json.loads(scheduler_status_call.stdout)
+    if scheduler_status_call_payload["status"] != "ok":
+        raise AssertionError("CLI resolution-scheduler-status agent-call should return an ok envelope")
+    scheduler_status_record = scheduler_status_call_payload["payload"]
+    if scheduler_status_record["lastTick"]["tickStatus"] != "due_pending":
+        raise AssertionError("CLI resolution-scheduler-status agent-call should expose the latest tick")
+    if scheduler_status_record["executionMode"] != "dry_run":
+        raise AssertionError("CLI resolution-scheduler-status agent-call should expose dry-run mode")
+    if scheduler_status_record["logPath"] != ".ope/live/resolution-scheduler/scheduler-runs.jsonl":
+        raise AssertionError("CLI resolution-scheduler-status agent-call should expose the log path")
+    if scheduler_status_record["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("CLI resolution-scheduler-status agent-call should not execute resolvers")
 
     source_guidance_call = run_cli(
         "agent-call",

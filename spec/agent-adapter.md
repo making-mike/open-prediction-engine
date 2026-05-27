@@ -11,7 +11,7 @@ The envelope schema is `spec/agent-envelope.schema.json`. Generated examples liv
 Each envelope carries:
 
 - adapter identity: local CLI and local MCP stdio now, future HTTP/queue surfaces later
-- operation: forecast request validation, evidence plan, evidence trace, forecast card, lifecycle bundle, private setup bundle, private setup adapter runbook, private source adapter guidance, private source-kind selection, private setup source-builder, private setup source-handoff, private setup method-gate, private setup forecast execution, resolution status, or scoring summary
+- operation: forecast request validation, evidence plan, evidence trace, forecast card, lifecycle bundle, private setup bundle, private setup adapter runbook, private setup adapter conformance summary, private source adapter guidance, private source-kind selection, private setup source-builder, private setup source-handoff, private setup method-gate, private setup forecast execution, resolution jobs, resolution scheduler status, resolution status, or scoring summary
 - input reference and record binding fields
 - lifecycle state fields that agents can read without parsing every nested record
 - status and standardized exit code
@@ -69,6 +69,8 @@ The schema enforces the basic status shape: successful envelopes use `status: ok
 | Read source-handoff next actions | Implemented, checked handoff cases only | Implemented as stdio tool | Future confirmation-gated wrapper | Future controlled handoff task |
 | Read setup method-gate guidance | Implemented, checked method-gate cases only | Implemented as stdio tool | Future benchmark-gated wrapper | Future controlled method-gate task |
 | Run setup forecast execution | Implemented, checked fixture cases only | Implemented as stdio tool | Future approval-gated wrapper | Future controlled forecast task |
+| Read resolution jobs | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
+| Read resolution scheduler status | Implemented, read-only | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Read resolution status | Implemented through envelope fixture | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Read scoring summary | Implemented through envelope fixture | Implemented as stdio tool | GET/read wrapper | Read result message |
 | Live fetch | Not implemented for production | Must be approval and source-policy gated | Must be approval and source-policy gated | Must be approval and source-policy gated |
@@ -208,6 +210,26 @@ python3 scripts/ope.py agent-call \
 ```
 
 The payload includes `setupForecastRun`, source-handoff/method-decision bindings, and forecast artifacts only for the confirmed handoff case. Blocked cases return `runStatus: blocked`, null forecast IDs, and next-action guidance. The operation does not resolve outcomes, score forecasts, fetch live data, accept raw private data, or store credentials.
+
+For due-resolution work, agents can read the checked resolution-job registry through the same envelope surface:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation resolution_jobs
+```
+
+The payload exposes pending due, waiting, already resolved, and invalid job guidance. It does not execute resolver commands, fetch live sources, create forecast artifacts, create resolution artifacts, score outcomes, install schedulers, or make calibration claims.
+Generated error examples cover missing live workspaces and unreadable state files with sanitized envelopes.
+
+Agents can also read the latest checked scheduler status without starting a scheduler:
+
+```bash
+python3 scripts/ope.py agent-call \
+  --operation resolution_scheduler_status
+```
+
+The payload includes the last tick, last shutdown reason, log path, execution mode, compact queue-state readbacks, and next recommended action. It remains read-only and cannot execute due jobs.
+Generated error examples cover malformed scheduler logs and oversized scheduler readbacks with sanitized envelopes.
 
 After a generated setup forecast, agents read the returned forecast through the normal forecast operations:
 

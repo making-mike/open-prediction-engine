@@ -69,6 +69,10 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/runtime-validation.md`: local contract validation surface and supported schema subset.
 - `spec/forecast-pipeline.md`: local fixture-mode forecast pipeline scaffold.
 - `spec/pipeline-resolution.md`: fixture-mode resolution of request-bound pipeline forecasts.
+- `spec/transit-forward-run-corpus.md`: checked public transport forward-run corpus counts, exclusions, and claim boundary.
+- `spec/transit-baseline-track-record-gate.md`: checked baseline track-record and calibration gate for the transit corpus.
+- `spec/transit-method-options.md`: checked public transport MVP method options and baseline-default boundary.
+- `spec/resolution-runtime-reliability.md`: checked failure taxonomy, retry guidance, provenance ledger, and live-source boundary for the resolution runtime.
 - `spec/release-manifest.md`: generated local release manifest and claim boundary summary.
 - `spec/ci-release-gate.md`: CI release workflow boundary and local guard.
 
@@ -154,6 +158,14 @@ python3 scripts/check_source_connectors.py
 python3 scripts/generate_live_connector_readiness.py --check
 python3 scripts/check_live_connector_readiness.py
 python3 scripts/check_live_capture_workspace.py
+python3 scripts/run_transit_delay_forward.py --check
+python3 scripts/check_transit_delay_forward.py
+python3 scripts/generate_transit_forward_run_corpus.py --check
+python3 scripts/check_transit_forward_run_corpus.py
+python3 scripts/generate_transit_baseline_track_record_gate.py --check
+python3 scripts/check_transit_baseline_track_record_gate.py
+python3 scripts/generate_transit_method_options.py --check
+python3 scripts/check_transit_method_options.py
 python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
 python3 scripts/build_source_manifest.py --check
@@ -192,6 +204,8 @@ python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
 python3 scripts/check_private_setup_adapter_conformance_matrix.py
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --check
 python3 scripts/check_private_setup_adapter_conformance_summary.py
+python3 scripts/generate_resolution_runtime_reliability.py --check
+python3 scripts/check_resolution_runtime_reliability.py
 python3 scripts/generate_private_source_adapter_capabilities.py --check
 python3 scripts/check_private_source_adapter_capabilities.py
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --check
@@ -227,7 +241,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -267,6 +281,9 @@ python3 scripts/ope.py gather-evidence
 python3 scripts/ope.py source-connectors
 python3 scripts/ope.py live-readiness
 python3 scripts/ope.py live-capture --input .ope/live/open-meteo-warsaw-YYYY-MM-DD-source-connector-results.json --check
+python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-track-record-gate
+python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py domain-setups
 python3 scripts/ope.py source-builder
 python3 scripts/ope.py source-handoff
@@ -305,6 +322,9 @@ python3 scripts/ope.py forecast-run-matrix
 python3 scripts/ope.py forecast-runbook
 python3 scripts/ope.py agent-envelopes
 python3 scripts/ope.py agent-protocol-map
+python3 scripts/ope.py resolution-runtime-reliability
+python3 scripts/ope.py transit-track-record-gate
+python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601
 python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001
 python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook
@@ -347,6 +367,9 @@ python3 scripts/plan_auto_evidence.py --write
 python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
+python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_baseline_track_record_gate.py --write
+python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_intake_handoff.py --write
@@ -371,6 +394,7 @@ python3 scripts/generate_private_setup_agent_bundles.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
+python3 scripts/generate_resolution_runtime_reliability.py --write
 python3 scripts/generate_private_source_adapter_capabilities.py --write
 python3 scripts/generate_private_source_adapter_outcome_matrix.py --write
 python3 scripts/generate_private_source_adapter_intake_bridge.py --write
@@ -454,6 +478,7 @@ Still needed before any hosted or service release:
 ## Commit Rules
 
 - Commit only when the user explicitly asks for a commit or the task clearly includes publishing the work.
+- For multi-milestone work, commit after each completed milestone once the relevant checks pass, unless the user explicitly asks not to commit.
 - Keep each commit to one coherent, reviewable slice.
 - Before staging, inspect `git status` and relevant `git diff`; stage only files that belong to the current change.
 - Include required schemas, fixtures, generated reports, docs, roadmap updates, and decision-log entries with the behavior that requires them.

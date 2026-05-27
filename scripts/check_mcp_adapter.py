@@ -116,7 +116,7 @@ def assert_forecast_run_result(
 def main() -> None:
     matrix, _summaries = build_matrix()
     expected_outcomes = {item["outcomeClass"]: item for item in matrix["outcomes"]}
-    forecast_run_start_id = 16
+    forecast_run_start_id = 18
     forecast_run_ids = {
         case.outcome_class: forecast_run_start_id + index
         for index, case in enumerate(CASES)
@@ -274,6 +274,22 @@ def main() -> None:
                     "arguments": {
                         "sourceKind": "private_api",
                     },
+                },
+            ),
+            message(
+                16,
+                "tools/call",
+                {
+                    "name": "ope_resolution_jobs",
+                    "arguments": {},
+                },
+            ),
+            message(
+                17,
+                "tools/call",
+                {
+                    "name": "ope_resolution_scheduler_status",
+                    "arguments": {},
                 },
             ),
             *forecast_run_messages,
@@ -519,6 +535,34 @@ def main() -> None:
         raise AssertionError("selected private-source-kind-selection MCP tool must not run commands")
     if selected_source_selection_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
         raise AssertionError("selected private-source-kind-selection MCP tool must not create forecast artifacts")
+
+    resolution_jobs = indexed[16]["result"]
+    if resolution_jobs.get("isError"):
+        raise AssertionError("resolution-jobs MCP tool should succeed")
+    resolution_jobs_envelope = resolution_jobs["structuredContent"]
+    assert_envelope(resolution_jobs_envelope)
+    if resolution_jobs_envelope["operation"] != "resolution_jobs":
+        raise AssertionError("resolution-jobs MCP tool returned the wrong operation")
+    resolution_jobs_payload = resolution_jobs_envelope["payload"]
+    if resolution_jobs_payload["summary"]["pendingDueCount"] != 1:
+        raise AssertionError("resolution-jobs MCP tool should expose one due job")
+    if resolution_jobs_payload["executionBoundary"]["registryExecutesResolvers"] is not False:
+        raise AssertionError("resolution-jobs MCP tool must not execute resolvers")
+
+    scheduler_status = indexed[17]["result"]
+    if scheduler_status.get("isError"):
+        raise AssertionError("resolution-scheduler-status MCP tool should succeed")
+    scheduler_status_envelope = scheduler_status["structuredContent"]
+    assert_envelope(scheduler_status_envelope)
+    if scheduler_status_envelope["operation"] != "resolution_scheduler_status":
+        raise AssertionError("resolution-scheduler-status MCP tool returned the wrong operation")
+    scheduler_status_payload = scheduler_status_envelope["payload"]
+    if scheduler_status_payload["lastTick"]["tickStatus"] != "due_pending":
+        raise AssertionError("resolution-scheduler-status MCP tool should expose the latest tick")
+    if scheduler_status_payload["executionMode"] != "dry_run":
+        raise AssertionError("resolution-scheduler-status MCP tool should expose dry-run mode")
+    if scheduler_status_payload["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("resolution-scheduler-status MCP tool must not execute resolvers")
 
     for case in CASES:
         result = indexed[forecast_run_ids[case.outcome_class]]["result"]

@@ -73,6 +73,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     transit_forward_resolver_command = [sys.executable, "scripts/resolve_due_transit_forward_runs.py"]
     resolution_jobs_command = [sys.executable, "scripts/generate_resolution_jobs.py"]
     resolution_scheduler_command = [sys.executable, "scripts/run_resolution_scheduler.py"]
+    resolution_runtime_reliability_command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
+    transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
+    transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
+    transit_method_options_command = [sys.executable, "scripts/generate_transit_method_options.py"]
     source_intake_command = [sys.executable, "scripts/generate_source_intake.py"]
     source_builder_command = [sys.executable, "scripts/build_source_manifest.py"]
     source_adapter_output_command = [sys.executable, "scripts/generate_source_adapter_output.py"]
@@ -127,6 +131,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         transit_forward_resolver_command.append("--write")
         resolution_jobs_command.append("--write")
         resolution_scheduler_command.append("--write")
+        resolution_runtime_reliability_command.append("--write")
+        transit_forward_run_corpus_command.append("--write")
+        transit_track_record_gate_command.append("--write")
+        transit_method_options_command.append("--write")
         source_intake_command.append("--write")
         source_builder_command.append("--write")
         source_adapter_output_command.append("--write")
@@ -178,6 +186,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         transit_forward_resolver_command.append("--check")
         resolution_jobs_command.append("--check")
         resolution_scheduler_command.append("--check")
+        resolution_runtime_reliability_command.append("--check")
+        transit_forward_run_corpus_command.append("--check")
+        transit_track_record_gate_command.append("--check")
+        transit_method_options_command.append("--check")
         source_intake_command.append("--check")
         source_builder_command.append("--check")
         source_adapter_output_command.append("--check")
@@ -223,6 +235,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(transit_forward_resolver_command)
     run(resolution_jobs_command)
     run(resolution_scheduler_command)
+    run(resolution_runtime_reliability_command)
+    run(transit_forward_run_corpus_command)
+    run(transit_track_record_gate_command)
+    run(transit_method_options_command)
     run(source_intake_command)
     run(source_builder_command)
     run(source_adapter_output_command)
@@ -626,6 +642,42 @@ def cmd_resolution_scheduler(args: argparse.Namespace) -> None:
         command.extend(["--max-bytes", str(args.max_bytes)])
     if args.static_gtfs_max_bytes is not None:
         command.extend(["--static-gtfs-max-bytes", str(args.static_gtfs_max_bytes)])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_resolution_runtime_reliability(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_forward_run_corpus(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_track_record_gate(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_method_options(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_transit_method_options.py"]
     if args.check:
         command.append("--check")
     if args.write:
@@ -1377,6 +1429,70 @@ def build_parser() -> argparse.ArgumentParser:
     resolution_scheduler.add_argument("--write", action="store_true", help="refresh generated scheduler fixture")
     resolution_scheduler.set_defaults(func=cmd_resolution_scheduler)
 
+    resolution_runtime_reliability = subparsers.add_parser(
+        "resolution-runtime-reliability",
+        help="print checked resolution runtime failure and provenance guidance",
+    )
+    resolution_runtime_reliability.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated resolution runtime reliability drift",
+    )
+    resolution_runtime_reliability.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated resolution runtime reliability fixture",
+    )
+    resolution_runtime_reliability.set_defaults(func=cmd_resolution_runtime_reliability)
+
+    transit_forward_run_corpus = subparsers.add_parser(
+        "transit-forward-run-corpus",
+        help="print checked public transport forward-run corpus counts and exclusions",
+    )
+    transit_forward_run_corpus.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated transit forward-run corpus drift",
+    )
+    transit_forward_run_corpus.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated transit forward-run corpus fixture",
+    )
+    transit_forward_run_corpus.set_defaults(func=cmd_transit_forward_run_corpus)
+
+    transit_track_record_gate = subparsers.add_parser(
+        "transit-track-record-gate",
+        help="print checked public transport baseline track-record and calibration gate",
+    )
+    transit_track_record_gate.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated transit baseline track-record gate drift",
+    )
+    transit_track_record_gate.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated transit baseline track-record gate fixture",
+    )
+    transit_track_record_gate.set_defaults(func=cmd_transit_track_record_gate)
+
+    transit_method_options = subparsers.add_parser(
+        "transit-method-options",
+        help="print checked public transport MVP method options and selection boundary",
+    )
+    transit_method_options.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated transit method options drift",
+    )
+    transit_method_options.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated transit method options fixture",
+    )
+    transit_method_options.set_defaults(func=cmd_transit_method_options)
+
     source_intake = subparsers.add_parser(
         "source-intake",
         help="check, refresh, or print source-manifest and field-mapping intake reports",
@@ -1886,6 +2002,8 @@ def build_parser() -> argparse.ArgumentParser:
             "private_setup_source_handoff",
             "private_setup_method_gate",
             "private_setup_forecast_execution",
+            "resolution_jobs",
+            "resolution_scheduler_status",
             "resolution_status",
             "scoring_summary",
         ],

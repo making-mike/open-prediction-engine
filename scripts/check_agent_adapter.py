@@ -33,6 +33,8 @@ REQUIRED_SUCCESS_OPERATIONS = {
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "resolution_jobs",
+    "resolution_scheduler_status",
     "resolution_status",
     "scoring_summary",
 }
@@ -59,8 +61,8 @@ def main() -> None:
     envelopes = build_envelopes()
     if set(envelopes) != set(OUTPUT_FILES.values()):
         raise AssertionError("agent adapter should emit the expected fixed envelope filenames")
-    if len(envelopes) != 45:
-        raise AssertionError("agent adapter should emit forty-two success envelopes and three error envelopes")
+    if len(envelopes) != 51:
+        raise AssertionError("agent adapter should emit forty-four success envelopes and seven error envelopes")
     cache_info = source_handoff_forecast_outputs_cache_info()
     if cache_info.misses != 1 or cache_info.hits < len(FORECAST_EXECUTION_ENVELOPE_CASES) - 1:
         raise AssertionError("agent adapter should reuse source-handoff forecast outputs across execution cases")
@@ -69,13 +71,25 @@ def main() -> None:
     error = [item for item in envelopes.values() if item["status"] == "error"]
     if {item["operation"] for item in success} != REQUIRED_SUCCESS_OPERATIONS:
         raise AssertionError("agent adapter success envelopes should cover every required operation")
-    if len(error) != 3:
-        raise AssertionError("agent adapter should include exactly three sanitized error examples")
+    if len(success) != 44:
+        raise AssertionError("agent adapter should include exactly forty-four success examples")
+    if len(error) != 7:
+        raise AssertionError("agent adapter should include exactly seven sanitized error examples")
     if any(item["exitCode"] != 0 for item in success):
         raise AssertionError("successful agent envelopes should use exit code 0")
+    if any(text_contains_local_absolute_path(item) for item in error):
+        raise AssertionError("sanitized error envelopes should not expose absolute local paths")
 
-    errors_by_operation = {item["operation"]: item for item in error}
-    error_envelope = errors_by_operation["forecast_card"]
+    def find_error_envelope(operation: str, input_ref: str | None = None) -> dict[str, object]:
+        for item in error:
+            if item["operation"] != operation:
+                continue
+            if input_ref is not None and item["adapterRequest"]["inputRef"] != input_ref:
+                continue
+            return item
+        raise AssertionError(f"missing error envelope for {operation} {input_ref or ''}".strip())
+
+    error_envelope = find_error_envelope("forecast_card")
     if error_envelope["operation"] != "forecast_card":
         raise AssertionError("sanitized error example should use the forecast-card operation")
     if error_envelope["exitCode"] != 4:
@@ -84,10 +98,8 @@ def main() -> None:
         raise AssertionError("missing record error should use the not_found code")
     if error_envelope["payload"] is not None:
         raise AssertionError("error envelopes should not carry a success payload")
-    if text_contains_local_absolute_path(error_envelope):
-        raise AssertionError("sanitized error envelope should not expose absolute local paths")
 
-    private_error = errors_by_operation["private_setup_bundle"]
+    private_error = find_error_envelope("private_setup_bundle")
     if private_error["exitCode"] != 4:
         raise AssertionError("missing private setup bundle errors should map to exit code 4")
     if private_error["error"]["code"] != "not_found":
@@ -96,18 +108,45 @@ def main() -> None:
         raise AssertionError("missing private setup bundle error should preserve requested setup request id")
     if private_error["payload"] is not None:
         raise AssertionError("private setup bundle error envelope should not carry a success payload")
-    if text_contains_local_absolute_path(private_error):
-        raise AssertionError("private setup error envelope should not expose absolute local paths")
 
-    source_builder_error = errors_by_operation["private_setup_source_builder"]
+    source_builder_error = find_error_envelope("private_setup_source_builder")
     if source_builder_error["exitCode"] != 2:
         raise AssertionError("malformed source-builder errors should map to exit code 2")
     if source_builder_error["error"]["code"] != "validation_failed":
         raise AssertionError("malformed source-builder error should use the validation_failed code")
     if source_builder_error["payload"] is not None:
         raise AssertionError("source-builder error envelope should not carry a success payload")
-    if text_contains_local_absolute_path(source_builder_error):
-        raise AssertionError("source-builder error envelope should not expose absolute local paths")
+    missing_workspace_error = find_error_envelope("resolution_jobs", "resolutionjobregistry-998")
+    if missing_workspace_error["exitCode"] != 4 or missing_workspace_error["error"]["code"] != "not_found":
+        raise AssertionError("missing live workspace errors should map to sanitized not_found")
+    if missing_workspace_error["state"]["planStatus"] != "missing_live_workspace":
+        raise AssertionError("missing live workspace error should expose safe plan status")
+    if missing_workspace_error["payload"] is not None:
+        raise AssertionError("missing live workspace error envelope should not carry a payload")
+
+    unreadable_state_error = find_error_envelope("resolution_jobs", "resolutionjobregistry-997")
+    if unreadable_state_error["exitCode"] != 4 or unreadable_state_error["error"]["code"] != "access_denied":
+        raise AssertionError("unreadable state errors should map to sanitized access_denied")
+    if unreadable_state_error["state"]["planStatus"] != "unreadable_state_file":
+        raise AssertionError("unreadable state error should expose safe plan status")
+    if unreadable_state_error["payload"] is not None:
+        raise AssertionError("unreadable state error envelope should not carry a payload")
+
+    malformed_log_error = find_error_envelope("resolution_scheduler_status", "resolutionschedulerstatus-998")
+    if malformed_log_error["exitCode"] != 2 or malformed_log_error["error"]["code"] != "validation_failed":
+        raise AssertionError("malformed scheduler logs should map to sanitized validation_failed")
+    if malformed_log_error["state"]["planStatus"] != "malformed_scheduler_log":
+        raise AssertionError("malformed scheduler log error should expose safe plan status")
+    if malformed_log_error["payload"] is not None:
+        raise AssertionError("malformed scheduler log error envelope should not carry a payload")
+
+    oversized_readback_error = find_error_envelope("resolution_scheduler_status", "resolutionschedulerstatus-997")
+    if oversized_readback_error["exitCode"] != 5 or oversized_readback_error["error"]["code"] != "response_too_large":
+        raise AssertionError("oversized scheduler readbacks should map to sanitized response_too_large")
+    if oversized_readback_error["state"]["planStatus"] != "oversized_readback":
+        raise AssertionError("oversized scheduler readback error should expose safe plan status")
+    if oversized_readback_error["payload"] is not None:
+        raise AssertionError("oversized scheduler readback error envelope should not carry a payload")
 
     def success_envelope(operation: str, forecast_id: str | None = None) -> dict[str, object]:
         for item in success:
@@ -165,6 +204,34 @@ def main() -> None:
         raise AssertionError("scoring-summary envelope should preserve positive baseline lift")
     if scoring["recordBinding"]["scoringReportId"] != "scoring-601":
         raise AssertionError("scoring-summary envelope should preserve scoring binding")
+
+    resolution_jobs = success_envelope("resolution_jobs")
+    resolution_jobs_payload = resolution_jobs["payload"]
+    if resolution_jobs_payload["summary"]["pendingDueCount"] != 1:
+        raise AssertionError("resolution-jobs envelope should expose one due fixture job")
+    if resolution_jobs_payload["executionBoundary"]["registryExecutesResolvers"] is not False:
+        raise AssertionError("resolution-jobs envelope must not execute resolvers")
+    due_jobs = [job for job in resolution_jobs_payload["jobs"] if job["jobStatus"] == "pending_due"]
+    if due_jobs[0]["agentAction"]["recommendedAction"] != "call_resolver_execute":
+        raise AssertionError("resolution-jobs envelope should route due jobs to resolver execution")
+    if resolution_jobs["state"]["resolutionStatus"] != "pending_due":
+        raise AssertionError("resolution-jobs envelope state should show due work")
+
+    scheduler_status = success_envelope("resolution_scheduler_status")
+    scheduler_status_payload = scheduler_status["payload"]
+    if scheduler_status_payload["executionMode"] != "dry_run":
+        raise AssertionError("resolution-scheduler-status envelope should expose dry-run mode")
+    if scheduler_status_payload["lastTick"]["tickStatus"] != "due_pending":
+        raise AssertionError("resolution-scheduler-status envelope should expose the latest due-pending tick")
+    if scheduler_status_payload["logPath"] != ".ope/live/resolution-scheduler/scheduler-runs.jsonl":
+        raise AssertionError("resolution-scheduler-status envelope should expose the scheduler log path")
+    queue_states = {row["queueState"]: row for row in scheduler_status_payload["queueStatusReadbacks"]}
+    if set(queue_states) != {"pending_due", "pending_not_due", "already_resolved", "invalid_state", "failed", "empty_queue"}:
+        raise AssertionError("resolution-scheduler-status envelope should expose every compact queue state")
+    if queue_states["pending_due"]["presentInLatestTick"] is not True:
+        raise AssertionError("resolution-scheduler-status envelope should mark due work present")
+    if scheduler_status_payload["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("resolution-scheduler-status envelope must not execute resolvers")
 
     setup_card = success_envelope("forecast_card", "forecast-1102")
     setup_card_record = setup_card["payload"]["record"]
@@ -250,6 +317,17 @@ def main() -> None:
         raise AssertionError("private-setup-adapter-conformance-summary envelope should expose total conformance cases")
     if adapter_conformance_summary_payload["readSurface"]["compactSummaryDoesNotEmbedEnvelopes"] is not True:
         raise AssertionError("private-setup-adapter-conformance-summary envelope should remain compact")
+    size_budget = adapter_conformance_summary_payload["sizeBudget"]
+    if len(render_json(adapter_conformance_summary_payload).encode("utf-8")) > size_budget["compactSummaryPayloadMaxBytes"]:
+        raise AssertionError("private-setup-adapter-conformance-summary payload should fit its compact budget")
+    if len(render_json(adapter_conformance_summary).encode("utf-8")) > size_budget["compactAgentEnvelopeMaxBytes"]:
+        raise AssertionError("private-setup-adapter-conformance-summary envelope should fit its compact budget")
+    if size_budget["fullMatrixRequiresExplicitCommand"] is not True:
+        raise AssertionError("private-setup-adapter-conformance-summary should make full matrix reads explicit")
+    if size_budget["oversizedAdapterErrorCode"] != "response_too_large":
+        raise AssertionError("private-setup-adapter-conformance-summary should declare response_too_large for oversized reads")
+    if "operationCases" in adapter_conformance_summary_payload:
+        raise AssertionError("private-setup-adapter-conformance-summary payload should not embed matrix rows")
     if adapter_conformance_summary_payload["artifactBoundary"]["artifactCreationAllowedOnlyFor"] != "private_setup_forecast_execution:confirmed_builder_draft":
         raise AssertionError("private-setup-adapter-conformance-summary envelope should keep artifact creation scoped")
     if adapter_conformance_summary_payload["executionBoundary"]["summaryDoesNotExecute"] is not True:

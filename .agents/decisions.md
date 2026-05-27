@@ -1835,3 +1835,52 @@ OPE should be agent-native without making every normal read carry implementation
 - The protocol map now contains sixteen envelope-returning adapter operations plus the separate forecast-run tool.
 - The summary is read-only and must not execute adapter calls, read private data, create source manifests, create forecasts, resolve outcomes, score forecasts, fetch live data, store credentials, or create hosted runtime state.
 - The next milestone should add explicit size-budget checks for compact read surfaces so future generated evidence cannot silently become default agent payload.
+
+### DEC-068 — Add Adapter Read-Surface Size Budgets
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Declare byte budgets in the compact private setup adapter conformance summary and enforce them in summary, adapter, dispatcher, and hardening checks.
+- **Why:** Routine agent reads should stay compact and predictable while the full embedded-envelope matrix remains available only through an explicit implementer command.
+- **Alternatives rejected:** Relying only on generic `maxBytes` behavior, embedding full matrix excerpts in the compact summary.
+
+### DEC-069 — Add Resolution Readbacks To Agent Adapter
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Expose `resolution_jobs` and `resolution_scheduler_status` as read-only agent adapter and MCP operations backed by checked local fixtures.
+- **Why:** Agents need to decide whether to wait, execute an approved resolver, inspect invalid or failed work, or read resolved outputs without parsing local files or terminal scheduler output.
+- **Alternatives rejected:** Making agents read `.ope/live` state directly, starting the scheduler from a status read, or adding hosted/OS scheduler claims before the local loop is reliable.
+
+### DEC-070 — Add Resolution Readback Error Envelopes
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Represent missing live workspaces, unreadable state files, malformed scheduler logs, and oversized scheduler readbacks as generated sanitized agent-envelope error examples.
+- **Why:** Future adapters need checked failure shapes before OPE expands live scheduler/runtime behavior, and agents need safe next-action signals without raw local paths, state contents, log contents, or stack traces.
+- **Alternatives rejected:** Adding live workspace arguments to the read-only adapter operations, probing ignored local files during normal checks, or treating scheduler status reads as a scheduler runtime.
+
+### DEC-071 — Add Resolution Runtime Reliability Read Model
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `resolution-runtime-reliability` contract, generated fixture, CLI command, and checker for runtime failure taxonomy, retry and next-action guidance, provenance ledger rows, and live-capture/source-policy boundaries.
+- **Why:** Before expanding the public transport corpus, live source usage, or forecasting methods, agents need one deterministic read model that explains runtime failures and provenance without executing resolvers or reading ignored local files.
+- **Alternatives rejected:** Encoding failure semantics only in prose, treating scheduler logs as the provenance ledger, or allowing resolution outcome evidence to appear in forecast-time provenance.
+
+### DEC-072 — Add Transit Forward-Run Corpus Index
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-forward-run-corpus` contract, generated fixture, CLI command, and checker over one comparable scored weather-transit-delay run plus explicit exclusion examples.
+- **Why:** OPE needs to report how many public transport forward windows are comparable, scored, excluded, or below claim thresholds before producing track-record or calibration surfaces.
+- **Alternatives rejected:** Treating the single forward-run summary as a corpus, creating calibration output from one scored run, or reading ignored `.ope/live/` captures during normal checks.
+
+### DEC-073 — Add Transit Baseline Track-Record Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-track-record-gate` contract, generated fixture, CLI command, and checker over the transit forward-run corpus.
+- **Why:** Agents need a compact way to inspect current Brier score, baseline score, lift, sample size, exclusions, and horizon coverage while knowing whether baseline track-record or calibration claims are allowed.
+- **Alternatives rejected:** Emitting a normal calibration summary from one scored run, treating below-threshold performance as a public quality claim, or hiding the one-off score until thresholds are met.
+
+### DEC-074 — Add Transit MVP Method Options
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-method-options` contract, generated fixture, CLI command, and checker over the transit corpus and baseline track-record gate.
+- **Why:** OPE needs to explain why early public transport runs stay baseline-only, while still preserving evidence for the transparent weather-adjustment candidate and clearly parking richer method families until clean benchmarks exist.
+- **Alternatives rejected:** Enabling the weather-adjustment method from one positive fixture lift, adding trained or retrieval-assisted methods without benchmark evidence, or allowing same-window transit outcome rows into forecast-time method evidence.

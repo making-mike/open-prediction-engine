@@ -2,7 +2,7 @@
 
 Status: checked agent-facing read model.
 
-Last reviewed: 2026-05-26.
+Last reviewed: 2026-05-27.
 
 Resolution jobs are the agent-friendly layer above saved forecast state and resolver commands. They let an agent ask OPE what needs resolving without knowing operating-system schedulers, `launchd`, cron syntax, or internal file conventions.
 
@@ -33,7 +33,15 @@ Run a local foreground scheduler over the same jobs:
 python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
 ```
 
+Read the same checked registry through the transport-neutral agent adapter:
+
+```bash
+python3 scripts/ope.py agent-call --operation resolution_jobs
+```
+
 The registry is a read model. It never resolves forecasts, fetches live sources, writes resolution artifacts, or creates calibration claims. It tells the caller which checked command to run next.
+
+Generated adapter error examples cover missing live workspaces and unreadable state files. Those envelopes expose stable error codes and safe plan status only; they do not reveal absolute local paths, state-file contents, raw diagnostics, or stack traces.
 
 ## Job Status
 
