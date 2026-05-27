@@ -1884,3 +1884,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `transit-method-options` contract, generated fixture, CLI command, and checker over the transit corpus and baseline track-record gate.
 - **Why:** OPE needs to explain why early public transport runs stay baseline-only, while still preserving evidence for the transparent weather-adjustment candidate and clearly parking richer method families until clean benchmarks exist.
 - **Alternatives rejected:** Enabling the weather-adjustment method from one positive fixture lift, adding trained or retrieval-assisted methods without benchmark evidence, or allowing same-window transit outcome rows into forecast-time method evidence.
+
+### DEC-075 — Add Policy-Bound Transit Live Evidence Promotion
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-live-evidence-promotion` contract, generated promotion fixture, sanitized promoted source-set fixture, CLI command, and checker for promoting selected ignored live weather drafts into forecast-time evidence.
+- **Why:** OPE needs a narrow way to use approved local live captures without committing raw `.ope/live/` artifacts, weakening provenance, or letting post-close and resolution-only captures leak into forecast evidence.
+- **Alternatives rejected:** Reading `.ope/live/` during normal checks, committing raw live captures, treating HSL TripUpdates outcome rows as forecast-time evidence, or adding a production live connector runtime before the local policy gate is explicit.

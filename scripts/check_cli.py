@@ -67,6 +67,7 @@ def main() -> None:
     run_cli("transit-forward-run-corpus", "--check")
     run_cli("transit-track-record-gate", "--check")
     run_cli("transit-method-options", "--check")
+    run_cli("transit-live-evidence-promotion", "--check")
     run_cli("source-intake", "--check")
     run_cli("source-builder", "--check")
     run_cli("source-adapter-output", "--check")
@@ -585,6 +586,61 @@ def main() -> None:
     transit_method_options_check = run_cli("transit-method-options", "--check")
     if "checked transit method options" not in transit_method_options_check.stdout:
         raise AssertionError("CLI transit-method-options --check did not check generated output")
+
+    transit_live_promotion = run_cli("transit-live-evidence-promotion")
+    transit_live_promotion_payload = json.loads(transit_live_promotion.stdout)
+    promotion_policy = transit_live_promotion_payload["policyBinding"]
+    if promotion_policy["normalChecksMayReadLiveWorkspace"] or promotion_policy["normalChecksMayFetchLiveNetwork"]:
+        raise AssertionError("CLI transit-live-evidence-promotion should keep normal checks offline")
+    if promotion_policy["retention"]["rawLocalArtifactsCommitted"]:
+        raise AssertionError("CLI transit-live-evidence-promotion should not commit raw live artifacts")
+    promotion_counts = transit_live_promotion_payload["readbackSummary"]["surfaceCounts"]
+    if (
+        promotion_counts["committedFixtures"] != 1
+        or promotion_counts["localLiveDrafts"] != 2
+        or promotion_counts["promotedForecastTimeEvidence"] != 1
+        or promotion_counts["resolutionOnlyEvidence"] != 1
+    ):
+        raise AssertionError("CLI transit-live-evidence-promotion should distinguish evidence surfaces")
+    promotion_cases = {item["promotionCaseId"]: item for item in transit_live_promotion_payload["promotionCases"]}
+    promoted_case = promotion_cases["transitlivepromotioncase-003"]
+    if promoted_case["promotionStatus"] != "promoted":
+        raise AssertionError("CLI transit-live-evidence-promotion should include a promoted case")
+    if promoted_case["gateChecks"]["captureTimingStatus"] != "pre_close":
+        raise AssertionError("CLI transit-live-evidence-promotion promoted case should be pre-close")
+    if promoted_case["gateChecks"]["freshnessStatus"] != "within_policy":
+        raise AssertionError("CLI transit-live-evidence-promotion promoted case should pass freshness")
+    if not promoted_case["sanitizedBinding"]["forecastTimeSourceSetBound"]:
+        raise AssertionError("CLI transit-live-evidence-promotion should bind promoted source set")
+    post_close_case = promotion_cases["transitlivepromotioncase-004"]
+    if "capture_after_forecast_close" not in post_close_case["rejectionReasons"]:
+        raise AssertionError("CLI transit-live-evidence-promotion should reject post-close captures")
+    resolution_only_case = promotion_cases["transitlivepromotioncase-005"]
+    if "source_role_resolution_only" not in resolution_only_case["rejectionReasons"]:
+        raise AssertionError("CLI transit-live-evidence-promotion should reject resolution-only evidence")
+    promotion_boundary = transit_live_promotion_payload["claimBoundary"]
+    if (
+        promotion_boundary["promotesPostCloseEvidence"]
+        or promotion_boundary["promotesResolutionOnlyEvidence"]
+        or promotion_boundary["createsForecastArtifacts"]
+        or promotion_boundary["fetchesLiveData"]
+    ):
+        raise AssertionError("CLI transit-live-evidence-promotion should keep blocked claims false")
+    promoted_source_set = run_cli(
+        "read",
+        "--record-type",
+        "evidence-source-set",
+        "--id",
+        transit_live_promotion_payload["readbackSummary"]["promotedEvidenceSourceSetId"],
+    )
+    promoted_source_set_payload = json.loads(promoted_source_set.stdout)
+    if promoted_source_set_payload["record"]["evidenceSourceSetId"] != "evidencesourceset-1201":
+        raise AssertionError("CLI read should expose promoted transit evidence source set")
+    if promoted_source_set_payload["record"]["records"][0]["connector"] != "open_meteo_weather":
+        raise AssertionError("CLI read should preserve promoted Open-Meteo source binding")
+    transit_live_promotion_check = run_cli("transit-live-evidence-promotion", "--check")
+    if "checked transit live evidence promotion" not in transit_live_promotion_check.stdout:
+        raise AssertionError("CLI transit-live-evidence-promotion --check did not check generated output")
 
     transit_api_connector = run_cli("transit-api-connector")
     transit_api_connector_payload = json.loads(transit_api_connector.stdout)

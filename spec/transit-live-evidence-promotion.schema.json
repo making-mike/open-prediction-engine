@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-live-evidence-promotion.schema.json",
+  "title": "Transit Live Evidence Promotion",
+  "description": "Policy-bound gate for promoting ignored local live transit evidence drafts into sanitized forecast-time source sets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitLiveEvidencePromotionId",
+    "generatedAt",
+    "domain",
+    "promotionMode",
+    "forecastWindow",
+    "policyBinding",
+    "intakeGate",
+    "promotionCases",
+    "readbackSummary",
+    "claimBoundary",
+    "readSurface",
+    "warnings"
+  ],
+  "properties": {
+    "transitLiveEvidencePromotionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "const": "weather-transit-delays" },
+    "promotionMode": {
+      "type": "string",
+      "enum": ["checked_policy_bound_live_evidence_promotion"]
+    },
+    "forecastWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "questionId",
+        "forecastedAt",
+        "forecastCloseAt",
+        "horizon",
+        "network",
+        "geography",
+        "serviceDate",
+        "serviceWindow"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+        "network": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "geography": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "serviceDate": { "type": "string", "format": "date" },
+        "serviceWindow": { "type": "string", "minLength": 1, "maxLength": 80 }
+      }
+    },
+    "policyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicyId",
+        "approvalRequired",
+        "allowedForecastTimeRoles",
+        "resolutionOnlyRoles",
+        "allowedConnectors",
+        "maxFreshnessSeconds",
+        "retention",
+        "credentialUseAllowed",
+        "normalChecksMayReadLiveWorkspace",
+        "normalChecksMayFetchLiveNetwork"
+      ],
+      "properties": {
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "approvalRequired": { "type": "boolean" },
+        "allowedForecastTimeRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/sourceRole" }
+        },
+        "resolutionOnlyRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/sourceRole" }
+        },
+        "allowedConnectors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/connector" }
+        },
+        "maxFreshnessSeconds": { "type": "integer", "minimum": 1 },
+        "retention": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rawLocalWorkspace",
+            "rawLocalArtifactsCommitted",
+            "rawPreviewStored",
+            "sanitizedNormalizedRecordsCommitted",
+            "contentHashesStored"
+          ],
+          "properties": {
+            "rawLocalWorkspace": { "type": "string", "minLength": 3, "maxLength": 240 },
+            "rawLocalArtifactsCommitted": { "type": "boolean" },
+            "rawPreviewStored": { "type": "boolean" },
+            "sanitizedNormalizedRecordsCommitted": { "type": "boolean" },
+            "contentHashesStored": { "type": "boolean" }
+          }
+        },
+        "credentialUseAllowed": { "type": "boolean" },
+        "normalChecksMayReadLiveWorkspace": { "type": "boolean" },
+        "normalChecksMayFetchLiveNetwork": { "type": "boolean" }
+      }
+    },
+    "intakeGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateId",
+        "requiredChecksBeforePromotion",
+        "rejectedAsForecastTimeEvidence",
+        "rawLocalWorkspace",
+        "promotedSourceSetPath"
+      ],
+      "properties": {
+        "gateId": { "$ref": "common.schema.json#/$defs/id" },
+        "requiredChecksBeforePromotion": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "rejectedAsForecastTimeEvidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 120 }
+        },
+        "rawLocalWorkspace": { "type": "string", "minLength": 3, "maxLength": 240 },
+        "promotedSourceSetPath": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "promotionCases": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/promotionCase" }
+    },
+    "readbackSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceCounts",
+        "promotedEvidenceSourceSetId",
+        "promotedEvidenceSourceSetPath",
+        "promotedEvidenceReadCommand",
+        "distinctionRules"
+      ],
+      "properties": {
+        "surfaceCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "committedFixtures",
+            "localLiveDrafts",
+            "promotedForecastTimeEvidence",
+            "resolutionOnlyEvidence",
+            "postCloseRejected",
+            "resolutionOnlyRejected"
+          ],
+          "properties": {
+            "committedFixtures": { "type": "integer", "minimum": 0 },
+            "localLiveDrafts": { "type": "integer", "minimum": 0 },
+            "promotedForecastTimeEvidence": { "type": "integer", "minimum": 0 },
+            "resolutionOnlyEvidence": { "type": "integer", "minimum": 0 },
+            "postCloseRejected": { "type": "integer", "minimum": 0 },
+            "resolutionOnlyRejected": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "promotedEvidenceSourceSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "promotedEvidenceSourceSetPath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "promotedEvidenceReadCommand": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "distinctionRules": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 240 }
+        }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksUseLiveNetwork",
+        "normalChecksReadLiveWorkspace",
+        "rawLiveCapturesCommitted",
+        "createsForecastArtifacts",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "fetchesLiveData",
+        "storesCredentials",
+        "promotesPostCloseEvidence",
+        "promotesResolutionOnlyEvidence",
+        "productionLiveRuntimeClaimAllowed",
+        "allEvidenceClaimAllowed"
+      ],
+      "properties": {
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "normalChecksReadLiveWorkspace": { "type": "boolean" },
+        "rawLiveCapturesCommitted": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "promotesPostCloseEvidence": { "type": "boolean" },
+        "promotesResolutionOnlyEvidence": { "type": "boolean" },
+        "productionLiveRuntimeClaimAllowed": { "type": "boolean" },
+        "allEvidenceClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "readSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "distinguishesEvidenceSurfaces",
+        "returnsPromotedSourceSetBinding",
+        "executesPromotion",
+        "readsIgnoredLiveWorkspace",
+        "fetchesLiveData",
+        "createsForecastArtifacts",
+        "createsResolutionArtifacts",
+        "createsScoringRecords"
+      ],
+      "properties": {
+        "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "distinguishesEvidenceSurfaces": { "type": "boolean" },
+        "returnsPromotedSourceSetBinding": { "type": "boolean" },
+        "executesPromotion": { "type": "boolean" },
+        "readsIgnoredLiveWorkspace": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "type": "string", "minLength": 3, "maxLength": 240 }
+    }
+  },
+  "$defs": {
+    "sourceRole": {
+      "type": "string",
+      "enum": [
+        "weather_forecast",
+        "historical_delay_rows",
+        "static_schedule",
+        "planned_service_alerts",
+        "transit_delay_outcome",
+        "feed_health",
+        "trip_updates_after_window",
+        "post_window_delay_rows",
+        "resolution_outcome"
+      ]
+    },
+    "connector": {
+      "type": "string",
+      "enum": [
+        "committed_fixture",
+        "open_meteo_weather",
+        "hsl_gtfs_rt_trip_updates",
+        "manual_upload",
+        "local_file"
+      ]
+    },
+    "surfaceType": {
+      "type": "string",
+      "enum": [
+        "committed_fixture",
+        "local_live_draft",
+        "promoted_forecast_time_evidence",
+        "resolution_only_evidence"
+      ]
+    },
+    "promotionStatus": {
+      "type": "string",
+      "enum": ["already_committed_fixture", "pending_approval", "promoted", "rejected"]
+    },
+    "inputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePath",
+        "sourcePathCommitted",
+        "localLiveWorkspace",
+        "captureTimestamp",
+        "forecastCloseAt",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "sourcePath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "sourcePathCommitted": { "type": "boolean" },
+        "localLiveWorkspace": { "type": "boolean" },
+        "captureTimestamp": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "gateChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicyStatus",
+        "captureTimingStatus",
+        "freshnessStatus",
+        "freshnessSeconds",
+        "maxFreshnessSeconds",
+        "retentionStatus",
+        "sourceRoleStatus",
+        "leakageStatus",
+        "provenanceStatus",
+        "allEvidenceClaimed"
+      ],
+      "properties": {
+        "sourcePolicyStatus": {
+          "type": "string",
+          "enum": ["passed", "not_required_committed_fixture", "pending_approval", "rejected"]
+        },
+        "captureTimingStatus": {
+          "type": "string",
+          "enum": ["pre_close", "post_close", "not_applicable"]
+        },
+        "freshnessStatus": {
+          "type": "string",
+          "enum": ["within_policy", "outside_policy", "pending_approval", "not_applicable"]
+        },
+        "freshnessSeconds": { "type": "integer", "minimum": 0 },
+        "maxFreshnessSeconds": { "type": "integer", "minimum": 1 },
+        "retentionStatus": {
+          "type": "string",
+          "enum": ["passed_metadata_only", "pending_approval", "rejected"]
+        },
+        "sourceRoleStatus": {
+          "type": "string",
+          "enum": [
+            "forecast_time_allowed",
+            "resolution_only_rejected",
+            "pending_approval",
+            "fixture_reference"
+          ]
+        },
+        "leakageStatus": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "rejected_post_close",
+            "rejected_resolution_only",
+            "pending_approval",
+            "not_applicable"
+          ]
+        },
+        "provenanceStatus": {
+          "type": "string",
+          "enum": ["bound", "not_bound_pending_approval", "not_bound_rejected", "fixture_reference"]
+        },
+        "allEvidenceClaimed": { "type": "boolean" }
+      }
+    },
+    "sanitizedBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bindingStatus",
+        "forecastTimeSourceSetBound",
+        "normalizedRecordCount",
+        "rawRowsIncluded",
+        "rawLocalPathCommitted",
+        "sanitizedArtifactCommitted",
+        "contentHashStored",
+        "normalChecksReadRawLocalPath"
+      ],
+      "properties": {
+        "bindingStatus": {
+          "type": "string",
+          "enum": ["fixture_reference", "draft_not_bound", "bound_promoted_source_set", "rejected_not_bound"]
+        },
+        "forecastTimeSourceSetBound": { "type": "boolean" },
+        "evidenceSourceSetId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceSetPath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "normalizedRecordCount": { "type": "integer", "minimum": 0 },
+        "rawRowsIncluded": { "type": "boolean" },
+        "rawLocalPathCommitted": { "type": "boolean" },
+        "sanitizedArtifactCommitted": { "type": "boolean" },
+        "contentHashStored": { "type": "boolean" },
+        "normalChecksReadRawLocalPath": { "type": "boolean" }
+      }
+    },
+    "promotionCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "promotionCaseId",
+        "surfaceType",
+        "sourceRole",
+        "connector",
+        "promotionStatus",
+        "inputBinding",
+        "gateChecks",
+        "sanitizedBinding",
+        "rejectionReasons",
+        "agentNextAction"
+      ],
+      "properties": {
+        "promotionCaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "surfaceType": { "$ref": "#/$defs/surfaceType" },
+        "sourceRole": { "$ref": "#/$defs/sourceRole" },
+        "connector": { "$ref": "#/$defs/connector" },
+        "promotionStatus": { "$ref": "#/$defs/promotionStatus" },
+        "inputBinding": { "$ref": "#/$defs/inputBinding" },
+        "gateChecks": { "$ref": "#/$defs/gateChecks" },
+        "sanitizedBinding": { "$ref": "#/$defs/sanitizedBinding" },
+        "rejectionReasons": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 120 }
+        },
+        "agentNextAction": { "type": "string", "minLength": 3, "maxLength": 240 }
+      }
+    }
+  }
+}

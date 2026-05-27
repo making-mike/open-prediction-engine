@@ -77,6 +77,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
     transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
     transit_method_options_command = [sys.executable, "scripts/generate_transit_method_options.py"]
+    transit_live_evidence_promotion_command = [sys.executable, "scripts/generate_transit_live_evidence_promotion.py"]
     source_intake_command = [sys.executable, "scripts/generate_source_intake.py"]
     source_builder_command = [sys.executable, "scripts/build_source_manifest.py"]
     source_adapter_output_command = [sys.executable, "scripts/generate_source_adapter_output.py"]
@@ -135,6 +136,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         transit_forward_run_corpus_command.append("--write")
         transit_track_record_gate_command.append("--write")
         transit_method_options_command.append("--write")
+        transit_live_evidence_promotion_command.append("--write")
         source_intake_command.append("--write")
         source_builder_command.append("--write")
         source_adapter_output_command.append("--write")
@@ -190,6 +192,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         transit_forward_run_corpus_command.append("--check")
         transit_track_record_gate_command.append("--check")
         transit_method_options_command.append("--check")
+        transit_live_evidence_promotion_command.append("--check")
         source_intake_command.append("--check")
         source_builder_command.append("--check")
         source_adapter_output_command.append("--check")
@@ -239,6 +242,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(transit_forward_run_corpus_command)
     run(transit_track_record_gate_command)
     run(transit_method_options_command)
+    run(transit_live_evidence_promotion_command)
     run(source_intake_command)
     run(source_builder_command)
     run(source_adapter_output_command)
@@ -678,6 +682,15 @@ def cmd_transit_track_record_gate(args: argparse.Namespace) -> None:
 
 def cmd_transit_method_options(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_transit_method_options.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_transit_live_evidence_promotion(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_transit_live_evidence_promotion.py"]
     if args.check:
         command.append("--check")
     if args.write:
@@ -1492,6 +1505,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated transit method options fixture",
     )
     transit_method_options.set_defaults(func=cmd_transit_method_options)
+
+    transit_live_evidence_promotion = subparsers.add_parser(
+        "transit-live-evidence-promotion",
+        help="print checked policy-bound live evidence promotion gate for transit runs",
+    )
+    transit_live_evidence_promotion.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated transit live evidence promotion drift",
+    )
+    transit_live_evidence_promotion.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated transit live evidence promotion fixtures",
+    )
+    transit_live_evidence_promotion.set_defaults(func=cmd_transit_live_evidence_promotion)
 
     source_intake = subparsers.add_parser(
         "source-intake",

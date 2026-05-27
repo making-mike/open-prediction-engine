@@ -8,13 +8,19 @@
   "recordSets": [
     {
       "recordType": "evidence-source-set",
-      "count": 1,
+      "count": 2,
       "records": [
         {
           "recordType": "evidence-source-set",
           "recordId": "evidencesourceset-019",
           "domain": "weather-logistics",
           "generatedAt": "2026-06-02T09:58:00Z"
+        },
+        {
+          "recordType": "evidence-source-set",
+          "recordId": "evidencesourceset-1201",
+          "domain": "weather-transit-delays",
+          "generatedAt": "2026-06-10T02:12:00Z"
         }
       ]
     },

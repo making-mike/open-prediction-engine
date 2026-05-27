@@ -247,6 +247,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "transit-baseline-track-record-gate.schema.json"
     if name.endswith("transit-method-options.generated.json"):
         return spec_root / "transit-method-options.schema.json"
+    if name.endswith("transit-live-evidence-promotion.generated.json"):
+        return spec_root / "transit-live-evidence-promotion.schema.json"
     if name.endswith("resolve-due-forward-runs.generated.json"):
         return spec_root / "transit-forward-run-resolver.schema.json"
     if name.endswith("resolution-jobs.generated.json"):

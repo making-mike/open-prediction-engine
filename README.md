@@ -27,7 +27,7 @@ The repository currently contains:
 - JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, private setup requests, first actions, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
-- a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
+- a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
 - a fixture-only evidence loop for resolved, ambiguous, and annulled weather-logistics cases
 - dependency-free scoring checks for Brier, log loss, interval score, pinball loss, calibration buckets, baseline lift, and track-record summaries
 - anti-leakage benchmark fixtures that distinguish clean pre-outcome runs from contaminated runs
@@ -63,6 +63,7 @@ The repository currently contains:
 - a checked source adapter output contract that lets external agent-built connectors hand OPE a sanitized source manifest and field mapping without living in core or creating forecast records
 - a checked HSL GTFS-RT transit API connector that can capture TripUpdates, derive delay rows through an opt-in static GTFS schedule join, and keep normal checks offline
 - a checked transit-delay forward-run workflow that records a forecast before the service window, resolves from declared outcome rows, scores against baseline, and exposes opt-in local live forecast/resolve phases under `.ope/live/transit-forward-run/`
+- a checked transit live evidence promotion gate that distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence while binding one sanitized promoted source set
 - a checked transit forward-run resolver-agent command that scans pending local states, classifies due/not-due/already-resolved runs, and can explicitly execute due resolver commands
 - a checked resolution job registry that gives agents read-only next-action guidance before resolver execution
 - a checked foreground terminal resolution scheduler that agents can start locally to poll resolution jobs and optionally execute due checked resolvers without Trigger.dev, cron, or OS scheduler files
@@ -135,7 +136,7 @@ The initial question shape is:
 Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
 ```
 
-This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked baseline track-record and calibration gate, checked MVP method options, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
 
 Run the checked fixture path:
 
@@ -145,6 +146,7 @@ python3 scripts/ope.py transit-delay-forward-run
 python3 scripts/ope.py transit-forward-run-corpus
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
+python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py resolution-jobs
 python3 scripts/ope.py resolution-scheduler
 python3 scripts/ope.py resolution-runtime-reliability
@@ -168,6 +170,7 @@ Inspect corpus counts and exclusion reasons:
 python3 scripts/ope.py transit-forward-run-corpus
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
+python3 scripts/ope.py transit-live-evidence-promotion
 ```
 
 Start an explicit local live forward forecast:
@@ -336,6 +339,8 @@ python3 scripts/generate_transit_baseline_track_record_gate.py --check
 python3 scripts/check_transit_baseline_track_record_gate.py
 python3 scripts/generate_transit_method_options.py --check
 python3 scripts/check_transit_method_options.py
+python3 scripts/generate_transit_live_evidence_promotion.py --check
+python3 scripts/check_transit_live_evidence_promotion.py
 python3 scripts/resolve_due_transit_forward_runs.py --check
 python3 scripts/check_transit_forward_resolver.py
 python3 scripts/generate_resolution_jobs.py --check
@@ -722,6 +727,7 @@ python3 scripts/connect_transit_api.py --write
 python3 scripts/generate_transit_forward_run_corpus.py --write
 python3 scripts/generate_transit_baseline_track_record_gate.py --write
 python3 scripts/generate_transit_method_options.py --write
+python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write

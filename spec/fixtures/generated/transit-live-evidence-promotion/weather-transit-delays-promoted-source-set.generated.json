@@ -1,0 +1,84 @@
+{
+  "evidenceSourceSetId": "evidencesourceset-1201",
+  "requestId": "request-1201",
+  "evidencePlanId": "evidenceplan-1201",
+  "generatedAt": "2026-06-10T02:12:00Z",
+  "executionMode": "live_fetch",
+  "dataMode": "hybrid",
+  "sourcePolicyId": "sourcepolicy-1201",
+  "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+  "sourceConnectorResultSetId": "sourceconnectorresults-001",
+  "domain": "weather-transit-delays",
+  "geography": "helsinki",
+  "serviceDate": "2026-06-10",
+  "records": [
+    {
+      "recordId": "sourcerecord-1201",
+      "sourceRole": "forecast_input",
+      "connector": "open_meteo_weather",
+      "connectorBinding": {
+        "sourceConnectorRegistryId": "sourceconnectorregistry-001",
+        "connectorId": "sourceconnector-001",
+        "sourceConnectorResultSetId": "sourceconnectorresults-001",
+        "connectorResultId": "connectorresult-001"
+      },
+      "plannedIntentIds": [
+        "searchintent-1201"
+      ],
+      "sourceRef": {
+        "sourceId": "source-1201",
+        "name": "Promoted Open-Meteo Helsinki weather forecast",
+        "sourceType": "public_dataset",
+        "uri": "local://.ope/live/transit-forward-run/2026-06-10T020000Z/weather/transit-weather-forecast.json",
+        "retrievedAt": "2026-06-10T02:00:00Z",
+        "contentHash": "2e389fa9944edaede2f4889dd84b8557c31d3184f382334f8f00ede4f71260c5"
+      },
+      "rawSourceMetadata": {
+        "mode": "live_fetch",
+        "fixturePath": null,
+        "contentHash": "2e389fa9944edaede2f4889dd84b8557c31d3184f382334f8f00ede4f71260c5"
+      },
+      "sourceQuality": {
+        "status": "current",
+        "coverage": "complete",
+        "freshnessStatus": "within_policy",
+        "notes": "Promoted from an approved ignored local live draft; raw file remains outside git."
+      },
+      "normalizedFields": {
+        "sourceRole": "weather_forecast",
+        "network": "hsl-surface",
+        "geography": "helsinki",
+        "serviceDate": "2026-06-10",
+        "serviceWindow": "morning_peak",
+        "capturedAt": "2026-06-10T02:00:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "forecastPrecipitationMm": 4.8,
+        "forecastSnowfallMm": 0.0,
+        "forecastWindGustKmh": 31.2,
+        "temperatureC": 7.4,
+        "sourceStatus": "current"
+      }
+    }
+  ],
+  "provenanceSummary": {
+    "sourceCount": 1,
+    "connectorsUsed": [
+      "open_meteo_weather"
+    ],
+    "sourceClassesUsed": [
+      "public_dataset"
+    ],
+    "unavailableEvidenceCount": 0,
+    "allEvidenceClaimed": false
+  },
+  "controls": {
+    "networkAccess": true,
+    "liveFetch": true,
+    "effectfulGeneration": false
+  },
+  "warnings": [
+    "This is a sanitized promoted source set; the raw .ope/live capture remains ignored.",
+    "The record is forecast-time evidence only, not a forecast, resolution, score, or quality claim.",
+    "Normal checks validate this committed sanitized artifact without reading .ope/live or fetching live data."
+  ]
+}

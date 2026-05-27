@@ -107,13 +107,14 @@ Done:
 - Public transport forward-run corpus now reports one comparable scored transit run, six exclusion examples, sample thresholds, and claim boundaries through `python3 scripts/ope.py transit-forward-run-corpus`.
 - Public transport baseline track-record gate now reports current Brier, baseline, lift, sample-size, and horizon/window coverage while blocking below-threshold calibration through `python3 scripts/ope.py transit-track-record-gate`.
 - Public transport method options now keep baseline-only execution as the default, record transparent weather adjustment as evidence-only, and keep richer methods proposed-only through `python3 scripts/ope.py transit-method-options`.
+- Policy-bound transit live evidence promotion now distinguishes committed fixtures, ignored live drafts, promoted forecast-time evidence, and resolution-only captures through `python3 scripts/ope.py transit-live-evidence-promotion`.
 
 Not started:
 
 - Arbitrary private API/database parsing beyond checked setup and local source-builder fixtures.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
-- Forecast execution that consumes ignored local live drafts.
+- Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
 - OS scheduler installation.
 - Production hosted, HTTP, or queue agent adapter runtime.
@@ -2307,22 +2308,36 @@ Completed outputs:
 
 ## Milestone 77: Policy-Bound Live Evidence Promotion
 
-Status: Planned.
+Status: Accepted.
 
 Goal: allow selected ignored local live captures to become forecast-time evidence only through an explicit source policy, freshness check, leakage check, and provenance binding.
 
 Tasks:
 
-- [ ] Define the intake gate for promoting local live draft captures into forecast-time source sets.
-- [ ] Require source policy, capture timestamp, forecast close time, freshness, retention, and source role checks before promotion.
-- [ ] Reject post-close or resolution-only captures as forecast-time evidence.
-- [ ] Preserve raw local artifacts as ignored workspace files while binding sanitized normalized records into OPE artifacts.
-- [ ] Add readback that distinguishes committed fixtures, local live drafts, promoted forecast-time evidence, and resolution-only evidence.
+- [x] Define the intake gate for promoting local live draft captures into forecast-time source sets.
+- [x] Require source policy, capture timestamp, forecast close time, freshness, retention, and source role checks before promotion.
+- [x] Reject post-close or resolution-only captures as forecast-time evidence.
+- [x] Preserve raw local artifacts as ignored workspace files while binding sanitized normalized records into OPE artifacts.
+- [x] Add readback that distinguishes committed fixtures, local live drafts, promoted forecast-time evidence, and resolution-only evidence.
 
 Exit criteria:
 
 - OPE can use approved live captures as forecast-time evidence without weakening provenance or leakage boundaries.
 - Live connector output remains non-production and local until a later runtime milestone explicitly changes that claim.
+
+Completed outputs:
+
+- `spec/transit-live-evidence-promotion.schema.json`
+- `spec/transit-live-evidence-promotion.md`
+- `scripts/generate_transit_live_evidence_promotion.py`
+- `scripts/check_transit_live_evidence_promotion.py`
+- checked promotion fixture at `spec/fixtures/generated/transit-live-evidence-promotion/transit-live-evidence-promotion.generated.json`
+- checked sanitized source-set fixture at `spec/fixtures/generated/transit-live-evidence-promotion/weather-transit-delays-promoted-source-set.generated.json`
+- CLI command `python3 scripts/ope.py transit-live-evidence-promotion`
+- readback for committed fixtures, local live drafts, promoted forecast-time evidence, and resolution-only evidence
+- source-policy, freshness, retention, source-role, leakage, and provenance checks for the promoted weather evidence case
+- explicit rejection examples for post-close weather captures and resolution-only HSL TripUpdates captures
+- schema-validation, run-check, CLI, docs, and release-manifest wiring for the promotion gate
 
 ## Milestone 78: External Connector Intake MVP
 

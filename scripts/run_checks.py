@@ -54,6 +54,8 @@ def main() -> None:
     run([sys.executable, "scripts/check_transit_baseline_track_record_gate.py"])
     run([sys.executable, "scripts/generate_transit_method_options.py", "--check"])
     run([sys.executable, "scripts/check_transit_method_options.py"])
+    run([sys.executable, "scripts/generate_transit_live_evidence_promotion.py", "--check"])
+    run([sys.executable, "scripts/check_transit_live_evidence_promotion.py"])
     run([sys.executable, "scripts/generate_source_intake.py", "--check"])
     run([sys.executable, "scripts/check_source_intake.py"])
     run([sys.executable, "scripts/build_source_manifest.py", "--check"])

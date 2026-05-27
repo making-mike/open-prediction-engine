@@ -1,6 +1,6 @@
 # Weather Transit Delays Public Beta Wedge
 
-Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, checked corpus index, checked baseline track-record gate, checked MVP method options, foreground terminal scheduler, and local resolver-agent scan implemented.
+Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, checked corpus index, checked baseline track-record gate, checked MVP method options, checked live evidence promotion gate, foreground terminal scheduler, and local resolver-agent scan implemented.
 
 Last reviewed: 2026-05-27.
 
@@ -36,6 +36,7 @@ Initial maturity:
 - checked forward-run corpus counts and exclusions through `python3 scripts/ope.py transit-forward-run-corpus`
 - checked baseline track-record and calibration gate through `python3 scripts/ope.py transit-track-record-gate`
 - checked MVP method options and baseline-default boundary through `python3 scripts/ope.py transit-method-options`
+- checked policy-bound live evidence promotion gate through `python3 scripts/ope.py transit-live-evidence-promotion`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -222,6 +223,14 @@ python3 scripts/ope.py transit-method-options
 
 It keeps the historical-frequency baseline as the default, records the transparent weather-adjustment method as evidence-only with one fixture comparison, and keeps historical-conditioned, trained ML, retrieval-assisted, ensemble, and external-reference methods proposed-only until clean benchmark evidence exists.
 
+The checked live evidence promotion surface is:
+
+```bash
+python3 scripts/ope.py transit-live-evidence-promotion
+```
+
+It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
+
 Explicit live local phases are available, but they write ignored developer artifacts and do not change normal release checks:
 
 ```bash
@@ -264,6 +273,7 @@ Current local prototype:
 8. Done: add an agent-facing resolution job registry that tells agents whether to wait, execute the resolver, read resolved outputs, or inspect invalid state.
 9. Done: add a foreground terminal scheduler that agents can run locally to poll jobs and optionally execute due checked resolver commands.
 10. Done: add a checked corpus index with comparable and excluded forward-run rows plus claim boundaries.
+11. Done: add a policy-bound live evidence promotion gate with one sanitized promoted forecast-time source set and explicit rejection examples.
 
 Next useful build:
 
@@ -294,6 +304,7 @@ Allowed now:
 - The repository documents source roles, resolution rules, baselines, and leakage controls for this wedge.
 - OPE can run a local custom-file weather-transit-delay prototype from approved CSV/JSON files and emit schema-bound forecast, resolution, and scoring records.
 - OPE can run a local terminal scheduler that polls saved forward runs and optionally executes due checked resolver commands on the developer's machine.
+- OPE can distinguish ignored local live drafts from approved sanitized forecast-time evidence without committing raw `.ope/live/` captures.
 
 Blocked now:
 
@@ -303,6 +314,7 @@ Blocked now:
 - OPE has a production live transit connector.
 - OPE has a hosted scheduler or production worker.
 - OPE can support arbitrary transit agencies without setup review.
+- OPE promotes post-close or resolution-only transit captures into forecast-time evidence.
 
 The stronger claim to earn is:
 

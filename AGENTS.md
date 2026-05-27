@@ -72,6 +72,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/transit-forward-run-corpus.md`: checked public transport forward-run corpus counts, exclusions, and claim boundary.
 - `spec/transit-baseline-track-record-gate.md`: checked baseline track-record and calibration gate for the transit corpus.
 - `spec/transit-method-options.md`: checked public transport MVP method options and baseline-default boundary.
+- `spec/transit-live-evidence-promotion.md`: checked policy-bound promotion gate for ignored local transit live drafts.
 - `spec/resolution-runtime-reliability.md`: checked failure taxonomy, retry guidance, provenance ledger, and live-source boundary for the resolution runtime.
 - `spec/release-manifest.md`: generated local release manifest and claim boundary summary.
 - `spec/ci-release-gate.md`: CI release workflow boundary and local guard.
@@ -166,6 +167,8 @@ python3 scripts/generate_transit_baseline_track_record_gate.py --check
 python3 scripts/check_transit_baseline_track_record_gate.py
 python3 scripts/generate_transit_method_options.py --check
 python3 scripts/check_transit_method_options.py
+python3 scripts/generate_transit_live_evidence_promotion.py --check
+python3 scripts/check_transit_live_evidence_promotion.py
 python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
 python3 scripts/build_source_manifest.py --check
@@ -241,7 +244,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit live evidence promotion, the release manifest, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -284,6 +287,7 @@ python3 scripts/ope.py live-capture --input .ope/live/open-meteo-warsaw-YYYY-MM-
 python3 scripts/ope.py transit-forward-run-corpus
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
+python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py domain-setups
 python3 scripts/ope.py source-builder
 python3 scripts/ope.py source-handoff
@@ -325,6 +329,7 @@ python3 scripts/ope.py agent-protocol-map
 python3 scripts/ope.py resolution-runtime-reliability
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
+python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-602 --question-id question-601
 python3 scripts/ope.py agent-call --operation private_setup_bundle --private-setup-request-id privatesetuprequest-001
 python3 scripts/ope.py agent-call --operation private_setup_adapter_runbook
@@ -370,6 +375,7 @@ python3 scripts/generate_live_connector_readiness.py --write
 python3 scripts/generate_transit_forward_run_corpus.py --write
 python3 scripts/generate_transit_baseline_track_record_gate.py --write
 python3 scripts/generate_transit_method_options.py --write
+python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_intake_handoff.py --write
@@ -433,6 +439,7 @@ Still needed before any hosted or service release:
 - Treat source-handoff forecast execution as the first artifact-generating handoff step. It must preserve handoff, source intake, benchmark, and method-decision bindings.
 - Treat source-handoff resolution as fixture scoring only; one resolved source-handoff outcome is not a calibration or quality claim.
 - Treat source-handoff setup runbooks as guidance over checked local fixtures, not a general private API/database parser.
+- Treat transit live evidence promotion as a policy gate over ignored local captures. Raw `.ope/live/` files must remain uncommitted; only sanitized normalized source-set records may become forecast-time evidence, and post-close or resolution-only captures must stay out of forecast provenance.
 - Treat private setup workflow records as domain-agnostic contracts. They may describe future manual upload, private API, or database source kinds, but they must label them as not implemented until a runtime exists.
 - Treat private source adapter capability records as declarations, not source execution. They must not imply credential access, live fetching, arbitrary parsing, or forecast evidence creation.
 - Treat private source adapter outcome matrices as next-action guidance only. They must not create source manifests, forecast artifacts, scoring records, or credential records.
