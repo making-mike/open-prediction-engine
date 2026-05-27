@@ -100,6 +100,7 @@ Done:
 - Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
 - Source adapter intake now validates external adapter outputs, routes accepted handoffs through source intake and method gates, and blocks unsafe connector outputs before intake through `python3 scripts/ope.py source-adapter-intake`.
 - Local private setup orchestrator summaries now join setup request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes for approved local-file and accepted source-adapter cases through `python3 scripts/ope.py private-setup-orchestrator`.
+- The release manifest now declares the local MVP runtime surface, CLI/agent-call/MCP machine interfaces, smoke checks, blocked-path examples, and non-goal claim review, with a compact runbook in `spec/mvp-local-runtime.md`.
 - Opt-in HSL GTFS-RT transit API connector now captures TripUpdates, derives delay rows through a static GTFS schedule join, and writes source-adapter output through `python3 scripts/ope.py transit-api-connector --schedule-join`.
 - Weather-transit-delay forward-run workflow now records a pre-window forecast, preserves run state, resolves from declared transit outcome rows, scores against baseline, and exposes explicit local live forecast/resolve phases through `python3 scripts/ope.py transit-delay-forward-run`.
 - Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
@@ -130,8 +131,7 @@ In progress:
 
 Next:
 
-1. Milestone 80: MVP Release Surface And Claim Review.
-2. Later: source quality and richer data-source coverage.
+1. Later: source quality and richer data-source coverage.
 
 MVP path:
 
@@ -2403,22 +2403,31 @@ Completed outputs:
 
 ## Milestone 80: MVP Release Surface And Claim Review
 
-Status: Planned.
+Status: Accepted.
 
 Goal: package the local MVP as a clear agent-native release surface with repeatable checks, examples, docs, and honest claim boundaries.
 
 Tasks:
 
-- [ ] Add a compact MVP runbook covering setup, forecast, recalculation, resolution, scoring, corpus readback, and failure recovery.
-- [ ] Add a release manifest section that labels the MVP local runtime surface and lists non-goals.
-- [ ] Add end-to-end smoke checks for the MVP happy path and representative blocked/failure paths.
-- [ ] Document minimum machine-readable interfaces for CLI, agent-call, and MCP use.
-- [ ] Keep HTTP, queue, hosted service, arbitrary private API/database parsing, broad provider optimization, and live calibration claims out of MVP.
+- [x] Add a compact MVP runbook covering setup, forecast, recalculation, resolution, scoring, corpus readback, and failure recovery.
+- [x] Add a release manifest section that labels the MVP local runtime surface and lists non-goals.
+- [x] Add end-to-end smoke checks for the MVP happy path and representative blocked/failure paths.
+- [x] Document minimum machine-readable interfaces for CLI, agent-call, and MCP use.
+- [x] Keep HTTP, queue, hosted service, arbitrary private API/database parsing, broad provider optimization, and live calibration claims out of MVP.
 
 Exit criteria:
 
 - A developer or agent can install the repo, run the local MVP loop, inspect forecast artifacts, resolve outcomes, score them, and understand exactly what is and is not claimed.
 - The MVP is release-checkable without live network dependency in normal checks.
+
+Completed outputs:
+
+- `spec/mvp-local-runtime.md`
+- `mvpLocalRuntime` section in `spec/fixtures/generated/release-manifest.generated.json`
+- release-manifest schema support for MVP local runtime surface, smoke checks, machine interfaces, blocked paths, and claim review
+- `scripts/check_mvp_release_surface.py`
+- normal check wiring for the MVP release-surface smoke check
+- docs, roadmap, and decision-log wiring for the local MVP release boundary
 
 ## Open Decisions
 

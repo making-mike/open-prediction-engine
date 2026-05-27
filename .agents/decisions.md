@@ -1905,3 +1905,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `private-setup-orchestrator` contract, generated summary fixture, CLI command, and checker that joins setup request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes over existing checked local records.
 - **Why:** Agents need one compact local MVP read surface for approved local-file and accepted source-adapter paths without manually chaining every lower-level command or losing the source-intake, benchmark, method-decision, and forecast-execution gates.
 - **Alternatives rejected:** Creating a runtime that executes private setup commands, letting adapter outputs produce forecasts directly, or hiding blocked paths such as missing approval, unconfirmed mappings, insufficient data, rejected sources, unsafe sources, and oversized readbacks.
+
+### DEC-078 — Declare The Local MVP Release Surface
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add an `mvpLocalRuntime` section to the release manifest, a compact `spec/mvp-local-runtime.md` runbook, and `scripts/check_mvp_release_surface.py` smoke checks for the local MVP happy path, blocked setup paths, agent-call readback, MCP protocol-map exposure, resolution jobs, and corpus claim gates.
+- **Why:** The MVP should be understandable and release-checkable as a local agent-native surface, with exact machine interfaces and claim boundaries recorded in a schema-bound artifact.
+- **Alternatives rejected:** Treating the README as the only MVP contract, declaring a hosted or HTTP/queue runtime before implementation, or allowing one-off resolved examples to imply calibration or broad quality claims.

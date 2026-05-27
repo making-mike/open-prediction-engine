@@ -106,7 +106,7 @@ The repository currently contains:
 - a historical-only baseline forecast path that emits a no-API forecast card and lifecycle bundle with forecast probability equal to baseline probability
 - a local deterministic forecast pipeline scaffold for accepted fixture requests
 - a fixture-mode resolver for request-bound pipeline forecasts
-- a generated release manifest that summarizes implemented local surfaces and claim boundaries
+- a generated release manifest with an explicit MVP local runtime section, smoke checks, machine interfaces, non-goals, and claim boundaries
 - a CI release gate that runs the local release check and compile pass
 - lightweight hardening and release-readiness checks
 - a small local CLI wrapper for common repository workflows
@@ -413,6 +413,7 @@ python3 scripts/check_historical_baseline_forecast.py
 python3 scripts/run_forecast_pipeline.py
 python3 scripts/resolve_pipeline_outcome.py
 python3 scripts/generate_release_manifest.py
+python3 scripts/check_mvp_release_surface.py
 python3 scripts/check_read_access.py
 python3 scripts/check_read_contracts.py
 python3 scripts/check_forecast_requests.py
@@ -715,6 +716,7 @@ Check the release manifest:
 
 ```bash
 python3 scripts/ope.py manifest
+python3 scripts/check_mvp_release_surface.py
 ```
 
 CI release gate:

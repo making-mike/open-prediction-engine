@@ -76,6 +76,7 @@ def main() -> None:
     run([sys.executable, "scripts/resolve_pipeline_outcome.py"])
     run([sys.executable, "scripts/generate_record_index.py"])
     run([sys.executable, "scripts/generate_release_manifest.py"])
+    run([sys.executable, "scripts/check_mvp_release_surface.py"])
     run([sys.executable, "scripts/check_benchmarks.py"])
     run([sys.executable, "scripts/check_method_registry.py"])
     run([sys.executable, "scripts/compare_forecasting_methods.py", "--check"])

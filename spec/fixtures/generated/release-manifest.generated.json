@@ -129,6 +129,129 @@
       "count": 6
     }
   ],
+  "mvpLocalRuntime": {
+    "surfaceStatus": "local_mvp_fixture_ready",
+    "runtimeMode": "local_cli_and_generated_records",
+    "runbookPath": "spec/mvp-local-runtime.md",
+    "supportedSourceInputs": [
+      "approved_local_csv_json",
+      "accepted_source_adapter_output",
+      "committed_fixture_request",
+      "policy_bound_promoted_fixture_source_set"
+    ],
+    "happyPath": {
+      "setupCommand": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+      "forecastCommand": "python3 scripts/ope.py forecast-run",
+      "readbackCommands": [
+        "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+        "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102"
+      ],
+      "resolutionCommand": "python3 scripts/ope.py resolve-source-handoff",
+      "scoringCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
+      "corpusReadbackCommand": "python3 scripts/ope.py transit-track-record-gate",
+      "failureRecoveryCommand": "python3 scripts/ope.py resolution-runtime-reliability",
+      "expectedForecastIds": [
+        "forecast-602",
+        "forecast-702",
+        "forecast-1102",
+        "forecast-1201"
+      ]
+    },
+    "machineInterfaces": [
+      {
+        "interface": "cli",
+        "command": "python3 scripts/ope.py",
+        "status": "implemented_local",
+        "minimumUse": "Run setup, forecast, resolution, scoring, readback, and release checks locally."
+      },
+      {
+        "interface": "agent_call",
+        "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+        "status": "implemented_local",
+        "minimumUse": "Return one schema-bound envelope with exit code, status, record binding, and payload."
+      },
+      {
+        "interface": "mcp_stdio",
+        "command": "python3 scripts/ope.py mcp-stdio",
+        "status": "local_scaffold",
+        "minimumUse": "Expose the local dispatcher as MCP stdio tools for MCP-capable hosts."
+      }
+    ],
+    "smokeChecks": [
+      {
+        "checkId": "mvp-smoke-local-setup-readback",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+        "expected": "forecast-1102 is resolved and scored, with quality claim still sample-size-blocked."
+      },
+      {
+        "checkId": "mvp-smoke-forecast-run",
+        "command": "python3 scripts/ope.py forecast-run",
+        "expected": "forecast-602 completes through forecast card, evidence trace, bundle, resolution, and score bindings."
+      },
+      {
+        "checkId": "mvp-smoke-agent-envelope",
+        "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+        "expected": "agent-call returns an ok envelope for the normal forecast-card readback."
+      },
+      {
+        "checkId": "mvp-smoke-resolution-jobs",
+        "command": "python3 scripts/ope.py resolution-jobs",
+        "expected": "resolution jobs expose next actions without executing resolver commands."
+      },
+      {
+        "checkId": "mvp-smoke-corpus-claim-gate",
+        "command": "python3 scripts/ope.py transit-track-record-gate",
+        "expected": "corpus readback reports below-threshold track-record and calibration status."
+      }
+    ],
+    "blockedPathExamples": [
+      {
+        "case": "missing_approval",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case missing_approval",
+        "expectedStatus": "missing_approval",
+        "nextAction": "confirm_approval",
+        "forecastArtifactsCreated": false
+      },
+      {
+        "case": "unconfirmed_mapping",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case unconfirmed_mapping",
+        "expectedStatus": "needs_confirmation",
+        "nextAction": "confirm_mapping",
+        "forecastArtifactsCreated": false
+      },
+      {
+        "case": "unsafe_source",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case unsafe_source",
+        "expectedStatus": "blocked_unsafe",
+        "nextAction": "stop_unsafe_connector",
+        "forecastArtifactsCreated": false
+      },
+      {
+        "case": "response_too_large",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case response_too_large",
+        "expectedStatus": "response_too_large",
+        "nextAction": "retry_with_smaller_readback",
+        "forecastArtifactsCreated": false
+      }
+    ],
+    "claimReview": {
+      "qualityClaimsAllowed": false,
+      "trackRecordStatus": "not_enough_resolved_comparable_outcomes",
+      "calibrationStatus": "not_enough_resolved_comparable_outcomes",
+      "liveCalibrationClaimAllowed": false,
+      "normalChecksUseLiveNetwork": false,
+      "nonGoalRefs": [
+        "network_api",
+        "hosted_service",
+        "production_agent_adapter_runtime",
+        "generic_private_api_database_runtime",
+        "production_forecast_use_of_live_connector_results",
+        "live_calibration_claim",
+        "unbounded_web_crawling"
+      ]
+    }
+  },
   "claimBoundaries": {
     "domain": "weather-logistics",
     "minimumCalibrationSampleSize": 30,

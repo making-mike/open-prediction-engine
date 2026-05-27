@@ -17,6 +17,7 @@ Check committed manifest output:
 ```bash
 python3 scripts/generate_release_manifest.py
 python3 scripts/ope.py manifest
+python3 scripts/check_mvp_release_surface.py
 ```
 
 Refresh the manifest:
@@ -35,6 +36,7 @@ The manifest records:
 - canonical setup, test, release, and CLI commands
 - schema file count and schema file paths, including source-policy, source-connector, live-connector-readiness, domain-setup, source-manifest-build, source-intake-handoff, source-handoff-method-gate, source-handoff setup runbook, private setup workflow, private setup request, private setup first-action, first-action runbook, agent bundle, adapter-chain runbook, private source adapter capability, outcome matrix, intake bridge, source-kind selection examples, and source-kind query matrix, source-manifest, field-mapping, source-intake-report, setup-benchmark-gate, setup-method-decision, setup-forecast-run, recalculation-trigger, recalculation-run, evidence-plan, method-registry, method-comparison, method-selection, agent-envelope, adapter protocol-map, forecast-run summary, intake matrix, and runbook contracts
 - public read-surface counts from the generated record index
+- the local MVP runtime section with supported source inputs, happy-path commands, blocked-path examples, CLI/agent-call/MCP machine interfaces, smoke checks, and claim review
 - claim boundaries for the first weather-logistics wedge, including live, pipeline, auto-evidence, and source-handoff fixture outcome counters, and read surfaces that include historical-only baseline forecasts
 - explicit non-goals such as network API, hosted service, production agent adapter runtime beyond the local MCP stdio scaffold, production live-data workflow, and live calibration claims
 - the live connector readiness schema as an offline contract, without making the integration live probe part of release readiness
@@ -73,6 +75,7 @@ Normal release checks verify:
 
 - the manifest matches deterministic generated output
 - the manifest validates against `spec/release-manifest.schema.json`
+- the MVP release surface smoke check exercises local setup readback, forecast-run, agent-call, MCP protocol-map exposure, resolution jobs, corpus gates, and representative blocked setup paths
 - the manifest names the CI workflow and release-check command
 - live calibration remains disallowed while comparable resolved outcomes are below the declared threshold
 - domain setup contracts are present without turning candidate private setups into production or calibration claims
