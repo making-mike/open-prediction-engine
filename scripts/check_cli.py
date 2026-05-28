@@ -352,6 +352,29 @@ def main() -> None:
     repeating_setup_check = run_cli("repeating-prediction-setup", "--check")
     if "checked repeating prediction setup" not in repeating_setup_check.stdout:
         raise AssertionError("CLI repeating-prediction-setup check output drifted")
+    prediction_campaign = run_cli("prediction-campaign")
+    prediction_campaign_payload = json.loads(prediction_campaign.stdout)
+    if prediction_campaign_payload["manifestStatus"] != "planned_dry_run_non_executing":
+        raise AssertionError("CLI prediction-campaign manifest status drifted")
+    if prediction_campaign_payload["summary"]["plannedRunCount"] != 4:
+        raise AssertionError("CLI prediction-campaign should expose four dry-run planned runs")
+    if prediction_campaign_payload["summary"]["runnerImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign must not implement a runner")
+    if prediction_campaign_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI prediction-campaign must not create forecast artifacts")
+    campaign_plan = run_cli("prediction-campaign", "plan")
+    campaign_plan_payload = json.loads(campaign_plan.stdout)
+    if campaign_plan_payload["plannedRuns"][0]["runId"] != "predictionrun-1301":
+        raise AssertionError("CLI prediction-campaign plan first run ID drifted")
+    if campaign_plan_payload["plannedRuns"][0]["forecastId"] == "forecast-1102":
+        raise AssertionError("CLI prediction-campaign plan must not reuse fixture forecast IDs")
+    campaign_status = run_cli("prediction-campaign", "status")
+    campaign_status_payload = json.loads(campaign_status.stdout)
+    if campaign_status_payload["progress"]["nextResolutionRunId"] != "none":
+        raise AssertionError("CLI prediction-campaign status should have no due resolution yet")
+    prediction_campaign_check = run_cli("prediction-campaign", "--check")
+    if "checked prediction campaign manifest" not in prediction_campaign_check.stdout:
+        raise AssertionError("CLI prediction-campaign check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

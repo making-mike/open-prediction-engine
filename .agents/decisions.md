@@ -1989,3 +1989,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `repeating-prediction-setup` contract, generated fixture, CLI command, and checker for recurrence policies, end conditions, and post-calibration behavior before campaign execution exists.
 - **Why:** Agents need a stable local-first way to describe finite, until-date, interval, open-ended, weekday/window, and calibration-threshold campaigns without inventing shell loops or implying a scheduler, hosted runtime, or quality claim.
 - **Alternatives rejected:** Starting with a foreground runner before the manifest contract, writing cron or OS scheduler configuration, mutating local campaign state during normal checks, or letting calibration thresholds auto-tune methods.
+
+### DEC-090 — Add Prediction Campaign Manifest
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-manifest` contract, generated fixture, CLI command, and checker that expands one repeating setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs.
+- **Why:** Before a terminal runner exists, agents need a resumable local manifest shape that can answer what is planned, what is due later, which duplicate keys are blocked, and where ignored local state will live without creating artifacts.
+- **Alternatives rejected:** Letting the first runner invent campaign IDs, writing `.ope/live/` campaign state during normal checks, reusing fixture forecast IDs for live campaign plans, or starting scheduler work before duplicate and status boundaries are checked.

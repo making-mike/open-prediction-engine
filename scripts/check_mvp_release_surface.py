@@ -93,6 +93,12 @@ def main() -> None:
     require(expansion["summary"]["qualityClaimAllowed"] is False, "expansion readiness must block quality claims")
     require(expansion["summary"]["generatedTypesIncluded"] is False, "expansion readiness should defer generated runtime types")
 
+    campaign_plan = run_cli("prediction-campaign", "plan")
+    require(campaign_plan["planningWindow"]["dryRunPlannerImplemented"] is True, "prediction campaign should expose a dry-run planner")
+    require(len(campaign_plan["plannedRuns"]) == 4, "prediction campaign should expose four planned runs")
+    require(campaign_plan["plannedRuns"][0]["runId"] == "predictionrun-1301", "prediction campaign run ID drifted")
+    require(campaign_plan["plannedRuns"][0]["createsForecastArtifacts"] is False, "prediction campaign must not create artifacts")
+
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
     require(adapter["forecastId"] is None, "accepted adapter path must not invent forecast artifacts")

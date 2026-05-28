@@ -135,6 +135,8 @@ def main() -> None:
     run([sys.executable, "scripts/check_expansion_readiness_gate.py"])
     run([sys.executable, "scripts/generate_repeating_prediction_setup.py", "--check"])
     run([sys.executable, "scripts/check_repeating_prediction_setup.py"])
+    run([sys.executable, "scripts/generate_prediction_campaign_manifest.py", "--check"])
+    run([sys.executable, "scripts/check_prediction_campaign_manifest.py"])
     run([sys.executable, "scripts/generate_recalculation_history.py", "--check"])
     run([sys.executable, "scripts/check_recalculation_history.py"])
     run([sys.executable, "scripts/run_agent_forecast.py", "--check"])

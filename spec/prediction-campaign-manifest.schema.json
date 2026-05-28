@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-manifest.schema.json",
+  "title": "Prediction Campaign Manifest",
+  "description": "Checked local manifest for expanding a repeating prediction setup into unique dry-run campaign and run identities before runner execution exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignManifestId",
+    "generatedAt",
+    "manifestStatus",
+    "domain",
+    "bindings",
+    "localStatePolicy",
+    "campaign",
+    "idNamespace",
+    "planningWindow",
+    "plannedRuns",
+    "statusExamples",
+    "progress",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "manifestStatus": {
+      "type": "string",
+      "enum": ["planned_dry_run_non_executing"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "localStatePolicy": { "$ref": "#/$defs/localStatePolicy" },
+    "campaign": { "$ref": "#/$defs/campaign" },
+    "idNamespace": { "$ref": "#/$defs/idNamespace" },
+    "planningWindow": { "$ref": "#/$defs/planningWindow" },
+    "plannedRuns": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/plannedRun" }
+    },
+    "statusExamples": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/statusExample" }
+    },
+    "progress": { "$ref": "#/$defs/progress" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "campaignRunStatus": {
+      "type": "string",
+      "enum": [
+        "planned_forecast_pending",
+        "waiting_resolution",
+        "due_resolution",
+        "resolved",
+        "skipped",
+        "missed",
+        "canceled",
+        "failed",
+        "manually_stopped",
+        "blocked_duplicate"
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repeatingPredictionSetupId",
+        "domainSetupId",
+        "sourcePolicyId",
+        "transitMethodOptionsId",
+        "transitBaselineTrackRecordGateId",
+        "transitLiveEvidencePromotionId",
+        "repeatingPredictionSetupPath"
+      ],
+      "properties": {
+        "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitMethodOptionsId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitBaselineTrackRecordGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitLiveEvidencePromotionId": { "$ref": "common.schema.json#/$defs/id" },
+        "repeatingPredictionSetupPath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "localStatePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceRoot",
+        "campaignStatePath",
+        "relativePathsOnly",
+        "gitIgnored",
+        "normalChecksWriteLiveState",
+        "credentialsStored",
+        "privateRowsStored",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "workspaceRoot": { "$ref": "#/$defs/boundedString" },
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "relativePathsOnly": { "type": "boolean" },
+        "gitIgnored": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "privateRowsStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignId",
+        "cycleId",
+        "recurrenceCaseKey",
+        "schedulePolicyId",
+        "timezone",
+        "serviceWindow",
+        "createdFromSetupAt",
+        "campaignStatePath",
+        "runnerImplemented"
+      ],
+      "properties": {
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "recurrenceCaseKey": { "$ref": "#/$defs/boundedString" },
+        "schedulePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "timezone": { "$ref": "#/$defs/boundedString" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "createdFromSetupAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "runnerImplemented": { "type": "boolean" }
+      }
+    },
+    "idNamespace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignId",
+        "cycleId",
+        "runIdPrefix",
+        "questionIdPrefix",
+        "forecastIdPrefix",
+        "resolutionIdPrefix",
+        "scoringReportIdPrefix",
+        "nextSequenceStart",
+        "uniquenessRule"
+      ],
+      "properties": {
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runIdPrefix": { "$ref": "#/$defs/boundedString" },
+        "questionIdPrefix": { "$ref": "#/$defs/boundedString" },
+        "forecastIdPrefix": { "$ref": "#/$defs/boundedString" },
+        "resolutionIdPrefix": { "$ref": "#/$defs/boundedString" },
+        "scoringReportIdPrefix": { "$ref": "#/$defs/boundedString" },
+        "nextSequenceStart": { "type": "integer", "minimum": 1 },
+        "uniquenessRule": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "planningWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dryRunPlannerImplemented",
+        "nextCandidateCount",
+        "duplicateKeyFields",
+        "duplicatePolicy",
+        "missedWindowPolicy",
+        "manualStopPolicy",
+        "statusesHandled"
+      ],
+      "properties": {
+        "dryRunPlannerImplemented": { "type": "boolean" },
+        "nextCandidateCount": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "duplicateKeyFields": { "$ref": "#/$defs/boundedStringList" },
+        "duplicatePolicy": { "$ref": "#/$defs/boundedString" },
+        "missedWindowPolicy": { "$ref": "#/$defs/boundedString" },
+        "manualStopPolicy": { "$ref": "#/$defs/boundedString" },
+        "statusesHandled": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/campaignRunStatus" }
+        }
+      }
+    },
+    "plannedRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "cycleId",
+        "sequenceNumber",
+        "serviceDate",
+        "serviceWindow",
+        "forecastCreateAt",
+        "forecastCloseAt",
+        "horizonStartsAt",
+        "horizonEndsAt",
+        "resolutionEligibleAt",
+        "questionId",
+        "forecastId",
+        "resolutionId",
+        "scoringReportId",
+        "sourcePolicyId",
+        "runStatus",
+        "duplicateKey",
+        "plannedStatePath",
+        "createsForecastArtifacts",
+        "fetchesLiveData",
+        "mutatesCampaignState"
+      ],
+      "properties": {
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sequenceNumber": { "type": "integer", "minimum": 1 },
+        "serviceDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "forecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonStartsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonEndsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "resolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionId": { "$ref": "common.schema.json#/$defs/id" },
+        "scoringReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "runStatus": { "$ref": "#/$defs/campaignRunStatus" },
+        "duplicateKey": { "$ref": "#/$defs/boundedString" },
+        "plannedStatePath": { "$ref": "#/$defs/boundedString" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "mutatesCampaignState": { "type": "boolean" }
+      }
+    },
+    "statusExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runStatus", "meaning", "nextAction", "createsForecastArtifacts", "mutatesCampaignState"],
+      "properties": {
+        "runStatus": { "$ref": "#/$defs/campaignRunStatus" },
+        "meaning": { "$ref": "#/$defs/boundedString" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "mutatesCampaignState": { "type": "boolean" }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plannedRunCount",
+        "forecastArtifactsCreated",
+        "resolvedComparableOutcomes",
+        "dueResolutionCount",
+        "blockedDuplicateCount",
+        "skippedCount",
+        "nextForecastRunId",
+        "nextResolutionRunId",
+        "nextAction"
+      ],
+      "properties": {
+        "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "forecastArtifactsCreated": { "type": "integer", "minimum": 0 },
+        "resolvedComparableOutcomes": { "type": "integer", "minimum": 0 },
+        "dueResolutionCount": { "type": "integer", "minimum": 0 },
+        "blockedDuplicateCount": { "type": "integer", "minimum": 0 },
+        "skippedCount": { "type": "integer", "minimum": 0 },
+        "nextForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextResolutionRunId": { "$ref": "#/$defs/boundedString" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignManifestImplemented",
+        "dryRunPlannerImplemented",
+        "runnerImplemented",
+        "plannedRunCount",
+        "uniqueRunIdsMinted",
+        "duplicatePreventionEnabled",
+        "mutatesLiveState",
+        "normalChecksUseLiveNetwork",
+        "qualityClaimAllowed",
+        "recommendedNextMilestone"
+      ],
+      "properties": {
+        "campaignManifestImplemented": { "type": "boolean" },
+        "dryRunPlannerImplemented": { "type": "boolean" },
+        "runnerImplemented": { "type": "boolean" },
+        "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "uniqueRunIdsMinted": { "type": "boolean" },
+        "duplicatePreventionEnabled": { "type": "boolean" },
+        "mutatesLiveState": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyDryRun",
+        "writesIgnoredLiveState",
+        "createsForecastArtifacts",
+        "executesForecastRunner",
+        "startsScheduler",
+        "fetchesLiveData",
+        "resolvesOutcomes",
+        "appendsCorpusEvidence",
+        "storesCredentials",
+        "storesPrivateRows",
+        "hostedRuntimeAllowed",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyDryRun": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "executesForecastRunner": { "type": "boolean" },
+        "startsScheduler": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "resolvesOutcomes": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

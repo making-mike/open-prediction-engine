@@ -16,6 +16,7 @@ python3 scripts/ope.py pilot-session-packet --section sanitization
 python3 scripts/ope.py pilot-summary-intake --section rules
 python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary
+python3 scripts/ope.py prediction-campaign plan
 ```
 
 2. Run the private setup summary for the checked local-file path:

@@ -116,6 +116,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     developer_adoption_command = [sys.executable, "scripts/generate_developer_adoption_surface.py"]
     expansion_readiness_command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
     repeating_prediction_setup_command = [sys.executable, "scripts/generate_repeating_prediction_setup.py"]
+    prediction_campaign_manifest_command = [sys.executable, "scripts/generate_prediction_campaign_manifest.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -188,6 +189,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         developer_adoption_command.append("--write")
         expansion_readiness_command.append("--write")
         repeating_prediction_setup_command.append("--write")
+        prediction_campaign_manifest_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -253,6 +255,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         developer_adoption_command.append("--check")
         expansion_readiness_command.append("--check")
         repeating_prediction_setup_command.append("--check")
+        prediction_campaign_manifest_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -319,6 +322,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(developer_adoption_command)
     run(expansion_readiness_command)
     run(repeating_prediction_setup_command)
+    run(prediction_campaign_manifest_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1213,6 +1217,21 @@ def cmd_repeating_prediction_setup(args: argparse.Namespace) -> None:
         command.extend(["--case", args.case])
     if args.section:
         command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_prediction_campaign(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_prediction_campaign_manifest.py"]
+    if args.action != "manifest":
+        command.extend(["--view", args.action])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.plan_count is not None:
+        command.extend(["--plan-count", str(args.plan_count)])
     if args.check:
         command.append("--check")
     if args.write:
@@ -2496,6 +2515,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated repeating prediction setup",
     )
     repeating_prediction_setup.set_defaults(func=cmd_repeating_prediction_setup)
+
+    prediction_campaign = subparsers.add_parser(
+        "prediction-campaign",
+        help="check, refresh, or print the local prediction campaign manifest",
+    )
+    prediction_campaign.add_argument(
+        "action",
+        nargs="?",
+        choices=["manifest", "plan", "status", "summary", "boundary"],
+        default="manifest",
+        help="print the full manifest or one campaign readback",
+    )
+    prediction_campaign.add_argument(
+        "--case",
+        choices=[
+            "daily_100_run_transit_calibration",
+            "hourly_short_horizon_count",
+            "weekly_until_date_campaign",
+            "open_ended_monitoring_campaign",
+            "weekday_peak_window_campaign",
+            "post_calibration_restart_campaign",
+        ],
+        help="expand one repeating prediction setup example",
+    )
+    prediction_campaign.add_argument(
+        "--plan-count",
+        type=int,
+        help="number of dry-run candidate runs to plan",
+    )
+    prediction_campaign.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated prediction campaign manifest drift",
+    )
+    prediction_campaign.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated prediction campaign manifest",
+    )
+    prediction_campaign.set_defaults(func=cmd_prediction_campaign)
 
     private_setup_adapter_runbook = subparsers.add_parser(
         "private-setup-adapter-runbook",

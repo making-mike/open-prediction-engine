@@ -156,6 +156,8 @@ The expansion readiness generator emits a checked post-MVP gate under `generated
 
 The repeating prediction setup generator emits a checked non-executing recurrence contract under `generated/repeating-prediction-setup/`, covering finite count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart examples before any campaign manifest or runner exists.
 
+The prediction campaign manifest generator emits a checked dry-run manifest under `generated/prediction-campaign-manifest/`, expanding the repeating setup into unique planned run IDs, duplicate keys, status readbacks, and ignored local-state path policy without creating forecast artifacts or writing live campaign state.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.

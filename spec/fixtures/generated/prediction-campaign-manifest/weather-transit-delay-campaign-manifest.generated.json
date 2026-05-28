@@ -1,0 +1,282 @@
+{
+  "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+  "generatedAt": "2026-05-29T00:00:00Z",
+  "manifestStatus": "planned_dry_run_non_executing",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+    "domainSetupId": "domainsetup-003",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "transitMethodOptionsId": "transitmethodoptions-001",
+    "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+    "transitLiveEvidencePromotionId": "transitliveevidencepromotion-001",
+    "repeatingPredictionSetupPath": "spec/fixtures/generated/repeating-prediction-setup/ope-repeating-prediction-setup.generated.json"
+  },
+  "localStatePolicy": {
+    "workspaceRoot": ".ope/live/prediction-campaigns",
+    "campaignStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/campaign-manifest.json",
+    "relativePathsOnly": true,
+    "gitIgnored": true,
+    "normalChecksWriteLiveState": false,
+    "credentialsStored": false,
+    "privateRowsStored": false,
+    "sanitizedDiagnosticsOnly": true
+  },
+  "campaign": {
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "recurrenceCaseKey": "daily_100_run_transit_calibration",
+    "schedulePolicyId": "repeatingschedulepolicy-001",
+    "timezone": "Europe/Helsinki",
+    "serviceWindow": "morning_peak",
+    "createdFromSetupAt": "2026-05-29T00:00:00Z",
+    "campaignStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/campaign-manifest.json",
+    "runnerImplemented": false
+  },
+  "idNamespace": {
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "runIdPrefix": "predictionrun",
+    "questionIdPrefix": "question",
+    "forecastIdPrefix": "forecast",
+    "resolutionIdPrefix": "resolution",
+    "scoringReportIdPrefix": "scoring",
+    "nextSequenceStart": 1301,
+    "uniquenessRule": "IDs are minted from the campaign sequence and must not reuse committed fixture IDs such as forecast-1102."
+  },
+  "planningWindow": {
+    "dryRunPlannerImplemented": true,
+    "nextCandidateCount": 4,
+    "duplicateKeyFields": [
+      "domain",
+      "network",
+      "geography",
+      "serviceDate",
+      "serviceWindow"
+    ],
+    "duplicatePolicy": "Block a candidate when the duplicate key already exists for the campaign cycle.",
+    "missedWindowPolicy": "If forecastCloseAt has passed before forecast creation, mark the run missed and never backfill a forecast.",
+    "manualStopPolicy": "Manual stop freezes future planning until an explicit resume creates a new cycle or run range.",
+    "statusesHandled": [
+      "planned_forecast_pending",
+      "waiting_resolution",
+      "due_resolution",
+      "resolved",
+      "skipped",
+      "missed",
+      "canceled",
+      "failed",
+      "manually_stopped",
+      "blocked_duplicate"
+    ]
+  },
+  "plannedRuns": [
+    {
+      "runId": "predictionrun-1301",
+      "cycleId": "predictioncycle-001",
+      "sequenceNumber": 1,
+      "serviceDate": "2026-06-11",
+      "serviceWindow": "morning_peak",
+      "forecastCreateAt": "2026-06-11T00:00:00Z",
+      "forecastCloseAt": "2026-06-11T04:45:00Z",
+      "horizonStartsAt": "2026-06-11T05:00:00Z",
+      "horizonEndsAt": "2026-06-11T07:00:00Z",
+      "resolutionEligibleAt": "2026-06-11T07:15:00Z",
+      "questionId": "question-1301",
+      "forecastId": "forecast-1301",
+      "resolutionId": "resolution-1301",
+      "scoringReportId": "scoring-1301",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "runStatus": "planned_forecast_pending",
+      "duplicateKey": "weather-transit-delays:hsl-surface:helsinki:2026-06-11:morning_peak",
+      "plannedStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+      "createsForecastArtifacts": false,
+      "fetchesLiveData": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runId": "predictionrun-1302",
+      "cycleId": "predictioncycle-001",
+      "sequenceNumber": 2,
+      "serviceDate": "2026-06-12",
+      "serviceWindow": "morning_peak",
+      "forecastCreateAt": "2026-06-12T00:00:00Z",
+      "forecastCloseAt": "2026-06-12T04:45:00Z",
+      "horizonStartsAt": "2026-06-12T05:00:00Z",
+      "horizonEndsAt": "2026-06-12T07:00:00Z",
+      "resolutionEligibleAt": "2026-06-12T07:15:00Z",
+      "questionId": "question-1302",
+      "forecastId": "forecast-1302",
+      "resolutionId": "resolution-1302",
+      "scoringReportId": "scoring-1302",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "runStatus": "planned_forecast_pending",
+      "duplicateKey": "weather-transit-delays:hsl-surface:helsinki:2026-06-12:morning_peak",
+      "plannedStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1302.json",
+      "createsForecastArtifacts": false,
+      "fetchesLiveData": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runId": "predictionrun-1303",
+      "cycleId": "predictioncycle-001",
+      "sequenceNumber": 3,
+      "serviceDate": "2026-06-13",
+      "serviceWindow": "morning_peak",
+      "forecastCreateAt": "2026-06-13T00:00:00Z",
+      "forecastCloseAt": "2026-06-13T04:45:00Z",
+      "horizonStartsAt": "2026-06-13T05:00:00Z",
+      "horizonEndsAt": "2026-06-13T07:00:00Z",
+      "resolutionEligibleAt": "2026-06-13T07:15:00Z",
+      "questionId": "question-1303",
+      "forecastId": "forecast-1303",
+      "resolutionId": "resolution-1303",
+      "scoringReportId": "scoring-1303",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "runStatus": "planned_forecast_pending",
+      "duplicateKey": "weather-transit-delays:hsl-surface:helsinki:2026-06-13:morning_peak",
+      "plannedStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1303.json",
+      "createsForecastArtifacts": false,
+      "fetchesLiveData": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runId": "predictionrun-1304",
+      "cycleId": "predictioncycle-001",
+      "sequenceNumber": 4,
+      "serviceDate": "2026-06-14",
+      "serviceWindow": "morning_peak",
+      "forecastCreateAt": "2026-06-14T00:00:00Z",
+      "forecastCloseAt": "2026-06-14T04:45:00Z",
+      "horizonStartsAt": "2026-06-14T05:00:00Z",
+      "horizonEndsAt": "2026-06-14T07:00:00Z",
+      "resolutionEligibleAt": "2026-06-14T07:15:00Z",
+      "questionId": "question-1304",
+      "forecastId": "forecast-1304",
+      "resolutionId": "resolution-1304",
+      "scoringReportId": "scoring-1304",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "runStatus": "planned_forecast_pending",
+      "duplicateKey": "weather-transit-delays:hsl-surface:helsinki:2026-06-14:morning_peak",
+      "plannedStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1304.json",
+      "createsForecastArtifacts": false,
+      "fetchesLiveData": false,
+      "mutatesCampaignState": false
+    }
+  ],
+  "statusExamples": [
+    {
+      "runStatus": "planned_forecast_pending",
+      "meaning": "A future run has unique IDs and a candidate window, but no forecast artifact exists yet.",
+      "nextAction": "A later runner may create the forecast only before forecastCloseAt.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "waiting_resolution",
+      "meaning": "A forecast exists and the service window has not ended yet.",
+      "nextAction": "Wait until resolutionEligibleAt before attempting resolution.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "due_resolution",
+      "meaning": "A forecast exists, the horizon has ended, and resolution-only evidence may be gathered.",
+      "nextAction": "Run a checked resolver only with an explicit execution command in a later milestone.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "resolved",
+      "meaning": "Resolution and scoring records exist and can be considered for comparable evidence if claim gates allow it.",
+      "nextAction": "Inspect scoring and append-readiness before any corpus mutation.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "skipped",
+      "meaning": "The runner intentionally skipped a candidate before close time with a recorded reason.",
+      "nextAction": "Keep the skipped run out of comparable outcome counts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "missed",
+      "meaning": "The runner noticed the forecast close time after it had already passed.",
+      "nextAction": "Do not backfill; record the missed window and plan the next eligible run.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "canceled",
+      "meaning": "The caller canceled a planned or waiting run.",
+      "nextAction": "Preserve the cancellation reason and do not create new artifacts for the run.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "failed",
+      "meaning": "A planned execution failed with sanitized diagnostics.",
+      "nextAction": "Retry only if the close-time and source-policy boundaries still allow it.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "manually_stopped",
+      "meaning": "The caller stopped the campaign or cycle before the end condition was reached.",
+      "nextAction": "Leave future runs uncreated unless the caller explicitly resumes.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "runStatus": "blocked_duplicate",
+      "meaning": "A service date/window duplicate key already exists in the campaign.",
+      "nextAction": "Do not create a second forecast for the same campaign key.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    }
+  ],
+  "progress": {
+    "plannedRunCount": 4,
+    "forecastArtifactsCreated": 0,
+    "resolvedComparableOutcomes": 0,
+    "dueResolutionCount": 0,
+    "blockedDuplicateCount": 0,
+    "skippedCount": 0,
+    "nextForecastRunId": "predictionrun-1301",
+    "nextResolutionRunId": "none",
+    "nextAction": "Use a future terminal campaign runner to create the first forecast before forecastCloseAt."
+  },
+  "summary": {
+    "campaignManifestImplemented": true,
+    "dryRunPlannerImplemented": true,
+    "runnerImplemented": false,
+    "plannedRunCount": 4,
+    "uniqueRunIdsMinted": true,
+    "duplicatePreventionEnabled": true,
+    "mutatesLiveState": false,
+    "normalChecksUseLiveNetwork": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextMilestone": "Milestone 93: Terminal Campaign Runner"
+  },
+  "executionBoundary": {
+    "readOnlyDryRun": true,
+    "writesIgnoredLiveState": false,
+    "createsForecastArtifacts": false,
+    "executesForecastRunner": false,
+    "startsScheduler": false,
+    "fetchesLiveData": false,
+    "resolvesOutcomes": false,
+    "appendsCorpusEvidence": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "hostedRuntimeAllowed": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This manifest is a dry-run planning readback; it does not write campaign state during normal checks.",
+    "The .ope/live/prediction-campaigns path is reserved for explicit local campaign state and remains git ignored.",
+    "Planned IDs are placeholders for future runner-created artifacts, not committed forecast, resolution, or scoring records.",
+    "Calibration and quality claims remain blocked until enough comparable resolved outcomes are appended through a checked ledger."
+  ]
+}

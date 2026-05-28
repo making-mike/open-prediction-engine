@@ -123,6 +123,7 @@ Done:
 - Pilot summary intake now classifies sanitized summary examples as ledger-ready, redaction-needed, or blocked through `python3 scripts/ope.py pilot-summary-intake`.
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 - Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
+- Prediction campaign manifests now expose a checked dry-run campaign plan with unique campaign, cycle, run, question, forecast, resolution, and scoring IDs, duplicate keys, ignored local-state path policy, and status readbacks through `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`.
 
 Not started:
 
@@ -146,11 +147,10 @@ In progress:
 
 Next:
 
-1. Add a local prediction campaign manifest so the checked repeating setup can expand into unique campaign, cycle, run, question, forecast, resolution, and scoring IDs without reusing fixtures.
-2. Add a terminal campaign runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
-3. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
-4. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
-5. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
+1. Add a terminal campaign runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
+2. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
+3. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
+4. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
 
 MVP path:
 
@@ -2794,18 +2794,18 @@ Completed outputs:
 
 ## Milestone 92: Local Prediction Campaign Manifest
 
-Status: Planned.
+Status: Accepted.
 
 Goal: give agents one local campaign state file that records a repeating prediction setup, unique run identities, planned windows, and resume-safe progress.
 
 Tasks:
 
-- [ ] Add a campaign manifest schema that wraps a repeating prediction setup with local runtime state.
-- [ ] Generate unique campaign, cycle, run, question, forecast, resolution, and scoring IDs instead of reusing fixture IDs across live runs.
-- [ ] Store ignored local campaign state under `.ope/live/prediction-campaigns/` with sanitized relative paths and no credentials.
-- [ ] Add a dry-run planner that expands the next N candidate runs without fetching live sources or creating forecast artifacts.
-- [ ] Add duplicate prevention for already planned service dates/windows and explicit handling for skipped, missed, canceled, failed, and manually stopped runs.
-- [ ] Preserve source-policy and claim-boundary metadata at campaign, cycle, and run level.
+- [x] Add a campaign manifest schema that wraps a repeating prediction setup with local runtime state.
+- [x] Generate unique campaign, cycle, run, question, forecast, resolution, and scoring IDs instead of reusing fixture IDs across live runs.
+- [x] Reserve ignored local campaign state paths under `.ope/live/prediction-campaigns/` with sanitized relative paths and no credentials; normal checks do not write those paths.
+- [x] Add a dry-run planner that expands the next N candidate runs without fetching live sources or creating forecast artifacts.
+- [x] Add duplicate prevention for already planned service dates/windows and explicit handling for skipped, missed, canceled, failed, and manually stopped runs.
+- [x] Preserve source-policy and claim-boundary metadata at campaign, cycle, and run level.
 
 Exit criteria:
 
@@ -2818,6 +2818,19 @@ Expected outputs:
 - `spec/prediction-campaign-manifest.md`
 - `python3 scripts/ope.py prediction-campaign plan`
 - `python3 scripts/ope.py prediction-campaign status`
+
+Completed outputs:
+
+- `spec/prediction-campaign-manifest.schema.json`
+- `spec/prediction-campaign-manifest.md`
+- `scripts/generate_prediction_campaign_manifest.py`
+- `scripts/check_prediction_campaign_manifest.py`
+- checked fixture at `spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json`
+- CLI command `python3 scripts/ope.py prediction-campaign`
+- CLI readbacks `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`
+- unique dry-run IDs for campaign, cycle, run, question, forecast, resolution, and scoring records
+- duplicate-key, skipped, missed, canceled, failed, manually stopped, and duplicate-blocked status boundaries
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the checked dry-run campaign manifest
 
 ## Milestone 93: Terminal Campaign Runner
 
