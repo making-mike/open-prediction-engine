@@ -20,6 +20,10 @@ OPE's target direction is agent-native private prediction setup. A developer or 
 
 This does not mean unbounded crawling or claiming access to all internet knowledge. OPE should declare the setup, source policy, mappings, and method boundary, record what it used, record what it could not verify, compare forecasts to baselines, and keep quality claims tied to resolved sample evidence.
 
+## Shared Docs Page
+
+Open `docs/agents-and-humans.html` for a compact role-oriented guide for human contributors and coding agents. It links the main docs, safe commands, current claim boundaries, and the milestone documentation rule.
+
 ## Current State
 
 The repository currently contains:

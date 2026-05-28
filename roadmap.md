@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## Purpose
 
@@ -17,7 +17,8 @@ The project should advance in this order:
 7. Add domain-agnostic private engine setup contracts.
 8. Add source manifests, field mappings, method policies, and recalculation history.
 9. Add policy-bound auto-evidence gathering for `data: auto`.
-10. Add stronger forecasting methods only after baseline and benchmark controls exist.
+10. Add local repeating prediction setup so agents can start, resume, resolve, score, and measure forecast campaigns from a terminal.
+11. Add stronger forecasting methods only after baseline, benchmark, track-record, and calibration controls exist.
 
 The roadmap is intentionally contract-first, agent-native, and domain-agnostic. OPE should not start as a generic LLM forecast endpoint or an unbounded web crawler. Weather-logistics is the reference wedge used to prove the standard, not the product's long-term boundary.
 
@@ -127,6 +128,9 @@ Not started:
 - Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
+- Agent-facing repeating prediction setup that starts future forecasts automatically, not only resolves already-created forecasts.
+- Flexible local campaign schedules for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
+- Append-only local corpus mutation from resolved live campaign runs into a calibration evidence ledger.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
 - OS scheduler installation.
@@ -141,14 +145,17 @@ In progress:
 
 Next:
 
-1. Run real agent/developer pilot sessions using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
-2. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
-3. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
+1. Add a local repeating prediction setup path so an agent can start a terminal campaign that creates future forecasts, waits for due resolution, scores outcomes, and reports progress toward track-record and calibration thresholds.
+2. Support flexible campaign policies: run for a fixed count, run until a date, run every interval, run until calibration threshold, run open-ended, or pause and start again after a configured post-calibration interval.
+3. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
+4. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
+5. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
 
 MVP path:
 
 - Milestones 72-80 define the minimum local, agent-native OPE product: connect approved or adapter-provided data, forecast before the outcome, preserve provenance, recalculate from pre-close evidence, resolve later, score against a baseline, and expose the whole loop through agent-readable surfaces.
 - Milestones 81-90 should validate that product with real agent/developer use, add local measurement, grow evidence toward claim thresholds, and improve adoption before expanding into hosted or broad private-source runtimes.
+- Milestones 91-97 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, and calibration readbacks without hosted scheduling.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -2751,6 +2758,215 @@ Completed outputs:
 - summary with accepted ledger-ready count `2`, needs-redaction count `1`, blocked count `3`, real sessions recorded `0`, and ledger rows written `0`
 - release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the checked intake classifier
 
+## Milestone 91: Repeating Prediction Setup Contract
+
+Status: Planned.
+
+Goal: define the contract that lets an agent set up repeated forecasts without inventing shell loops or scheduler semantics.
+
+Tasks:
+
+- [ ] Add a repeating prediction setup schema and spec that binds domain setup, source policy, forecast template, resolution policy, schedule policy, end conditions, and claim boundaries.
+- [ ] Support flexible schedule policies: fixed count, until date, open-ended, every interval, selected weekdays/windows, and threshold-targeted runs such as "run until 100 comparable resolved outcomes."
+- [ ] Support interval durations beyond daily runs, including hourly, multi-hour, daily, weekly, and custom ISO-8601-like duration intervals, while keeping timezone and close-time rules explicit.
+- [ ] Add a post-calibration policy with at least `stop`, `continue`, `pause_then_resume_after`, and `start_next_cycle_after` options so a setup can run without a count and restart after a configured delay once calibration is reached.
+- [ ] Require forecast-before-close, resolve-after-horizon, source-policy, and resolution-only evidence boundaries for every generated run.
+- [ ] Add examples for a 100-run daily transit calibration campaign, an hourly short-horizon campaign, a weekly until-date campaign, and an open-ended campaign that restarts after calibration.
+- [ ] Keep the contract local-first and transport-neutral: no hosted scheduler, OS scheduler, cron file, credentials, or live quality claim.
+
+Exit criteria:
+
+- An agent can read one setup record and know when the next forecast should be created, when it should be resolved, when to stop, and what happens after calibration is reached.
+- A campaign can be finite, date-bounded, interval-based, threshold-targeted, or open-ended without changing the forecast artifact contracts.
+
+Expected outputs:
+
+- `spec/repeating-prediction-setup.schema.json`
+- `spec/repeating-prediction-setup.md`
+- checked examples for finite, until-date, interval, open-ended, calibration-threshold, and post-calibration restart policies
+- CLI readback command such as `python3 scripts/ope.py repeating-prediction-setup`
+
+## Milestone 92: Local Prediction Campaign Manifest
+
+Status: Planned.
+
+Goal: give agents one local campaign state file that records a repeating prediction setup, unique run identities, planned windows, and resume-safe progress.
+
+Tasks:
+
+- [ ] Add a campaign manifest schema that wraps a repeating prediction setup with local runtime state.
+- [ ] Generate unique campaign, cycle, run, question, forecast, resolution, and scoring IDs instead of reusing fixture IDs across live runs.
+- [ ] Store ignored local campaign state under `.ope/live/prediction-campaigns/` with sanitized relative paths and no credentials.
+- [ ] Add a dry-run planner that expands the next N candidate runs without fetching live sources or creating forecast artifacts.
+- [ ] Add duplicate prevention for already planned service dates/windows and explicit handling for skipped, missed, canceled, failed, and manually stopped runs.
+- [ ] Preserve source-policy and claim-boundary metadata at campaign, cycle, and run level.
+
+Exit criteria:
+
+- An agent can start or inspect a campaign without knowing OPE's internal file layout.
+- The campaign manifest is resumable and can answer "what is planned, what already ran, what is due, and what is blocked?"
+
+Expected outputs:
+
+- `spec/prediction-campaign-manifest.schema.json`
+- `spec/prediction-campaign-manifest.md`
+- `python3 scripts/ope.py prediction-campaign plan`
+- `python3 scripts/ope.py prediction-campaign status`
+
+## Milestone 93: Terminal Campaign Runner
+
+Status: Planned.
+
+Goal: make one foreground terminal command create future forecasts on schedule, then leave due resolutions to the checked resolver path.
+
+Tasks:
+
+- [ ] Add `python3 scripts/ope.py prediction-campaign start` for local foreground execution.
+- [ ] Support campaign creation from flags and from a setup JSON file.
+- [ ] Support finite count, until date, open-ended, interval, and calibration-threshold modes from the same command surface.
+- [ ] Support `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
+- [ ] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
+- [ ] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
+- [ ] Emit JSONL by default when stdout is captured and compact human status lines in an interactive terminal.
+- [ ] Keep execution local and explicit: live fetches and resolver execution require clear flags.
+
+Exit criteria:
+
+- A developer or agent can start a 100-run transit campaign from one terminal command.
+- The same command shape can run hourly, daily, weekly, count-bounded, until-date, or open-ended campaigns.
+
+Example target commands:
+
+```bash
+python3 scripts/ope.py prediction-campaign start \
+  --domain weather-transit-delays \
+  --service-window morning_peak \
+  --interval P1D \
+  --count 100 \
+  --live-weather \
+  --execute-resolvers \
+  --output-format jsonl
+```
+
+```bash
+python3 scripts/ope.py prediction-campaign start \
+  --domain weather-transit-delays \
+  --service-window morning_peak \
+  --interval P1D \
+  --calibration-target 100 \
+  --post-calibration-action pause_then_resume_after \
+  --post-calibration-delay P14D
+```
+
+## Milestone 94: Campaign Resolution, Scoring, And Recovery
+
+Status: Planned.
+
+Goal: connect campaign-created forecasts to due resolution, scoring, retry, and recovery without manual per-run commands.
+
+Tasks:
+
+- [ ] Extend the existing resolution job registry to read campaign manifests as well as standalone forward-run states.
+- [ ] Let the campaign runner call the checked resolver for due runs when `--execute-resolvers` is explicit.
+- [ ] Record per-run resolver attempts, failure categories, retry eligibility, source fetch metadata, and sanitized diagnostics.
+- [ ] Avoid duplicate resolution and duplicate scoring for runs that are already resolved, ambiguous, annulled, blocked, or excluded.
+- [ ] Add resume behavior after terminal interruption: the runner should continue from campaign state and never overwrite prior run evidence.
+- [ ] Add compact agent readbacks for campaign health, due runs, failed runs, append-ready runs, and next action.
+
+Exit criteria:
+
+- A terminal campaign can survive interruption and resume without losing the forecast-before-outcome trail.
+- Agents can tell whether to wait, retry, resolve, append, or stop without reading raw state files.
+
+Expected outputs:
+
+- campaign-aware `python3 scripts/ope.py resolution-jobs --campaign ...`
+- campaign-aware `python3 scripts/ope.py resolution-scheduler --campaign ...`
+- `python3 scripts/ope.py prediction-campaign resume`
+- `python3 scripts/ope.py prediction-campaign doctor`
+
+## Milestone 95: Append-Only Calibration Evidence Ledger
+
+Status: Planned.
+
+Goal: turn resolved campaign runs into local comparable evidence without manual corpus editing.
+
+Tasks:
+
+- [ ] Add an append-only local campaign evidence ledger that stores comparable scored rows and exclusion rows separately.
+- [ ] Add append checks for forecast-before-close, resolution-after-horizon, score binding, source-policy binding, observation coverage, comparable scope, and no post-close evidence leakage.
+- [ ] Make append idempotent: the same resolved run can be inspected repeatedly without creating duplicate corpus rows.
+- [ ] Preserve excluded rows for audit with reason codes such as missed close, missing outcome, low coverage, feed unavailable, invalid window, leakage risk, ambiguous, annulled, and non-comparable.
+- [ ] Add `prediction-campaign append-ready` and `prediction-campaign append` commands, with dry-run default and explicit mutation for ignored local ledgers.
+- [ ] Let track-record and calibration gates read the checked fixture corpus plus selected local campaign ledgers when `--live` or `--campaign` is explicit.
+- [ ] Keep normal release checks deterministic and offline.
+
+Exit criteria:
+
+- A resolved campaign can grow local comparable evidence toward 30-run track-record and 100-run calibration thresholds without hand-editing JSON.
+- Append operations are local, append-only, auditable, and safe to rerun.
+
+Expected outputs:
+
+- `spec/prediction-campaign-evidence-ledger.schema.json`
+- `spec/prediction-campaign-evidence-ledger.md`
+- `python3 scripts/ope.py prediction-campaign append-ready`
+- `python3 scripts/ope.py prediction-campaign append`
+
+## Milestone 96: Calibration Gate And Post-Calibration Continuation
+
+Status: Planned.
+
+Goal: once a campaign reaches enough comparable outcomes, generate calibration readbacks and follow the configured continuation policy.
+
+Tasks:
+
+- [ ] Extend the transit track-record and calibration gate to read campaign evidence ledgers and produce threshold-aware local readbacks.
+- [ ] Generate calibration summaries only when the declared comparable resolved threshold is met.
+- [ ] Distinguish calibration measurement from automatic model tuning: the first implementation reports calibration and does not silently change method behavior.
+- [ ] Add campaign cycle state so post-calibration policies can stop, continue collecting evidence, pause, or start the next cycle after a configured delay.
+- [ ] Support open-ended campaigns that have no count but pause and resume after calibration according to `postCalibrationPolicy`.
+- [ ] Add warnings when a campaign has enough runs but too many exclusions, horizon gaps, source failures, or non-comparable windows to support a calibration claim.
+- [ ] Keep stronger method selection, recalibration of probabilities, and model updates behind a later explicit method-update gate.
+
+Exit criteria:
+
+- A campaign that reaches 100 comparable resolved outcomes can produce a local calibration readback.
+- A campaign without a count can automatically decide whether to stop, continue, pause, or start the next cycle after the configured post-calibration delay.
+
+Expected outputs:
+
+- `python3 scripts/ope.py prediction-campaign calibration-status`
+- `python3 scripts/ope.py transit-track-record-gate --campaign ...`
+- checked examples for below-threshold, threshold-met, too-many-exclusions, and post-calibration-restart cases
+
+## Milestone 97: Repeating Prediction Pilot Experience
+
+Status: Planned.
+
+Goal: make repeated prediction setup simple enough for Codex or another agent to run during pilot sessions without custom glue code.
+
+Tasks:
+
+- [ ] Add a pilot task card for starting a repeating prediction campaign and explaining the next forecast, next resolution, evidence threshold, and claim boundary.
+- [ ] Add a short runbook for "start 100 calibration sessions in a terminal" and "start an open-ended campaign that pauses after calibration and resumes later."
+- [ ] Add agent adapter and MCP readbacks for campaign plan, status, health, append-readiness, and calibration status.
+- [ ] Add sanitized error envelopes for invalid interval, missed forecast close, unavailable live source, duplicate campaign, unsafe source policy, and unsupported post-calibration action.
+- [ ] Add local usage trace events for campaign start, forecast-created, resolve-due, resolver-executed, append-ready, appended, calibration-threshold-met, paused, resumed, and stopped.
+- [ ] Update developer adoption and expansion-readiness surfaces so recurring prediction setup is evaluated before hosted scheduling or broader runtime work.
+
+Exit criteria:
+
+- A pilot agent can start, monitor, explain, stop, and resume a repeating prediction campaign using documented commands and machine-readable readbacks.
+- Pilot feedback can distinguish agent UX issues from forecast-quality or calibration evidence.
+
+Expected outputs:
+
+- `spec/repeating-prediction-pilot-runbook.md`
+- `python3 scripts/ope.py prediction-campaign explain`
+- agent adapter operations for campaign plan/status/calibration readbacks
+- pilot-session-packet task card for repeating prediction setup
+
 ## Open Decisions
 
 - When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
@@ -2764,6 +2980,9 @@ Completed outputs:
 - How should TypeScript or other language-specific validators be generated from the JSON Schema-first contracts if a service runtime is added?
 - Should track-record reports use Brier score as the default public metric for binary forecasts, or log score with Brier as supporting metric?
 - Should benchmark mode support LLM forecasters in the first implementation, or only deterministic/statistical models?
+- What minimal recurrence syntax should OPE expose so agents can express hourly, daily, weekly, until-date, count-bounded, threshold-targeted, and open-ended campaigns without writing raw scheduler configuration?
+- Should local campaign evidence ledgers remain ignored artifacts only, or should sanitized append summaries have a committed promotion path?
+- After calibration is measured, what explicit gate should be required before OPE updates forecast probabilities, changes method weights, or selects stronger methods automatically?
 
 ## Claim Discipline
 

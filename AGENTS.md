@@ -26,6 +26,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `README.md`: human onboarding and current repository status.
 - `CONTRIBUTING.md`: local setup and contribution checks.
 - `PRODUCT.md`: compact product direction, audience, agent requirements, claim boundaries, and product metrics.
+- `docs/agents-and-humans.html`: compact shared orientation page for human contributors and coding agents.
 - `whitepaper.md`: public positioning and architecture narrative for OPE.
 - `research/whitepaper-evaluation.md`: research-backed critique of the whitepaper and recommended next implementation priorities.
 - `spec/README.md`: index of the first machine-readable OPE contracts.

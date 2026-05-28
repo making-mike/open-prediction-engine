@@ -148,7 +148,16 @@ Before starting a new milestone, do a broader consistency review of the current 
 - Verify that completed roadmap items are genuinely implemented and tested.
 - Capture any gaps either as immediate fixes or as explicit roadmap follow-ups.
 
-## 12. Commit Deliberately
+## 12. Update Docs With Milestone Commits
+
+Every completed milestone must leave the documentation current for both human contributors and agent callers.
+
+- After each milestone is completed, update the relevant docs before or as part of the same milestone commit.
+- At minimum, review `roadmap.md`, `README.md`, `docs/agents-and-humans.html`, `AGENTS.md`, relevant `spec/*.md` files, and generated release or read surfaces affected by the milestone.
+- Do not commit a milestone as complete while docs send humans or agents to stale commands, claim boundaries, status labels, or next actions.
+- If no documentation changes are needed because the milestone has no user-visible, agent-visible, contract, command, or claim-boundary impact, say so in the handoff or commit preparation notes.
+
+## 13. Commit Deliberately
 
 Commits should be small, reviewable snapshots of completed work.
 
@@ -162,7 +171,7 @@ Commits should be small, reviewable snapshots of completed work.
 - Use a concise imperative commit subject that names the changed contract, behavior, or documentation surface.
 - Never commit raw live fetches, credentials, private source data, local-only `.ope/live/` drafts, or artifacts that would make public claims stronger than the checked implementation supports.
 
-## 13. Keep Adjacent-Standard Claims Exact
+## 14. Keep Adjacent-Standard Claims Exact
 
 Agent-facing projects often touch adjacent standards such as agent-discovery protocols, tool protocols, payment rails, DID, OAuth, OpenAPI, and sector compliance frameworks.
 
@@ -172,7 +181,7 @@ Agent-facing projects often touch adjacent standards such as agent-discovery pro
 - Treat payment metadata as compatibility hooks unless settlement, authorization, and audit behavior are implemented and tested.
 - Treat compliance metadata as policy input, not as a legal guarantee.
 
-## 14. Transfer This Rule Set Deliberately
+## 15. Transfer This Rule Set Deliberately
 
 When creating a new repository with the same assumptions:
 
