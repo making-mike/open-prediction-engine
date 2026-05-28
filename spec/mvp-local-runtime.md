@@ -10,12 +10,18 @@ Milestone 80 defines the local MVP release surface as a fixture-ready, agent-rea
 python3 --version
 python3 scripts/run_checks.py
 python3 scripts/ope.py check
+python3 scripts/ope.py developer-adoption --section quickstart
+python3 scripts/ope.py pilot-evidence --section summary
+python3 scripts/ope.py pilot-session-packet --section sanitization
+python3 scripts/ope.py pilot-summary-intake --section rules
+python3 scripts/ope.py expansion-readiness --section options
 ```
 
 2. Run the private setup summary for the checked local-file path:
 
 ```bash
 python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed
+python3 scripts/ope.py local-source-runtime
 ```
 
 3. Run the fixture-safe forecast path or read the already generated source-handoff forecast:
@@ -58,7 +64,9 @@ The MVP intentionally exposes blocked summaries rather than repairing or executi
 - `rejected_source` asks for a replacement source.
 - `unsafe_source` stops unsafe connector output before source intake.
 - `response_too_large` asks the caller to retry with a smaller readback or approved byte budget.
+- `local-source-runtime --case credentials_detected` blocks credential-like fields before source intake.
+- `local-source-runtime --case unsafe_path` blocks paths outside the approved local source folder.
 
 ## Claim Boundary
 
-The local MVP can produce and read checked forecast, resolution, scoring, and corpus artifacts. It cannot claim calibration, broad forecast quality, production live-source use, hosted scheduler execution, arbitrary private API/database parsing, or a production agent adapter runtime. Normal release checks must remain offline and deterministic.
+The local MVP can produce and read checked forecast, resolution, scoring, and corpus artifacts. It cannot claim calibration, broad forecast quality, production live-source use, hosted scheduler execution, arbitrary private API/database parsing beyond the approved local-folder runtime, or a production agent adapter runtime. Normal release checks must remain offline and deterministic.

@@ -128,7 +128,8 @@ def local_uri(path: Path) -> str:
         rel = path.resolve().relative_to(ROOT)
     except ValueError:
         rel = path.resolve()
-    return f"local://{str(rel).replace('\\', '/')}"
+    normalized = str(rel).replace("\\", "/")
+    return f"local://{normalized}"
 
 
 def source_ref(source_id: str, name: str, source_type: str, path: Path, retrieved_at: str | None = None) -> dict[str, Any]:

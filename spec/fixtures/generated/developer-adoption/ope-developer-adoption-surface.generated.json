@@ -1,0 +1,269 @@
+{
+  "developerAdoptionSurfaceId": "developeradoptionsurface-001",
+  "generatedAt": "2026-06-10T10:05:00Z",
+  "surfaceStatus": "local_mvp_adoption_ready",
+  "audience": [
+    "developer",
+    "agent",
+    "mcp_host",
+    "maintainer"
+  ],
+  "bindings": {
+    "releaseManifestId": "releasemanifest-001",
+    "mvpRunbookPath": "spec/mvp-local-runtime.md",
+    "localSourceRuntimeId": "localsourceruntime-001",
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "forecastCardId": "forecastcard-forecast-1102",
+    "forecastBundleId": "forecastbundle-forecast-1102"
+  },
+  "quickstart": [
+    {
+      "stepId": "adoptionquickstart-001",
+      "order": 1,
+      "title": "Confirm Python runtime",
+      "command": "python3 --version",
+      "expected": "Python 3.12+ is preferred; the repository uses only the standard library.",
+      "timeBudgetSeconds": 20
+    },
+    {
+      "stepId": "adoptionquickstart-002",
+      "order": 2,
+      "title": "Run the local check suite",
+      "command": "python3 scripts/run_checks.py",
+      "expected": "All schema, fixture, read-surface, agent, and release checks pass without live network access.",
+      "timeBudgetSeconds": 900
+    },
+    {
+      "stepId": "adoptionquickstart-003",
+      "order": 3,
+      "title": "Inspect approved local-folder runtime",
+      "command": "python3 scripts/ope.py local-source-runtime",
+      "expected": "The approved local-folder case binds to forecast-1102 and blocked examples remain non-generating.",
+      "timeBudgetSeconds": 30
+    },
+    {
+      "stepId": "adoptionquickstart-004",
+      "order": 4,
+      "title": "Read the first forecast card",
+      "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "expected": "A compact forecast card is available with probability, baseline, setup binding, and claim warning.",
+      "timeBudgetSeconds": 20
+    },
+    {
+      "stepId": "adoptionquickstart-005",
+      "order": 5,
+      "title": "Read the lifecycle bundle",
+      "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "expected": "The bundle links question, evidence, forecast artifact, history, resolution, scoring, and setup bindings.",
+      "timeBudgetSeconds": 20
+    },
+    {
+      "stepId": "adoptionquickstart-006",
+      "order": 6,
+      "title": "Inspect the claim boundary",
+      "command": "python3 scripts/ope.py transit-track-record-gate",
+      "expected": "The public transport gate remains below track-record and calibration thresholds.",
+      "timeBudgetSeconds": 20
+    }
+  ],
+  "exampleScenario": {
+    "scenarioId": "adoptionscenario-100",
+    "title": "Approved Local Source To Forecast Readback",
+    "goal": "Reach a valid forecast card and lifecycle bundle from the checked local MVP while preserving source, method, resolution, scoring, and claim boundaries.",
+    "steps": [
+      {
+        "stepId": "adoptionscenario-001",
+        "phase": "source_setup",
+        "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+        "expectedStatus": "completed_forecast_readback",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-002",
+        "phase": "runtime_gate",
+        "command": "python3 scripts/ope.py local-source-runtime --case approved_local_folder",
+        "expectedStatus": "forecast_card_ready",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-003",
+        "phase": "forecast_readback",
+        "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "expectedStatus": "available",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-004",
+        "phase": "lifecycle_bundle",
+        "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+        "expectedStatus": "available",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-005",
+        "phase": "resolution_scoring",
+        "command": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
+        "expectedStatus": "ok",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-006",
+        "phase": "claim_review",
+        "command": "python3 scripts/ope.py transit-track-record-gate",
+        "expectedStatus": "not_enough_resolved_comparable_outcomes",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      }
+    ],
+    "expectedFinalState": {
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "forecastCardAvailable": true,
+      "lifecycleBundleAvailable": true,
+      "resolutionStatus": "resolved",
+      "scoreStatus": "scored",
+      "qualityClaimAllowed": false
+    }
+  },
+  "integrationNotes": [
+    {
+      "interface": "cli",
+      "implementedStatus": "implemented_local",
+      "minimumInput": "A local shell with Python and repository files.",
+      "exampleCommand": "python3 scripts/ope.py local-source-runtime",
+      "expectedOutput": "JSON summary or one section/case with checked IDs, statuses, commands, and claim boundaries.",
+      "boundary": "CLI commands are local and deterministic by default; live probes remain explicit opt-in commands."
+    },
+    {
+      "interface": "agent_call",
+      "implementedStatus": "implemented_local",
+      "minimumInput": "Operation name plus IDs such as forecastId=forecast-1102 and questionId=question-1102.",
+      "exampleCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+      "expectedOutput": "One transport-neutral envelope with status, exitCode, recordBinding, payload, and sanitized errors.",
+      "boundary": "Agent-call is a local dispatcher, not a hosted API or production protocol service."
+    },
+    {
+      "interface": "mcp_stdio",
+      "implementedStatus": "local_scaffold",
+      "minimumInput": "An MCP-capable host that can launch python3 scripts/ope.py mcp-stdio.",
+      "exampleCommand": "python3 scripts/ope.py mcp-stdio",
+      "expectedOutput": "MCP tools expose the same local dispatcher envelope semantics over stdio.",
+      "boundary": "The MCP adapter is local stdio only; HTTP and queue adapters remain future protocol mappings."
+    }
+  ],
+  "releaseNotes": [
+    {
+      "category": "implemented",
+      "items": [
+        "Local CLI checks, readbacks, forecast cards, lifecycle bundles, and generated record validation.",
+        "Approved local-folder source runtime for checked CSV/JSON fixture files under path and size limits.",
+        "Transport-neutral agent-call envelopes and local MCP stdio scaffold over the same dispatcher.",
+        "Resolution, scoring, source-handoff, setup method, source-quality, usage-trace, and pilot-validation readbacks."
+      ]
+    },
+    {
+      "category": "fixture_only",
+      "items": [
+        "Weather-logistics source-handoff forecast, resolution, and scoring remain checked fixture-mode paths.",
+        "Public transport corpus growth, method options, track-record gates, and live evidence promotion remain below claim thresholds.",
+        "Usage traces and pilot summaries are synthetic checked examples, not real hosted telemetry."
+      ]
+    },
+    {
+      "category": "non_goal",
+      "items": [
+        "No hosted service, network API, production SDK, or production agent adapter runtime is implemented.",
+        "No arbitrary private API/database parsing, credential storage, raw private-row retention, or hosted watcher exists.",
+        "No calibration, broad forecast-quality, or production connector claim is allowed from the current examples.",
+        "No generated language-specific runtime types are included before adoption evidence shows they reduce setup friction."
+      ]
+    }
+  ],
+  "typeGenerationDecision": {
+    "decisionStatus": "defer_until_adoption_evidence",
+    "currentContractSource": "JSON Schema contracts under spec/ remain the source of truth for the local MVP.",
+    "rationale": "Generated language-specific types should wait until pilot or adoption evidence shows they reduce setup friction more than they add maintenance surface.",
+    "triggerToRevisit": "Revisit when agent pilot summaries or local usage traces show repeated integration friction around schema shape or validation.",
+    "generatedTypesIncluded": false
+  },
+  "successChecks": [
+    {
+      "checkId": "adoptioncheck-001",
+      "command": "python3 scripts/ope.py developer-adoption --check",
+      "expected": "developer adoption surface fixture is current"
+    },
+    {
+      "checkId": "adoptioncheck-002",
+      "command": "python3 scripts/ope.py local-source-runtime --check",
+      "expected": "approved local-folder runtime fixture is current"
+    },
+    {
+      "checkId": "adoptioncheck-003",
+      "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "expected": "forecast card readback succeeds"
+    },
+    {
+      "checkId": "adoptioncheck-004",
+      "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "expected": "lifecycle bundle readback succeeds"
+    },
+    {
+      "checkId": "adoptioncheck-005",
+      "command": "python3 scripts/check_mvp_release_surface.py",
+      "expected": "local MVP smoke check passes"
+    },
+    {
+      "checkId": "adoptioncheck-006",
+      "command": "python3 scripts/run_checks.py",
+      "expected": "canonical dependency-free check suite passes"
+    }
+  ],
+  "summary": {
+    "quickstartStepCount": 6,
+    "scenarioStepCount": 6,
+    "integrationCount": 3,
+    "implementedNoteCount": 4,
+    "fixtureOnlyNoteCount": 3,
+    "nonGoalNoteCount": 4,
+    "firstForecastId": "forecast-1102",
+    "qualityClaimAllowed": false,
+    "generatedTypesIncluded": false
+  },
+  "executionBoundary": {
+    "readOnlyGuide": true,
+    "normalChecksDeterministicOffline": true,
+    "executesCommands": false,
+    "createsForecastArtifacts": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "hostedRuntime": false,
+    "productionSdk": false,
+    "languageTypesGenerated": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "Developer adoption surface is a read-only guide over existing checked local records.",
+    "Commands named in the guide are not executed by the generator or checker.",
+    "Fixture examples do not imply calibration, production connector support, or broad forecast quality.",
+    "Generated language-specific runtime types remain deferred until adoption evidence justifies them."
+  ]
+}

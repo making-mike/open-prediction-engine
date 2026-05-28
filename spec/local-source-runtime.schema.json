@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/local-source-runtime.schema.json",
+  "title": "Local Source Runtime",
+  "description": "Narrow approved local-folder source runtime that routes checked files through source builder, intake, method gates, and explicit forecast execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "localSourceRuntimeId",
+    "generatedAt",
+    "domain",
+    "runtimeMode",
+    "runtimePolicy",
+    "runtimeCases",
+    "forecastCardReadback",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "localSourceRuntimeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "runtimeMode": {
+      "type": "string",
+      "enum": ["approved_local_folder_runtime"]
+    },
+    "runtimePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicyId",
+        "approvalRequired",
+        "allowedRoots",
+        "requiredRoleFiles",
+        "allowedFormats",
+        "maxFileBytes",
+        "maxTotalBytes",
+        "allowNetworkAccess",
+        "credentialStorageImplemented",
+        "rawRetention"
+      ],
+      "properties": {
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "approvalRequired": { "type": "boolean" },
+        "allowedRoots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "requiredRoleFiles": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/roleFile" }
+        },
+        "allowedFormats": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "enum": ["csv", "json"]
+          }
+        },
+        "maxFileBytes": { "type": "integer", "minimum": 1, "maximum": 10000000 },
+        "maxTotalBytes": { "type": "integer", "minimum": 1, "maximum": 50000000 },
+        "allowNetworkAccess": { "type": "boolean" },
+        "credentialStorageImplemented": { "type": "boolean" },
+        "rawRetention": {
+          "type": "string",
+          "enum": ["metadata_only"]
+        }
+      }
+    },
+    "runtimeCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/runtimeCase" }
+    },
+    "forecastCardReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "questionId",
+        "cardId",
+        "readCommand",
+        "readStatus",
+        "probability",
+        "claimStatus",
+        "sourceRuntimeCaseId"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "cardId": { "$ref": "common.schema.json#/$defs/id" },
+        "readCommand": { "$ref": "#/$defs/boundedString" },
+        "readStatus": {
+          "type": "string",
+          "enum": ["available"]
+        },
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "claimStatus": { "$ref": "#/$defs/boundedString" },
+        "sourceRuntimeCaseId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseCount",
+        "forecastCardReadyCount",
+        "blockedCount",
+        "missingApprovalCount",
+        "credentialBlockedCount",
+        "unsafePathBlockedCount",
+        "oversizedBlockedCount",
+        "schemaMismatchBlockedCount",
+        "leakageBlockedCount",
+        "qualityClaimAllowed",
+        "productionConnectorClaimAllowed"
+      ],
+      "properties": {
+        "caseCount": { "type": "integer", "minimum": 0 },
+        "forecastCardReadyCount": { "type": "integer", "minimum": 0 },
+        "blockedCount": { "type": "integer", "minimum": 0 },
+        "missingApprovalCount": { "type": "integer", "minimum": 0 },
+        "credentialBlockedCount": { "type": "integer", "minimum": 0 },
+        "unsafePathBlockedCount": { "type": "integer", "minimum": 0 },
+        "oversizedBlockedCount": { "type": "integer", "minimum": 0 },
+        "schemaMismatchBlockedCount": { "type": "integer", "minimum": 0 },
+        "leakageBlockedCount": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "productionConnectorClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtimeReadsAllowlistedLocalFiles",
+        "runtimeRequiresCallerApproval",
+        "normalChecksDeterministicOffline",
+        "networkAccess",
+        "liveFetch",
+        "credentialStorage",
+        "rawRowsStored",
+        "arbitraryPrivateApiParsing",
+        "arbitraryDatabaseParsing",
+        "hostedRuntime",
+        "osWatcherInstalled",
+        "runtimeCreatesForecastArtifacts",
+        "explicitForecastExecutionRequired",
+        "qualityClaimAllowed",
+        "productionConnectorClaimAllowed"
+      ],
+      "properties": {
+        "runtimeReadsAllowlistedLocalFiles": { "type": "boolean" },
+        "runtimeRequiresCallerApproval": { "type": "boolean" },
+        "normalChecksDeterministicOffline": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "credentialStorage": { "type": "boolean" },
+        "rawRowsStored": { "type": "boolean" },
+        "arbitraryPrivateApiParsing": { "type": "boolean" },
+        "arbitraryDatabaseParsing": { "type": "boolean" },
+        "hostedRuntime": { "type": "boolean" },
+        "osWatcherInstalled": { "type": "boolean" },
+        "runtimeCreatesForecastArtifacts": { "type": "boolean" },
+        "explicitForecastExecutionRequired": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "productionConnectorClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 520
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        { "$ref": "#/$defs/boundedString" },
+        { "type": "null" }
+      ]
+    },
+    "roleFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRole", "fileName"],
+      "properties": {
+        "sourceRole": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "fileName": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": [
+        "forecast_card_ready",
+        "blocked_missing_approval",
+        "blocked_credentials",
+        "blocked_unsafe_path",
+        "blocked_oversized",
+        "blocked_schema_mismatch",
+        "blocked_leakage"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "read_forecast_card",
+        "confirm_approval",
+        "remove_credentials",
+        "choose_allowlisted_path",
+        "reduce_file_size",
+        "replace_with_supported_schema",
+        "remove_leakage_source"
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diagnosticId", "level", "message", "rawDetailIncluded"],
+      "properties": {
+        "diagnosticId": { "$ref": "common.schema.json#/$defs/id" },
+        "level": {
+          "type": "string",
+          "enum": ["info", "warning", "error"]
+        },
+        "message": { "$ref": "#/$defs/boundedString" },
+        "rawDetailIncluded": { "type": "boolean" }
+      }
+    },
+    "runtimeBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceManifestBuildId",
+        "sourceIntakeHandoffId",
+        "sourceIntakeReportId",
+        "setupBenchmarkGateId",
+        "setupMethodDecisionId",
+        "setupForecastRunId",
+        "forecastId",
+        "questionId",
+        "forecastCardId"
+      ],
+      "properties": {
+        "sourceManifestBuildId": { "$ref": "#/$defs/nullableId" },
+        "sourceIntakeHandoffId": { "$ref": "#/$defs/nullableId" },
+        "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+        "setupBenchmarkGateId": { "$ref": "#/$defs/nullableId" },
+        "setupMethodDecisionId": { "$ref": "#/$defs/nullableId" },
+        "setupForecastRunId": { "$ref": "#/$defs/nullableId" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "forecastCardId": { "$ref": "#/$defs/nullableId" }
+      }
+    },
+    "runtimeControls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicyBound",
+        "approvalVerified",
+        "pathAllowlistPassed",
+        "sizeLimitPassed",
+        "sourceBuilderInspected",
+        "sourceIntakeValidated",
+        "methodGateValidated",
+        "explicitForecastExecutionValidated",
+        "runtimeCreatedForecastArtifacts",
+        "networkAccess",
+        "liveFetch",
+        "credentialsRead",
+        "credentialsStored",
+        "rawRowsStored",
+        "arbitraryParsing",
+        "hostedRuntime"
+      ],
+      "properties": {
+        "sourcePolicyBound": { "type": "boolean" },
+        "approvalVerified": { "type": "boolean" },
+        "pathAllowlistPassed": { "type": "boolean" },
+        "sizeLimitPassed": { "type": "boolean" },
+        "sourceBuilderInspected": { "type": "boolean" },
+        "sourceIntakeValidated": { "type": "boolean" },
+        "methodGateValidated": { "type": "boolean" },
+        "explicitForecastExecutionValidated": { "type": "boolean" },
+        "runtimeCreatedForecastArtifacts": { "type": "boolean" },
+        "networkAccess": { "type": "boolean" },
+        "liveFetch": { "type": "boolean" },
+        "credentialsRead": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "rawRowsStored": { "type": "boolean" },
+        "arbitraryParsing": { "type": "boolean" },
+        "hostedRuntime": { "type": "boolean" }
+      }
+    },
+    "runtimeCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "case",
+        "inputPath",
+        "runtimeStatus",
+        "nextAction",
+        "approvalPresent",
+        "allowlistStatus",
+        "totalBytes",
+        "diagnostics",
+        "blockedReasons",
+        "bindings",
+        "controls"
+      ],
+      "properties": {
+        "caseId": { "$ref": "common.schema.json#/$defs/id" },
+        "case": {
+          "type": "string",
+          "enum": [
+            "approved_local_folder",
+            "missing_approval",
+            "credentials_detected",
+            "unsafe_path",
+            "oversized_response",
+            "schema_mismatch",
+            "leakage_indicator"
+          ]
+        },
+        "inputPath": { "$ref": "#/$defs/boundedString" },
+        "runtimeStatus": { "$ref": "#/$defs/runtimeStatus" },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "approvalPresent": { "type": "boolean" },
+        "allowlistStatus": {
+          "type": "string",
+          "enum": ["passed", "failed"]
+        },
+        "totalBytes": { "type": "integer", "minimum": 0, "maximum": 50000000 },
+        "diagnostics": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "blockedReasons": { "$ref": "#/$defs/reasonCodes" },
+        "bindings": { "$ref": "#/$defs/runtimeBindings" },
+        "controls": { "$ref": "#/$defs/runtimeControls" }
+      }
+    }
+  }
+}

@@ -1,0 +1,521 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-pilot-validation.schema.json",
+  "title": "Agent Pilot Validation Pack",
+  "description": "Checked local pilot protocol for validating whether agents and supervised developers understand the MVP setup, readback, and claim boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentPilotValidationId",
+    "generatedAt",
+    "scope",
+    "runtimeStatus",
+    "bindings",
+    "pilotProtocol",
+    "taskScenarios",
+    "feedbackSchema",
+    "comprehensionRubric",
+    "examplePilotSummaries",
+    "successMetrics",
+    "decisionRules",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "local_mvp_validation"
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": ["checked_pilot_protocol_only"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mvpRunbookPath",
+        "releaseManifestId",
+        "privateSetupOrchestratorId",
+        "forecastRunCommand",
+        "claimGateCommand"
+      ],
+      "properties": {
+        "mvpRunbookPath": { "$ref": "#/$defs/boundedString" },
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "privateSetupOrchestratorId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastRunCommand": { "$ref": "#/$defs/boundedString" },
+        "claimGateCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "pilotProtocol": { "$ref": "#/$defs/pilotProtocol" },
+    "taskScenarios": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/taskScenario" }
+    },
+    "feedbackSchema": { "$ref": "#/$defs/feedbackSchema" },
+    "comprehensionRubric": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/rubricItem" }
+    },
+    "examplePilotSummaries": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/examplePilotSummary" }
+    },
+    "successMetrics": { "$ref": "#/$defs/successMetrics" },
+    "decisionRules": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/decisionRule" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 420
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        { "$ref": "#/$defs/boundedString" },
+        { "type": "null" }
+      ]
+    },
+    "nullableBoolean": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "null" }
+      ]
+    },
+    "scenarioKey": {
+      "type": "string",
+      "enum": [
+        "local_file_setup_readback",
+        "accepted_adapter_output_ready",
+        "unsafe_source_block",
+        "forecast_run_readback",
+        "claim_gate_readback"
+      ]
+    },
+    "metricDimension": {
+      "type": "string",
+      "enum": [
+        "task_completion",
+        "forecast_card_comprehension",
+        "lifecycle_bundle_comprehension",
+        "source_intake_comprehension",
+        "blocked_path_comprehension",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support",
+        "setup_friction",
+        "runtime_gap_classification"
+      ]
+    },
+    "pilotProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolId",
+        "minimumSessions",
+        "targetSessions",
+        "participantProfiles",
+        "sessionLengthMinutes",
+        "setupMode",
+        "moderationSteps",
+        "privacyBoundary"
+      ],
+      "properties": {
+        "protocolId": { "$ref": "common.schema.json#/$defs/id" },
+        "minimumSessions": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5
+        },
+        "targetSessions": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5
+        },
+        "participantProfiles": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "sessionLengthMinutes": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 90
+        },
+        "setupMode": {
+          "type": "string",
+          "enum": ["moderated_local_cli"]
+        },
+        "moderationSteps": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "privacyBoundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "storesRawTranscripts",
+            "storesPrivateData",
+            "storesCredentials",
+            "storesPromptLogs",
+            "requiresSanitizedSummaries",
+            "usesSyntheticExamplesOnly"
+          ],
+          "properties": {
+            "storesRawTranscripts": { "type": "boolean" },
+            "storesPrivateData": { "type": "boolean" },
+            "storesCredentials": { "type": "boolean" },
+            "storesPromptLogs": { "type": "boolean" },
+            "requiresSanitizedSummaries": { "type": "boolean" },
+            "usesSyntheticExamplesOnly": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "taskScenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "scenarioKey",
+        "title",
+        "interface",
+        "command",
+        "participantPrompt",
+        "expectedOutcomeClass",
+        "expectedReadback",
+        "measures",
+        "successCriteria"
+      ],
+      "properties": {
+        "taskId": { "$ref": "common.schema.json#/$defs/id" },
+        "scenarioKey": { "$ref": "#/$defs/scenarioKey" },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "interface": {
+          "type": "string",
+          "enum": ["cli", "agent_call", "mcp_stdio"]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "participantPrompt": { "$ref": "#/$defs/boundedString" },
+        "expectedOutcomeClass": {
+          "type": "string",
+          "enum": [
+            "completed_forecast_readback",
+            "ready_for_forecast_execution",
+            "blocked_unsafe",
+            "completed_forecast_run",
+            "claim_gate_readback"
+          ]
+        },
+        "expectedReadback": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "statusPath",
+            "expectedStatus",
+            "forecastId",
+            "questionId",
+            "nextAction",
+            "qualityClaimAllowed",
+            "forecastArtifactsCreated"
+          ],
+          "properties": {
+            "statusPath": { "$ref": "#/$defs/boundedString" },
+            "expectedStatus": { "$ref": "#/$defs/nullableString" },
+            "forecastId": { "$ref": "#/$defs/nullableId" },
+            "questionId": { "$ref": "#/$defs/nullableId" },
+            "nextAction": { "$ref": "#/$defs/nullableString" },
+            "qualityClaimAllowed": { "$ref": "#/$defs/nullableBoolean" },
+            "forecastArtifactsCreated": { "type": "boolean" }
+          }
+        },
+        "measures": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/metricDimension" }
+        },
+        "successCriteria": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "feedbackSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feedbackSchemaId", "ratingScale", "dimensions"],
+      "properties": {
+        "feedbackSchemaId": { "$ref": "common.schema.json#/$defs/id" },
+        "ratingScale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimumScore", "maximumScore", "anchors"],
+          "properties": {
+            "minimumScore": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1
+            },
+            "maximumScore": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 5
+            },
+            "anchors": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 5,
+              "items": { "$ref": "#/$defs/boundedString" }
+            }
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/feedbackDimension" }
+        }
+      }
+    },
+    "feedbackDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensionId", "question", "responseType", "required"],
+      "properties": {
+        "dimensionId": { "$ref": "#/$defs/metricDimension" },
+        "question": { "$ref": "#/$defs/boundedString" },
+        "responseType": {
+          "type": "string",
+          "enum": ["rating_1_to_5", "boolean", "short_text"]
+        },
+        "required": { "type": "boolean" }
+      }
+    },
+    "rubricItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rubricId",
+        "surface",
+        "passingScore",
+        "taskRefs",
+        "passingSignals",
+        "failureSignals"
+      ],
+      "properties": {
+        "rubricId": { "$ref": "common.schema.json#/$defs/id" },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "forecast_card",
+            "lifecycle_bundle",
+            "source_intake",
+            "blocked_path",
+            "claim_boundary"
+          ]
+        },
+        "passingScore": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "taskRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "passingSignals": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "failureSignals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "examplePilotSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exampleId",
+        "taskId",
+        "participantType",
+        "isSyntheticExample",
+        "rawTranscriptStored",
+        "privateDataStored",
+        "sanitizedSummary",
+        "observedSignals",
+        "ratings",
+        "followUpClassification"
+      ],
+      "properties": {
+        "exampleId": { "$ref": "common.schema.json#/$defs/id" },
+        "taskId": { "$ref": "common.schema.json#/$defs/id" },
+        "participantType": {
+          "type": "string",
+          "enum": ["agent_developer", "supervising_developer"]
+        },
+        "isSyntheticExample": { "type": "boolean" },
+        "rawTranscriptStored": { "type": "boolean" },
+        "privateDataStored": { "type": "boolean" },
+        "sanitizedSummary": { "$ref": "#/$defs/boundedString" },
+        "observedSignals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "ratings": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/rating" }
+        },
+        "followUpClassification": {
+          "type": "string",
+          "enum": ["passed", "usability_gap", "runtime_gap", "claim_boundary_gap"]
+        }
+      }
+    },
+    "rating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensionId", "score"],
+      "properties": {
+        "dimensionId": { "$ref": "#/$defs/metricDimension" },
+        "score": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    },
+    "successMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimumSessions",
+        "targetSessions",
+        "minimumTaskCompletionRate",
+        "minimumMedianTrustScore",
+        "minimumClaimBoundaryMedianScore",
+        "usabilityGapReviewThreshold"
+      ],
+      "properties": {
+        "minimumSessions": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5
+        },
+        "targetSessions": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5
+        },
+        "minimumTaskCompletionRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumMedianTrustScore": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "minimumClaimBoundaryMedianScore": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "usabilityGapReviewThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    },
+    "decisionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decisionRuleId", "signal", "decision", "nextAction"],
+      "properties": {
+        "decisionRuleId": { "$ref": "common.schema.json#/$defs/id" },
+        "signal": { "$ref": "#/$defs/boundedString" },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "continue_mvp_validation",
+            "fix_comprehension_gap",
+            "prioritize_runtime_gap",
+            "pause_quality_claims"
+          ]
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runsPilotSessions",
+        "recruitsParticipants",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "createsForecastArtifacts",
+        "claimsForecastQuality",
+        "usesExistingCheckedFixturesOnly",
+        "storesSyntheticExamplesOnly"
+      ],
+      "properties": {
+        "runsPilotSessions": { "type": "boolean" },
+        "recruitsParticipants": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "claimsForecastQuality": { "type": "boolean" },
+        "usesExistingCheckedFixturesOnly": { "type": "boolean" },
+        "storesSyntheticExamplesOnly": { "type": "boolean" }
+      }
+    }
+  }
+}

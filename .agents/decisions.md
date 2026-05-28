@@ -1912,3 +1912,73 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add an `mvpLocalRuntime` section to the release manifest, a compact `spec/mvp-local-runtime.md` runbook, and `scripts/check_mvp_release_surface.py` smoke checks for the local MVP happy path, blocked setup paths, agent-call readback, MCP protocol-map exposure, resolution jobs, and corpus claim gates.
 - **Why:** The MVP should be understandable and release-checkable as a local agent-native surface, with exact machine interfaces and claim boundaries recorded in a schema-bound artifact.
 - **Alternatives rejected:** Treating the README as the only MVP contract, declaring a hosted or HTTP/queue runtime before implementation, or allowing one-off resolved examples to imply calibration or broad quality claims.
+
+### DEC-079 — Add Agent Pilot Validation Pack
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `agent-pilot-validation` contract, generated fixture, CLI command, and checker for local MVP pilot protocol, task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries.
+- **Why:** Before adding runtime scope, OPE needs repeatable usability evidence that agents and supervising developers can understand setup paths, readbacks, blocked states, and claim boundaries without storing private data or raw transcripts.
+- **Alternatives rejected:** Treating roadmap text as the pilot protocol, storing raw interview transcripts in the repo, or expanding private-source/runtime behavior before measuring MVP comprehension.
+
+### DEC-080 — Add Local Usage Trace Read Model
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `local-usage-trace` contract, generated fixture, CLI command, and checker with synthetic local MVP event rows, trace fields, aggregate product metrics, and privacy boundaries.
+- **Why:** OPE needs a measurable local vocabulary for forecast completion, read success, blocked paths, response sizes, and elapsed times before adding opt-in runtime logs or hosted telemetry.
+- **Alternatives rejected:** Adding hosted analytics, writing runtime logs during normal checks, or treating synthetic local trace rows as real usage evidence.
+
+### DEC-081 — Add Transit Corpus Growth Loop
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-corpus-growth` contract, generated fixture, CLI command, and checker for append-ready candidates, exclusion-ledger rows, due-run and post-resolution checklists, and threshold progress readback.
+- **Why:** The public transport wedge needs a repeatable way to inspect whether new resolved forward runs can grow the comparable corpus while preserving forecast-time versus resolution-only evidence boundaries and keeping quality claims blocked below threshold.
+- **Alternatives rejected:** Mutating the canonical corpus during normal checks, treating excluded runs as calibration evidence, or allowing one append-ready example to imply track-record or calibration quality.
+
+### DEC-082 — Add Source Quality Mapping Confidence Readback
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `source-quality` read model, generated fixture, CLI command, and checker over builder drafts, source-adapter intake, source-intake reports, and setup method decisions.
+- **Why:** Agents need compact guidance that explains whether connected data is forecast-usable, baseline-only usable, mapping-confirmation blocked, data-sparse, rejected, or unsafe before they proceed to method gates or explicit forecast execution.
+- **Alternatives rejected:** Letting source quality create forecast artifacts, executing source-builder or adapter code from the readback, or treating quality summaries as production-readiness or forecast-quality claims.
+
+### DEC-083 — Add Approved Local Source Runtime
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `local-source-runtime` contract, generated fixture, CLI command, and checker for one caller-approved local-folder runtime that routes accepted files through existing builder, intake, benchmark, method, and explicit forecast-execution gates to the `forecast-1102` card.
+- **Why:** The roadmap needs one concrete source runtime pattern that proves approved local data can reach a forecast readback while preserving approval, allow-list, size-limit, source-policy, and sanitized-diagnostic boundaries.
+- **Alternatives rejected:** Adding arbitrary private API or database parsing, storing credentials or raw rows, installing a hosted/local watcher, letting the runtime create forecast artifacts directly, or treating the narrow runtime as production connector support.
+
+### DEC-084 — Add Developer Adoption Surface
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `developer-adoption` contract, generated fixture, CLI command, and checker for quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision.
+- **Why:** The local MVP needs a fast, testable path to the first forecast card and lifecycle bundle so developers and agents can try OPE without misreading fixture-mode examples as hosted runtime or quality claims.
+- **Alternatives rejected:** Leaving onboarding only in prose, adding generated language-specific runtime types before adoption evidence justifies them, or letting an adoption guide execute setup commands, fetch live data, or create forecast artifacts.
+
+### DEC-085 — Add Expansion Readiness Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `expansion-readiness` contract, generated fixture, CLI command, and checker over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types.
+- **Why:** After the local MVP adoption surface, OPE needs a disciplined way to decide what not to build yet, using pilot, usage, source-runtime, corpus, and track-record evidence before widening runtime scope.
+- **Alternatives rejected:** Starting hosted service work from roadmap enthusiasm alone, treating synthetic pilot notes or one comparable transit run as enough evidence for stronger methods, or generating runtime types before adoption friction shows they are worth maintaining.
+
+### DEC-086 — Add Pilot Evidence Ledger
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-evidence` contract, generated fixture, CLI command, and checker for sanitized pilot-session summary intake.
+- **Why:** The next roadmap step needs real agent/developer pilot evidence, but the repository needs a safe format first: dimension scores, sanitized findings, friction classes, and expansion signals without raw transcripts, private data, credentials, prompt logs, or participant identities.
+- **Alternatives rejected:** Storing raw pilot transcripts, counting synthetic examples as real adoption evidence, allowing private session details into checked fixtures, or letting pilot notes unblock hosted/runtime/type-generation work before real sanitized session thresholds are met.
+
+### DEC-087 — Add Pilot Session Packet
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-session-packet` contract, generated fixture, CLI command, and checker for running real local MVP pilot sessions safely.
+- **Why:** The pilot evidence ledger defines what can be stored, but agents and moderators also need a checked task packet, sanitization review, and stop conditions before real sessions begin.
+- **Alternatives rejected:** Running pilot sessions from ad hoc notes, storing raw transcripts for later redaction, letting the packet write ledger rows, or treating session collection readiness as expansion evidence.
+
+### DEC-088 — Add Pilot Summary Intake Classifier
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-summary-intake` contract, generated fixture, CLI command, and checker for classifying sanitized pilot summaries before ledger review.
+- **Why:** Real pilot sessions need one safe pre-ledger decision point that can accept ledger-ready summaries, request redaction, or block raw transcripts, private rows, credentials, participant identity, and quality overclaims.
+- **Alternatives rejected:** Letting moderators copy summaries directly into the ledger, storing unsafe notes for later cleanup, counting checked examples as real sessions, or letting accepted pilot summaries unblock expansion.

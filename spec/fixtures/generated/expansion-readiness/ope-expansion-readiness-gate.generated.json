@@ -1,0 +1,272 @@
+{
+  "expansionReadinessGateId": "expansionreadinessgate-001",
+  "generatedAt": "2026-06-10T10:45:00Z",
+  "gateStatus": "blocked_pending_evidence",
+  "decision": {
+    "currentPosture": "hold_local_mvp_and_gather_evidence",
+    "nextAction": "run_real_pilots_and_grow_corpus",
+    "reason": "The local MVP is coherent, but hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types need real pilot, usage, and comparable outcome evidence before implementation."
+  },
+  "bindings": {
+    "releaseManifestId": "releasemanifest-001",
+    "developerAdoptionSurfaceId": "developeradoptionsurface-001",
+    "agentPilotValidationId": "agentpilotvalidation-001",
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "localUsageTraceId": "localusagetrace-001",
+    "transitCorpusGrowthLoopId": "transitcorpusgrowthloop-001",
+    "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+    "localSourceRuntimeId": "localsourceruntime-001"
+  },
+  "evidenceInputs": [
+    {
+      "inputId": "expansionevidence-001",
+      "source": "release manifest",
+      "observedValue": "surfaceStatus=local_mvp_fixture_ready",
+      "threshold": "local MVP fixture-ready release surface",
+      "status": "met",
+      "implication": "The local MVP is coherent enough to guide adoption and pilot work."
+    },
+    {
+      "inputId": "expansionevidence-002",
+      "source": "developer adoption surface",
+      "observedValue": "quickstartSteps=6; scenarioSteps=6",
+      "threshold": "checked quickstart and full scenario",
+      "status": "met",
+      "implication": "Developers and agents have a local path to first forecast card and lifecycle bundle."
+    },
+    {
+      "inputId": "expansionevidence-003",
+      "source": "agent pilot validation",
+      "observedValue": "syntheticSummaries=3; targetSessions=5",
+      "threshold": "3-5 real pilot sessions with sanitized notes",
+      "status": "synthetic_only",
+      "implication": "Real pilot evidence is still needed before adding hosted or broad runtime surfaces."
+    },
+    {
+      "inputId": "expansionevidence-004",
+      "source": "pilot evidence ledger",
+      "observedValue": "acceptedRealSessions=0; acceptedSyntheticSummaries=2",
+      "threshold": "3-5 real sanitized pilot sessions accepted for aggregation",
+      "status": "below_threshold",
+      "implication": "The ledger can accept sanitized summaries, but the checked fixture records no real sessions yet."
+    },
+    {
+      "inputId": "expansionevidence-005",
+      "source": "local usage trace",
+      "observedValue": "events=10; forecastCompletionRate=1.0",
+      "threshold": "local deterministic usage signals without hosted telemetry",
+      "status": "met",
+      "implication": "Local measurement exists, but it is not a substitute for real hosted telemetry or support evidence."
+    },
+    {
+      "inputId": "expansionevidence-006",
+      "source": "transit corpus growth loop",
+      "observedValue": "projectedComparableResolved=2",
+      "threshold": "30 comparable resolved runs for track record; 100 for calibration",
+      "status": "below_threshold",
+      "implication": "Public transport quality and stronger-method claims remain blocked by sample size."
+    },
+    {
+      "inputId": "expansionevidence-007",
+      "source": "transit baseline track-record gate",
+      "observedValue": "resolvedComparableSampleSize=1; trackRecordStatus=not_enough_resolved_comparable_outcomes",
+      "threshold": "track-record and calibration thresholds reached with clean evidence",
+      "status": "below_threshold",
+      "implication": "Baseline track-record and calibration readbacks remain below threshold."
+    },
+    {
+      "inputId": "expansionevidence-008",
+      "source": "approved local-folder source runtime",
+      "observedValue": "forecastCardReadyCount=1",
+      "threshold": "one narrow real source runtime reaches forecast card through existing gates",
+      "status": "met",
+      "implication": "A repeatable local runtime pattern exists, but it does not justify arbitrary private API or database parsing."
+    },
+    {
+      "inputId": "expansionevidence-009",
+      "source": "release non-goals",
+      "observedValue": "hosted service, network API, production agent runtime, and generic private API/database runtime are listed non-goals",
+      "threshold": "explicit non-goals remain enforced before expansion work",
+      "status": "blocked",
+      "implication": "Expansion must start with readiness gates and narrow specs, not production runtime claims."
+    }
+  ],
+  "expansionOptions": [
+    {
+      "area": "hosted_runtime",
+      "status": "blocked_pending_evidence",
+      "evidenceRequired": [
+        "3-5 real pilot sessions identify a hosted-runtime need that local CLI cannot satisfy.",
+        "Hosted auth, tenancy, job state, scheduler, and provenance boundaries are specified before implementation."
+      ],
+      "blockedBy": [
+        "hosted_service",
+        "network_api",
+        "production_agent_adapter_runtime"
+      ],
+      "nextLocalStep": "Run real pilot sessions against the current local MVP and classify friction before designing a hosted runtime."
+    },
+    {
+      "area": "broader_private_sources",
+      "status": "blocked_pending_evidence",
+      "evidenceRequired": [
+        "Repeated pilot or usage evidence shows the approved local-folder runtime is insufficient.",
+        "One next source kind can be bounded with approval, allow-listing, size limits, and sanitized diagnostics."
+      ],
+      "blockedBy": [
+        "generic_private_api_database_runtime",
+        "credential_storage",
+        "raw_private_row_retention"
+      ],
+      "nextLocalStep": "Choose at most one next source runtime from observed pilot friction, such as approved HTTP JSON, and keep it non-general."
+    },
+    {
+      "area": "live_forecast_evidence",
+      "status": "blocked_pending_evidence",
+      "evidenceRequired": [
+        "Forecast-time live captures are promoted through policy-bound source sets before the forecast closes.",
+        "Resolution-only and post-close captures remain excluded from forecast provenance."
+      ],
+      "blockedBy": [
+        "production_forecast_use_of_live_connector_results",
+        "public_forecast_use_of_local_live_drafts"
+      ],
+      "nextLocalStep": "Keep collecting ignored local live drafts and promote only sanitized forecast-time source sets through the existing gate."
+    },
+    {
+      "area": "stronger_methods",
+      "status": "blocked_pending_evidence",
+      "evidenceRequired": [
+        "Comparable resolved transit runs reach 30 for track record; current projected count is 2.",
+        "Calibration needs 100 comparable resolved runs; current resolved sample is 1."
+      ],
+      "blockedBy": [
+        "not_enough_resolved_comparable_outcomes",
+        "method_quality_claim_blocked"
+      ],
+      "nextLocalStep": "Grow the transit forward-run corpus and keep baseline-only execution until method lift is supported by clean samples."
+    },
+    {
+      "area": "generated_runtime_types",
+      "status": "deferred_pending_adoption_evidence",
+      "evidenceRequired": [
+        "Pilot notes or usage traces show repeated schema integration friction.",
+        "Generated types can be checked against JSON Schema without becoming the source of truth."
+      ],
+      "blockedBy": [
+        "generated_language_specific_runtime_types_deferred"
+      ],
+      "nextLocalStep": "Keep JSON Schema as the contract source and revisit generated TypeScript only after adoption evidence shows clear friction."
+    }
+  ],
+  "recommendedSequence": [
+    {
+      "order": 1,
+      "milestoneName": "Real Agent Pilot Sessions",
+      "trigger": "Developer adoption surface can guide first forecast-card readback.",
+      "workBoundary": "Run 3-5 local sessions and record sanitized summaries only.",
+      "createsProductionRuntime": false
+    },
+    {
+      "order": 2,
+      "milestoneName": "Transit Corpus Growth",
+      "trigger": "Public transport corpus has append-ready candidate guidance.",
+      "workBoundary": "Add comparable forward runs without broad quality or calibration claims.",
+      "createsProductionRuntime": false
+    },
+    {
+      "order": 3,
+      "milestoneName": "One Next Source Runtime Choice",
+      "trigger": "Pilot evidence shows a repeated source-kind blocker.",
+      "workBoundary": "Specify one bounded runtime path before writing execution code.",
+      "createsProductionRuntime": false
+    },
+    {
+      "order": 4,
+      "milestoneName": "Generated Types Decision",
+      "trigger": "Adoption evidence shows repeated schema friction.",
+      "workBoundary": "Generate checked helper types only if JSON Schema remains the source of truth.",
+      "createsProductionRuntime": false
+    },
+    {
+      "order": 5,
+      "milestoneName": "Hosted Runtime Boundary",
+      "trigger": "Local pilots and corpus evidence justify service work.",
+      "workBoundary": "Write hosted runtime contracts and threat boundaries before hosted implementation.",
+      "createsProductionRuntime": false
+    }
+  ],
+  "successCriteria": [
+    {
+      "criterionId": "expansioncriterion-001",
+      "area": "local MVP adoption",
+      "currentStatus": "quickstart validated; usage events=10",
+      "target": "A new developer or agent reaches forecast-1102 card and bundle locally.",
+      "ready": true
+    },
+    {
+      "criterionId": "expansioncriterion-002",
+      "area": "real pilot evidence",
+      "currentStatus": "accepted real sessions=0; synthetic summaries=3",
+      "target": "At least 3 real pilot sessions with sanitized findings.",
+      "ready": false
+    },
+    {
+      "criterionId": "expansioncriterion-003",
+      "area": "public transit track record",
+      "currentStatus": "projected comparable resolved=2",
+      "target": "At least 30 comparable resolved public transit runs.",
+      "ready": false
+    },
+    {
+      "criterionId": "expansioncriterion-004",
+      "area": "calibration evidence",
+      "currentStatus": "resolved comparable sample size=1",
+      "target": "At least 100 comparable resolved runs before calibration claims.",
+      "ready": false
+    },
+    {
+      "criterionId": "expansioncriterion-005",
+      "area": "source runtime evidence",
+      "currentStatus": "forecast-card-ready cases=1",
+      "target": "One additional source runtime chosen from real friction and bounded before execution.",
+      "ready": false
+    },
+    {
+      "criterionId": "expansioncriterion-006",
+      "area": "generated type evidence",
+      "currentStatus": "no recurring real adoption friction recorded yet",
+      "target": "Repeated integration friction that generated types would directly reduce.",
+      "ready": false
+    }
+  ],
+  "summary": {
+    "evidenceInputCount": 9,
+    "optionCount": 5,
+    "readyOptionCount": 0,
+    "blockedOptionCount": 5,
+    "recommendedNextMilestone": "Milestone 88: Pilot Evidence Ledger, then real pilot sessions and transit corpus growth before hosted or broader runtime work.",
+    "qualityClaimAllowed": false,
+    "hostedRuntimeAllowed": false,
+    "generatedTypesIncluded": false
+  },
+  "executionBoundary": {
+    "readOnlyGate": true,
+    "deterministicOffline": true,
+    "executesCommands": false,
+    "createsForecastArtifacts": false,
+    "fetchesLiveData": false,
+    "startsHostedRuntime": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "generatesRuntimeTypes": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "Expansion readiness is a read-only decision surface over checked local records.",
+    "The gate does not execute commands named in recommendations.",
+    "Hosted runtime, production network APIs, and broad private-source runtimes remain non-goals until evidence unblocks them.",
+    "Stronger methods and calibration claims remain blocked by comparable resolved sample thresholds.",
+    "Generated runtime types remain deferred until adoption evidence shows they reduce integration friction."
+  ]
+}

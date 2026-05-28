@@ -1,0 +1,438 @@
+{
+  "localSourceRuntimeId": "localsourceruntime-001",
+  "generatedAt": "2026-06-10T09:20:00Z",
+  "domain": "weather-logistics",
+  "runtimeMode": "approved_local_folder_runtime",
+  "runtimePolicy": {
+    "sourcePolicyId": "sourcepolicy-850",
+    "approvalRequired": true,
+    "allowedRoots": [
+      "spec/fixtures/local-source-files"
+    ],
+    "requiredRoleFiles": [
+      {
+        "sourceRole": "weather_forecast",
+        "fileName": "weather-forecast.json"
+      },
+      {
+        "sourceRole": "historical_baseline",
+        "fileName": "history.csv"
+      },
+      {
+        "sourceRole": "declared_operations_outcome",
+        "fileName": "outcome.csv"
+      }
+    ],
+    "allowedFormats": [
+      "csv",
+      "json"
+    ],
+    "maxFileBytes": 2048,
+    "maxTotalBytes": 4096,
+    "allowNetworkAccess": false,
+    "credentialStorageImplemented": false,
+    "rawRetention": "metadata_only"
+  },
+  "runtimeCases": [
+    {
+      "caseId": "localsourceruntimecase-001",
+      "case": "approved_local_folder",
+      "inputPath": "spec/fixtures/local-source-files",
+      "runtimeStatus": "forecast_card_ready",
+      "nextAction": "read_forecast_card",
+      "approvalPresent": true,
+      "allowlistStatus": "passed",
+      "totalBytes": 1084,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-001",
+          "level": "info",
+          "message": "Caller-approved local folder matched the OPE allow-list and required role files.",
+          "rawDetailIncluded": false
+        },
+        {
+          "diagnosticId": "localsourceruntimediagnostic-002",
+          "level": "info",
+          "message": "Existing source-builder, intake, method gate, and explicit forecast execution records produced forecast-1102.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [],
+      "bindings": {
+        "sourceManifestBuildId": "sourcemanifestbuild-001",
+        "sourceIntakeHandoffId": "sourceintakehandoff-002",
+        "sourceIntakeReportId": "sourceintakereport-102",
+        "setupBenchmarkGateId": "setupbenchmarkgate-102",
+        "setupMethodDecisionId": "setupmethoddecision-102",
+        "setupForecastRunId": "setupforecastrun-1102",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "forecastCardId": "forecastcard-forecast-1102"
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": true,
+        "sourceBuilderInspected": true,
+        "sourceIntakeValidated": true,
+        "methodGateValidated": true,
+        "explicitForecastExecutionValidated": true,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-002",
+      "case": "missing_approval",
+      "inputPath": "spec/fixtures/local-source-files",
+      "runtimeStatus": "blocked_missing_approval",
+      "nextAction": "confirm_approval",
+      "approvalPresent": false,
+      "allowlistStatus": "passed",
+      "totalBytes": 0,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-003",
+          "level": "error",
+          "message": "Runtime did not inspect local files because caller approval was missing.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "caller_approval_missing"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": null,
+        "sourceIntakeHandoffId": null,
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": false,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": true,
+        "sourceBuilderInspected": false,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-003",
+      "case": "credentials_detected",
+      "inputPath": "spec/fixtures/local-source-files/contains-secret.csv",
+      "runtimeStatus": "blocked_credentials",
+      "nextAction": "remove_credentials",
+      "approvalPresent": true,
+      "allowlistStatus": "passed",
+      "totalBytes": 86,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-004",
+          "level": "error",
+          "message": "Credential-like fields were detected and blocked before source intake.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "source_contains_secrets"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": "sourcemanifestbuild-002",
+        "sourceIntakeHandoffId": "sourceintakehandoff-004",
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": true,
+        "sourceBuilderInspected": true,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-004",
+      "case": "unsafe_path",
+      "inputPath": "/tmp/ope-unapproved/private-source.csv",
+      "runtimeStatus": "blocked_unsafe_path",
+      "nextAction": "choose_allowlisted_path",
+      "approvalPresent": true,
+      "allowlistStatus": "failed",
+      "totalBytes": 0,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-005",
+          "level": "error",
+          "message": "Input path is outside the configured local source runtime allow-list.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "path_not_allowlisted"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": null,
+        "sourceIntakeHandoffId": null,
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": false,
+        "sizeLimitPassed": false,
+        "sourceBuilderInspected": false,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-005",
+      "case": "oversized_response",
+      "inputPath": "spec/fixtures/local-source-files/oversized.csv",
+      "runtimeStatus": "blocked_oversized",
+      "nextAction": "reduce_file_size",
+      "approvalPresent": true,
+      "allowlistStatus": "passed",
+      "totalBytes": 2283,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-006",
+          "level": "error",
+          "message": "Local file exceeds the narrow runtime size limit.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "file_too_large"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": "sourcemanifestbuild-004",
+        "sourceIntakeHandoffId": "sourceintakehandoff-006",
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": false,
+        "sourceBuilderInspected": true,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-006",
+      "case": "schema_mismatch",
+      "inputPath": "spec/fixtures/local-source-files/unsupported.txt",
+      "runtimeStatus": "blocked_schema_mismatch",
+      "nextAction": "replace_with_supported_schema",
+      "approvalPresent": true,
+      "allowlistStatus": "passed",
+      "totalBytes": 88,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-007",
+          "level": "error",
+          "message": "Local file format is outside the runtime CSV/JSON schema boundary.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "unsupported_format"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": "sourcemanifestbuild-003",
+        "sourceIntakeHandoffId": "sourceintakehandoff-005",
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": true,
+        "sourceBuilderInspected": true,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    },
+    {
+      "caseId": "localsourceruntimecase-007",
+      "case": "leakage_indicator",
+      "inputPath": "spec/fixtures/local-source-files/post-outcome-leakage.csv",
+      "runtimeStatus": "blocked_leakage",
+      "nextAction": "remove_leakage_source",
+      "approvalPresent": true,
+      "allowlistStatus": "passed",
+      "totalBytes": 97,
+      "diagnostics": [
+        {
+          "diagnosticId": "localsourceruntimediagnostic-008",
+          "level": "error",
+          "message": "Post-outcome leakage indicators were detected and blocked before source intake.",
+          "rawDetailIncluded": false
+        }
+      ],
+      "blockedReasons": [
+        "post_outcome_leakage_indicator"
+      ],
+      "bindings": {
+        "sourceManifestBuildId": "sourcemanifestbuild-005",
+        "sourceIntakeHandoffId": "sourceintakehandoff-007",
+        "sourceIntakeReportId": null,
+        "setupBenchmarkGateId": null,
+        "setupMethodDecisionId": null,
+        "setupForecastRunId": null,
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardId": null
+      },
+      "controls": {
+        "sourcePolicyBound": true,
+        "approvalVerified": true,
+        "pathAllowlistPassed": true,
+        "sizeLimitPassed": true,
+        "sourceBuilderInspected": true,
+        "sourceIntakeValidated": false,
+        "methodGateValidated": false,
+        "explicitForecastExecutionValidated": false,
+        "runtimeCreatedForecastArtifacts": false,
+        "networkAccess": false,
+        "liveFetch": false,
+        "credentialsRead": false,
+        "credentialsStored": false,
+        "rawRowsStored": false,
+        "arbitraryParsing": false,
+        "hostedRuntime": false
+      }
+    }
+  ],
+  "forecastCardReadback": {
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "cardId": "forecastcard-forecast-1102",
+    "readCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+    "readStatus": "available",
+    "probability": 0.645,
+    "claimStatus": "not_enough_resolved_source_handoff_outcomes",
+    "sourceRuntimeCaseId": "localsourceruntimecase-001"
+  },
+  "summary": {
+    "caseCount": 7,
+    "forecastCardReadyCount": 1,
+    "blockedCount": 6,
+    "missingApprovalCount": 1,
+    "credentialBlockedCount": 1,
+    "unsafePathBlockedCount": 1,
+    "oversizedBlockedCount": 1,
+    "schemaMismatchBlockedCount": 1,
+    "leakageBlockedCount": 1,
+    "qualityClaimAllowed": false,
+    "productionConnectorClaimAllowed": false
+  },
+  "executionBoundary": {
+    "runtimeReadsAllowlistedLocalFiles": true,
+    "runtimeRequiresCallerApproval": true,
+    "normalChecksDeterministicOffline": true,
+    "networkAccess": false,
+    "liveFetch": false,
+    "credentialStorage": false,
+    "rawRowsStored": false,
+    "arbitraryPrivateApiParsing": false,
+    "arbitraryDatabaseParsing": false,
+    "hostedRuntime": false,
+    "osWatcherInstalled": false,
+    "runtimeCreatesForecastArtifacts": false,
+    "explicitForecastExecutionRequired": true,
+    "qualityClaimAllowed": false,
+    "productionConnectorClaimAllowed": false
+  },
+  "warnings": [
+    "This runtime is limited to caller-approved local CSV/JSON files under the configured allow-listed folder.",
+    "Accepted files still pass through source builder, source intake, setup benchmark, setup method decision, and explicit forecast execution gates.",
+    "The runtime does not parse arbitrary private APIs, databases, credentials, or hosted watch events.",
+    "Forecast quality and production connector claims remain blocked."
+  ]
+}

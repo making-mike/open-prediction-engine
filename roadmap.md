@@ -99,8 +99,11 @@ Done:
 - Local weather-transit-delay custom-file prototype now emits schema-bound forecast, resolution, and scoring records through `python3 scripts/ope.py transit-delay-forecast`.
 - Source adapter output contract now lets external agent-built connectors hand OPE a sanitized source manifest, field mapping, provenance summary, and intake boundary without living in core or creating forecast records.
 - Source adapter intake now validates external adapter outputs, routes accepted handoffs through source intake and method gates, and blocks unsafe connector outputs before intake through `python3 scripts/ope.py source-adapter-intake`.
+- Source-quality and mapping-confidence readbacks now summarize freshness, coverage, role fit, entity scope, leakage risk, missingness, outcome availability, and mapping confidence through `python3 scripts/ope.py source-quality`.
 - Local private setup orchestrator summaries now join setup request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes for approved local-file and accepted source-adapter cases through `python3 scripts/ope.py private-setup-orchestrator`.
 - The release manifest now declares the local MVP runtime surface, CLI/agent-call/MCP machine interfaces, smoke checks, blocked-path examples, and non-goal claim review, with a compact runbook in `spec/mvp-local-runtime.md`.
+- Agent pilot validation now has a checked local pack for 3-5 agent/developer sessions, task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries through `python3 scripts/ope.py agent-pilot-validation`.
+- Local usage trace readbacks now expose checked synthetic CLI, agent-call, MCP, blocked-path, release-smoke, and pilot-validation events with aggregate product metrics through `python3 scripts/ope.py local-usage-trace`.
 - Opt-in HSL GTFS-RT transit API connector now captures TripUpdates, derives delay rows through a static GTFS schedule join, and writes source-adapter output through `python3 scripts/ope.py transit-api-connector --schedule-join`.
 - Weather-transit-delay forward-run workflow now records a pre-window forecast, preserves run state, resolves from declared transit outcome rows, scores against baseline, and exposes explicit local live forecast/resolve phases through `python3 scripts/ope.py transit-delay-forward-run`.
 - Weather-transit-delay resolver-agent command now scans saved forward-run states, classifies due/not-due/already-resolved runs, and can explicitly execute the checked resolver command through `python3 scripts/ope.py resolve-due-forward-runs`.
@@ -108,13 +111,20 @@ Done:
 - Foreground terminal resolution scheduler now lets agents poll resolution jobs and optionally execute due checked resolvers locally through `python3 scripts/ope.py resolution-scheduler`, without Trigger.dev, cron, `launchd`, or hosted workers.
 - Resolution runtime reliability now has a checked failure taxonomy, retry/next-action guidance, provenance ledger, and live-capture boundary through `python3 scripts/ope.py resolution-runtime-reliability`.
 - Public transport forward-run corpus now reports one comparable scored transit run, six exclusion examples, sample thresholds, and claim boundaries through `python3 scripts/ope.py transit-forward-run-corpus`.
+- Public transport corpus growth now reports append-ready candidates, exclusion-ledger rows, due-run and post-resolution checklists, and threshold progress through `python3 scripts/ope.py transit-corpus-growth`.
 - Public transport baseline track-record gate now reports current Brier, baseline, lift, sample-size, and horizon/window coverage while blocking below-threshold calibration through `python3 scripts/ope.py transit-track-record-gate`.
 - Public transport method options now keep baseline-only execution as the default, record transparent weather adjustment as evidence-only, and keep richer methods proposed-only through `python3 scripts/ope.py transit-method-options`.
 - Policy-bound transit live evidence promotion now distinguishes committed fixtures, ignored live drafts, promoted forecast-time evidence, and resolution-only captures through `python3 scripts/ope.py transit-live-evidence-promotion`.
+- One narrow approved local-folder source runtime now requires caller approval, path allow-listing, size limits, source-policy binding, and sanitized diagnostics before binding accepted files to `forecast-1102` through `python3 scripts/ope.py local-source-runtime`.
+- Developer adoption surface now exposes a checked quickstart, complete local setup scenario, CLI/agent-call/MCP integration notes, release-note boundaries, and deferred generated-types decision through `python3 scripts/ope.py developer-adoption`.
+- Pilot evidence ledger now exposes checked sanitized intake examples, raw/private-data blockers, claim-confusion signals, and zero real sessions recorded through `python3 scripts/ope.py pilot-evidence`.
+- Pilot session packet now exposes checked real-session task cards, sanitization review, ledger-ready summary shape, and stop conditions through `python3 scripts/ope.py pilot-session-packet`.
+- Pilot summary intake now classifies sanitized summary examples as ledger-ready, redaction-needed, or blocked through `python3 scripts/ope.py pilot-summary-intake`.
+- Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 
 Not started:
 
-- Arbitrary private API/database parsing beyond checked setup and local source-builder fixtures.
+- Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
@@ -123,7 +133,7 @@ Not started:
 - Production hosted, HTTP, or queue agent adapter runtime.
 - Hosted service runtime and network API.
 - Production forecast use of live connector results.
-- Generated language-specific runtime types, if needed later.
+- Generated language-specific runtime types remain deferred until pilot/adoption evidence shows they reduce setup friction.
 
 In progress:
 
@@ -131,11 +141,14 @@ In progress:
 
 Next:
 
-1. Later: source quality and richer data-source coverage.
+1. Run real agent/developer pilot sessions using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
+2. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
+3. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
 
 MVP path:
 
 - Milestones 72-80 define the minimum local, agent-native OPE product: connect approved or adapter-provided data, forecast before the outcome, preserve provenance, recalculate from pre-close evidence, resolve later, score against a baseline, and expose the whole loop through agent-readable surfaces.
+- Milestones 81-90 should validate that product with real agent/developer use, add local measurement, grow evidence toward claim thresholds, and improve adoption before expanding into hosted or broad private-source runtimes.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -2428,6 +2441,315 @@ Completed outputs:
 - `scripts/check_mvp_release_surface.py`
 - normal check wiring for the MVP release-surface smoke check
 - docs, roadmap, and decision-log wiring for the local MVP release boundary
+
+## Milestone 81: Agent Pilot Validation Pack
+
+Status: Accepted.
+
+Goal: validate the local MVP with realistic agent/developer setup sessions before expanding runtime scope.
+
+Tasks:
+
+- [x] Add a compact pilot protocol for 3-5 agent/developer setup sessions.
+- [x] Add task scenarios that ask an agent to set up an OPE-compatible engine from connected source data.
+- [x] Add a feedback schema for comprehension, trust, task completion, and claim-boundary understanding.
+- [x] Add a rubric for forecast-card, lifecycle-bundle, source-intake, and blocked-path comprehension.
+- [x] Add checked example pilot notes or transcript summaries without storing private data.
+
+Exit criteria:
+
+- OPE has a repeatable way to test whether a developer can trust the local MVP output enough for agent decision support.
+- Pilot evidence can distinguish usability gaps from missing runtime features.
+
+Completed outputs:
+
+- `spec/agent-pilot-validation.md`
+- `spec/agent-pilot-validation.schema.json`
+- checked fixture under `spec/fixtures/generated/agent-pilot-validation/`
+- CLI command `python3 scripts/ope.py agent-pilot-validation`
+- `scripts/check_agent_pilot_validation.py`
+- normal check, release manifest, docs, roadmap, and decision-log wiring for the pilot validation pack
+
+## Milestone 82: Local Usage And Trace Events
+
+Status: Accepted.
+
+Goal: make local MVP usage measurable without hosted telemetry.
+
+Tasks:
+
+- [x] Add a schema-bound local event log for CLI, `agent-call`, MCP, setup, forecast-run, readback, blocked path, and release-surface smoke events.
+- [x] Add local trace summaries for elapsed time, command outcome, record binding, response size, and sanitized error class.
+- [x] Add aggregate readbacks for agent forecast completion rate, read success rate, and blocked-path frequency.
+- [x] Keep telemetry opt-in or local-only, with no credential, private row, prompt, or raw source capture.
+- [x] Add checks that normal release runs remain deterministic and offline.
+
+Exit criteria:
+
+- The product metrics in `PRODUCT.md` have a local measurement surface that agents and developers can inspect.
+- Usage instrumentation does not weaken privacy, source, or claim boundaries.
+
+Completed outputs:
+
+- `spec/local-usage-trace.md`
+- `spec/local-usage-trace.schema.json`
+- checked fixture under `spec/fixtures/generated/local-usage-trace/`
+- CLI command `python3 scripts/ope.py local-usage-trace`
+- `scripts/check_local_usage_trace.py`
+- normal check, release manifest, docs, roadmap, and decision-log wiring for the local usage trace boundary
+
+## Milestone 83: Public Transit Corpus Growth Loop
+
+Status: Accepted.
+
+Goal: grow comparable public transit forward-run evidence toward real track-record and calibration thresholds.
+
+Tasks:
+
+- [x] Add an append-only corpus update command for new resolved transit forward runs.
+- [x] Add due-run and post-resolution checklists that preserve forecast-time versus resolution-time evidence boundaries.
+- [x] Add an exclusion ledger for missing outcomes, stale evidence, leakage risk, post-close sources, and incomparable windows.
+- [x] Add a progress readback toward track-record and calibration sample thresholds.
+- [x] Keep quality, calibration, and method-performance claims blocked until thresholds and clean evidence support them.
+
+Exit criteria:
+
+- OPE can repeatedly add comparable resolved transit runs without manual corpus editing.
+- Agents can see whether the public beta wedge is moving toward or away from claim-ready evidence.
+
+Completed outputs:
+
+- `spec/transit-corpus-growth-loop.schema.json`
+- `spec/transit-corpus-growth-loop.md`
+- `scripts/generate_transit_corpus_growth_loop.py`
+- `scripts/check_transit_corpus_growth_loop.py`
+- checked fixture at `spec/fixtures/generated/transit-corpus-growth/transit-corpus-growth-loop.generated.json`
+- CLI command `python3 scripts/ope.py transit-corpus-growth`
+- six candidate classifications: append-ready comparable resolved, missing outcome, stale evidence, leakage risk, post-close source, and incomparable window
+- due-run checklist, post-resolution checklist, exclusion ledger, threshold progress readback, and non-mutating execution boundary
+- schema-validation, run-check, CLI, docs, release-manifest, and decision-log wiring for the checked corpus growth loop
+
+## Milestone 84: Source Quality And Mapping Confidence
+
+Status: Accepted.
+
+Goal: help agents understand whether connected data is merely accepted or actually useful for forecasting.
+
+Tasks:
+
+- [x] Add source-quality and mapping-confidence records over freshness, coverage, role fit, entity scope, leakage risk, missingness, and outcome availability.
+- [x] Bind source-quality readbacks to source-builder, source-adapter intake, source-intake reports, and setup method decisions.
+- [x] Add guidance for when to confirm mappings, collect more data, replace sources, or proceed to method gates.
+- [x] Add checks that source quality cannot by itself create forecast, score, calibration, or production-readiness claims.
+- [x] Add compact agent-facing summaries that fit readback size budgets.
+
+Exit criteria:
+
+- Agents can explain why a source is forecast-usable, needs confirmation, needs more data, or should be rejected.
+- Source quality improves setup trust without broadening into arbitrary private parsing.
+
+Completed outputs:
+
+- `spec/source-quality-mapping-confidence.schema.json`
+- `spec/source-quality-mapping-confidence.md`
+- `scripts/generate_source_quality_mapping_confidence.py`
+- `scripts/check_source_quality_mapping_confidence.py`
+- checked fixture at `spec/fixtures/generated/source-quality-mapping-confidence/weather-logistics-source-quality-mapping-confidence.generated.json`
+- CLI command `python3 scripts/ope.py source-quality`
+- seven source-quality cases: builder draft, accepted intake, partial baseline-only intake, needs-confirmation intake, insufficient adapter data, rejected intake, and unsafe adapter output
+- freshness, coverage, role-fit, entity-scope, leakage-risk, missingness, outcome-availability, mapping-confidence, compact-readback, and non-generating execution-boundary checks
+- schema-validation, run-check, CLI, docs, release-manifest, and decision-log wiring for the checked source-quality read model
+
+## Milestone 85: One Narrow Real Source Runtime
+
+Status: Accepted.
+
+Goal: add one carefully bounded non-fixture source runtime based on pilot evidence, not broad connector ambition.
+
+Tasks:
+
+- [x] Choose one narrow source runtime from pilot evidence, such as approved local SQLite, approved HTTP JSON, or watched local folder input.
+- [x] Add explicit caller approval, path/endpoint allow-listing, size limits, source-policy binding, and sanitized diagnostics.
+- [x] Route accepted runtime output through source manifest, mapping, source intake, benchmark gate, method decision, and explicit forecast execution.
+- [x] Add blocked examples for missing approval, credentials, unsafe locations, oversized responses, schema mismatch, and leakage indicators.
+- [x] Keep arbitrary private API/database parsing, credential storage, live fetching, hosted runtime, and production connector claims out of scope.
+
+Exit criteria:
+
+- One real source runtime can produce a checked forecast card through the existing gates.
+- The runtime proves a repeatable pattern without implying general private-source support.
+
+Completed outputs:
+
+- `spec/local-source-runtime.schema.json`
+- `spec/local-source-runtime.md`
+- `scripts/generate_local_source_runtime.py`
+- `scripts/check_local_source_runtime.py`
+- checked fixture at `spec/fixtures/generated/local-source-runtime/weather-logistics-local-source-runtime.generated.json`
+- CLI command `python3 scripts/ope.py local-source-runtime`
+- one accepted approved-local-folder case binding to `forecast-1102`
+- blocked examples for missing approval, credential-like fields, unsafe path, oversized file, unsupported schema, and leakage indicator
+- source-policy binding, path allow-list, size limit, sanitized diagnostics, non-goal boundary, schema-validation, run-check, CLI, docs, release-manifest, and decision-log wiring
+
+## Milestone 86: Developer Adoption Surface
+
+Status: Accepted.
+
+Goal: make the local MVP easier for developers and agents to try, understand, and integrate.
+
+Tasks:
+
+- [x] Add a compact quickstart from clone to first forecast card and lifecycle bundle.
+- [x] Add one complete example scenario for local source setup, forecast, readback, resolution, scoring, and claim review.
+- [x] Add integration notes for CLI, `agent-call`, and MCP stdio with minimum expected inputs and outputs.
+- [x] Add release notes that state what is implemented, what is fixture-only, and what remains non-goal.
+- [x] Consider generated language-specific types only if pilot/adoption evidence shows they reduce setup friction.
+
+Exit criteria:
+
+- A new developer or agent can reach a valid forecast card quickly and understand the product boundaries.
+- Adoption work improves time-to-first-forecast-card without overstating runtime maturity.
+
+Completed outputs:
+
+- `spec/developer-adoption-surface.schema.json`
+- `spec/developer-adoption-surface.md`
+- `scripts/generate_developer_adoption_surface.py`
+- `scripts/check_developer_adoption_surface.py`
+- checked fixture at `spec/fixtures/generated/developer-adoption/ope-developer-adoption-surface.generated.json`
+- CLI command `python3 scripts/ope.py developer-adoption`
+- quickstart from Python setup to local checks, approved local runtime, forecast card, lifecycle bundle, and claim gate
+- complete scenario from local setup through runtime gate, forecast readback, lifecycle bundle, resolution/scoring, and claim review
+- CLI, `agent-call`, and MCP stdio integration notes with boundaries
+- release-note sections for implemented, fixture-only, and non-goal surfaces, plus a deferred generated-types decision
+- schema-validation, run-check, CLI, docs, release-manifest, MVP-smoke, and decision-log wiring for the checked developer adoption surface
+
+## Milestone 87: Expansion Readiness Gate
+
+Status: Accepted.
+
+Goal: prevent post-MVP expansion from outrunning pilot, usage, corpus, and adoption evidence.
+
+Tasks:
+
+- [x] Add a checked gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types.
+- [x] Bind the gate to release manifest, developer adoption, pilot validation, usage trace, transit corpus growth, transit track-record, and local source runtime evidence.
+- [x] Distinguish met local MVP evidence from synthetic-only pilot evidence, below-threshold corpus evidence, and explicit non-goal blockers.
+- [x] Add a recommended post-MVP sequence that starts with real pilot sessions and corpus growth before hosted or broader runtime work.
+- [x] Keep the gate read-only: no hosted runtime, live fetch, private source execution, artifact creation, runtime type generation, or quality claim.
+
+Exit criteria:
+
+- Agents and maintainers can see why major expansion paths are blocked or deferred.
+- The next roadmap work is evidence-gathering and corpus growth, not premature production-runtime construction.
+
+Completed outputs:
+
+- `spec/expansion-readiness-gate.schema.json`
+- `spec/expansion-readiness-gate.md`
+- `scripts/generate_expansion_readiness_gate.py`
+- `scripts/check_expansion_readiness_gate.py`
+- checked fixture at `spec/fixtures/generated/expansion-readiness/ope-expansion-readiness-gate.generated.json`
+- CLI command `python3 scripts/ope.py expansion-readiness`
+- five expansion options: hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types
+- evidence bindings over release manifest, developer adoption, agent pilot validation, pilot evidence ledger, local usage trace, transit corpus growth, transit track-record gate, and approved local-folder runtime
+- schema-validation, run-check, CLI, docs, release-manifest, MVP-smoke, and decision-log wiring for the checked expansion readiness gate
+
+## Milestone 88: Pilot Evidence Ledger
+
+Status: Accepted.
+
+Goal: give real pilot sessions a safe sanitized evidence intake path before post-MVP expansion decisions.
+
+Tasks:
+
+- [x] Add a checked pilot evidence ledger for sanitized session summaries, dimension scores, friction classes, and expansion signals.
+- [x] Add intake examples for accepted sanitized summaries, notes needing redaction, raw transcript blockers, private data blockers, and claim-boundary confusion.
+- [x] Bind the ledger to the pilot validation pack, developer adoption surface, release manifest, and expansion-readiness gate.
+- [x] Keep checked examples from counting as real pilot evidence or unblocking hosted runtime, broader private-source runtime, generated types, stronger methods, or quality claims.
+- [x] Add CLI, normal-check, release-manifest, MVP-smoke, docs, and decision-log wiring.
+
+Exit criteria:
+
+- Real pilot sessions have a checked repository-safe format for sanitized summaries.
+- Raw transcripts, private data, credentials, prompt logs, and participant identity are blocked before aggregation.
+- Expansion remains blocked until enough real sanitized sessions are recorded.
+
+Completed outputs:
+
+- `spec/pilot-evidence-ledger.schema.json`
+- `spec/pilot-evidence-ledger.md`
+- `scripts/generate_pilot_evidence_ledger.py`
+- `scripts/check_pilot_evidence_ledger.py`
+- checked fixture at `spec/fixtures/generated/pilot-evidence/ope-pilot-evidence-ledger.generated.json`
+- CLI command `python3 scripts/ope.py pilot-evidence`
+- five intake cases: accepted sanitized summary, needs redaction, raw transcript blocked, private data blocked, and claim-boundary confusion
+- aggregate summary with accepted real session count `0`, target session count `5`, blocked-case count `2`, and expansion evidence still not ready
+- expansion-readiness binding that keeps post-MVP runtime and type-generation work blocked pending real pilot evidence
+
+## Milestone 89: Pilot Session Packet
+
+Status: Accepted.
+
+Goal: give agents and moderators one checked way to run real local MVP pilot sessions and produce ledger-ready sanitized summaries.
+
+Tasks:
+
+- [x] Add a checked pilot session packet that binds the pilot validation tasks to the pilot evidence ledger.
+- [x] Add task cards, moderator checklist, participant brief, session steps, and capture fields for the five existing pilot scenarios.
+- [x] Add a sanitized evidence template and required sanitization review before any ledger submission.
+- [x] Add stop conditions for raw transcripts, private rows, credentials, participant identity, and quality/hosted-runtime claim confusion.
+- [x] Keep the packet read-only: it must not run sessions, write ledger rows, store raw/private data, create forecast artifacts, fetch live data, or unblock expansion.
+
+Exit criteria:
+
+- A real pilot session can start from a checked task card and end with a safe summary shape ready for `pilot-evidence`.
+- Moderators have explicit stop conditions before private or raw notes enter repository evidence.
+- The packet itself records zero real sessions and does not change expansion readiness.
+
+Completed outputs:
+
+- `spec/pilot-session-packet.schema.json`
+- `spec/pilot-session-packet.md`
+- `scripts/generate_pilot_session_packet.py`
+- `scripts/check_pilot_session_packet.py`
+- checked fixture at `spec/fixtures/generated/pilot-session-packet/ope-pilot-session-packet.generated.json`
+- CLI command `python3 scripts/ope.py pilot-session-packet`
+- five task cards over local setup readback, accepted adapter output, unsafe source block, forecast-run readback, and claim-gate readback
+- sanitization review with seven required checks and a ledger-ready summary template
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the checked pilot collection packet
+
+## Milestone 90: Pilot Summary Intake Validator
+
+Status: Accepted.
+
+Goal: classify sanitized real-session pilot summaries before they can be reviewed for the pilot evidence ledger.
+
+Tasks:
+
+- [x] Add a checked summary intake classifier that binds the pilot validation pack, pilot evidence ledger, and pilot session packet.
+- [x] Add ledger-ready, claim-confusion, redaction-needed, raw-transcript-blocked, private-data-blocked, and claim-overreach-blocked examples.
+- [x] Add decision rules for accepting, redacting, or blocking submitted summaries before repository storage.
+- [x] Keep the classifier read-only: it must not run sessions, write ledger rows, record real sessions, store raw/private data, create artifacts, fetch live data, or unblock expansion.
+- [x] Add CLI, normal-check, release-manifest, MVP-smoke, docs, roadmap, and decision-log wiring.
+
+Exit criteria:
+
+- A moderator can tell whether a sanitized session summary is ledger-ready, needs redaction, or must be blocked.
+- Raw transcripts, private rows, credentials, participant identity, and quality/hosted-runtime overclaims are stopped before ledger review.
+- The classifier records zero real sessions and writes zero ledger rows.
+
+Completed outputs:
+
+- `spec/pilot-summary-intake.schema.json`
+- `spec/pilot-summary-intake.md`
+- `scripts/generate_pilot_summary_intake.py`
+- `scripts/check_pilot_summary_intake.py`
+- checked fixture at `spec/fixtures/generated/pilot-summary-intake/ope-pilot-summary-intake.generated.json`
+- CLI command `python3 scripts/ope.py pilot-summary-intake`
+- six intake cases: ledger-ready local setup summary, ledger-ready claim-confusion product signal, redaction-needed source detail, blocked raw transcript, blocked private rows, and blocked quality claim
+- summary with accepted ledger-ready count `2`, needs-redaction count `1`, blocked count `3`, real sessions recorded `0`, and ledger rows written `0`
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the checked intake classifier
 
 ## Open Decisions
 

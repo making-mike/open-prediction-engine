@@ -24,7 +24,7 @@ This does not mean unbounded crawling or claiming access to all internet knowled
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, private setup requests, first actions, orchestrators, runbooks, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, local source runtimes, developer adoption surfaces, private setup requests, first actions, orchestrators, runbooks, agent pilot validation, local usage traces, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
@@ -62,9 +62,12 @@ The repository currently contains:
 - a local source manifest builder that inspects small caller-approved CSV/JSON files, drafts manifest/mapping records, and rejects secrets, unsupported formats, oversized files, and leakage indicators before source intake
 - a checked source adapter output contract that lets external agent-built connectors hand OPE a sanitized source manifest and field mapping without living in core or creating forecast records
 - a checked source adapter intake gate that validates external adapter outputs, routes accepted outputs through source intake and method gates, and blocks unsafe connector handoffs before intake
+- a checked source-quality and mapping-confidence readback over builder, adapter-intake, source-intake, and setup-method surfaces without executing sources or creating artifacts
+- a checked approved local-folder source runtime that requires caller approval, path allow-listing, size limits, source-policy binding, and sanitized diagnostics before routing one accepted file set to `forecast-1102`
 - a checked HSL GTFS-RT transit API connector that can capture TripUpdates, derive delay rows through an opt-in static GTFS schedule join, and keep normal checks offline
 - a checked transit-delay forward-run workflow that records a forecast before the service window, resolves from declared outcome rows, scores against baseline, and exposes opt-in local live forecast/resolve phases under `.ope/live/transit-forward-run/`
 - a checked transit live evidence promotion gate that distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence while binding one sanitized promoted source set
+- a checked transit corpus growth loop that classifies append-ready resolved runs, exclusion-ledger rows, and progress toward track-record and calibration thresholds
 - a checked transit forward-run resolver-agent command that scans pending local states, classifies due/not-due/already-resolved runs, and can explicitly execute due resolver commands
 - a checked resolution job registry that gives agents read-only next-action guidance before resolver execution
 - a checked foreground terminal resolution scheduler that agents can start locally to poll resolution jobs and optionally execute due checked resolvers without Trigger.dev, cron, or OS scheduler files
@@ -86,6 +89,12 @@ The repository currently contains:
 - a checked private setup first-action runbook that maps each first-action status to the next safe caller-visible step
 - a checked private setup agent bundle that joins request, first-action, and runbook guidance into one read-only response
 - a checked local private setup orchestrator summary that joins request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes without executing commands
+- a checked agent pilot validation pack with a 3-5 session protocol, local MVP task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries
+- a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, and zero real sessions counted so far
+- a checked pilot session packet with task cards, moderator and participant checklists, sanitized evidence template, sanitization review, and stop conditions for real local MVP pilot sessions
+- a checked pilot summary intake classifier that marks sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions
+- a checked local usage trace read model with synthetic local MVP event rows, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
+- a checked developer adoption surface with a quickstart, one complete local source setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision
 - a checked private setup bundle adapter operation that returns the same guidance through the transport-neutral agent envelope and local MCP scaffold without executing setup commands
 - a checked private setup source-builder adapter operation that inspects only caller-approved local CSV/JSON files and returns draft manifest/mapping guidance without creating forecast or score records
 - a checked private setup source-handoff adapter operation that returns source-handoff confirmation and method-gate readiness guidance without creating forecast or score records
@@ -97,6 +106,7 @@ The repository currently contains:
 - a checked private source adapter guidance adapter operation that joins capability, outcome, and intake-bridge guidance through the transport-neutral envelope and local MCP scaffold without executing source reads
 - a checked private source-kind selection adapter operation that returns compact source-kind path examples, or one selected source-kind recommendation, through the same envelope and MCP surfaces without executing the selected path
 - source manifest and field mapping intake fixtures that classify data as accepted, accepted-partial, needs-confirmation, or rejected before forecasting
+- source-quality and mapping-confidence readbacks that explain freshness, coverage, role fit, entity scope, leakage, missingness, outcome availability, and mapping confidence before method gates
 - setup-specific benchmark gates that allow deterministic fixture execution only when source intake, benchmark binding, anti-leakage controls, and execution thresholds pass
 - setup-aware method decisions that select a benchmark-gated deterministic method, fall back to baseline, block unconfirmed mappings, or reject unusable intake before forecast artifacts are created
 - setup-aware forecast execution that turns accepted setup intake and method decisions into benchmark-gated deterministic or baseline forecast artifacts, cards, and bundles while keeping blocked intake non-generating
@@ -138,7 +148,7 @@ The initial question shape is:
 Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
 ```
 
-This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked corpus growth loop, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The growth loop classifies append-ready comparable runs, exclusion-ledger rows, and projected progress toward track-record and calibration thresholds while keeping normal checks non-mutating. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
 
 Run the checked fixture path:
 
@@ -146,6 +156,7 @@ Run the checked fixture path:
 python3 scripts/ope.py transit-delay-forecast
 python3 scripts/ope.py transit-delay-forward-run
 python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-corpus-growth
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
@@ -170,6 +181,7 @@ Inspect corpus counts and exclusion reasons:
 
 ```bash
 python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-corpus-growth
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
@@ -267,9 +279,10 @@ External connector handoff shape:
 ```bash
 python3 scripts/ope.py source-adapter-output
 python3 scripts/ope.py source-adapter-intake
+python3 scripts/ope.py source-quality
 ```
 
-This shows the contract an agent-built connector should produce before OPE source intake and the checked gate OPE uses to accept, reject, or block it.
+This shows the contract an agent-built connector should produce before OPE source intake, the checked gate OPE uses to accept, reject, or block it, and the compact quality readback agents can use before method gates.
 
 ## Repository Map
 
@@ -338,6 +351,8 @@ python3 scripts/run_transit_delay_forward.py --check
 python3 scripts/check_transit_delay_forward.py
 python3 scripts/generate_transit_forward_run_corpus.py --check
 python3 scripts/check_transit_forward_run_corpus.py
+python3 scripts/generate_transit_corpus_growth_loop.py --check
+python3 scripts/check_transit_corpus_growth_loop.py
 python3 scripts/generate_transit_baseline_track_record_gate.py --check
 python3 scripts/check_transit_baseline_track_record_gate.py
 python3 scripts/generate_transit_method_options.py --check
@@ -358,6 +373,10 @@ python3 scripts/generate_source_adapter_output.py --check
 python3 scripts/check_source_adapter_output.py
 python3 scripts/generate_source_adapter_intake.py --check
 python3 scripts/check_source_adapter_intake.py
+python3 scripts/generate_source_quality_mapping_confidence.py --check
+python3 scripts/check_source_quality_mapping_confidence.py
+python3 scripts/generate_local_source_runtime.py --check
+python3 scripts/check_local_source_runtime.py
 python3 scripts/generate_source_intake_handoff.py --check
 python3 scripts/check_source_intake_handoff.py
 python3 scripts/generate_source_handoff_method_gate.py --check
@@ -388,6 +407,20 @@ python3 scripts/generate_private_setup_agent_bundles.py --check
 python3 scripts/check_private_setup_agent_bundles.py
 python3 scripts/generate_private_setup_orchestrator.py --check
 python3 scripts/check_private_setup_orchestrator.py
+python3 scripts/generate_agent_pilot_validation.py --check
+python3 scripts/check_agent_pilot_validation.py
+python3 scripts/generate_pilot_evidence_ledger.py --check
+python3 scripts/check_pilot_evidence_ledger.py
+python3 scripts/generate_pilot_session_packet.py --check
+python3 scripts/check_pilot_session_packet.py
+python3 scripts/generate_pilot_summary_intake.py --check
+python3 scripts/check_pilot_summary_intake.py
+python3 scripts/generate_local_usage_trace.py --check
+python3 scripts/check_local_usage_trace.py
+python3 scripts/generate_developer_adoption_surface.py --check
+python3 scripts/check_developer_adoption_surface.py
+python3 scripts/generate_expansion_readiness_gate.py --check
+python3 scripts/check_expansion_readiness_gate.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -556,6 +589,22 @@ python3 scripts/ope.py source-adapter-intake
 python3 scripts/ope.py source-adapter-intake --case unsafe
 ```
 
+Inspect source quality and mapping confidence:
+
+```bash
+python3 scripts/ope.py source-quality
+python3 scripts/ope.py source-quality --case source_intake_accepted
+python3 scripts/ope.py source-quality --case adapter_insufficient_data
+```
+
+Inspect the approved local-folder source runtime:
+
+```bash
+python3 scripts/ope.py local-source-runtime
+python3 scripts/ope.py local-source-runtime --case approved_local_folder
+python3 scripts/ope.py local-source-runtime --case unsafe_path
+```
+
 Inspect source-builder to source-intake handoffs:
 
 ```bash
@@ -601,6 +650,7 @@ Check explicit source-handoff forecast execution:
 ```bash
 python3 scripts/ope.py source-handoff-forecast
 python3 scripts/ope.py source-handoff-forecast --case confirmed_builder_draft
+python3 scripts/ope.py local-source-runtime
 python3 scripts/ope.py resolve-source-handoff
 python3 scripts/ope.py source-handoff-runbook
 python3 scripts/ope.py private-setup-workflow
@@ -616,6 +666,15 @@ python3 scripts/ope.py private-setup-action-runbook
 python3 scripts/ope.py private-setup-bundles
 python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
 python3 scripts/ope.py private-setup-orchestrator
+python3 scripts/ope.py agent-pilot-validation
+python3 scripts/ope.py pilot-evidence
+python3 scripts/ope.py pilot-session-packet
+python3 scripts/ope.py pilot-summary-intake
+python3 scripts/ope.py local-usage-trace
+python3 scripts/ope.py developer-adoption
+python3 scripts/ope.py developer-adoption --section quickstart
+python3 scripts/ope.py expansion-readiness
+python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -717,6 +776,11 @@ Check the release manifest:
 ```bash
 python3 scripts/ope.py manifest
 python3 scripts/check_mvp_release_surface.py
+python3 scripts/check_agent_pilot_validation.py
+python3 scripts/check_pilot_session_packet.py
+python3 scripts/check_pilot_summary_intake.py
+python3 scripts/ope.py developer-adoption --section quickstart
+python3 scripts/ope.py expansion-readiness --section options
 ```
 
 CI release gate:
@@ -737,6 +801,7 @@ python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
 python3 scripts/connect_transit_api.py --write
 python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_corpus_growth_loop.py --write
 python3 scripts/generate_transit_baseline_track_record_gate.py --write
 python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_transit_live_evidence_promotion.py --write
@@ -744,6 +809,8 @@ python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write
 python3 scripts/generate_source_adapter_intake.py --write
+python3 scripts/generate_source_quality_mapping_confidence.py --write
+python3 scripts/generate_local_source_runtime.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write
@@ -764,6 +831,13 @@ python3 scripts/generate_private_setup_first_actions.py --write
 python3 scripts/generate_private_setup_first_action_runbook.py --write
 python3 scripts/generate_private_setup_agent_bundles.py --write
 python3 scripts/generate_private_setup_orchestrator.py --write
+python3 scripts/generate_agent_pilot_validation.py --write
+python3 scripts/generate_pilot_evidence_ledger.py --write
+python3 scripts/generate_pilot_session_packet.py --write
+python3 scripts/generate_pilot_summary_intake.py --write
+python3 scripts/generate_local_usage_trace.py --write
+python3 scripts/generate_developer_adoption_surface.py --write
+python3 scripts/generate_expansion_readiness_gate.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
@@ -792,7 +866,8 @@ OPE still needs:
 
 - generated runtime types or non-Python validators if the project moves beyond local scripts
 - a production service runtime if OPE grows beyond local file and CLI surfaces
-- source manifest and field mapping intake for arbitrary manual uploads, private APIs, and databases beyond current checked local-file builder fixtures and capability declarations
+- source manifest and field mapping intake for arbitrary manual uploads, private APIs, and databases beyond current checked local-file builder fixtures, approved local-folder runtime, and capability declarations
+- source-quality-driven source execution, artifact creation, or production-readiness claims
 - additional setup-aware method execution beyond the current deterministic fixture path
 - forecast execution from ignored local live drafts
 - live or scheduled recalculation beyond committed fixtures

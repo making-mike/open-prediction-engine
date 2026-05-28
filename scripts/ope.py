@@ -75,6 +75,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     resolution_scheduler_command = [sys.executable, "scripts/run_resolution_scheduler.py"]
     resolution_runtime_reliability_command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
     transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
+    transit_corpus_growth_command = [sys.executable, "scripts/generate_transit_corpus_growth_loop.py"]
     transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
     transit_method_options_command = [sys.executable, "scripts/generate_transit_method_options.py"]
     transit_live_evidence_promotion_command = [sys.executable, "scripts/generate_transit_live_evidence_promotion.py"]
@@ -82,6 +83,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     source_builder_command = [sys.executable, "scripts/build_source_manifest.py"]
     source_adapter_output_command = [sys.executable, "scripts/generate_source_adapter_output.py"]
     source_adapter_intake_command = [sys.executable, "scripts/generate_source_adapter_intake.py"]
+    source_quality_command = [sys.executable, "scripts/generate_source_quality_mapping_confidence.py"]
     source_handoff_command = [sys.executable, "scripts/generate_source_intake_handoff.py"]
     source_handoff_method_command = [sys.executable, "scripts/generate_source_handoff_method_gate.py"]
     auto_evidence_forecast_command = [sys.executable, "scripts/run_auto_evidence_forecast.py"]
@@ -93,6 +95,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     setup_method_command = [sys.executable, "scripts/select_setup_method.py"]
     setup_forecast_command = [sys.executable, "scripts/run_setup_forecast.py"]
     source_handoff_forecast_command = [sys.executable, "scripts/run_source_handoff_forecast.py"]
+    local_source_runtime_command = [sys.executable, "scripts/generate_local_source_runtime.py"]
     source_handoff_resolution_command = [sys.executable, "scripts/resolve_source_handoff_outcome.py"]
     source_handoff_runbook_command = [sys.executable, "scripts/generate_source_handoff_setup_runbook.py"]
     private_setup_workflow_command = [sys.executable, "scripts/generate_private_setup_workflow.py"]
@@ -105,6 +108,13 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     private_setup_action_runbook_command = [sys.executable, "scripts/generate_private_setup_first_action_runbook.py"]
     private_setup_agent_bundles_command = [sys.executable, "scripts/generate_private_setup_agent_bundles.py"]
     private_setup_orchestrator_command = [sys.executable, "scripts/generate_private_setup_orchestrator.py"]
+    agent_pilot_validation_command = [sys.executable, "scripts/generate_agent_pilot_validation.py"]
+    pilot_evidence_command = [sys.executable, "scripts/generate_pilot_evidence_ledger.py"]
+    pilot_session_packet_command = [sys.executable, "scripts/generate_pilot_session_packet.py"]
+    pilot_summary_intake_command = [sys.executable, "scripts/generate_pilot_summary_intake.py"]
+    local_usage_trace_command = [sys.executable, "scripts/generate_local_usage_trace.py"]
+    developer_adoption_command = [sys.executable, "scripts/generate_developer_adoption_surface.py"]
+    expansion_readiness_command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -136,6 +146,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_scheduler_command.append("--write")
         resolution_runtime_reliability_command.append("--write")
         transit_forward_run_corpus_command.append("--write")
+        transit_corpus_growth_command.append("--write")
         transit_track_record_gate_command.append("--write")
         transit_method_options_command.append("--write")
         transit_live_evidence_promotion_command.append("--write")
@@ -143,6 +154,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         source_builder_command.append("--write")
         source_adapter_output_command.append("--write")
         source_adapter_intake_command.append("--write")
+        source_quality_command.append("--write")
         source_handoff_command.append("--write")
         source_handoff_method_command.append("--write")
         auto_evidence_forecast_command.append("--write")
@@ -154,6 +166,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         setup_method_command.append("--write")
         setup_forecast_command.append("--write")
         source_handoff_forecast_command.append("--write")
+        local_source_runtime_command.append("--write")
         source_handoff_resolution_command.append("--write")
         source_handoff_runbook_command.append("--write")
         private_setup_workflow_command.append("--write")
@@ -166,6 +179,13 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_setup_action_runbook_command.append("--write")
         private_setup_agent_bundles_command.append("--write")
         private_setup_orchestrator_command.append("--write")
+        agent_pilot_validation_command.append("--write")
+        pilot_evidence_command.append("--write")
+        pilot_session_packet_command.append("--write")
+        pilot_summary_intake_command.append("--write")
+        local_usage_trace_command.append("--write")
+        developer_adoption_command.append("--write")
+        expansion_readiness_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -194,6 +214,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_scheduler_command.append("--check")
         resolution_runtime_reliability_command.append("--check")
         transit_forward_run_corpus_command.append("--check")
+        transit_corpus_growth_command.append("--check")
         transit_track_record_gate_command.append("--check")
         transit_method_options_command.append("--check")
         transit_live_evidence_promotion_command.append("--check")
@@ -201,6 +222,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         source_builder_command.append("--check")
         source_adapter_output_command.append("--check")
         source_adapter_intake_command.append("--check")
+        source_quality_command.append("--check")
         source_handoff_command.append("--check")
         source_handoff_method_command.append("--check")
         method_comparison_command.append("--check")
@@ -209,6 +231,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         setup_method_command.append("--check")
         setup_forecast_command.append("--check")
         source_handoff_forecast_command.append("--check")
+        local_source_runtime_command.append("--check")
         source_handoff_runbook_command.append("--check")
         private_setup_workflow_command.append("--check")
         private_source_adapters_command.append("--check")
@@ -220,6 +243,13 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         private_setup_action_runbook_command.append("--check")
         private_setup_agent_bundles_command.append("--check")
         private_setup_orchestrator_command.append("--check")
+        agent_pilot_validation_command.append("--check")
+        pilot_evidence_command.append("--check")
+        pilot_session_packet_command.append("--check")
+        pilot_summary_intake_command.append("--check")
+        local_usage_trace_command.append("--check")
+        developer_adoption_command.append("--check")
+        expansion_readiness_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -246,6 +276,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(resolution_scheduler_command)
     run(resolution_runtime_reliability_command)
     run(transit_forward_run_corpus_command)
+    run(transit_corpus_growth_command)
     run(transit_track_record_gate_command)
     run(transit_method_options_command)
     run(transit_live_evidence_promotion_command)
@@ -253,6 +284,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(source_builder_command)
     run(source_adapter_output_command)
     run(source_adapter_intake_command)
+    run(source_quality_command)
     run(source_handoff_command)
     run(source_handoff_method_command)
     run(auto_evidence_forecast_command)
@@ -264,6 +296,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(setup_method_command)
     run(setup_forecast_command)
     run(source_handoff_forecast_command)
+    run(local_source_runtime_command)
     run(source_handoff_resolution_command)
     run(source_handoff_runbook_command)
     run(private_setup_workflow_command)
@@ -275,6 +308,13 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(private_setup_action_runbook_command)
     run(private_setup_agent_bundles_command)
     run(private_setup_orchestrator_command)
+    run(agent_pilot_validation_command)
+    run(pilot_evidence_command)
+    run(pilot_session_packet_command)
+    run(pilot_summary_intake_command)
+    run(local_usage_trace_command)
+    run(developer_adoption_command)
+    run(expansion_readiness_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -679,6 +719,17 @@ def cmd_transit_forward_run_corpus(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_transit_corpus_growth(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_transit_corpus_growth_loop.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
 def cmd_transit_track_record_gate(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
     if args.check:
@@ -745,6 +796,17 @@ def cmd_source_adapter_output(args: argparse.Namespace) -> None:
 
 def cmd_source_adapter_intake(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_source_adapter_intake.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_source_quality(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_source_quality_mapping_confidence.py"]
     if args.case:
         command.extend(["--case", args.case])
     if args.check:
@@ -852,6 +914,17 @@ def cmd_setup_forecast(args: argparse.Namespace) -> None:
 
 def cmd_source_handoff_forecast(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/run_source_handoff_forecast.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_local_source_runtime(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_local_source_runtime.py"]
     if args.case:
         command.extend(["--case", args.case])
     if args.check:
@@ -1040,6 +1113,89 @@ def cmd_private_setup_orchestrator(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_private_setup_orchestrator.py"]
     if args.case:
         command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_agent_pilot_validation(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_agent_pilot_validation.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_evidence(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_evidence_ledger.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_session_packet(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_session_packet.py"]
+    if args.task:
+        command.extend(["--task", args.task])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_summary_intake(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_summary_intake.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_local_usage_trace(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_local_usage_trace.py"]
+    if args.event:
+        command.extend(["--event", args.event])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_developer_adoption(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_developer_adoption_surface.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_expansion_readiness(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
+    if args.section:
+        command.extend(["--section", args.section])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1504,6 +1660,34 @@ def build_parser() -> argparse.ArgumentParser:
     )
     transit_forward_run_corpus.set_defaults(func=cmd_transit_forward_run_corpus)
 
+    transit_corpus_growth = subparsers.add_parser(
+        "transit-corpus-growth",
+        help="check, refresh, or print the transit corpus append-readiness loop",
+    )
+    transit_corpus_growth.add_argument(
+        "--case",
+        choices=[
+            "comparable_resolved",
+            "missing_outcome",
+            "stale_evidence",
+            "leakage_risk",
+            "post_close_source",
+            "incomparable_window",
+        ],
+        help="print one corpus growth candidate",
+    )
+    transit_corpus_growth.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated transit corpus growth loop drift",
+    )
+    transit_corpus_growth.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated transit corpus growth loop fixture",
+    )
+    transit_corpus_growth.set_defaults(func=cmd_transit_corpus_growth)
+
     transit_track_record_gate = subparsers.add_parser(
         "transit-track-record-gate",
         help="print checked public transport baseline track-record and calibration gate",
@@ -1609,6 +1793,27 @@ def build_parser() -> argparse.ArgumentParser:
     source_adapter_intake.add_argument("--check", action="store_true", help="check generated source-adapter intake drift")
     source_adapter_intake.add_argument("--write", action="store_true", help="refresh generated source-adapter intake fixtures")
     source_adapter_intake.set_defaults(func=cmd_source_adapter_intake)
+
+    source_quality = subparsers.add_parser(
+        "source-quality",
+        help="check, refresh, or print source quality and mapping confidence readbacks",
+    )
+    source_quality.add_argument(
+        "--case",
+        choices=[
+            "builder_local_draft",
+            "source_intake_accepted",
+            "source_intake_partial",
+            "source_intake_needs_confirmation",
+            "adapter_insufficient_data",
+            "source_intake_rejected",
+            "adapter_unsafe",
+        ],
+        help="print one source quality case row",
+    )
+    source_quality.add_argument("--check", action="store_true", help="check generated source-quality drift")
+    source_quality.add_argument("--write", action="store_true", help="refresh generated source-quality readback")
+    source_quality.set_defaults(func=cmd_source_quality)
 
     source_handoff = subparsers.add_parser(
         "source-handoff",
@@ -1758,6 +1963,27 @@ def build_parser() -> argparse.ArgumentParser:
     source_handoff_forecast.add_argument("--check", action="store_true", help="check generated source-handoff forecast drift")
     source_handoff_forecast.add_argument("--write", action="store_true", help="refresh source-handoff forecast records")
     source_handoff_forecast.set_defaults(func=cmd_source_handoff_forecast)
+
+    local_source_runtime = subparsers.add_parser(
+        "local-source-runtime",
+        help="check, refresh, or print the approved local-folder source runtime",
+    )
+    local_source_runtime.add_argument(
+        "--case",
+        choices=[
+            "approved_local_folder",
+            "missing_approval",
+            "credentials_detected",
+            "unsafe_path",
+            "oversized_response",
+            "schema_mismatch",
+            "leakage_indicator",
+        ],
+        help="print one local source runtime case",
+    )
+    local_source_runtime.add_argument("--check", action="store_true", help="check generated local source runtime drift")
+    local_source_runtime.add_argument("--write", action="store_true", help="refresh generated local source runtime")
+    local_source_runtime.set_defaults(func=cmd_local_source_runtime)
 
     recalculation = subparsers.add_parser(
         "recalculation",
@@ -2022,6 +2248,204 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated private setup orchestrator",
     )
     private_setup_orchestrator.set_defaults(func=cmd_private_setup_orchestrator)
+
+    agent_pilot_validation = subparsers.add_parser(
+        "agent-pilot-validation",
+        help="check, refresh, or print the local agent pilot validation pack",
+    )
+    agent_pilot_validation.add_argument(
+        "--case",
+        choices=[
+            "local_file_setup_readback",
+            "accepted_adapter_output_ready",
+            "unsafe_source_block",
+            "forecast_run_readback",
+            "claim_gate_readback",
+        ],
+        help="print one pilot task scenario",
+    )
+    agent_pilot_validation.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated agent pilot validation pack drift",
+    )
+    agent_pilot_validation.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated agent pilot validation pack",
+    )
+    agent_pilot_validation.set_defaults(func=cmd_agent_pilot_validation)
+
+    pilot_evidence = subparsers.add_parser(
+        "pilot-evidence",
+        help="check, refresh, or print the sanitized pilot evidence ledger",
+    )
+    pilot_evidence.add_argument(
+        "--case",
+        choices=[
+            "accepted_sanitized_summary",
+            "needs_redaction",
+            "raw_transcript_blocked",
+            "private_data_blocked",
+            "claim_boundary_confusion",
+        ],
+        help="print one pilot evidence case",
+    )
+    pilot_evidence.add_argument(
+        "--section",
+        choices=["policy", "cases", "summary", "next-actions", "boundary"],
+        help="print one pilot evidence ledger section",
+    )
+    pilot_evidence.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot evidence ledger drift",
+    )
+    pilot_evidence.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot evidence ledger",
+    )
+    pilot_evidence.set_defaults(func=cmd_pilot_evidence)
+
+    pilot_session_packet = subparsers.add_parser(
+        "pilot-session-packet",
+        help="check, refresh, or print the real pilot-session collection packet",
+    )
+    pilot_session_packet.add_argument(
+        "--task",
+        choices=[
+            "local_file_setup_readback",
+            "accepted_adapter_output_ready",
+            "unsafe_source_block",
+            "forecast_run_readback",
+            "claim_gate_readback",
+        ],
+        help="print one pilot session task card",
+    )
+    pilot_session_packet.add_argument(
+        "--section",
+        choices=["plan", "tasks", "template", "sanitization", "summary", "boundary"],
+        help="print one pilot session packet section",
+    )
+    pilot_session_packet.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot session packet drift",
+    )
+    pilot_session_packet.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot session packet",
+    )
+    pilot_session_packet.set_defaults(func=cmd_pilot_session_packet)
+
+    pilot_summary_intake = subparsers.add_parser(
+        "pilot-summary-intake",
+        help="check, refresh, or print the sanitized pilot-summary intake classifier",
+    )
+    pilot_summary_intake.add_argument(
+        "--case",
+        choices=[
+            "accepted_local_setup_summary",
+            "accepted_claim_confusion_summary",
+            "needs_redaction_source_detail",
+            "blocked_raw_transcript",
+            "blocked_private_rows",
+            "blocked_quality_claim",
+        ],
+        help="print one pilot summary intake case",
+    )
+    pilot_summary_intake.add_argument(
+        "--section",
+        choices=["policy", "cases", "rules", "summary", "boundary"],
+        help="print one pilot summary intake section",
+    )
+    pilot_summary_intake.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot summary intake drift",
+    )
+    pilot_summary_intake.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot summary intake",
+    )
+    pilot_summary_intake.set_defaults(func=cmd_pilot_summary_intake)
+
+    local_usage_trace = subparsers.add_parser(
+        "local-usage-trace",
+        help="check, refresh, or print the local MVP usage trace read model",
+    )
+    local_usage_trace.add_argument(
+        "--event",
+        choices=[
+            "local_file_setup_readback",
+            "unsafe_source_block",
+            "forecast_run_readback",
+            "forecast_card_read",
+            "agent_call_forecast_card",
+            "mcp_protocol_map_read",
+            "release_surface_smoke",
+            "response_too_large_readback",
+            "claim_gate_readback",
+            "agent_pilot_validation_read",
+        ],
+        help="print one usage trace event",
+    )
+    local_usage_trace.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated local usage trace drift",
+    )
+    local_usage_trace.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated local usage trace",
+    )
+    local_usage_trace.set_defaults(func=cmd_local_usage_trace)
+
+    developer_adoption = subparsers.add_parser(
+        "developer-adoption",
+        help="check, refresh, or print the local MVP developer adoption surface",
+    )
+    developer_adoption.add_argument(
+        "--section",
+        choices=["quickstart", "scenario", "integrations", "release-notes", "type-decision"],
+        help="print one developer adoption surface section",
+    )
+    developer_adoption.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated developer adoption surface drift",
+    )
+    developer_adoption.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated developer adoption surface",
+    )
+    developer_adoption.set_defaults(func=cmd_developer_adoption)
+
+    expansion_readiness = subparsers.add_parser(
+        "expansion-readiness",
+        help="check, refresh, or print the post-MVP expansion readiness gate",
+    )
+    expansion_readiness.add_argument(
+        "--section",
+        choices=["evidence", "options", "sequence", "criteria", "boundary"],
+        help="print one expansion readiness gate section",
+    )
+    expansion_readiness.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated expansion readiness gate drift",
+    )
+    expansion_readiness.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated expansion readiness gate",
+    )
+    expansion_readiness.set_defaults(func=cmd_expansion_readiness)
 
     private_setup_adapter_runbook = subparsers.add_parser(
         "private-setup-adapter-runbook",

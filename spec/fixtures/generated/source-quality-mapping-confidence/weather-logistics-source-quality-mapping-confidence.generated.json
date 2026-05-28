@@ -1,0 +1,807 @@
+{
+  "sourceQualityMappingConfidenceId": "sourcequalitymappingconfidence-001",
+  "generatedAt": "2026-06-10T08:35:00Z",
+  "domain": "weather-logistics",
+  "qualityMode": "checked_source_quality_mapping_confidence",
+  "surfaceBindings": [
+    {
+      "surface": "source_builder",
+      "command": "python3 scripts/ope.py source-builder --case local_draft",
+      "recordId": "sourcemanifestbuild-001",
+      "status": "draft_ready",
+      "artifactPath": "spec/fixtures/generated/source-builder/weather-logistics-local-draft-source-manifest-build.generated.json"
+    },
+    {
+      "surface": "source_adapter_intake",
+      "command": "python3 scripts/ope.py source-adapter-intake",
+      "recordId": "sourceadapterintake-1301",
+      "status": "checked_adapter_intake_matrix",
+      "artifactPath": "spec/fixtures/generated/source-adapter-intake/weather-logistics-source-adapter-intake.generated.json"
+    },
+    {
+      "surface": "source_intake_report",
+      "command": "python3 scripts/ope.py source-intake",
+      "recordId": "sourceintakereport-001",
+      "status": "four_checked_source_intake_reports",
+      "artifactPath": "spec/fixtures/generated/source-intake/"
+    },
+    {
+      "surface": "setup_method_decision",
+      "command": "python3 scripts/ope.py setup-method",
+      "recordId": "setupmethoddecision-001",
+      "status": "four_checked_setup_method_decisions",
+      "artifactPath": "spec/fixtures/generated/setup-method-decision/"
+    }
+  ],
+  "caseRows": [
+    {
+      "caseId": "sourcequalitycase-001",
+      "case": "builder_local_draft",
+      "inputSurface": "source_builder",
+      "boundRecordIds": {
+        "sourceManifestBuildId": "sourcemanifestbuild-001",
+        "sourceAdapterOutputId": null,
+        "sourceAdapterIntakeCaseId": null,
+        "sourceIntakeReportId": null,
+        "setupMethodDecisionId": null,
+        "sourceManifestId": "sourcemanifestdraft-001",
+        "fieldMappingId": "fieldmappingdraft-001"
+      },
+      "qualityStatus": "needs_mapping_confirmation",
+      "recommendedNextAction": "confirm_mappings",
+      "dimensions": {
+        "freshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "builder_inputs_available_before_close"
+          ],
+          "summary": "Local builder inspected caller-approved files with forecast-time availability metadata."
+        },
+        "coverage": {
+          "status": "passed",
+          "reasonCodes": [
+            "builder_draft_sources_inspected"
+          ],
+          "summary": "Draft sources have enough inspected metadata for source intake."
+        },
+        "roleFit": {
+          "status": "passed",
+          "reasonCodes": [
+            "builder_source_roles_declared"
+          ],
+          "summary": "Draft source roles are declared before source intake."
+        },
+        "entityScope": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "entity_alias_requires_confirmation"
+          ],
+          "summary": "Entity aliases require caller confirmation."
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_leakage_indicator"
+          ],
+          "summary": "Builder inputs did not show post-outcome leakage indicators."
+        },
+        "missingness": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "draft_mapping_requires_confirmation"
+          ],
+          "summary": "Field completeness is draft-only until mappings are confirmed."
+        },
+        "outcomeAvailability": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "outcome_role_draft_present"
+          ],
+          "summary": "A draft outcome role is present but cannot be treated as confirmed until intake."
+        },
+        "mappingConfidence": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "mapping_requires_confirmation"
+          ],
+          "summary": "Agent-inferred or draft mappings must be confirmed before method gates."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "partialRoles": [],
+        "missingRequiredRoles": [],
+        "rejectedRoles": []
+      },
+      "mappingSummary": {
+        "acceptedMappings": 3,
+        "proposedMappings": 10,
+        "rejectedMappings": 0,
+        "averageConfidence": 0.78
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": false,
+        "canProduceForecast": false,
+        "selectedMethodClass": null,
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Local builder drafts can enter source intake only after caller confirmation of proposed mappings."
+    },
+    {
+      "caseId": "sourcequalitycase-002",
+      "case": "source_intake_accepted",
+      "inputSurface": "source_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": null,
+        "sourceAdapterIntakeCaseId": null,
+        "sourceIntakeReportId": "sourceintakereport-001",
+        "setupMethodDecisionId": "setupmethoddecision-001",
+        "sourceManifestId": "sourcemanifest-001",
+        "fieldMappingId": "fieldmapping-001"
+      },
+      "qualityStatus": "forecast_usable",
+      "recommendedNextAction": "proceed_to_method_gate",
+      "dimensions": {
+        "freshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time",
+            "source_fresh_enough"
+          ],
+          "summary": "Forecast-time sources are fresh enough for the declared close time."
+        },
+        "coverage": {
+          "status": "passed",
+          "reasonCodes": [
+            "baseline_sample_sufficient",
+            "not_baseline_source"
+          ],
+          "summary": "Comparable historical coverage is sufficient for checked setup decisions."
+        },
+        "roleFit": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_roles_present"
+          ],
+          "summary": "Source roles fit the declared domain setup."
+        },
+        "entityScope": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ],
+          "summary": "Source entity scope matches the requested setup."
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected",
+            "source_role_resolution_only"
+          ],
+          "summary": "No post-outcome or post-close evidence is present in forecast-time sources."
+        },
+        "missingness": {
+          "status": "passed",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "baseline_sample_sufficient",
+            "not_baseline_source"
+          ],
+          "summary": "Required fields and comparable samples are sufficient for the allowed setup path."
+        },
+        "outcomeAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "outcome_source_declared"
+          ],
+          "summary": "A declared resolution/outcome source is present for later scoring."
+        },
+        "mappingConfidence": {
+          "status": "passed",
+          "reasonCodes": [
+            "mappings_confirmed"
+          ],
+          "summary": "Mappings are confirmed enough for the checked intake or method-decision surface."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "partialRoles": [],
+        "missingRequiredRoles": [],
+        "rejectedRoles": []
+      },
+      "mappingSummary": {
+        "acceptedMappings": 10,
+        "proposedMappings": 0,
+        "rejectedMappings": 0,
+        "averageConfidence": 1.0
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": true,
+        "canProduceForecast": true,
+        "selectedMethodClass": "deterministic_statistical",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Confirmed source roles and mappings can proceed to setup method gates."
+    },
+    {
+      "caseId": "sourcequalitycase-003",
+      "case": "source_intake_partial",
+      "inputSurface": "source_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": null,
+        "sourceAdapterIntakeCaseId": null,
+        "sourceIntakeReportId": "sourceintakereport-002",
+        "setupMethodDecisionId": "setupmethoddecision-002",
+        "sourceManifestId": "sourcemanifest-002",
+        "fieldMappingId": "fieldmapping-002"
+      },
+      "qualityStatus": "baseline_only_usable",
+      "recommendedNextAction": "proceed_to_method_gate",
+      "dimensions": {
+        "freshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time",
+            "source_fresh_enough"
+          ],
+          "summary": "Forecast-time sources are fresh enough for the declared close time."
+        },
+        "coverage": {
+          "status": "partial",
+          "reasonCodes": [
+            "missing_required_source_role"
+          ],
+          "summary": "Coverage is enough for baseline-only use but not for all configured methods."
+        },
+        "roleFit": {
+          "status": "partial",
+          "reasonCodes": [
+            "missing_required_source_role"
+          ],
+          "summary": "A required role is missing; only methods whose role needs are still met can proceed."
+        },
+        "entityScope": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ],
+          "summary": "Source entity scope matches the requested setup."
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected",
+            "source_role_resolution_only"
+          ],
+          "summary": "No post-outcome or post-close evidence is present in forecast-time sources."
+        },
+        "missingness": {
+          "status": "partial",
+          "reasonCodes": [
+            "missing_required_source_role"
+          ],
+          "summary": "Some role-level evidence is missing even though a baseline path may remain usable."
+        },
+        "outcomeAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "outcome_source_declared"
+          ],
+          "summary": "A declared resolution/outcome source is present for later scoring."
+        },
+        "mappingConfidence": {
+          "status": "passed",
+          "reasonCodes": [
+            "mappings_confirmed"
+          ],
+          "summary": "Mappings are confirmed enough for the checked intake or method-decision surface."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [
+          "declared_operations_outcome",
+          "historical_baseline"
+        ],
+        "partialRoles": [],
+        "missingRequiredRoles": [
+          "weather_forecast"
+        ],
+        "rejectedRoles": []
+      },
+      "mappingSummary": {
+        "acceptedMappings": 6,
+        "proposedMappings": 0,
+        "rejectedMappings": 0,
+        "averageConfidence": 1.0
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": true,
+        "canProduceForecast": true,
+        "selectedMethodClass": "historical_baseline",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "The baseline path remains usable, but missing weather evidence blocks stronger configured methods."
+    },
+    {
+      "caseId": "sourcequalitycase-004",
+      "case": "source_intake_needs_confirmation",
+      "inputSurface": "source_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": null,
+        "sourceAdapterIntakeCaseId": null,
+        "sourceIntakeReportId": "sourceintakereport-003",
+        "setupMethodDecisionId": "setupmethoddecision-003",
+        "sourceManifestId": "sourcemanifest-003",
+        "fieldMappingId": "fieldmapping-003"
+      },
+      "qualityStatus": "needs_mapping_confirmation",
+      "recommendedNextAction": "confirm_mappings",
+      "dimensions": {
+        "freshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time",
+            "source_fresh_enough"
+          ],
+          "summary": "Forecast-time sources are fresh enough for the declared close time."
+        },
+        "coverage": {
+          "status": "passed",
+          "reasonCodes": [
+            "baseline_sample_sufficient",
+            "not_baseline_source"
+          ],
+          "summary": "Comparable historical coverage is sufficient for checked setup decisions."
+        },
+        "roleFit": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "source_role_needs_confirmation"
+          ],
+          "summary": "Source roles are present but need mapping or alias confirmation."
+        },
+        "entityScope": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "alias_or_mapping_requires_confirmation"
+          ],
+          "summary": "Entity aliases or mappings need confirmation."
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected",
+            "source_role_resolution_only"
+          ],
+          "summary": "No post-outcome or post-close evidence is present in forecast-time sources."
+        },
+        "missingness": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "proposed_required_mappings"
+          ],
+          "summary": "Missingness cannot be finalized until proposed mappings are confirmed."
+        },
+        "outcomeAvailability": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "outcome_mapping_needs_confirmation"
+          ],
+          "summary": "The outcome role is present but its mappings need confirmation."
+        },
+        "mappingConfidence": {
+          "status": "needs_confirmation",
+          "reasonCodes": [
+            "mapping_requires_confirmation"
+          ],
+          "summary": "Agent-inferred or draft mappings must be confirmed before method gates."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [],
+        "partialRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "missingRequiredRoles": [],
+        "rejectedRoles": []
+      },
+      "mappingSummary": {
+        "acceptedMappings": 0,
+        "proposedMappings": 10,
+        "rejectedMappings": 0,
+        "averageConfidence": 0.7
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": false,
+        "canProduceForecast": false,
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Agent-inferred field and alias mappings need caller confirmation before method gates."
+    },
+    {
+      "caseId": "sourcequalitycase-005",
+      "case": "adapter_insufficient_data",
+      "inputSurface": "source_adapter_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": "sourceadapteroutput-1303",
+        "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1303",
+        "sourceIntakeReportId": "sourceintakereport-1303",
+        "setupMethodDecisionId": "setupmethoddecision-1303",
+        "sourceManifestId": "sourcemanifest-1303",
+        "fieldMappingId": "fieldmapping-1303"
+      },
+      "qualityStatus": "needs_more_data",
+      "recommendedNextAction": "collect_more_data",
+      "dimensions": {
+        "freshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time",
+            "source_fresh_enough"
+          ],
+          "summary": "Forecast-time sources are fresh enough for the declared close time."
+        },
+        "coverage": {
+          "status": "failed",
+          "reasonCodes": [
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes",
+            "not_baseline_source"
+          ],
+          "summary": "Historical coverage is too thin for method selection."
+        },
+        "roleFit": {
+          "status": "failed",
+          "reasonCodes": [
+            "source_role_rejected"
+          ],
+          "summary": "One or more source roles are rejected and cannot proceed to method gates."
+        },
+        "entityScope": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ],
+          "summary": "Source entity scope matches the requested setup."
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected",
+            "source_role_resolution_only"
+          ],
+          "summary": "No post-outcome or post-close evidence is present in forecast-time sources."
+        },
+        "missingness": {
+          "status": "failed",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes",
+            "not_baseline_source"
+          ],
+          "summary": "Missing fields, rows, or outcomes block method selection."
+        },
+        "outcomeAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "outcome_source_declared"
+          ],
+          "summary": "A declared resolution/outcome source is present for later scoring."
+        },
+        "mappingConfidence": {
+          "status": "passed",
+          "reasonCodes": [
+            "mappings_confirmed"
+          ],
+          "summary": "Mappings are confirmed enough for the checked intake or method-decision surface."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [
+          "declared_operations_outcome",
+          "weather_forecast"
+        ],
+        "partialRoles": [],
+        "missingRequiredRoles": [],
+        "rejectedRoles": [
+          "historical_baseline"
+        ]
+      },
+      "mappingSummary": {
+        "acceptedMappings": 10,
+        "proposedMappings": 0,
+        "rejectedMappings": 0,
+        "averageConfidence": 1.0
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": false,
+        "canProduceForecast": false,
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Adapter output is sanitized, but comparable rows and positive outcomes are too sparse."
+    },
+    {
+      "caseId": "sourcequalitycase-006",
+      "case": "source_intake_rejected",
+      "inputSurface": "source_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": null,
+        "sourceAdapterIntakeCaseId": null,
+        "sourceIntakeReportId": "sourceintakereport-004",
+        "setupMethodDecisionId": "setupmethoddecision-004",
+        "sourceManifestId": "sourcemanifest-004",
+        "fieldMappingId": "fieldmapping-004"
+      },
+      "qualityStatus": "replace_source",
+      "recommendedNextAction": "replace_source",
+      "dimensions": {
+        "freshness": {
+          "status": "failed",
+          "reasonCodes": [
+            "source_fresh_enough",
+            "source_retrieved_after_forecast_close"
+          ],
+          "summary": "At least one forecast-time source is stale or retrieved after close."
+        },
+        "coverage": {
+          "status": "failed",
+          "reasonCodes": [
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes",
+            "not_baseline_source"
+          ],
+          "summary": "Historical coverage is too thin for method selection."
+        },
+        "roleFit": {
+          "status": "failed",
+          "reasonCodes": [
+            "source_role_rejected"
+          ],
+          "summary": "One or more source roles are rejected and cannot proceed to method gates."
+        },
+        "entityScope": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ],
+          "summary": "Source entity scope matches the requested setup."
+        },
+        "leakageRisk": {
+          "status": "failed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected",
+            "post_close_or_unavailable_forecast_source"
+          ],
+          "summary": "Leakage or post-close source evidence blocks this source path."
+        },
+        "missingness": {
+          "status": "failed",
+          "reasonCodes": [
+            "all_required_fields_mapped",
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes",
+            "missing_required_fields",
+            "not_baseline_source",
+            "rejected_required_mappings"
+          ],
+          "summary": "Missing fields, rows, or outcomes block method selection."
+        },
+        "outcomeAvailability": {
+          "status": "partial",
+          "reasonCodes": [
+            "outcome_source_missing"
+          ],
+          "summary": "Forecast setup may continue only if resolution is declared or supplied later."
+        },
+        "mappingConfidence": {
+          "status": "failed",
+          "reasonCodes": [
+            "mapping_rejected"
+          ],
+          "summary": "One or more mappings were rejected and the source should be replaced or corrected."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [],
+        "partialRoles": [],
+        "missingRequiredRoles": [],
+        "rejectedRoles": [
+          "historical_baseline",
+          "weather_forecast"
+        ]
+      },
+      "mappingSummary": {
+        "acceptedMappings": 3,
+        "proposedMappings": 0,
+        "rejectedMappings": 1,
+        "averageConfidence": 0.75
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": true,
+        "canProceedToMethodGate": false,
+        "canProduceForecast": false,
+        "selectedMethodClass": "none",
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Rejected source intake has leakage, freshness, privacy, mapping, or sample-size failures."
+    },
+    {
+      "caseId": "sourcequalitycase-007",
+      "case": "adapter_unsafe",
+      "inputSurface": "source_adapter_intake",
+      "boundRecordIds": {
+        "sourceManifestBuildId": null,
+        "sourceAdapterOutputId": "sourceadapteroutput-1305",
+        "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1305",
+        "sourceIntakeReportId": null,
+        "setupMethodDecisionId": null,
+        "sourceManifestId": "sourcemanifest-1305",
+        "fieldMappingId": "fieldmapping-1305"
+      },
+      "qualityStatus": "stop_unsafe_connector",
+      "recommendedNextAction": "stop_unsafe_connector",
+      "dimensions": {
+        "freshness": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "coverage": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "roleFit": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "entityScope": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "leakageRisk": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "missingness": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "outcomeAvailability": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        },
+        "mappingConfidence": {
+          "status": "blocked",
+          "reasonCodes": [
+            "unsafe_adapter_output"
+          ],
+          "summary": "Unsafe adapter output is blocked before source intake and quality scoring."
+        }
+      },
+      "roleSummary": {
+        "presentRoles": [
+          "declared_operations_outcome",
+          "historical_baseline",
+          "weather_forecast"
+        ],
+        "partialRoles": [],
+        "missingRequiredRoles": [],
+        "rejectedRoles": []
+      },
+      "mappingSummary": {
+        "acceptedMappings": 11,
+        "proposedMappings": 0,
+        "rejectedMappings": 0,
+        "averageConfidence": 1.0
+      },
+      "forecastImpact": {
+        "canEnterSourceIntake": false,
+        "canProceedToMethodGate": false,
+        "canProduceForecast": false,
+        "selectedMethodClass": null,
+        "forecastArtifactsCreated": false,
+        "qualityClaimAllowed": false,
+        "productionReadinessClaimAllowed": false
+      },
+      "agentSummary": "Unsafe adapter output is blocked before source intake because credential or raw-row boundaries were crossed."
+    }
+  ],
+  "summary": {
+    "caseCount": 7,
+    "forecastUsableCount": 1,
+    "baselineOnlyCount": 1,
+    "needsMappingConfirmationCount": 2,
+    "needsMoreDataCount": 1,
+    "replaceSourceCount": 1,
+    "stopUnsafeConnectorCount": 1,
+    "qualityClaimAllowed": false,
+    "productionReadinessClaimAllowed": false
+  },
+  "compactReadback": {
+    "maxBytes": 12000,
+    "measuredBytes": 2673,
+    "fitsBudget": true,
+    "includesRawRows": false,
+    "includesRawPrompts": false,
+    "includesCredentials": false,
+    "includedCaseCount": 7
+  },
+  "executionBoundary": {
+    "readOnly": true,
+    "executesSourceBuilder": false,
+    "executesSourceAdapter": false,
+    "readsPrivateRows": false,
+    "storesRawRows": false,
+    "storesCredentials": false,
+    "fetchesLiveData": false,
+    "createsSourceManifest": false,
+    "createsForecastArtifacts": false,
+    "createsResolutionRecords": false,
+    "createsScoringRecords": false,
+    "allowsQualityClaims": false,
+    "allowsProductionReadinessClaims": false,
+    "normalChecksDeterministicOffline": true
+  },
+  "warnings": [
+    "Source quality is a read model over checked local records, not a private source runtime.",
+    "Quality and mapping confidence cannot create forecast, resolution, or scoring artifacts.",
+    "Proceeding still requires source intake, setup benchmark gates, setup method decisions, and explicit forecast execution.",
+    "No raw rows, prompts, credentials, or live fetches are included in normal checks."
+  ]
+}

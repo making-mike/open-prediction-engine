@@ -50,7 +50,8 @@ def local_uri(path: Path) -> str:
         rel = path.resolve().relative_to(ROOT)
     except ValueError:
         rel = path.resolve()
-    return f"local://{str(rel).replace('\\', '/')}"
+    normalized = str(rel).replace("\\", "/")
+    return f"local://{normalized}"
 
 
 def workspace_path(path: Path) -> str:

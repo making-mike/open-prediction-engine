@@ -1,0 +1,437 @@
+{
+  "localUsageTraceId": "localusagetrace-001",
+  "generatedAt": "2026-06-10T06:45:00Z",
+  "scope": "local_mvp_usage_trace",
+  "traceMode": "checked_synthetic_local_trace",
+  "bindings": {
+    "releaseManifestId": "releasemanifest-001",
+    "agentPilotValidationId": "agentpilotvalidation-001",
+    "mvpRunbookPath": "spec/mvp-local-runtime.md",
+    "normalCheckCommand": "python3 scripts/run_checks.py"
+  },
+  "eventLog": [
+    {
+      "eventId": "localusageevent-001",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "setup",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "private-setup-orchestrator",
+        "recordId": "privatesetuporchestratorrun-001",
+        "sourceCase": "local_file_setup_readback"
+      },
+      "trace": {
+        "elapsedMs": 420,
+        "exitCode": 0,
+        "responseBytes": 1850,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-002",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "blocked_path",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case unsafe_source",
+      "outcome": "blocked",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "private-setup-orchestrator",
+        "recordId": "privatesetuporchestratorrun-007",
+        "sourceCase": "unsafe_source_block"
+      },
+      "trace": {
+        "elapsedMs": 390,
+        "exitCode": 0,
+        "responseBytes": 1450,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": "blocked_unsafe"
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-003",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "forecast_run",
+      "command": "python3 scripts/ope.py forecast-run",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-602",
+        "questionId": "question-601",
+        "recordType": "forecast-run-summary",
+        "recordId": "forecast-run-601",
+        "sourceCase": "forecast_run_readback"
+      },
+      "trace": {
+        "elapsedMs": 260,
+        "exitCode": 0,
+        "responseBytes": 2600,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-004",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "developer",
+      "interface": "cli",
+      "eventClass": "readback",
+      "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "forecast-card",
+        "recordId": "forecastcard-1102",
+        "sourceCase": "forecast_card_read"
+      },
+      "trace": {
+        "elapsedMs": 95,
+        "exitCode": 0,
+        "responseBytes": 3200,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-005",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "agent_call",
+      "eventClass": "agent_call",
+      "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "agent-envelope",
+        "recordId": "agentenvelope-forecast-card-1102",
+        "sourceCase": "agent_call_forecast_card"
+      },
+      "trace": {
+        "elapsedMs": 130,
+        "exitCode": 0,
+        "responseBytes": 3800,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-006",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "mcp_host",
+      "interface": "mcp_stdio",
+      "eventClass": "mcp_stdio",
+      "command": "python3 scripts/ope.py agent-protocol-map",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "agent-adapter-protocol-map",
+        "recordId": "agentadapterprotocolmap-001",
+        "sourceCase": "mcp_protocol_map_read"
+      },
+      "trace": {
+        "elapsedMs": 120,
+        "exitCode": 0,
+        "responseBytes": 2400,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-007",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "local_check",
+      "interface": "checker",
+      "eventClass": "release_surface_smoke",
+      "command": "python3 scripts/check_mvp_release_surface.py",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "release-manifest",
+        "recordId": "releasemanifest-001",
+        "sourceCase": "release_surface_smoke"
+      },
+      "trace": {
+        "elapsedMs": 1900,
+        "exitCode": 0,
+        "responseBytes": 36,
+        "responseSizeClass": "compact",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-008",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "blocked_path",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case response_too_large",
+      "outcome": "blocked",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "private-setup-orchestrator",
+        "recordId": "privatesetuporchestratorrun-008",
+        "sourceCase": "response_too_large_readback"
+      },
+      "trace": {
+        "elapsedMs": 380,
+        "exitCode": 0,
+        "responseBytes": 720,
+        "responseSizeClass": "oversized_blocked",
+        "sanitizedErrorClass": "response_too_large"
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-009",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "developer",
+      "interface": "cli",
+      "eventClass": "claim_gate",
+      "command": "python3 scripts/ope.py transit-track-record-gate",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "transit-baseline-track-record-gate",
+        "recordId": "transitbaselinetrackrecordgate-001",
+        "sourceCase": "claim_gate_readback"
+      },
+      "trace": {
+        "elapsedMs": 210,
+        "exitCode": 0,
+        "responseBytes": 4200,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-010",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "local_check",
+      "interface": "checker",
+      "eventClass": "validation_pack",
+      "command": "python3 scripts/ope.py agent-pilot-validation",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "agent-pilot-validation",
+        "recordId": "agentpilotvalidation-001",
+        "sourceCase": "agent_pilot_validation_read"
+      },
+      "trace": {
+        "elapsedMs": 520,
+        "exitCode": 0,
+        "responseBytes": 2200,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    }
+  ],
+  "traceSummary": [
+    {
+      "interface": "cli",
+      "eventCount": 6,
+      "successCount": 4,
+      "blockedCount": 2,
+      "sanitizedErrorCount": 2,
+      "averageElapsedMs": 292,
+      "maxResponseBytes": 4200
+    },
+    {
+      "interface": "agent_call",
+      "eventCount": 1,
+      "successCount": 1,
+      "blockedCount": 0,
+      "sanitizedErrorCount": 0,
+      "averageElapsedMs": 130,
+      "maxResponseBytes": 3800
+    },
+    {
+      "interface": "mcp_stdio",
+      "eventCount": 1,
+      "successCount": 1,
+      "blockedCount": 0,
+      "sanitizedErrorCount": 0,
+      "averageElapsedMs": 120,
+      "maxResponseBytes": 2400
+    },
+    {
+      "interface": "checker",
+      "eventCount": 2,
+      "successCount": 2,
+      "blockedCount": 0,
+      "sanitizedErrorCount": 0,
+      "averageElapsedMs": 1210,
+      "maxResponseBytes": 2200
+    }
+  ],
+  "aggregateReadbacks": {
+    "totalEvents": 10,
+    "successfulEvents": 8,
+    "blockedEvents": 2,
+    "sanitizedErrorEvents": 2,
+    "localOnlyEvents": 10,
+    "forecastCompletionRate": 1.0,
+    "agentReadSuccessRate": 0.6667,
+    "blockedPathFrequency": 0.2,
+    "normalChecksUseLiveNetwork": false,
+    "hostedTelemetryEnabled": false
+  },
+  "productMetricReadbacks": [
+    {
+      "metricId": "agent_forecast_completion_rate",
+      "description": "Share of forecast-capable local MVP events that produced a forecast binding.",
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1.0,
+      "interpretation": "Checked MVP setup and forecast-run examples both produce forecast bindings."
+    },
+    {
+      "metricId": "agent_read_success_rate",
+      "description": "Share of readback-like local events that returned usable output instead of a blocked path.",
+      "numerator": 4,
+      "denominator": 6,
+      "value": 0.6667,
+      "interpretation": "Successful readbacks are visible while unsafe and oversized paths remain explicit blocked signals."
+    },
+    {
+      "metricId": "blocked_path_frequency",
+      "description": "Share of checked local events that intentionally stop before forecast or readback completion.",
+      "numerator": 2,
+      "denominator": 10,
+      "value": 0.2,
+      "interpretation": "Blocked path frequency is a usability signal, not a runtime failure rate."
+    },
+    {
+      "metricId": "local_only_privacy_rate",
+      "description": "Share of checked trace events that stay local-only and store no private rows, credentials, prompts, or transcripts.",
+      "numerator": 10,
+      "denominator": 10,
+      "value": 1.0,
+      "interpretation": "The checked trace model remains local-only and privacy-preserving."
+    }
+  ],
+  "executionBoundary": {
+    "executesCommands": false,
+    "collectsHostedTelemetry": false,
+    "writesRuntimeLog": false,
+    "readsPrivateData": false,
+    "storesPrompts": false,
+    "storesRawTranscripts": false,
+    "storesCredentials": false,
+    "fetchesLiveData": false,
+    "usesSyntheticCheckedEventsOnly": true,
+    "normalChecksDeterministicOffline": true,
+    "localOnly": true
+  },
+  "warnings": [
+    "The local usage trace is a checked synthetic read model; it does not collect telemetry or write runtime logs.",
+    "Elapsed time and response-size fields are bounded examples for product metrics, not measured analytics.",
+    "Blocked unsafe and response-too-large rows are expected usability signals, not hidden forecast failures.",
+    "Normal checks stay deterministic and offline; live connector captures remain explicit opt-in commands."
+  ]
+}

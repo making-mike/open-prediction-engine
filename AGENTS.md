@@ -39,6 +39,8 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/source-manifest-builder.md`: local CSV/JSON inspection and draft manifest/mapping boundary before intake.
 - `spec/source-adapter-output.md`: checked external connector output handoff contract before source intake.
 - `spec/source-adapter-intake.md`: checked external connector intake path from sanitized adapter output to source intake and method gates.
+- `spec/source-quality-mapping-confidence.md`: checked source-quality and mapping-confidence read model over builder, adapter-intake, source-intake, and method-decision surfaces.
+- `spec/local-source-runtime.md`: checked approved local-folder source runtime with caller approval, path allow-listing, size limits, sanitized diagnostics, and blocked examples.
 - `spec/source-intake-handoff.md`: checked handoff from builder drafts to source intake next actions.
 - `spec/source-handoff-method-gate.md`: checked bridge from source-intake handoffs to setup benchmark and method decisions.
 - `spec/source-intake.md`: bounded source manifest, field mapping, and pre-forecast usability report.
@@ -54,6 +56,13 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/private-setup-first-action-runbook.md`: checked private setup first-action runbook boundary.
 - `spec/private-setup-agent-bundle.md`: checked private setup agent bundle boundary.
 - `spec/private-setup-orchestrator.md`: checked local private setup orchestration summary and non-execution boundary.
+- `spec/agent-pilot-validation.md`: checked local MVP pilot protocol, task scenarios, feedback schema, rubric, and sanitized example-summary boundary.
+- `spec/pilot-evidence-ledger.md`: checked sanitized pilot evidence intake ledger and real-session evidence boundary.
+- `spec/pilot-session-packet.md`: checked real pilot-session task packet, sanitization review, and ledger-ready summary boundary.
+- `spec/pilot-summary-intake.md`: checked sanitized pilot summary intake classifier before ledger review.
+- `spec/local-usage-trace.md`: checked local-only MVP usage trace read model and aggregate product metrics.
+- `spec/developer-adoption-surface.md`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
+- `spec/expansion-readiness-gate.md`: checked post-MVP readiness gate for hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
@@ -73,6 +82,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/forecast-pipeline.md`: local fixture-mode forecast pipeline scaffold.
 - `spec/pipeline-resolution.md`: fixture-mode resolution of request-bound pipeline forecasts.
 - `spec/transit-forward-run-corpus.md`: checked public transport forward-run corpus counts, exclusions, and claim boundary.
+- `spec/transit-corpus-growth-loop.md`: checked append-readiness loop, exclusion ledger, and threshold progress readback for growing the transit corpus.
 - `spec/transit-baseline-track-record-gate.md`: checked baseline track-record and calibration gate for the transit corpus.
 - `spec/transit-method-options.md`: checked public transport MVP method options and baseline-default boundary.
 - `spec/transit-live-evidence-promotion.md`: checked policy-bound promotion gate for ignored local transit live drafts.
@@ -167,6 +177,8 @@ python3 scripts/run_transit_delay_forward.py --check
 python3 scripts/check_transit_delay_forward.py
 python3 scripts/generate_transit_forward_run_corpus.py --check
 python3 scripts/check_transit_forward_run_corpus.py
+python3 scripts/generate_transit_corpus_growth_loop.py --check
+python3 scripts/check_transit_corpus_growth_loop.py
 python3 scripts/generate_transit_baseline_track_record_gate.py --check
 python3 scripts/check_transit_baseline_track_record_gate.py
 python3 scripts/generate_transit_method_options.py --check
@@ -181,6 +193,10 @@ python3 scripts/generate_source_adapter_output.py --check
 python3 scripts/check_source_adapter_output.py
 python3 scripts/generate_source_adapter_intake.py --check
 python3 scripts/check_source_adapter_intake.py
+python3 scripts/generate_source_quality_mapping_confidence.py --check
+python3 scripts/check_source_quality_mapping_confidence.py
+python3 scripts/generate_local_source_runtime.py --check
+python3 scripts/check_local_source_runtime.py
 python3 scripts/generate_source_intake_handoff.py --check
 python3 scripts/check_source_intake_handoff.py
 python3 scripts/generate_source_handoff_method_gate.py --check
@@ -211,6 +227,20 @@ python3 scripts/generate_private_setup_agent_bundles.py --check
 python3 scripts/check_private_setup_agent_bundles.py
 python3 scripts/generate_private_setup_orchestrator.py --check
 python3 scripts/check_private_setup_orchestrator.py
+python3 scripts/generate_agent_pilot_validation.py --check
+python3 scripts/check_agent_pilot_validation.py
+python3 scripts/generate_pilot_evidence_ledger.py --check
+python3 scripts/check_pilot_evidence_ledger.py
+python3 scripts/generate_pilot_session_packet.py --check
+python3 scripts/check_pilot_session_packet.py
+python3 scripts/generate_pilot_summary_intake.py --check
+python3 scripts/check_pilot_summary_intake.py
+python3 scripts/generate_local_usage_trace.py --check
+python3 scripts/check_local_usage_trace.py
+python3 scripts/generate_developer_adoption_surface.py --check
+python3 scripts/check_developer_adoption_surface.py
+python3 scripts/generate_expansion_readiness_gate.py --check
+python3 scripts/check_expansion_readiness_gate.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -255,7 +285,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-adapter outputs, source-adapter intake gates, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, local private setup orchestrator summaries, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit live evidence promotion, the release manifest, MVP release-surface smoke checks, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-adapter outputs, source-adapter intake gates, source-quality and mapping-confidence readbacks, approved local-source runtime boundaries, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, local private setup orchestrator summaries, agent pilot validation protocol/rubric boundaries, pilot evidence intake boundaries, pilot session packet and summary-intake boundaries, local usage trace metric boundaries, developer adoption quickstart/readback boundaries, expansion readiness gating, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit corpus growth, transit live evidence promotion, the release manifest, MVP release-surface smoke checks, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -296,6 +326,7 @@ python3 scripts/ope.py source-connectors
 python3 scripts/ope.py live-readiness
 python3 scripts/ope.py live-capture --input .ope/live/open-meteo-warsaw-YYYY-MM-DD-source-connector-results.json --check
 python3 scripts/ope.py transit-forward-run-corpus
+python3 scripts/ope.py transit-corpus-growth
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
@@ -303,6 +334,8 @@ python3 scripts/ope.py domain-setups
 python3 scripts/ope.py source-builder
 python3 scripts/ope.py source-adapter-output
 python3 scripts/ope.py source-adapter-intake
+python3 scripts/ope.py source-quality
+python3 scripts/ope.py local-source-runtime
 python3 scripts/ope.py source-handoff
 python3 scripts/ope.py source-handoff-method
 python3 scripts/ope.py source-intake
@@ -323,6 +356,13 @@ python3 scripts/ope.py private-setup-action-runbook
 python3 scripts/ope.py private-setup-bundles
 python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
 python3 scripts/ope.py private-setup-orchestrator
+python3 scripts/ope.py agent-pilot-validation
+python3 scripts/ope.py pilot-evidence
+python3 scripts/ope.py pilot-session-packet
+python3 scripts/ope.py pilot-summary-intake
+python3 scripts/ope.py local-usage-trace
+python3 scripts/ope.py developer-adoption
+python3 scripts/ope.py expansion-readiness
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -341,6 +381,7 @@ python3 scripts/ope.py forecast-runbook
 python3 scripts/ope.py agent-envelopes
 python3 scripts/ope.py agent-protocol-map
 python3 scripts/ope.py resolution-runtime-reliability
+python3 scripts/ope.py transit-corpus-growth
 python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
@@ -387,6 +428,7 @@ python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
 python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_corpus_growth_loop.py --write
 python3 scripts/generate_transit_baseline_track_record_gate.py --write
 python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_transit_live_evidence_promotion.py --write
@@ -394,6 +436,8 @@ python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write
 python3 scripts/generate_source_adapter_intake.py --write
+python3 scripts/generate_source_quality_mapping_confidence.py --write
+python3 scripts/generate_local_source_runtime.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write
@@ -414,6 +458,13 @@ python3 scripts/generate_private_setup_first_actions.py --write
 python3 scripts/generate_private_setup_first_action_runbook.py --write
 python3 scripts/generate_private_setup_agent_bundles.py --write
 python3 scripts/generate_private_setup_orchestrator.py --write
+python3 scripts/generate_agent_pilot_validation.py --write
+python3 scripts/generate_pilot_evidence_ledger.py --write
+python3 scripts/generate_pilot_session_packet.py --write
+python3 scripts/generate_pilot_summary_intake.py --write
+python3 scripts/generate_local_usage_trace.py --write
+python3 scripts/generate_developer_adoption_surface.py --write
+python3 scripts/generate_expansion_readiness_gate.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
@@ -452,11 +503,14 @@ Still needed before any hosted or service release:
 - Treat source intake as a pre-forecast gate. It may classify usable data and eligible methods, but it must not create forecast artifacts.
 - Treat source manifest builder outputs as drafts. Local file inspection can propose manifests and mappings, but it must not create public read records or forecast artifacts.
 - Treat source adapter intake as a non-executing handoff gate for sanitized external connector outputs. It may validate manifests, mappings, provenance, source roles, freshness, and leakage boundaries, but it must not execute connector code, read credentials, store raw private rows, create forecast artifacts, create scoring records, or bypass source intake and method gates.
+- Treat source-quality and mapping-confidence readbacks as compact guidance only. They may summarize freshness, coverage, role fit, entity scope, leakage risk, missingness, outcome availability, and mapping confidence over checked records, but they must not execute source reads or adapters, create source manifests, create forecast/resolution/scoring artifacts, store raw rows or credentials, or imply quality and production-readiness claims.
+- Treat local source runtime records as one narrow approved local-folder boundary. They may require approval, enforce path and size limits, route accepted files through existing gates, and expose a forecast-card readback, but they must not parse arbitrary private APIs/databases, store credentials or raw rows, fetch live data, host watchers, create forecast artifacts directly, or imply production connector support.
 - Treat source intake handoffs as next-action guidance. They may route accepted intake toward method gates, but they must not bypass setup benchmark or method decisions.
 - Treat source-handoff method gates as method-selection guidance, not forecast outputs. Accepted cases still require explicit setup forecast execution.
 - Treat source-handoff forecast execution as the first artifact-generating handoff step. It must preserve handoff, source intake, benchmark, and method-decision bindings.
 - Treat source-handoff resolution as fixture scoring only; one resolved source-handoff outcome is not a calibration or quality claim.
 - Treat source-handoff setup runbooks as guidance over checked local fixtures, not a general private API/database parser.
+- Treat transit corpus growth loops as append-readiness read models. They may classify append-ready, excluded, and rejected candidate rows and report threshold progress, but normal checks must not mutate the canonical corpus, read ignored live workspaces, create forecast/resolution/scoring artifacts, or imply quality and calibration claims.
 - Treat transit live evidence promotion as a policy gate over ignored local captures. Raw `.ope/live/` files must remain uncommitted; only sanitized normalized source-set records may become forecast-time evidence, and post-close or resolution-only captures must stay out of forecast provenance.
 - Treat private setup workflow records as domain-agnostic contracts. They may describe future manual upload, private API, or database source kinds, but they must label them as not implemented until a runtime exists.
 - Treat private source adapter capability records as declarations, not source execution. They must not imply credential access, live fetching, arbitrary parsing, or forecast evidence creation.
@@ -471,6 +525,12 @@ Still needed before any hosted or service release:
 - Treat private setup first-action runbooks as non-executing guidance. They may explain next steps, but planned, unsafe, unknown, and approval-missing sources must not enter source intake through the runbook.
 - Treat private setup agent bundles as read-only joins over request, action, and runbook records. They must not create source, forecast, scoring, live-fetch, or credential artifacts.
 - Treat private setup orchestrator summaries as read-only joins over checked local fixtures. They must not execute commands, read private data, create source manifests, create forecasts, score forecasts, store credentials, fetch live data, or bypass source intake, mapping confirmation, benchmark gates, method decisions, and explicit forecast execution boundaries.
+- Treat agent pilot validation packs as checked usability protocols only. They must not run pilot sessions, recruit participants, store raw transcripts, store private data, collect credentials, create forecast artifacts, or imply forecast-quality evidence.
+- Treat pilot evidence ledgers as checked sanitized intake guidance only. They must not store raw transcripts, private data, credentials, prompt logs, or participant identity; checked examples do not count as real pilot evidence or unblock expansion.
+- Treat pilot summary intake classifiers as checked examples only. They may classify sanitized summaries as ledger-ready, redaction-needed, or blocked, but they must not write ledger rows, record real sessions, store raw/private data, or unblock expansion.
+- Treat local usage traces as checked local synthetic read models only. They must not collect hosted telemetry, write runtime logs, read private data, store prompts, store transcripts, store credentials, fetch live data, or imply real usage analytics.
+- Treat developer adoption surfaces as read-only onboarding guidance only. They may name quickstart, scenario, integration, and release-boundary commands, but they must not execute commands, create artifacts, fetch live data, generate runtime types, store credentials, or imply production/runtime maturity.
+- Treat expansion readiness gates as read-only decision surfaces only. They must not start hosted runtimes, execute private sources, fetch live data, create artifacts, generate runtime types, or imply quality claims.
 - Treat private setup adapter-chain runbooks as non-executing guidance. They may name adapter operations and readback order, but they must not execute calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
 - Treat private setup adapter-runbook envelopes as read-only guidance. They may expose the checked operation sequence through agent-call or MCP, but they must not execute adapter calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.
 - Treat private setup adapter conformance matrices as examples over checked envelopes only. They must not execute adapter calls, read private data, or create source, forecast, resolution, scoring, live-fetch, credential, or hosted-runtime artifacts.

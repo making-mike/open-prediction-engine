@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/local-usage-trace.schema.json",
+  "title": "Local Usage Trace",
+  "description": "Checked local-only usage and trace read model for MVP CLI, agent-call, MCP, setup, forecast, readback, blocked-path, and release-surface events.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "localUsageTraceId",
+    "generatedAt",
+    "scope",
+    "traceMode",
+    "bindings",
+    "eventLog",
+    "traceSummary",
+    "aggregateReadbacks",
+    "productMetricReadbacks",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "localUsageTraceId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "scope": {
+      "type": "string",
+      "const": "local_mvp_usage_trace"
+    },
+    "traceMode": {
+      "type": "string",
+      "enum": ["checked_synthetic_local_trace"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseManifestId",
+        "agentPilotValidationId",
+        "mvpRunbookPath",
+        "normalCheckCommand"
+      ],
+      "properties": {
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
+        "mvpRunbookPath": { "$ref": "#/$defs/boundedString" },
+        "normalCheckCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "eventLog": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/usageEvent" }
+    },
+    "traceSummary": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/traceSummaryRow" }
+    },
+    "aggregateReadbacks": { "$ref": "#/$defs/aggregateReadbacks" },
+    "productMetricReadbacks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/productMetricReadback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 420
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        { "$ref": "#/$defs/boundedString" },
+        { "type": "null" }
+      ]
+    },
+    "nullableInteger": {
+      "oneOf": [
+        { "type": "integer" },
+        { "type": "null" }
+      ]
+    },
+    "interface": {
+      "type": "string",
+      "enum": ["cli", "agent_call", "mcp_stdio", "checker"]
+    },
+    "eventClass": {
+      "type": "string",
+      "enum": [
+        "setup",
+        "forecast_run",
+        "readback",
+        "blocked_path",
+        "release_surface_smoke",
+        "agent_call",
+        "mcp_stdio",
+        "claim_gate",
+        "validation_pack"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "blocked", "error_sanitized"]
+    },
+    "sanitizedErrorClass": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["response_too_large", "blocked_unsafe", "none"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "usageEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "occurredAt",
+        "actor",
+        "interface",
+        "eventClass",
+        "command",
+        "outcome",
+        "recordBinding",
+        "trace",
+        "privacy",
+        "deterministicFixture"
+      ],
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurredAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "actor": {
+          "type": "string",
+          "enum": ["agent", "developer", "local_check", "mcp_host"]
+        },
+        "interface": { "$ref": "#/$defs/interface" },
+        "eventClass": { "$ref": "#/$defs/eventClass" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "outcome": { "$ref": "#/$defs/outcome" },
+        "recordBinding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "forecastId",
+            "questionId",
+            "recordType",
+            "recordId",
+            "sourceCase"
+          ],
+          "properties": {
+            "forecastId": { "$ref": "#/$defs/nullableId" },
+            "questionId": { "$ref": "#/$defs/nullableId" },
+            "recordType": { "$ref": "#/$defs/nullableString" },
+            "recordId": { "$ref": "#/$defs/nullableId" },
+            "sourceCase": { "$ref": "#/$defs/nullableString" }
+          }
+        },
+        "trace": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elapsedMs",
+            "exitCode",
+            "responseBytes",
+            "responseSizeClass",
+            "sanitizedErrorClass"
+          ],
+          "properties": {
+            "elapsedMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 600000
+            },
+            "exitCode": { "$ref": "#/$defs/nullableInteger" },
+            "responseBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "responseSizeClass": {
+              "type": "string",
+              "enum": ["compact", "standard", "oversized_blocked"]
+            },
+            "sanitizedErrorClass": { "$ref": "#/$defs/sanitizedErrorClass" }
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "localOnly",
+            "liveFetch",
+            "rawPromptStored",
+            "rawTranscriptStored",
+            "privateRowsStored",
+            "credentialsStored"
+          ],
+          "properties": {
+            "localOnly": { "type": "boolean" },
+            "liveFetch": { "type": "boolean" },
+            "rawPromptStored": { "type": "boolean" },
+            "rawTranscriptStored": { "type": "boolean" },
+            "privateRowsStored": { "type": "boolean" },
+            "credentialsStored": { "type": "boolean" }
+          }
+        },
+        "deterministicFixture": { "type": "boolean" }
+      }
+    },
+    "traceSummaryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interface",
+        "eventCount",
+        "successCount",
+        "blockedCount",
+        "sanitizedErrorCount",
+        "averageElapsedMs",
+        "maxResponseBytes"
+      ],
+      "properties": {
+        "interface": { "$ref": "#/$defs/interface" },
+        "eventCount": { "type": "integer", "minimum": 0 },
+        "successCount": { "type": "integer", "minimum": 0 },
+        "blockedCount": { "type": "integer", "minimum": 0 },
+        "sanitizedErrorCount": { "type": "integer", "minimum": 0 },
+        "averageElapsedMs": { "type": "integer", "minimum": 0 },
+        "maxResponseBytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "aggregateReadbacks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalEvents",
+        "successfulEvents",
+        "blockedEvents",
+        "sanitizedErrorEvents",
+        "localOnlyEvents",
+        "forecastCompletionRate",
+        "agentReadSuccessRate",
+        "blockedPathFrequency",
+        "normalChecksUseLiveNetwork",
+        "hostedTelemetryEnabled"
+      ],
+      "properties": {
+        "totalEvents": { "type": "integer", "minimum": 0 },
+        "successfulEvents": { "type": "integer", "minimum": 0 },
+        "blockedEvents": { "type": "integer", "minimum": 0 },
+        "sanitizedErrorEvents": { "type": "integer", "minimum": 0 },
+        "localOnlyEvents": { "type": "integer", "minimum": 0 },
+        "forecastCompletionRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "agentReadSuccessRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "blockedPathFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "hostedTelemetryEnabled": { "type": "boolean" }
+      }
+    },
+    "productMetricReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metricId",
+        "description",
+        "numerator",
+        "denominator",
+        "value",
+        "interpretation"
+      ],
+      "properties": {
+        "metricId": {
+          "type": "string",
+          "enum": [
+            "agent_forecast_completion_rate",
+            "agent_read_success_rate",
+            "blocked_path_frequency",
+            "local_only_privacy_rate"
+          ]
+        },
+        "description": { "$ref": "#/$defs/boundedString" },
+        "numerator": { "type": "integer", "minimum": 0 },
+        "denominator": { "type": "integer", "minimum": 0 },
+        "value": { "type": "number", "minimum": 0, "maximum": 1 },
+        "interpretation": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executesCommands",
+        "collectsHostedTelemetry",
+        "writesRuntimeLog",
+        "readsPrivateData",
+        "storesPrompts",
+        "storesRawTranscripts",
+        "storesCredentials",
+        "fetchesLiveData",
+        "usesSyntheticCheckedEventsOnly",
+        "normalChecksDeterministicOffline",
+        "localOnly"
+      ],
+      "properties": {
+        "executesCommands": { "type": "boolean" },
+        "collectsHostedTelemetry": { "type": "boolean" },
+        "writesRuntimeLog": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "storesPrompts": { "type": "boolean" },
+        "storesRawTranscripts": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "usesSyntheticCheckedEventsOnly": { "type": "boolean" },
+        "normalChecksDeterministicOffline": { "type": "boolean" },
+        "localOnly": { "type": "boolean" }
+      }
+    }
+  }
+}

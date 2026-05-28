@@ -194,6 +194,7 @@
             "type": "string",
             "enum": [
               "approved_local_csv_json",
+              "approved_local_folder_runtime",
               "accepted_source_adapter_output",
               "committed_fixture_request",
               "policy_bound_promoted_fixture_source_set"
@@ -219,7 +220,7 @@
             "readbackCommands": {
               "type": "array",
               "minItems": 1,
-              "maxItems": 8,
+              "maxItems": 10,
               "items": { "$ref": "#/$defs/boundedString" }
             },
             "resolutionCommand": { "$ref": "#/$defs/boundedString" },

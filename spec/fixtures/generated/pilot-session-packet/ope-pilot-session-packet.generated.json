@@ -1,0 +1,362 @@
+{
+  "pilotSessionPacketId": "pilotsessionpacket-001",
+  "generatedAt": "2026-06-10T12:00:00Z",
+  "packetMode": "checked_real_pilot_session_collection_packet",
+  "bindings": {
+    "releaseManifestId": "releasemanifest-001",
+    "agentPilotValidationId": "agentpilotvalidation-001",
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "developerAdoptionSurfaceId": "developeradoptionsurface-001",
+    "pilotProtocolId": "agentpilotprotocol-001",
+    "pilotEvidencePolicyId": "pilotevidencepolicy-001"
+  },
+  "sessionPlan": {
+    "planId": "pilotsessionplan-001",
+    "minimumRealSessions": 3,
+    "targetRealSessions": 5,
+    "participantProfiles": [
+      "agent_developer",
+      "supervising_developer"
+    ],
+    "moderatorChecklist": [
+      "Confirm the participant is using the local MVP and understands no hosted service is being tested.",
+      "Choose one checked task scenario and keep the task command visible.",
+      "Capture only scores, sanitized findings, friction classes, expansion signals, and next action.",
+      "Stop intake if raw transcripts, private rows, credentials, prompt logs, or participant identity appear."
+    ],
+    "participantBrief": [
+      "Use the checked local MVP commands as written; do not connect private production systems.",
+      "Explain what you trust, what is confusing, and where the readback blocks claims or runtime expansion.",
+      "Do not paste raw conversation logs, private data, credentials, or identifying details into the summary."
+    ],
+    "sessionSteps": [
+      {
+        "stepId": "pilotsessionstep-001",
+        "order": 1,
+        "action": "Select one checked task card from the packet.",
+        "expectedOutput": "A task ID, command, expected outcome class, and measured dimensions are known before the session starts."
+      },
+      {
+        "stepId": "pilotsessionstep-002",
+        "order": 2,
+        "action": "Run or inspect the local MVP command in the participant environment.",
+        "expectedOutput": "The participant can describe the readback, blocked state, or claim boundary in their own words."
+      },
+      {
+        "stepId": "pilotsessionstep-003",
+        "order": 3,
+        "action": "Score the required dimensions from 1 to 5 using only sanitized evidence notes.",
+        "expectedOutput": "Dimension ratings are ready for the pilot evidence ledger without raw transcript text."
+      },
+      {
+        "stepId": "pilotsessionstep-004",
+        "order": 4,
+        "action": "Classify friction and expansion signals from the checked vocabulary.",
+        "expectedOutput": "Repeated real-session patterns can later guide adoption, docs, runtime, or type-generation decisions."
+      },
+      {
+        "stepId": "pilotsessionstep-005",
+        "order": 5,
+        "action": "Run the sanitization review before any ledger submission.",
+        "expectedOutput": "Unsafe notes are redacted or discarded before they become repository evidence."
+      }
+    ]
+  },
+  "taskCards": [
+    {
+      "taskId": "agentpilottask-001",
+      "scenarioKey": "local_file_setup_readback",
+      "title": "Approved local-file setup readback",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+      "expectedOutcomeClass": "completed_forecast_readback",
+      "measures": [
+        "task_completion",
+        "forecast_card_comprehension",
+        "lifecycle_bundle_comprehension",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "tighten_claim_copy"
+        ],
+        "claimBoundaryRequired": true
+      },
+      "moderatorPrompt": "Use the local MVP to inspect an approved local-file setup path. Explain what forecast was produced, how it was scored, and why the quality claim is still blocked."
+    },
+    {
+      "taskId": "agentpilottask-002",
+      "scenarioKey": "accepted_adapter_output_ready",
+      "title": "Accepted adapter output stops before forecast execution",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case source_adapter_output_accepted",
+      "expectedOutcomeClass": "ready_for_forecast_execution",
+      "measures": [
+        "task_completion",
+        "source_intake_comprehension",
+        "lifecycle_bundle_comprehension",
+        "runtime_gap_classification"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "source_runtime_gap",
+          "schema_integration_friction"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "consider_next_source_runtime"
+        ],
+        "claimBoundaryRequired": false
+      },
+      "moderatorPrompt": "Inspect the accepted source-adapter-output path. Decide whether forecast artifacts already exist and name the next safe step."
+    },
+    {
+      "taskId": "agentpilottask-003",
+      "scenarioKey": "unsafe_source_block",
+      "title": "Unsafe source is stopped before intake",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case unsafe_source",
+      "expectedOutcomeClass": "blocked_unsafe",
+      "measures": [
+        "task_completion",
+        "blocked_path_comprehension",
+        "source_intake_comprehension",
+        "claim_boundary_comprehension"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "source_runtime_gap"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "tighten_claim_copy"
+        ],
+        "claimBoundaryRequired": true
+      },
+      "moderatorPrompt": "Inspect the unsafe-source path. Explain why OPE stops and what should happen before any source intake or forecast work."
+    },
+    {
+      "taskId": "agentpilottask-004",
+      "scenarioKey": "forecast_run_readback",
+      "title": "Fixture-safe forecast-run readback",
+      "command": "python3 scripts/ope.py forecast-run",
+      "expectedOutcomeClass": "completed_forecast_run",
+      "measures": [
+        "task_completion",
+        "forecast_card_comprehension",
+        "lifecycle_bundle_comprehension",
+        "trust_for_agent_decision_support"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs"
+        ],
+        "claimBoundaryRequired": false
+      },
+      "moderatorPrompt": "Run the fixture-safe forecast-run summary. Explain the produced forecast card, evidence trace, lifecycle bundle, resolution, and scoring bindings."
+    },
+    {
+      "taskId": "agentpilottask-005",
+      "scenarioKey": "claim_gate_readback",
+      "title": "Transit claim gate stays below threshold",
+      "command": "python3 scripts/ope.py transit-track-record-gate",
+      "expectedOutcomeClass": "claim_gate_readback",
+      "measures": [
+        "task_completion",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support",
+        "runtime_gap_classification"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "schema_integration_friction"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "consider_next_source_runtime",
+          "tighten_claim_copy"
+        ],
+        "claimBoundaryRequired": true
+      },
+      "moderatorPrompt": "Inspect the public transport baseline track-record gate. Decide whether OPE may claim calibration or broad method quality yet."
+    }
+  ],
+  "evidenceTemplate": {
+    "templateId": "pilotsessiontemplate-001",
+    "allowedFields": [
+      "Task IDs from the checked pilot validation pack.",
+      "Dimension ratings from 1 to 5 with short sanitized evidence notes.",
+      "Sanitized findings that omit participant identity, raw transcript text, private data, and credentials.",
+      "Friction classes and expansion signals from the checked vocabulary.",
+      "One next action for adoption, documentation, runtime selection, or evidence collection."
+    ],
+    "blockedFields": [
+      "Raw transcripts, recordings, prompt logs, or full chat excerpts.",
+      "Private source rows, customer or participant identifiers, credentials, and internal table names.",
+      "Claims that one pilot session proves forecast quality, calibration, hosted readiness, or production runtime maturity."
+    ],
+    "requiredFields": [
+      "At least one task reference.",
+      "At least one dimension rating.",
+      "At least one sanitized finding.",
+      "At least one friction class.",
+      "At least one expansion signal."
+    ],
+    "ledgerSubmissionShape": {
+      "taskRefs": true,
+      "dimensionRatings": true,
+      "sanitizedFindings": true,
+      "frictionClasses": true,
+      "expansionSignals": true,
+      "nextAction": true,
+      "canSubmitToPilotEvidence": true
+    }
+  },
+  "sanitizationReview": {
+    "reviewId": "pilotsessionreview-001",
+    "checks": [
+      {
+        "checkId": "pilotsessioncheck-001",
+        "check": "No raw transcript, recording, prompt log, or full chat excerpt is included.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-002",
+        "check": "No private source rows, credentials, customer names, or participant identity are included.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-003",
+        "check": "All findings are summarized enough to be stored in the repository.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-004",
+        "check": "Dimension scores use the checked feedback dimensions and 1-5 scale.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-005",
+        "check": "Friction classes and expansion signals use the checked ledger vocabulary.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-006",
+        "check": "Claim-boundary confusion is recorded as a product signal, not as quality evidence.",
+        "requiredForLedgerSubmission": true
+      },
+      {
+        "checkId": "pilotsessioncheck-007",
+        "check": "The summary does not unblock hosted runtime, generated types, stronger methods, or broad source runtimes.",
+        "requiredForLedgerSubmission": true
+      }
+    ],
+    "requiredPassCount": 7
+  },
+  "stopConditions": [
+    "Stop the session intake if the participant submits raw transcript text or recordings.",
+    "Stop the session intake if private rows, credentials, source secrets, or participant identity appear.",
+    "Stop the session intake if notes cannot be summarized without private operational details.",
+    "Stop any expansion interpretation that treats pilot usability evidence as forecast-quality or calibration evidence."
+  ],
+  "collectionSummary": {
+    "taskCardCount": 5,
+    "minimumRealSessions": 3,
+    "targetRealSessions": 5,
+    "realSessionsRecorded": 0,
+    "packetStatus": "ready_for_real_pilot_sessions",
+    "ledgerSubmissionReady": true,
+    "expansionEvidenceReady": false,
+    "qualityClaimAllowed": false,
+    "hostedRuntimeAllowed": false
+  },
+  "executionBoundary": {
+    "readOnlyPacket": true,
+    "usesCheckedTaskDefinitions": true,
+    "runsPilotSessions": false,
+    "writesPilotEvidence": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "createsForecastArtifacts": false,
+    "startsHostedRuntime": false,
+    "fetchesLiveData": false,
+    "unblocksExpansion": false
+  },
+  "warnings": [
+    "This packet prepares real pilot sessions but does not run them or record any real session evidence.",
+    "Ledger submission is allowed only after sanitization review passes and unsafe details are removed.",
+    "Pilot usability evidence can guide adoption and expansion priorities, but it is not forecast-quality or calibration evidence.",
+    "Expansion remains blocked until enough real sanitized sessions and corpus evidence exist."
+  ]
+}

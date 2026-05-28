@@ -243,6 +243,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "transit-delay-forward-run.schema.json"
     if name.endswith("transit-forward-run-corpus.generated.json"):
         return spec_root / "transit-forward-run-corpus.schema.json"
+    if name.endswith("transit-corpus-growth-loop.generated.json"):
+        return spec_root / "transit-corpus-growth-loop.schema.json"
     if name.endswith("transit-baseline-track-record-gate.generated.json"):
         return spec_root / "transit-baseline-track-record-gate.schema.json"
     if name.endswith("transit-method-options.generated.json"):
@@ -275,6 +277,14 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "field-mapping.schema.json"
     if name.endswith("-source-intake-report.generated.json"):
         return spec_root / "source-intake-report.schema.json"
+    if name.endswith("source-quality-mapping-confidence.generated.json"):
+        return spec_root / "source-quality-mapping-confidence.schema.json"
+    if name.endswith("local-source-runtime.generated.json"):
+        return spec_root / "local-source-runtime.schema.json"
+    if name.endswith("developer-adoption-surface.generated.json"):
+        return spec_root / "developer-adoption-surface.schema.json"
+    if name.endswith("expansion-readiness-gate.generated.json"):
+        return spec_root / "expansion-readiness-gate.schema.json"
     if name.endswith("-setup-benchmark-gate.generated.json"):
         return spec_root / "setup-benchmark-gate.schema.json"
     if name.endswith("-setup-method-decision.generated.json"):
@@ -339,6 +349,16 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "private-setup-adapter-conformance-summary.schema.json"
     if name.endswith("-private-setup-orchestrator.generated.json"):
         return spec_root / "private-setup-orchestrator.schema.json"
+    if name.endswith("-agent-pilot-validation.generated.json"):
+        return spec_root / "agent-pilot-validation.schema.json"
+    if name.endswith("-pilot-evidence-ledger.generated.json"):
+        return spec_root / "pilot-evidence-ledger.schema.json"
+    if name.endswith("-pilot-session-packet.generated.json"):
+        return spec_root / "pilot-session-packet.schema.json"
+    if name.endswith("-pilot-summary-intake.generated.json"):
+        return spec_root / "pilot-summary-intake.schema.json"
+    if name.endswith("-local-usage-trace.generated.json"):
+        return spec_root / "local-usage-trace.schema.json"
     if "-private-setup-first-action-" in name and name.endswith(".generated.json"):
         return spec_root / "private-setup-first-action.schema.json"
     if "-private-setup-agent-bundle-" in name and name.endswith(".generated.json"):
