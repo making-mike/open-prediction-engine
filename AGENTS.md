@@ -64,6 +64,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/local-usage-trace.md`: checked local-only MVP usage trace read model and aggregate product metrics.
 - `spec/developer-adoption-surface.md`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
 - `spec/expansion-readiness-gate.md`: checked post-MVP readiness gate for hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
+- `spec/repeating-prediction-setup.md`: checked local-first repeating prediction setup contract, recurrence examples, post-calibration policies, and non-execution boundary.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
@@ -242,6 +243,8 @@ python3 scripts/generate_developer_adoption_surface.py --check
 python3 scripts/check_developer_adoption_surface.py
 python3 scripts/generate_expansion_readiness_gate.py --check
 python3 scripts/check_expansion_readiness_gate.py
+python3 scripts/generate_repeating_prediction_setup.py --check
+python3 scripts/check_repeating_prediction_setup.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -364,6 +367,7 @@ python3 scripts/ope.py pilot-summary-intake
 python3 scripts/ope.py local-usage-trace
 python3 scripts/ope.py developer-adoption
 python3 scripts/ope.py expansion-readiness
+python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -466,6 +470,7 @@ python3 scripts/generate_pilot_summary_intake.py --write
 python3 scripts/generate_local_usage_trace.py --write
 python3 scripts/generate_developer_adoption_surface.py --write
 python3 scripts/generate_expansion_readiness_gate.py --write
+python3 scripts/generate_repeating_prediction_setup.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

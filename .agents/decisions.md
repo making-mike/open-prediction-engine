@@ -1982,3 +1982,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `pilot-summary-intake` contract, generated fixture, CLI command, and checker for classifying sanitized pilot summaries before ledger review.
 - **Why:** Real pilot sessions need one safe pre-ledger decision point that can accept ledger-ready summaries, request redaction, or block raw transcripts, private rows, credentials, participant identity, and quality overclaims.
 - **Alternatives rejected:** Letting moderators copy summaries directly into the ledger, storing unsafe notes for later cleanup, counting checked examples as real sessions, or letting accepted pilot summaries unblock expansion.
+
+### DEC-089 — Add Repeating Prediction Setup Contract
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `repeating-prediction-setup` contract, generated fixture, CLI command, and checker for recurrence policies, end conditions, and post-calibration behavior before campaign execution exists.
+- **Why:** Agents need a stable local-first way to describe finite, until-date, interval, open-ended, weekday/window, and calibration-threshold campaigns without inventing shell loops or implying a scheduler, hosted runtime, or quality claim.
+- **Alternatives rejected:** Starting with a foreground runner before the manifest contract, writing cron or OS scheduler configuration, mutating local campaign state during normal checks, or letting calibration thresholds auto-tune methods.

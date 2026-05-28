@@ -115,6 +115,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     local_usage_trace_command = [sys.executable, "scripts/generate_local_usage_trace.py"]
     developer_adoption_command = [sys.executable, "scripts/generate_developer_adoption_surface.py"]
     expansion_readiness_command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
+    repeating_prediction_setup_command = [sys.executable, "scripts/generate_repeating_prediction_setup.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -186,6 +187,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         local_usage_trace_command.append("--write")
         developer_adoption_command.append("--write")
         expansion_readiness_command.append("--write")
+        repeating_prediction_setup_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -250,6 +252,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         local_usage_trace_command.append("--check")
         developer_adoption_command.append("--check")
         expansion_readiness_command.append("--check")
+        repeating_prediction_setup_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -315,6 +318,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(local_usage_trace_command)
     run(developer_adoption_command)
     run(expansion_readiness_command)
+    run(repeating_prediction_setup_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1194,6 +1198,19 @@ def cmd_developer_adoption(args: argparse.Namespace) -> None:
 
 def cmd_expansion_readiness(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_repeating_prediction_setup(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_repeating_prediction_setup.py"]
+    if args.case:
+        command.extend(["--case", args.case])
     if args.section:
         command.extend(["--section", args.section])
     if args.check:
@@ -2446,6 +2463,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated expansion readiness gate",
     )
     expansion_readiness.set_defaults(func=cmd_expansion_readiness)
+
+    repeating_prediction_setup = subparsers.add_parser(
+        "repeating-prediction-setup",
+        help="check, refresh, or print the repeating prediction setup contract",
+    )
+    repeating_prediction_setup.add_argument(
+        "--case",
+        choices=[
+            "daily_100_run_transit_calibration",
+            "hourly_short_horizon_count",
+            "weekly_until_date_campaign",
+            "open_ended_monitoring_campaign",
+            "weekday_peak_window_campaign",
+            "post_calibration_restart_campaign",
+        ],
+        help="print one repeating prediction setup example",
+    )
+    repeating_prediction_setup.add_argument(
+        "--section",
+        choices=["template", "schedules", "examples", "requirements", "boundary", "summary"],
+        help="print one repeating prediction setup section",
+    )
+    repeating_prediction_setup.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated repeating prediction setup drift",
+    )
+    repeating_prediction_setup.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated repeating prediction setup",
+    )
+    repeating_prediction_setup.set_defaults(func=cmd_repeating_prediction_setup)
 
     private_setup_adapter_runbook = subparsers.add_parser(
         "private-setup-adapter-runbook",

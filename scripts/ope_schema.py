@@ -285,6 +285,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "developer-adoption-surface.schema.json"
     if name.endswith("expansion-readiness-gate.generated.json"):
         return spec_root / "expansion-readiness-gate.schema.json"
+    if name.endswith("repeating-prediction-setup.generated.json"):
+        return spec_root / "repeating-prediction-setup.schema.json"
     if name.endswith("-setup-benchmark-gate.generated.json"):
         return spec_root / "setup-benchmark-gate.schema.json"
     if name.endswith("-setup-method-decision.generated.json"):

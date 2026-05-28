@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 80,
+    "schemaFileCount": 81,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -78,6 +78,7 @@
       "spec/recalculation-trigger.schema.json",
       "spec/record-index.schema.json",
       "spec/release-manifest.schema.json",
+      "spec/repeating-prediction-setup.schema.json",
       "spec/resolution-job-registry.schema.json",
       "spec/resolution-record.schema.json",
       "spec/resolution-runtime-reliability.schema.json",
@@ -160,6 +161,7 @@
         "python3 scripts/ope.py pilot-session-packet",
         "python3 scripts/ope.py pilot-summary-intake",
         "python3 scripts/ope.py expansion-readiness",
+        "python3 scripts/ope.py repeating-prediction-setup",
         "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
         "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
         "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102"
@@ -230,6 +232,11 @@
         "checkId": "mvp-smoke-expansion-readiness",
         "command": "python3 scripts/ope.py expansion-readiness",
         "expected": "post-MVP expansion options remain blocked or deferred until real pilot, corpus, and adoption evidence justify them."
+      },
+      {
+        "checkId": "mvp-smoke-repeating-prediction-setup",
+        "command": "python3 scripts/ope.py repeating-prediction-setup",
+        "expected": "repeating prediction setup recurrence examples are available without starting a runner, scheduler, live fetch, or campaign-state mutation."
       },
       {
         "checkId": "mvp-smoke-forecast-run",

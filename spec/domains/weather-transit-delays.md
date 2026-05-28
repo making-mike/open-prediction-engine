@@ -37,6 +37,7 @@ Initial maturity:
 - checked baseline track-record and calibration gate through `python3 scripts/ope.py transit-track-record-gate`
 - checked MVP method options and baseline-default boundary through `python3 scripts/ope.py transit-method-options`
 - checked policy-bound live evidence promotion gate through `python3 scripts/ope.py transit-live-evidence-promotion`
+- checked repeating prediction setup contract through `python3 scripts/ope.py repeating-prediction-setup`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -228,6 +229,14 @@ The checked live evidence promotion surface is:
 ```bash
 python3 scripts/ope.py transit-live-evidence-promotion
 ```
+
+The checked repeating prediction setup contract is:
+
+```bash
+python3 scripts/ope.py repeating-prediction-setup
+```
+
+It defines finite, until-date, interval, open-ended, selected weekday/window, calibration-threshold, and post-calibration restart policies without creating campaign state, starting a runner, fetching live data, or making calibration claims.
 
 It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
 

@@ -79,6 +79,7 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py pilot-session-packet",
                 "python3 scripts/ope.py pilot-summary-intake",
                 "python3 scripts/ope.py expansion-readiness",
+                "python3 scripts/ope.py repeating-prediction-setup",
                 "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
@@ -144,6 +145,11 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-expansion-readiness",
                 "command": "python3 scripts/ope.py expansion-readiness",
                 "expected": "post-MVP expansion options remain blocked or deferred until real pilot, corpus, and adoption evidence justify them.",
+            },
+            {
+                "checkId": "mvp-smoke-repeating-prediction-setup",
+                "command": "python3 scripts/ope.py repeating-prediction-setup",
+                "expected": "repeating prediction setup recurrence examples are available without starting a runner, scheduler, live fetch, or campaign-state mutation.",
             },
             {
                 "checkId": "mvp-smoke-forecast-run",

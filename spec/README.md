@@ -71,6 +71,7 @@ The contracts are intentionally record-first:
 - `local-usage-trace.schema.json`: checked local-only MVP usage and trace read model for CLI, agent-call, MCP, blocked-path, and release-surface events.
 - `developer-adoption-surface.schema.json`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
 - `expansion-readiness-gate.schema.json`: checked post-MVP readiness gate over hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
+- `repeating-prediction-setup.schema.json`: checked local-first repeating prediction setup contract with recurrence examples, end conditions, post-calibration policies, and non-execution boundary.
 - `private-setup-adapter-chain-runbook.schema.json`: checked adapter operation sequence and readback guidance for private setup callers.
 - `private-setup-adapter-conformance-matrix.schema.json`: checked conformance examples across private setup adapter operation envelopes.
 - `private-setup-adapter-conformance-summary.schema.json`: compact read surface over private setup adapter conformance.
@@ -127,6 +128,7 @@ The contracts are intentionally record-first:
 - `local-usage-trace.md`: checked local-only usage trace read model and aggregate MVP product metrics.
 - `developer-adoption-surface.md`: checked local MVP developer and agent adoption guide.
 - `expansion-readiness-gate.md`: checked post-MVP expansion readiness decision surface.
+- `repeating-prediction-setup.md`: checked local-first repeating prediction setup contract and recurrence policy boundary.
 - `private-setup-adapter-chain-runbook.md`: checked private setup adapter-chain runbook boundary.
 - `private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix.
 - `private-setup-adapter-conformance-summary.md`: compact private setup adapter conformance summary.
@@ -196,6 +198,7 @@ The pilot summary intake generator writes checked classification examples under 
 The local usage trace generator writes a checked synthetic trace under `spec/fixtures/generated/local-usage-trace/` with local MVP event rows, response-size and elapsed-time fields, aggregate product metrics, and privacy boundaries.
 The developer adoption surface generator writes a checked onboarding guide under `spec/fixtures/generated/developer-adoption/` with quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release notes, and a deferred generated-types decision.
 The expansion readiness generator writes a checked post-MVP decision gate under `spec/fixtures/generated/expansion-readiness/`; it keeps hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types blocked or deferred until real pilot, corpus, and adoption evidence justify them.
+The repeating prediction setup generator writes a checked non-executing recurrence contract under `spec/fixtures/generated/repeating-prediction-setup/`, covering fixed-count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart policies before any campaign manifest or runner exists.
 The private setup adapter-chain runbook generator writes checked non-executing operation-sequence guidance under `spec/fixtures/generated/private-setup-adapter-chain/`.
 The private setup adapter conformance generator writes checked source-builder, source-handoff, method-gate, forecast-execution, and generated forecast readback examples under `spec/fixtures/generated/private-setup-adapter-conformance/` without executing adapter calls.
 The private setup adapter conformance summary generator writes a compact read surface under `spec/fixtures/generated/private-setup-adapter-conformance/` without embedding full envelopes.

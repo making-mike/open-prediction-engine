@@ -154,6 +154,8 @@ The developer adoption surface generator emits a checked onboarding guide under 
 
 The expansion readiness generator emits a checked post-MVP gate under `generated/expansion-readiness/`, keeping hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types blocked or deferred until real pilot, corpus, and adoption evidence justify them.
 
+The repeating prediction setup generator emits a checked non-executing recurrence contract under `generated/repeating-prediction-setup/`, covering finite count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart examples before any campaign manifest or runner exists.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.

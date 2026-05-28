@@ -330,6 +330,28 @@ def main() -> None:
     expansion_readiness_check = run_cli("expansion-readiness", "--check")
     if "checked expansion readiness gate" not in expansion_readiness_check.stdout:
         raise AssertionError("CLI expansion-readiness check output drifted")
+    repeating_setup = run_cli("repeating-prediction-setup")
+    repeating_setup_payload = json.loads(repeating_setup.stdout)
+    if repeating_setup_payload["setupStatus"] != "contract_ready_non_executing":
+        raise AssertionError("CLI repeating-prediction-setup status drifted")
+    if repeating_setup_payload["summary"]["campaignExampleCount"] != 6:
+        raise AssertionError("CLI repeating-prediction-setup should expose six campaign examples")
+    if repeating_setup_payload["summary"]["runnerImplemented"] is not False:
+        raise AssertionError("CLI repeating-prediction-setup must not implement a runner")
+    repeating_cases = {
+        item["caseKey"]: item for item in repeating_setup_payload["campaignExamples"]
+    }
+    if repeating_cases["daily_100_run_transit_calibration"]["schedulePolicy"]["targetCount"] != 100:
+        raise AssertionError("CLI repeating-prediction-setup daily calibration target drifted")
+    if repeating_cases["post_calibration_restart_campaign"]["postCalibrationPolicy"]["action"] != "pause_then_resume_after":
+        raise AssertionError("CLI repeating-prediction-setup post-calibration policy drifted")
+    repeating_schedules = run_cli("repeating-prediction-setup", "--section", "schedules")
+    repeating_schedules_payload = json.loads(repeating_schedules.stdout)
+    if repeating_schedules_payload[0]["policyKind"] != "fixed_count":
+        raise AssertionError("CLI repeating-prediction-setup schedule section order drifted")
+    repeating_setup_check = run_cli("repeating-prediction-setup", "--check")
+    if "checked repeating prediction setup" not in repeating_setup_check.stdout:
+        raise AssertionError("CLI repeating-prediction-setup check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

@@ -122,14 +122,15 @@ Done:
 - Pilot session packet now exposes checked real-session task cards, sanitization review, ledger-ready summary shape, and stop conditions through `python3 scripts/ope.py pilot-session-packet`.
 - Pilot summary intake now classifies sanitized summary examples as ledger-ready, redaction-needed, or blocked through `python3 scripts/ope.py pilot-summary-intake`.
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
+- Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
 
 Not started:
 
 - Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
-- Agent-facing repeating prediction setup that starts future forecasts automatically, not only resolves already-created forecasts.
-- Flexible local campaign schedules for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
+- Agent-facing repeating prediction runner that starts future forecasts automatically, not only resolves already-created forecasts.
+- Local campaign manifest and runner execution for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
 - Append-only local corpus mutation from resolved live campaign runs into a calibration evidence ledger.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
@@ -145,8 +146,8 @@ In progress:
 
 Next:
 
-1. Add a local repeating prediction setup path so an agent can start a terminal campaign that creates future forecasts, waits for due resolution, scores outcomes, and reports progress toward track-record and calibration thresholds.
-2. Support flexible campaign policies: run for a fixed count, run until a date, run every interval, run until calibration threshold, run open-ended, or pause and start again after a configured post-calibration interval.
+1. Add a local prediction campaign manifest so the checked repeating setup can expand into unique campaign, cycle, run, question, forecast, resolution, and scoring IDs without reusing fixtures.
+2. Add a terminal campaign runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
 3. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
 4. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
 5. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
@@ -2760,31 +2761,36 @@ Completed outputs:
 
 ## Milestone 91: Repeating Prediction Setup Contract
 
-Status: Planned.
+Status: Accepted.
 
 Goal: define the contract that lets an agent set up repeated forecasts without inventing shell loops or scheduler semantics.
 
 Tasks:
 
-- [ ] Add a repeating prediction setup schema and spec that binds domain setup, source policy, forecast template, resolution policy, schedule policy, end conditions, and claim boundaries.
-- [ ] Support flexible schedule policies: fixed count, until date, open-ended, every interval, selected weekdays/windows, and threshold-targeted runs such as "run until 100 comparable resolved outcomes."
-- [ ] Support interval durations beyond daily runs, including hourly, multi-hour, daily, weekly, and custom ISO-8601-like duration intervals, while keeping timezone and close-time rules explicit.
-- [ ] Add a post-calibration policy with at least `stop`, `continue`, `pause_then_resume_after`, and `start_next_cycle_after` options so a setup can run without a count and restart after a configured delay once calibration is reached.
-- [ ] Require forecast-before-close, resolve-after-horizon, source-policy, and resolution-only evidence boundaries for every generated run.
-- [ ] Add examples for a 100-run daily transit calibration campaign, an hourly short-horizon campaign, a weekly until-date campaign, and an open-ended campaign that restarts after calibration.
-- [ ] Keep the contract local-first and transport-neutral: no hosted scheduler, OS scheduler, cron file, credentials, or live quality claim.
+- [x] Add a repeating prediction setup schema and spec that binds domain setup, source policy, forecast template, resolution policy, schedule policy, end conditions, and claim boundaries.
+- [x] Support flexible schedule policies: fixed count, until date, open-ended, every interval, selected weekdays/windows, and threshold-targeted runs such as "run until 100 comparable resolved outcomes."
+- [x] Support interval durations beyond daily runs, including hourly, multi-hour, daily, weekly, and custom ISO-8601-like duration intervals, while keeping timezone and close-time rules explicit.
+- [x] Add a post-calibration policy with at least `stop`, `continue`, `pause_then_resume_after`, and `start_next_cycle_after` options so a setup can run without a count and restart after a configured delay once calibration is reached.
+- [x] Require forecast-before-close, resolve-after-horizon, source-policy, and resolution-only evidence boundaries for every generated run.
+- [x] Add examples for a 100-run daily transit calibration campaign, an hourly short-horizon campaign, a weekly until-date campaign, and an open-ended campaign that restarts after calibration.
+- [x] Keep the contract local-first and transport-neutral: no hosted scheduler, OS scheduler, cron file, credentials, or live quality claim.
 
 Exit criteria:
 
 - An agent can read one setup record and know when the next forecast should be created, when it should be resolved, when to stop, and what happens after calibration is reached.
 - A campaign can be finite, date-bounded, interval-based, threshold-targeted, or open-ended without changing the forecast artifact contracts.
 
-Expected outputs:
+Completed outputs:
 
 - `spec/repeating-prediction-setup.schema.json`
 - `spec/repeating-prediction-setup.md`
-- checked examples for finite, until-date, interval, open-ended, calibration-threshold, and post-calibration restart policies
-- CLI readback command such as `python3 scripts/ope.py repeating-prediction-setup`
+- `scripts/generate_repeating_prediction_setup.py`
+- `scripts/check_repeating_prediction_setup.py`
+- checked fixture at `spec/fixtures/generated/repeating-prediction-setup/ope-repeating-prediction-setup.generated.json`
+- CLI command `python3 scripts/ope.py repeating-prediction-setup`
+- checked examples for finite, until-date, interval, open-ended, selected weekday/window, calibration-threshold, and post-calibration restart policies
+- post-calibration policies for `stop`, `continue`, `pause_then_resume_after`, and `start_next_cycle_after`
+- release-manifest, CLI, docs, roadmap, and decision-log wiring for the checked non-executing recurrence contract
 
 ## Milestone 92: Local Prediction Campaign Manifest
 
