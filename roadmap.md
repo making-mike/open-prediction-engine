@@ -124,14 +124,15 @@ Done:
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 - Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
 - Prediction campaign manifests now expose a checked dry-run campaign plan with unique campaign, cycle, run, question, forecast, resolution, and scoring IDs, duplicate keys, ignored local-state path policy, and status readbacks through `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`.
+- Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, output modes, dry-run run decisions, and non-execution boundaries before effectful forecast creation exists.
 
 Not started:
 
 - Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
-- Agent-facing repeating prediction runner that starts future forecasts automatically, not only resolves already-created forecasts.
-- Local campaign manifest and runner execution for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
+- Effectful agent-facing repeating prediction runner that starts future forecasts automatically, not only resolves already-created forecasts.
+- Local campaign runner execution for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
 - Append-only local corpus mutation from resolved live campaign runs into a calibration evidence ledger.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
@@ -147,7 +148,7 @@ In progress:
 
 Next:
 
-1. Add a terminal campaign runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
+1. Turn the checked `prediction-campaign start` readback into an explicit local runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
 2. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
 3. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
 4. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
@@ -2834,20 +2835,21 @@ Completed outputs:
 
 ## Milestone 93: Terminal Campaign Runner
 
-Status: Planned.
+Status: In Progress.
 
 Goal: make one foreground terminal command create future forecasts on schedule, then leave due resolutions to the checked resolver path.
 
 Tasks:
 
-- [ ] Add `python3 scripts/ope.py prediction-campaign start` for local foreground execution.
+- [x] Add a checked dry-run `python3 scripts/ope.py prediction-campaign start` readback before effectful foreground execution.
+- [ ] Turn `python3 scripts/ope.py prediction-campaign start` into local foreground execution.
 - [ ] Support campaign creation from flags and from a setup JSON file.
-- [ ] Support finite count, until date, open-ended, interval, and calibration-threshold modes from the same command surface.
-- [ ] Support `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
+- [x] Expose finite count, until date, open-ended, interval, and calibration-threshold modes from the same command surface in the dry-run readback.
+- [x] Expose `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
 - [ ] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
 - [ ] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
-- [ ] Emit JSONL by default when stdout is captured and compact human status lines in an interactive terminal.
-- [ ] Keep execution local and explicit: live fetches and resolver execution require clear flags.
+- [x] Document JSONL captured output and compact human status line expectations in the dry-run runner readback.
+- [x] Keep dry-run execution local and explicit: live fetches and resolver execution are named future flags, not normal-check behavior.
 
 Exit criteria:
 
@@ -2876,6 +2878,16 @@ python3 scripts/ope.py prediction-campaign start \
   --post-calibration-action pause_then_resume_after \
   --post-calibration-delay P14D
 ```
+
+Completed outputs so far:
+
+- `spec/prediction-campaign-runner.schema.json`
+- `spec/prediction-campaign-runner.md`
+- `scripts/generate_prediction_campaign_runner.py`
+- `scripts/check_prediction_campaign_runner.py`
+- checked fixture at `spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json`
+- CLI readback `python3 scripts/ope.py prediction-campaign start`
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the checked dry-run runner readback
 
 ## Milestone 94: Campaign Resolution, Scoring, And Recovery
 

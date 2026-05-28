@@ -375,6 +375,38 @@ def main() -> None:
     prediction_campaign_check = run_cli("prediction-campaign", "--check")
     if "checked prediction campaign manifest" not in prediction_campaign_check.stdout:
         raise AssertionError("CLI prediction-campaign check output drifted")
+    prediction_campaign_start = run_cli("prediction-campaign", "start")
+    prediction_campaign_start_payload = json.loads(prediction_campaign_start.stdout)
+    if prediction_campaign_start_payload["runnerStatus"] != "dry_run_ready_non_executing":
+        raise AssertionError("CLI prediction-campaign start status drifted")
+    if prediction_campaign_start_payload["summary"]["forecastCreationImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign start must not create forecasts yet")
+    if prediction_campaign_start_payload["progress"]["nextForecastRunId"] != "predictionrun-1301":
+        raise AssertionError("CLI prediction-campaign start next forecast run drifted")
+    if prediction_campaign_start_payload["outputModes"]["capturedStdoutMode"] != "jsonl":
+        raise AssertionError("CLI prediction-campaign start captured output mode drifted")
+    prediction_campaign_start_flags = run_cli(
+        "prediction-campaign",
+        "start",
+        "--domain",
+        "weather-transit-delays",
+        "--service-window",
+        "morning_peak",
+        "--interval",
+        "P1D",
+        "--count",
+        "100",
+        "--live-weather",
+        "--execute-resolvers",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_start_flags_payload = json.loads(prediction_campaign_start_flags.stdout)
+    if prediction_campaign_start_flags_payload["executionBoundary"]["fetchesLiveData"] is not False:
+        raise AssertionError("CLI prediction-campaign start flags must remain dry-run non-fetching")
+    prediction_campaign_start_check = run_cli("prediction-campaign", "start", "--check")
+    if "checked prediction campaign runner" not in prediction_campaign_start_check.stdout:
+        raise AssertionError("CLI prediction-campaign start check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

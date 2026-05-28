@@ -39,6 +39,7 @@ Initial maturity:
 - checked policy-bound live evidence promotion gate through `python3 scripts/ope.py transit-live-evidence-promotion`
 - checked repeating prediction setup contract through `python3 scripts/ope.py repeating-prediction-setup`
 - checked dry-run prediction campaign manifest through `python3 scripts/ope.py prediction-campaign plan`
+- checked dry-run terminal campaign runner readback through `python3 scripts/ope.py prediction-campaign start`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -247,6 +248,14 @@ python3 scripts/ope.py prediction-campaign status
 ```
 
 It expands the repeating setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs with duplicate keys and status readbacks, without writing live campaign state or creating forecast artifacts.
+
+The checked prediction campaign runner readback is:
+
+```bash
+python3 scripts/ope.py prediction-campaign start
+```
+
+It exposes the terminal `start` command semantics, recurrence flags, output modes, dry-run run decisions, missed-run and duplicate policies, and non-execution boundary without sleeping, polling, fetching live data, running resolvers, writing local campaign state, or creating forecast artifacts.
 
 It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
 

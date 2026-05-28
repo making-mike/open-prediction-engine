@@ -117,6 +117,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     expansion_readiness_command = [sys.executable, "scripts/generate_expansion_readiness_gate.py"]
     repeating_prediction_setup_command = [sys.executable, "scripts/generate_repeating_prediction_setup.py"]
     prediction_campaign_manifest_command = [sys.executable, "scripts/generate_prediction_campaign_manifest.py"]
+    prediction_campaign_runner_command = [sys.executable, "scripts/generate_prediction_campaign_runner.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -190,6 +191,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         expansion_readiness_command.append("--write")
         repeating_prediction_setup_command.append("--write")
         prediction_campaign_manifest_command.append("--write")
+        prediction_campaign_runner_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -256,6 +258,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         expansion_readiness_command.append("--check")
         repeating_prediction_setup_command.append("--check")
         prediction_campaign_manifest_command.append("--check")
+        prediction_campaign_runner_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -323,6 +326,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(expansion_readiness_command)
     run(repeating_prediction_setup_command)
     run(prediction_campaign_manifest_command)
+    run(prediction_campaign_runner_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1225,6 +1229,15 @@ def cmd_repeating_prediction_setup(args: argparse.Namespace) -> None:
 
 
 def cmd_prediction_campaign(args: argparse.Namespace) -> None:
+    if args.action == "start":
+        command = [sys.executable, "scripts/generate_prediction_campaign_runner.py"]
+        if args.check:
+            command.append("--check")
+        if args.write:
+            command.append("--write")
+        run(command)
+        return
+
     command = [sys.executable, "scripts/generate_prediction_campaign_manifest.py"]
     if args.action != "manifest":
         command.extend(["--view", args.action])
@@ -2523,9 +2536,9 @@ def build_parser() -> argparse.ArgumentParser:
     prediction_campaign.add_argument(
         "action",
         nargs="?",
-        choices=["manifest", "plan", "status", "summary", "boundary"],
+        choices=["manifest", "plan", "status", "summary", "boundary", "start"],
         default="manifest",
-        help="print the full manifest or one campaign readback",
+        help="print the full manifest, one campaign readback, or the dry-run runner start readback",
     )
     prediction_campaign.add_argument(
         "--case",
@@ -2544,15 +2557,40 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="number of dry-run candidate runs to plan",
     )
+    prediction_campaign.add_argument("--domain", help="dry-run runner domain selector")
+    prediction_campaign.add_argument("--service-window", help="dry-run runner service window selector")
+    prediction_campaign.add_argument("--interval", help="dry-run runner recurrence interval")
+    prediction_campaign.add_argument("--count", type=int, help="dry-run runner finite run count")
+    prediction_campaign.add_argument("--until", help="dry-run runner until-date boundary")
+    prediction_campaign.add_argument("--calibration-target", type=int, help="dry-run runner calibration target")
+    prediction_campaign.add_argument("--post-calibration-action", help="dry-run runner post-calibration action")
+    prediction_campaign.add_argument("--post-calibration-delay", help="dry-run runner post-calibration delay")
+    prediction_campaign.add_argument("--setup-json", help="dry-run runner setup JSON input path")
+    prediction_campaign.add_argument("--manifest-json", help="dry-run runner manifest JSON input path")
+    prediction_campaign.add_argument(
+        "--live-weather",
+        action="store_true",
+        help="dry-run flag for future explicit live weather fetching",
+    )
+    prediction_campaign.add_argument(
+        "--execute-resolvers",
+        action="store_true",
+        help="dry-run flag for future explicit resolver execution",
+    )
+    prediction_campaign.add_argument(
+        "--output-format",
+        choices=["jsonl", "human"],
+        help="dry-run runner output format",
+    )
     prediction_campaign.add_argument(
         "--check",
         action="store_true",
-        help="check generated prediction campaign manifest drift",
+        help="check generated prediction campaign manifest or runner drift",
     )
     prediction_campaign.add_argument(
         "--write",
         action="store_true",
-        help="refresh generated prediction campaign manifest",
+        help="refresh generated prediction campaign manifest or runner",
     )
     prediction_campaign.set_defaults(func=cmd_prediction_campaign)
 

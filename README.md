@@ -152,7 +152,7 @@ The initial question shape is:
 Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
 ```
 
-This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked corpus growth loop, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, a checked repeating prediction setup contract, a checked dry-run prediction campaign manifest, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The growth loop classifies append-ready comparable runs, exclusion-ledger rows, and projected progress toward track-record and calibration thresholds while keeping normal checks non-mutating. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The repeating prediction setup contract defines finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart policies without starting a runner or scheduler. The prediction campaign manifest expands that setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs with duplicate keys and status readbacks, without writing live state or creating forecast artifacts. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked corpus growth loop, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, a checked repeating prediction setup contract, a checked dry-run prediction campaign manifest, a checked dry-run terminal campaign runner readback, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The growth loop classifies append-ready comparable runs, exclusion-ledger rows, and projected progress toward track-record and calibration thresholds while keeping normal checks non-mutating. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The repeating prediction setup contract defines finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart policies without starting a runner or scheduler. The prediction campaign manifest expands that setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs with duplicate keys and status readbacks, without writing live state or creating forecast artifacts. The campaign runner readback exposes `prediction-campaign start` command semantics, recurrence flags, dry-run decisions, JSONL output expectations, and the non-execution boundary without sleeping, polling, fetching live data, writing state, or creating forecast artifacts. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs. The scheduler lets an agent keep a local terminal polling those jobs and, with explicit `--execute`, call the checked resolver when runs become due. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
 
 Run the checked fixture path:
 
@@ -166,6 +166,7 @@ python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py prediction-campaign plan
+python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py resolution-jobs
 python3 scripts/ope.py resolution-scheduler
 python3 scripts/ope.py resolution-runtime-reliability
@@ -193,6 +194,7 @@ python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py prediction-campaign status
+python3 scripts/ope.py prediction-campaign start
 ```
 
 Start an explicit local live forward forecast:
@@ -433,6 +435,8 @@ python3 scripts/generate_repeating_prediction_setup.py --check
 python3 scripts/check_repeating_prediction_setup.py
 python3 scripts/generate_prediction_campaign_manifest.py --check
 python3 scripts/check_prediction_campaign_manifest.py
+python3 scripts/generate_prediction_campaign_runner.py --check
+python3 scripts/check_prediction_campaign_runner.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -691,6 +695,7 @@ python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py repeating-prediction-setup --section examples
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign status
+python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -799,6 +804,7 @@ python3 scripts/ope.py developer-adoption --section quickstart
 python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary
 python3 scripts/ope.py prediction-campaign plan
+python3 scripts/ope.py prediction-campaign start
 ```
 
 CI release gate:
@@ -858,6 +864,7 @@ python3 scripts/generate_developer_adoption_surface.py --write
 python3 scripts/generate_expansion_readiness_gate.py --write
 python3 scripts/generate_repeating_prediction_setup.py --write
 python3 scripts/generate_prediction_campaign_manifest.py --write
+python3 scripts/generate_prediction_campaign_runner.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

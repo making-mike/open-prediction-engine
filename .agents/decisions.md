@@ -1996,3 +1996,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `prediction-campaign-manifest` contract, generated fixture, CLI command, and checker that expands one repeating setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs.
 - **Why:** Before a terminal runner exists, agents need a resumable local manifest shape that can answer what is planned, what is due later, which duplicate keys are blocked, and where ignored local state will live without creating artifacts.
 - **Alternatives rejected:** Letting the first runner invent campaign IDs, writing `.ope/live/` campaign state during normal checks, reusing fixture forecast IDs for live campaign plans, or starting scheduler work before duplicate and status boundaries are checked.
+
+### DEC-091 — Add Prediction Campaign Runner Dry-Run Surface
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-runner` contract, generated fixture, CLI command, and checker for `prediction-campaign start` command semantics, recurrence flags, output modes, dry-run decisions, and non-execution boundaries.
+- **Why:** Agents need to see how a terminal campaign runner will behave before OPE creates forecast artifacts, sleeps or polls, writes ignored live state, fetches live data, runs resolvers, or implies calibration quality.
+- **Alternatives rejected:** Starting with an effectful foreground loop, letting normal checks write campaign state, hiding missed-run and duplicate policies in prose, or treating dry-run runner decisions as forecast or calibration evidence.

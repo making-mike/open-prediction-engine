@@ -158,6 +158,8 @@ The repeating prediction setup generator emits a checked non-executing recurrenc
 
 The prediction campaign manifest generator emits a checked dry-run manifest under `generated/prediction-campaign-manifest/`, expanding the repeating setup into unique planned run IDs, duplicate keys, status readbacks, and ignored local-state path policy without creating forecast artifacts or writing live campaign state.
 
+The prediction campaign runner generator emits a checked dry-run terminal runner readback under `generated/prediction-campaign-runner/`, exposing `prediction-campaign start` command semantics, recurrence flags, output modes, run decisions, and non-execution boundaries before effectful forecast creation exists.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.
