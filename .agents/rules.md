@@ -153,6 +153,7 @@ Before starting a new milestone, do a broader consistency review of the current 
 Commits should be small, reviewable snapshots of completed work.
 
 - Do not create a commit unless the user explicitly asks for one or the current task clearly includes publishing or committing the work.
+- For multi-milestone roadmap work, commit after each completed milestone once the relevant checks pass, unless the user explicitly asks not to commit.
 - Commit one coherent implementation slice at a time; do not mix unrelated fixes, formatting churn, generated output, or exploratory edits into the same commit.
 - Before staging, inspect `git status` and the relevant `git diff` so unrelated local changes, user work, ignored live captures, secrets, and scratch files are not staged accidentally.
 - Include required schema, fixture, generated report, documentation, roadmap, and decision-log updates in the same commit as the behavior that requires them.
