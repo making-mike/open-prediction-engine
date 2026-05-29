@@ -14,7 +14,7 @@ from typing import Any
 import generate_resolution_jobs
 import resolve_due_transit_forward_runs as resolver
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -277,24 +277,11 @@ def output_path(args: argparse.Namespace) -> Path:
 
 
 def write_report(report: dict[str, Any], args: argparse.Namespace) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    output_path(args).write_text(render_json(report), encoding="utf-8")
-    print("generated resolution scheduler")
+    write_generated(output_path(args), report, label="resolution scheduler", regen="python3 scripts/run_resolution_scheduler.py --write")
 
 
 def check_report(report: dict[str, Any], args: argparse.Namespace) -> None:
-    expected = render_json(report)
-    path = output_path(args)
-    if not path.exists():
-        print(f"missing resolution scheduler: {path}", file=sys.stderr)
-        print("run `python3 scripts/run_resolution_scheduler.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = path.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"resolution scheduler drift: {path}", file=sys.stderr)
-        print("run `python3 scripts/run_resolution_scheduler.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked resolution scheduler")
+    check_generated(output_path(args), report, label="resolution scheduler", regen="python3 scripts/run_resolution_scheduler.py --write")
 
 
 def append_log(path: Path, report: dict[str, Any]) -> None:

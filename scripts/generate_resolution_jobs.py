@@ -16,7 +16,7 @@ from generate_prediction_campaign_forecast_write import build_prediction_campaig
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 import resolve_due_transit_forward_runs as resolver
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -308,24 +308,11 @@ def output_path(args: argparse.Namespace) -> Path:
 
 
 def write_registry(registry: dict[str, Any], args: argparse.Namespace) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    output_path(args).write_text(render_json(registry), encoding="utf-8")
-    print("generated resolution jobs")
+    write_generated(output_path(args), registry, label="resolution jobs", regen="python3 scripts/generate_resolution_jobs.py --write")
 
 
 def check_registry(registry: dict[str, Any], args: argparse.Namespace) -> None:
-    expected = render_json(registry)
-    path = output_path(args)
-    if not path.exists():
-        print(f"missing resolution jobs: {path}", file=sys.stderr)
-        print("run `python3 scripts/generate_resolution_jobs.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = path.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"resolution jobs drift: {path}", file=sys.stderr)
-        print("run `python3 scripts/generate_resolution_jobs.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked resolution jobs")
+    check_generated(output_path(args), registry, label="resolution jobs", regen="python3 scripts/generate_resolution_jobs.py --write")
 
 
 def main() -> None:
