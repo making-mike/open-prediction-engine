@@ -94,6 +94,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/transit-method-options.md`: checked public transport MVP method options and baseline-default boundary.
 - `spec/transit-live-evidence-promotion.md`: checked policy-bound promotion gate for ignored local transit live drafts.
 - `spec/resolution-jobs.md`: checked agent-facing resolution job registry, including campaign-aware next-action readbacks.
+- `spec/resolution-scheduler.md`: checked foreground terminal scheduler, including campaign-aware dry-run ticks.
 - `spec/resolution-runtime-reliability.md`: checked failure taxonomy, retry guidance, provenance ledger, and live-source boundary for the resolution runtime.
 - `spec/release-manifest.md`: generated local release manifest and claim boundary summary.
 - `spec/mvp-local-runtime.md`: compact local MVP runtime runbook, machine interfaces, smoke checks, and claim boundary.
@@ -264,6 +265,8 @@ python3 scripts/check_prediction_campaign_forecast_write.py
 python3 scripts/generate_resolution_jobs.py --check
 python3 scripts/generate_resolution_jobs.py --campaign predictioncampaign-001 --check
 python3 scripts/check_resolution_jobs.py
+python3 scripts/run_resolution_scheduler.py --campaign predictioncampaign-001 --check
+python3 scripts/check_resolution_scheduler.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -394,6 +397,7 @@ python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -504,6 +508,7 @@ python3 scripts/generate_prediction_campaign_forecast_artifact.py --write
 python3 scripts/generate_prediction_campaign_forecast_write.py --write
 python3 scripts/generate_resolution_jobs.py --write
 python3 scripts/generate_resolution_jobs.py --campaign predictioncampaign-001 --write
+python3 scripts/run_resolution_scheduler.py --campaign predictioncampaign-001 --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

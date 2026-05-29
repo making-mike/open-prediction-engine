@@ -106,6 +106,8 @@ The transit forward-run corpus generator emits a checked corpus index under `gen
 
 The resolution jobs generator emits checked default and campaign-aware registries under `generated/resolution-jobs/`, including the `forecast-1301` campaign wait state without executing resolvers, writing campaign state, creating scoring records, or appending corpus evidence.
 
+The resolution scheduler generator emits checked default and campaign-aware ticks under `generated/resolution-scheduler/`; the campaign tick includes the `forecast-1301` wait action without executing campaign resolvers or writing campaign state.
+
 The domain setup generator emits reference and candidate setup records under `generated/domain-setups/`.
 
 The source manifest builder inspects caller-approved local CSV/JSON files under `local-source-files/` and emits checked build results plus draft source manifest and field mapping files under `generated/source-builder/`. Rejected examples cover secrets, unsupported formats, oversized files, and post-outcome leakage indicators. Drafts are excluded from public read surfaces until source intake accepts them.

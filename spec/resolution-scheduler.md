@@ -2,7 +2,7 @@
 
 Status: checked foreground terminal scheduler.
 
-Last reviewed: 2026-05-27.
+Last reviewed: 2026-05-29.
 
 The resolution scheduler is the local "keep working later" loop for OPE agents. It polls the checked resolution job registry and, only when explicitly allowed, asks the checked resolver to execute due transit forward runs.
 
@@ -14,6 +14,15 @@ Default checked fixture:
 python3 scripts/ope.py resolution-scheduler
 python3 scripts/ope.py resolution-scheduler --check
 ```
+
+Campaign-aware checked fixture:
+
+```bash
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --check
+```
+
+The campaign fixture reads the checked campaign manifest, `forecast-1301` artifact, and campaign forecast-write plan through the resolution job registry. It adds the campaign wait action to the scheduler tick, but it does not execute campaign resolvers, write campaign state, create resolution or scoring records, or append corpus evidence.
 
 One live dry-run tick:
 
@@ -90,6 +99,6 @@ When watch mode is stopped with `Ctrl+C`, the scheduler exits with code 130 and 
 
 ## Boundary
 
-Normal checks perform one offline fixture tick. Live watching requires `--live --watch`. Resolver execution additionally requires `--execute`.
+Normal checks perform one offline fixture tick. `--campaign predictioncampaign-001` performs a separate offline campaign-aware fixture tick. Live watching requires `--live --watch`. Resolver execution additionally requires `--execute`.
 
-The scheduler can execute due resolver commands only through `resolve-due-forward-runs`, preserving the existing source policy, resolution logic, scoring boundary, and sample-size claim boundary. It does not create hosted schedulers, OS scheduler files, forecast artifacts, calibration claims, or production runtime claims.
+The scheduler can execute due standalone forward-run resolver commands only through `resolve-due-forward-runs`, preserving the existing source policy, resolution logic, scoring boundary, and sample-size claim boundary. Campaign jobs remain read-only until an explicit campaign resolver path exists. It does not create hosted schedulers, OS scheduler files, forecast artifacts, calibration claims, or production runtime claims.

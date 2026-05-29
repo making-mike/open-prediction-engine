@@ -189,6 +189,17 @@ def main() -> None:
     require(campaign_jobs[0]["agentAction"]["recommendedAction"] == "wait", "campaign resolution job should tell agents to wait")
     require(campaign_resolution_jobs["executionBoundary"]["registryExecutesResolvers"] is False, "campaign resolution jobs must not execute resolvers")
 
+    campaign_scheduler = run_cli("resolution-scheduler", "--campaign", "predictioncampaign-001")
+    campaign_actions = [
+        action for action in campaign_scheduler["ticks"][0]["actions"]
+        if action["statePath"].startswith(".ope/live/prediction-campaigns/")
+    ]
+    require(campaign_scheduler["schedulerMode"] == "campaign_fixture_once", "campaign scheduler mode drifted")
+    require(len(campaign_actions) == 1, "campaign scheduler should expose one campaign action")
+    require(campaign_actions[0]["schedulerAction"] == "wait_until_due", "campaign scheduler should wait until due")
+    require(campaign_scheduler["executionMode"] == "dry_run", "campaign scheduler fixture should stay dry-run")
+    require(campaign_scheduler["executionBoundary"]["hostedSchedulerCreated"] is False, "campaign scheduler must not create hosted schedulers")
+
     track_gate = run_cli("transit-track-record-gate")
     require(track_gate["claimBoundary"]["qualityClaimAllowed"] is False, "MVP transit gate must block quality claims")
     require(track_gate["claimBoundary"]["calibrationClaimAllowed"] is False, "MVP transit gate must block calibration claims")

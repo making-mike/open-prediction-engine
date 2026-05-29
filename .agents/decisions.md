@@ -2031,3 +2031,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Extend the checked `resolution-jobs` registry with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that add the `forecast-1301` campaign wait state alongside existing forward-run jobs.
 - **Why:** Campaign-created forecasts need to appear in the same agent-facing resolution queue before campaign resolver execution, scheduler integration, resume, or corpus append behavior exists.
 - **Alternatives rejected:** Executing campaign resolvers from the registry, writing `.ope/live` campaign state during normal checks, inventing a separate campaign-only queue, or treating the waiting campaign forecast as resolution, scoring, corpus, or calibration evidence.
+
+### DEC-096 — Add Campaign-Aware Resolution Scheduler Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Extend the checked `resolution-scheduler` with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that include the `forecast-1301` campaign wait action in a dry-run scheduler tick.
+- **Why:** Agents need the same "keep checking later" surface for campaign-created forecasts before campaign resolver execution, campaign state mutation, resume, recovery, or corpus append behavior exists.
+- **Alternatives rejected:** Executing campaign resolvers from the scheduler, writing `.ope/live` campaign state during normal checks, creating hosted or OS scheduler files, or treating a scheduler wait action as resolution, scoring, corpus, or calibration evidence.

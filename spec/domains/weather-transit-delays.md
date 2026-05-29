@@ -47,6 +47,7 @@ Initial maturity:
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked campaign-aware resolution job readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
+- checked campaign-aware scheduler tick through `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`
 - no calibration, benchmark, production, or live quality claim
 
 ## First Beta Question Template
@@ -306,11 +307,14 @@ python3 scripts/ope.py resolve-due-forward-runs --live --execute --download-stat
 
 python3 scripts/ope.py resolution-jobs --live
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
 python3 scripts/ope.py resolution-scheduler --live --watch --execute --download-static-gtfs --poll-seconds 60
 ```
 
 The campaign-aware registry joins the checked campaign manifest, `forecast-1301` artifact, and forecast-write plan into the same agent-facing job readback. It reports the campaign run as waiting until `resolutionEligibleAt`; it does not execute campaign resolvers, write campaign state, create resolution or scoring records, append corpus evidence, or allow quality claims.
+
+The campaign-aware scheduler adds that same wait action to the checked scheduler tick. It keeps execution mode dry-run and leaves campaign resolver execution for a later explicit campaign path.
 
 The command accepts custom local CSV/JSON files with the same role shape:
 

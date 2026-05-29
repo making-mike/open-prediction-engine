@@ -19,6 +19,7 @@ from ope_schema import SPEC, validate_record
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "spec" / "fixtures" / "generated" / "resolution-scheduler"
 OUTPUT_PATH = GENERATED / "resolution-scheduler-run.generated.json"
+CAMPAIGN_OUTPUT_PATH = GENERATED / "resolution-scheduler-campaign-run.generated.json"
 SCHEMA = SPEC / "resolution-scheduler-run.schema.json"
 DEFAULT_LOG = ROOT / ".ope" / "live" / "resolution-scheduler" / "scheduler-runs.jsonl"
 
@@ -114,6 +115,7 @@ def registry_args(args: argparse.Namespace, now: str | None) -> SimpleNamespace:
         live=args.live,
         workspace=args.workspace,
         run_state=args.run_state or [],
+        campaign=args.campaign,
         now=now,
         limit=args.limit,
     )
@@ -139,6 +141,8 @@ def resolver_args(args: argparse.Namespace, now: str | None, execute: bool) -> S
 
 def scheduler_action(job: dict[str, Any], execute_due: bool) -> str:
     status = job["jobStatus"]
+    if job["target"].get("campaignId") and status == "pending_due":
+        return "campaign_resolver_not_implemented"
     if status == "pending_due":
         return "resolver_execute_requested" if execute_due else "due_waiting_for_execute_flag"
     if status == "pending_not_due":
@@ -163,8 +167,11 @@ def tick_status(job_summary: dict[str, int], resolver_summary: dict[str, Any]) -
 def build_tick(args: argparse.Namespace, tick_number: int) -> dict[str, Any]:
     now = None if args.live else resolver.FIXTURE_NOW
     registry = generate_resolution_jobs.build_registry(registry_args(args, now))
-    pending_due = registry["summary"]["pendingDueCount"]
-    execute_due = bool(args.execute and pending_due > 0)
+    executable_due = [
+        job for job in registry["jobs"]
+        if job["jobStatus"] == "pending_due" and not job["target"].get("campaignId")
+    ]
+    execute_due = bool(args.execute and executable_due)
     resolver_report = resolver.build_report(resolver_args(args, registry["generatedAt"], execute_due)) if execute_due else None
     resolver_summary = {
         "ranResolver": resolver_report is not None,
@@ -201,7 +208,19 @@ def build_report(
     report = {
         "resolutionSchedulerRunId": "resolutionschedulerrun-001",
         "generatedAt": ticks[-1]["startedAt"],
-        "schedulerMode": "live_watch" if args.watch else "live_once" if args.live else "fixture_once",
+        "schedulerMode": (
+            "campaign_live_watch"
+            if args.watch and args.campaign
+            else "live_watch"
+            if args.watch
+            else "campaign_live_once"
+            if args.live and args.campaign
+            else "live_once"
+            if args.live
+            else "campaign_fixture_once"
+            if args.campaign
+            else "fixture_once"
+        ),
         "executionMode": "execute" if args.execute else "dry_run",
         "pollSeconds": args.poll_seconds,
         "tickCount": len(ticks),
@@ -222,6 +241,10 @@ def build_report(
             "Scheduler execution may resolve due runs, but it never creates calibration claims.",
         ],
     }
+    if args.campaign:
+        report["warnings"].append(
+            "Campaign-aware scheduler ticks read checked campaign jobs but do not execute campaign resolvers or write campaign state."
+        )
     if shutdown_reason is not None:
         report["shutdown"] = {
             "shutdownReason": shutdown_reason,
@@ -250,21 +273,28 @@ def validate_report(report: dict[str, Any]) -> None:
                 raise ResolutionSchedulerError("dry-run scheduler must not execute resolvers")
 
 
-def write_report(report: dict[str, Any]) -> None:
+def output_path(args: argparse.Namespace) -> Path:
+    if args.campaign:
+        return CAMPAIGN_OUTPUT_PATH
+    return OUTPUT_PATH
+
+
+def write_report(report: dict[str, Any], args: argparse.Namespace) -> None:
     GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(report), encoding="utf-8")
+    output_path(args).write_text(render_json(report), encoding="utf-8")
     print("generated resolution scheduler")
 
 
-def check_report(report: dict[str, Any]) -> None:
+def check_report(report: dict[str, Any], args: argparse.Namespace) -> None:
     expected = render_json(report)
-    if not OUTPUT_PATH.exists():
-        print(f"missing resolution scheduler: {OUTPUT_PATH}", file=sys.stderr)
+    path = output_path(args)
+    if not path.exists():
+        print(f"missing resolution scheduler: {path}", file=sys.stderr)
         print("run `python3 scripts/run_resolution_scheduler.py --write`", file=sys.stderr)
         raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
+    actual = path.read_text(encoding="utf-8")
     if actual != expected:
-        print(f"resolution scheduler drift: {OUTPUT_PATH}", file=sys.stderr)
+        print(f"resolution scheduler drift: {path}", file=sys.stderr)
         print("run `python3 scripts/run_resolution_scheduler.py --write`", file=sys.stderr)
         raise SystemExit(1)
     print("checked resolution scheduler")
@@ -321,6 +351,7 @@ def main() -> None:
     parser.add_argument("--execute", action="store_true", help="execute due jobs through the checked resolver")
     parser.add_argument("--workspace", default=str(resolver.LIVE_WORKSPACE))
     parser.add_argument("--run-state", action="append", default=[])
+    parser.add_argument("--campaign", help="include a checked prediction campaign in scheduler ticks")
     parser.add_argument("--limit", type=int, default=50)
     parser.add_argument("--poll-seconds", type=int, default=60)
     parser.add_argument("--max-ticks", type=int)
@@ -352,9 +383,9 @@ def main() -> None:
             if report is None:
                 raise ResolutionSchedulerError("scheduler did not produce a report")
             if args.write:
-                write_report(report)
+                write_report(report, args)
             else:
-                check_report(report)
+                check_report(report, args)
             return
         report = run_scheduler(args)
         if report is not None and not args.watch:

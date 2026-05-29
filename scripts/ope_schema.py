@@ -255,7 +255,7 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "transit-forward-run-resolver.schema.json"
     if name.endswith("resolution-jobs.generated.json") or name.endswith("resolution-jobs-campaign.generated.json"):
         return spec_root / "resolution-job-registry.schema.json"
-    if name.endswith("resolution-scheduler-run.generated.json"):
+    if name.endswith("resolution-scheduler-run.generated.json") or name.endswith("resolution-scheduler-campaign-run.generated.json"):
         return spec_root / "resolution-scheduler-run.schema.json"
     if name.endswith("resolution-runtime-reliability.generated.json"):
         return spec_root / "resolution-runtime-reliability.schema.json"

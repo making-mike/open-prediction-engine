@@ -868,6 +868,23 @@ def main() -> None:
     resolution_scheduler_check = run_cli("resolution-scheduler", "--check")
     if "checked resolution scheduler" not in resolution_scheduler_check.stdout:
         raise AssertionError("CLI resolution-scheduler --check did not check generated output")
+    campaign_scheduler = run_cli("resolution-scheduler", "--campaign", "predictioncampaign-001")
+    campaign_scheduler_payload = json.loads(campaign_scheduler.stdout)
+    if campaign_scheduler_payload["schedulerMode"] != "campaign_fixture_once":
+        raise AssertionError("CLI campaign resolution-scheduler should use campaign fixture mode")
+    if campaign_scheduler_payload["ticks"][0]["jobSummary"]["jobCount"] != 4:
+        raise AssertionError("CLI campaign resolution-scheduler should include the campaign job")
+    campaign_actions = [
+        action for action in campaign_scheduler_payload["ticks"][0]["actions"]
+        if action["statePath"].startswith(".ope/live/prediction-campaigns/")
+    ]
+    if len(campaign_actions) != 1:
+        raise AssertionError("CLI campaign resolution-scheduler should expose one campaign action")
+    if campaign_actions[0]["schedulerAction"] != "wait_until_due":
+        raise AssertionError("CLI campaign resolution-scheduler should wait for the campaign resolution time")
+    campaign_scheduler_check = run_cli("resolution-scheduler", "--campaign", "predictioncampaign-001", "--check")
+    if "checked resolution scheduler" not in campaign_scheduler_check.stdout:
+        raise AssertionError("CLI campaign resolution-scheduler --check did not check generated output")
 
     runtime_reliability = run_cli("resolution-runtime-reliability")
     runtime_reliability_payload = json.loads(runtime_reliability.stdout)

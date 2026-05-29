@@ -705,6 +705,8 @@ def cmd_resolution_scheduler(args: argparse.Namespace) -> None:
         command.extend(["--workspace", args.workspace])
     for run_state in args.run_state or []:
         command.extend(["--run-state", run_state])
+    if args.campaign:
+        command.extend(["--campaign", args.campaign])
     if args.limit is not None:
         command.extend(["--limit", str(args.limit)])
     if args.poll_seconds is not None:
@@ -1705,6 +1707,7 @@ def build_parser() -> argparse.ArgumentParser:
     resolution_scheduler.add_argument("--execute", action="store_true", help="execute due jobs through the checked resolver")
     resolution_scheduler.add_argument("--workspace", help="ignored local forward-run workspace")
     resolution_scheduler.add_argument("--run-state", action="append", help="specific forward-run-state.json to watch")
+    resolution_scheduler.add_argument("--campaign", help="include a checked prediction campaign in scheduler ticks")
     resolution_scheduler.add_argument("--limit", type=int)
     resolution_scheduler.add_argument("--poll-seconds", type=int)
     resolution_scheduler.add_argument("--max-ticks", type=int)
