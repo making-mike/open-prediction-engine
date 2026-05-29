@@ -1,0 +1,316 @@
+#!/usr/bin/env python3
+"""Generate or check the checked prediction campaign forecast artifact."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from generate_prediction_campaign_forecast_creation import build_prediction_campaign_forecast_creation
+from ope_schema import SPEC, validate_record
+
+
+ROOT = Path(__file__).resolve().parents[1]
+GENERATED = ROOT / "spec" / "fixtures" / "generated" / "prediction-campaign-forecast-artifact"
+MANIFEST_PATH = (
+    ROOT
+    / "spec"
+    / "fixtures"
+    / "generated"
+    / "prediction-campaign-manifest"
+    / "weather-transit-delay-campaign-manifest.generated.json"
+)
+CREATION_PATH = (
+    ROOT
+    / "spec"
+    / "fixtures"
+    / "generated"
+    / "prediction-campaign-forecast-creation"
+    / "weather-transit-delay-campaign-forecast-creation.generated.json"
+)
+HISTORY_SOURCE_PATH = ROOT / "spec" / "fixtures" / "local-source-files" / "transit-delay-history.csv"
+OUTPUT_NAMES = {
+    "question": "weather-transit-delay-campaign-forecast-question.generated.json",
+    "evidence": "weather-transit-delay-campaign-forecast-evidence.generated.json",
+    "artifact": "weather-transit-delay-campaign-forecast-artifact.generated.json",
+    "history": "weather-transit-delay-campaign-forecast-history.generated.json",
+}
+SCHEMAS = {
+    "question": SPEC / "forecast-question.schema.json",
+    "evidence": SPEC / "evidence-packet.schema.json",
+    "artifact": SPEC / "forecast-artifact.schema.json",
+    "history": SPEC / "forecast-history.schema.json",
+}
+GENERATED_AT = "2026-05-29T00:45:00Z"
+NETWORK = "hsl-surface"
+GEOGRAPHY = "helsinki"
+EVENT_THRESHOLD = 0.2
+LATE_SECONDS = 300
+MIN_OBSERVATIONS = 10
+BASELINE_PROBABILITY = 0.25
+
+
+def render_json(data: Any) -> str:
+    return json.dumps(data, indent=2, sort_keys=False) + "\n"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def local_uri(path: Path) -> str:
+    try:
+        rel = path.resolve().relative_to(ROOT)
+    except ValueError:
+        rel = path.resolve()
+    normalized = str(rel).replace("\\", "/")
+    return f"local://{normalized}"
+
+
+def source_ref(
+    source_id: str,
+    name: str,
+    source_type: str,
+    path: Path | None = None,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    ref: dict[str, Any] = {
+        "sourceId": source_id,
+        "name": name,
+        "sourceType": source_type,
+    }
+    if path is not None:
+        ref["uri"] = local_uri(path)
+        ref["contentHash"] = sha256(path)
+    if retrieved_at is not None:
+        ref["retrievedAt"] = retrieved_at
+    return ref
+
+
+def horizon(run: dict[str, Any]) -> dict[str, Any]:
+    label = f"same-day-{run['serviceWindow'].replace('_', '-')}"
+    return {
+        "startsAt": run["horizonStartsAt"],
+        "endsAt": run["horizonEndsAt"],
+        "label": label,
+    }
+
+
+def resolution_criteria(run: dict[str, Any]) -> str:
+    threshold_percent = int(EVENT_THRESHOLD * 100)
+    return (
+        f"Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for {NETWORK} "
+        f"in {GEOGRAPHY} during {run['serviceWindow']} on {run['serviceDate']} include at least "
+        f"{MIN_OBSERVATIONS} eligible trip-stop observations and at least {threshold_percent}% have "
+        f"delay_seconds >= {LATE_SECONDS}. Resolve No if coverage passes and the ratio is below threshold. "
+        "Resolve Ambiguous if coverage fails."
+    )
+
+
+def build_prediction_campaign_forecast_artifact() -> dict[str, dict[str, Any]]:
+    creation = build_prediction_campaign_forecast_creation()
+    run = creation["readyRun"]
+    bindings = creation["bindings"]
+    horizon_record = horizon(run)
+    criteria = resolution_criteria(run)
+    outcome_ref = source_ref(
+        "source-1304",
+        "Future transit delay outcome capture",
+        "public_dataset",
+    )
+    provenance_refs = [
+        source_ref(
+            "source-1301",
+            "Historical transit delay fixture",
+            "public_dataset",
+            HISTORY_SOURCE_PATH,
+            run["forecastCreateAt"],
+        ),
+        source_ref(
+            "source-1302",
+            "Prediction campaign manifest fixture",
+            "other",
+            MANIFEST_PATH,
+            GENERATED_AT,
+        ),
+        source_ref(
+            "source-1303",
+            "Prediction campaign forecast-creation handoff",
+            "other",
+            CREATION_PATH,
+            GENERATED_AT,
+        ),
+    ]
+    model = {
+        "modelId": "model-1301",
+        "version": "weather-transit-delay-campaign-baseline-v0",
+        "trainingCutoff": run["forecastCloseAt"],
+        "configurationHash": "sha256-campaign-baseline-v0",
+    }
+    forecast_output = {"outputType": "binary", "probability": BASELINE_PROBABILITY}
+    question = {
+        "questionId": run["questionId"],
+        "title": (
+            f"Will {NETWORK} in {GEOGRAPHY} exceed the beta delay threshold during "
+            f"{run['serviceWindow']} on {run['serviceDate']}?"
+        ),
+        "background": (
+            "Created as a checked prediction campaign fixture from the ready runner decision. "
+            "It uses the baseline-only campaign method because transit method options still block "
+            "non-baseline selection below the comparable-outcome threshold."
+        ),
+        "domain": creation["domain"],
+        "outputType": "binary",
+        "status": "open",
+        "openAt": run["forecastCreateAt"],
+        "closeAt": run["forecastCloseAt"],
+        "resolveAt": run["horizonEndsAt"],
+        "horizon": horizon_record,
+        "resolutionCriteria": criteria,
+        "resolutionAuthority": "OPE local transit delay resolver",
+        "resolutionMode": "automated_measurement",
+        "primaryResolutionSource": outcome_ref,
+        "fallbackResolutionSources": [],
+        "validOutcomeSpace": {
+            "description": "Binary outcome: Yes if the network late-observation ratio meets the declared threshold; No otherwise.",
+            "labels": ["yes", "no"],
+        },
+        "clarificationHistory": [],
+        "incentiveRiskReview": {
+            "riskLevel": "minimal",
+            "notes": "Local transit delay campaign fixture; no passenger-level, fare, enforcement, or public-safety use.",
+        },
+        "createdAt": run["forecastCreateAt"],
+        "updatedAt": run["forecastCreateAt"],
+    }
+    evidence = {
+        "evidencePacketId": "evidence-1301",
+        "forecastId": run["forecastId"],
+        "questionId": run["questionId"],
+        "questionStatus": "open",
+        "domain": creation["domain"],
+        "horizon": horizon_record,
+        "forecastedAt": run["forecastCreateAt"],
+        "model": model,
+        "inputSourceClasses": ["public_dataset", "other"],
+        "provenanceReferences": provenance_refs,
+        "forecastOutput": forecast_output,
+        "baselineForecast": forecast_output,
+        "rationaleSummary": (
+            "The checked campaign fixture creates an unresolved baseline-only forecast artifact from "
+            "the ready runner decision. It binds the campaign manifest, forecast-creation handoff, "
+            "source policy, and historical delay fixture without live fetches or resolver execution."
+        ),
+        "keyFactors": [
+            f"campaign run {run['runId']}",
+            f"runner decision {bindings['runnerDecisionId']}",
+            f"source policy {bindings['sourcePolicyId']}",
+            "baseline-only default selected below transit comparable-outcome threshold",
+            f"forecast closes at {run['forecastCloseAt']} before horizon start {run['horizonStartsAt']}",
+            "normal checks do not write .ope/live campaign state",
+            "resolution and scoring remain pending until post-window evidence is explicitly resolved",
+        ],
+        "resolutionCriteria": criteria,
+        "resolutionSource": outcome_ref,
+        "fallbackResolutionSources": [],
+        "scheduledResolutionAt": run["horizonEndsAt"],
+    }
+    artifact = {
+        "forecastId": run["forecastId"],
+        "questionId": run["questionId"],
+        "questionStatus": "open",
+        "domain": creation["domain"],
+        "horizon": horizon_record,
+        "forecastedAt": run["forecastCreateAt"],
+        "closedAt": run["forecastCloseAt"],
+        "outputType": "binary",
+        "forecastOutput": forecast_output,
+        "baselineForecast": forecast_output,
+        "model": model,
+        "evidencePacketId": evidence["evidencePacketId"],
+        "resolutionPlan": {
+            "resolutionCriteria": criteria,
+            "resolutionAuthority": question["resolutionAuthority"],
+            "primaryResolutionSource": outcome_ref,
+            "fallbackResolutionSources": [],
+            "scheduledResolutionAt": run["horizonEndsAt"],
+        },
+    }
+    history = {
+        "historyId": "history-1301",
+        "questionId": run["questionId"],
+        "entries": [
+            {
+                "forecastId": run["forecastId"],
+                "forecastedAt": run["forecastCreateAt"],
+                "state": "active",
+                "sourceClass": "baseline",
+                "model": model,
+                "forecastOutput": forecast_output,
+                "rationaleSummary": evidence["rationaleSummary"],
+                "evidencePacketId": evidence["evidencePacketId"],
+            }
+        ],
+        "createdAt": run["forecastCreateAt"],
+        "updatedAt": run["forecastCreateAt"],
+    }
+    return {
+        "question": question,
+        "evidence": evidence,
+        "artifact": artifact,
+        "history": history,
+    }
+
+
+def validate_records(records: dict[str, dict[str, Any]]) -> None:
+    for key, record in records.items():
+        errors = validate_record(record, SCHEMAS[key])
+        if errors:
+            for error in errors:
+                print(f"{key}: {error}")
+            raise SystemExit(1)
+
+
+def check_or_write(records: dict[str, dict[str, Any]], *, write: bool) -> None:
+    validate_records(records)
+    if write:
+        GENERATED.mkdir(parents=True, exist_ok=True)
+        for key, record in records.items():
+            (GENERATED / OUTPUT_NAMES[key]).write_text(render_json(record), encoding="utf-8")
+        return
+
+    for key, record in records.items():
+        path = GENERATED / OUTPUT_NAMES[key]
+        if not path.exists():
+            raise SystemExit(f"Missing generated prediction campaign forecast artifact record: {path}")
+        if path.read_text(encoding="utf-8") != render_json(record):
+            raise SystemExit("prediction campaign forecast artifact fixture drifted; run with --write")
+    print("checked prediction campaign forecast artifact")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--write", action="store_true", help="refresh generated campaign forecast artifact records")
+    parser.add_argument("--check", action="store_true", help="check generated campaign forecast artifact drift")
+    parser.add_argument(
+        "--view",
+        choices=sorted(OUTPUT_NAMES),
+        default="artifact",
+        help="print one campaign forecast artifact record",
+    )
+    args = parser.parse_args()
+
+    records = build_prediction_campaign_forecast_artifact()
+    if args.write or args.check:
+        check_or_write(records, write=args.write)
+        return
+    validate_records(records)
+    print(render_json(records[args.view]), end="")
+
+
+if __name__ == "__main__":
+    main()

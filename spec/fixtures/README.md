@@ -162,6 +162,8 @@ The prediction campaign runner generator emits a checked dry-run terminal runner
 
 The prediction campaign forecast-creation generator emits a checked dry-run handoff under `generated/prediction-campaign-forecast-creation/`, binding the ready runner decision to planned forecast artifact IDs and pre-creation checks without writing fixtures, live state, or campaign artifacts.
 
+The prediction campaign forecast artifact generator emits checked question, evidence, artifact, and history records under `generated/prediction-campaign-forecast-artifact/`, binding `forecast-1301` to the ready run as an unresolved baseline-only fixture without live fetches, resolver execution, scoring, or campaign-state writes.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.

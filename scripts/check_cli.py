@@ -432,6 +432,31 @@ def main() -> None:
     prediction_campaign_forecast_create_check = run_cli("prediction-campaign", "forecast-create", "--check")
     if "checked prediction campaign forecast creation" not in prediction_campaign_forecast_create_check.stdout:
         raise AssertionError("CLI prediction-campaign forecast-create check output drifted")
+    prediction_campaign_forecast_artifact = run_cli("prediction-campaign", "forecast-artifact")
+    prediction_campaign_forecast_artifact_payload = json.loads(prediction_campaign_forecast_artifact.stdout)
+    if prediction_campaign_forecast_artifact_payload["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-campaign forecast-artifact forecast ID drifted")
+    if prediction_campaign_forecast_artifact_payload["questionId"] != "question-1301":
+        raise AssertionError("CLI prediction-campaign forecast-artifact question ID drifted")
+    if (
+        prediction_campaign_forecast_artifact_payload["forecastOutput"]
+        != prediction_campaign_forecast_artifact_payload["baselineForecast"]
+    ):
+        raise AssertionError("CLI prediction-campaign forecast-artifact must remain baseline-only")
+    prediction_campaign_forecast_artifact_flags = run_cli(
+        "prediction-campaign",
+        "forecast-artifact",
+        "--live-weather",
+        "--execute-resolvers",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_forecast_artifact_flags_payload = json.loads(prediction_campaign_forecast_artifact_flags.stdout)
+    if prediction_campaign_forecast_artifact_flags_payload["forecastOutput"]["probability"] != 0.25:
+        raise AssertionError("CLI prediction-campaign forecast-artifact flags must remain checked fixture-only")
+    prediction_campaign_forecast_artifact_check = run_cli("prediction-campaign", "forecast-artifact", "--check")
+    if "checked prediction campaign forecast artifact" not in prediction_campaign_forecast_artifact_check.stdout:
+        raise AssertionError("CLI prediction-campaign forecast-artifact check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

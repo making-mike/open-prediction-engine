@@ -41,6 +41,7 @@ Initial maturity:
 - checked dry-run prediction campaign manifest through `python3 scripts/ope.py prediction-campaign plan`
 - checked dry-run terminal campaign runner readback through `python3 scripts/ope.py prediction-campaign start`
 - checked dry-run campaign forecast-creation handoff through `python3 scripts/ope.py prediction-campaign forecast-create`
+- checked unresolved campaign forecast artifact through `python3 scripts/ope.py prediction-campaign forecast-artifact`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -265,6 +266,14 @@ python3 scripts/ope.py prediction-campaign forecast-create
 ```
 
 It binds the ready runner decision to planned question, forecast, forecast-card, and lifecycle-bundle IDs, checks duplicate-key, source-policy, close-time, and method-default boundaries, and still does not write `.ope/live/`, fetch live data, run methods, or create forecast artifacts during normal checks.
+
+The checked campaign forecast artifact is:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-artifact
+```
+
+It materializes `forecast-1301` as unresolved baseline-only question, evidence, artifact, and history records using the standard lifecycle contracts. It remains a checked fixture: no `.ope/live/` state is written, no live evidence is fetched, no resolver runs, no score is produced, and no quality or calibration claim is allowed.
 
 It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
 

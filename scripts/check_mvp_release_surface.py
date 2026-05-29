@@ -111,6 +111,20 @@ def main() -> None:
     require(campaign_forecast_creation["summary"]["effectfulForecastCreationImplemented"] is False, "prediction campaign forecast creation must remain non-effectful")
     require(campaign_forecast_creation["executionBoundary"]["createsForecastArtifacts"] is False, "prediction campaign forecast creation must not create artifacts")
 
+    campaign_forecast_artifact = run_cli("prediction-campaign", "forecast-artifact")
+    require(campaign_forecast_artifact["forecastId"] == "forecast-1301", "prediction campaign forecast artifact ID drifted")
+    require(campaign_forecast_artifact["questionId"] == "question-1301", "prediction campaign forecast question ID drifted")
+    require(campaign_forecast_artifact["questionStatus"] == "open", "prediction campaign forecast should remain unresolved")
+    require(
+        campaign_forecast_artifact["forecastOutput"] == campaign_forecast_artifact["baselineForecast"],
+        "prediction campaign forecast artifact should remain baseline-only",
+    )
+
+    campaign_card = run_cli("read", "--record-type", "forecast-card", "--id", "forecast-1301", "--question-id", "question-1301")
+    require(campaign_card["record"]["status"] == "open", "prediction campaign forecast card should remain open")
+    require(campaign_card["record"]["score"] is None, "prediction campaign forecast card should remain unscored")
+    require(campaign_card["record"]["qualityClaim"]["status"] == "unresolved", "prediction campaign forecast card quality boundary drifted")
+
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
     require(adapter["forecastId"] is None, "accepted adapter path must not invent forecast artifacts")

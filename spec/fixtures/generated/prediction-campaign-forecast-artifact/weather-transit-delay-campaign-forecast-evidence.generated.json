@@ -1,0 +1,75 @@
+{
+  "evidencePacketId": "evidence-1301",
+  "forecastId": "forecast-1301",
+  "questionId": "question-1301",
+  "questionStatus": "open",
+  "domain": "weather-transit-delays",
+  "horizon": {
+    "startsAt": "2026-06-11T05:00:00Z",
+    "endsAt": "2026-06-11T07:00:00Z",
+    "label": "same-day-morning-peak"
+  },
+  "forecastedAt": "2026-06-11T00:00:00Z",
+  "model": {
+    "modelId": "model-1301",
+    "version": "weather-transit-delay-campaign-baseline-v0",
+    "trainingCutoff": "2026-06-11T04:45:00Z",
+    "configurationHash": "sha256-campaign-baseline-v0"
+  },
+  "inputSourceClasses": [
+    "public_dataset",
+    "other"
+  ],
+  "provenanceReferences": [
+    {
+      "sourceId": "source-1301",
+      "name": "Historical transit delay fixture",
+      "sourceType": "public_dataset",
+      "uri": "local://spec/fixtures/local-source-files/transit-delay-history.csv",
+      "contentHash": "6e7e339a0dd78925072cc0052f057f8168b34667f9331d658683ae30f3bbf4f4",
+      "retrievedAt": "2026-06-11T00:00:00Z"
+    },
+    {
+      "sourceId": "source-1302",
+      "name": "Prediction campaign manifest fixture",
+      "sourceType": "other",
+      "uri": "local://spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
+      "contentHash": "781fca03e9f722acb5ec0a493541a13455a08f3dde41355638475b1c7d0ac3a6",
+      "retrievedAt": "2026-05-29T00:45:00Z"
+    },
+    {
+      "sourceId": "source-1303",
+      "name": "Prediction campaign forecast-creation handoff",
+      "sourceType": "other",
+      "uri": "local://spec/fixtures/generated/prediction-campaign-forecast-creation/weather-transit-delay-campaign-forecast-creation.generated.json",
+      "contentHash": "faa4be6b4a4e096e5a4c0d9f44e3f987cc702b0f72ccf111d0635909d9011032",
+      "retrievedAt": "2026-05-29T00:45:00Z"
+    }
+  ],
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "rationaleSummary": "The checked campaign fixture creates an unresolved baseline-only forecast artifact from the ready runner decision. It binds the campaign manifest, forecast-creation handoff, source policy, and historical delay fixture without live fetches or resolver execution.",
+  "keyFactors": [
+    "campaign run predictionrun-1301",
+    "runner decision predictionrunnerdecision-001",
+    "source policy sourcepolicy-1201",
+    "baseline-only default selected below transit comparable-outcome threshold",
+    "forecast closes at 2026-06-11T04:45:00Z before horizon start 2026-06-11T05:00:00Z",
+    "normal checks do not write .ope/live campaign state",
+    "resolution and scoring remain pending until post-window evidence is explicitly resolved"
+  ],
+  "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-11 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
+  "resolutionSource": {
+    "sourceId": "source-1304",
+    "name": "Future transit delay outcome capture",
+    "sourceType": "public_dataset"
+  },
+  "fallbackResolutionSources": [],
+  "scheduledResolutionAt": "2026-06-11T07:00:00Z"
+}

@@ -128,6 +128,21 @@ def check_source_handoff_forecast_card_read() -> None:
         raise AssertionError("source-handoff forecast card should not link an auto-evidence trace")
 
 
+def check_campaign_forecast_card_read() -> None:
+    response = read_record("forecast-card", "forecast-1301", "question-1301")
+    record = response["record"]
+    if record["status"] != "open":
+        raise AssertionError("campaign forecast card should remain open before resolution")
+    if record["forecast"] != record["baseline"]:
+        raise AssertionError("campaign forecast card should expose baseline-only equality")
+    if record["score"] is not None:
+        raise AssertionError("campaign forecast card should not expose a score before resolution")
+    if record["qualityClaim"]["status"] != "unresolved":
+        raise AssertionError("campaign forecast card should preserve unresolved claim boundary")
+    if record["links"]["resolutionRecord"] is not None or record["links"]["scoringReport"] is not None:
+        raise AssertionError("campaign forecast card should not link resolution or scoring records yet")
+
+
 def check_evidence_trace_read() -> None:
     response = read_record("evidence-trace", "forecast-602", "question-601")
     record = response["record"]
@@ -245,6 +260,7 @@ def main() -> None:
     check_historical_forecast_card_read()
     check_setup_forecast_card_read()
     check_source_handoff_forecast_card_read()
+    check_campaign_forecast_card_read()
     check_evidence_trace_read()
     check_evidence_source_set_read()
     check_source_connector_results_read()

@@ -2010,3 +2010,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `prediction-campaign-forecast-creation` contract, generated fixture, CLI command, and checker that binds a ready campaign runner decision to planned question, forecast, card, and lifecycle-bundle IDs.
 - **Why:** Before implementing artifact mutation, OPE needs a stable handoff that proves the next forecast can be selected, checked before close, bound to source policy and duplicate-key rules, and kept separate from live fetches, resolver execution, and quality claims.
 - **Alternatives rejected:** Creating ignored campaign artifacts during normal checks, letting the runner invent forecast paths at execution time, backfilling missed forecasts, or mixing forecast creation with due resolution and corpus append behavior.
+
+### DEC-093 — Add Checked Campaign Forecast Artifact Fixture
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign forecast-artifact` generator, fixture set, CLI readback, and checker that materializes `forecast-1301` as unresolved baseline-only question, evidence, artifact, and history records using existing lifecycle schemas.
+- **Why:** Agents need to see the actual OPE-standard forecast records that follow the campaign handoff before OPE implements ignored live-state mutation, live evidence capture, resolver execution, scoring, or corpus append behavior.
+- **Alternatives rejected:** Adding a campaign-specific forecast schema, writing `.ope/live/` campaign artifacts during normal checks, resolving and scoring the future run immediately, or selecting a non-baseline method before comparable transit evidence clears the gate.

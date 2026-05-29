@@ -97,6 +97,18 @@ def main() -> None:
     if handoff_card["links"]["evidenceTrace"] is not None:
         raise AssertionError("source-handoff forecast card should not link an evidence trace")
 
+    campaign_card_response = read_record("forecast-card", "forecast-1301", "question-1301")
+    campaign_card = campaign_card_response["record"]
+    assert_valid(campaign_card, FORECAST_CARD_SCHEMA, "prediction campaign forecast card")
+    if campaign_card["status"] != "open":
+        raise AssertionError("prediction campaign forecast card should remain open")
+    if campaign_card["score"] is not None:
+        raise AssertionError("prediction campaign forecast card should remain unscored")
+    if campaign_card["forecast"] != campaign_card["baseline"]:
+        raise AssertionError("prediction campaign forecast card should preserve baseline-only output")
+    if campaign_card["requestBinding"]["pipelineRunId"] is not None:
+        raise AssertionError("prediction campaign forecast card should not invent a pipeline run")
+
     trace_response = read_record("evidence-trace", "forecast-602", "question-601")
     trace = trace_response["record"]
     assert_valid(trace, EVIDENCE_TRACE_SCHEMA, "evidence trace")
