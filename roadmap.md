@@ -127,6 +127,7 @@ Done:
 - Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, output modes, dry-run run decisions, and non-execution boundaries before effectful forecast creation exists.
 - Prediction campaign forecast-creation handoffs now bind a ready runner decision to planned question, forecast, card, and bundle IDs through `python3 scripts/ope.py prediction-campaign forecast-create`, without creating artifacts or writing campaign state.
 - Prediction campaign forecast artifacts now materialize `forecast-1301` as an unresolved baseline-only checked fixture through `python3 scripts/ope.py prediction-campaign forecast-artifact`, using the standard question, evidence, artifact, and history contracts without live fetches, resolver execution, scoring, or campaign-state writes.
+- Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`, without executing local writes during normal checks.
 
 Not started:
 
@@ -2850,6 +2851,7 @@ Tasks:
 - [x] Expose `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
 - [x] Add a checked forecast-creation handoff for the ready run before effectful artifact creation.
 - [x] Add a checked unresolved campaign forecast artifact for the ready run using the standard lifecycle contracts.
+- [x] Add a checked non-mutating campaign forecast write plan before effectful ignored-state mutation.
 - [ ] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
 - [ ] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
 - [x] Document JSONL captured output and compact human status line expectations in the dry-run runner readback.
@@ -2902,7 +2904,13 @@ Completed outputs so far:
 - `scripts/check_prediction_campaign_forecast_artifact.py`
 - checked lifecycle fixtures under `spec/fixtures/generated/prediction-campaign-forecast-artifact/`
 - CLI readback `python3 scripts/ope.py prediction-campaign forecast-artifact`
-- release-manifest, MVP-smoke, read-surface, CLI, docs, roadmap, and decision-log wiring for the checked dry-run runner, forecast-creation, and forecast-artifact readbacks
+- `spec/prediction-campaign-forecast-write.schema.json`
+- `spec/prediction-campaign-forecast-write.md`
+- `scripts/generate_prediction_campaign_forecast_write.py`
+- `scripts/check_prediction_campaign_forecast_write.py`
+- checked write-plan fixture under `spec/fixtures/generated/prediction-campaign-forecast-write/`
+- CLI readback `python3 scripts/ope.py prediction-campaign forecast-write`
+- release-manifest, MVP-smoke, read-surface, CLI, docs, roadmap, and decision-log wiring for the checked dry-run runner, forecast-creation, forecast-artifact, and forecast-write readbacks
 
 ## Milestone 94: Campaign Resolution, Scoring, And Recovery
 

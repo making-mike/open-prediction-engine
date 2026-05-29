@@ -42,6 +42,7 @@ Initial maturity:
 - checked dry-run terminal campaign runner readback through `python3 scripts/ope.py prediction-campaign start`
 - checked dry-run campaign forecast-creation handoff through `python3 scripts/ope.py prediction-campaign forecast-create`
 - checked unresolved campaign forecast artifact through `python3 scripts/ope.py prediction-campaign forecast-artifact`
+- checked non-mutating campaign forecast write plan through `python3 scripts/ope.py prediction-campaign forecast-write`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
@@ -274,6 +275,14 @@ python3 scripts/ope.py prediction-campaign forecast-artifact
 ```
 
 It materializes `forecast-1301` as unresolved baseline-only question, evidence, artifact, and history records using the standard lifecycle contracts. It remains a checked fixture: no `.ope/live/` state is written, no live evidence is fetched, no resolver runs, no score is produced, and no quality or calibration claim is allowed.
+
+The checked campaign forecast write plan is:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-write
+```
+
+It binds those lifecycle records to intended ignored `.ope/live/prediction-campaigns/...` target paths, content hashes, schema files, duplicate/source-policy guards, and write-boundary warnings. The current surface is still a read-only plan: `--write-local` is accepted as a documented future flag shape, but normal checks do not write campaign state, fetch live data, run resolvers, score, append corpus evidence, or allow quality claims.
 
 It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
 

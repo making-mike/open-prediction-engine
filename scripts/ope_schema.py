@@ -293,6 +293,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "prediction-campaign-runner.schema.json"
     if name.endswith("campaign-forecast-creation.generated.json"):
         return spec_root / "prediction-campaign-forecast-creation.schema.json"
+    if name.endswith("campaign-forecast-write.generated.json"):
+        return spec_root / "prediction-campaign-forecast-write.schema.json"
     if name.endswith("-setup-benchmark-gate.generated.json"):
         return spec_root / "setup-benchmark-gate.schema.json"
     if name.endswith("-setup-method-decision.generated.json"):

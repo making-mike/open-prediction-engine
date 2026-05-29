@@ -457,6 +457,31 @@ def main() -> None:
     prediction_campaign_forecast_artifact_check = run_cli("prediction-campaign", "forecast-artifact", "--check")
     if "checked prediction campaign forecast artifact" not in prediction_campaign_forecast_artifact_check.stdout:
         raise AssertionError("CLI prediction-campaign forecast-artifact check output drifted")
+    prediction_campaign_forecast_write = run_cli("prediction-campaign", "forecast-write")
+    prediction_campaign_forecast_write_payload = json.loads(prediction_campaign_forecast_write.stdout)
+    if prediction_campaign_forecast_write_payload["writeStatus"] != "ready_for_explicit_local_write":
+        raise AssertionError("CLI prediction-campaign forecast-write status drifted")
+    if prediction_campaign_forecast_write_payload["bindings"]["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-campaign forecast-write forecast binding drifted")
+    if prediction_campaign_forecast_write_payload["summary"]["effectfulLocalWriteImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-write must remain non-mutating")
+    if prediction_campaign_forecast_write_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-write must not write ignored live state")
+    prediction_campaign_forecast_write_flags = run_cli(
+        "prediction-campaign",
+        "forecast-write",
+        "--run-id",
+        "predictionrun-1301",
+        "--write-local",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_forecast_write_flags_payload = json.loads(prediction_campaign_forecast_write_flags.stdout)
+    if prediction_campaign_forecast_write_flags_payload["commandSurface"]["normalChecksExecuteWrite"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-write flags must remain checked non-mutating")
+    prediction_campaign_forecast_write_check = run_cli("prediction-campaign", "forecast-write", "--check")
+    if "checked prediction campaign forecast write" not in prediction_campaign_forecast_write_check.stdout:
+        raise AssertionError("CLI prediction-campaign forecast-write check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

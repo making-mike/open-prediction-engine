@@ -84,6 +84,7 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py prediction-campaign start",
                 "python3 scripts/ope.py prediction-campaign forecast-create",
                 "python3 scripts/ope.py prediction-campaign forecast-artifact",
+                "python3 scripts/ope.py prediction-campaign forecast-write",
                 "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
@@ -174,6 +175,11 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-prediction-campaign-forecast-artifact",
                 "command": "python3 scripts/ope.py prediction-campaign forecast-artifact",
                 "expected": "prediction campaign forecast-artifact exposes the checked unresolved baseline-only forecast-1301 record without live fetch, resolver execution, or campaign-state writes.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-forecast-write",
+                "command": "python3 scripts/ope.py prediction-campaign forecast-write",
+                "expected": "prediction campaign forecast-write exposes the guarded ignored-local-state write plan without executing the write during normal checks.",
             },
             {
                 "checkId": "mvp-smoke-forecast-run",

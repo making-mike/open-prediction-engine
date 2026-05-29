@@ -1,0 +1,178 @@
+{
+  "predictionCampaignForecastWriteId": "predictioncampaignforecastwrite-001",
+  "generatedAt": "2026-05-29T01:00:00Z",
+  "writeStatus": "ready_for_explicit_local_write",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "predictionCampaignForecastCreationId": "predictioncampaignforecastcreation-001",
+    "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "runId": "predictionrun-1301",
+    "runnerDecisionId": "predictionrunnerdecision-001",
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "evidencePacketId": "evidence-1301",
+    "historyId": "history-1301",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "manifestPath": "spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
+    "forecastCreationPath": "spec/fixtures/generated/prediction-campaign-forecast-creation/weather-transit-delay-campaign-forecast-creation.generated.json",
+    "forecastArtifactFixtureDirectory": "spec/fixtures/generated/prediction-campaign-forecast-artifact"
+  },
+  "sourceArtifacts": [
+    {
+      "recordType": "forecast_question",
+      "recordId": "question-1301",
+      "fixturePath": "spec/fixtures/generated/prediction-campaign-forecast-artifact/weather-transit-delay-campaign-forecast-question.generated.json",
+      "targetPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/question-1301.json",
+      "contentHash": "063655f1faa260a82d8b1f091df150e378f55a8f029226e4575e2f9bc25bf518",
+      "schemaFile": "spec/forecast-question.schema.json"
+    },
+    {
+      "recordType": "evidence_packet",
+      "recordId": "evidence-1301",
+      "fixturePath": "spec/fixtures/generated/prediction-campaign-forecast-artifact/weather-transit-delay-campaign-forecast-evidence.generated.json",
+      "targetPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/evidence-1301.json",
+      "contentHash": "b0637aaede3722b7010bba307a626c576d7da3ba31ce3fe0a2df3d4bc920f31e",
+      "schemaFile": "spec/evidence-packet.schema.json"
+    },
+    {
+      "recordType": "forecast_artifact",
+      "recordId": "forecast-1301",
+      "fixturePath": "spec/fixtures/generated/prediction-campaign-forecast-artifact/weather-transit-delay-campaign-forecast-artifact.generated.json",
+      "targetPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json",
+      "contentHash": "b85e59f7d7cfe6007778ed9e1d7d79d3c9f114ecc8c8db7cb63ffd6c812894b2",
+      "schemaFile": "spec/forecast-artifact.schema.json"
+    },
+    {
+      "recordType": "forecast_history",
+      "recordId": "history-1301",
+      "fixturePath": "spec/fixtures/generated/prediction-campaign-forecast-artifact/weather-transit-delay-campaign-forecast-history.generated.json",
+      "targetPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/history-1301.json",
+      "contentHash": "45cff64a66b02e26adadf5bbac9c9400f42c351b70fd31d0fbddc2f25d94ad55",
+      "schemaFile": "spec/forecast-history.schema.json"
+    }
+  ],
+  "targetState": {
+    "workspaceRoot": ".ope/live/prediction-campaigns",
+    "campaignStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/campaign-manifest.json",
+    "runStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+    "artifactDirectory": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301",
+    "questionPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/question-1301.json",
+    "evidencePacketPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/evidence-1301.json",
+    "forecastArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json",
+    "forecastHistoryPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/history-1301.json",
+    "idempotencyKey": "predictioncampaign-001:predictionrun-1301:forecast-1301",
+    "relativePathsOnly": true,
+    "gitIgnored": true,
+    "normalChecksWriteLiveState": false,
+    "credentialsStored": false,
+    "privateRowsStored": false,
+    "sanitizedDiagnosticsOnly": true
+  },
+  "writeGuards": [
+    {
+      "guardId": "forecastwriteguard-001",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "All source lifecycle records validate against the standard OPE schemas."
+    },
+    {
+      "guardId": "forecastwriteguard-002",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "predictionrun-1301 is bound to ready forecast-creation decision predictionrunnerdecision-001."
+    },
+    {
+      "guardId": "forecastwriteguard-003",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Forecast artifact forecast-1301 is forecasted before close time 2026-06-11T04:45:00Z."
+    },
+    {
+      "guardId": "forecastwriteguard-004",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Forecast close time remains before the horizon starts, preserving forecast-before-outcome evidence."
+    },
+    {
+      "guardId": "forecastwriteguard-005",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Source policy sourcepolicy-1201 is bound before local campaign artifacts can be written."
+    },
+    {
+      "guardId": "forecastwriteguard-006",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Duplicate key is already reserved by the campaign manifest and must block later duplicate writes."
+    },
+    {
+      "guardId": "forecastwriteguard-007",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Target paths are relative ignored .ope/live paths and normal checks do not write them."
+    },
+    {
+      "guardId": "forecastwriteguard-008",
+      "guardStatus": "pass",
+      "requiredBeforeWrite": false,
+      "blocksWrite": false,
+      "message": "The write plan does not fetch live data, execute resolvers, create scores, or append corpus evidence."
+    }
+  ],
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign forecast-write",
+    "acceptedFlags": [
+      "--run-id",
+      "--manifest-json",
+      "--write-local",
+      "--output-format"
+    ],
+    "defaultMode": "checked_write_plan",
+    "capturedStdoutMode": "json",
+    "explicitWriteFlagRequired": true,
+    "normalChecksExecuteWrite": false
+  },
+  "summary": {
+    "forecastWritePlanImplemented": true,
+    "effectfulLocalWriteImplemented": false,
+    "lifecycleRecordCount": 4,
+    "writeGuardCount": 8,
+    "writesIgnoredLiveStateInNormalChecks": false,
+    "normalChecksUseLiveNetwork": false,
+    "resolverExecutionImplemented": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Implement guarded --write-local artifact copy and campaign state update with idempotency checks."
+  },
+  "executionBoundary": {
+    "readOnlyWritePlan": true,
+    "createsCheckedLifecycleFixtures": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesForecastMethod": false,
+    "executesResolvers": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "appendsCorpusEvidence": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This write plan validates source and target bindings only; it does not write .ope/live state.",
+    "Effectful local writes must require an explicit future --write-local path and preserve idempotency.",
+    "Resolution, scoring, corpus append, and quality claims remain separate later steps.",
+    "Normal checks validate checked fixtures without live network access or ignored state mutation."
+  ]
+}

@@ -125,6 +125,12 @@ def main() -> None:
     require(campaign_card["record"]["score"] is None, "prediction campaign forecast card should remain unscored")
     require(campaign_card["record"]["qualityClaim"]["status"] == "unresolved", "prediction campaign forecast card quality boundary drifted")
 
+    campaign_forecast_write = run_cli("prediction-campaign", "forecast-write")
+    require(campaign_forecast_write["writeStatus"] == "ready_for_explicit_local_write", "prediction campaign forecast write status drifted")
+    require(campaign_forecast_write["bindings"]["forecastId"] == "forecast-1301", "prediction campaign forecast write binding drifted")
+    require(campaign_forecast_write["summary"]["effectfulLocalWriteImplemented"] is False, "prediction campaign forecast write should remain a plan")
+    require(campaign_forecast_write["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign forecast write must not mutate state")
+
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
     require(adapter["forecastId"] is None, "accepted adapter path must not invent forecast artifacts")
