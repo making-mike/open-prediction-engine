@@ -218,6 +218,20 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# Generated fixtures that are intentionally schema-less intermediates: computed
+# feature snapshots, normalized source dumps, and human-readable run/outcome
+# summaries that are not contract records. Every *other* file under
+# spec/fixtures/generated/ must resolve to a schema via schema_for(); the
+# schema-contract check enforces that so a renamed fixture or a stale
+# endswith() rule cannot silently drop out of validation.
+SCHEMALESS_GENERATED_SUFFIXES = (
+    "-feature-snapshot.generated.json",
+    "-normalized-sources.generated.json",
+    "-outcome-summary.generated.json",
+    "-run-summary.generated.json",
+)
+
+
 def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
     name = path.name
     parts = path.parts
@@ -239,7 +253,7 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "live-connector-readiness.schema.json"
     if name.endswith("-transit-api-connector.generated.json"):
         return spec_root / "transit-api-connector.schema.json"
-    if name.endswith("-transit-delay-forward-run.generated.json"):
+    if name.endswith("-transit-delays-forward-run.generated.json"):
         return spec_root / "transit-delay-forward-run.schema.json"
     if name.endswith("transit-forward-run-corpus.generated.json"):
         return spec_root / "transit-forward-run-corpus.schema.json"
@@ -287,9 +301,9 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "expansion-readiness-gate.schema.json"
     if name.endswith("repeating-prediction-setup.generated.json"):
         return spec_root / "repeating-prediction-setup.schema.json"
-    if name.endswith("prediction-campaign-manifest.generated.json"):
+    if name.endswith("-campaign-manifest.generated.json"):
         return spec_root / "prediction-campaign-manifest.schema.json"
-    if name.endswith("prediction-campaign-runner.generated.json"):
+    if name.endswith("-campaign-runner.generated.json"):
         return spec_root / "prediction-campaign-runner.schema.json"
     if name.endswith("campaign-forecast-creation.generated.json"):
         return spec_root / "prediction-campaign-forecast-creation.schema.json"
@@ -395,6 +409,10 @@ def iter_contract_records(fixtures_root: Path = SPEC / "fixtures", spec_root: Pa
         if schema is not None:
             records.append((path, schema))
     return records
+
+
+def iter_generated_fixtures(generated_root: Path = SPEC / "fixtures" / "generated") -> list[Path]:
+    return sorted(generated_root.rglob("*.json"))
 
 
 def validate_record(
