@@ -19,6 +19,12 @@ Inspect ignored local live forward-run state:
 python3 scripts/ope.py resolution-jobs --live
 ```
 
+Inspect the checked prediction campaign forecast alongside forward-run jobs:
+
+```bash
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+```
+
 Inspect one saved run:
 
 ```bash
@@ -47,6 +53,7 @@ Generated adapter error examples cover missing live workspaces and unreadable st
 
 - `pending_due`: the resolution time has passed and an agent may call `resolve-due-forward-runs --execute` if live execution is approved.
 - `pending_not_due`: the resolution time is still in the future; the agent should wait or schedule a later check.
+- `pending_not_due` with `campaignId`: a checked campaign forecast exists, but `resolutionEligibleAt` has not arrived; the agent should wait and must not run a campaign resolver yet.
 - `already_resolved`: the forward run is no longer pending; the agent should read resolved outputs instead of resolving again.
 - `invalid_state`: the saved state is missing required resolution metadata and should be inspected.
 
@@ -57,5 +64,7 @@ Generated adapter error examples cover missing live workspaces and unreadable st
 `resolve-due-forward-runs` performs the checked dry-run scan and, with explicit `--execute`, can run due resolvers.
 
 `resolution-scheduler` repeatedly asks the registry the same question in a foreground terminal and can call the checked resolver when both `--watch` and `--execute` are explicit.
+
+`resolution-jobs --campaign predictioncampaign-001` reads the checked campaign manifest, forecast artifact, and forecast-write plan to expose the next resolution wait state for `forecast-1301`. It does not write campaign state, execute a campaign resolver, create resolution/scoring records, or append corpus evidence.
 
 This split keeps the default agent UX safe and inspectable while still allowing local scheduled or supervised execution through narrow commands.

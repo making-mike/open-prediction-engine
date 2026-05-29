@@ -178,6 +178,17 @@ def main() -> None:
     require(resolution_jobs["summary"]["pendingDueCount"] == 1, "MVP resolution jobs should expose one due fixture job")
     require(resolution_jobs["executionBoundary"]["registryExecutesResolvers"] is False, "MVP resolution jobs must not execute resolvers")
 
+    campaign_resolution_jobs = run_cli("resolution-jobs", "--campaign", "predictioncampaign-001")
+    campaign_jobs = [
+        job for job in campaign_resolution_jobs["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    require(campaign_resolution_jobs["registryMode"] == "campaign_fixture_registry", "campaign resolution jobs mode drifted")
+    require(len(campaign_jobs) == 1, "campaign resolution jobs should expose one campaign job")
+    require(campaign_jobs[0]["target"]["forecastId"] == "forecast-1301", "campaign resolution job forecast binding drifted")
+    require(campaign_jobs[0]["agentAction"]["recommendedAction"] == "wait", "campaign resolution job should tell agents to wait")
+    require(campaign_resolution_jobs["executionBoundary"]["registryExecutesResolvers"] is False, "campaign resolution jobs must not execute resolvers")
+
     track_gate = run_cli("transit-track-record-gate")
     require(track_gate["claimBoundary"]["qualityClaimAllowed"] is False, "MVP transit gate must block quality claims")
     require(track_gate["claimBoundary"]["calibrationClaimAllowed"] is False, "MVP transit gate must block calibration claims")

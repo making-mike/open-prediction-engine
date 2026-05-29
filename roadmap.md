@@ -128,6 +128,7 @@ Done:
 - Prediction campaign forecast-creation handoffs now bind a ready runner decision to planned question, forecast, card, and bundle IDs through `python3 scripts/ope.py prediction-campaign forecast-create`, without creating artifacts or writing campaign state.
 - Prediction campaign forecast artifacts now materialize `forecast-1301` as an unresolved baseline-only checked fixture through `python3 scripts/ope.py prediction-campaign forecast-artifact`, using the standard question, evidence, artifact, and history contracts without live fetches, resolver execution, scoring, or campaign-state writes.
 - Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`, without executing local writes during normal checks.
+- Resolution job registries now have a campaign-aware readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait state without executing campaign resolvers or mutating campaign state.
 
 Not started:
 
@@ -2920,7 +2921,7 @@ Goal: connect campaign-created forecasts to due resolution, scoring, retry, and 
 
 Tasks:
 
-- [ ] Extend the existing resolution job registry to read campaign manifests as well as standalone forward-run states.
+- [x] Extend the existing resolution job registry to read campaign manifests as well as standalone forward-run states.
 - [ ] Let the campaign runner call the checked resolver for due runs when `--execute-resolvers` is explicit.
 - [ ] Record per-run resolver attempts, failure categories, retry eligibility, source fetch metadata, and sanitized diagnostics.
 - [ ] Avoid duplicate resolution and duplicate scoring for runs that are already resolved, ambiguous, annulled, blocked, or excluded.
@@ -2938,6 +2939,13 @@ Expected outputs:
 - campaign-aware `python3 scripts/ope.py resolution-scheduler --campaign ...`
 - `python3 scripts/ope.py prediction-campaign resume`
 - `python3 scripts/ope.py prediction-campaign doctor`
+
+Completed outputs so far:
+
+- `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
+- checked campaign-aware fixture at `spec/fixtures/generated/resolution-jobs/resolution-jobs-campaign.generated.json`
+- source binding from forward-run state plus checked campaign manifest, campaign forecast artifact, and forecast-write plan
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for the campaign-aware resolution-jobs readback
 
 ## Milestone 95: Append-Only Calibration Evidence Ledger
 

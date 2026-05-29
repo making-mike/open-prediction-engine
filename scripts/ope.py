@@ -680,6 +680,8 @@ def cmd_resolution_jobs(args: argparse.Namespace) -> None:
         command.extend(["--workspace", args.workspace])
     for run_state in args.run_state or []:
         command.extend(["--run-state", run_state])
+    if args.campaign:
+        command.extend(["--campaign", args.campaign])
     if args.now:
         command.extend(["--now", args.now])
     if args.limit is not None:
@@ -1687,6 +1689,7 @@ def build_parser() -> argparse.ArgumentParser:
     resolution_jobs.add_argument("--live", action="store_true", help="read ignored local forward-run state files")
     resolution_jobs.add_argument("--workspace", help="ignored local forward-run workspace")
     resolution_jobs.add_argument("--run-state", action="append", help="specific forward-run-state.json to inspect")
+    resolution_jobs.add_argument("--campaign", help="include a checked prediction campaign in the registry")
     resolution_jobs.add_argument("--now", help="override current timestamp for deterministic scans")
     resolution_jobs.add_argument("--limit", type=int)
     resolution_jobs.add_argument("--check", action="store_true", help="check generated resolution-job fixture drift")

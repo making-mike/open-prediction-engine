@@ -829,6 +829,25 @@ def main() -> None:
     resolution_jobs_check = run_cli("resolution-jobs", "--check")
     if "checked resolution jobs" not in resolution_jobs_check.stdout:
         raise AssertionError("CLI resolution-jobs --check did not check generated output")
+    campaign_resolution_jobs = run_cli("resolution-jobs", "--campaign", "predictioncampaign-001")
+    campaign_resolution_jobs_payload = json.loads(campaign_resolution_jobs.stdout)
+    if campaign_resolution_jobs_payload["registryMode"] != "campaign_fixture_registry":
+        raise AssertionError("CLI campaign resolution-jobs should use campaign fixture mode")
+    if campaign_resolution_jobs_payload["summary"]["jobCount"] != 4:
+        raise AssertionError("CLI campaign resolution-jobs should include one campaign forecast job")
+    campaign_jobs = [
+        job for job in campaign_resolution_jobs_payload["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    if len(campaign_jobs) != 1:
+        raise AssertionError("CLI campaign resolution-jobs should expose one campaign job")
+    if campaign_jobs[0]["target"]["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI campaign resolution-jobs forecast binding drifted")
+    if campaign_jobs[0]["agentAction"]["recommendedAction"] != "wait":
+        raise AssertionError("CLI campaign resolution-jobs should tell agents to wait")
+    campaign_resolution_jobs_check = run_cli("resolution-jobs", "--campaign", "predictioncampaign-001", "--check")
+    if "checked resolution jobs" not in campaign_resolution_jobs_check.stdout:
+        raise AssertionError("CLI campaign resolution-jobs --check did not check generated output")
 
     resolution_scheduler = run_cli("resolution-scheduler")
     resolution_scheduler_payload = json.loads(resolution_scheduler.stdout)

@@ -2024,3 +2024,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `prediction-campaign forecast-write` contract, generated fixture, CLI readback, and checker that bind the `forecast-1301` lifecycle records to intended ignored `.ope/live` target paths and write guards without executing the local write.
 - **Why:** Before effectful campaign state mutation exists, agents need a stable target-path, idempotency, source-policy, duplicate-key, and forecast-before-close plan they can inspect and validate.
 - **Alternatives rejected:** Copying fixtures into `.ope/live/` during normal checks, letting the future runner invent write paths at execution time, storing private rows or credentials, or mixing local writes with live fetch, resolution, scoring, corpus append, or quality claims.
+
+### DEC-095 — Add Campaign-Aware Resolution Job Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Extend the checked `resolution-jobs` registry with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that add the `forecast-1301` campaign wait state alongside existing forward-run jobs.
+- **Why:** Campaign-created forecasts need to appear in the same agent-facing resolution queue before campaign resolver execution, scheduler integration, resume, or corpus append behavior exists.
+- **Alternatives rejected:** Executing campaign resolvers from the registry, writing `.ope/live` campaign state during normal checks, inventing a separate campaign-only queue, or treating the waiting campaign forecast as resolution, scoring, corpus, or calibration evidence.

@@ -45,6 +45,7 @@ Initial maturity:
 - checked non-mutating campaign forecast write plan through `python3 scripts/ope.py prediction-campaign forecast-write`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
+- checked campaign-aware resolution job readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
 - no calibration, benchmark, production, or live quality claim
 
@@ -304,9 +305,12 @@ python3 scripts/ope.py resolve-due-forward-runs --live
 python3 scripts/ope.py resolve-due-forward-runs --live --execute --download-static-gtfs
 
 python3 scripts/ope.py resolution-jobs --live
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
 python3 scripts/ope.py resolution-scheduler --live --watch --execute --download-static-gtfs --poll-seconds 60
 ```
+
+The campaign-aware registry joins the checked campaign manifest, `forecast-1301` artifact, and forecast-write plan into the same agent-facing job readback. It reports the campaign run as waiting until `resolutionEligibleAt`; it does not execute campaign resolvers, write campaign state, create resolution or scoring records, append corpus evidence, or allow quality claims.
 
 The command accepts custom local CSV/JSON files with the same role shape:
 

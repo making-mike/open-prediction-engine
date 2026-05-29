@@ -21,6 +21,7 @@ python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 ```
 
 2. Run the private setup summary for the checked local-file path:

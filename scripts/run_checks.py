@@ -43,6 +43,7 @@ def main() -> None:
     run([sys.executable, "scripts/resolve_due_transit_forward_runs.py", "--check"])
     run([sys.executable, "scripts/check_transit_forward_resolver.py"])
     run([sys.executable, "scripts/generate_resolution_jobs.py", "--check"])
+    run([sys.executable, "scripts/generate_resolution_jobs.py", "--campaign", "predictioncampaign-001", "--check"])
     run([sys.executable, "scripts/check_resolution_jobs.py"])
     run([sys.executable, "scripts/run_resolution_scheduler.py", "--check"])
     run([sys.executable, "scripts/check_resolution_scheduler.py"])
