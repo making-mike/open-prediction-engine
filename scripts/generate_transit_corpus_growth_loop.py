@@ -12,6 +12,7 @@ from typing import Any
 from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,6 @@ CASE_ORDER = [
 
 class TransitCorpusGrowthLoopError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

@@ -17,6 +17,7 @@ from build_live_weather_evidence import (
 )
 from ope_schema import SPEC, validate_file, validate_record
 from validate_forecast_request import validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,10 +31,6 @@ PRECIPITATION_THRESHOLD_MM = 20.0
 
 class HistoricalBaselineError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

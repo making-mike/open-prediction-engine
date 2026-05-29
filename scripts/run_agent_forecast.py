@@ -21,6 +21,7 @@ from run_historical_baseline_forecast import (
 )
 from select_forecasting_method import MethodSelectionError, build_selection
 from validate_forecast_request import load_json, validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,10 +39,6 @@ class ForecastRunError(Exception):
         self.code = code
         self.message = message
         self.retryable = retryable
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

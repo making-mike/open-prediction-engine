@@ -20,6 +20,7 @@ from source_connector_catalog import (
     connector_binding,
 )
 from validate_forecast_request import load_json
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,10 +42,6 @@ UNSAFE_SOURCE_PHRASES = [
 
 class EvidenceGatheringError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def fixture_label(path: Path) -> str:

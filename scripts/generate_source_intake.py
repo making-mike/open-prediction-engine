@@ -12,6 +12,7 @@ from typing import Any
 
 from generate_domain_setups import WEATHER_DOMAIN, build_setups
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,10 +35,6 @@ CASE_REPORT_IDS = {
 
 class SourceIntakeError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def case_slug(case: str) -> str:

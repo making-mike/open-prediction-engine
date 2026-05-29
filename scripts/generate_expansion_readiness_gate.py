@@ -18,6 +18,7 @@ from generate_release_manifest import build_manifest
 from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_corpus_growth_loop import build_growth_loop
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,10 +38,6 @@ OPTION_ORDER = [
 
 class ExpansionReadinessGateError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def evidence_input(

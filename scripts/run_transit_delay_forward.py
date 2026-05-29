@@ -15,6 +15,7 @@ import connect_transit_api as transit_api
 import fetch_open_meteo_weather as open_meteo
 import run_transit_delay_forecast as transit_forecast
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,10 +28,6 @@ HELSINKI_TZ = ZoneInfo("Europe/Helsinki")
 
 class ForwardRunError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def utc_now() -> datetime:

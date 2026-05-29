@@ -15,6 +15,7 @@ from ope_scoring import (
     score_forecast_output,
     track_record_summary,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,10 +37,6 @@ def round_float(value: float | None) -> float | None:
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=False) + "\n")
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def expected_calibration_error(buckets: list[dict[str, Any]], sample_size: int) -> float:

@@ -32,6 +32,7 @@ from run_source_handoff_forecast import SourceHandoffForecastError
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
 from run_source_handoff_forecast import output_prefix as source_handoff_forecast_output_prefix
 from validate_forecast_request import load_json, validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -199,10 +200,6 @@ def source_handoff_forecast_outputs() -> dict[str, Any]:
 
 def source_handoff_forecast_outputs_cache_info() -> Any:
     return source_handoff_forecast_outputs.cache_info()
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def nullable_binding(**values: str | None) -> dict[str, str | None]:

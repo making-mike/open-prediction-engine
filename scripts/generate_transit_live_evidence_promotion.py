@@ -13,6 +13,7 @@ from typing import Any
 
 from ope_schema import SPEC, validate_record
 from source_connector_catalog import SOURCE_CONNECTOR_REGISTRY_ID, SOURCE_CONNECTOR_RESULT_SET_ID, connector_binding
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,10 +51,6 @@ PROMOTED_CONTENT_HASH = hashlib.sha256(PROMOTED_DRAFT_PATH.encode("utf-8")).hexd
 
 class TransitLiveEvidencePromotionError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

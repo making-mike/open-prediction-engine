@@ -20,6 +20,7 @@ from source_connector_catalog import (
     SOURCE_CONNECTOR_REGISTRY_ID,
     SOURCE_CONNECTOR_RESULT_SET_ID,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,10 +32,6 @@ GENERATED_AT = "2026-06-06T14:25:00Z"
 
 class LiveReadinessError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def default_service_date() -> str:

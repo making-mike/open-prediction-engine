@@ -16,6 +16,7 @@ from generate_prediction_campaign_forecast_write import build_prediction_campaig
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_prediction_campaign_runner import build_prediction_campaign_runner
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +24,6 @@ GENERATED = ROOT / "spec" / "fixtures" / "generated" / "prediction-campaign-resu
 OUTPUT_PATH = GENERATED / "weather-transit-delay-campaign-resume.generated.json"
 SCHEMA = SPEC / "prediction-campaign-resume.schema.json"
 GENERATED_AT = "2026-05-29T02:00:00Z"
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def registry_args(campaign_id: str) -> SimpleNamespace:

@@ -13,6 +13,7 @@ from generate_local_source_runtime import build_runtime
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,10 +43,6 @@ SCENARIO_PHASES = [
 
 class DeveloperAdoptionSurfaceError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def quickstart_step(index: int, key: str, title: str, command: str, expected: str, seconds: int) -> dict[str, Any]:

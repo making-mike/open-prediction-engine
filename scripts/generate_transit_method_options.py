@@ -14,6 +14,7 @@ from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ EXTERNAL_REFERENCE_METHOD_ID = "transitmethod-601"
 
 class TransitMethodOptionsError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

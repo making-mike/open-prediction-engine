@@ -22,6 +22,7 @@ from run_setup_forecast import (
     source_by_role,
     source_ref,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,10 +43,6 @@ CASE_SUFFIX = {
 
 class SourceHandoffForecastError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_private_source_adapter_intake_bridge import build_bridge
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,10 +26,6 @@ FORECAST_SCORE_BLOCKS = ["forecast_artifact", "forecast_card", "scoring_report",
 
 class PrivateSetupRequestError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def forecast_intent(question: str) -> dict[str, Any]:

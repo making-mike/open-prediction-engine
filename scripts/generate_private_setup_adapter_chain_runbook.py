@@ -19,6 +19,7 @@ from generate_agent_adapter_protocol_map import build_protocol_map
 from generate_private_setup_agent_bundles import bundle_by_request_id
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ QUESTION_ID = "question-1102"
 
 class PrivateSetupAdapterChainRunbookError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def operation_map() -> dict[str, dict[str, Any]]:

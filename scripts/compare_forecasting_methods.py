@@ -12,6 +12,7 @@ from typing import Any
 from check_benchmarks import load_json, load_questions, validate_benchmark_run
 from check_method_registry import REGISTRY_PATH, benchmark_runs
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,10 +23,6 @@ GENERATED_AT = "2026-06-06T12:03:00Z"
 
 class MethodComparisonError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def baseline_method_id(registry: dict[str, Any]) -> str:

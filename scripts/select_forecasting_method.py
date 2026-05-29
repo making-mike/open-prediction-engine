@@ -12,6 +12,7 @@ from typing import Any
 from check_method_registry import REGISTRY_PATH, benchmark_runs
 from ope_schema import SPEC, validate_record
 from validate_forecast_request import load_json
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +24,6 @@ GENERATED_AT = "2026-06-06T12:05:00Z"
 
 class MethodSelectionError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def compatible(method: dict[str, Any], request: dict[str, Any]) -> bool:

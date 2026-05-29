@@ -20,6 +20,7 @@ from source_connector_catalog import (
     SOURCE_CONNECTOR_RESULT_SET_ID,
     connector_binding,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,10 +31,6 @@ SOURCE_SET_SCHEMA = SPEC / "evidence-source-set.schema.json"
 
 class LiveCaptureError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def load_json(path: Path) -> Any:

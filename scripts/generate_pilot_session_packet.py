@@ -14,6 +14,7 @@ from generate_developer_adoption_surface import build_developer_adoption_surface
 from generate_pilot_evidence_ledger import build_pilot_evidence_ledger
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,10 +35,6 @@ SECTION_NAMES = [
 
 class PilotSessionPacketError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def session_step(index: int, action: str, expected_output: str) -> dict[str, Any]:

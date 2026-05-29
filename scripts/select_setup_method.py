@@ -13,6 +13,7 @@ from generate_domain_setups import build_setups
 from generate_source_intake import CASE_ORDER, build_reports
 from generate_setup_benchmark_gate import build_gates
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,10 +49,6 @@ REQUIRED_ROLES_BY_METHOD = {
 
 class SetupMethodDecisionError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def case_slug(case: str) -> str:

@@ -14,6 +14,7 @@ from generate_private_setup_adapter_chain_runbook import build_runbook
 from generate_private_setup_first_actions import build_actions
 from generate_private_setup_requests import build_request_set
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,10 +37,6 @@ SOURCE_KIND_ORDER = [
 
 class PrivateSourceKindSelectionExamplesError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def agent_call_command(operation: str, *args: str) -> str:

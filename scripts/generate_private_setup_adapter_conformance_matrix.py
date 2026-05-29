@@ -18,6 +18,7 @@ from build_agent_adapter_fixtures import (
 from generate_agent_adapter_protocol_map import build_protocol_map
 from generate_private_setup_adapter_chain_runbook import build_runbook
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -71,10 +72,6 @@ READBACK_ROWS = [
 
 class PrivateSetupAdapterConformanceMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def agent_call_command(operation: str, adapter_case: str | None) -> str:

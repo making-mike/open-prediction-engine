@@ -13,6 +13,7 @@ from typing import Any
 from generate_agent_pilot_validation import build_agent_pilot_validation
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,10 +38,6 @@ EVENT_ORDER = [
 
 class LocalUsageTraceError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def record_binding(

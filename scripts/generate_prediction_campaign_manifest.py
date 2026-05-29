@@ -12,6 +12,7 @@ from typing import Any
 
 from generate_repeating_prediction_setup import EXAMPLE_ORDER, build_repeating_prediction_setup
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,10 +39,6 @@ RUN_STATUSES = [
 
 class PredictionCampaignManifestError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def parse_utc(value: str) -> datetime:

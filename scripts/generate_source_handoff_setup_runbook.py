@@ -15,6 +15,7 @@ from ope_schema import SPEC, validate_record
 from resolve_source_handoff_outcome import build_outputs as build_resolution_outputs
 from run_source_handoff_forecast import build_outputs as build_forecast_outputs
 from run_source_handoff_forecast import output_prefix
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,10 +27,6 @@ GENERATED_AT = "2026-06-06T19:35:00Z"
 
 class SourceHandoffSetupRunbookError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def workflow_steps() -> list[dict[str, Any]]:

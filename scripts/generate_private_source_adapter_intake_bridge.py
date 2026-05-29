@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_private_source_adapter_outcome_matrix import build_matrix
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,10 +32,6 @@ FORECAST_SCORE_CREDENTIAL_BLOCKS = [
 
 class PrivateSourceAdapterIntakeBridgeError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def bridge_row(

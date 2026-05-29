@@ -16,6 +16,7 @@ from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
 from run_source_handoff_forecast import output_prefix
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,10 +47,6 @@ ROLE_FILES = [
 
 class LocalSourceRuntimeError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

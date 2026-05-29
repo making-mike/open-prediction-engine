@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,10 +35,6 @@ GENERATED_AT = "2026-06-06T11:00:00Z"
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def schema_files() -> list[str]:

@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,10 +19,6 @@ GENERATED = ROOT / "spec" / "fixtures" / "generated" / "prediction-campaign-runn
 OUTPUT_PATH = GENERATED / "weather-transit-delay-campaign-runner.generated.json"
 SCHEMA = SPEC / "prediction-campaign-runner.schema.json"
 GENERATED_AT = "2026-05-29T00:15:00Z"
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def recurrence_mode(mode: str, flag: str) -> dict[str, Any]:

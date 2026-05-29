@@ -21,6 +21,7 @@ from generate_private_source_kind_selection_examples import SOURCE_KIND_ORDER, b
 from ope_schema import SPEC, validate_record
 from plan_auto_evidence import DEFAULT_REQUEST
 from read_ope_record import DEFAULT_MAX_BYTES
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ UNSUPPORTED_SOURCE_KIND = "spreadsheet_macro"
 
 class PrivateSourceKindQueryMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def dispatcher_args(source_kind: str | None) -> argparse.Namespace:

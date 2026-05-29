@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,7 @@ from generate_prediction_campaign_forecast_creation import build_prediction_camp
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_prediction_campaign_runner import build_prediction_campaign_runner
 from ope_schema import SPEC, validate_record
+from ope_fixtures import compact_json, render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,10 +29,11 @@ FORECAST_ARTIFACT_FIXTURE_DIR = (
 )
 SCHEMA = SPEC / "prediction-campaign-forecast-write.schema.json"
 GENERATED_AT = "2026-05-29T01:00:00Z"
+LOCAL_STATE_ROOT = ".ope/live/prediction-campaigns"
 
 
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
+class PredictionCampaignForecastWriteError(Exception):
+    pass
 
 
 def content_hash(data: dict[str, Any]) -> str:

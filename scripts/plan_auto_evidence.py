@@ -17,6 +17,7 @@ from source_connector_catalog import (
     connector_policy_checks,
 )
 from validate_forecast_request import load_json, question_hash, validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,10 +29,6 @@ GENERATED_AT = "2026-06-02T09:57:30Z"
 
 class EvidencePlanError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def plan_status(request: dict[str, Any], decision: dict[str, Any]) -> str:

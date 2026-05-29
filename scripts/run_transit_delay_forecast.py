@@ -14,6 +14,7 @@ from typing import Any
 
 from ope_schema import SPEC, validate_record
 from ope_scoring import baseline_lift, binary_brier
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,10 +53,6 @@ OUTPUT_NAMES = {
 
 class TransitForecastError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def normalize_key(value: str) -> str:

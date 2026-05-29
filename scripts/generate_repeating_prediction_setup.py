@@ -14,6 +14,7 @@ from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_live_evidence_promotion import build_promotion
 from generate_transit_method_options import build_options as build_transit_method_options
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,10 +51,6 @@ POST_CALIBRATION_ACTIONS = [
 
 class RepeatingPredictionSetupError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def supported_schedule_policy(

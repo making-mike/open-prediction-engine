@@ -12,6 +12,7 @@ from typing import Any
 from generate_private_source_adapter_capabilities import build_capabilities
 from generate_private_setup_workflow import build_workflow
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,10 +48,6 @@ BLOCK_FORECAST_AND_SCORING = [
 
 class PrivateSourceAdapterOutcomeMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def outcome_class(

@@ -14,6 +14,7 @@ from check_benchmarks import load_questions, validate_benchmark_run
 from check_method_registry import REGISTRY_PATH, benchmark_runs
 from generate_source_intake import CASE_ORDER, build_reports
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,10 +38,6 @@ GATE_IDS = {
 
 class SetupBenchmarkGateError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def case_slug(case: str) -> str:

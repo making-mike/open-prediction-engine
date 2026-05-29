@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_source_handoff_setup_runbook import build_runbook as build_source_handoff_runbook
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,10 +23,6 @@ GENERATED_AT = "2026-06-06T20:00:00Z"
 
 class PrivateSetupWorkflowError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def supported_source_kinds() -> list[dict[str, Any]]:

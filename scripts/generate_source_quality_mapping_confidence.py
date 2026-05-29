@@ -14,6 +14,7 @@ from generate_source_adapter_intake import build_records as build_source_adapter
 from generate_source_intake import build_reports as build_source_intake_reports
 from ope_schema import SPEC, validate_record
 from select_setup_method import build_decisions as build_setup_method_decisions
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,10 +47,6 @@ DIMENSION_KEYS = [
 
 class SourceQualityMappingConfidenceError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

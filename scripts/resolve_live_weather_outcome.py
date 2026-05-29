@@ -21,6 +21,7 @@ from ope_scoring import (
     should_exclude_resolution,
     track_record_summary,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,10 +36,6 @@ FORECASTED_AT = "2026-06-02T10:00:00Z"
 RESOLVED_AT = "2026-06-04T10:30:00Z"
 GENERATED_AT = "2026-06-04T10:35:00Z"
 MIN_CALIBRATION_SAMPLE_SIZE = 30
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

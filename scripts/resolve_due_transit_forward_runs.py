@@ -14,6 +14,7 @@ from typing import Any
 
 import run_transit_delay_forward as forward_run
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,10 +27,6 @@ FIXTURE_NOW = "2026-06-10T08:30:00Z"
 
 class TransitForwardRunResolverError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def utc_now() -> str:

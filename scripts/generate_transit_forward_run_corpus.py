@@ -12,6 +12,7 @@ from typing import Any
 
 import run_transit_delay_forecast as transit_forecast
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,10 +66,6 @@ EXCLUSION_REASONS = {
 
 class TransitForwardRunCorpusError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def load_json(path: Path) -> Any:
