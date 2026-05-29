@@ -18,6 +18,7 @@ def run(command: list[str]) -> None:
 def main() -> None:
     run([sys.executable, "scripts/check_json.py"])
     run([sys.executable, "scripts/check_schema_contracts.py"])
+    run([sys.executable, "scripts/check_ope_fixtures.py"])
     run([sys.executable, "scripts/check_contract_validator.py"])
     run([sys.executable, "scripts/generate_fixture_reports.py"])
     run([sys.executable, "scripts/run_fixture_loop.py"])
