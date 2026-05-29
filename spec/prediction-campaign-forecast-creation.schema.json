@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-forecast-creation.schema.json",
+  "title": "Prediction Campaign Forecast Creation",
+  "description": "Checked handoff from a ready campaign runner decision to a future forecast artifact creation step.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignForecastCreationId",
+    "generatedAt",
+    "creationStatus",
+    "domain",
+    "bindings",
+    "readyRun",
+    "readinessChecks",
+    "artifactPlan",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignForecastCreationId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "creationStatus": {
+      "type": "string",
+      "enum": ["ready_dry_run_creation_request"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "readyRun": { "$ref": "#/$defs/readyRun" },
+    "readinessChecks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/readinessCheck" }
+    },
+    "artifactPlan": { "$ref": "#/$defs/artifactPlan" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "repeatingPredictionSetupId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "runnerDecisionId",
+        "sourcePolicyId",
+        "manifestPath",
+        "runnerPath"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "runnerDecisionId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "manifestPath": { "$ref": "#/$defs/boundedString" },
+        "runnerPath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "readyRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "sequenceNumber",
+        "serviceDate",
+        "serviceWindow",
+        "forecastCreateAt",
+        "forecastCloseAt",
+        "horizonStartsAt",
+        "horizonEndsAt",
+        "questionId",
+        "forecastId",
+        "duplicateKey",
+        "runStatus",
+        "runnerDecisionStatus"
+      ],
+      "properties": {
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "sequenceNumber": { "type": "integer", "minimum": 1 },
+        "serviceDate": { "$ref": "#/$defs/boundedString" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "forecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonStartsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonEndsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "duplicateKey": { "$ref": "#/$defs/boundedString" },
+        "runStatus": { "$ref": "#/$defs/boundedString" },
+        "runnerDecisionStatus": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "readinessCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "checkStatus", "requiredBeforeCreation", "blocksCreation", "message"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredBeforeCreation": { "type": "boolean" },
+        "blocksCreation": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "artifactPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionId",
+        "forecastId",
+        "forecastArtifactPath",
+        "forecastCardPath",
+        "lifecycleBundlePath",
+        "campaignStatePath",
+        "writesCheckedFixtures",
+        "writesIgnoredLiveState",
+        "createsForecastArtifacts"
+      ],
+      "properties": {
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "forecastCardPath": { "$ref": "#/$defs/boundedString" },
+        "lifecycleBundlePath": { "$ref": "#/$defs/boundedString" },
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitExecutionRequired"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitExecutionRequired": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastCreationReadbackImplemented",
+        "effectfulForecastCreationImplemented",
+        "readyRunCount",
+        "blockedRunCount",
+        "artifactCreationAllowedInNormalChecks",
+        "normalChecksUseLiveNetwork",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "forecastCreationReadbackImplemented": { "type": "boolean" },
+        "effectfulForecastCreationImplemented": { "type": "boolean" },
+        "readyRunCount": { "type": "integer", "minimum": 0 },
+        "blockedRunCount": { "type": "integer", "minimum": 0 },
+        "artifactCreationAllowedInNormalChecks": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyPlanning",
+        "createsForecastArtifacts",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesForecastMethod",
+        "executesResolvers",
+        "appendsCorpusEvidence",
+        "storesCredentials",
+        "storesPrivateRows",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyPlanning": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesForecastMethod": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

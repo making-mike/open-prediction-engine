@@ -18,6 +18,7 @@ python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign start
+python3 scripts/ope.py prediction-campaign forecast-create
 ```
 
 2. Run the private setup summary for the checked local-file path:

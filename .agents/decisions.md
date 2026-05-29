@@ -2003,3 +2003,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `prediction-campaign-runner` contract, generated fixture, CLI command, and checker for `prediction-campaign start` command semantics, recurrence flags, output modes, dry-run decisions, and non-execution boundaries.
 - **Why:** Agents need to see how a terminal campaign runner will behave before OPE creates forecast artifacts, sleeps or polls, writes ignored live state, fetches live data, runs resolvers, or implies calibration quality.
 - **Alternatives rejected:** Starting with an effectful foreground loop, letting normal checks write campaign state, hiding missed-run and duplicate policies in prose, or treating dry-run runner decisions as forecast or calibration evidence.
+
+### DEC-092 — Add Prediction Campaign Forecast Creation Handoff
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-forecast-creation` contract, generated fixture, CLI command, and checker that binds a ready campaign runner decision to planned question, forecast, card, and lifecycle-bundle IDs.
+- **Why:** Before implementing artifact mutation, OPE needs a stable handoff that proves the next forecast can be selected, checked before close, bound to source policy and duplicate-key rules, and kept separate from live fetches, resolver execution, and quality claims.
+- **Alternatives rejected:** Creating ignored campaign artifacts during normal checks, letting the runner invent forecast paths at execution time, backfilling missed forecasts, or mixing forecast creation with due resolution and corpus append behavior.

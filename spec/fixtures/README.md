@@ -160,6 +160,8 @@ The prediction campaign manifest generator emits a checked dry-run manifest unde
 
 The prediction campaign runner generator emits a checked dry-run terminal runner readback under `generated/prediction-campaign-runner/`, exposing `prediction-campaign start` command semantics, recurrence flags, output modes, run decisions, and non-execution boundaries before effectful forecast creation exists.
 
+The prediction campaign forecast-creation generator emits a checked dry-run handoff under `generated/prediction-campaign-forecast-creation/`, binding the ready runner decision to planned forecast artifact IDs and pre-creation checks without writing fixtures, live state, or campaign artifacts.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.

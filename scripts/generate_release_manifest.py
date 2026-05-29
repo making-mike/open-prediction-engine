@@ -82,6 +82,7 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py repeating-prediction-setup",
                 "python3 scripts/ope.py prediction-campaign plan",
                 "python3 scripts/ope.py prediction-campaign start",
+                "python3 scripts/ope.py prediction-campaign forecast-create",
                 "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
                 "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
@@ -162,6 +163,11 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-prediction-campaign-start",
                 "command": "python3 scripts/ope.py prediction-campaign start",
                 "expected": "prediction campaign start exposes the dry-run terminal runner surface without sleeping, polling, fetching live data, or creating forecasts.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-forecast-create",
+                "command": "python3 scripts/ope.py prediction-campaign forecast-create",
+                "expected": "prediction campaign forecast-create exposes the ready run and planned artifact IDs without writing campaign state or creating forecasts.",
             },
             {
                 "checkId": "mvp-smoke-forecast-run",

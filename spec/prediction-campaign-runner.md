@@ -20,3 +20,11 @@ Required boundaries:
 - captured stdout should use JSONL, while interactive terminals can print compact human status lines.
 
 This contract is the bridge from campaign planning to a future foreground runner. It does not yet implement the effectful runner loop.
+
+The next handoff is `prediction-campaign-forecast-creation.schema.json`, exposed through:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-create
+```
+
+That handoff binds the ready runner decision to planned forecast artifact IDs while still keeping normal checks read-only.

@@ -67,6 +67,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/repeating-prediction-setup.md`: checked local-first repeating prediction setup contract, recurrence examples, post-calibration policies, and non-execution boundary.
 - `spec/prediction-campaign-manifest.md`: checked local dry-run campaign manifest with unique run IDs, duplicate prevention, local-state path policy, and status readbacks.
 - `spec/prediction-campaign-runner.md`: checked dry-run terminal runner readback for campaign start command semantics and non-execution boundary.
+- `spec/prediction-campaign-forecast-creation.md`: checked dry-run handoff from a ready campaign runner decision to planned forecast artifact IDs.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
@@ -251,6 +252,8 @@ python3 scripts/generate_prediction_campaign_manifest.py --check
 python3 scripts/check_prediction_campaign_manifest.py
 python3 scripts/generate_prediction_campaign_runner.py --check
 python3 scripts/check_prediction_campaign_runner.py
+python3 scripts/generate_prediction_campaign_forecast_creation.py --check
+python3 scripts/check_prediction_campaign_forecast_creation.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -377,6 +380,7 @@ python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign status
 python3 scripts/ope.py prediction-campaign start
+python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -482,6 +486,7 @@ python3 scripts/generate_expansion_readiness_gate.py --write
 python3 scripts/generate_repeating_prediction_setup.py --write
 python3 scripts/generate_prediction_campaign_manifest.py --write
 python3 scripts/generate_prediction_campaign_runner.py --write
+python3 scripts/generate_prediction_campaign_forecast_creation.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

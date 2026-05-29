@@ -118,6 +118,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     repeating_prediction_setup_command = [sys.executable, "scripts/generate_repeating_prediction_setup.py"]
     prediction_campaign_manifest_command = [sys.executable, "scripts/generate_prediction_campaign_manifest.py"]
     prediction_campaign_runner_command = [sys.executable, "scripts/generate_prediction_campaign_runner.py"]
+    prediction_campaign_forecast_creation_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_forecast_creation.py",
+    ]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -192,6 +196,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         repeating_prediction_setup_command.append("--write")
         prediction_campaign_manifest_command.append("--write")
         prediction_campaign_runner_command.append("--write")
+        prediction_campaign_forecast_creation_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -259,6 +264,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         repeating_prediction_setup_command.append("--check")
         prediction_campaign_manifest_command.append("--check")
         prediction_campaign_runner_command.append("--check")
+        prediction_campaign_forecast_creation_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -327,6 +333,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(repeating_prediction_setup_command)
     run(prediction_campaign_manifest_command)
     run(prediction_campaign_runner_command)
+    run(prediction_campaign_forecast_creation_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1231,6 +1238,14 @@ def cmd_repeating_prediction_setup(args: argparse.Namespace) -> None:
 def cmd_prediction_campaign(args: argparse.Namespace) -> None:
     if args.action == "start":
         command = [sys.executable, "scripts/generate_prediction_campaign_runner.py"]
+        if args.check:
+            command.append("--check")
+        if args.write:
+            command.append("--write")
+        run(command)
+        return
+    if args.action == "forecast-create":
+        command = [sys.executable, "scripts/generate_prediction_campaign_forecast_creation.py"]
         if args.check:
             command.append("--check")
         if args.write:
@@ -2536,9 +2551,9 @@ def build_parser() -> argparse.ArgumentParser:
     prediction_campaign.add_argument(
         "action",
         nargs="?",
-        choices=["manifest", "plan", "status", "summary", "boundary", "start"],
+        choices=["manifest", "plan", "status", "summary", "boundary", "start", "forecast-create"],
         default="manifest",
-        help="print the full manifest, one campaign readback, or the dry-run runner start readback",
+        help="print the full manifest, one campaign readback, or a dry-run runner/forecast-creation readback",
     )
     prediction_campaign.add_argument(
         "--case",
@@ -2567,6 +2582,7 @@ def build_parser() -> argparse.ArgumentParser:
     prediction_campaign.add_argument("--post-calibration-delay", help="dry-run runner post-calibration delay")
     prediction_campaign.add_argument("--setup-json", help="dry-run runner setup JSON input path")
     prediction_campaign.add_argument("--manifest-json", help="dry-run runner manifest JSON input path")
+    prediction_campaign.add_argument("--run-id", help="dry-run forecast creation run ID")
     prediction_campaign.add_argument(
         "--live-weather",
         action="store_true",

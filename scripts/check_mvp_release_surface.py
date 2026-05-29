@@ -105,6 +105,12 @@ def main() -> None:
     require(campaign_runner["summary"]["forecastCreationImplemented"] is False, "prediction campaign runner must not create forecasts yet")
     require(campaign_runner["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign runner must not write live state")
 
+    campaign_forecast_creation = run_cli("prediction-campaign", "forecast-create")
+    require(campaign_forecast_creation["creationStatus"] == "ready_dry_run_creation_request", "prediction campaign forecast creation status drifted")
+    require(campaign_forecast_creation["readyRun"]["runId"] == "predictionrun-1301", "prediction campaign forecast creation run drifted")
+    require(campaign_forecast_creation["summary"]["effectfulForecastCreationImplemented"] is False, "prediction campaign forecast creation must remain non-effectful")
+    require(campaign_forecast_creation["executionBoundary"]["createsForecastArtifacts"] is False, "prediction campaign forecast creation must not create artifacts")
+
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
     require(adapter["forecastId"] is None, "accepted adapter path must not invent forecast artifacts")

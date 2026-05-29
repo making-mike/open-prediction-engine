@@ -1,0 +1,129 @@
+{
+  "predictionCampaignForecastCreationId": "predictioncampaignforecastcreation-001",
+  "generatedAt": "2026-05-29T00:30:00Z",
+  "creationStatus": "ready_dry_run_creation_request",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "runId": "predictionrun-1301",
+    "runnerDecisionId": "predictionrunnerdecision-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "manifestPath": "spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
+    "runnerPath": "spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json"
+  },
+  "readyRun": {
+    "runId": "predictionrun-1301",
+    "sequenceNumber": 1,
+    "serviceDate": "2026-06-11",
+    "serviceWindow": "morning_peak",
+    "forecastCreateAt": "2026-06-11T00:00:00Z",
+    "forecastCloseAt": "2026-06-11T04:45:00Z",
+    "horizonStartsAt": "2026-06-11T05:00:00Z",
+    "horizonEndsAt": "2026-06-11T07:00:00Z",
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "duplicateKey": "weather-transit-delays:hsl-surface:helsinki:2026-06-11:morning_peak",
+    "runStatus": "planned_forecast_pending",
+    "runnerDecisionStatus": "ready_to_create_forecast"
+  },
+  "readinessChecks": [
+    {
+      "checkId": "forecastcreationcheck-001",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": true,
+      "blocksCreation": false,
+      "message": "predictionrun-1301 is bound to ready runner decision predictionrunnerdecision-001."
+    },
+    {
+      "checkId": "forecastcreationcheck-002",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": true,
+      "blocksCreation": false,
+      "message": "Forecast creation is planned before forecastCloseAt 2026-06-11T04:45:00Z."
+    },
+    {
+      "checkId": "forecastcreationcheck-003",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": true,
+      "blocksCreation": false,
+      "message": "Duplicate key is reserved for one campaign run and must block later duplicates."
+    },
+    {
+      "checkId": "forecastcreationcheck-004",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": true,
+      "blocksCreation": false,
+      "message": "Source policy is bound before any live or fixture evidence can be used."
+    },
+    {
+      "checkId": "forecastcreationcheck-005",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": true,
+      "blocksCreation": false,
+      "message": "Baseline-default method policy is preserved until track-record gates allow stronger methods."
+    },
+    {
+      "checkId": "forecastcreationcheck-006",
+      "checkStatus": "pass",
+      "requiredBeforeCreation": false,
+      "blocksCreation": false,
+      "message": "Normal checks keep live fetch, resolver execution, and campaign-state writes disabled."
+    }
+  ],
+  "artifactPlan": {
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "forecastArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json",
+    "forecastCardPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301-card.json",
+    "lifecycleBundlePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301-bundle.json",
+    "campaignStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/campaign-manifest.json",
+    "writesCheckedFixtures": false,
+    "writesIgnoredLiveState": false,
+    "createsForecastArtifacts": false
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign forecast-create",
+    "acceptedFlags": [
+      "--run-id",
+      "--manifest-json",
+      "--setup-json",
+      "--live-weather",
+      "--output-format"
+    ],
+    "defaultMode": "dry_run_readback",
+    "capturedStdoutMode": "json",
+    "explicitExecutionRequired": true
+  },
+  "summary": {
+    "forecastCreationReadbackImplemented": true,
+    "effectfulForecastCreationImplemented": false,
+    "readyRunCount": 1,
+    "blockedRunCount": 0,
+    "artifactCreationAllowedInNormalChecks": false,
+    "normalChecksUseLiveNetwork": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Implement explicit local artifact creation for the ready run while preserving forecast-before-close and source-policy boundaries."
+  },
+  "executionBoundary": {
+    "readOnlyPlanning": true,
+    "createsForecastArtifacts": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesForecastMethod": false,
+    "executesResolvers": false,
+    "appendsCorpusEvidence": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This handoff validates the ready run and planned artifact IDs only; it does not create forecast artifacts.",
+    "Effectful forecast creation must still check forecastCloseAt before writing ignored local campaign state.",
+    "Live evidence and resolver execution require explicit future execution flags and remain disabled in normal checks.",
+    "No track-record, calibration, or quality claim is allowed from a forecast-creation request."
+  ]
+}

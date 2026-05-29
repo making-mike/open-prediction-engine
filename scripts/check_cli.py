@@ -407,6 +407,31 @@ def main() -> None:
     prediction_campaign_start_check = run_cli("prediction-campaign", "start", "--check")
     if "checked prediction campaign runner" not in prediction_campaign_start_check.stdout:
         raise AssertionError("CLI prediction-campaign start check output drifted")
+    prediction_campaign_forecast_create = run_cli("prediction-campaign", "forecast-create")
+    prediction_campaign_forecast_create_payload = json.loads(prediction_campaign_forecast_create.stdout)
+    if prediction_campaign_forecast_create_payload["creationStatus"] != "ready_dry_run_creation_request":
+        raise AssertionError("CLI prediction-campaign forecast-create status drifted")
+    if prediction_campaign_forecast_create_payload["readyRun"]["runId"] != "predictionrun-1301":
+        raise AssertionError("CLI prediction-campaign forecast-create run drifted")
+    if prediction_campaign_forecast_create_payload["summary"]["effectfulForecastCreationImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-create must not create forecasts yet")
+    if prediction_campaign_forecast_create_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-create must remain non-mutating")
+    prediction_campaign_forecast_create_flags = run_cli(
+        "prediction-campaign",
+        "forecast-create",
+        "--run-id",
+        "predictionrun-1301",
+        "--live-weather",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_forecast_create_flags_payload = json.loads(prediction_campaign_forecast_create_flags.stdout)
+    if prediction_campaign_forecast_create_flags_payload["executionBoundary"]["fetchesLiveData"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast-create flags must remain dry-run non-fetching")
+    prediction_campaign_forecast_create_check = run_cli("prediction-campaign", "forecast-create", "--check")
+    if "checked prediction campaign forecast creation" not in prediction_campaign_forecast_create_check.stdout:
+        raise AssertionError("CLI prediction-campaign forecast-create check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

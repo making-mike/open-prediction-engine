@@ -74,6 +74,7 @@ The contracts are intentionally record-first:
 - `repeating-prediction-setup.schema.json`: checked local-first repeating prediction setup contract with recurrence examples, end conditions, post-calibration policies, and non-execution boundary.
 - `prediction-campaign-manifest.schema.json`: checked local dry-run campaign manifest with unique run IDs, duplicate prevention, local-state path policy, and status readbacks.
 - `prediction-campaign-runner.schema.json`: checked dry-run terminal campaign runner readback with command semantics, output modes, decisions, and non-execution boundary.
+- `prediction-campaign-forecast-creation.schema.json`: checked dry-run handoff from ready campaign runner decision to planned forecast artifact IDs.
 - `private-setup-adapter-chain-runbook.schema.json`: checked adapter operation sequence and readback guidance for private setup callers.
 - `private-setup-adapter-conformance-matrix.schema.json`: checked conformance examples across private setup adapter operation envelopes.
 - `private-setup-adapter-conformance-summary.schema.json`: compact read surface over private setup adapter conformance.
@@ -133,6 +134,7 @@ The contracts are intentionally record-first:
 - `repeating-prediction-setup.md`: checked local-first repeating prediction setup contract and recurrence policy boundary.
 - `prediction-campaign-manifest.md`: checked local dry-run campaign manifest and planned-run status boundary.
 - `prediction-campaign-runner.md`: checked dry-run terminal campaign runner start boundary.
+- `prediction-campaign-forecast-creation.md`: checked ready-run forecast creation handoff boundary.
 - `private-setup-adapter-chain-runbook.md`: checked private setup adapter-chain runbook boundary.
 - `private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix.
 - `private-setup-adapter-conformance-summary.md`: compact private setup adapter conformance summary.
@@ -205,6 +207,7 @@ The expansion readiness generator writes a checked post-MVP decision gate under 
 The repeating prediction setup generator writes a checked non-executing recurrence contract under `spec/fixtures/generated/repeating-prediction-setup/`, covering fixed-count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart policies before any campaign manifest or runner exists.
 The prediction campaign manifest generator writes a checked dry-run manifest under `spec/fixtures/generated/prediction-campaign-manifest/`, expanding the repeating setup into unique planned run IDs, duplicate keys, status readbacks, and ignored local-state path policy without creating artifacts or writing live campaign state.
 The prediction campaign runner generator writes a checked dry-run terminal runner readback under `spec/fixtures/generated/prediction-campaign-runner/`, exposing `prediction-campaign start` command semantics, recurrence flags, output modes, and non-execution decisions before effectful forecast creation exists.
+The prediction campaign forecast-creation generator writes a checked dry-run handoff under `spec/fixtures/generated/prediction-campaign-forecast-creation/`, binding the ready runner decision to planned question, forecast, card, and bundle IDs without creating artifacts or writing campaign state.
 The private setup adapter-chain runbook generator writes checked non-executing operation-sequence guidance under `spec/fixtures/generated/private-setup-adapter-chain/`.
 The private setup adapter conformance generator writes checked source-builder, source-handoff, method-gate, forecast-execution, and generated forecast readback examples under `spec/fixtures/generated/private-setup-adapter-conformance/` without executing adapter calls.
 The private setup adapter conformance summary generator writes a compact read surface under `spec/fixtures/generated/private-setup-adapter-conformance/` without embedding full envelopes.
