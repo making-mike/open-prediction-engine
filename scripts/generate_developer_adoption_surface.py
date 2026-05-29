@@ -13,7 +13,7 @@ from generate_local_source_runtime import build_runtime
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -459,23 +459,11 @@ def section(surface: dict[str, Any], section_name: str) -> Any:
 
 
 def write_surface(surface: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(surface), encoding="utf-8")
-    print("generated developer adoption surface")
+    write_generated(OUTPUT_PATH, surface, label="developer adoption surface", regen="python3 scripts/generate_developer_adoption_surface.py --write")
 
 
 def check_surface(surface: dict[str, Any]) -> None:
-    expected = render_json(surface)
-    if not OUTPUT_PATH.exists():
-        print(f"missing developer adoption surface: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_developer_adoption_surface.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"developer adoption surface drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_developer_adoption_surface.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked developer adoption surface")
+    check_generated(OUTPUT_PATH, surface, label="developer adoption surface", regen="python3 scripts/generate_developer_adoption_surface.py --write")
 
 
 def main() -> None:

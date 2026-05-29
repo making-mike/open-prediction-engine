@@ -13,7 +13,7 @@ from typing import Any
 from generate_agent_pilot_validation import build_agent_pilot_validation
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -454,23 +454,11 @@ def summary(trace_model: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_trace(trace_model: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    TRACE_PATH.write_text(render_json(trace_model), encoding="utf-8")
-    print("generated local usage trace")
+    write_generated(TRACE_PATH, trace_model, label="local usage trace", regen="python3 scripts/generate_local_usage_trace.py --write")
 
 
 def check_trace(trace_model: dict[str, Any]) -> None:
-    expected = render_json(trace_model)
-    if not TRACE_PATH.exists():
-        print(f"missing local usage trace: {TRACE_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_local_usage_trace.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = TRACE_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"local usage trace drift: {TRACE_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_local_usage_trace.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked local usage trace")
+    check_generated(TRACE_PATH, trace_model, label="local usage trace", regen="python3 scripts/generate_local_usage_trace.py --write")
 
 
 def main() -> None:

@@ -14,7 +14,7 @@ from generate_pilot_evidence_ledger import build_pilot_evidence_ledger
 from generate_pilot_session_packet import build_pilot_session_packet
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -400,23 +400,11 @@ def case(intake: dict[str, Any], case_key: str) -> dict[str, Any]:
 
 
 def write_intake(intake: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(intake), encoding="utf-8")
-    print("generated pilot summary intake")
+    write_generated(OUTPUT_PATH, intake, label="pilot summary intake", regen="python3 scripts/generate_pilot_summary_intake.py --write")
 
 
 def check_intake(intake: dict[str, Any]) -> None:
-    expected = render_json(intake)
-    if not OUTPUT_PATH.exists():
-        print(f"missing pilot summary intake: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_pilot_summary_intake.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"pilot summary intake drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_pilot_summary_intake.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked pilot summary intake")
+    check_generated(OUTPUT_PATH, intake, label="pilot summary intake", regen="python3 scripts/generate_pilot_summary_intake.py --write")
 
 
 def main() -> None:

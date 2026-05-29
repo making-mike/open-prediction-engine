@@ -13,7 +13,7 @@ from generate_agent_pilot_validation import build_agent_pilot_validation
 from generate_developer_adoption_surface import build_developer_adoption_surface
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -454,23 +454,11 @@ def case(ledger: dict[str, Any], case_key: str) -> dict[str, Any]:
 
 
 def write_ledger(ledger: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(ledger), encoding="utf-8")
-    print("generated pilot evidence ledger")
+    write_generated(OUTPUT_PATH, ledger, label="pilot evidence ledger", regen="python3 scripts/generate_pilot_evidence_ledger.py --write")
 
 
 def check_ledger(ledger: dict[str, Any]) -> None:
-    expected = render_json(ledger)
-    if not OUTPUT_PATH.exists():
-        print(f"missing pilot evidence ledger: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_pilot_evidence_ledger.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"pilot evidence ledger drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_pilot_evidence_ledger.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked pilot evidence ledger")
+    check_generated(OUTPUT_PATH, ledger, label="pilot evidence ledger", regen="python3 scripts/generate_pilot_evidence_ledger.py --write")
 
 
 def main() -> None:

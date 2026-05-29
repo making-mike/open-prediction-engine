@@ -13,7 +13,7 @@ from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
 from ope_scoring import calibration_buckets, track_record_summary
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -274,23 +274,11 @@ def validate_gate(gate: dict[str, Any]) -> None:
 
 
 def write_gate(gate: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(gate), encoding="utf-8")
-    print("generated transit baseline track-record gate")
+    write_generated(OUTPUT_PATH, gate, label="transit baseline track-record gate", regen="python3 scripts/generate_transit_baseline_track_record_gate.py --write")
 
 
 def check_gate(gate: dict[str, Any]) -> None:
-    expected = render_json(gate)
-    if not OUTPUT_PATH.exists():
-        print(f"missing transit baseline track-record gate: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_baseline_track_record_gate.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit baseline track-record gate drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_baseline_track_record_gate.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit baseline track-record gate")
+    check_generated(OUTPUT_PATH, gate, label="transit baseline track-record gate", regen="python3 scripts/generate_transit_baseline_track_record_gate.py --write")
 
 
 def main() -> None:

@@ -11,7 +11,7 @@ from typing import Any
 
 from generate_private_source_adapter_outcome_matrix import build_matrix
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -349,23 +349,11 @@ def validate_bridge(bridge: dict[str, Any], matrix: dict[str, Any]) -> None:
 
 
 def write_bridge(bridge: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    BRIDGE_PATH.write_text(render_json(bridge), encoding="utf-8")
-    print("generated private source adapter intake bridge")
+    write_generated(BRIDGE_PATH, bridge, label="private source adapter intake bridge", regen="python3 scripts/generate_private_source_adapter_intake_bridge.py --write")
 
 
 def check_bridge(bridge: dict[str, Any]) -> None:
-    expected = render_json(bridge)
-    if not BRIDGE_PATH.exists():
-        print(f"missing private source adapter intake bridge: {BRIDGE_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_adapter_intake_bridge.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = BRIDGE_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private source adapter intake bridge drift: {BRIDGE_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_adapter_intake_bridge.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private source adapter intake bridge")
+    check_generated(BRIDGE_PATH, bridge, label="private source adapter intake bridge", regen="python3 scripts/generate_private_source_adapter_intake_bridge.py --write")
 
 
 def main() -> None:

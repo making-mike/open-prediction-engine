@@ -12,7 +12,7 @@ from typing import Any
 from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -390,23 +390,11 @@ def summary(growth_loop: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_growth_loop(growth_loop: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    GROWTH_PATH.write_text(render_json(growth_loop), encoding="utf-8")
-    print("generated transit corpus growth loop")
+    write_generated(GROWTH_PATH, growth_loop, label="transit corpus growth loop", regen="python3 scripts/generate_transit_corpus_growth_loop.py --write")
 
 
 def check_growth_loop(growth_loop: dict[str, Any]) -> None:
-    expected = render_json(growth_loop)
-    if not GROWTH_PATH.exists():
-        print(f"missing transit corpus growth loop: {GROWTH_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_corpus_growth_loop.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = GROWTH_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit corpus growth loop drift: {GROWTH_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_corpus_growth_loop.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit corpus growth loop")
+    check_generated(GROWTH_PATH, growth_loop, label="transit corpus growth loop", regen="python3 scripts/generate_transit_corpus_growth_loop.py --write")
 
 
 def main() -> None:

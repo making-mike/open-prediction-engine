@@ -12,7 +12,7 @@ from typing import Any
 from check_benchmarks import load_json, load_questions, validate_benchmark_run
 from check_method_registry import REGISTRY_PATH, benchmark_runs
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -136,23 +136,11 @@ def validate_comparison(comparison: dict[str, Any]) -> None:
 
 
 def write_comparison(comparison: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    COMPARISON_PATH.write_text(render_json(comparison), encoding="utf-8")
-    print("generated method comparison")
+    write_generated(COMPARISON_PATH, comparison, label="method comparison", regen="python3 scripts/compare_forecasting_methods.py --write")
 
 
 def check_comparison(comparison: dict[str, Any]) -> None:
-    expected = render_json(comparison)
-    if not COMPARISON_PATH.exists():
-        print(f"missing method comparison: {COMPARISON_PATH}", file=sys.stderr)
-        print("run `python3 scripts/compare_forecasting_methods.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = COMPARISON_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"method comparison drift: {COMPARISON_PATH}", file=sys.stderr)
-        print("run `python3 scripts/compare_forecasting_methods.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked method comparison")
+    check_generated(COMPARISON_PATH, comparison, label="method comparison", regen="python3 scripts/compare_forecasting_methods.py --write")
 
 
 def main() -> None:

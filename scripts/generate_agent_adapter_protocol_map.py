@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -765,23 +765,11 @@ def validate_protocol_map(protocol_map: dict[str, Any]) -> None:
 
 
 def write_protocol_map(protocol_map: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    MAP_PATH.write_text(render_json(protocol_map), encoding="utf-8")
-    print("generated agent adapter protocol map")
+    write_generated(MAP_PATH, protocol_map, label="agent adapter protocol map", regen="python3 scripts/generate_agent_adapter_protocol_map.py --write")
 
 
 def check_protocol_map(protocol_map: dict[str, Any]) -> None:
-    expected = render_json(protocol_map)
-    if not MAP_PATH.exists():
-        print(f"missing agent adapter protocol map: {MAP_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_adapter_protocol_map.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = MAP_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"agent adapter protocol map drift: {MAP_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_adapter_protocol_map.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked agent adapter protocol map")
+    check_generated(MAP_PATH, protocol_map, label="agent adapter protocol map", regen="python3 scripts/generate_agent_adapter_protocol_map.py --write")
 
 
 def main() -> None:

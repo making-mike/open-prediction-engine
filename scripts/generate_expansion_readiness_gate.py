@@ -18,7 +18,7 @@ from generate_release_manifest import build_manifest
 from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_corpus_growth_loop import build_growth_loop
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -479,23 +479,11 @@ def section(gate: dict[str, Any], section_name: str) -> Any:
 
 
 def write_gate(gate: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(gate), encoding="utf-8")
-    print("generated expansion readiness gate")
+    write_generated(OUTPUT_PATH, gate, label="expansion readiness gate", regen="python3 scripts/generate_expansion_readiness_gate.py --write")
 
 
 def check_gate(gate: dict[str, Any]) -> None:
-    expected = render_json(gate)
-    if not OUTPUT_PATH.exists():
-        print(f"missing expansion readiness gate: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_expansion_readiness_gate.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"expansion readiness gate drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_expansion_readiness_gate.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked expansion readiness gate")
+    check_generated(OUTPUT_PATH, gate, label="expansion readiness gate", regen="python3 scripts/generate_expansion_readiness_gate.py --write")
 
 
 def main() -> None:

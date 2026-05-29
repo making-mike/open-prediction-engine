@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_private_setup_first_actions import action_path, build_actions
 from generate_private_setup_requests import render_json
+from ope_fixtures import check_generated, write_generated
 from ope_schema import SPEC, validate_record
 
 
@@ -285,23 +286,11 @@ def validate_runbook(runbook: dict[str, Any]) -> None:
 
 
 def write_runbook(runbook: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    RUNBOOK_PATH.write_text(render_json(runbook), encoding="utf-8")
-    print("generated private setup first-action runbook")
+    write_generated(RUNBOOK_PATH, runbook, label="private setup first-action runbook", regen="python3 scripts/generate_private_setup_first_action_runbook.py --write")
 
 
 def check_runbook(runbook: dict[str, Any]) -> None:
-    expected = render_json(runbook)
-    if not RUNBOOK_PATH.exists():
-        print(f"missing private setup first-action runbook: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_first_action_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = RUNBOOK_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup first-action runbook drift: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_first_action_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup first-action runbook")
+    check_generated(RUNBOOK_PATH, runbook, label="private setup first-action runbook", regen="python3 scripts/generate_private_setup_first_action_runbook.py --write")
 
 
 def main() -> None:

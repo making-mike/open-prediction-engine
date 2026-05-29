@@ -14,7 +14,7 @@ from generate_private_setup_adapter_chain_runbook import build_runbook
 from generate_private_setup_first_actions import build_actions
 from generate_private_setup_requests import build_request_set
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -401,23 +401,11 @@ def validate_examples(
 
 
 def write_examples(record: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    EXAMPLES_PATH.write_text(render_json(record), encoding="utf-8")
-    print("generated private source-kind selection examples")
+    write_generated(EXAMPLES_PATH, record, label="private source-kind selection examples", regen="python3 scripts/generate_private_source_kind_selection_examples.py --write")
 
 
 def check_examples(record: dict[str, Any]) -> None:
-    expected = render_json(record)
-    if not EXAMPLES_PATH.exists():
-        print(f"missing private source-kind selection examples: {EXAMPLES_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_kind_selection_examples.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = EXAMPLES_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private source-kind selection examples drift: {EXAMPLES_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_kind_selection_examples.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private source-kind selection examples")
+    check_generated(EXAMPLES_PATH, record, label="private source-kind selection examples", regen="python3 scripts/generate_private_source_kind_selection_examples.py --write")
 
 
 def main() -> None:

@@ -14,7 +14,7 @@ from generate_source_adapter_intake import build_records as build_source_adapter
 from generate_source_intake import build_reports as build_source_intake_reports
 from ope_schema import SPEC, validate_record
 from select_setup_method import build_decisions as build_setup_method_decisions
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -776,23 +776,11 @@ def summary(model: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_model(model: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(model), encoding="utf-8")
-    print("generated source quality mapping confidence")
+    write_generated(OUTPUT_PATH, model, label="source quality mapping confidence", regen="python3 scripts/generate_source_quality_mapping_confidence.py --write")
 
 
 def check_model(model: dict[str, Any]) -> None:
-    expected = render_json(model)
-    if not OUTPUT_PATH.exists():
-        print(f"missing source quality mapping confidence: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_quality_mapping_confidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"source quality mapping confidence drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_quality_mapping_confidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked source quality mapping confidence")
+    check_generated(OUTPUT_PATH, model, label="source quality mapping confidence", regen="python3 scripts/generate_source_quality_mapping_confidence.py --write")
 
 
 def main() -> None:

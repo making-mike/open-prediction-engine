@@ -14,7 +14,7 @@ from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -359,23 +359,11 @@ def validate_options(options: dict[str, Any]) -> None:
 
 
 def write_options(options: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(options), encoding="utf-8")
-    print("generated transit method options")
+    write_generated(OUTPUT_PATH, options, label="transit method options", regen="python3 scripts/generate_transit_method_options.py --write")
 
 
 def check_options(options: dict[str, Any]) -> None:
-    expected = render_json(options)
-    if not OUTPUT_PATH.exists():
-        print(f"missing transit method options: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_method_options.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit method options drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_method_options.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit method options")
+    check_generated(OUTPUT_PATH, options, label="transit method options", regen="python3 scripts/generate_transit_method_options.py --write")
 
 
 def main() -> None:

@@ -21,7 +21,7 @@ from run_historical_baseline_forecast import (
 )
 from select_forecasting_method import MethodSelectionError, build_selection
 from validate_forecast_request import load_json, validate_request
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -518,23 +518,11 @@ def validate_summary(summary: dict[str, Any]) -> None:
 
 
 def write_summary(summary: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    SUMMARY_PATH.write_text(render_json(summary), encoding="utf-8")
-    print("generated agent forecast run summary")
+    write_generated(SUMMARY_PATH, summary, label="agent forecast run summary", regen="python3 scripts/run_agent_forecast.py --write")
 
 
 def check_summary(summary: dict[str, Any]) -> None:
-    expected = render_json(summary)
-    if not SUMMARY_PATH.exists():
-        print(f"missing agent forecast run summary: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/run_agent_forecast.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = SUMMARY_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"agent forecast run summary drift: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/run_agent_forecast.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked agent forecast run summary")
+    check_generated(SUMMARY_PATH, summary, label="agent forecast run summary", regen="python3 scripts/run_agent_forecast.py --write")
 
 
 def main() -> None:

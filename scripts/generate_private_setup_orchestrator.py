@@ -14,6 +14,7 @@ from generate_private_setup_requests import build_request_set, render_json
 from generate_source_adapter_intake import build_records as build_source_adapter_intake_records
 from generate_source_handoff_method_gate import build_records as build_source_handoff_method_records
 from generate_source_intake_handoff import build_handoffs
+from ope_fixtures import check_generated, write_generated
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
@@ -373,23 +374,11 @@ def summary(orchestrator: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_orchestrator(orchestrator: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    ORCHESTRATOR_PATH.write_text(render_json(orchestrator), encoding="utf-8")
-    print("generated private setup orchestrator")
+    write_generated(ORCHESTRATOR_PATH, orchestrator, label="private setup orchestrator", regen="python3 scripts/generate_private_setup_orchestrator.py --write")
 
 
 def check_orchestrator(orchestrator: dict[str, Any]) -> None:
-    expected = render_json(orchestrator)
-    if not ORCHESTRATOR_PATH.exists():
-        print(f"missing private setup orchestrator: {ORCHESTRATOR_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_orchestrator.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = ORCHESTRATOR_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup orchestrator drift: {ORCHESTRATOR_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_orchestrator.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup orchestrator")
+    check_generated(ORCHESTRATOR_PATH, orchestrator, label="private setup orchestrator", regen="python3 scripts/generate_private_setup_orchestrator.py --write")
 
 
 def main() -> None:

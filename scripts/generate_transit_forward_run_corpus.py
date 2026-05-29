@@ -12,7 +12,7 @@ from typing import Any
 
 import run_transit_delay_forecast as transit_forecast
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -347,23 +347,11 @@ def validate_corpus(corpus: dict[str, Any]) -> None:
 
 
 def write_corpus(corpus: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(corpus), encoding="utf-8")
-    print("generated transit forward-run corpus")
+    write_generated(OUTPUT_PATH, corpus, label="transit forward-run corpus", regen="python3 scripts/generate_transit_forward_run_corpus.py --write")
 
 
 def check_corpus(corpus: dict[str, Any]) -> None:
-    expected = render_json(corpus)
-    if not OUTPUT_PATH.exists():
-        print(f"missing transit forward-run corpus: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_forward_run_corpus.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit forward-run corpus drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_transit_forward_run_corpus.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit forward-run corpus")
+    check_generated(OUTPUT_PATH, corpus, label="transit forward-run corpus", regen="python3 scripts/generate_transit_forward_run_corpus.py --write")
 
 
 def main() -> None:

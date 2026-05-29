@@ -19,7 +19,7 @@ from generate_agent_adapter_protocol_map import build_protocol_map
 from generate_private_setup_agent_bundles import bundle_by_request_id
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -555,23 +555,11 @@ def validate_runbook(runbook: dict[str, Any]) -> None:
 
 
 def write_runbook(runbook: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    RUNBOOK_PATH.write_text(render_json(runbook), encoding="utf-8")
-    print("generated private setup adapter-chain runbook")
+    write_generated(RUNBOOK_PATH, runbook, label="private setup adapter-chain runbook", regen="python3 scripts/generate_private_setup_adapter_chain_runbook.py --write")
 
 
 def check_runbook(runbook: dict[str, Any]) -> None:
-    expected = render_json(runbook)
-    if not RUNBOOK_PATH.exists():
-        print(f"missing private setup adapter-chain runbook: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_chain_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = RUNBOOK_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup adapter-chain runbook drift: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_chain_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup adapter-chain runbook")
+    check_generated(RUNBOOK_PATH, runbook, label="private setup adapter-chain runbook", regen="python3 scripts/generate_private_setup_adapter_chain_runbook.py --write")
 
 
 def main() -> None:

@@ -11,7 +11,7 @@ from typing import Any
 
 from generate_private_source_adapter_intake_bridge import build_bridge
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -263,23 +263,11 @@ def validate_request_set(request_set: dict[str, Any], bridge: dict[str, Any]) ->
 
 
 def write_request_set(request_set: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    REQUESTS_PATH.write_text(render_json(request_set), encoding="utf-8")
-    print("generated private setup requests")
+    write_generated(REQUESTS_PATH, request_set, label="private setup requests", regen="python3 scripts/generate_private_setup_requests.py --write")
 
 
 def check_request_set(request_set: dict[str, Any]) -> None:
-    expected = render_json(request_set)
-    if not REQUESTS_PATH.exists():
-        print(f"missing private setup requests: {REQUESTS_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_requests.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = REQUESTS_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup requests drift: {REQUESTS_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_requests.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup requests")
+    check_generated(REQUESTS_PATH, request_set, label="private setup requests", regen="python3 scripts/generate_private_setup_requests.py --write")
 
 
 def main() -> None:

@@ -16,7 +16,7 @@ from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
 from run_source_handoff_forecast import output_prefix
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -548,23 +548,11 @@ def summary(runtime: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_runtime(runtime: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(runtime), encoding="utf-8")
-    print("generated local source runtime")
+    write_generated(OUTPUT_PATH, runtime, label="local source runtime", regen="python3 scripts/generate_local_source_runtime.py --write")
 
 
 def check_runtime(runtime: dict[str, Any]) -> None:
-    expected = render_json(runtime)
-    if not OUTPUT_PATH.exists():
-        print(f"missing local source runtime: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_local_source_runtime.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"local source runtime drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_local_source_runtime.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked local source runtime")
+    check_generated(OUTPUT_PATH, runtime, label="local source runtime", regen="python3 scripts/generate_local_source_runtime.py --write")
 
 
 def main() -> None:

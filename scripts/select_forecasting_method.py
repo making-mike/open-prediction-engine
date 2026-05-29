@@ -12,7 +12,7 @@ from typing import Any
 from check_method_registry import REGISTRY_PATH, benchmark_runs
 from ope_schema import SPEC, validate_record
 from validate_forecast_request import load_json
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -160,23 +160,11 @@ def validate_selection(selection: dict[str, Any]) -> None:
 
 
 def write_selection(selection: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    SELECTION_PATH.write_text(render_json(selection), encoding="utf-8")
-    print("generated method selection")
+    write_generated(SELECTION_PATH, selection, label="method selection", regen="python3 scripts/select_forecasting_method.py --write")
 
 
 def check_selection(selection: dict[str, Any]) -> None:
-    expected = render_json(selection)
-    if not SELECTION_PATH.exists():
-        print(f"missing method selection: {SELECTION_PATH}", file=sys.stderr)
-        print("run `python3 scripts/select_forecasting_method.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = SELECTION_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"method selection drift: {SELECTION_PATH}", file=sys.stderr)
-        print("run `python3 scripts/select_forecasting_method.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked method selection")
+    check_generated(SELECTION_PATH, selection, label="method selection", regen="python3 scripts/select_forecasting_method.py --write")
 
 
 def main() -> None:

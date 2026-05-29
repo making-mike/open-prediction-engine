@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -433,23 +433,11 @@ def validate_output(output: dict[str, Any]) -> None:
 
 
 def write_output(output: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(output), encoding="utf-8")
-    print("generated source adapter output")
+    write_generated(OUTPUT_PATH, output, label="source adapter output", regen="python3 scripts/generate_source_adapter_output.py --write")
 
 
 def check_output(output: dict[str, Any]) -> None:
-    expected = render_json(output)
-    if not OUTPUT_PATH.exists():
-        print(f"missing source adapter output: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_adapter_output.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"source adapter output drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_adapter_output.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked source adapter output")
+    check_generated(OUTPUT_PATH, output, label="source adapter output", regen="python3 scripts/generate_source_adapter_output.py --write")
 
 
 def main() -> None:

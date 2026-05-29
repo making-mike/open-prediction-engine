@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -357,23 +357,11 @@ def validate_reliability(reliability: dict[str, Any]) -> None:
 
 
 def write_reliability(reliability: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(reliability), encoding="utf-8")
-    print("generated resolution runtime reliability")
+    write_generated(OUTPUT_PATH, reliability, label="resolution runtime reliability", regen="python3 scripts/generate_resolution_runtime_reliability.py --write")
 
 
 def check_reliability(reliability: dict[str, Any]) -> None:
-    expected = render_json(reliability)
-    if not OUTPUT_PATH.exists():
-        print(f"missing resolution runtime reliability: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_resolution_runtime_reliability.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"resolution runtime reliability drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_resolution_runtime_reliability.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked resolution runtime reliability")
+    check_generated(OUTPUT_PATH, reliability, label="resolution runtime reliability", regen="python3 scripts/generate_resolution_runtime_reliability.py --write")
 
 
 def main() -> None:

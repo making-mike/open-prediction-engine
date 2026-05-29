@@ -12,7 +12,7 @@ from typing import Any
 from generate_private_setup_orchestrator import build_orchestrator
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -585,23 +585,11 @@ def summary(pack: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_pack(pack: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    PILOT_PATH.write_text(render_json(pack), encoding="utf-8")
-    print("generated agent pilot validation pack")
+    write_generated(PILOT_PATH, pack, label="agent pilot validation pack", regen="python3 scripts/generate_agent_pilot_validation.py --write")
 
 
 def check_pack(pack: dict[str, Any]) -> None:
-    expected = render_json(pack)
-    if not PILOT_PATH.exists():
-        print(f"missing agent pilot validation pack: {PILOT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_pilot_validation.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = PILOT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"agent pilot validation pack drift: {PILOT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_pilot_validation.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked agent pilot validation pack")
+    check_generated(PILOT_PATH, pack, label="agent pilot validation pack", regen="python3 scripts/generate_agent_pilot_validation.py --write")
 
 
 def main() -> None:

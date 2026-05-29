@@ -11,7 +11,7 @@ from typing import Any
 
 from generate_agent_adapter_protocol_map import build_protocol_map
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -354,23 +354,11 @@ def validate_against_matrix(summary: dict[str, Any]) -> None:
 
 
 def write_summary(summary: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    SUMMARY_PATH.write_text(render_json(summary), encoding="utf-8")
-    print("generated private setup adapter conformance summary")
+    write_generated(SUMMARY_PATH, summary, label="private setup adapter conformance summary", regen="python3 scripts/generate_private_setup_adapter_conformance_summary.py --write")
 
 
 def check_summary(summary: dict[str, Any]) -> None:
-    expected = render_json(summary)
-    if not SUMMARY_PATH.exists():
-        print(f"missing private setup adapter conformance summary: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_summary.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = SUMMARY_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup adapter conformance summary drift: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_summary.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup adapter conformance summary")
+    check_generated(SUMMARY_PATH, summary, label="private setup adapter conformance summary", regen="python3 scripts/generate_private_setup_adapter_conformance_summary.py --write")
 
 
 def main() -> None:

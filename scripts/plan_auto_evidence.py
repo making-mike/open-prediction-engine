@@ -17,7 +17,7 @@ from source_connector_catalog import (
     connector_policy_checks,
 )
 from validate_forecast_request import load_json, question_hash, validate_request
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -237,23 +237,11 @@ def build_plan(request_path: Path = DEFAULT_REQUEST) -> dict[str, Any]:
 
 
 def write_plan(plan: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    PLAN_PATH.write_text(render_json(plan), encoding="utf-8")
-    print("generated auto-evidence plan")
+    write_generated(PLAN_PATH, plan, label="auto-evidence plan", regen="python3 scripts/plan_auto_evidence.py --write")
 
 
 def check_plan(plan: dict[str, Any]) -> None:
-    expected = render_json(plan)
-    if not PLAN_PATH.exists():
-        print(f"missing auto-evidence plan: {PLAN_PATH}", file=sys.stderr)
-        print("run `python3 scripts/plan_auto_evidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = PLAN_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"auto-evidence plan drift: {PLAN_PATH}", file=sys.stderr)
-        print("run `python3 scripts/plan_auto_evidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked auto-evidence plan")
+    check_generated(PLAN_PATH, plan, label="auto-evidence plan", regen="python3 scripts/plan_auto_evidence.py --write")
 
 
 def main() -> None:
