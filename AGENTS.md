@@ -70,6 +70,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/prediction-campaign-forecast-creation.md`: checked dry-run handoff from a ready campaign runner decision to planned forecast artifact IDs.
 - `spec/prediction-campaign-forecast-artifact.md`: checked unresolved campaign forecast artifact using the standard lifecycle contracts.
 - `spec/prediction-campaign-forecast-write.md`: checked non-mutating campaign forecast lifecycle write plan and local-state guard boundary.
+- `spec/prediction-campaign-resume.md`: checked non-mutating campaign resume readback and recovery boundary.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
@@ -262,6 +263,8 @@ python3 scripts/generate_prediction_campaign_forecast_artifact.py --check
 python3 scripts/check_prediction_campaign_forecast_artifact.py
 python3 scripts/generate_prediction_campaign_forecast_write.py --check
 python3 scripts/check_prediction_campaign_forecast_write.py
+python3 scripts/generate_prediction_campaign_resume.py --check
+python3 scripts/check_prediction_campaign_resume.py
 python3 scripts/generate_resolution_jobs.py --check
 python3 scripts/generate_resolution_jobs.py --campaign predictioncampaign-001 --check
 python3 scripts/check_resolution_jobs.py
@@ -396,6 +399,7 @@ python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
+python3 scripts/ope.py prediction-campaign resume
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py private-setup-adapter-runbook
@@ -506,6 +510,7 @@ python3 scripts/generate_prediction_campaign_runner.py --write
 python3 scripts/generate_prediction_campaign_forecast_creation.py --write
 python3 scripts/generate_prediction_campaign_forecast_artifact.py --write
 python3 scripts/generate_prediction_campaign_forecast_write.py --write
+python3 scripts/generate_prediction_campaign_resume.py --write
 python3 scripts/generate_resolution_jobs.py --write
 python3 scripts/generate_resolution_jobs.py --campaign predictioncampaign-001 --write
 python3 scripts/run_resolution_scheduler.py --campaign predictioncampaign-001 --write

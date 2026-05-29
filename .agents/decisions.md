@@ -2038,3 +2038,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Extend the checked `resolution-scheduler` with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that include the `forecast-1301` campaign wait action in a dry-run scheduler tick.
 - **Why:** Agents need the same "keep checking later" surface for campaign-created forecasts before campaign resolver execution, campaign state mutation, resume, recovery, or corpus append behavior exists.
 - **Alternatives rejected:** Executing campaign resolvers from the scheduler, writing `.ope/live` campaign state during normal checks, creating hosted or OS scheduler files, or treating a scheduler wait action as resolution, scoring, corpus, or calibration evidence.
+
+### DEC-097 — Add Prediction Campaign Resume Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign resume` contract, generated fixture, CLI readback, and checker that join the campaign manifest, forecast-write plan, open forecast, and campaign resolution queue into safe recovery actions.
+- **Why:** Before effectful resume can survive terminal interruption, agents need one compact readback that shows bound state paths, overwrite boundaries, safe commands, and blocked future mutation steps without reading raw ignored state.
+- **Alternatives rejected:** Reading `.ope/live` during normal checks, writing campaign state from the resume command, executing campaign resolvers during resume, or treating resume guidance as resolution, scoring, corpus, or calibration evidence.

@@ -170,6 +170,8 @@ The prediction campaign forecast artifact generator emits checked question, evid
 
 The prediction campaign forecast write generator emits a checked non-mutating write plan under `generated/prediction-campaign-forecast-write/`, binding lifecycle fixture records to ignored `.ope/live` target paths and guard checks before any future explicit local mutation.
 
+The prediction campaign resume generator emits a checked non-mutating recovery readback under `generated/prediction-campaign-resume/`, joining the campaign manifest, write plan, open forecast, and campaign resolution queue without reading or writing ignored live state.
+
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 
 The private source adapter capability generator emits checked non-executing adapter declarations under `generated/private-source-adapters/` and keeps manual uploads, private APIs, and private databases runtime-not-implemented.

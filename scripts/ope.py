@@ -130,6 +130,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         sys.executable,
         "scripts/generate_prediction_campaign_forecast_write.py",
     ]
+    prediction_campaign_resume_command = [sys.executable, "scripts/generate_prediction_campaign_resume.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -207,6 +208,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_forecast_creation_command.append("--write")
         prediction_campaign_forecast_artifact_command.append("--write")
         prediction_campaign_forecast_write_command.append("--write")
+        prediction_campaign_resume_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -277,6 +279,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_forecast_creation_command.append("--check")
         prediction_campaign_forecast_artifact_command.append("--check")
         prediction_campaign_forecast_write_command.append("--check")
+        prediction_campaign_resume_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -348,6 +351,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     run(prediction_campaign_forecast_creation_command)
     run(prediction_campaign_forecast_artifact_command)
     run(prediction_campaign_forecast_write_command)
+    run(prediction_campaign_resume_command)
     run(private_setup_adapter_runbook_command)
     run(private_setup_adapter_conformance_command)
     run(private_setup_adapter_conformance_summary_command)
@@ -1280,6 +1284,14 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
         return
     if args.action == "forecast-write":
         command = [sys.executable, "scripts/generate_prediction_campaign_forecast_write.py"]
+        if args.check:
+            command.append("--check")
+        if args.write:
+            command.append("--write")
+        run(command)
+        return
+    if args.action == "resume":
+        command = [sys.executable, "scripts/generate_prediction_campaign_resume.py"]
         if args.check:
             command.append("--check")
         if args.write:
@@ -2597,6 +2609,7 @@ def build_parser() -> argparse.ArgumentParser:
             "forecast-create",
             "forecast-artifact",
             "forecast-write",
+            "resume",
         ],
         default="manifest",
         help="print the full manifest, one campaign readback, or a dry-run runner/forecast artifact readback",

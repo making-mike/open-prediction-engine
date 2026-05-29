@@ -482,6 +482,19 @@ def main() -> None:
     prediction_campaign_forecast_write_check = run_cli("prediction-campaign", "forecast-write", "--check")
     if "checked prediction campaign forecast write" not in prediction_campaign_forecast_write_check.stdout:
         raise AssertionError("CLI prediction-campaign forecast-write check output drifted")
+    prediction_campaign_resume = run_cli("prediction-campaign", "resume")
+    prediction_campaign_resume_payload = json.loads(prediction_campaign_resume.stdout)
+    if prediction_campaign_resume_payload["resumeStatus"] != "checked_resume_plan_non_mutating":
+        raise AssertionError("CLI prediction-campaign resume status drifted")
+    if prediction_campaign_resume_payload["bindings"]["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-campaign resume forecast binding drifted")
+    if prediction_campaign_resume_payload["summary"]["effectfulResumeImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign resume must remain non-effectful")
+    if prediction_campaign_resume_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign resume must not write ignored live state")
+    prediction_campaign_resume_check = run_cli("prediction-campaign", "resume", "--check")
+    if "checked prediction campaign resume" not in prediction_campaign_resume_check.stdout:
+        raise AssertionError("CLI prediction-campaign resume check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")

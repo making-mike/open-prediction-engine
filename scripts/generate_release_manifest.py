@@ -85,6 +85,7 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py prediction-campaign forecast-create",
                 "python3 scripts/ope.py prediction-campaign forecast-artifact",
                 "python3 scripts/ope.py prediction-campaign forecast-write",
+                "python3 scripts/ope.py prediction-campaign resume",
                 "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
                 "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
                 "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
@@ -182,6 +183,11 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-prediction-campaign-forecast-write",
                 "command": "python3 scripts/ope.py prediction-campaign forecast-write",
                 "expected": "prediction campaign forecast-write exposes the guarded ignored-local-state write plan without executing the write during normal checks.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-resume",
+                "command": "python3 scripts/ope.py prediction-campaign resume",
+                "expected": "prediction campaign resume exposes checked recovery actions after interruption without reading or writing ignored live state.",
             },
             {
                 "checkId": "mvp-smoke-campaign-resolution-jobs",

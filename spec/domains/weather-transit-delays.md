@@ -43,6 +43,7 @@ Initial maturity:
 - checked dry-run campaign forecast-creation handoff through `python3 scripts/ope.py prediction-campaign forecast-create`
 - checked unresolved campaign forecast artifact through `python3 scripts/ope.py prediction-campaign forecast-artifact`
 - checked non-mutating campaign forecast write plan through `python3 scripts/ope.py prediction-campaign forecast-write`
+- checked non-mutating campaign resume readback through `python3 scripts/ope.py prediction-campaign resume`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
 - checked campaign-aware resolution job readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
@@ -306,6 +307,7 @@ python3 scripts/ope.py resolve-due-forward-runs --live
 python3 scripts/ope.py resolve-due-forward-runs --live --execute --download-static-gtfs
 
 python3 scripts/ope.py resolution-jobs --live
+python3 scripts/ope.py prediction-campaign resume
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
@@ -315,6 +317,8 @@ python3 scripts/ope.py resolution-scheduler --live --watch --execute --download-
 The campaign-aware registry joins the checked campaign manifest, `forecast-1301` artifact, and forecast-write plan into the same agent-facing job readback. It reports the campaign run as waiting until `resolutionEligibleAt`; it does not execute campaign resolvers, write campaign state, create resolution or scoring records, append corpus evidence, or allow quality claims.
 
 The campaign-aware scheduler adds that same wait action to the checked scheduler tick. It keeps execution mode dry-run and leaves campaign resolver execution for a later explicit campaign path.
+
+The campaign resume readback joins the campaign manifest, forecast-write plan, open forecast fixture, and resolution queue into safe recovery actions after interruption. It does not read ignored live state, write campaign state, execute resolvers, overwrite prior evidence, or append corpus rows.
 
 The command accepts custom local CSV/JSON files with the same role shape:
 

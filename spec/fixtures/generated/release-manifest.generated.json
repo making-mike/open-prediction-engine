@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 85,
+    "schemaFileCount": 86,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -63,6 +63,7 @@
       "spec/prediction-campaign-forecast-creation.schema.json",
       "spec/prediction-campaign-forecast-write.schema.json",
       "spec/prediction-campaign-manifest.schema.json",
+      "spec/prediction-campaign-resume.schema.json",
       "spec/prediction-campaign-runner.schema.json",
       "spec/private-setup-adapter-chain-runbook.schema.json",
       "spec/private-setup-adapter-conformance-matrix.schema.json",
@@ -171,6 +172,7 @@
         "python3 scripts/ope.py prediction-campaign forecast-create",
         "python3 scripts/ope.py prediction-campaign forecast-artifact",
         "python3 scripts/ope.py prediction-campaign forecast-write",
+        "python3 scripts/ope.py prediction-campaign resume",
         "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
         "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
         "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
@@ -274,6 +276,11 @@
         "checkId": "mvp-smoke-prediction-campaign-forecast-write",
         "command": "python3 scripts/ope.py prediction-campaign forecast-write",
         "expected": "prediction campaign forecast-write exposes the guarded ignored-local-state write plan without executing the write during normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-resume",
+        "command": "python3 scripts/ope.py prediction-campaign resume",
+        "expected": "prediction campaign resume exposes checked recovery actions after interruption without reading or writing ignored live state."
       },
       {
         "checkId": "mvp-smoke-campaign-resolution-jobs",

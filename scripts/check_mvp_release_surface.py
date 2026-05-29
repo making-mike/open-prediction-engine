@@ -131,6 +131,13 @@ def main() -> None:
     require(campaign_forecast_write["summary"]["effectfulLocalWriteImplemented"] is False, "prediction campaign forecast write should remain a plan")
     require(campaign_forecast_write["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign forecast write must not mutate state")
 
+    campaign_resume = run_cli("prediction-campaign", "resume")
+    require(campaign_resume["resumeStatus"] == "checked_resume_plan_non_mutating", "prediction campaign resume status drifted")
+    require(campaign_resume["bindings"]["forecastId"] == "forecast-1301", "prediction campaign resume forecast binding drifted")
+    require(campaign_resume["observedState"]["priorEvidenceOverwriteAllowed"] is False, "prediction campaign resume must not allow overwrite")
+    require(campaign_resume["summary"]["effectfulResumeImplemented"] is False, "prediction campaign resume must remain non-effectful")
+    require(campaign_resume["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign resume must not write live state")
+
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
     require(adapter["forecastId"] is None, "accepted adapter path must not invent forecast artifacts")

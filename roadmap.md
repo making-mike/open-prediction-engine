@@ -128,6 +128,7 @@ Done:
 - Prediction campaign forecast-creation handoffs now bind a ready runner decision to planned question, forecast, card, and bundle IDs through `python3 scripts/ope.py prediction-campaign forecast-create`, without creating artifacts or writing campaign state.
 - Prediction campaign forecast artifacts now materialize `forecast-1301` as an unresolved baseline-only checked fixture through `python3 scripts/ope.py prediction-campaign forecast-artifact`, using the standard question, evidence, artifact, and history contracts without live fetches, resolver execution, scoring, or campaign-state writes.
 - Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`, without executing local writes during normal checks.
+- Prediction campaign resume readbacks now join the checked campaign manifest, forecast-write plan, open forecast, and campaign resolution queue through `python3 scripts/ope.py prediction-campaign resume`, without reading or writing ignored live state.
 - Resolution job registries now have a campaign-aware readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait state without executing campaign resolvers or mutating campaign state.
 - Resolution scheduler readbacks now have a campaign-aware dry-run tick through `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait action without executing campaign resolvers or writing campaign state.
 
@@ -2945,10 +2946,12 @@ Completed outputs so far:
 
 - `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
 - `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`
+- `python3 scripts/ope.py prediction-campaign resume`
 - checked campaign-aware fixture at `spec/fixtures/generated/resolution-jobs/resolution-jobs-campaign.generated.json`
 - checked campaign-aware scheduler fixture at `spec/fixtures/generated/resolution-scheduler/resolution-scheduler-campaign-run.generated.json`
+- checked campaign resume fixture at `spec/fixtures/generated/prediction-campaign-resume/weather-transit-delay-campaign-resume.generated.json`
 - source binding from forward-run state plus checked campaign manifest, campaign forecast artifact, and forecast-write plan
-- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for campaign-aware resolution job and scheduler readbacks
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for campaign-aware resolution job, scheduler, and resume readbacks
 
 ## Milestone 95: Append-Only Calibration Evidence Ledger
 

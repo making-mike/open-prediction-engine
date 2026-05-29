@@ -21,6 +21,7 @@ python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
+python3 scripts/ope.py prediction-campaign resume
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 ```
