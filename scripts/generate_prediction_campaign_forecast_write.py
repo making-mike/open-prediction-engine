@@ -286,7 +286,13 @@ def ensure_safe_local_path(path_value: str) -> Path:
         raise PredictionCampaignForecastWriteError(
             f"Refusing path outside {LOCAL_STATE_ROOT}: {path_value}"
         )
-    return ROOT / path
+    target = ROOT / path
+    state_root = (ROOT / LOCAL_STATE_ROOT).resolve()
+    if not target.resolve().is_relative_to(state_root):
+        raise PredictionCampaignForecastWriteError(
+            f"Refusing symlinked local campaign path outside {LOCAL_STATE_ROOT}: {path_value}"
+        )
+    return target
 
 
 def read_json(path: Path) -> dict[str, Any]:
