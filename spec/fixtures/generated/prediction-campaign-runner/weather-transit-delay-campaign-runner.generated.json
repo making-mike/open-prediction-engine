@@ -16,6 +16,8 @@
     "acceptsSetupJson": true,
     "acceptsManifestJson": true,
     "flags": [
+      "--case",
+      "--plan-count",
       "--domain",
       "--service-window",
       "--interval",
@@ -28,11 +30,33 @@
       "--manifest-json",
       "--live-weather",
       "--execute-resolvers",
+      "--write-local",
       "--output-format"
     ],
     "requiresExplicitLiveFetchFlag": true,
     "requiresExplicitResolverExecutionFlag": true,
     "defaultMissedRunPolicy": "skip_if_forecast_close_passed"
+  },
+  "campaignCreationRequest": {
+    "inputMode": "default_fixture",
+    "setupJsonPath": "none",
+    "manifestJsonPath": "none",
+    "flagOverrides": [],
+    "domain": "weather-transit-delays",
+    "serviceWindow": "morning_peak",
+    "interval": "P1D",
+    "targetCount": "100",
+    "until": "none",
+    "calibrationTarget": "none",
+    "postCalibrationAction": "stop",
+    "postCalibrationDelay": "none",
+    "candidatePlanCount": "4",
+    "liveWeatherRequested": false,
+    "resolverExecutionRequested": false,
+    "acceptedForDryRun": true,
+    "createsCampaignManifest": false,
+    "writesCampaignState": false,
+    "nextAction": "Review the normalized campaign request; use --write-local only when creating the ready forecast in ignored local state."
   },
   "supportedRecurrenceModes": [
     {
@@ -118,6 +142,20 @@
       "writesLiveState": false
     }
   ],
+  "missedRunPolicy": {
+    "policyName": "skip_if_forecast_close_passed",
+    "defaultAction": "mark_missed_without_forecast",
+    "decisionStatus": "skip_missed_close",
+    "recordedRunStatus": "missed",
+    "triggerCondition": "Apply when forecastCloseAt is earlier than the runner clock before any forecast artifact is created.",
+    "exclusionReasonCode": "missed_forecast_close",
+    "excludedFromComparableEvidence": true,
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "appendsCorpusEvidence": false,
+    "nextAction": "Record a missed run state and plan the next eligible window instead of backfilling a forecast."
+  },
   "outputModes": {
     "interactiveTerminalMode": "compact_human_status_lines",
     "capturedStdoutMode": "jsonl",
@@ -130,7 +168,7 @@
     "forecastArtifactsCreated": 0,
     "resolvedComparableOutcomes": 0,
     "nextForecastRunId": "predictionrun-1301",
-    "nextAction": "Implement the effectful local runner loop that creates the next forecast before close."
+    "nextAction": "Use --write-local for the ready-run creation tick; future-window scheduling remains next."
   },
   "summary": {
     "terminalRunnerSurfaceImplemented": true,
@@ -140,7 +178,7 @@
     "writesLiveState": false,
     "normalChecksUseLiveNetwork": false,
     "qualityClaimAllowed": false,
-    "recommendedNextMilestone": "Milestone 93 effectful local forecast creation"
+    "recommendedNextMilestone": "Milestone 93 forecast scheduling after explicit local creation"
   },
   "executionBoundary": {
     "readOnlyDryRun": true,
@@ -157,8 +195,8 @@
     "qualityClaimAllowed": false
   },
   "warnings": [
-    "This runner readback checks command semantics only; it does not start a foreground loop.",
-    "Forecast creation remains a later effectful milestone and must preserve forecast-before-close boundaries.",
+    "This runner readback checks command semantics by default; --write-local performs one ready-run creation tick.",
+    "Forecast scheduling across future windows remains a later effectful milestone and must preserve forecast-before-close boundaries.",
     "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
     "No calibration or quality claim is allowed from dry-run runner decisions."
   ]

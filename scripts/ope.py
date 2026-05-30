@@ -1264,6 +1264,40 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
             command.append("--check")
         if args.write:
             command.append("--write")
+        if args.case:
+            command.extend(["--case", args.case])
+        if args.plan_count is not None:
+            command.extend(["--plan-count", str(args.plan_count)])
+        if args.domain:
+            command.extend(["--domain", args.domain])
+        if args.service_window:
+            command.extend(["--service-window", args.service_window])
+        if args.interval:
+            command.extend(["--interval", args.interval])
+        if args.count is not None:
+            command.extend(["--count", str(args.count)])
+        if args.until:
+            command.extend(["--until", args.until])
+        if args.calibration_target is not None:
+            command.extend(["--calibration-target", str(args.calibration_target)])
+        if args.post_calibration_action:
+            command.extend(["--post-calibration-action", args.post_calibration_action])
+        if args.post_calibration_delay:
+            command.extend(["--post-calibration-delay", args.post_calibration_delay])
+        if args.setup_json:
+            command.extend(["--setup-json", args.setup_json])
+        if args.manifest_json:
+            command.extend(["--manifest-json", args.manifest_json])
+        if args.live_weather:
+            command.append("--live-weather")
+        if args.execute_resolvers:
+            command.append("--execute-resolvers")
+        if args.write_local:
+            command.append("--write-local")
+        if args.output_format:
+            command.extend(["--output-format", args.output_format])
+        if args.view:
+            command.extend(["--view", args.view])
         run(command)
         return
     if args.action == "forecast-create":
@@ -1288,6 +1322,14 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
             command.append("--check")
         if args.write:
             command.append("--write")
+        if args.run_id:
+            command.extend(["--run-id", args.run_id])
+        if args.manifest_json:
+            command.extend(["--manifest-json", args.manifest_json])
+        if args.write_local:
+            command.append("--write-local")
+        if args.output_format:
+            command.extend(["--output-format", args.output_format])
         run(command)
         return
     if args.action == "resume":
@@ -2661,6 +2703,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-format",
         choices=["jsonl", "human"],
         help="dry-run runner output format",
+    )
+    prediction_campaign.add_argument(
+        "--view",
+        choices=["runner", "campaign-creation", "decisions", "missed-run-policy", "summary", "boundary"],
+        help="print one start readback view",
     )
     prediction_campaign.add_argument(
         "--check",

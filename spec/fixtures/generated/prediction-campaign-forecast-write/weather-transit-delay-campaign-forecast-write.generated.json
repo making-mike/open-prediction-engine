@@ -152,7 +152,7 @@
     "normalChecksUseLiveNetwork": false,
     "resolverExecutionImplemented": false,
     "qualityClaimAllowed": false,
-    "recommendedNextAction": "Implement guarded --write-local artifact copy and campaign state update with idempotency checks."
+    "recommendedNextAction": "Use --write-local only when an explicit local campaign forecast write is intended."
   },
   "executionBoundary": {
     "readOnlyWritePlan": true,
@@ -171,7 +171,7 @@
   },
   "warnings": [
     "This write plan validates source and target bindings only; it does not write .ope/live state.",
-    "Effectful local writes must require an explicit future --write-local path and preserve idempotency.",
+    "Effectful local writes require explicit --write-local and preserve idempotency.",
     "Resolution, scoring, corpus append, and quality claims remain separate later steps.",
     "Normal checks validate checked fixtures without live network access or ignored state mutation."
   ]

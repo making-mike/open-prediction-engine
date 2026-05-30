@@ -2045,3 +2045,24 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a checked `prediction-campaign resume` contract, generated fixture, CLI readback, and checker that join the campaign manifest, forecast-write plan, open forecast, and campaign resolution queue into safe recovery actions.
 - **Why:** Before effectful resume can survive terminal interruption, agents need one compact readback that shows bound state paths, overwrite boundaries, safe commands, and blocked future mutation steps without reading raw ignored state.
 - **Alternatives rejected:** Reading `.ope/live` during normal checks, writing campaign state from the resume command, executing campaign resolvers during resume, or treating resume guidance as resolution, scoring, corpus, or calibration evidence.
+
+### DEC-098 — Add Explicit Campaign Forecast Local Write
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add explicit `--write-local` execution for the ready prediction campaign run, writing checked lifecycle records and minimal campaign/run state under ignored `.ope/live/prediction-campaigns/`.
+- **Why:** Milestone 93 needs the first effectful foreground runner slice, but normal checks must remain deterministic and non-mutating; a guarded idempotent write path proves local artifact creation without live fetches, resolver execution, scoring, corpus append, or quality claims.
+- **Alternatives rejected:** Writing campaign state during normal checks, starting a long-running scheduler before one-run idempotency exists, overwriting existing local state, or mixing forecast creation with resolution and calibration-ledger mutation.
+
+### DEC-099 — Add Campaign Missed-Run Policy
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a schema-bound prediction campaign runner missed-run policy that marks candidates as `missed` after forecast close and records `missed_forecast_close` as an exclusion reason.
+- **Why:** Future foreground scheduling needs an explicit rule for late ticks before it mutates campaign state; missed forecast windows must not be backfilled, resolved, scored, appended as comparable corpus evidence, or used for calibration claims.
+- **Alternatives rejected:** Backfilling forecasts after close, treating missed windows as scored evidence, relying only on prose in the manifest, or delaying the policy until the long-running scheduler exists.
+
+### DEC-100 — Add Campaign Creation Input Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a schema-bound campaign creation request to the terminal runner readback that normalizes CLI flags, setup JSON, manifest JSON, and explicit future live/resolver requests without mutating local campaign state.
+- **Why:** Milestone 93 needs one command shape that agents can call from flags or a checked setup file before the foreground scheduler exists; the request needs to be inspectable and deterministic while normal checks remain non-mutating.
+- **Alternatives rejected:** Ignoring accepted CLI flags, requiring agents to edit raw scheduler syntax, writing a new campaign manifest during normal checks, or letting setup JSON bypass schema validation.

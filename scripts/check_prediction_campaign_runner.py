@@ -15,7 +15,9 @@ def main() -> None:
     runner = build_prediction_campaign_runner()
     bindings = runner["bindings"]
     command = runner["commandSurface"]
+    creation = runner["campaignCreationRequest"]
     decisions = runner["runnerDecisions"]
+    missed_policy = runner["missedRunPolicy"]
     progress = runner["progress"]
     summary = runner["summary"]
     boundary = runner["executionBoundary"]
@@ -30,6 +32,8 @@ def main() -> None:
 
     require(command["command"] == "python3 scripts/ope.py prediction-campaign start", "runner command drifted")
     for flag in [
+        "--case",
+        "--plan-count",
         "--interval",
         "--count",
         "--until",
@@ -37,6 +41,7 @@ def main() -> None:
         "--post-calibration-action",
         "--live-weather",
         "--execute-resolvers",
+        "--write-local",
         "--output-format",
     ]:
         require(flag in command["flags"], f"{flag} should be exposed")
@@ -45,6 +50,29 @@ def main() -> None:
     require(command["requiresExplicitLiveFetchFlag"] is True, "live fetch should require explicit flag")
     require(command["requiresExplicitResolverExecutionFlag"] is True, "resolver execution should require explicit flag")
     require(command["defaultMissedRunPolicy"] == "skip_if_forecast_close_passed", "missed-run policy drifted")
+
+    require(creation["inputMode"] == "default_fixture", "default campaign input mode drifted")
+    require(creation["setupJsonPath"] == "none", "default setup JSON path drifted")
+    require(creation["manifestJsonPath"] == "none", "default manifest JSON path drifted")
+    require(creation["flagOverrides"] == [], "default campaign input should not have flag overrides")
+    require(creation["domain"] == "weather-transit-delays", "campaign creation domain drifted")
+    require(creation["serviceWindow"] == "morning_peak", "campaign creation service window drifted")
+    require(creation["interval"] == "P1D", "campaign creation interval drifted")
+    require(creation["targetCount"] == "100", "campaign creation target count drifted")
+    require(creation["acceptedForDryRun"] is True, "campaign creation input should be accepted for dry-run")
+    require(creation["createsCampaignManifest"] is False, "dry-run campaign input must not create a manifest")
+    require(creation["writesCampaignState"] is False, "dry-run campaign input must not write state")
+
+    require(missed_policy["policyName"] == "skip_if_forecast_close_passed", "missed-run policy name drifted")
+    require(missed_policy["defaultAction"] == "mark_missed_without_forecast", "missed-run default action drifted")
+    require(missed_policy["decisionStatus"] == "skip_missed_close", "missed-run decision status drifted")
+    require(missed_policy["recordedRunStatus"] == "missed", "missed-run recorded status drifted")
+    require(missed_policy["exclusionReasonCode"] == "missed_forecast_close", "missed-run reason code drifted")
+    require(missed_policy["excludedFromComparableEvidence"] is True, "missed runs must be excluded from comparable evidence")
+    require(missed_policy["createsForecastArtifacts"] is False, "missed runs must not create forecasts")
+    require(missed_policy["createsResolutionArtifacts"] is False, "missed runs must not create resolutions")
+    require(missed_policy["createsScoringRecords"] is False, "missed runs must not create scoring records")
+    require(missed_policy["appendsCorpusEvidence"] is False, "missed runs must not append corpus evidence")
 
     modes = {item["mode"]: item for item in runner["supportedRecurrenceModes"]}
     for mode in ["fixed_count", "until_date", "open_ended", "interval", "calibration_threshold", "post_calibration_restart"]:

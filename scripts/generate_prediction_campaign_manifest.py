@@ -176,8 +176,10 @@ def build_prediction_campaign_manifest(
     *,
     case_key: str = DEFAULT_CASE,
     plan_count: int = DEFAULT_PLAN_COUNT,
+    setup: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    setup = build_repeating_prediction_setup()
+    if setup is None:
+        setup = build_repeating_prediction_setup()
     case = find_case(setup, case_key)
     schedule = case["schedulePolicy"]
     planned_runs = build_planned_runs(setup, case, plan_count=plan_count)

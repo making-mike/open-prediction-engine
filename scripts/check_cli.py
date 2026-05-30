@@ -385,6 +385,20 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign start next forecast run drifted")
     if prediction_campaign_start_payload["outputModes"]["capturedStdoutMode"] != "jsonl":
         raise AssertionError("CLI prediction-campaign start captured output mode drifted")
+    if prediction_campaign_start_payload["campaignCreationRequest"]["inputMode"] != "default_fixture":
+        raise AssertionError("CLI prediction-campaign start default input mode drifted")
+    if prediction_campaign_start_payload["campaignCreationRequest"]["targetCount"] != "100":
+        raise AssertionError("CLI prediction-campaign start target count drifted")
+    if prediction_campaign_start_payload["missedRunPolicy"]["recordedRunStatus"] != "missed":
+        raise AssertionError("CLI prediction-campaign start missed-run status drifted")
+    if prediction_campaign_start_payload["missedRunPolicy"]["excludedFromComparableEvidence"] is not True:
+        raise AssertionError("CLI prediction-campaign start must exclude missed runs from comparable evidence")
+    prediction_campaign_missed_policy = run_cli("prediction-campaign", "start", "--view", "missed-run-policy")
+    prediction_campaign_missed_policy_payload = json.loads(prediction_campaign_missed_policy.stdout)
+    if prediction_campaign_missed_policy_payload["exclusionReasonCode"] != "missed_forecast_close":
+        raise AssertionError("CLI prediction-campaign missed-run policy reason drifted")
+    if prediction_campaign_missed_policy_payload["appendsCorpusEvidence"] is not False:
+        raise AssertionError("CLI prediction-campaign missed-run policy must not append corpus evidence")
     prediction_campaign_start_flags = run_cli(
         "prediction-campaign",
         "start",
@@ -404,6 +418,27 @@ def main() -> None:
     prediction_campaign_start_flags_payload = json.loads(prediction_campaign_start_flags.stdout)
     if prediction_campaign_start_flags_payload["executionBoundary"]["fetchesLiveData"] is not False:
         raise AssertionError("CLI prediction-campaign start flags must remain dry-run non-fetching")
+    if prediction_campaign_start_flags_payload["campaignCreationRequest"]["inputMode"] != "flag_overrides":
+        raise AssertionError("CLI prediction-campaign start flags should be reflected as overrides")
+    if prediction_campaign_start_flags_payload["campaignCreationRequest"]["targetCount"] != "100":
+        raise AssertionError("CLI prediction-campaign start flag count drifted")
+    if prediction_campaign_start_flags_payload["campaignCreationRequest"]["liveWeatherRequested"] is not True:
+        raise AssertionError("CLI prediction-campaign start should record explicit live weather requests")
+    if prediction_campaign_start_flags_payload["campaignCreationRequest"]["resolverExecutionRequested"] is not True:
+        raise AssertionError("CLI prediction-campaign start should record explicit resolver requests")
+    prediction_campaign_setup_json = run_cli(
+        "prediction-campaign",
+        "start",
+        "--setup-json",
+        "spec/fixtures/generated/repeating-prediction-setup/ope-repeating-prediction-setup.generated.json",
+        "--view",
+        "campaign-creation",
+    )
+    prediction_campaign_setup_json_payload = json.loads(prediction_campaign_setup_json.stdout)
+    if prediction_campaign_setup_json_payload["inputMode"] != "setup_json":
+        raise AssertionError("CLI prediction-campaign start should accept setup JSON")
+    if prediction_campaign_setup_json_payload["acceptedForDryRun"] is not True:
+        raise AssertionError("CLI prediction-campaign setup JSON should be accepted for dry-run")
     prediction_campaign_start_check = run_cli("prediction-campaign", "start", "--check")
     if "checked prediction campaign runner" not in prediction_campaign_start_check.stdout:
         raise AssertionError("CLI prediction-campaign start check output drifted")
@@ -472,7 +507,6 @@ def main() -> None:
         "forecast-write",
         "--run-id",
         "predictionrun-1301",
-        "--write-local",
         "--output-format",
         "jsonl",
     )

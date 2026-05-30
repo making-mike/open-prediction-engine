@@ -245,7 +245,7 @@ def build_prediction_campaign_forecast_write() -> dict[str, Any]:
             "normalChecksUseLiveNetwork": False,
             "resolverExecutionImplemented": False,
             "qualityClaimAllowed": False,
-            "recommendedNextAction": "Implement guarded --write-local artifact copy and campaign state update with idempotency checks.",
+            "recommendedNextAction": "Use --write-local only when an explicit local campaign forecast write is intended.",
         },
         "executionBoundary": {
             "readOnlyWritePlan": True,
@@ -264,11 +264,272 @@ def build_prediction_campaign_forecast_write() -> dict[str, Any]:
         },
         "warnings": [
             "This write plan validates source and target bindings only; it does not write .ope/live state.",
-            "Effectful local writes must require an explicit future --write-local path and preserve idempotency.",
+            "Effectful local writes require explicit --write-local and preserve idempotency.",
             "Resolution, scoring, corpus append, and quality claims remain separate later steps.",
             "Normal checks validate checked fixtures without live network access or ignored state mutation.",
         ],
     }
+
+
+def now_timestamp() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def ensure_safe_local_path(path_value: str) -> Path:
+    path = Path(path_value)
+    if path.is_absolute():
+        raise PredictionCampaignForecastWriteError(f"Refusing absolute local campaign path: {path_value}")
+    if ".." in path.parts:
+        raise PredictionCampaignForecastWriteError(f"Refusing parent traversal in local campaign path: {path_value}")
+    root_parts = Path(LOCAL_STATE_ROOT).parts
+    if path.parts[: len(root_parts)] != root_parts:
+        raise PredictionCampaignForecastWriteError(
+            f"Refusing path outside {LOCAL_STATE_ROOT}: {path_value}"
+        )
+    return ROOT / path
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise PredictionCampaignForecastWriteError(f"Invalid JSON at {rel(path)}") from exc
+    if not isinstance(data, dict):
+        raise PredictionCampaignForecastWriteError(f"Expected JSON object at {rel(path)}")
+    return data
+
+
+def validate_source_artifact(artifact: dict[str, Any]) -> str:
+    fixture_path = ROOT / artifact["fixturePath"]
+    if not fixture_path.exists():
+        raise PredictionCampaignForecastWriteError(f"Missing source artifact fixture: {artifact['fixturePath']}")
+    data = read_json(fixture_path)
+    expected_hash = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
+    if expected_hash != artifact["contentHash"]:
+        raise PredictionCampaignForecastWriteError(
+            f"Source artifact hash drifted for {artifact['fixturePath']}"
+        )
+    schema_path = ROOT / artifact["schemaFile"]
+    errors = validate_record(data, schema_path)
+    if errors:
+        joined = "; ".join(errors)
+        raise PredictionCampaignForecastWriteError(
+            f"Source artifact {artifact['fixturePath']} failed schema validation: {joined}"
+        )
+    return fixture_path.read_text(encoding="utf-8")
+
+
+def preflight_artifact_target(artifact: dict[str, Any]) -> None:
+    validate_source_artifact(artifact)
+    target_path = ensure_safe_local_path(artifact["targetPath"])
+    if target_path.exists():
+        existing_hash = hashlib.sha256(target_path.read_bytes()).hexdigest()
+        if existing_hash != artifact["contentHash"]:
+            raise PredictionCampaignForecastWriteError(
+                f"Refusing to overwrite different existing artifact: {artifact['targetPath']}"
+            )
+
+
+def write_artifact_if_safe(artifact: dict[str, Any]) -> dict[str, Any]:
+    rendered = validate_source_artifact(artifact)
+    target_path = ensure_safe_local_path(artifact["targetPath"])
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    if target_path.exists():
+        existing_hash = hashlib.sha256(target_path.read_bytes()).hexdigest()
+        if existing_hash != artifact["contentHash"]:
+            raise PredictionCampaignForecastWriteError(
+                f"Refusing to overwrite different existing artifact: {artifact['targetPath']}"
+            )
+        status = "already_present"
+    else:
+        target_path.write_text(rendered, encoding="utf-8")
+        status = "written"
+    return {
+        "recordType": artifact["recordType"],
+        "recordId": artifact["recordId"],
+        "targetPath": artifact["targetPath"],
+        "writeStatus": status,
+        "contentHash": artifact["contentHash"],
+    }
+
+
+def build_run_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
+    bindings = plan["bindings"]
+    target = plan["targetState"]
+    return {
+        "stateType": "prediction_campaign_run_state",
+        "stateVersion": 1,
+        "writtenAt": written_at,
+        "campaignId": bindings["campaignId"],
+        "cycleId": bindings["cycleId"],
+        "runId": bindings["runId"],
+        "questionId": bindings["questionId"],
+        "forecastId": bindings["forecastId"],
+        "evidencePacketId": bindings["evidencePacketId"],
+        "historyId": bindings["historyId"],
+        "sourcePolicyId": bindings["sourcePolicyId"],
+        "idempotencyKey": target["idempotencyKey"],
+        "runStatus": "waiting_resolution",
+        "artifactPaths": {
+            "questionPath": target["questionPath"],
+            "evidencePacketPath": target["evidencePacketPath"],
+            "forecastArtifactPath": target["forecastArtifactPath"],
+            "forecastHistoryPath": target["forecastHistoryPath"],
+        },
+        "executionBoundary": {
+            "fetchesLiveData": False,
+            "executesResolvers": False,
+            "createsResolutionArtifacts": False,
+            "createsScoringRecords": False,
+            "appendsCorpusEvidence": False,
+            "storesCredentials": False,
+            "storesPrivateRows": False,
+            "qualityClaimAllowed": False,
+        },
+    }
+
+
+def build_campaign_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
+    bindings = plan["bindings"]
+    target = plan["targetState"]
+    return {
+        "stateType": "prediction_campaign_state",
+        "stateVersion": 1,
+        "writtenAt": written_at,
+        "campaignId": bindings["campaignId"],
+        "cycleId": bindings["cycleId"],
+        "sourceManifestPath": plan["bindings"]["manifestPath"],
+        "runStatePaths": [target["runStatePath"]],
+        "createdRunIdempotencyKeys": [target["idempotencyKey"]],
+        "forecastArtifactsCreated": 1,
+        "resolvedComparableOutcomes": 0,
+        "nextAction": "Wait until the campaign forecast is eligible for resolution.",
+        "executionBoundary": {
+            "fetchesLiveData": False,
+            "executesResolvers": False,
+            "appendsCorpusEvidence": False,
+            "storesCredentials": False,
+            "storesPrivateRows": False,
+            "qualityClaimAllowed": False,
+        },
+    }
+
+
+def preflight_state_target(path_value: str, idempotency_key: str) -> None:
+    target_path = ensure_safe_local_path(path_value)
+    if target_path.exists():
+        existing = read_json(target_path)
+        existing_key = existing.get("idempotencyKey")
+        existing_keys = existing.get("createdRunIdempotencyKeys", [])
+        if existing_key != idempotency_key and idempotency_key not in existing_keys:
+            raise PredictionCampaignForecastWriteError(
+                f"Refusing to overwrite different existing campaign state: {path_value}"
+            )
+
+
+def write_state_if_safe(path_value: str, state: dict[str, Any], idempotency_key: str) -> dict[str, Any]:
+    target_path = ensure_safe_local_path(path_value)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    if target_path.exists():
+        existing = read_json(target_path)
+        existing_key = existing.get("idempotencyKey")
+        existing_keys = existing.get("createdRunIdempotencyKeys", [])
+        if existing_key != idempotency_key and idempotency_key not in existing_keys:
+            raise PredictionCampaignForecastWriteError(
+                f"Refusing to overwrite different existing campaign state: {path_value}"
+            )
+        status = "already_present"
+    else:
+        target_path.write_text(render_json(state), encoding="utf-8")
+        status = "written"
+    return {
+        "stateType": state["stateType"],
+        "targetPath": path_value,
+        "writeStatus": status,
+    }
+
+
+def preflight_local_write(plan: dict[str, Any]) -> None:
+    target = plan["targetState"]
+    for artifact in plan["sourceArtifacts"]:
+        preflight_artifact_target(artifact)
+    preflight_state_target(target["runStatePath"], target["idempotencyKey"])
+    preflight_state_target(target["campaignStatePath"], target["idempotencyKey"])
+
+
+def execute_local_forecast_write(plan: dict[str, Any] | None = None) -> dict[str, Any]:
+    if plan is None:
+        plan = build_prediction_campaign_forecast_write()
+    blocking_guards = [guard for guard in plan["writeGuards"] if guard["blocksWrite"]]
+    if blocking_guards:
+        guard_ids = ", ".join(guard["guardId"] for guard in blocking_guards)
+        raise PredictionCampaignForecastWriteError(f"Forecast write blocked by guards: {guard_ids}")
+
+    preflight_local_write(plan)
+    written_at = now_timestamp()
+    artifact_writes = [write_artifact_if_safe(artifact) for artifact in plan["sourceArtifacts"]]
+    run_state = build_run_state(plan, written_at)
+    campaign_state = build_campaign_state(plan, written_at)
+    target = plan["targetState"]
+    state_writes = [
+        write_state_if_safe(target["runStatePath"], run_state, target["idempotencyKey"]),
+        write_state_if_safe(target["campaignStatePath"], campaign_state, target["idempotencyKey"]),
+    ]
+    write_rows = artifact_writes + state_writes
+    written_count = len([item for item in write_rows if item["writeStatus"] == "written"])
+    already_count = len([item for item in write_rows if item["writeStatus"] == "already_present"])
+    write_status = "local_write_completed" if written_count else "local_write_already_present"
+    return {
+        "predictionCampaignForecastWriteId": plan["predictionCampaignForecastWriteId"],
+        "generatedAt": written_at,
+        "writeStatus": write_status,
+        "domain": plan["domain"],
+        "bindings": plan["bindings"],
+        "idempotencyKey": target["idempotencyKey"],
+        "artifactWrites": artifact_writes,
+        "stateWrites": state_writes,
+        "summary": {
+            "effectfulLocalWriteImplemented": True,
+            "forecastArtifactsCreated": 1,
+            "lifecycleRecordCount": len(artifact_writes),
+            "stateRecordCount": len(state_writes),
+            "newFileWriteCount": written_count,
+            "alreadyPresentCount": already_count,
+            "fetchesLiveData": False,
+            "executesResolvers": False,
+            "createsResolutionArtifacts": False,
+            "createsScoringRecords": False,
+            "appendsCorpusEvidence": False,
+            "qualityClaimAllowed": False,
+            "nextAction": "Wait for the campaign forecast resolution window, then inspect campaign-aware resolution jobs.",
+        },
+        "executionBoundary": {
+            "writesIgnoredLiveState": True,
+            "writesCampaignState": True,
+            "fetchesLiveData": False,
+            "executesForecastMethod": False,
+            "executesResolvers": False,
+            "createsResolutionArtifacts": False,
+            "createsScoringRecords": False,
+            "appendsCorpusEvidence": False,
+            "storesCredentials": False,
+            "storesPrivateRows": False,
+            "qualityClaimAllowed": False,
+        },
+    }
+
+
+def print_write_result(result: dict[str, Any], output_format: str | None) -> None:
+    if output_format == "human":
+        print(
+            f"{result['bindings']['runId']} {result['writeStatus']} "
+            f"forecastId={result['bindings']['forecastId']} newFiles={result['summary']['newFileWriteCount']}"
+        )
+        return
+    if output_format == "jsonl":
+        print(compact_json(result), end="")
+        return
+    print(render_json(result), end="")
 
 
 def print_view(plan: dict[str, Any], view: str) -> None:
@@ -308,6 +569,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="refresh generated prediction campaign forecast write plan")
     parser.add_argument("--check", action="store_true", help="check generated prediction campaign forecast write drift")
+    parser.add_argument("--run-id", help="run ID to write; only the checked ready run is supported")
+    parser.add_argument("--manifest-json", help="reserved explicit manifest JSON input path")
+    parser.add_argument(
+        "--write-local",
+        action="store_true",
+        help="explicitly write the checked lifecycle records into ignored local campaign state",
+    )
+    parser.add_argument(
+        "--output-format",
+        choices=["json", "jsonl", "human"],
+        default="json",
+        help="format for --write-local output",
+    )
     parser.add_argument(
         "--view",
         choices=["plan", "artifacts", "target", "guards", "summary", "boundary"],
@@ -317,8 +591,21 @@ def main() -> None:
     args = parser.parse_args()
 
     plan = build_prediction_campaign_forecast_write()
+    if args.run_id and args.run_id != plan["bindings"]["runId"]:
+        raise SystemExit(f"Unsupported campaign run ID for checked write plan: {args.run_id}")
+    if args.manifest_json:
+        raise SystemExit("--manifest-json is reserved for a later campaign runner slice")
     if args.write or args.check:
+        if args.write_local:
+            raise SystemExit("--write-local cannot be combined with --write or --check")
         check_or_write(plan, write=args.write)
+        return
+    if args.write_local:
+        try:
+            result = execute_local_forecast_write(plan)
+        except PredictionCampaignForecastWriteError as exc:
+            raise SystemExit(str(exc)) from exc
+        print_write_result(result, args.output_format)
         return
     errors = validate_record(plan, SCHEMA)
     if errors:

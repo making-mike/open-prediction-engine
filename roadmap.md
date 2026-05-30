@@ -124,10 +124,10 @@ Done:
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 - Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
 - Prediction campaign manifests now expose a checked dry-run campaign plan with unique campaign, cycle, run, question, forecast, resolution, and scoring IDs, duplicate keys, ignored local-state path policy, and status readbacks through `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`.
-- Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, output modes, dry-run run decisions, and non-execution boundaries before effectful forecast creation exists.
+- Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, normalized campaign creation from flags or setup JSON, output modes, dry-run run decisions, a checked missed-run policy, and an explicit guarded `--write-local` creation tick for the ready run.
 - Prediction campaign forecast-creation handoffs now bind a ready runner decision to planned question, forecast, card, and bundle IDs through `python3 scripts/ope.py prediction-campaign forecast-create`, without creating artifacts or writing campaign state.
 - Prediction campaign forecast artifacts now materialize `forecast-1301` as an unresolved baseline-only checked fixture through `python3 scripts/ope.py prediction-campaign forecast-artifact`, using the standard question, evidence, artifact, and history contracts without live fetches, resolver execution, scoring, or campaign-state writes.
-- Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`, without executing local writes during normal checks.
+- Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`; explicit `--write-local` copies those records and minimal campaign/run state idempotently while normal checks stay non-mutating.
 - Prediction campaign resume readbacks now join the checked campaign manifest, forecast-write plan, open forecast, and campaign resolution queue through `python3 scripts/ope.py prediction-campaign resume`, without reading or writing ignored live state.
 - Resolution job registries now have a campaign-aware readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait state without executing campaign resolvers or mutating campaign state.
 - Resolution scheduler readbacks now have a campaign-aware dry-run tick through `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait action without executing campaign resolvers or writing campaign state.
@@ -137,7 +137,7 @@ Not started:
 - Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
-- Effectful agent-facing repeating prediction runner that starts future forecasts automatically from the checked forecast-creation handoff, not only resolves already-created forecasts.
+- Effectful agent-facing repeating prediction runner that schedules future forecasts automatically beyond the current explicit one-tick checked forecast creation.
 - Local campaign runner execution for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
 - Append-only local corpus mutation from resolved live campaign runs into a calibration evidence ledger.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
@@ -150,11 +150,11 @@ Not started:
 
 In progress:
 
-- None.
+- Milestone 93 terminal campaign runner: explicit one-tick local forecast creation, normalized flag/setup-JSON campaign input, and the missed-run skip policy exist; forecast scheduling across future recurrence windows remains in progress.
 
 Next:
 
-1. Turn the checked `prediction-campaign start` readback into an explicit local runner that can create future forecasts on schedule, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
+1. Extend the current explicit `prediction-campaign start --write-local` creation tick into a foreground runner that can schedule future forecasts, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
 2. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
 3. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
 4. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
@@ -2849,14 +2849,15 @@ Tasks:
 
 - [x] Add a checked dry-run `python3 scripts/ope.py prediction-campaign start` readback before effectful foreground execution.
 - [ ] Turn `python3 scripts/ope.py prediction-campaign start` into local foreground execution.
-- [ ] Support campaign creation from flags and from a setup JSON file.
+- [x] Support dry-run campaign creation input from flags and from a setup JSON file.
 - [x] Expose finite count, until date, open-ended, interval, and calibration-threshold modes from the same command surface in the dry-run readback.
 - [x] Expose `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
 - [x] Add a checked forecast-creation handoff for the ready run before effectful artifact creation.
 - [x] Add a checked unresolved campaign forecast artifact for the ready run using the standard lifecycle contracts.
 - [x] Add a checked non-mutating campaign forecast write plan before effectful ignored-state mutation.
+- [x] Add explicit guarded `--write-local` execution for the ready run that writes lifecycle records plus minimal campaign/run state under ignored `.ope/live/prediction-campaigns/`.
 - [ ] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
-- [ ] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
+- [x] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
 - [x] Document JSONL captured output and compact human status line expectations in the dry-run runner readback.
 - [x] Keep dry-run execution local and explicit: live fetches and resolver execution are named future flags, not normal-check behavior.
 
@@ -2896,6 +2897,8 @@ Completed outputs so far:
 - `scripts/check_prediction_campaign_runner.py`
 - checked fixture at `spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json`
 - CLI readback `python3 scripts/ope.py prediction-campaign start`
+- CLI normalized campaign input view `python3 scripts/ope.py prediction-campaign start --view campaign-creation`
+- CLI missed-run policy view `python3 scripts/ope.py prediction-campaign start --view missed-run-policy`
 - `spec/prediction-campaign-forecast-creation.schema.json`
 - `spec/prediction-campaign-forecast-creation.md`
 - `scripts/generate_prediction_campaign_forecast_creation.py`
@@ -2913,6 +2916,8 @@ Completed outputs so far:
 - `scripts/check_prediction_campaign_forecast_write.py`
 - checked write-plan fixture under `spec/fixtures/generated/prediction-campaign-forecast-write/`
 - CLI readback `python3 scripts/ope.py prediction-campaign forecast-write`
+- explicit local write commands `python3 scripts/ope.py prediction-campaign forecast-write --write-local --output-format jsonl` and `python3 scripts/ope.py prediction-campaign start --write-local --output-format jsonl`
+- idempotent ignored local state under `.ope/live/prediction-campaigns/predictioncampaign-001/` when a developer explicitly runs `--write-local`
 - release-manifest, MVP-smoke, read-surface, CLI, docs, roadmap, and decision-log wiring for the checked dry-run runner, forecast-creation, forecast-artifact, and forecast-write readbacks
 
 ## Milestone 94: Campaign Resolution, Scoring, And Recovery

@@ -79,6 +79,7 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py repeating-prediction-setup",
                 "python3 scripts/ope.py prediction-campaign plan",
                 "python3 scripts/ope.py prediction-campaign start",
+                "python3 scripts/ope.py prediction-campaign start --view campaign-creation",
                 "python3 scripts/ope.py prediction-campaign forecast-create",
                 "python3 scripts/ope.py prediction-campaign forecast-artifact",
                 "python3 scripts/ope.py prediction-campaign forecast-write",
@@ -165,6 +166,11 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-prediction-campaign-start",
                 "command": "python3 scripts/ope.py prediction-campaign start",
                 "expected": "prediction campaign start exposes the dry-run terminal runner surface without sleeping, polling, fetching live data, or creating forecasts.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-creation-input",
+                "command": "python3 scripts/ope.py prediction-campaign start --view campaign-creation",
+                "expected": "prediction campaign start normalizes default, flag, setup JSON, and manifest JSON inputs without writing campaign state.",
             },
             {
                 "checkId": "mvp-smoke-prediction-campaign-forecast-create",

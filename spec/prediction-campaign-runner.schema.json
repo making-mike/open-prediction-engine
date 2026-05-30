@@ -12,8 +12,10 @@
     "domain",
     "bindings",
     "commandSurface",
+    "campaignCreationRequest",
     "supportedRecurrenceModes",
     "runnerDecisions",
+    "missedRunPolicy",
     "outputModes",
     "progress",
     "summary",
@@ -30,6 +32,7 @@
     "domain": { "$ref": "common.schema.json#/$defs/domain" },
     "bindings": { "$ref": "#/$defs/bindings" },
     "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "campaignCreationRequest": { "$ref": "#/$defs/campaignCreationRequest" },
     "supportedRecurrenceModes": {
       "type": "array",
       "minItems": 5,
@@ -42,6 +45,7 @@
       "maxItems": 12,
       "items": { "$ref": "#/$defs/runnerDecision" }
     },
+    "missedRunPolicy": { "$ref": "#/$defs/missedRunPolicy" },
     "outputModes": { "$ref": "#/$defs/outputModes" },
     "progress": { "$ref": "#/$defs/progress" },
     "summary": { "$ref": "#/$defs/summary" },
@@ -62,6 +66,12 @@
     "boundedStringList": {
       "type": "array",
       "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "optionalStringList": {
+      "type": "array",
+      "minItems": 0,
       "maxItems": 16,
       "items": { "$ref": "#/$defs/boundedString" }
     },
@@ -105,6 +115,55 @@
         "requiresExplicitLiveFetchFlag": { "type": "boolean" },
         "requiresExplicitResolverExecutionFlag": { "type": "boolean" },
         "defaultMissedRunPolicy": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "campaignCreationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputMode",
+        "setupJsonPath",
+        "manifestJsonPath",
+        "flagOverrides",
+        "domain",
+        "serviceWindow",
+        "interval",
+        "targetCount",
+        "until",
+        "calibrationTarget",
+        "postCalibrationAction",
+        "postCalibrationDelay",
+        "candidatePlanCount",
+        "liveWeatherRequested",
+        "resolverExecutionRequested",
+        "acceptedForDryRun",
+        "createsCampaignManifest",
+        "writesCampaignState",
+        "nextAction"
+      ],
+      "properties": {
+        "inputMode": {
+          "type": "string",
+          "enum": ["default_fixture", "flag_overrides", "setup_json", "manifest_json"]
+        },
+        "setupJsonPath": { "$ref": "#/$defs/boundedString" },
+        "manifestJsonPath": { "$ref": "#/$defs/boundedString" },
+        "flagOverrides": { "$ref": "#/$defs/optionalStringList" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "interval": { "$ref": "#/$defs/boundedString" },
+        "targetCount": { "$ref": "#/$defs/boundedString" },
+        "until": { "$ref": "#/$defs/boundedString" },
+        "calibrationTarget": { "$ref": "#/$defs/boundedString" },
+        "postCalibrationAction": { "$ref": "#/$defs/boundedString" },
+        "postCalibrationDelay": { "$ref": "#/$defs/boundedString" },
+        "candidatePlanCount": { "$ref": "#/$defs/boundedString" },
+        "liveWeatherRequested": { "type": "boolean" },
+        "resolverExecutionRequested": { "type": "boolean" },
+        "acceptedForDryRun": { "type": "boolean" },
+        "createsCampaignManifest": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
       }
     },
     "recurrenceMode": {
@@ -151,6 +210,44 @@
         "liveFetchRequired": { "type": "boolean" },
         "resolverExecutionRequired": { "type": "boolean" },
         "writesLiveState": { "type": "boolean" }
+      }
+    },
+    "missedRunPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyName",
+        "defaultAction",
+        "decisionStatus",
+        "recordedRunStatus",
+        "triggerCondition",
+        "exclusionReasonCode",
+        "excludedFromComparableEvidence",
+        "createsForecastArtifacts",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "nextAction"
+      ],
+      "properties": {
+        "policyName": { "$ref": "#/$defs/boundedString" },
+        "defaultAction": { "$ref": "#/$defs/boundedString" },
+        "decisionStatus": {
+          "type": "string",
+          "enum": ["skip_missed_close"]
+        },
+        "recordedRunStatus": {
+          "type": "string",
+          "enum": ["missed"]
+        },
+        "triggerCondition": { "$ref": "#/$defs/boundedString" },
+        "exclusionReasonCode": { "$ref": "#/$defs/boundedString" },
+        "excludedFromComparableEvidence": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
       }
     },
     "outputModes": {

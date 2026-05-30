@@ -18,9 +18,12 @@ python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign start
+python3 scripts/ope.py prediction-campaign start --view campaign-creation
+python3 scripts/ope.py prediction-campaign start --view missed-run-policy
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
+python3 scripts/ope.py prediction-campaign forecast-write --write-local --output-format jsonl
 python3 scripts/ope.py prediction-campaign resume
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
