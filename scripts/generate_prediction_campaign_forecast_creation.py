@@ -12,7 +12,7 @@ from typing import Any
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_prediction_campaign_runner import build_prediction_campaign_runner
 from ope_schema import SPEC, validate_record
-from ope_fixtures import render_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -211,19 +211,10 @@ def check_or_write(data: dict[str, Any], *, write: bool) -> None:
         for error in errors:
             print(error)
         raise SystemExit(1)
-
-    rendered = render_json(data)
     if write:
-        GENERATED.mkdir(parents=True, exist_ok=True)
-        OUTPUT_PATH.write_text(rendered, encoding="utf-8")
-        return
-
-    if not OUTPUT_PATH.exists():
-        raise SystemExit(f"Missing generated prediction campaign forecast-creation fixture: {OUTPUT_PATH}")
-    existing = OUTPUT_PATH.read_text(encoding="utf-8")
-    if existing != rendered:
-        raise SystemExit("prediction campaign forecast-creation fixture drifted; run with --write")
-    print("checked prediction campaign forecast creation")
+        write_generated(OUTPUT_PATH, data, label="prediction campaign forecast creation", regen="python3 scripts/generate_prediction_campaign_forecast_creation.py --write")
+    else:
+        check_generated(OUTPUT_PATH, data, label="prediction campaign forecast creation", regen="python3 scripts/generate_prediction_campaign_forecast_creation.py --write")
 
 
 def main() -> None:
