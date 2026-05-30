@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from ope_schema import validate_record
+
 
 def render_json(data: Any) -> str:
     return json.dumps(data, indent=2, sort_keys=False) + "\n"
@@ -34,3 +36,24 @@ def check_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
         print(f"run `{regen}`", file=sys.stderr)
         raise SystemExit(1)
     print(f"checked {label}")
+
+
+def validate_and_emit(
+    data: Any,
+    schema_path: Path,
+    path: Path,
+    *,
+    write: bool,
+    label: str,
+    regen: str,
+) -> None:
+    """Validate a record, then write it or check it for drift."""
+    errors = validate_record(data, schema_path)
+    if errors:
+        for error in errors:
+            print(error)
+        raise SystemExit(1)
+    if write:
+        write_generated(path, data, label=label, regen=regen)
+    else:
+        check_generated(path, data, label=label, regen=regen)

@@ -3040,6 +3040,36 @@ Expected outputs:
 - agent adapter operations for campaign plan/status/calibration readbacks
 - pilot-session-packet task card for repeating prediction setup
 
+## Milestone 98: Codebase Quality And Tooling Hardening
+
+Status: In progress.
+
+Goal: act on the comprehensive repository review — finish consolidating the residual fixture-scaffold duplication, add automated lint/type and a security hardening, and improve check-suite developer experience, without changing runtime behavior or generated fixtures.
+
+Tasks:
+
+- [ ] Deduplicate the remaining `compact_json` copy: import it from `ope_fixtures` in `run_resolution_scheduler.py` instead of redefining it (so `render_json` and `compact_json` each live once, in `ope_fixtures.py`).
+- [ ] Harden `ensure_safe_local_path` in `generate_prediction_campaign_forecast_write.py` to resolve the target and confirm it stays under `.ope/live/prediction-campaigns`, defeating symlink escape (the path already rejects absolute paths and `..`).
+- [ ] Parallelize `run_checks.py` so the ~170 subprocess checks fan out across workers, cutting local wall-time without losing coverage.
+- [ ] Add a dev-only lint and type gate (`ruff` + `mypy`) to `release_check.py` and CI, enforcing the existing type hints while keeping the runtime stdlib-only.
+- [ ] Extract a shared validate+write/check helper so the delegating `check_or_write` wrappers and similar single-output generators share one path.
+- [ ] Split oversized modules: lift the `--write-local` runtime out of `generate_prediction_campaign_forecast_write.py`, and group `ope.py` command handlers.
+- [ ] Reduce documentation lockstep churn: convert the monolithic README/PRODUCT wedge paragraphs to additive bullet lists or generated sections.
+
+Exit criteria:
+
+- `def render_json` and `def compact_json` each appear exactly once (in `ope_fixtures.py`).
+- `ensure_safe_local_path` rejects symlinked targets that resolve outside the campaign state root.
+- `python3 scripts/run_checks.py` stays green and completes substantially faster.
+- `python3 scripts/release_check.py` runs lint and type checks and stays green; CI enforces them.
+
+Expected outputs:
+
+- shared `ope_fixtures` helper covering validate+write/check
+- a parallel `run_checks.py`
+- `ruff`/`mypy` configuration and a CI step
+- a smaller `generate_prediction_campaign_forecast_write.py`
+
 ## Open Decisions
 
 - When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
