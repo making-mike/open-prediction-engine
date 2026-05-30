@@ -14,7 +14,7 @@ from typing import Any
 import generate_resolution_jobs
 import resolve_due_transit_forward_runs as resolver
 from ope_schema import SPEC, validate_record
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import check_generated, compact_json, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +33,6 @@ class SchedulerInterrupted(Exception):
     def __init__(self, report: dict[str, Any] | None) -> None:
         super().__init__("resolution scheduler interrupted")
         self.report = report
-
-
-def compact_json(data: Any) -> str:
-    return json.dumps(data, separators=(",", ":"), sort_keys=False) + "\n"
 
 
 def plural(count: int, noun: str) -> str:
