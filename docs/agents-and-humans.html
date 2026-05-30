@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Prediction Engine Docs For Agents And Humans</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #ffffff;
+      --surface: #f7f8f5;
+      --surface-strong: #eef3ee;
+      --ink: #1f2824;
+      --muted: #5d665f;
+      --line: #d7dfd8;
+      --accent: #216b59;
+      --accent-dark: #164a3d;
+      --accent-soft: #dfeee8;
+      --rose: #8b3653;
+      --rose-soft: #f4e4eb;
+      --amber: #896400;
+      --amber-soft: #fff4cf;
+      --code: #f2f4ef;
+      --shadow: 0 1px 2px rgba(31, 40, 36, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent-dark);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+    }
+
+    a:hover {
+      color: var(--rose);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 20;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      padding: 0.65rem 0.85rem;
+    }
+
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .topbar {
+      display: flex;
+      min-height: 64px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .mark {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.35rem;
+    }
+
+    nav a,
+    .quick-link {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 0.42rem 0.65rem;
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    nav a:hover,
+    .quick-link:hover {
+      border-color: var(--line);
+      background: var(--paper);
+      color: var(--accent-dark);
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.7fr);
+      gap: 2rem;
+      padding: 3rem 0 2.5rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.75rem;
+      color: var(--rose);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 12ch;
+      font-size: clamp(2.35rem, 6vw, 4.5rem);
+    }
+
+    h2 {
+      font-size: 1.55rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lede {
+      max-width: 66ch;
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      padding: 0.22rem 0.65rem;
+    }
+
+    .workflow-figure {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+    }
+
+    .workflow-figure svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    main {
+      padding: 2rem 0 3rem;
+    }
+
+    section {
+      padding: 2rem 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.45fr) minmax(0, 1fr);
+      gap: 2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-head p {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+    }
+
+    .card h3 {
+      margin-bottom: 0.45rem;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+      padding: 1rem;
+    }
+
+    .callout.warning {
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .callout.rule {
+      border-left-color: var(--rose);
+      background: var(--rose-soft);
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    li + li {
+      margin-top: 0.45rem;
+    }
+
+    code {
+      border-radius: 4px;
+      background: var(--code);
+      padding: 0.08rem 0.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--code);
+      padding: 1rem;
+      line-height: 1.45;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+
+    .doc-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    .doc-list li {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 0.75rem;
+    }
+
+    .doc-list strong {
+      display: block;
+      color: var(--ink);
+    }
+
+    .doc-list span {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      padding: 1.25rem 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 860px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 1rem 0;
+      }
+
+      nav {
+        justify-content: flex-start;
+      }
+
+      .intro,
+      .section-head,
+      .grid,
+      .grid.three,
+      .doc-list {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header>
+    <div class="shell topbar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">OPE</span>
+        <span>Open Prediction Engine Docs</span>
+      </div>
+      <nav aria-label="Primary">
+        <a href="#humans">Humans</a>
+        <a href="#agents">Agents</a>
+        <a href="#lifecycle">Lifecycle</a>
+        <a href="#milestone-rule">Milestone Rule</a>
+        <a href="#map">Doc Map</a>
+      </nav>
+    </div>
+    <div class="shell intro">
+      <div>
+        <p class="eyebrow">Shared working guide</p>
+        <h1>Docs for agents and humans</h1>
+        <p class="lede">
+          A compact orientation page for people and coding agents working on OPE. Use it to find the current scope, trusted commands, claim boundaries, and the documents that must stay synchronized as milestones land.
+        </p>
+        <div class="meta" aria-label="Page facts">
+          <span class="pill">Last reviewed: 2026-05-28</span>
+          <span class="pill">Runtime: Python 3.12+ standard library</span>
+          <span class="pill">Release mode: local fixture-ready MVP</span>
+        </div>
+      </div>
+
+      <figure class="workflow-figure" aria-labelledby="workflow-title">
+        <svg viewBox="0 0 680 390" role="img" aria-describedby="workflow-desc">
+          <title id="workflow-title">OPE forecast lifecycle map</title>
+          <desc id="workflow-desc">A six step map from question setup through scoring and calibration.</desc>
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#216b59"></path>
+            </marker>
+          </defs>
+          <rect x="1" y="1" width="678" height="388" rx="8" fill="#f7f8f5" stroke="#d7dfd8"></rect>
+          <g font-family="Inter, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1f2824">
+            <rect x="44" y="42" width="170" height="66" rx="8" fill="#ffffff" stroke="#216b59"></rect>
+            <text x="70" y="70">Question</text>
+            <text x="70" y="93" font-size="13" font-weight="500" fill="#5d665f">Resolvable contract</text>
+
+            <rect x="254" y="42" width="170" height="66" rx="8" fill="#ffffff" stroke="#216b59"></rect>
+            <text x="280" y="70">Evidence</text>
+            <text x="280" y="93" font-size="13" font-weight="500" fill="#5d665f">Policy-bound inputs</text>
+
+            <rect x="464" y="42" width="170" height="66" rx="8" fill="#ffffff" stroke="#216b59"></rect>
+            <text x="490" y="70">Forecast</text>
+            <text x="490" y="93" font-size="13" font-weight="500" fill="#5d665f">Probability artifact</text>
+
+            <rect x="464" y="176" width="170" height="66" rx="8" fill="#ffffff" stroke="#8b3653"></rect>
+            <text x="490" y="204">History</text>
+            <text x="490" y="227" font-size="13" font-weight="500" fill="#5d665f">Append-only states</text>
+
+            <rect x="254" y="176" width="170" height="66" rx="8" fill="#ffffff" stroke="#8b3653"></rect>
+            <text x="280" y="204">Resolution</text>
+            <text x="280" y="227" font-size="13" font-weight="500" fill="#5d665f">Declared sources</text>
+
+            <rect x="44" y="176" width="170" height="66" rx="8" fill="#ffffff" stroke="#8b3653"></rect>
+            <text x="70" y="204">Scoring</text>
+            <text x="70" y="227" font-size="13" font-weight="500" fill="#5d665f">Baseline comparison</text>
+
+            <rect x="182" y="296" width="316" height="54" rx="8" fill="#dfeee8" stroke="#216b59"></rect>
+            <text x="216" y="328">Calibration stays sample-size bound</text>
+          </g>
+          <g fill="none" stroke="#216b59" stroke-width="3" marker-end="url(#arrow)">
+            <path d="M216 75 H246"></path>
+            <path d="M426 75 H456"></path>
+            <path d="M550 110 V168"></path>
+            <path d="M462 209 H432"></path>
+            <path d="M252 209 H222"></path>
+            <path d="M130 244 C130 286 178 314 174 314"></path>
+          </g>
+        </svg>
+      </figure>
+    </div>
+  </header>
+
+  <main id="main" class="shell">
+    <section id="scope">
+      <div class="section-head">
+        <h2>Current Scope</h2>
+        <p>
+          OPE is a contract-first, agent-native forecasting package and standard. The current repository proves local, schema-bound forecast lifecycle mechanics before making hosted, broad-source, or quality claims.
+        </p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>What OPE does now</h3>
+          <p>It validates contracts, generates checked fixtures, reads forecast cards and bundles, runs local forecast paths, resolves outcomes, scores forecasts, and exposes agent-readable envelopes.</p>
+        </article>
+        <article class="card">
+          <h3>What OPE does not claim</h3>
+          <p>It is not a universal prediction oracle, hosted service runtime, unbounded crawler, trust authority, payment layer, or production live-data workflow.</p>
+        </article>
+        <article class="card">
+          <h3>Reference wedges</h3>
+          <p>Weather-logistics proves the core lifecycle. Weather-transit-delays now anchors checked recurring setup, runner, and forecast-creation handoff contracts for future evidence-producing campaigns.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="humans">
+      <div class="section-head">
+        <h2>For Humans</h2>
+        <p>
+          Start with the narrative docs, then use the CLI checks to confirm the repository still says what the implementation proves.
+        </p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <h3>Read first</h3>
+          <ul>
+            <li><a href="../README.md">README.md</a> for current status and runnable examples.</li>
+            <li><a href="../PRODUCT.md">PRODUCT.md</a> for product direction and claim boundaries.</li>
+            <li><a href="../roadmap.md">roadmap.md</a> for completed, current, and next milestones.</li>
+            <li><a href="../spec/README.md">spec/README.md</a> for contract indexes.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Run the normal checks</h3>
+          <pre><code>python3 --version
+python3 scripts/run_checks.py
+python3 scripts/ope.py check</code></pre>
+        </article>
+      </div>
+      <div class="callout warning" style="margin-top: 1rem;">
+        <strong>Claim boundary:</strong> Treat generated fixtures and one-off forward runs as mechanics evidence, not forecasting quality evidence. Track-record and calibration claims require comparable resolved sample sizes.
+      </div>
+    </section>
+
+    <section id="agents">
+      <div class="section-head">
+        <h2>For Agents</h2>
+        <p>
+          Work from the repository rules, keep changes contract-first, preserve private data boundaries, and return machine-readable artifacts only when the checked implementation supports them.
+        </p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <h3>Operating order</h3>
+          <ol>
+            <li>Read <a href="../AGENTS.md">AGENTS.md</a> and <a href="../.agents/rules.md">.agents/rules.md</a>.</li>
+            <li>Use schemas and fixtures as the source of truth for engine behavior.</li>
+            <li>Update generated fixtures with the matching <code>--write</code> command only when behavior intentionally changes.</li>
+            <li>Run focused checks first, then the canonical checks before handoff or commit.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h3>Safe local read examples</h3>
+          <pre><code>python3 scripts/ope.py read \
+  --record-type forecast-card \
+  --id forecast-502 \
+  --question-id question-501
+
+python3 scripts/ope.py agent-call \
+  --operation private_setup_bundle \
+  --private-setup-request-id privatesetuprequest-001</code></pre>
+        </article>
+      </div>
+      <div class="callout" style="margin-top: 1rem;">
+        <strong>Live-source rule:</strong> Normal checks stay offline. Use opt-in live connector probes only when a developer explicitly asks for them and keep local captures under ignored workspaces.
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <div class="section-head">
+        <h2>Lifecycle</h2>
+        <p>
+          Every forecast-facing change should preserve the lifecycle below unless the relevant schemas, docs, fixtures, and checks change together.
+        </p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>1. Setup</h3>
+          <p>Define a resolvable question, source policy, horizon, close time, resolution source, and output type.</p>
+        </article>
+        <article class="card">
+          <h3>2. Evidence</h3>
+          <p>Gather or accept allowed evidence, normalize sources, record provenance, and block unsafe or unapproved inputs.</p>
+        </article>
+        <article class="card">
+          <h3>3. Forecast</h3>
+          <p>Select baseline or benchmark-gated method, emit artifacts, and preserve forecast history before outcomes are known.</p>
+        </article>
+        <article class="card">
+          <h3>4. Recalculate</h3>
+          <p>Append forecast updates only from pre-close evidence and keep post-outcome evidence out of forecast inputs.</p>
+        </article>
+        <article class="card">
+          <h3>5. Resolve</h3>
+          <p>Resolve outcomes from declared sources, classify ambiguous or annulled outcomes, and keep unscorable cases explicit.</p>
+        </article>
+        <article class="card">
+          <h3>6. Score</h3>
+          <p>Score against baselines, report sample-size limits, and keep calibration claims below threshold until evidence supports them.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="milestone-rule">
+      <div class="section-head">
+        <h2>Milestone Rule</h2>
+        <p>
+          Milestone commits should leave the docs in the same state as the implementation. A completed milestone is not done if humans or agents would be sent to stale instructions.
+        </p>
+      </div>
+      <div class="callout rule">
+        <strong>Required after each completed milestone:</strong> update human-facing docs, agent-facing docs, relevant specs, generated read surfaces, and the roadmap in the same milestone commit. If a milestone changes behavior, commands, boundaries, or next actions, update this page and the linked source documents before committing.
+      </div>
+      <div class="grid" style="margin-top: 1rem;">
+        <article class="card">
+          <h3>Minimum doc check</h3>
+          <ul>
+            <li><code>roadmap.md</code> accurately marks the milestone status.</li>
+            <li><code>README.md</code> and this HTML page reflect new user-visible behavior.</li>
+            <li><code>AGENTS.md</code> and <code>.agents/rules.md</code> reflect new agent workflows or rules.</li>
+            <li><code>spec/*.md</code> and schemas reflect contract or read-surface changes.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Commit expectation</h3>
+          <p>Include docs, generated artifacts, checks, and decision-log entries in the same coherent milestone commit when they are part of the completed work.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="map">
+      <div class="section-head">
+        <h2>Doc Map</h2>
+        <p>
+          These are the highest-signal entry points for keeping the repository understandable.
+        </p>
+      </div>
+      <ul class="doc-list">
+        <li>
+          <strong><a href="../CONTRIBUTING.md">CONTRIBUTING.md</a></strong>
+          <span>Local setup, checks, generated fixtures, and contribution expectations.</span>
+        </li>
+        <li>
+          <strong><a href="../whitepaper.md">whitepaper.md</a></strong>
+          <span>Public narrative and architecture framing.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/developer-adoption-surface.md">developer-adoption-surface.md</a></strong>
+          <span>Checked local quickstart, integration notes, and release-note boundaries.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/mvp-local-runtime.md">mvp-local-runtime.md</a></strong>
+          <span>Compact runtime runbook, machine interfaces, and smoke checks.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/repeating-prediction-setup.md">repeating-prediction-setup.md</a></strong>
+          <span>Checked recurrence policies, post-calibration actions, and non-execution boundary.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-manifest.md">prediction-campaign-manifest.md</a></strong>
+          <span>Checked dry-run campaign plan, unique run IDs, duplicate keys, and status readbacks.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-runner.md">prediction-campaign-runner.md</a></strong>
+          <span>Checked dry-run terminal runner start semantics and non-execution boundary.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-forecast-creation.md">prediction-campaign-forecast-creation.md</a></strong>
+          <span>Checked ready-run forecast creation handoff and planned artifact IDs.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-forecast-artifact.md">prediction-campaign-forecast-artifact.md</a></strong>
+          <span>Checked unresolved campaign forecast artifact using the standard lifecycle contracts.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-forecast-write.md">prediction-campaign-forecast-write.md</a></strong>
+          <span>Checked non-mutating forecast lifecycle write plan and local-state guard boundary.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/release-manifest.md">release-manifest.md</a></strong>
+          <span>Generated release surface and claim-boundary summary.</span>
+        </li>
+        <li>
+          <strong><a href="../.agents/decisions.md">.agents/decisions.md</a></strong>
+          <span>Append-only rationale for non-trivial technical and architectural choices.</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Keep this page compact. Link to source documents for detail, and update it when a completed milestone changes what agents or humans should do next.
+    </div>
+  </footer>
+</body>
+</html>

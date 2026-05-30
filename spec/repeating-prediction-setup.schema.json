@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/repeating-prediction-setup.schema.json",
+  "title": "Repeating Prediction Setup",
+  "description": "Checked local-first contract for defining repeated forecast campaigns before campaign state, scheduling, or runner execution exist.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "repeatingPredictionSetupId",
+    "generatedAt",
+    "setupStatus",
+    "domain",
+    "bindings",
+    "forecastTemplate",
+    "sourcePolicyBinding",
+    "resolutionPolicy",
+    "supportedSchedulePolicies",
+    "postCalibrationPolicies",
+    "campaignExamples",
+    "nextRunReadback",
+    "contractRequirements",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "setupStatus": {
+      "type": "string",
+      "enum": ["contract_ready_non_executing"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "forecastTemplate": { "$ref": "#/$defs/forecastTemplate" },
+    "sourcePolicyBinding": { "$ref": "#/$defs/sourcePolicyBinding" },
+    "resolutionPolicy": { "$ref": "#/$defs/resolutionPolicy" },
+    "supportedSchedulePolicies": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/supportedSchedulePolicy" }
+    },
+    "postCalibrationPolicies": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/postCalibrationPolicy" }
+    },
+    "campaignExamples": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/campaignExample" }
+    },
+    "nextRunReadback": { "$ref": "#/$defs/nextRunReadback" },
+    "contractRequirements": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/contractRequirement" }
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "duration": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32,
+      "pattern": "^P[T0-9DWMH]+$"
+    },
+    "weekday": {
+      "type": "string",
+      "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    },
+    "schedulePolicyKind": {
+      "type": "string",
+      "enum": [
+        "fixed_count",
+        "until_date",
+        "open_ended",
+        "interval",
+        "selected_weekdays_window",
+        "calibration_threshold"
+      ]
+    },
+    "endConditionKind": {
+      "type": "string",
+      "enum": [
+        "fixed_count",
+        "until_date",
+        "manual_stop",
+        "calibration_threshold",
+        "track_record_threshold",
+        "open_ended"
+      ]
+    },
+    "postCalibrationAction": {
+      "type": "string",
+      "enum": ["stop", "continue", "pause_then_resume_after", "start_next_cycle_after"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domainSetupId",
+        "sourcePolicyId",
+        "transitMethodOptionsId",
+        "transitBaselineTrackRecordGateId",
+        "transitLiveEvidencePromotionId",
+        "referenceDomainSetupPath",
+        "methodOptionsPath",
+        "trackRecordGatePath",
+        "liveEvidencePromotionPath"
+      ],
+      "properties": {
+        "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitMethodOptionsId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitBaselineTrackRecordGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitLiveEvidencePromotionId": { "$ref": "common.schema.json#/$defs/id" },
+        "referenceDomainSetupPath": { "$ref": "#/$defs/boundedString" },
+        "methodOptionsPath": { "$ref": "#/$defs/boundedString" },
+        "trackRecordGatePath": { "$ref": "#/$defs/boundedString" },
+        "liveEvidencePromotionPath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "forecastTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateId",
+        "questionTemplate",
+        "outputType",
+        "domain",
+        "entityScope",
+        "forecastCloseRule",
+        "methodBoundary",
+        "uniqueIdBoundary"
+      ],
+      "properties": {
+        "templateId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionTemplate": { "$ref": "#/$defs/boundedString" },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "entityScope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["network", "geography", "serviceWindow"],
+          "properties": {
+            "network": { "$ref": "#/$defs/boundedString" },
+            "geography": { "$ref": "#/$defs/boundedString" },
+            "serviceWindow": { "$ref": "#/$defs/boundedString" }
+          }
+        },
+        "forecastCloseRule": { "$ref": "#/$defs/boundedString" },
+        "methodBoundary": { "$ref": "#/$defs/boundedString" },
+        "uniqueIdBoundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "sourcePolicyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicyId",
+        "allowedForecastTimeRoles",
+        "resolutionOnlyRoles",
+        "allowedConnectors",
+        "callerApprovalRequired",
+        "provenanceRequired",
+        "normalChecksMayFetchLiveNetwork",
+        "rawLocalArtifactsCommitted"
+      ],
+      "properties": {
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "allowedForecastTimeRoles": { "$ref": "#/$defs/boundedStringList" },
+        "resolutionOnlyRoles": { "$ref": "#/$defs/boundedStringList" },
+        "allowedConnectors": { "$ref": "#/$defs/boundedStringList" },
+        "callerApprovalRequired": { "type": "boolean" },
+        "provenanceRequired": { "type": "boolean" },
+        "normalChecksMayFetchLiveNetwork": { "type": "boolean" },
+        "rawLocalArtifactsCommitted": { "type": "boolean" }
+      }
+    },
+    "resolutionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolutionRole",
+        "resolveAfterHorizon",
+        "resolutionDueRule",
+        "resolverCommandBoundary",
+        "scoringRule",
+        "ambiguousOutcomeHandling",
+        "annulledOutcomeHandling"
+      ],
+      "properties": {
+        "resolutionRole": { "$ref": "#/$defs/boundedString" },
+        "resolveAfterHorizon": { "type": "boolean" },
+        "resolutionDueRule": { "$ref": "#/$defs/boundedString" },
+        "resolverCommandBoundary": { "$ref": "#/$defs/boundedString" },
+        "scoringRule": { "$ref": "#/$defs/boundedString" },
+        "ambiguousOutcomeHandling": { "$ref": "#/$defs/boundedString" },
+        "annulledOutcomeHandling": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "supportedSchedulePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyKind", "description", "durationExamples", "endConditionKinds", "requiresExplicitTimezone"],
+      "properties": {
+        "policyKind": { "$ref": "#/$defs/schedulePolicyKind" },
+        "description": { "$ref": "#/$defs/boundedString" },
+        "durationExamples": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/duration" }
+        },
+        "endConditionKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/endConditionKind" }
+        },
+        "requiresExplicitTimezone": { "type": "boolean" }
+      }
+    },
+    "schedulePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schedulePolicyId",
+        "policyKind",
+        "interval",
+        "timezone",
+        "forecastCreateRule",
+        "forecastCloseRule",
+        "horizonRule",
+        "resolutionDueRule",
+        "nextForecastCandidateAt"
+      ],
+      "properties": {
+        "schedulePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "policyKind": { "$ref": "#/$defs/schedulePolicyKind" },
+        "interval": { "$ref": "#/$defs/duration" },
+        "timezone": { "$ref": "#/$defs/boundedString" },
+        "forecastCreateRule": { "$ref": "#/$defs/boundedString" },
+        "forecastCloseRule": { "$ref": "#/$defs/boundedString" },
+        "horizonRule": { "$ref": "#/$defs/boundedString" },
+        "resolutionDueRule": { "$ref": "#/$defs/boundedString" },
+        "nextForecastCandidateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "targetCount": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "untilDate": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "selectedWeekdays": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "$ref": "#/$defs/weekday" }
+        },
+        "selectedWindows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "thresholdMetric": { "$ref": "#/$defs/boundedString" },
+        "thresholdValue": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "openEnded": { "type": "boolean" }
+      }
+    },
+    "endCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conditionKind", "behaviorWhenReached"],
+      "properties": {
+        "conditionKind": { "$ref": "#/$defs/endConditionKind" },
+        "targetCount": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "targetDate": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "thresholdMetric": { "$ref": "#/$defs/boundedString" },
+        "thresholdValue": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "behaviorWhenReached": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "postCalibrationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "delay", "nextCycleRule", "automaticMethodChangeAllowed", "notes"],
+      "properties": {
+        "action": { "$ref": "#/$defs/postCalibrationAction" },
+        "delay": { "$ref": "#/$defs/boundedString" },
+        "nextCycleRule": { "$ref": "#/$defs/boundedString" },
+        "automaticMethodChangeAllowed": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "campaignExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exampleId",
+        "caseKey",
+        "title",
+        "schedulePolicy",
+        "endConditions",
+        "postCalibrationPolicy",
+        "requiredRunBoundaries",
+        "nextAction",
+        "createsForecastArtifacts",
+        "mutatesCampaignState"
+      ],
+      "properties": {
+        "exampleId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": { "$ref": "#/$defs/boundedString" },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "schedulePolicy": { "$ref": "#/$defs/schedulePolicy" },
+        "endConditions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/endCondition" }
+        },
+        "postCalibrationPolicy": { "$ref": "#/$defs/postCalibrationPolicy" },
+        "requiredRunBoundaries": { "$ref": "#/$defs/boundedStringList" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "mutatesCampaignState": { "type": "boolean" }
+      }
+    },
+    "nextRunReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackStatus",
+        "nextForecastCandidateAt",
+        "nextResolutionEligibleAt",
+        "stopDecisionAvailable",
+        "requiresCampaignManifest",
+        "requiresRunner"
+      ],
+      "properties": {
+        "readbackStatus": {
+          "type": "string",
+          "enum": ["contract_only_example"]
+        },
+        "nextForecastCandidateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "nextResolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "stopDecisionAvailable": { "type": "boolean" },
+        "requiresCampaignManifest": { "type": "boolean" },
+        "requiresRunner": { "type": "boolean" }
+      }
+    },
+    "contractRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirementId", "requirementKey", "description", "enforcedByCurrentContract"],
+      "properties": {
+        "requirementId": { "$ref": "common.schema.json#/$defs/id" },
+        "requirementKey": { "$ref": "#/$defs/boundedString" },
+        "description": { "$ref": "#/$defs/boundedString" },
+        "enforcedByCurrentContract": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supportedSchedulePolicyCount",
+        "campaignExampleCount",
+        "postCalibrationActionCount",
+        "finiteCampaignSupported",
+        "untilDateCampaignSupported",
+        "openEndedCampaignSupported",
+        "calibrationThresholdSupported",
+        "runnerImplemented",
+        "campaignManifestImplemented",
+        "hostedSchedulerAllowed",
+        "qualityClaimAllowed",
+        "recommendedNextMilestone"
+      ],
+      "properties": {
+        "supportedSchedulePolicyCount": { "type": "integer", "minimum": 0 },
+        "campaignExampleCount": { "type": "integer", "minimum": 0 },
+        "postCalibrationActionCount": { "type": "integer", "minimum": 0 },
+        "finiteCampaignSupported": { "type": "boolean" },
+        "untilDateCampaignSupported": { "type": "boolean" },
+        "openEndedCampaignSupported": { "type": "boolean" },
+        "calibrationThresholdSupported": { "type": "boolean" },
+        "runnerImplemented": { "type": "boolean" },
+        "campaignManifestImplemented": { "type": "boolean" },
+        "hostedSchedulerAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyContract",
+        "createsForecastArtifacts",
+        "mutatesCampaignState",
+        "startsScheduler",
+        "installsOsScheduler",
+        "writesCron",
+        "fetchesLiveData",
+        "storesCredentials",
+        "storesPrivateRows",
+        "hostedRuntimeAllowed",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyContract": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "mutatesCampaignState": { "type": "boolean" },
+        "startsScheduler": { "type": "boolean" },
+        "installsOsScheduler": { "type": "boolean" },
+        "writesCron": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

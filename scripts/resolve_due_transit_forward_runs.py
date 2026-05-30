@@ -14,6 +14,7 @@ from typing import Any
 
 import run_transit_delay_forward as forward_run
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,10 +27,6 @@ FIXTURE_NOW = "2026-06-10T08:30:00Z"
 
 class TransitForwardRunResolverError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def utc_now() -> str:
@@ -333,23 +330,11 @@ def validate_report(report: dict[str, Any]) -> None:
 
 
 def write_report(report: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(report), encoding="utf-8")
-    print("generated transit forward-run resolver")
+    write_generated(OUTPUT_PATH, report, label="transit forward-run resolver", regen="python3 scripts/resolve_due_transit_forward_runs.py --write")
 
 
 def check_report(report: dict[str, Any]) -> None:
-    expected = render_json(report)
-    if not OUTPUT_PATH.exists():
-        print(f"missing transit forward-run resolver: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/resolve_due_transit_forward_runs.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit forward-run resolver drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/resolve_due_transit_forward_runs.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit forward-run resolver")
+    check_generated(OUTPUT_PATH, report, label="transit forward-run resolver", regen="python3 scripts/resolve_due_transit_forward_runs.py --write")
 
 
 def main() -> None:

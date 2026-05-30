@@ -1,0 +1,55 @@
+{
+  "agentEnvelopeId": "agentenvelope-050",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "resolution_scheduler_status",
+  "adapterRequest": {
+    "operation": "resolution_scheduler_status",
+    "inputRecordType": "resolution_scheduler_status",
+    "inputRef": "resolutionschedulerstatus-998",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read scheduler status from a malformed scheduler log to demonstrate sanitized errors."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "resolution_scheduler_status_blocked",
+    "approvalStatus": "not_required",
+    "dataMode": "live_watch",
+    "planStatus": "malformed_scheduler_log",
+    "executionMode": "read_only",
+    "sourceMode": "foreground_terminal_scheduler",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "failed",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "error",
+  "exitCode": 2,
+  "payload": null,
+  "error": {
+    "code": "validation_failed",
+    "message": "Resolution scheduler log could not be parsed as checked JSONL.",
+    "retryable": true
+  },
+  "warnings": [
+    "Error payload is sanitized and does not expose absolute local paths, raw state-file contents, scheduler log contents, or stack traces.",
+    "Resolution readback error examples are conformance fixtures only and do not execute resolvers or start schedulers."
+  ]
+}

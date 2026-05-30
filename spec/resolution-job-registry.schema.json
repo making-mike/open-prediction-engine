@@ -21,7 +21,7 @@
     "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
     "registryMode": {
       "type": "string",
-      "enum": ["fixture_registry", "live_registry"]
+      "enum": ["fixture_registry", "live_registry", "campaign_fixture_registry", "campaign_live_registry"]
     },
     "domain": {
       "type": "string",
@@ -35,7 +35,7 @@
       "properties": {
         "sourceKind": {
           "type": "string",
-          "enum": ["forward_run_state"]
+          "enum": ["forward_run_state", "forward_run_state_and_campaign_manifest"]
         },
         "workspace": {
           "type": "string",
@@ -47,7 +47,27 @@
           "minLength": 1,
           "maxLength": 120
         },
-        "stateFilesCommitted": { "type": "boolean" }
+        "stateFilesCommitted": { "type": "boolean" },
+        "campaignId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "campaignManifestPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "campaignRunStatePath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "forecastWritePlanPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
       }
     },
     "jobs": {
@@ -91,12 +111,32 @@
                 "minLength": 1,
                 "maxLength": 120
               },
+              "campaignId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "campaignRunId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
               "forecastId": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
               },
               "questionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "resolutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "scoringReportId": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
@@ -135,7 +175,13 @@
             "properties": {
               "recommendedAction": {
                 "type": "string",
-                "enum": ["wait", "call_resolver_execute", "read_resolved_outputs", "inspect_invalid_state"]
+                "enum": [
+                  "wait",
+                  "call_resolver_execute",
+                  "wait_for_campaign_resolver",
+                  "read_resolved_outputs",
+                  "inspect_invalid_state"
+                ]
               },
               "reason": {
                 "type": "string",

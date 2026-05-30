@@ -1,0 +1,367 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-evidence-ledger.schema.json",
+  "title": "Pilot Evidence Ledger",
+  "description": "Checked sanitized pilot evidence intake ledger for post-MVP real-session summaries without raw transcripts or private data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotEvidenceLedgerId",
+    "generatedAt",
+    "ledgerMode",
+    "bindings",
+    "intakePolicy",
+    "caseRows",
+    "aggregationRules",
+    "summary",
+    "nextActions",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "pilotEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "ledgerMode": {
+      "type": "string",
+      "enum": ["checked_sanitized_pilot_summary_intake"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseManifestId",
+        "agentPilotValidationId",
+        "developerAdoptionSurfaceId",
+        "pilotProtocolId",
+        "feedbackSchemaId"
+      ],
+      "properties": {
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
+        "developerAdoptionSurfaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotProtocolId": { "$ref": "common.schema.json#/$defs/id" },
+        "feedbackSchemaId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "intakePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "minimumRealSessions",
+        "targetRealSessions",
+        "allowedInputs",
+        "blockedInputs",
+        "requiredSanitizationChecks",
+        "acceptedUse"
+      ],
+      "properties": {
+        "policyId": { "$ref": "common.schema.json#/$defs/id" },
+        "minimumRealSessions": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "targetRealSessions": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "allowedInputs": { "$ref": "#/$defs/boundedStringList" },
+        "blockedInputs": { "$ref": "#/$defs/boundedStringList" },
+        "requiredSanitizationChecks": { "$ref": "#/$defs/boundedStringList" },
+        "acceptedUse": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "caseRows": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/caseRow" }
+    },
+    "aggregationRules": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/aggregationRule" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalCaseCount",
+        "acceptedSyntheticSummaryCount",
+        "acceptedRealSessionCount",
+        "blockedCaseCount",
+        "needsRedactionCount",
+        "claimBoundaryIssueCount",
+        "minimumRealSessions",
+        "targetRealSessions",
+        "pilotEvidenceStatus",
+        "expansionEvidenceReady",
+        "qualityClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesEvidenceReady"
+      ],
+      "properties": {
+        "totalCaseCount": { "type": "integer", "minimum": 0 },
+        "acceptedSyntheticSummaryCount": { "type": "integer", "minimum": 0 },
+        "acceptedRealSessionCount": { "type": "integer", "minimum": 0 },
+        "blockedCaseCount": { "type": "integer", "minimum": 0 },
+        "needsRedactionCount": { "type": "integer", "minimum": 0 },
+        "claimBoundaryIssueCount": { "type": "integer", "minimum": 0 },
+        "minimumRealSessions": { "type": "integer", "minimum": 1 },
+        "targetRealSessions": { "type": "integer", "minimum": 1 },
+        "pilotEvidenceStatus": {
+          "type": "string",
+          "enum": ["real_sessions_needed"]
+        },
+        "expansionEvidenceReady": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" }
+      }
+    },
+    "nextActions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/nextAction" }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyLedger",
+        "usesSyntheticCheckedExamplesOnly",
+        "declaresFutureRealSummaryIntake",
+        "runsPilotSessions",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "generatesRuntimeTypes",
+        "unblocksExpansion"
+      ],
+      "properties": {
+        "readOnlyLedger": { "type": "boolean" },
+        "usesSyntheticCheckedExamplesOnly": { "type": "boolean" },
+        "declaresFutureRealSummaryIntake": { "type": "boolean" },
+        "runsPilotSessions": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "generatesRuntimeTypes": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "taskRefList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "caseRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "caseKey",
+        "evidenceClass",
+        "participantProfile",
+        "taskRefs",
+        "intakeStatus",
+        "acceptedForAggregation",
+        "contributesRealSessionEvidence",
+        "inputSignals",
+        "privacyChecks",
+        "dimensionRatings",
+        "sanitizedFindings",
+        "frictionClasses",
+        "expansionSignals",
+        "nextAction"
+      ],
+      "properties": {
+        "caseId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": {
+          "type": "string",
+          "enum": [
+            "accepted_sanitized_summary",
+            "needs_redaction",
+            "raw_transcript_blocked",
+            "private_data_blocked",
+            "claim_boundary_confusion"
+          ]
+        },
+        "evidenceClass": {
+          "type": "string",
+          "enum": ["synthetic_example", "future_real_summary"]
+        },
+        "participantProfile": {
+          "type": "string",
+          "enum": ["agent_developer", "supervising_developer"]
+        },
+        "taskRefs": { "$ref": "#/$defs/taskRefList" },
+        "intakeStatus": {
+          "type": "string",
+          "enum": [
+            "accepted_for_aggregation",
+            "needs_redaction",
+            "blocked_raw_transcript",
+            "blocked_private_data",
+            "accepted_with_claim_boundary_issue"
+          ]
+        },
+        "acceptedForAggregation": { "type": "boolean" },
+        "contributesRealSessionEvidence": { "type": "boolean" },
+        "inputSignals": { "$ref": "#/$defs/inputSignals" },
+        "privacyChecks": { "$ref": "#/$defs/privacyChecks" },
+        "dimensionRatings": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/dimensionRating" }
+        },
+        "sanitizedFindings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "frictionClasses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": [
+              "none",
+              "readback_navigation",
+              "claim_boundary_confusion",
+              "source_runtime_gap",
+              "schema_integration_friction",
+              "privacy_redaction_needed"
+            ]
+          }
+        },
+        "expansionSignals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": [
+              "keep_local_mvp",
+              "improve_docs",
+              "run_more_pilots",
+              "consider_next_source_runtime",
+              "defer_generated_types",
+              "tighten_claim_copy"
+            ]
+          }
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "inputSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptSubmitted",
+        "privateDataSubmitted",
+        "credentialLikeTextSubmitted",
+        "claimConfusionObserved",
+        "runtimeGapObserved"
+      ],
+      "properties": {
+        "rawTranscriptSubmitted": { "type": "boolean" },
+        "privateDataSubmitted": { "type": "boolean" },
+        "credentialLikeTextSubmitted": { "type": "boolean" },
+        "claimConfusionObserved": { "type": "boolean" },
+        "runtimeGapObserved": { "type": "boolean" }
+      }
+    },
+    "privacyChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptStored",
+        "privateDataStored",
+        "credentialsStored",
+        "promptLogStored",
+        "participantIdentityStored",
+        "notesRedacted"
+      ],
+      "properties": {
+        "rawTranscriptStored": { "type": "boolean" },
+        "privateDataStored": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "promptLogStored": { "type": "boolean" },
+        "participantIdentityStored": { "type": "boolean" },
+        "notesRedacted": { "type": "boolean" }
+      }
+    },
+    "dimensionRating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensionId", "score", "evidenceNote"],
+      "properties": {
+        "dimensionId": {
+          "type": "string",
+          "enum": [
+            "task_completion",
+            "forecast_card_comprehension",
+            "lifecycle_bundle_comprehension",
+            "source_intake_comprehension",
+            "blocked_path_comprehension",
+            "claim_boundary_comprehension",
+            "trust_for_agent_decision_support",
+            "setup_friction",
+            "runtime_gap_classification"
+          ]
+        },
+        "score": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "evidenceNote": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "aggregationRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "rule", "effect"],
+      "properties": {
+        "ruleId": { "$ref": "common.schema.json#/$defs/id" },
+        "rule": { "$ref": "#/$defs/boundedString" },
+        "effect": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "priority", "action", "blocksExpansionUntilDone"],
+      "properties": {
+        "actionId": { "$ref": "common.schema.json#/$defs/id" },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "action": { "$ref": "#/$defs/boundedString" },
+        "blocksExpansionUntilDone": { "type": "boolean" }
+      }
+    }
+  }
+}

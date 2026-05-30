@@ -21,7 +21,14 @@
     "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
     "schedulerMode": {
       "type": "string",
-      "enum": ["fixture_once", "live_once", "live_watch"]
+      "enum": [
+        "fixture_once",
+        "live_once",
+        "live_watch",
+        "campaign_fixture_once",
+        "campaign_live_once",
+        "campaign_live_watch"
+      ]
     },
     "executionMode": {
       "type": "string",
@@ -104,6 +111,7 @@
                     "wait_until_due",
                     "resolver_execute_requested",
                     "due_waiting_for_execute_flag",
+                    "campaign_resolver_not_implemented",
                     "skip_already_resolved",
                     "inspect_invalid_state"
                   ]

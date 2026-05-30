@@ -20,6 +20,7 @@ from gather_auto_evidence import build_source_set
 from ope_schema import SPEC, validate_record
 from plan_auto_evidence import DEFAULT_REQUEST, build_plan
 from validate_forecast_request import load_json, validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,10 +31,6 @@ GENERATED_AT = "2026-06-02T10:02:00Z"
 
 class AutoEvidenceForecastError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

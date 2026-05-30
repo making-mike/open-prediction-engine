@@ -18,6 +18,7 @@ from build_agent_adapter_fixtures import (
 from generate_agent_adapter_protocol_map import build_protocol_map
 from generate_private_setup_adapter_chain_runbook import build_runbook
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -71,10 +72,6 @@ READBACK_ROWS = [
 
 class PrivateSetupAdapterConformanceMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def agent_call_command(operation: str, adapter_case: str | None) -> str:
@@ -437,23 +434,11 @@ def validate_matrix(matrix: dict[str, Any]) -> None:
 
 
 def write_matrix(matrix: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    MATRIX_PATH.write_text(render_json(matrix), encoding="utf-8")
-    print("generated private setup adapter conformance matrix")
+    write_generated(MATRIX_PATH, matrix, label="private setup adapter conformance matrix", regen="python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write")
 
 
 def check_matrix(matrix: dict[str, Any]) -> None:
-    expected = render_json(matrix)
-    if not MATRIX_PATH.exists():
-        print(f"missing private setup adapter conformance matrix: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = MATRIX_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup adapter conformance matrix drift: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup adapter conformance matrix")
+    check_generated(MATRIX_PATH, matrix, label="private setup adapter conformance matrix", regen="python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write")
 
 
 def main() -> None:

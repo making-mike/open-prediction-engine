@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_source_handoff_setup_runbook import build_runbook as build_source_handoff_runbook
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,10 +23,6 @@ GENERATED_AT = "2026-06-06T20:00:00Z"
 
 class PrivateSetupWorkflowError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def supported_source_kinds() -> list[dict[str, Any]]:
@@ -372,23 +369,11 @@ def validate_workflow(workflow: dict[str, Any]) -> None:
 
 
 def write_workflow(workflow: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    WORKFLOW_PATH.write_text(render_json(workflow), encoding="utf-8")
-    print("generated private setup workflow")
+    write_generated(WORKFLOW_PATH, workflow, label="private setup workflow", regen="python3 scripts/generate_private_setup_workflow.py --write")
 
 
 def check_workflow(workflow: dict[str, Any]) -> None:
-    expected = render_json(workflow)
-    if not WORKFLOW_PATH.exists():
-        print(f"missing private setup workflow: {WORKFLOW_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_workflow.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = WORKFLOW_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup workflow drift: {WORKFLOW_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_workflow.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup workflow")
+    check_generated(WORKFLOW_PATH, workflow, label="private setup workflow", regen="python3 scripts/generate_private_setup_workflow.py --write")
 
 
 def main() -> None:

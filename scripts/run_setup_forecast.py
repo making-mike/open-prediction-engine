@@ -13,6 +13,7 @@ from build_live_weather_evidence import horizon_for_service_date, resolution_cri
 from generate_source_intake import CASE_ORDER, build_fixture_cases, build_reports
 from ope_schema import SPEC, validate_record
 from select_setup_method import build_decisions
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,6 @@ CASE_SUFFIX = {
 
 class SetupForecastError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

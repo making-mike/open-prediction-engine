@@ -27,7 +27,7 @@ python3 scripts/ope.py live-capture \
   --write
 ```
 
-The draft is also written under `.ope/live/` by default. It validates against `evidence-source-set.schema.json` with `executionMode: live_fetch`, but remains a draft until a future forecast command explicitly consumes and binds it.
+The draft is also written under `.ope/live/` by default. It validates against `evidence-source-set.schema.json` with `executionMode: live_fetch`, but remains a draft until an explicit promotion or forecast command consumes and binds it. The checked transit promotion boundary is documented in `spec/transit-live-evidence-promotion.md`.
 
 ## Guardrails
 

@@ -1,0 +1,224 @@
+{
+  "transitMethodOptionsId": "transitmethodoptions-001",
+  "generatedAt": "2026-05-27T15:00:00Z",
+  "domain": "weather-transit-delays",
+  "optionsMode": "checked_fixture_method_options",
+  "sourceBindings": {
+    "transitForwardRunCorpusId": "transitforwardruncorpus-001",
+    "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+    "corpusPath": "spec/fixtures/generated/transit-forward-run-corpus/transit-forward-run-corpus.generated.json",
+    "trackRecordGatePath": "spec/fixtures/generated/transit-baseline-track-record-gate/transit-baseline-track-record-gate.generated.json"
+  },
+  "defaultSelection": {
+    "baselineOnlyDefault": true,
+    "selectedMethodId": "transitmethod-100",
+    "selectedMethodClass": "baseline",
+    "selectionStatus": "baseline_selected",
+    "reasonCode": "insufficient_comparable_method_evidence",
+    "selectionReason": "Use the historical-frequency baseline until a non-baseline method has enough comparable resolved transit windows and clean anti-leakage evidence."
+  },
+  "corpusEvidence": {
+    "resolvedComparableSampleSize": 1,
+    "excludedSampleSize": 6,
+    "minimumComparableResolvedForTrackRecord": 30,
+    "minimumComparableResolvedForCalibration": 100,
+    "minimumComparableResolvedForNonBaselineSelection": 30,
+    "trackRecordStatus": "not_enough_resolved_comparable_outcomes",
+    "calibrationStatus": "not_enough_resolved_comparable_outcomes"
+  },
+  "methodComparison": {
+    "comparisonStatus": "below_threshold_evidence_only",
+    "scoringRule": "brier",
+    "higherIsBetter": false,
+    "baselineScore": 0.5625,
+    "bestCandidateScore": 0.4489,
+    "bestCandidateBaselineLift": 0.1136,
+    "sameWindowOutcomeUsedAsForecastEvidence": false,
+    "forecastTimeEvidenceRoles": [
+      "weather_forecast",
+      "historical_delay_rows",
+      "static_schedule",
+      "planned_service_alerts"
+    ],
+    "resolutionOnlyEvidenceRoles": [
+      "trip_updates_after_window",
+      "post_window_delay_rows",
+      "resolution_outcome"
+    ],
+    "antiLeakageStatus": "passed_fixture_boundary",
+    "comparisonRows": [
+      {
+        "methodId": "transitmethod-100",
+        "methodKind": "historical_frequency_baseline",
+        "comparisonStatus": "baseline_reference",
+        "score": 0.5625,
+        "sampleSize": 1,
+        "baselineLift": 0.0
+      },
+      {
+        "methodId": "transitmethod-101",
+        "methodKind": "transparent_weather_adjustment",
+        "comparisonStatus": "fixture_comparable",
+        "score": 0.4489,
+        "sampleSize": 1,
+        "baselineLift": 0.1136
+      }
+    ]
+  },
+  "methodOptions": [
+    {
+      "methodId": "transitmethod-100",
+      "methodClass": "baseline",
+      "methodKind": "historical_frequency_baseline",
+      "status": "enabled",
+      "selectionEligibility": "eligible_default",
+      "benchmarkStatus": "baseline_reference",
+      "sampleSize": 1,
+      "minimumComparableResolvedRequired": 0,
+      "sourceEvidenceStatus": "available_forecast_time_only",
+      "leakageStatus": "passed_fixture_boundary",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [],
+      "primaryScore": 0.5625,
+      "baselineScore": 0.5625,
+      "baselineLift": 0.0
+    },
+    {
+      "methodId": "transitmethod-101",
+      "methodClass": "deterministic_statistical",
+      "methodKind": "transparent_weather_adjustment",
+      "status": "evidence_only",
+      "selectionEligibility": "rejected",
+      "benchmarkStatus": "benchmarked_fixture_only",
+      "sampleSize": 1,
+      "minimumComparableResolvedRequired": 30,
+      "sourceEvidenceStatus": "available_forecast_time_only",
+      "leakageStatus": "passed_fixture_boundary",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "resolved_comparable_sample_below_threshold",
+        "quality_claim_blocked",
+        "baseline_only_default_for_early_corpus_runs"
+      ],
+      "primaryScore": 0.4489,
+      "baselineScore": 0.5625,
+      "baselineLift": 0.1136
+    },
+    {
+      "methodId": "transitmethod-201",
+      "methodClass": "model_assisted",
+      "methodKind": "historical_conditioned_statistical",
+      "status": "proposed",
+      "selectionEligibility": "proposed_only",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 1,
+      "minimumComparableResolvedRequired": 100,
+      "sourceEvidenceStatus": "insufficient_corpus",
+      "leakageStatus": "not_checked",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "insufficient_weather_weekday_season_window_buckets",
+        "benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "transitmethod-301",
+      "methodClass": "model_assisted",
+      "methodKind": "trained_ml",
+      "status": "proposed",
+      "selectionEligibility": "proposed_only",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "minimumComparableResolvedRequired": 100,
+      "sourceEvidenceStatus": "not_implemented",
+      "leakageStatus": "not_checked",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "clean_benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "transitmethod-401",
+      "methodClass": "retrieval_assisted",
+      "methodKind": "retrieval_assisted",
+      "status": "proposed",
+      "selectionEligibility": "proposed_only",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "minimumComparableResolvedRequired": 30,
+      "sourceEvidenceStatus": "not_implemented",
+      "leakageStatus": "not_checked",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "retrieval_policy_missing",
+        "clean_benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "transitmethod-501",
+      "methodClass": "ensemble",
+      "methodKind": "ensemble",
+      "status": "proposed",
+      "selectionEligibility": "proposed_only",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "minimumComparableResolvedRequired": 30,
+      "sourceEvidenceStatus": "not_implemented",
+      "leakageStatus": "not_checked",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "component_methods_not_eligible",
+        "clean_benchmark_missing",
+        "method_not_enabled"
+      ]
+    },
+    {
+      "methodId": "transitmethod-601",
+      "methodClass": "external_reference",
+      "methodKind": "external_reference",
+      "status": "proposed",
+      "selectionEligibility": "proposed_only",
+      "benchmarkStatus": "not_benchmarked",
+      "sampleSize": 0,
+      "minimumComparableResolvedRequired": 30,
+      "sourceEvidenceStatus": "not_implemented",
+      "leakageStatus": "not_checked",
+      "sameWindowOutcomeUsedAsForecastEvidence": false,
+      "rejectionReasons": [
+        "external_provider_policy_missing",
+        "clean_benchmark_missing",
+        "method_not_enabled"
+      ]
+    }
+  ],
+  "claimBoundary": {
+    "nonBaselineSelectionAllowed": false,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "trainedMlAllowed": false,
+    "ensembleAllowed": false,
+    "retrievalAssistedAllowed": false,
+    "externalReferenceAllowed": false,
+    "sameWindowOutcomeAsForecastEvidenceAllowed": false,
+    "normalChecksUseLiveNetwork": false,
+    "liveCapturesCommitted": false
+  },
+  "readSurface": {
+    "command": "python3 scripts/ope.py transit-method-options",
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "selectsNonBaselineMethod": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This read surface explains method eligibility; it does not execute or select a new forecast method.",
+    "The weather-adjustment candidate has one fixture comparison and remains evidence-only below threshold.",
+    "Historical-conditioned, trained ML, retrieval-assisted, ensemble, and external-reference methods remain proposed-only.",
+    "Resolution-only transit outcome rows must not become forecast-time evidence."
+  ]
+}

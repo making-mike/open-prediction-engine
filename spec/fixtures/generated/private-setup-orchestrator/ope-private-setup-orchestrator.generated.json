@@ -1,0 +1,406 @@
+{
+  "privateSetupOrchestratorId": "privatesetuporchestrator-001",
+  "generatedAt": "2026-06-10T05:10:00Z",
+  "scope": "domain_agnostic",
+  "runtimeStatus": "checked_local_summary_only",
+  "bindings": {
+    "privateSetupRequestSetId": "privatesetuprequestset-001",
+    "privateSetupWorkflowId": "privatesetupworkflow-001",
+    "sourceAdapterIntakeId": "sourceadapterintake-1301",
+    "sourceHandoffForecastId": "forecast-1102",
+    "sourceHandoffQuestionId": "question-1102"
+  },
+  "orchestratorRuns": [
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-001",
+      "runCase": "local_file_confirmed",
+      "sourceKind": "local_file",
+      "privateSetupRequestId": "privatesetuprequest-001",
+      "sourceAdapterOutputId": null,
+      "sourceAdapterIntakeCaseId": null,
+      "sourceIntakeReportId": "sourceintakereport-102",
+      "sourceIntakeStatus": "accepted",
+      "setupMethodDecisionId": "setupmethoddecision-102",
+      "setupBenchmarkGateId": "setupbenchmarkgate-102",
+      "setupForecastRunId": "setupforecastrun-1102",
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "forecastCardId": "forecastcard-forecast-1102",
+      "forecastBundleId": "forecastbundle-forecast-1102",
+      "orchestratorStatus": "completed_forecast_readback",
+      "nextAction": "read_forecast_card",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": true,
+        "methodDecisionValidated": true,
+        "forecastExecutionRun": true,
+        "normalReadbackRun": true
+      },
+      "readbackSummary": {
+        "forecastCardStatus": "resolved",
+        "forecastBundleStatus": "resolved",
+        "resolutionStatus": "resolved",
+        "scoreStatus": "scored",
+        "qualityClaimStatus": "not_enough_resolved_source_handoff_outcomes"
+      },
+      "forecastArtifactsPresent": true,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [],
+      "requiredActions": [
+        "Ready to run the checked local source-builder command.",
+        "Read the generated forecast card or lifecycle bundle; do not infer quality claims from one resolved handoff outcome."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-002",
+      "runCase": "source_adapter_output_accepted",
+      "sourceKind": "source_adapter_output",
+      "privateSetupRequestId": null,
+      "sourceAdapterOutputId": "sourceadapteroutput-1301",
+      "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1301",
+      "sourceIntakeReportId": "sourceintakereport-1301",
+      "sourceIntakeStatus": "accepted",
+      "setupMethodDecisionId": "setupmethoddecision-1301",
+      "setupBenchmarkGateId": "setupbenchmarkgate-1301",
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "ready_for_forecast_execution",
+      "nextAction": "run_explicit_setup_forecast_execution",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": true,
+        "methodDecisionValidated": true,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [],
+      "requiredActions": [
+        "Run an explicit setup forecast execution step for the accepted source-adapter output before reading forecast artifacts."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-003",
+      "runCase": "missing_approval",
+      "sourceKind": "private_api",
+      "privateSetupRequestId": "privatesetuprequest-005",
+      "sourceAdapterOutputId": null,
+      "sourceAdapterIntakeCaseId": null,
+      "sourceIntakeReportId": null,
+      "sourceIntakeStatus": null,
+      "setupMethodDecisionId": null,
+      "setupBenchmarkGateId": null,
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "missing_approval",
+      "nextAction": "confirm_approval",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": false,
+        "methodDecisionValidated": false,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "missing_caller_approval",
+        "credential_runtime_not_available"
+      ],
+      "requiredActions": [
+        "Confirm caller approval and wait for a checked credential-safe runtime before setup can continue."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-004",
+      "runCase": "unconfirmed_mapping",
+      "sourceKind": "source_adapter_output",
+      "privateSetupRequestId": null,
+      "sourceAdapterOutputId": "sourceadapteroutput-1302",
+      "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1302",
+      "sourceIntakeReportId": "sourceintakereport-1302",
+      "sourceIntakeStatus": "needs_confirmation",
+      "setupMethodDecisionId": "setupmethoddecision-1302",
+      "setupBenchmarkGateId": "setupbenchmarkgate-1302",
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "needs_confirmation",
+      "nextAction": "confirm_mapping",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": true,
+        "methodDecisionValidated": true,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "agent_inferred_mapping",
+        "mapping_requires_confirmation"
+      ],
+      "requiredActions": [
+        "Confirm agent-inferred field and alias mappings before method selection."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-005",
+      "runCase": "insufficient_data",
+      "sourceKind": "source_adapter_output",
+      "privateSetupRequestId": null,
+      "sourceAdapterOutputId": "sourceadapteroutput-1303",
+      "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1303",
+      "sourceIntakeReportId": "sourceintakereport-1303",
+      "sourceIntakeStatus": "rejected",
+      "setupMethodDecisionId": "setupmethoddecision-1303",
+      "setupBenchmarkGateId": "setupbenchmarkgate-1303",
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "needs_more_data",
+      "nextAction": "collect_more_data",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": true,
+        "methodDecisionValidated": true,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "no_post_outcome_evidence_detected",
+        "privacy_boundary_ok",
+        "source_fresh_enough",
+        "types_compatible"
+      ],
+      "requiredActions": [
+        "Collect more comparable historical rows and positive outcomes before method selection."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-006",
+      "runCase": "rejected_source",
+      "sourceKind": "source_adapter_output",
+      "privateSetupRequestId": null,
+      "sourceAdapterOutputId": "sourceadapteroutput-1304",
+      "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1304",
+      "sourceIntakeReportId": "sourceintakereport-1304",
+      "sourceIntakeStatus": "rejected",
+      "setupMethodDecisionId": "setupmethoddecision-1304",
+      "setupBenchmarkGateId": "setupbenchmarkgate-1304",
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "rejected_source",
+      "nextAction": "replace_source",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": true,
+        "methodDecisionValidated": true,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "mapping_rejected",
+        "missing_required_fields",
+        "no_post_outcome_evidence_detected",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "privacy_boundary_ok",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_fresh_enough",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch",
+        "types_compatible"
+      ],
+      "requiredActions": [
+        "Declare how role declared_operations_outcome will be resolved later.",
+        "Remove or replace rejected source manifestsource-13041 for role weather_forecast.",
+        "Remove or replace rejected source manifestsource-13042 for role historical_baseline."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-007",
+      "runCase": "unsafe_source",
+      "sourceKind": "unsafe_source",
+      "privateSetupRequestId": null,
+      "sourceAdapterOutputId": "sourceadapteroutput-1305",
+      "sourceAdapterIntakeCaseId": "sourceadapterintakecase-1305",
+      "sourceIntakeReportId": null,
+      "sourceIntakeStatus": null,
+      "setupMethodDecisionId": null,
+      "setupBenchmarkGateId": null,
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "blocked_unsafe",
+      "nextAction": "stop_unsafe_connector",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": false,
+        "methodDecisionValidated": false,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "prompt_visible_credentials_not_allowed",
+        "raw_private_rows_not_allowed"
+      ],
+      "requiredActions": [
+        "Stop the connector handoff and replace the output with a sanitized source-adapter output."
+      ]
+    },
+    {
+      "orchestratorRunId": "privatesetuporchestratorrun-008",
+      "runCase": "response_too_large",
+      "sourceKind": "local_file",
+      "privateSetupRequestId": "privatesetuprequest-001",
+      "sourceAdapterOutputId": null,
+      "sourceAdapterIntakeCaseId": null,
+      "sourceIntakeReportId": null,
+      "sourceIntakeStatus": null,
+      "setupMethodDecisionId": null,
+      "setupBenchmarkGateId": null,
+      "setupForecastRunId": null,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardId": null,
+      "forecastBundleId": null,
+      "orchestratorStatus": "response_too_large",
+      "nextAction": "retry_with_smaller_readback",
+      "chain": {
+        "requestClassified": true,
+        "firstActionRead": true,
+        "sourceIntakeValidated": false,
+        "methodDecisionValidated": false,
+        "forecastExecutionRun": false,
+        "normalReadbackRun": false
+      },
+      "readbackSummary": {
+        "forecastCardStatus": null,
+        "forecastBundleStatus": null,
+        "resolutionStatus": null,
+        "scoreStatus": null,
+        "qualityClaimStatus": null
+      },
+      "forecastArtifactsPresent": false,
+      "qualityClaimAllowed": false,
+      "blockedReasons": [
+        "readback_response_too_large"
+      ],
+      "requiredActions": [
+        "Retry the forecast readback with a smaller record or higher caller-approved max-bytes limit."
+      ]
+    }
+  ],
+  "summary": {
+    "runCount": 8,
+    "completedForecastReadbacks": 1,
+    "readyForForecastExecution": 1,
+    "blockedRuns": 6,
+    "localFileSupported": true,
+    "sourceAdapterOutputSupported": true,
+    "plannedRuntimeRuns": 1
+  },
+  "executionBoundary": {
+    "orchestratorExecutesCommands": false,
+    "readsPrivateData": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "createsSourceManifests": false,
+    "createsFieldMappings": false,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "bypassesSourceIntake": false,
+    "bypassesMethodGate": false,
+    "usesExistingCheckedFixturesOnly": true
+  },
+  "warnings": [
+    "The orchestrator summary does not execute commands; it joins existing checked local fixtures.",
+    "Forecast artifacts referenced by completed rows come from explicit forecast execution fixtures.",
+    "Source-adapter output rows must still run explicit forecast execution before forecast readback exists.",
+    "Private API, database, manual upload, and credentialed connectors remain planned-only unless represented by accepted sanitized adapter output."
+  ]
+}

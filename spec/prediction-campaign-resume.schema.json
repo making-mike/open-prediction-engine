@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-resume.schema.json",
+  "title": "Prediction Campaign Resume Readback",
+  "description": "Checked non-mutating resume plan for prediction campaigns after interruption.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignResumeId",
+    "generatedAt",
+    "resumeStatus",
+    "domain",
+    "bindings",
+    "observedState",
+    "resumeChecks",
+    "recoveryActions",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignResumeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "resumeStatus": {
+      "type": "string",
+      "enum": ["checked_resume_plan_non_mutating"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "observedState": { "$ref": "#/$defs/observedState" },
+    "resumeChecks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/resumeCheck" }
+    },
+    "recoveryActions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/recoveryAction" }
+    },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignForecastWriteId",
+        "resolutionJobRegistryId",
+        "repeatingPredictionSetupId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "questionId",
+        "forecastId",
+        "sourcePolicyId",
+        "campaignStatePath",
+        "runStatePath"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignForecastWriteId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionJobRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "runStatePath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "observedState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKind",
+        "liveStateRead",
+        "ignoredLiveStateRequired",
+        "forecastWritePlanReady",
+        "forecastArtifactOpen",
+        "campaignJobStatus",
+        "waitingResolutionCount",
+        "dueResolutionCount",
+        "duplicateRiskCount",
+        "interruptedRunStateFound",
+        "priorEvidenceOverwriteAllowed"
+      ],
+      "properties": {
+        "sourceKind": {
+          "type": "string",
+          "enum": ["checked_fixture_bundle"]
+        },
+        "liveStateRead": { "type": "boolean" },
+        "ignoredLiveStateRequired": { "type": "boolean" },
+        "forecastWritePlanReady": { "type": "boolean" },
+        "forecastArtifactOpen": { "type": "boolean" },
+        "campaignJobStatus": {
+          "type": "string",
+          "enum": ["pending_due", "pending_not_due", "already_resolved", "invalid_state"]
+        },
+        "waitingResolutionCount": { "type": "integer", "minimum": 0 },
+        "dueResolutionCount": { "type": "integer", "minimum": 0 },
+        "duplicateRiskCount": { "type": "integer", "minimum": 0 },
+        "interruptedRunStateFound": { "type": "boolean" },
+        "priorEvidenceOverwriteAllowed": { "type": "boolean" }
+      }
+    },
+    "resumeCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "checkStatus", "requiredBeforeResume", "blocksResume", "message"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredBeforeResume": { "type": "boolean" },
+        "blocksResume": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "recoveryAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "actionStatus", "command", "reason", "mutatesState", "executesResolver"],
+      "properties": {
+        "actionId": { "$ref": "common.schema.json#/$defs/id" },
+        "actionStatus": {
+          "type": "string",
+          "enum": ["available", "wait", "blocked"]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "reason": { "$ref": "#/$defs/boundedString" },
+        "mutatesState": { "type": "boolean" },
+        "executesResolver": { "type": "boolean" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitWriteFlagRequired",
+        "explicitResolverFlagRequired",
+        "normalChecksWriteLiveState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteFlagRequired": { "type": "boolean" },
+        "explicitResolverFlagRequired": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resumeReadbackImplemented",
+        "effectfulResumeImplemented",
+        "safeToResumeReadback",
+        "writesIgnoredLiveState",
+        "executesResolvers",
+        "qualityClaimAllowed",
+        "recommendedNextAction",
+        "recommendedNextMilestone"
+      ],
+      "properties": {
+        "resumeReadbackImplemented": { "type": "boolean" },
+        "effectfulResumeImplemented": { "type": "boolean" },
+        "safeToResumeReadback": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" },
+        "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyResumePlan",
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesForecastCreation",
+        "executesResolvers",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "overwritesPriorEvidence",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyResumePlan": { "type": "boolean" },
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesForecastCreation": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "overwritesPriorEvidence": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/expansion-readiness-gate.schema.json",
+  "title": "Expansion Readiness Gate",
+  "description": "Checked post-MVP gate for deciding whether hosted runtime, broader private sources, live evidence, stronger methods, or generated runtime types are ready to build.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "expansionReadinessGateId",
+    "generatedAt",
+    "gateStatus",
+    "decision",
+    "bindings",
+    "evidenceInputs",
+    "expansionOptions",
+    "recommendedSequence",
+    "successCriteria",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "expansionReadinessGateId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "gateStatus": {
+      "type": "string",
+      "enum": ["blocked_pending_evidence"]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currentPosture", "nextAction", "reason"],
+      "properties": {
+        "currentPosture": {
+          "type": "string",
+          "enum": ["hold_local_mvp_and_gather_evidence"]
+        },
+        "nextAction": {
+          "type": "string",
+          "enum": ["run_real_pilots_and_grow_corpus"]
+        },
+        "reason": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseManifestId",
+        "developerAdoptionSurfaceId",
+        "agentPilotValidationId",
+        "pilotEvidenceLedgerId",
+        "localUsageTraceId",
+        "transitCorpusGrowthLoopId",
+        "transitBaselineTrackRecordGateId",
+        "localSourceRuntimeId"
+      ],
+      "properties": {
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "developerAdoptionSurfaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+        "localUsageTraceId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitCorpusGrowthLoopId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitBaselineTrackRecordGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "localSourceRuntimeId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "evidenceInputs": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/evidenceInput" }
+    },
+    "expansionOptions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/expansionOption" }
+    },
+    "recommendedSequence": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/sequenceStep" }
+    },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/successCriterion" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceInputCount",
+        "optionCount",
+        "readyOptionCount",
+        "blockedOptionCount",
+        "recommendedNextMilestone",
+        "qualityClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesIncluded"
+      ],
+      "properties": {
+        "evidenceInputCount": { "type": "integer", "minimum": 0 },
+        "optionCount": { "type": "integer", "minimum": 0 },
+        "readyOptionCount": { "type": "integer", "minimum": 0 },
+        "blockedOptionCount": { "type": "integer", "minimum": 0 },
+        "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesIncluded": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyGate",
+        "deterministicOffline",
+        "executesCommands",
+        "createsForecastArtifacts",
+        "fetchesLiveData",
+        "startsHostedRuntime",
+        "storesCredentials",
+        "storesPrivateRows",
+        "generatesRuntimeTypes",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyGate": { "type": "boolean" },
+        "deterministicOffline": { "type": "boolean" },
+        "executesCommands": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "generatesRuntimeTypes": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "evidenceInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputId", "source", "observedValue", "threshold", "status", "implication"],
+      "properties": {
+        "inputId": { "$ref": "common.schema.json#/$defs/id" },
+        "source": { "$ref": "#/$defs/boundedString" },
+        "observedValue": { "$ref": "#/$defs/boundedString" },
+        "threshold": { "$ref": "#/$defs/boundedString" },
+        "status": {
+          "type": "string",
+          "enum": ["met", "synthetic_only", "below_threshold", "blocked", "deferred"]
+        },
+        "implication": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "expansionOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["area", "status", "evidenceRequired", "blockedBy", "nextLocalStep"],
+      "properties": {
+        "area": {
+          "type": "string",
+          "enum": [
+            "hosted_runtime",
+            "broader_private_sources",
+            "live_forecast_evidence",
+            "stronger_methods",
+            "generated_runtime_types"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["blocked_pending_evidence", "deferred_pending_adoption_evidence"]
+        },
+        "evidenceRequired": { "$ref": "#/$defs/boundedStringList" },
+        "blockedBy": { "$ref": "#/$defs/boundedStringList" },
+        "nextLocalStep": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "sequenceStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "milestoneName", "trigger", "workBoundary", "createsProductionRuntime"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "milestoneName": { "$ref": "#/$defs/boundedString" },
+        "trigger": { "$ref": "#/$defs/boundedString" },
+        "workBoundary": { "$ref": "#/$defs/boundedString" },
+        "createsProductionRuntime": { "type": "boolean" }
+      }
+    },
+    "successCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterionId", "area", "currentStatus", "target", "ready"],
+      "properties": {
+        "criterionId": { "$ref": "common.schema.json#/$defs/id" },
+        "area": { "$ref": "#/$defs/boundedString" },
+        "currentStatus": { "$ref": "#/$defs/boundedString" },
+        "target": { "$ref": "#/$defs/boundedString" },
+        "ready": { "type": "boolean" }
+      }
+    }
+  }
+}

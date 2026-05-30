@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-summary-intake.schema.json",
+  "title": "Pilot Summary Intake",
+  "description": "Checked intake classifier for ledger-ready sanitized pilot summaries without storing raw transcripts or private data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotSummaryIntakeId",
+    "generatedAt",
+    "intakeMode",
+    "bindings",
+    "inputPolicy",
+    "submissionCases",
+    "decisionRules",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "pilotSummaryIntakeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "intakeMode": {
+      "type": "string",
+      "enum": ["checked_sanitized_pilot_summary_intake_classifier"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseManifestId",
+        "agentPilotValidationId",
+        "pilotEvidenceLedgerId",
+        "pilotSessionPacketId",
+        "pilotEvidencePolicyId",
+        "pilotSessionReviewId"
+      ],
+      "properties": {
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSessionPacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotEvidencePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSessionReviewId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "inputPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "allowedFields",
+        "blockedSignals",
+        "requiredReviewChecks",
+        "acceptedUse"
+      ],
+      "properties": {
+        "policyId": { "$ref": "common.schema.json#/$defs/id" },
+        "allowedFields": { "$ref": "#/$defs/boundedStringList" },
+        "blockedSignals": { "$ref": "#/$defs/boundedStringList" },
+        "requiredReviewChecks": { "$ref": "#/$defs/boundedStringList" },
+        "acceptedUse": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "submissionCases": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/submissionCase" }
+    },
+    "decisionRules": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/decisionRule" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalCaseCount",
+        "acceptedLedgerReadyCount",
+        "needsRedactionCount",
+        "blockedCaseCount",
+        "realSessionsRecorded",
+        "ledgerRowsWritten",
+        "intakeStatus",
+        "expansionEvidenceReady",
+        "qualityClaimAllowed",
+        "hostedRuntimeAllowed"
+      ],
+      "properties": {
+        "totalCaseCount": { "type": "integer", "minimum": 0 },
+        "acceptedLedgerReadyCount": { "type": "integer", "minimum": 0 },
+        "needsRedactionCount": { "type": "integer", "minimum": 0 },
+        "blockedCaseCount": { "type": "integer", "minimum": 0 },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "ledgerRowsWritten": { "type": "integer", "minimum": 0 },
+        "intakeStatus": {
+          "type": "string",
+          "enum": ["ready_for_sanitized_real_summaries"]
+        },
+        "expansionEvidenceReady": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyClassifier",
+        "usesCheckedExamplesOnly",
+        "runsPilotSessions",
+        "writesPilotEvidenceLedger",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion"
+      ],
+      "properties": {
+        "readOnlyClassifier": { "type": "boolean" },
+        "usesCheckedExamplesOnly": { "type": "boolean" },
+        "runsPilotSessions": { "type": "boolean" },
+        "writesPilotEvidenceLedger": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "submissionCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "caseKey",
+        "evidenceClass",
+        "taskRefs",
+        "submittedShape",
+        "riskSignals",
+        "intakeDecision",
+        "ledgerReady",
+        "acceptedForAggregation",
+        "contributesRealSessionEvidence",
+        "reviewOutcome",
+        "requiredFixes",
+        "nextAction"
+      ],
+      "properties": {
+        "caseId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": {
+          "type": "string",
+          "enum": [
+            "accepted_local_setup_summary",
+            "accepted_claim_confusion_summary",
+            "needs_redaction_source_detail",
+            "blocked_raw_transcript",
+            "blocked_private_rows",
+            "blocked_quality_claim"
+          ]
+        },
+        "evidenceClass": {
+          "type": "string",
+          "enum": ["checked_intake_example"]
+        },
+        "taskRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "submittedShape": { "$ref": "#/$defs/submittedShape" },
+        "riskSignals": { "$ref": "#/$defs/riskSignals" },
+        "intakeDecision": {
+          "type": "string",
+          "enum": [
+            "accept_for_ledger_review",
+            "accept_with_product_signal",
+            "needs_redaction",
+            "block_raw_transcript",
+            "block_private_data",
+            "block_claim_overreach"
+          ]
+        },
+        "ledgerReady": { "type": "boolean" },
+        "acceptedForAggregation": { "type": "boolean" },
+        "contributesRealSessionEvidence": { "type": "boolean" },
+        "reviewOutcome": { "$ref": "#/$defs/boundedString" },
+        "requiredFixes": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "submittedShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hasTaskRefs",
+        "hasDimensionRatings",
+        "hasSanitizedFindings",
+        "hasFrictionClasses",
+        "hasExpansionSignals",
+        "hasNextAction"
+      ],
+      "properties": {
+        "hasTaskRefs": { "type": "boolean" },
+        "hasDimensionRatings": { "type": "boolean" },
+        "hasSanitizedFindings": { "type": "boolean" },
+        "hasFrictionClasses": { "type": "boolean" },
+        "hasExpansionSignals": { "type": "boolean" },
+        "hasNextAction": { "type": "boolean" }
+      }
+    },
+    "riskSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptDetected",
+        "privateRowsDetected",
+        "credentialLikeTextDetected",
+        "participantIdentityDetected",
+        "unredactedSourceDetailDetected",
+        "claimOverreachDetected"
+      ],
+      "properties": {
+        "rawTranscriptDetected": { "type": "boolean" },
+        "privateRowsDetected": { "type": "boolean" },
+        "credentialLikeTextDetected": { "type": "boolean" },
+        "participantIdentityDetected": { "type": "boolean" },
+        "unredactedSourceDetailDetected": { "type": "boolean" },
+        "claimOverreachDetected": { "type": "boolean" }
+      }
+    },
+    "decisionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "condition", "decision", "effect"],
+      "properties": {
+        "ruleId": { "$ref": "common.schema.json#/$defs/id" },
+        "condition": { "$ref": "#/$defs/boundedString" },
+        "decision": { "$ref": "#/$defs/boundedString" },
+        "effect": { "$ref": "#/$defs/boundedString" }
+      }
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "resolutionJobRegistryId": "resolutionjobregistry-001",
+  "generatedAt": "2026-06-10T08:30:00Z",
+  "registryMode": "campaign_fixture_registry",
+  "domain": "weather-transit-delays",
+  "sourceBinding": {
+    "sourceKind": "forward_run_state_and_campaign_manifest",
+    "workspace": "fixture://transit-forward-run-resolver",
+    "resolverOperation": "resolve-due-forward-runs",
+    "stateFilesCommitted": false,
+    "campaignId": "predictioncampaign-001",
+    "campaignManifestPath": "spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
+    "campaignRunStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+    "forecastWritePlanPath": "spec/fixtures/generated/prediction-campaign-forecast-write/weather-transit-delay-campaign-forecast-write.generated.json"
+  },
+  "jobs": [
+    {
+      "resolutionJobId": "resolutionjob-001",
+      "jobStatus": "pending_due",
+      "due": true,
+      "target": {
+        "forwardRunId": "transitdelayforwardrun-001",
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "runStatus": "forecast_recorded",
+        "statePath": ".ope/live/transit-forward-run/fixture-due/forward-run-state.json",
+        "resolveAt": "2026-06-10T08:00:00Z",
+        "serviceDate": "2026-06-10",
+        "serviceWindow": "morning_peak"
+      },
+      "agentAction": {
+        "recommendedAction": "call_resolver_execute",
+        "reason": "resolution time has passed; call the checked resolver command when live execution is approved",
+        "commands": [
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-due/forward-run-state.json",
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-due/forward-run-state.json --execute --download-static-gtfs"
+        ]
+      },
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "normalChecksUseLiveNetwork": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "resolutionJobId": "resolutionjob-002",
+      "jobStatus": "pending_not_due",
+      "due": false,
+      "target": {
+        "forwardRunId": "transitdelayforwardrun-001",
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "runStatus": "forecast_recorded",
+        "statePath": ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json",
+        "resolveAt": "2026-06-11T08:00:00Z",
+        "serviceDate": "2026-06-11",
+        "serviceWindow": "morning_peak"
+      },
+      "agentAction": {
+        "recommendedAction": "wait",
+        "reason": "resolveAt 2026-06-11T08:00:00Z is still in the future",
+        "commands": [
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-not-due/forward-run-state.json"
+        ]
+      },
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "normalChecksUseLiveNetwork": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "resolutionJobId": "resolutionjob-003",
+      "jobStatus": "already_resolved",
+      "due": true,
+      "target": {
+        "forwardRunId": "transitdelayforwardrun-001",
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "runStatus": "scored",
+        "statePath": ".ope/live/transit-forward-run/fixture-scored/forward-run-state.json",
+        "resolveAt": "2026-06-09T08:00:00Z",
+        "serviceDate": "2026-06-09",
+        "serviceWindow": "morning_peak"
+      },
+      "agentAction": {
+        "recommendedAction": "read_resolved_outputs",
+        "reason": "run status is scored; resolver will not execute it again",
+        "commands": [
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-scored/forward-run-state.json"
+        ]
+      },
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "normalChecksUseLiveNetwork": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "resolutionJobId": "resolutionjob-004",
+      "jobStatus": "pending_not_due",
+      "due": false,
+      "target": {
+        "forwardRunId": "none",
+        "campaignId": "predictioncampaign-001",
+        "campaignRunId": "predictionrun-1301",
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "resolutionId": "resolution-1301",
+        "scoringReportId": "scoring-1301",
+        "runStatus": "waiting_resolution",
+        "statePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+        "resolveAt": "2026-06-11T07:15:00Z",
+        "serviceDate": "2026-06-11",
+        "serviceWindow": "morning_peak"
+      },
+      "agentAction": {
+        "recommendedAction": "wait",
+        "reason": "campaign run predictionrun-1301 has forecast forecast-1301 and resolutionEligibleAt 2026-06-11T07:15:00Z",
+        "commands": [
+          "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+          "python3 scripts/ope.py read --record-type forecast-card --id forecast-1301 --question-id question-1301"
+        ]
+      },
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "normalChecksUseLiveNetwork": false,
+        "calibrationClaimAllowed": false
+      }
+    }
+  ],
+  "summary": {
+    "jobCount": 4,
+    "pendingDueCount": 1,
+    "pendingNotDueCount": 2,
+    "alreadyResolvedCount": 1,
+    "invalidCount": 0
+  },
+  "executionBoundary": {
+    "registryExecutesResolvers": false,
+    "liveScanRequiresExplicitFlag": true,
+    "executeRequiresResolveDueCommand": true,
+    "hostedSchedulerCreated": false,
+    "calibrationClaimAllowed": false
+  },
+  "warnings": [
+    "This registry is an agent-facing read model; it does not execute resolver commands.",
+    "Live state scanning requires --live and reads ignored local forward-run state files.",
+    "Agents should call resolve-due-forward-runs for execution instead of writing scheduler files.",
+    "Resolution jobs do not create calibration claims by themselves.",
+    "Campaign jobs are read from checked campaign fixtures and do not execute campaign resolvers or write campaign state."
+  ]
+}

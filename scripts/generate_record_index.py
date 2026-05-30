@@ -10,15 +10,12 @@ from pathlib import Path
 from typing import Any
 
 from read_ope_record import RECORD_TYPES, list_records
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_PATH = ROOT / "spec" / "fixtures" / "generated" / "record-index.generated.json"
 GENERATED_AT = "2026-06-06T10:30:00Z"
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def build_index() -> dict[str, Any]:

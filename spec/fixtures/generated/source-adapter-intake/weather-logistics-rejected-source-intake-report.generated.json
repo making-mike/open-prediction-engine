@@ -1,0 +1,245 @@
+{
+  "sourceIntakeReportId": "sourceintakereport-1304",
+  "generatedAt": "2026-06-06T16:20:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-1304",
+  "fieldMappingId": "fieldmapping-1304",
+  "intakeStatus": "rejected",
+  "canProduceForecast": false,
+  "forecastGenerationAllowed": false,
+  "roleCoverage": [
+    {
+      "sourceRole": "weather_forecast",
+      "requiredForForecast": true,
+      "status": "rejected",
+      "sourceIds": [
+        "manifestsource-13041"
+      ]
+    },
+    {
+      "sourceRole": "historical_baseline",
+      "requiredForForecast": true,
+      "status": "rejected",
+      "sourceIds": [
+        "manifestsource-13042"
+      ]
+    },
+    {
+      "sourceRole": "declared_operations_outcome",
+      "requiredForForecast": false,
+      "status": "missing",
+      "sourceIds": []
+    }
+  ],
+  "sourceDecisions": [
+    {
+      "sourceId": "manifestsource-13041",
+      "sourceRole": "weather_forecast",
+      "decision": "rejected",
+      "reasonCodes": [
+        "entity_scope_matches",
+        "missing_required_fields",
+        "not_available_before_forecast_close",
+        "not_baseline_source",
+        "post_close_or_unavailable_forecast_source",
+        "rejected_required_mappings",
+        "source_contains_secrets",
+        "source_retrieved_after_forecast_close",
+        "type_mismatch"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "failed",
+          "reasonCodes": [
+            "missing_required_fields",
+            "rejected_required_mappings"
+          ]
+        },
+        "typeParsing": {
+          "status": "failed",
+          "reasonCodes": [
+            "type_mismatch"
+          ]
+        },
+        "entityMatch": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "failed",
+          "reasonCodes": [
+            "not_available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "failed",
+          "reasonCodes": [
+            "source_retrieved_after_forecast_close"
+          ]
+        },
+        "leakageRisk": {
+          "status": "failed",
+          "reasonCodes": [
+            "post_close_or_unavailable_forecast_source"
+          ]
+        },
+        "sampleSize": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "not_baseline_source"
+          ]
+        },
+        "privacy": {
+          "status": "failed",
+          "reasonCodes": [
+            "source_contains_secrets"
+          ]
+        }
+      }
+    },
+    {
+      "sourceId": "manifestsource-13042",
+      "sourceRole": "historical_baseline",
+      "decision": "rejected",
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "no_post_outcome_evidence_detected",
+        "privacy_boundary_ok",
+        "source_fresh_enough",
+        "types_compatible"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "passed",
+          "reasonCodes": [
+            "all_required_fields_mapped"
+          ]
+        },
+        "typeParsing": {
+          "status": "passed",
+          "reasonCodes": [
+            "types_compatible"
+          ]
+        },
+        "entityMatch": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_fresh_enough"
+          ]
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected"
+          ]
+        },
+        "sampleSize": {
+          "status": "failed",
+          "reasonCodes": [
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    }
+  ],
+  "mappingDecisions": [
+    {
+      "mappingId": "mapping-13041",
+      "sourceId": "manifestsource-13041",
+      "targetField": "forecast_daily_precipitation_mm",
+      "decision": "rejected",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_rejected"
+      ]
+    },
+    {
+      "mappingId": "mapping-13042",
+      "sourceId": "manifestsource-13042",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13043",
+      "sourceId": "manifestsource-13042",
+      "targetField": "geography",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13044",
+      "sourceId": "manifestsource-13042",
+      "targetField": "disruption_observed",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    }
+  ],
+  "methodEligibility": [
+    {
+      "methodClass": "historical_baseline",
+      "eligible": false,
+      "reasonCodes": [
+        "missing_usable_historical_baseline",
+        "source_rejected"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "eligible": false,
+      "reasonCodes": [
+        "missing_usable_historical_baseline",
+        "missing_usable_weather_forecast",
+        "source_rejected"
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Declare how role declared_operations_outcome will be resolved later.",
+    "Remove or replace rejected source manifestsource-13041 for role weather_forecast.",
+    "Remove or replace rejected source manifestsource-13042 for role historical_baseline."
+  ],
+  "warnings": [
+    "Source intake reports do not produce forecast artifacts.",
+    "Rejected intake must not bind generated forecast outputs."
+  ]
+}

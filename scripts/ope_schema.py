@@ -218,6 +218,20 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# Generated fixtures that are intentionally schema-less intermediates: computed
+# feature snapshots, normalized source dumps, and human-readable run/outcome
+# summaries that are not contract records. Every *other* file under
+# spec/fixtures/generated/ must resolve to a schema via schema_for(); the
+# schema-contract check enforces that so a renamed fixture or a stale
+# endswith() rule cannot silently drop out of validation.
+SCHEMALESS_GENERATED_SUFFIXES = (
+    "-feature-snapshot.generated.json",
+    "-normalized-sources.generated.json",
+    "-outcome-summary.generated.json",
+    "-run-summary.generated.json",
+)
+
+
 def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
     name = path.name
     parts = path.parts
@@ -239,20 +253,34 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "live-connector-readiness.schema.json"
     if name.endswith("-transit-api-connector.generated.json"):
         return spec_root / "transit-api-connector.schema.json"
-    if name.endswith("-transit-delay-forward-run.generated.json"):
+    if name.endswith("-transit-delays-forward-run.generated.json"):
         return spec_root / "transit-delay-forward-run.schema.json"
+    if name.endswith("transit-forward-run-corpus.generated.json"):
+        return spec_root / "transit-forward-run-corpus.schema.json"
+    if name.endswith("transit-corpus-growth-loop.generated.json"):
+        return spec_root / "transit-corpus-growth-loop.schema.json"
+    if name.endswith("transit-baseline-track-record-gate.generated.json"):
+        return spec_root / "transit-baseline-track-record-gate.schema.json"
+    if name.endswith("transit-method-options.generated.json"):
+        return spec_root / "transit-method-options.schema.json"
+    if name.endswith("transit-live-evidence-promotion.generated.json"):
+        return spec_root / "transit-live-evidence-promotion.schema.json"
     if name.endswith("resolve-due-forward-runs.generated.json"):
         return spec_root / "transit-forward-run-resolver.schema.json"
-    if name.endswith("resolution-jobs.generated.json"):
+    if name.endswith("resolution-jobs.generated.json") or name.endswith("resolution-jobs-campaign.generated.json"):
         return spec_root / "resolution-job-registry.schema.json"
-    if name.endswith("resolution-scheduler-run.generated.json"):
+    if name.endswith("resolution-scheduler-run.generated.json") or name.endswith("resolution-scheduler-campaign-run.generated.json"):
         return spec_root / "resolution-scheduler-run.schema.json"
+    if name.endswith("resolution-runtime-reliability.generated.json"):
+        return spec_root / "resolution-runtime-reliability.schema.json"
     if name.endswith("-domain-setup.generated.json"):
         return spec_root / "domain-setup.schema.json"
     if name.endswith("-source-manifest-build.generated.json"):
         return spec_root / "source-manifest-build.schema.json"
     if name.endswith("-source-adapter-output.generated.json"):
         return spec_root / "source-adapter-output.schema.json"
+    if name.endswith("-source-adapter-intake.generated.json"):
+        return spec_root / "source-adapter-intake.schema.json"
     if name.endswith("-source-intake-handoff.generated.json"):
         return spec_root / "source-intake-handoff.schema.json"
     if name.endswith("-source-handoff-method-gate.generated.json"):
@@ -263,6 +291,26 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "field-mapping.schema.json"
     if name.endswith("-source-intake-report.generated.json"):
         return spec_root / "source-intake-report.schema.json"
+    if name.endswith("source-quality-mapping-confidence.generated.json"):
+        return spec_root / "source-quality-mapping-confidence.schema.json"
+    if name.endswith("local-source-runtime.generated.json"):
+        return spec_root / "local-source-runtime.schema.json"
+    if name.endswith("developer-adoption-surface.generated.json"):
+        return spec_root / "developer-adoption-surface.schema.json"
+    if name.endswith("expansion-readiness-gate.generated.json"):
+        return spec_root / "expansion-readiness-gate.schema.json"
+    if name.endswith("repeating-prediction-setup.generated.json"):
+        return spec_root / "repeating-prediction-setup.schema.json"
+    if name.endswith("-campaign-manifest.generated.json"):
+        return spec_root / "prediction-campaign-manifest.schema.json"
+    if name.endswith("-campaign-runner.generated.json"):
+        return spec_root / "prediction-campaign-runner.schema.json"
+    if name.endswith("campaign-forecast-creation.generated.json"):
+        return spec_root / "prediction-campaign-forecast-creation.schema.json"
+    if name.endswith("campaign-forecast-write.generated.json"):
+        return spec_root / "prediction-campaign-forecast-write.schema.json"
+    if name.endswith("campaign-resume.generated.json"):
+        return spec_root / "prediction-campaign-resume.schema.json"
     if name.endswith("-setup-benchmark-gate.generated.json"):
         return spec_root / "setup-benchmark-gate.schema.json"
     if name.endswith("-setup-method-decision.generated.json"):
@@ -325,6 +373,18 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "private-setup-adapter-conformance-matrix.schema.json"
     if name.endswith("-private-setup-adapter-conformance-summary.generated.json"):
         return spec_root / "private-setup-adapter-conformance-summary.schema.json"
+    if name.endswith("-private-setup-orchestrator.generated.json"):
+        return spec_root / "private-setup-orchestrator.schema.json"
+    if name.endswith("-agent-pilot-validation.generated.json"):
+        return spec_root / "agent-pilot-validation.schema.json"
+    if name.endswith("-pilot-evidence-ledger.generated.json"):
+        return spec_root / "pilot-evidence-ledger.schema.json"
+    if name.endswith("-pilot-session-packet.generated.json"):
+        return spec_root / "pilot-session-packet.schema.json"
+    if name.endswith("-pilot-summary-intake.generated.json"):
+        return spec_root / "pilot-summary-intake.schema.json"
+    if name.endswith("-local-usage-trace.generated.json"):
+        return spec_root / "local-usage-trace.schema.json"
     if "-private-setup-first-action-" in name and name.endswith(".generated.json"):
         return spec_root / "private-setup-first-action.schema.json"
     if "-private-setup-agent-bundle-" in name and name.endswith(".generated.json"):
@@ -351,6 +411,10 @@ def iter_contract_records(fixtures_root: Path = SPEC / "fixtures", spec_root: Pa
         if schema is not None:
             records.append((path, schema))
     return records
+
+
+def iter_generated_fixtures(generated_root: Path = SPEC / "fixtures" / "generated") -> list[Path]:
+    return sorted(generated_root.rglob("*.json"))
 
 
 def validate_record(

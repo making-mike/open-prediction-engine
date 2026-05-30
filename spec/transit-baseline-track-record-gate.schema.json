@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-baseline-track-record-gate.schema.json",
+  "title": "Transit Baseline Track Record Gate",
+  "description": "Checked gate over the weather-transit-delay forward-run corpus for baseline track-record and calibration reporting.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitBaselineTrackRecordGateId",
+    "generatedAt",
+    "domain",
+    "gateMode",
+    "sourceCorpus",
+    "coverageSummary",
+    "sampleSummary",
+    "trackRecordSummary",
+    "calibrationGate",
+    "claimBoundary",
+    "readSurface",
+    "warnings"
+  ],
+  "properties": {
+    "transitBaselineTrackRecordGateId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "const": "weather-transit-delays" },
+    "gateMode": {
+      "type": "string",
+      "enum": ["checked_fixture_gate"]
+    },
+    "sourceCorpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transitForwardRunCorpusId",
+        "corpusPath",
+        "corpusMode",
+        "policyId",
+        "sourceCommand"
+      ],
+      "properties": {
+        "transitForwardRunCorpusId": { "$ref": "common.schema.json#/$defs/id" },
+        "corpusPath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "corpusMode": {
+          "type": "string",
+          "enum": ["checked_fixture_index"]
+        },
+        "policyId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceCommand": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    },
+    "coverageSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network",
+        "geography",
+        "serviceWindow",
+        "horizonWindowCoverage"
+      ],
+      "properties": {
+        "network": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "geography": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "serviceWindow": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "horizonWindowCoverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "horizonStartsAt",
+            "horizonEndsAt",
+            "comparableWindowCount",
+            "excludedWindowCount",
+            "comparableServiceDates",
+            "excludedServiceDates"
+          ],
+          "properties": {
+            "horizonStartsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "horizonEndsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "comparableWindowCount": { "type": "integer", "minimum": 0 },
+            "excludedWindowCount": { "type": "integer", "minimum": 0 },
+            "comparableServiceDates": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 200,
+              "items": { "type": "string", "format": "date" }
+            },
+            "excludedServiceDates": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 200,
+              "items": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    },
+    "sampleSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolvedComparableSampleSize",
+        "scoredSampleSize",
+        "excludedSampleSize",
+        "pendingSampleSize",
+        "minimumComparableResolvedForTrackRecord",
+        "minimumComparableResolvedForCalibration",
+        "trackRecordStatus",
+        "calibrationStatus"
+      ],
+      "properties": {
+        "resolvedComparableSampleSize": { "type": "integer", "minimum": 0 },
+        "scoredSampleSize": { "type": "integer", "minimum": 0 },
+        "excludedSampleSize": { "type": "integer", "minimum": 0 },
+        "pendingSampleSize": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForTrackRecord": { "type": "integer", "minimum": 1 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 1 },
+        "trackRecordStatus": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        },
+        "calibrationStatus": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        }
+      }
+    },
+    "trackRecordSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summaryGenerated",
+        "status",
+        "scoringRule",
+        "higherIsBetter",
+        "primaryScore",
+        "baselineScore",
+        "baselineLift",
+        "resolvedSampleSize",
+        "excludedSampleSize",
+        "scoreRows"
+      ],
+      "properties": {
+        "summaryGenerated": { "type": "boolean" },
+        "status": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        },
+        "scoringRule": {
+          "type": "string",
+          "enum": ["brier"]
+        },
+        "higherIsBetter": { "type": "boolean" },
+        "primaryScore": { "type": "number", "minimum": 0 },
+        "baselineScore": { "type": "number", "minimum": 0 },
+        "baselineLift": { "type": "number" },
+        "resolvedSampleSize": { "type": "integer", "minimum": 0 },
+        "excludedSampleSize": { "type": "integer", "minimum": 0 },
+        "scoreRows": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/scoreRow" }
+        }
+      }
+    },
+    "calibrationGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summaryGenerated",
+        "status",
+        "reasonCode",
+        "minimumComparableResolved",
+        "resolvedComparableSampleSize",
+        "calibrationSummary"
+      ],
+      "properties": {
+        "summaryGenerated": { "type": "boolean" },
+        "status": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        },
+        "reasonCode": {
+          "type": "string",
+          "enum": ["threshold_met", "not_enough_resolved_comparable_outcomes"]
+        },
+        "minimumComparableResolved": { "type": "integer", "minimum": 1 },
+        "resolvedComparableSampleSize": { "type": "integer", "minimum": 0 },
+        "calibrationSummary": {
+          "oneOf": [
+            { "$ref": "calibration-summary.schema.json" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualityClaimAllowed",
+        "baselineTrackRecordAllowed",
+        "calibrationClaimAllowed",
+        "reasonCode",
+        "oneOffForwardRunCanCreateCalibrationEvidence",
+        "normalChecksUseLiveNetwork",
+        "liveCapturesCommitted"
+      ],
+      "properties": {
+        "qualityClaimAllowed": { "type": "boolean" },
+        "baselineTrackRecordAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "reasonCode": {
+          "type": "string",
+          "enum": ["threshold_met", "not_enough_resolved_comparable_outcomes"]
+        },
+        "oneOffForwardRunCanCreateCalibrationEvidence": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "liveCapturesCommitted": { "type": "boolean" }
+      }
+    },
+    "readSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "sourceCommand",
+        "createsForecastArtifacts",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "createsCalibrationSummariesBelowThreshold",
+        "fetchesLiveData",
+        "storesCredentials"
+      ],
+      "properties": {
+        "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "sourceCommand": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "createsCalibrationSummariesBelowThreshold": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    }
+  },
+  "$defs": {
+    "scoreRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "corpusRunId",
+        "forwardRunId",
+        "forecastId",
+        "questionId",
+        "serviceDate",
+        "outcomeLabel",
+        "primaryScore",
+        "baselineScore",
+        "baselineLift"
+      ],
+      "properties": {
+        "corpusRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "forwardRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "serviceDate": { "type": "string", "format": "date" },
+        "outcomeLabel": {
+          "type": "string",
+          "enum": ["yes", "no"]
+        },
+        "primaryScore": { "type": "number", "minimum": 0 },
+        "baselineScore": { "type": "number", "minimum": 0 },
+        "baselineLift": { "type": "number" }
+      }
+    }
+  }
+}

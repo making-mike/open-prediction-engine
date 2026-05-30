@@ -18,6 +18,8 @@ Any approved source
 
 The adapter output may describe source metadata, sanitized provenance, source manifests, and field mappings. It must not create forecast artifacts, scoring reports, credential records, or quality claims.
 
+`spec/source-adapter-intake.md` defines the checked MVP intake path that validates sanitized adapter outputs, runs safe outputs through source intake and method gates, and blocks unsafe outputs before intake.
+
 ## Contract
 
 The schema is:
@@ -46,6 +48,7 @@ Inspect the checked adapter output:
 
 ```bash
 python3 scripts/ope.py source-adapter-output
+python3 scripts/ope.py source-adapter-intake
 ```
 
 Check drift and invariants:

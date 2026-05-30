@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-quality-mapping-confidence.schema.json",
+  "title": "Source Quality Mapping Confidence",
+  "description": "Checked read model for source quality, mapping confidence, and next actions before setup method gates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceQualityMappingConfidenceId",
+    "generatedAt",
+    "domain",
+    "qualityMode",
+    "surfaceBindings",
+    "caseRows",
+    "summary",
+    "compactReadback",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "sourceQualityMappingConfidenceId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "qualityMode": {
+      "type": "string",
+      "enum": ["checked_source_quality_mapping_confidence"]
+    },
+    "surfaceBindings": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/surfaceBinding" }
+    },
+    "caseRows": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/caseRow" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseCount",
+        "forecastUsableCount",
+        "baselineOnlyCount",
+        "needsMappingConfirmationCount",
+        "needsMoreDataCount",
+        "replaceSourceCount",
+        "stopUnsafeConnectorCount",
+        "qualityClaimAllowed",
+        "productionReadinessClaimAllowed"
+      ],
+      "properties": {
+        "caseCount": { "type": "integer", "minimum": 0 },
+        "forecastUsableCount": { "type": "integer", "minimum": 0 },
+        "baselineOnlyCount": { "type": "integer", "minimum": 0 },
+        "needsMappingConfirmationCount": { "type": "integer", "minimum": 0 },
+        "needsMoreDataCount": { "type": "integer", "minimum": 0 },
+        "replaceSourceCount": { "type": "integer", "minimum": 0 },
+        "stopUnsafeConnectorCount": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "productionReadinessClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "compactReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxBytes",
+        "measuredBytes",
+        "fitsBudget",
+        "includesRawRows",
+        "includesRawPrompts",
+        "includesCredentials",
+        "includedCaseCount"
+      ],
+      "properties": {
+        "maxBytes": { "type": "integer", "minimum": 1000, "maximum": 64000 },
+        "measuredBytes": { "type": "integer", "minimum": 0, "maximum": 64000 },
+        "fitsBudget": { "type": "boolean" },
+        "includesRawRows": { "type": "boolean" },
+        "includesRawPrompts": { "type": "boolean" },
+        "includesCredentials": { "type": "boolean" },
+        "includedCaseCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnly",
+        "executesSourceBuilder",
+        "executesSourceAdapter",
+        "readsPrivateRows",
+        "storesRawRows",
+        "storesCredentials",
+        "fetchesLiveData",
+        "createsSourceManifest",
+        "createsForecastArtifacts",
+        "createsResolutionRecords",
+        "createsScoringRecords",
+        "allowsQualityClaims",
+        "allowsProductionReadinessClaims",
+        "normalChecksDeterministicOffline"
+      ],
+      "properties": {
+        "readOnly": { "type": "boolean" },
+        "executesSourceBuilder": { "type": "boolean" },
+        "executesSourceAdapter": { "type": "boolean" },
+        "readsPrivateRows": { "type": "boolean" },
+        "storesRawRows": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "createsSourceManifest": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionRecords": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "allowsQualityClaims": { "type": "boolean" },
+        "allowsProductionReadinessClaims": { "type": "boolean" },
+        "normalChecksDeterministicOffline": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 520
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        { "$ref": "#/$defs/boundedString" },
+        { "type": "null" }
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+      }
+    },
+    "surfaceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface", "command", "recordId", "status", "artifactPath"],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "enum": [
+            "source_builder",
+            "source_adapter_intake",
+            "source_intake_report",
+            "setup_method_decision"
+          ]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "recordId": { "$ref": "#/$defs/nullableId" },
+        "status": { "$ref": "#/$defs/boundedString" },
+        "artifactPath": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "qualityStatus": {
+      "type": "string",
+      "enum": [
+        "forecast_usable",
+        "baseline_only_usable",
+        "needs_mapping_confirmation",
+        "needs_more_data",
+        "replace_source",
+        "stop_unsafe_connector"
+      ]
+    },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "proceed_to_method_gate",
+        "confirm_mappings",
+        "collect_more_data",
+        "replace_source",
+        "stop_unsafe_connector"
+      ]
+    },
+    "dimensionStatus": {
+      "type": "string",
+      "enum": ["passed", "partial", "needs_confirmation", "failed", "blocked", "not_applicable"]
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "summary"],
+      "properties": {
+        "status": { "$ref": "#/$defs/dimensionStatus" },
+        "reasonCodes": { "$ref": "#/$defs/reasonCodes" },
+        "summary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "dimensionSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "freshness",
+        "coverage",
+        "roleFit",
+        "entityScope",
+        "leakageRisk",
+        "missingness",
+        "outcomeAvailability",
+        "mappingConfidence"
+      ],
+      "properties": {
+        "freshness": { "$ref": "#/$defs/dimension" },
+        "coverage": { "$ref": "#/$defs/dimension" },
+        "roleFit": { "$ref": "#/$defs/dimension" },
+        "entityScope": { "$ref": "#/$defs/dimension" },
+        "leakageRisk": { "$ref": "#/$defs/dimension" },
+        "missingness": { "$ref": "#/$defs/dimension" },
+        "outcomeAvailability": { "$ref": "#/$defs/dimension" },
+        "mappingConfidence": { "$ref": "#/$defs/dimension" }
+      }
+    },
+    "roleSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presentRoles", "partialRoles", "missingRequiredRoles", "rejectedRoles"],
+      "properties": {
+        "presentRoles": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "partialRoles": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "missingRequiredRoles": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "rejectedRoles": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "mappingSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acceptedMappings", "proposedMappings", "rejectedMappings", "averageConfidence"],
+      "properties": {
+        "acceptedMappings": { "type": "integer", "minimum": 0 },
+        "proposedMappings": { "type": "integer", "minimum": 0 },
+        "rejectedMappings": { "type": "integer", "minimum": 0 },
+        "averageConfidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "forecastImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canEnterSourceIntake",
+        "canProceedToMethodGate",
+        "canProduceForecast",
+        "selectedMethodClass",
+        "forecastArtifactsCreated",
+        "qualityClaimAllowed",
+        "productionReadinessClaimAllowed"
+      ],
+      "properties": {
+        "canEnterSourceIntake": { "type": "boolean" },
+        "canProceedToMethodGate": { "type": "boolean" },
+        "canProduceForecast": { "type": "boolean" },
+        "selectedMethodClass": { "$ref": "#/$defs/nullableString" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "productionReadinessClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "caseRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "case",
+        "inputSurface",
+        "boundRecordIds",
+        "qualityStatus",
+        "recommendedNextAction",
+        "dimensions",
+        "roleSummary",
+        "mappingSummary",
+        "forecastImpact",
+        "agentSummary"
+      ],
+      "properties": {
+        "caseId": { "$ref": "common.schema.json#/$defs/id" },
+        "case": {
+          "type": "string",
+          "enum": [
+            "builder_local_draft",
+            "source_intake_accepted",
+            "source_intake_partial",
+            "source_intake_needs_confirmation",
+            "adapter_insufficient_data",
+            "source_intake_rejected",
+            "adapter_unsafe"
+          ]
+        },
+        "inputSurface": {
+          "type": "string",
+          "enum": ["source_builder", "source_intake", "source_adapter_intake"]
+        },
+        "boundRecordIds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceManifestBuildId",
+            "sourceAdapterOutputId",
+            "sourceAdapterIntakeCaseId",
+            "sourceIntakeReportId",
+            "setupMethodDecisionId",
+            "sourceManifestId",
+            "fieldMappingId"
+          ],
+          "properties": {
+            "sourceManifestBuildId": { "$ref": "#/$defs/nullableId" },
+            "sourceAdapterOutputId": { "$ref": "#/$defs/nullableId" },
+            "sourceAdapterIntakeCaseId": { "$ref": "#/$defs/nullableId" },
+            "sourceIntakeReportId": { "$ref": "#/$defs/nullableId" },
+            "setupMethodDecisionId": { "$ref": "#/$defs/nullableId" },
+            "sourceManifestId": { "$ref": "#/$defs/nullableId" },
+            "fieldMappingId": { "$ref": "#/$defs/nullableId" }
+          }
+        },
+        "qualityStatus": { "$ref": "#/$defs/qualityStatus" },
+        "recommendedNextAction": { "$ref": "#/$defs/nextAction" },
+        "dimensions": { "$ref": "#/$defs/dimensionSet" },
+        "roleSummary": { "$ref": "#/$defs/roleSummary" },
+        "mappingSummary": { "$ref": "#/$defs/mappingSummary" },
+        "forecastImpact": { "$ref": "#/$defs/forecastImpact" },
+        "agentSummary": { "$ref": "#/$defs/boundedString" }
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,10 +37,6 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
-
-
 def schema_files() -> list[str]:
     return [
         str(path.relative_to(ROOT))
@@ -55,6 +52,227 @@ def read_surfaces(record_index: dict[str, Any]) -> list[dict[str, Any]]:
         }
         for record_set in record_index["recordSets"]
     ]
+
+
+def mvp_local_runtime() -> dict[str, Any]:
+    return {
+        "surfaceStatus": "local_mvp_fixture_ready",
+        "runtimeMode": "local_cli_and_generated_records",
+        "runbookPath": "spec/mvp-local-runtime.md",
+        "supportedSourceInputs": [
+            "approved_local_csv_json",
+            "approved_local_folder_runtime",
+            "accepted_source_adapter_output",
+            "committed_fixture_request",
+            "policy_bound_promoted_fixture_source_set",
+        ],
+        "happyPath": {
+            "setupCommand": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+            "forecastCommand": "python3 scripts/ope.py forecast-run",
+            "readbackCommands": [
+                "python3 scripts/ope.py local-source-runtime",
+                "python3 scripts/ope.py developer-adoption",
+                "python3 scripts/ope.py pilot-evidence",
+                "python3 scripts/ope.py pilot-session-packet",
+                "python3 scripts/ope.py pilot-summary-intake",
+                "python3 scripts/ope.py expansion-readiness",
+                "python3 scripts/ope.py repeating-prediction-setup",
+                "python3 scripts/ope.py prediction-campaign plan",
+                "python3 scripts/ope.py prediction-campaign start",
+                "python3 scripts/ope.py prediction-campaign forecast-create",
+                "python3 scripts/ope.py prediction-campaign forecast-artifact",
+                "python3 scripts/ope.py prediction-campaign forecast-write",
+                "python3 scripts/ope.py prediction-campaign resume",
+                "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+                "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
+                "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+                "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+                "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+            ],
+            "resolutionCommand": "python3 scripts/ope.py resolve-source-handoff",
+            "scoringCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
+            "corpusReadbackCommand": "python3 scripts/ope.py transit-track-record-gate",
+            "failureRecoveryCommand": "python3 scripts/ope.py resolution-runtime-reliability",
+            "expectedForecastIds": ["forecast-602", "forecast-702", "forecast-1102", "forecast-1201", "forecast-1301"],
+        },
+        "machineInterfaces": [
+            {
+                "interface": "cli",
+                "command": "python3 scripts/ope.py",
+                "status": "implemented_local",
+                "minimumUse": "Run setup, forecast, resolution, scoring, readback, and release checks locally.",
+            },
+            {
+                "interface": "agent_call",
+                "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+                "status": "implemented_local",
+                "minimumUse": "Return one schema-bound envelope with exit code, status, record binding, and payload.",
+            },
+            {
+                "interface": "mcp_stdio",
+                "command": "python3 scripts/ope.py mcp-stdio",
+                "status": "local_scaffold",
+                "minimumUse": "Expose the local dispatcher as MCP stdio tools for MCP-capable hosts.",
+            },
+        ],
+        "smokeChecks": [
+            {
+                "checkId": "mvp-smoke-local-setup-readback",
+                "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+                "expected": "forecast-1102 is resolved and scored, with quality claim still sample-size-blocked.",
+            },
+            {
+                "checkId": "mvp-smoke-local-source-runtime",
+                "command": "python3 scripts/ope.py local-source-runtime",
+                "expected": "approved local-folder runtime binds to forecast-1102 and exposes blocked examples without creating artifacts directly.",
+            },
+            {
+                "checkId": "mvp-smoke-developer-adoption",
+                "command": "python3 scripts/ope.py developer-adoption",
+                "expected": "quickstart, scenario, integrations, release notes, and type-generation boundary are available.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-evidence",
+                "command": "python3 scripts/ope.py pilot-evidence",
+                "expected": "sanitized pilot evidence intake examples are available while real session count remains zero.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-session-packet",
+                "command": "python3 scripts/ope.py pilot-session-packet",
+                "expected": "real pilot-session task cards, sanitization checks, and ledger-ready template are available without recording real sessions.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-summary-intake",
+                "command": "python3 scripts/ope.py pilot-summary-intake",
+                "expected": "sanitized summary intake examples classify ledger-ready, redaction-needed, and blocked cases without writing ledger rows.",
+            },
+            {
+                "checkId": "mvp-smoke-expansion-readiness",
+                "command": "python3 scripts/ope.py expansion-readiness",
+                "expected": "post-MVP expansion options remain blocked or deferred until real pilot, corpus, and adoption evidence justify them.",
+            },
+            {
+                "checkId": "mvp-smoke-repeating-prediction-setup",
+                "command": "python3 scripts/ope.py repeating-prediction-setup",
+                "expected": "repeating prediction setup recurrence examples are available without starting a runner, scheduler, live fetch, or campaign-state mutation.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-plan",
+                "command": "python3 scripts/ope.py prediction-campaign plan",
+                "expected": "prediction campaign dry-run plan exposes unique future run IDs without creating forecast artifacts or writing live campaign state.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-start",
+                "command": "python3 scripts/ope.py prediction-campaign start",
+                "expected": "prediction campaign start exposes the dry-run terminal runner surface without sleeping, polling, fetching live data, or creating forecasts.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-forecast-create",
+                "command": "python3 scripts/ope.py prediction-campaign forecast-create",
+                "expected": "prediction campaign forecast-create exposes the ready run and planned artifact IDs without writing campaign state or creating forecasts.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-forecast-artifact",
+                "command": "python3 scripts/ope.py prediction-campaign forecast-artifact",
+                "expected": "prediction campaign forecast-artifact exposes the checked unresolved baseline-only forecast-1301 record without live fetch, resolver execution, or campaign-state writes.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-forecast-write",
+                "command": "python3 scripts/ope.py prediction-campaign forecast-write",
+                "expected": "prediction campaign forecast-write exposes the guarded ignored-local-state write plan without executing the write during normal checks.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-resume",
+                "command": "python3 scripts/ope.py prediction-campaign resume",
+                "expected": "prediction campaign resume exposes checked recovery actions after interruption without reading or writing ignored live state.",
+            },
+            {
+                "checkId": "mvp-smoke-campaign-resolution-jobs",
+                "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+                "expected": "campaign-aware resolution jobs include the checked forecast-1301 run and tell agents to wait without executing resolvers.",
+            },
+            {
+                "checkId": "mvp-smoke-campaign-resolution-scheduler",
+                "command": "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
+                "expected": "campaign-aware resolution scheduler ticks include the checked forecast-1301 wait action without executing campaign resolvers.",
+            },
+            {
+                "checkId": "mvp-smoke-forecast-run",
+                "command": "python3 scripts/ope.py forecast-run",
+                "expected": "forecast-602 completes through forecast card, evidence trace, bundle, resolution, and score bindings.",
+            },
+            {
+                "checkId": "mvp-smoke-agent-envelope",
+                "command": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+                "expected": "agent-call returns an ok envelope for the normal forecast-card readback.",
+            },
+            {
+                "checkId": "mvp-smoke-resolution-jobs",
+                "command": "python3 scripts/ope.py resolution-jobs",
+                "expected": "resolution jobs expose next actions without executing resolver commands.",
+            },
+            {
+                "checkId": "mvp-smoke-corpus-claim-gate",
+                "command": "python3 scripts/ope.py transit-track-record-gate",
+                "expected": "corpus readback reports below-threshold track-record and calibration status.",
+            },
+        ],
+        "blockedPathExamples": [
+            {
+                "case": "missing_approval",
+                "command": "python3 scripts/ope.py private-setup-orchestrator --case missing_approval",
+                "expectedStatus": "missing_approval",
+                "nextAction": "confirm_approval",
+                "forecastArtifactsCreated": False,
+            },
+            {
+                "case": "unconfirmed_mapping",
+                "command": "python3 scripts/ope.py private-setup-orchestrator --case unconfirmed_mapping",
+                "expectedStatus": "needs_confirmation",
+                "nextAction": "confirm_mapping",
+                "forecastArtifactsCreated": False,
+            },
+            {
+                "case": "unsafe_source",
+                "command": "python3 scripts/ope.py private-setup-orchestrator --case unsafe_source",
+                "expectedStatus": "blocked_unsafe",
+                "nextAction": "stop_unsafe_connector",
+                "forecastArtifactsCreated": False,
+            },
+            {
+                "case": "response_too_large",
+                "command": "python3 scripts/ope.py private-setup-orchestrator --case response_too_large",
+                "expectedStatus": "response_too_large",
+                "nextAction": "retry_with_smaller_readback",
+                "forecastArtifactsCreated": False,
+            },
+        ],
+        "claimReview": {
+            "qualityClaimsAllowed": False,
+            "trackRecordStatus": "not_enough_resolved_comparable_outcomes",
+            "calibrationStatus": "not_enough_resolved_comparable_outcomes",
+            "liveCalibrationClaimAllowed": False,
+            "normalChecksUseLiveNetwork": False,
+            "nonGoalRefs": [
+                "network_api",
+                "hosted_service",
+                "production_agent_adapter_runtime",
+                "generic_private_api_database_runtime",
+                "production_forecast_use_of_live_connector_results",
+                "live_calibration_claim",
+                "unbounded_web_crawling",
+                "agent_pilot_validation_session_execution",
+                "agent_pilot_validation_quality_claim",
+                "local_usage_trace_hosted_telemetry",
+                "local_usage_trace_live_fetch",
+                "source_quality_mapping_confidence_source_execution",
+                "source_quality_mapping_confidence_quality_claim",
+                "local_source_runtime_arbitrary_private_api",
+                "local_source_runtime_credential_storage",
+                "local_source_runtime_hosted_runtime",
+            ],
+        },
+    }
 
 
 def build_manifest() -> dict[str, Any]:
@@ -95,6 +313,7 @@ def build_manifest() -> dict[str, Any]:
             "schemaFiles": schemas,
         },
         "readSurfaces": read_surfaces(record_index),
+        "mvpLocalRuntime": mvp_local_runtime(),
         "claimBoundaries": {
             "domain": "weather-logistics",
             "minimumCalibrationSampleSize": pipeline_outcome["minimumCalibrationSampleSize"],
@@ -116,6 +335,11 @@ def build_manifest() -> dict[str, Any]:
             "public_forecast_use_of_local_live_drafts",
             "public_forecast_use_of_unapproved_source_builder_drafts",
             "public_forecast_use_of_unapproved_source_handoff_drafts",
+            "source_adapter_intake_connector_execution",
+            "source_adapter_intake_live_fetch",
+            "source_adapter_intake_credential_storage",
+            "source_adapter_intake_raw_private_rows",
+            "source_adapter_intake_forecast_execution",
             "generic_private_api_database_runtime",
             "generic_manual_upload_runtime",
             "private_source_adapter_execution",
@@ -125,6 +349,22 @@ def build_manifest() -> dict[str, Any]:
             "private_setup_first_action_execution",
             "private_setup_first_action_runbook_execution",
             "private_setup_agent_bundle_execution",
+            "private_setup_orchestrator_execution",
+            "private_setup_orchestrator_source_reads",
+            "private_setup_orchestrator_forecast_creation",
+            "private_setup_orchestrator_scoring_creation",
+            "private_setup_orchestrator_credential_storage",
+            "private_setup_orchestrator_live_fetch",
+            "agent_pilot_validation_session_execution",
+            "agent_pilot_validation_raw_transcript_storage",
+            "agent_pilot_validation_private_data_storage",
+            "agent_pilot_validation_quality_claim",
+            "local_usage_trace_hosted_telemetry",
+            "local_usage_trace_raw_prompt_storage",
+            "local_usage_trace_raw_transcript_storage",
+            "local_usage_trace_private_data_storage",
+            "local_usage_trace_credential_storage",
+            "local_usage_trace_live_fetch",
             "private_setup_source_builder_forecast_execution",
             "private_setup_source_builder_public_read_records",
             "private_setup_source_handoff_forecast_execution",
@@ -159,6 +399,57 @@ def build_manifest() -> dict[str, Any]:
             "private_source_kind_selection_scoring",
             "private_source_kind_query_matrix_execution",
             "private_source_kind_query_matrix_artifact_creation",
+            "resolution_runtime_reliability_execution",
+            "resolution_runtime_reliability_live_fetch",
+            "resolution_runtime_reliability_artifact_creation",
+            "transit_forward_run_corpus_execution",
+            "transit_forward_run_corpus_live_fetch",
+            "transit_forward_run_corpus_calibration_claim",
+            "transit_corpus_growth_canonical_mutation",
+            "transit_corpus_growth_live_fetch",
+            "transit_corpus_growth_quality_claim",
+            "source_quality_mapping_confidence_source_execution",
+            "source_quality_mapping_confidence_artifact_creation",
+            "source_quality_mapping_confidence_quality_claim",
+            "local_source_runtime_arbitrary_private_api",
+            "local_source_runtime_database_parsing",
+            "local_source_runtime_credential_storage",
+            "local_source_runtime_live_fetch",
+            "local_source_runtime_hosted_runtime",
+            "local_source_runtime_forecast_artifact_creation",
+            "developer_adoption_surface_command_execution",
+            "developer_adoption_surface_type_generation",
+            "developer_adoption_surface_quality_claim",
+            "pilot_evidence_raw_transcript_storage",
+            "pilot_evidence_private_data_storage",
+            "pilot_evidence_real_session_claim",
+            "pilot_evidence_quality_claim",
+            "pilot_session_packet_session_execution",
+            "pilot_session_packet_raw_transcript_storage",
+            "pilot_session_packet_private_data_storage",
+            "pilot_session_packet_ledger_write",
+            "pilot_session_packet_quality_claim",
+            "pilot_summary_intake_real_session_recording",
+            "pilot_summary_intake_raw_transcript_storage",
+            "pilot_summary_intake_private_data_storage",
+            "pilot_summary_intake_ledger_write",
+            "pilot_summary_intake_quality_claim",
+            "expansion_readiness_hosted_runtime_execution",
+            "expansion_readiness_private_source_execution",
+            "expansion_readiness_live_fetch",
+            "expansion_readiness_type_generation",
+            "expansion_readiness_quality_claim",
+            "transit_track_record_gate_execution",
+            "transit_track_record_gate_below_threshold_calibration_summary",
+            "transit_track_record_gate_live_fetch",
+            "transit_method_options_execution",
+            "transit_method_options_non_baseline_selection",
+            "transit_method_options_live_fetch",
+            "transit_live_evidence_promotion_live_fetch",
+            "transit_live_evidence_promotion_live_workspace_reads",
+            "transit_live_evidence_promotion_post_close_forecast_evidence",
+            "transit_live_evidence_promotion_resolution_only_forecast_evidence",
+            "transit_live_evidence_promotion_production_runtime",
             "integration_live_fetch_in_release_checks",
             "local_live_capture_in_release_checks",
             "unbounded_web_crawling",

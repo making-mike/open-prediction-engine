@@ -17,6 +17,7 @@ from ope_scoring import (
     should_exclude_resolution,
     track_record_summary,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,10 +28,6 @@ GENERATED_AT = "2026-06-04T10:20:00Z"
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

@@ -12,6 +12,7 @@ from typing import Any
 from generate_agent_adapter_protocol_map import build_protocol_map
 from generate_forecast_run_intake_matrix import build_matrix
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ NEXT_ACTION_BY_OUTCOME = {
 
 class ForecastRunbookError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def operation_map(protocol_map: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -390,23 +387,11 @@ def validate_runbook(
 
 
 def write_runbook(runbook: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    RUNBOOK_PATH.write_text(render_json(runbook), encoding="utf-8")
-    print("generated agent forecast runbook")
+    write_generated(RUNBOOK_PATH, runbook, label="agent forecast runbook", regen="python3 scripts/generate_agent_forecast_runbook.py --write")
 
 
 def check_runbook(runbook: dict[str, Any]) -> None:
-    expected = render_json(runbook)
-    if not RUNBOOK_PATH.exists():
-        print(f"missing agent forecast runbook: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_forecast_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = RUNBOOK_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"agent forecast runbook drift: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_forecast_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked agent forecast runbook")
+    check_generated(RUNBOOK_PATH, runbook, label="agent forecast runbook", regen="python3 scripts/generate_agent_forecast_runbook.py --write")
 
 
 def main() -> None:

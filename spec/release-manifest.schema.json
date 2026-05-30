@@ -14,6 +14,7 @@
     "commands",
     "contracts",
     "readSurfaces",
+    "mvpLocalRuntime",
     "claimBoundaries",
     "nonGoals"
   ],
@@ -161,6 +162,124 @@
         }
       }
     },
+    "mvpLocalRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceStatus",
+        "runtimeMode",
+        "runbookPath",
+        "supportedSourceInputs",
+        "happyPath",
+        "machineInterfaces",
+        "smokeChecks",
+        "blockedPathExamples",
+        "claimReview"
+      ],
+      "properties": {
+        "surfaceStatus": {
+          "type": "string",
+          "enum": ["local_mvp_fixture_ready"]
+        },
+        "runtimeMode": {
+          "type": "string",
+          "enum": ["local_cli_and_generated_records"]
+        },
+        "runbookPath": { "$ref": "#/$defs/boundedString" },
+        "supportedSourceInputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "approved_local_csv_json",
+              "approved_local_folder_runtime",
+              "accepted_source_adapter_output",
+              "committed_fixture_request",
+              "policy_bound_promoted_fixture_source_set"
+            ]
+          }
+        },
+        "happyPath": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "setupCommand",
+            "forecastCommand",
+            "readbackCommands",
+            "resolutionCommand",
+            "scoringCommand",
+            "corpusReadbackCommand",
+            "failureRecoveryCommand",
+            "expectedForecastIds"
+          ],
+          "properties": {
+            "setupCommand": { "$ref": "#/$defs/boundedString" },
+            "forecastCommand": { "$ref": "#/$defs/boundedString" },
+            "readbackCommands": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 18,
+              "items": { "$ref": "#/$defs/boundedString" }
+            },
+            "resolutionCommand": { "$ref": "#/$defs/boundedString" },
+            "scoringCommand": { "$ref": "#/$defs/boundedString" },
+            "corpusReadbackCommand": { "$ref": "#/$defs/boundedString" },
+            "failureRecoveryCommand": { "$ref": "#/$defs/boundedString" },
+            "expectedForecastIds": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 12,
+              "items": { "$ref": "common.schema.json#/$defs/id" }
+            }
+          }
+        },
+        "machineInterfaces": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/machineInterface" }
+        },
+        "smokeChecks": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/smokeCheck" }
+        },
+        "blockedPathExamples": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/blockedPathExample" }
+        },
+        "claimReview": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "qualityClaimsAllowed",
+            "trackRecordStatus",
+            "calibrationStatus",
+            "liveCalibrationClaimAllowed",
+            "normalChecksUseLiveNetwork",
+            "nonGoalRefs"
+          ],
+          "properties": {
+            "qualityClaimsAllowed": { "type": "boolean" },
+            "trackRecordStatus": { "$ref": "#/$defs/boundedString" },
+            "calibrationStatus": { "$ref": "#/$defs/boundedString" },
+            "liveCalibrationClaimAllowed": { "type": "boolean" },
+            "normalChecksUseLiveNetwork": { "type": "boolean" },
+            "nonGoalRefs": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 16,
+              "items": { "$ref": "#/$defs/boundedString" }
+            }
+          }
+        }
+      }
+    },
     "claimBoundaries": {
       "type": "object",
       "additionalProperties": false,
@@ -209,6 +328,52 @@
         "type": "string",
         "minLength": 1,
         "maxLength": 120
+      }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 260
+    },
+    "machineInterface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["interface", "command", "status", "minimumUse"],
+      "properties": {
+        "interface": {
+          "type": "string",
+          "enum": ["cli", "agent_call", "mcp_stdio"]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "status": {
+          "type": "string",
+          "enum": ["implemented_local", "local_scaffold"]
+        },
+        "minimumUse": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "smokeCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "command", "expected"],
+      "properties": {
+        "checkId": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expected": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "blockedPathExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "command", "expectedStatus", "nextAction", "forecastArtifactsCreated"],
+      "properties": {
+        "case": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedStatus": { "$ref": "#/$defs/boundedString" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactsCreated": { "type": "boolean" }
       }
     }
   }

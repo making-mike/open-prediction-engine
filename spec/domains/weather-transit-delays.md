@@ -1,8 +1,8 @@
 # Weather Transit Delays Public Beta Wedge
 
-Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, foreground terminal scheduler, and local resolver-agent scan implemented.
+Status: local custom-file prototype, opt-in live connector, checked forward-run workflow, checked corpus index, checked baseline track-record gate, checked MVP method options, checked live evidence promotion gate, foreground terminal scheduler, and local resolver-agent scan implemented.
 
-Last reviewed: 2026-05-26.
+Last reviewed: 2026-05-27.
 
 This note defines the next OPE wedge for making a real, checkable prediction loop from public source data. It is a domain contract and implementation target, not a live performance claim.
 
@@ -33,9 +33,22 @@ Initial maturity:
 - `fixture_ready`
 - runnable from approved local CSV/JSON files through `python3 scripts/ope.py transit-delay-forecast`
 - checked forward-run fixture and opt-in local live phases through `python3 scripts/ope.py transit-delay-forward-run`
+- checked forward-run corpus counts and exclusions through `python3 scripts/ope.py transit-forward-run-corpus`
+- checked baseline track-record and calibration gate through `python3 scripts/ope.py transit-track-record-gate`
+- checked MVP method options and baseline-default boundary through `python3 scripts/ope.py transit-method-options`
+- checked policy-bound live evidence promotion gate through `python3 scripts/ope.py transit-live-evidence-promotion`
+- checked repeating prediction setup contract through `python3 scripts/ope.py repeating-prediction-setup`
+- checked dry-run prediction campaign manifest through `python3 scripts/ope.py prediction-campaign plan`
+- checked dry-run terminal campaign runner readback through `python3 scripts/ope.py prediction-campaign start`
+- checked dry-run campaign forecast-creation handoff through `python3 scripts/ope.py prediction-campaign forecast-create`
+- checked unresolved campaign forecast artifact through `python3 scripts/ope.py prediction-campaign forecast-artifact`
+- checked non-mutating campaign forecast write plan through `python3 scripts/ope.py prediction-campaign forecast-write`
+- checked non-mutating campaign resume readback through `python3 scripts/ope.py prediction-campaign resume`
 - checked local resolver-agent scan through `python3 scripts/ope.py resolve-due-forward-runs`
 - checked agent-facing resolution job registry through `python3 scripts/ope.py resolution-jobs`
+- checked campaign-aware resolution job readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
 - checked foreground terminal scheduler through `python3 scripts/ope.py resolution-scheduler`
+- checked campaign-aware scheduler tick through `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`
 - no calibration, benchmark, production, or live quality claim
 
 ## First Beta Question Template
@@ -195,6 +208,87 @@ python3 scripts/ope.py transit-delay-forward-run
 
 It binds the forecast, later outcome capture or approved trip-update rows, resolution, scoring, and claim boundary into one summary under `spec/fixtures/generated/transit-delay-forward-run/`.
 
+The checked corpus index is:
+
+```bash
+python3 scripts/ope.py transit-forward-run-corpus
+```
+
+It reports one comparable scored fixture row, exclusion examples for ambiguous, annulled, low-coverage, invalid-window, feed-unavailable, and non-comparable runs, and sample-size thresholds before any baseline track-record or calibration claim.
+
+The checked track-record and calibration gate is:
+
+```bash
+python3 scripts/ope.py transit-track-record-gate
+```
+
+It reports the current Brier score, baseline score, baseline lift, resolved and excluded sample sizes, and horizon/window coverage. It keeps `not_enough_resolved_comparable_outcomes` explicit and withholds calibration summaries until the declared threshold is met.
+
+The checked MVP method-options surface is:
+
+```bash
+python3 scripts/ope.py transit-method-options
+```
+
+It keeps the historical-frequency baseline as the default, records the transparent weather-adjustment method as evidence-only with one fixture comparison, and keeps historical-conditioned, trained ML, retrieval-assisted, ensemble, and external-reference methods proposed-only until clean benchmark evidence exists.
+
+The checked live evidence promotion surface is:
+
+```bash
+python3 scripts/ope.py transit-live-evidence-promotion
+```
+
+The checked repeating prediction setup contract is:
+
+```bash
+python3 scripts/ope.py repeating-prediction-setup
+```
+
+It defines finite, until-date, interval, open-ended, selected weekday/window, calibration-threshold, and post-calibration restart policies without creating campaign state, starting a runner, fetching live data, or making calibration claims.
+
+The checked prediction campaign manifest is:
+
+```bash
+python3 scripts/ope.py prediction-campaign plan
+python3 scripts/ope.py prediction-campaign status
+```
+
+It expands the repeating setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs with duplicate keys and status readbacks, without writing live campaign state or creating forecast artifacts.
+
+The checked prediction campaign runner readback is:
+
+```bash
+python3 scripts/ope.py prediction-campaign start
+```
+
+It exposes the terminal `start` command semantics, recurrence flags, output modes, dry-run run decisions, missed-run and duplicate policies, and non-execution boundary without sleeping, polling, fetching live data, running resolvers, writing local campaign state, or creating forecast artifacts.
+
+The checked prediction campaign forecast-creation handoff is:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-create
+```
+
+It binds the ready runner decision to planned question, forecast, forecast-card, and lifecycle-bundle IDs, checks duplicate-key, source-policy, close-time, and method-default boundaries, and still does not write `.ope/live/`, fetch live data, run methods, or create forecast artifacts during normal checks.
+
+The checked campaign forecast artifact is:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-artifact
+```
+
+It materializes `forecast-1301` as unresolved baseline-only question, evidence, artifact, and history records using the standard lifecycle contracts. It remains a checked fixture: no `.ope/live/` state is written, no live evidence is fetched, no resolver runs, no score is produced, and no quality or calibration claim is allowed.
+
+The checked campaign forecast write plan is:
+
+```bash
+python3 scripts/ope.py prediction-campaign forecast-write
+```
+
+It binds those lifecycle records to intended ignored `.ope/live/prediction-campaigns/...` target paths, content hashes, schema files, duplicate/source-policy guards, and write-boundary warnings. The current surface is still a read-only plan: `--write-local` is accepted as a documented future flag shape, but normal checks do not write campaign state, fetch live data, run resolvers, score, append corpus evidence, or allow quality claims.
+
+It distinguishes committed fixtures, ignored local live drafts, promoted forecast-time evidence, and resolution-only evidence. A selected local live weather draft may bind to a sanitized evidence source set only after source-policy, timestamp, close-time, freshness, retention, source-role, leakage, and provenance checks pass. Post-close captures and transit outcome captures remain blocked from forecast-time evidence.
+
 Explicit live local phases are available, but they write ignored developer artifacts and do not change normal release checks:
 
 ```bash
@@ -213,9 +307,18 @@ python3 scripts/ope.py resolve-due-forward-runs --live
 python3 scripts/ope.py resolve-due-forward-runs --live --execute --download-static-gtfs
 
 python3 scripts/ope.py resolution-jobs --live
+python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
 python3 scripts/ope.py resolution-scheduler --live --watch --execute --download-static-gtfs --poll-seconds 60
 ```
+
+The campaign-aware registry joins the checked campaign manifest, `forecast-1301` artifact, and forecast-write plan into the same agent-facing job readback. It reports the campaign run as waiting until `resolutionEligibleAt`; it does not execute campaign resolvers, write campaign state, create resolution or scoring records, append corpus evidence, or allow quality claims.
+
+The campaign-aware scheduler adds that same wait action to the checked scheduler tick. It keeps execution mode dry-run and leaves campaign resolver execution for a later explicit campaign path.
+
+The campaign resume readback joins the campaign manifest, forecast-write plan, open forecast fixture, and resolution queue into safe recovery actions after interruption. It does not read ignored live state, write campaign state, execute resolvers, overwrite prior evidence, or append corpus rows.
 
 The command accepts custom local CSV/JSON files with the same role shape:
 
@@ -236,11 +339,13 @@ Current local prototype:
 7. Done: add a local resolver-agent scan that finds due saved forward runs and can explicitly execute the checked resolver command.
 8. Done: add an agent-facing resolution job registry that tells agents whether to wait, execute the resolver, read resolved outputs, or inspect invalid state.
 9. Done: add a foreground terminal scheduler that agents can run locally to poll jobs and optionally execute due checked resolver commands.
+10. Done: add a checked corpus index with comparable and excluded forward-run rows plus claim boundaries.
+11. Done: add a policy-bound live evidence promotion gate with one sanitized promoted forecast-time source set and explicit rejection examples.
 
 Next useful build:
 
 1. Run repeated comparable live forward windows and save their local state.
-2. Expose resolution job and scheduler readback through the agent adapter surface.
+2. Turn the corpus into a baseline-first track record only after the declared sample threshold is met.
 3. Add calibration summaries only after enough comparable resolved outcomes exist.
 
 The first public beta should not launch until OPE can repeat that loop without hand-editing forecast, outcome, or scoring records, and until the source coverage and retention policy for live captures is explicit.
@@ -266,6 +371,7 @@ Allowed now:
 - The repository documents source roles, resolution rules, baselines, and leakage controls for this wedge.
 - OPE can run a local custom-file weather-transit-delay prototype from approved CSV/JSON files and emit schema-bound forecast, resolution, and scoring records.
 - OPE can run a local terminal scheduler that polls saved forward runs and optionally executes due checked resolver commands on the developer's machine.
+- OPE can distinguish ignored local live drafts from approved sanitized forecast-time evidence without committing raw `.ope/live/` captures.
 
 Blocked now:
 
@@ -275,6 +381,7 @@ Blocked now:
 - OPE has a production live transit connector.
 - OPE has a hosted scheduler or production worker.
 - OPE can support arbitrary transit agencies without setup review.
+- OPE promotes post-close or resolution-only transit captures into forecast-time evidence.
 
 The stronger claim to earn is:
 

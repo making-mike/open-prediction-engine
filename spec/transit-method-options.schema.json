@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-method-options.schema.json",
+  "title": "Transit Method Options",
+  "description": "Checked public transport MVP method options, baseline default, comparison evidence, and selection boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitMethodOptionsId",
+    "generatedAt",
+    "domain",
+    "optionsMode",
+    "sourceBindings",
+    "defaultSelection",
+    "corpusEvidence",
+    "methodComparison",
+    "methodOptions",
+    "claimBoundary",
+    "readSurface",
+    "warnings"
+  ],
+  "properties": {
+    "transitMethodOptionsId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "const": "weather-transit-delays" },
+    "optionsMode": {
+      "type": "string",
+      "enum": ["checked_fixture_method_options"]
+    },
+    "sourceBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transitForwardRunCorpusId",
+        "transitBaselineTrackRecordGateId",
+        "corpusPath",
+        "trackRecordGatePath"
+      ],
+      "properties": {
+        "transitForwardRunCorpusId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitBaselineTrackRecordGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "corpusPath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "trackRecordGatePath": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "defaultSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineOnlyDefault",
+        "selectedMethodId",
+        "selectedMethodClass",
+        "selectionStatus",
+        "reasonCode",
+        "selectionReason"
+      ],
+      "properties": {
+        "baselineOnlyDefault": { "type": "boolean" },
+        "selectedMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "selectedMethodClass": {
+          "type": "string",
+          "enum": ["baseline"]
+        },
+        "selectionStatus": {
+          "type": "string",
+          "enum": ["baseline_selected"]
+        },
+        "reasonCode": {
+          "type": "string",
+          "enum": ["insufficient_comparable_method_evidence"]
+        },
+        "selectionReason": { "type": "string", "minLength": 3, "maxLength": 240 }
+      }
+    },
+    "corpusEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolvedComparableSampleSize",
+        "excludedSampleSize",
+        "minimumComparableResolvedForTrackRecord",
+        "minimumComparableResolvedForCalibration",
+        "minimumComparableResolvedForNonBaselineSelection",
+        "trackRecordStatus",
+        "calibrationStatus"
+      ],
+      "properties": {
+        "resolvedComparableSampleSize": { "type": "integer", "minimum": 0 },
+        "excludedSampleSize": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForTrackRecord": { "type": "integer", "minimum": 1 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 1 },
+        "minimumComparableResolvedForNonBaselineSelection": { "type": "integer", "minimum": 1 },
+        "trackRecordStatus": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        },
+        "calibrationStatus": {
+          "type": "string",
+          "enum": ["ready", "not_enough_resolved_comparable_outcomes"]
+        }
+      }
+    },
+    "methodComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparisonStatus",
+        "scoringRule",
+        "higherIsBetter",
+        "baselineScore",
+        "bestCandidateScore",
+        "bestCandidateBaselineLift",
+        "sameWindowOutcomeUsedAsForecastEvidence",
+        "forecastTimeEvidenceRoles",
+        "resolutionOnlyEvidenceRoles",
+        "antiLeakageStatus",
+        "comparisonRows"
+      ],
+      "properties": {
+        "comparisonStatus": {
+          "type": "string",
+          "enum": ["below_threshold_evidence_only", "ready"]
+        },
+        "scoringRule": {
+          "type": "string",
+          "enum": ["brier"]
+        },
+        "higherIsBetter": { "type": "boolean" },
+        "baselineScore": { "type": "number", "minimum": 0 },
+        "bestCandidateScore": { "type": "number", "minimum": 0 },
+        "bestCandidateBaselineLift": { "type": "number" },
+        "sameWindowOutcomeUsedAsForecastEvidence": { "type": "boolean" },
+        "forecastTimeEvidenceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        },
+        "resolutionOnlyEvidenceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        },
+        "antiLeakageStatus": {
+          "type": "string",
+          "enum": ["passed_fixture_boundary"]
+        },
+        "comparisonRows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/comparisonRow" }
+        }
+      }
+    },
+    "methodOptions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/methodOption" }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nonBaselineSelectionAllowed",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "trainedMlAllowed",
+        "ensembleAllowed",
+        "retrievalAssistedAllowed",
+        "externalReferenceAllowed",
+        "sameWindowOutcomeAsForecastEvidenceAllowed",
+        "normalChecksUseLiveNetwork",
+        "liveCapturesCommitted"
+      ],
+      "properties": {
+        "nonBaselineSelectionAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "trainedMlAllowed": { "type": "boolean" },
+        "ensembleAllowed": { "type": "boolean" },
+        "retrievalAssistedAllowed": { "type": "boolean" },
+        "externalReferenceAllowed": { "type": "boolean" },
+        "sameWindowOutcomeAsForecastEvidenceAllowed": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "liveCapturesCommitted": { "type": "boolean" }
+      }
+    },
+    "readSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "createsForecastArtifacts",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "selectsNonBaselineMethod",
+        "fetchesLiveData",
+        "storesCredentials"
+      ],
+      "properties": {
+        "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "selectsNonBaselineMethod": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "type": "string", "minLength": 3, "maxLength": 240 }
+    }
+  },
+  "$defs": {
+    "methodClass": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "deterministic_statistical",
+        "model_assisted",
+        "retrieval_assisted",
+        "ensemble",
+        "external_reference"
+      ]
+    },
+    "methodKind": {
+      "type": "string",
+      "enum": [
+        "historical_frequency_baseline",
+        "transparent_weather_adjustment",
+        "historical_conditioned_statistical",
+        "trained_ml",
+        "retrieval_assisted",
+        "ensemble",
+        "external_reference"
+      ]
+    },
+    "comparisonRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodId",
+        "methodKind",
+        "comparisonStatus",
+        "score",
+        "sampleSize",
+        "baselineLift"
+      ],
+      "properties": {
+        "methodId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodKind": { "$ref": "#/$defs/methodKind" },
+        "comparisonStatus": {
+          "type": "string",
+          "enum": ["baseline_reference", "fixture_comparable", "not_benchmarked"]
+        },
+        "score": { "type": "number", "minimum": 0 },
+        "sampleSize": { "type": "integer", "minimum": 0 },
+        "baselineLift": { "type": "number" }
+      }
+    },
+    "methodOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodId",
+        "methodClass",
+        "methodKind",
+        "status",
+        "selectionEligibility",
+        "benchmarkStatus",
+        "sampleSize",
+        "minimumComparableResolvedRequired",
+        "sourceEvidenceStatus",
+        "leakageStatus",
+        "sameWindowOutcomeUsedAsForecastEvidence",
+        "rejectionReasons"
+      ],
+      "properties": {
+        "methodId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodClass": { "$ref": "#/$defs/methodClass" },
+        "methodKind": { "$ref": "#/$defs/methodKind" },
+        "status": {
+          "type": "string",
+          "enum": ["enabled", "evidence_only", "proposed"]
+        },
+        "selectionEligibility": {
+          "type": "string",
+          "enum": ["eligible_default", "rejected", "proposed_only"]
+        },
+        "benchmarkStatus": {
+          "type": "string",
+          "enum": ["baseline_reference", "benchmarked_fixture_only", "not_benchmarked"]
+        },
+        "sampleSize": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedRequired": { "type": "integer", "minimum": 0 },
+        "primaryScore": { "type": "number", "minimum": 0 },
+        "baselineScore": { "type": "number", "minimum": 0 },
+        "baselineLift": { "type": "number" },
+        "sourceEvidenceStatus": {
+          "type": "string",
+          "enum": ["available_forecast_time_only", "insufficient_corpus", "not_implemented"]
+        },
+        "leakageStatus": {
+          "type": "string",
+          "enum": ["passed_fixture_boundary", "not_checked"]
+        },
+        "sameWindowOutcomeUsedAsForecastEvidence": { "type": "boolean" },
+        "rejectionReasons": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 160 }
+        }
+      }
+    }
+  }
+}

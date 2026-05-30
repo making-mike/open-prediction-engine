@@ -18,6 +18,7 @@ from source_connector_catalog import (
     SOURCE_CONNECTOR_REGISTRY_ID,
     SOURCE_CONNECTOR_RESULT_SET_ID,
 )
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,10 +35,6 @@ OPERATIONS_OUTCOME_FIXTURE = (
 
 class SourceConnectorError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def rel(path: Path) -> str:

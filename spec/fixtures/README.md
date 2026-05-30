@@ -30,8 +30,16 @@ python3 scripts/plan_auto_evidence.py --write
 python3 scripts/gather_auto_evidence.py --write
 python3 scripts/generate_source_connectors.py --write
 python3 scripts/generate_live_connector_readiness.py --write
+python3 scripts/generate_transit_forward_run_corpus.py --write
+python3 scripts/generate_transit_baseline_track_record_gate.py --write
+python3 scripts/generate_transit_method_options.py --write
+python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
 python3 scripts/build_source_manifest.py --write
+python3 scripts/generate_source_adapter_output.py --write
+python3 scripts/generate_source_adapter_intake.py --write
+python3 scripts/generate_source_quality_mapping_confidence.py --write
+python3 scripts/generate_local_source_runtime.py --write
 python3 scripts/generate_source_intake_handoff.py --write
 python3 scripts/generate_source_handoff_method_gate.py --write
 python3 scripts/generate_source_intake.py --write
@@ -50,6 +58,12 @@ python3 scripts/generate_private_setup_requests.py --write
 python3 scripts/generate_private_setup_first_actions.py --write
 python3 scripts/generate_private_setup_first_action_runbook.py --write
 python3 scripts/generate_private_setup_agent_bundles.py --write
+python3 scripts/generate_private_setup_orchestrator.py --write
+python3 scripts/generate_agent_pilot_validation.py --write
+python3 scripts/generate_pilot_evidence_ledger.py --write
+python3 scripts/generate_local_usage_trace.py --write
+python3 scripts/generate_developer_adoption_surface.py --write
+python3 scripts/generate_expansion_readiness_gate.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write
@@ -88,9 +102,17 @@ The live connector readiness generator emits an offline readiness record under `
 
 Ignored local live captures and source-set drafts live under `.ope/live/`, not under `generated/`, and are excluded from fixture reports, public record indexes, track records, calibration, and release checks.
 
+The transit forward-run corpus generator emits a checked corpus index under `generated/transit-forward-run-corpus/` with one comparable scored run, exclusion examples, sample thresholds, and claim boundaries. The transit corpus growth loop emits a checked append-readiness model under `generated/transit-corpus-growth/` with candidate decisions, exclusion-ledger rows, due-run and post-resolution checklists, and threshold progress readbacks. The transit baseline track-record gate emits a checked read model under `generated/transit-baseline-track-record-gate/` with current Brier, baseline, lift, sample-size, horizon/window coverage, and below-threshold calibration status. The transit method options generator emits a checked read model under `generated/transit-method-options/` that keeps baseline-only execution as the default, records weather adjustment as evidence-only, and keeps richer methods proposed-only. The transit live evidence promotion generator emits a checked gate and one sanitized promoted source set under `generated/transit-live-evidence-promotion/`; raw local captures remain ignored under `.ope/live/`.
+
+The resolution jobs generator emits checked default and campaign-aware registries under `generated/resolution-jobs/`, including the `forecast-1301` campaign wait state without executing resolvers, writing campaign state, creating scoring records, or appending corpus evidence.
+
+The resolution scheduler generator emits checked default and campaign-aware ticks under `generated/resolution-scheduler/`; the campaign tick includes the `forecast-1301` wait action without executing campaign resolvers or writing campaign state.
+
 The domain setup generator emits reference and candidate setup records under `generated/domain-setups/`.
 
 The source manifest builder inspects caller-approved local CSV/JSON files under `local-source-files/` and emits checked build results plus draft source manifest and field mapping files under `generated/source-builder/`. Rejected examples cover secrets, unsupported formats, oversized files, and post-outcome leakage indicators. Drafts are excluded from public read surfaces until source intake accepts them.
+
+The source adapter output generator emits a checked external connector handoff under `generated/source-adapter-output/`; the source adapter intake generator emits five checked external adapter conformance cases under `generated/source-adapter-intake/`, routing accepted, needs-confirmation, insufficient-data, rejected, and unsafe outputs without executing connector code or creating forecast records. The source-quality mapping-confidence generator emits a checked read model under `generated/source-quality-mapping-confidence/`, summarizing freshness, coverage, role fit, entity scope, leakage risk, missingness, outcome availability, mapping confidence, and next actions without executing sources or creating artifacts. The local source runtime generator emits a checked approved local-folder runtime under `generated/local-source-runtime/`, with one accepted forecast-card readback and blocked examples for missing approval, credentials, unsafe paths, oversized files, schema mismatch, and leakage.
 
 The source intake handoff generator emits checked builder-to-intake handoff records under `generated/source-handoff/`, including unconfirmed, confirmed, insufficient-sample, and builder-rejected cases with deterministic next actions.
 
@@ -119,6 +141,36 @@ The private setup first-action generator emits checked dispatcher examples under
 The private setup first-action runbook generator emits checked guidance under `generated/private-setup-actions/` and keeps planned, unknown, unsafe, and approval-missing sources out of source intake.
 
 The private setup agent bundle generator emits checked request/action/runbook joins under `generated/private-setup-agent-bundles/` and keeps every bundle read-only and non-generating.
+
+The private setup orchestrator generator emits a checked local orchestration summary under `generated/private-setup-orchestrator/`, joining request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes without executing commands or creating new artifacts.
+
+The agent pilot validation generator emits a checked local pilot protocol under `generated/agent-pilot-validation/`, covering task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries without storing raw transcripts or private data.
+
+The pilot evidence ledger generator emits checked sanitized intake examples under `generated/pilot-evidence/`, covering accepted summaries, redaction-needed notes, blocked raw transcripts, blocked private data, and claim-boundary confusion while keeping real session evidence at zero until actual sanitized pilots are recorded.
+
+The pilot session packet generator emits a checked collection kit under `generated/pilot-session-packet/`, covering task cards, moderator and participant checklists, sanitized evidence templates, sanitization review, and stop conditions without running sessions or writing ledger rows.
+
+The pilot summary intake generator emits checked classifier examples under `generated/pilot-summary-intake/`, covering ledger-ready summaries, redaction-needed source details, blocked raw transcripts, blocked private rows, and blocked quality overclaims without writing ledger rows.
+
+The local usage trace generator emits a checked synthetic trace under `generated/local-usage-trace/`, covering local MVP CLI, agent-call, MCP, blocked-path, release-smoke, and pilot-validation event rows without collecting hosted telemetry.
+
+The developer adoption surface generator emits a checked onboarding guide under `generated/developer-adoption/`, covering quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and deferred generated runtime types.
+
+The expansion readiness generator emits a checked post-MVP gate under `generated/expansion-readiness/`, keeping hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types blocked or deferred until real pilot, corpus, and adoption evidence justify them.
+
+The repeating prediction setup generator emits a checked non-executing recurrence contract under `generated/repeating-prediction-setup/`, covering finite count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart examples before any campaign manifest or runner exists.
+
+The prediction campaign manifest generator emits a checked dry-run manifest under `generated/prediction-campaign-manifest/`, expanding the repeating setup into unique planned run IDs, duplicate keys, status readbacks, and ignored local-state path policy without creating forecast artifacts or writing live campaign state.
+
+The prediction campaign runner generator emits a checked dry-run terminal runner readback under `generated/prediction-campaign-runner/`, exposing `prediction-campaign start` command semantics, recurrence flags, output modes, run decisions, and non-execution boundaries before effectful forecast creation exists.
+
+The prediction campaign forecast-creation generator emits a checked dry-run handoff under `generated/prediction-campaign-forecast-creation/`, binding the ready runner decision to planned forecast artifact IDs and pre-creation checks without writing fixtures, live state, or campaign artifacts.
+
+The prediction campaign forecast artifact generator emits checked question, evidence, artifact, and history records under `generated/prediction-campaign-forecast-artifact/`, binding `forecast-1301` to the ready run as an unresolved baseline-only fixture without live fetches, resolver execution, scoring, or campaign-state writes.
+
+The prediction campaign forecast write generator emits a checked non-mutating write plan under `generated/prediction-campaign-forecast-write/`, binding lifecycle fixture records to ignored `.ope/live` target paths and guard checks before any future explicit local mutation.
+
+The prediction campaign resume generator emits a checked non-mutating recovery readback under `generated/prediction-campaign-resume/`, joining the campaign manifest, write plan, open forecast, and campaign resolution queue without reading or writing ignored live state.
 
 The private setup adapter-chain runbook generator emits checked operation-sequence guidance under `generated/private-setup-adapter-chain/` and keeps the runbook from executing adapter calls or creating artifacts.
 

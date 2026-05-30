@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +36,8 @@ OPERATIONS = [
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "resolution_jobs",
+    "resolution_scheduler_status",
     "resolution_status",
     "scoring_summary",
 ]
@@ -54,6 +57,8 @@ INPUT_RECORD_TYPES = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "resolution_jobs": "resolution_job_registry",
+    "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
     "scoring_summary": "scoring_summary",
 }
@@ -73,6 +78,8 @@ SIDE_EFFECT_LEVELS = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "resolution_jobs": "read_only",
+    "resolution_scheduler_status": "read_only",
     "resolution_status": "status_read",
     "scoring_summary": "scoring_read",
 }
@@ -92,6 +99,8 @@ USAGE_GUIDANCE = {
     "private_setup_source_handoff": "Use after source-builder guidance to inspect checked source-handoff next actions and confirmation gates.",
     "private_setup_method_gate": "Use after confirmed source-handoff guidance to inspect setup benchmark and method-decision readiness.",
     "private_setup_forecast_execution": "Use only after method-gate readiness to run checked setup forecast execution and return artifacts for allowed cases; read generated forecasts through normal read operations.",
+    "resolution_jobs": "Use when an agent needs pending, due, resolved, invalid, and waiting resolution-job guidance without reading local state files or executing resolvers.",
+    "resolution_scheduler_status": "Use when an agent needs the last scheduler tick, shutdown reason, log path, execution mode, queue state readbacks, and next action without starting a scheduler.",
     "resolution_status": "Use when an agent needs to decide whether a normal or setup-generated forecast is resolved, pending, ambiguous, or annulled.",
     "scoring_summary": "Use when an agent needs score, baseline comparison, and quality-claim boundaries before acting on a normal or setup-generated forecast.",
 }
@@ -111,6 +120,8 @@ HTTP_PATHS = {
     "private_setup_source_handoff": "/agent/private-setup-source-handoff",
     "private_setup_method_gate": "/agent/private-setup-method-gate",
     "private_setup_forecast_execution": "/agent/private-setup-forecast-execution",
+    "resolution_jobs": "/agent/resolution-jobs",
+    "resolution_scheduler_status": "/agent/resolution-scheduler-status",
     "resolution_status": "/agent/resolution-status",
     "scoring_summary": "/agent/scoring-summary",
 }
@@ -118,10 +129,6 @@ HTTP_PATHS = {
 
 class ProtocolMapError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def field(
@@ -202,6 +209,14 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
             *common,
         ]
     if operation == "private_setup_adapter_conformance_summary":
+        return [
+            *common,
+        ]
+    if operation == "resolution_jobs":
+        return [
+            *common,
+        ]
+    if operation == "resolution_scheduler_status":
         return [
             *common,
         ]
@@ -348,6 +363,16 @@ def cli_command(operation: str) -> str:
             "python3 scripts/ope.py agent-call "
             "--operation private_setup_adapter_conformance_summary"
         )
+    if operation == "resolution_jobs":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation resolution_jobs"
+        )
+    if operation == "resolution_scheduler_status":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation resolution_scheduler_status"
+        )
     if operation == "private_source_adapter_guidance":
         return (
             "python3 scripts/ope.py agent-call "
@@ -422,6 +447,8 @@ def approval_gate(operation: str) -> str:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "resolution_jobs",
+        "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary",
     }:
@@ -458,6 +485,10 @@ def credential_boundary(operation: str) -> str:
         return "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
     if operation == "private_setup_forecast_execution":
         return "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+    if operation == "resolution_jobs":
+        return "Resolution-job readbacks accept no credentials in prompt-visible arguments and return only checked registry guidance."
+    if operation == "resolution_scheduler_status":
+        return "Resolution-scheduler status reads accept no credentials in prompt-visible arguments and return only checked scheduler readback guidance."
     return "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
 
 
@@ -665,6 +696,20 @@ def decision_examples() -> list[dict[str, Any]]:
             "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API.",
         },
         {
+            "situation": "The agent needs to know whether any forward-run forecasts are due for outcome resolution.",
+            "preferredOperation": "resolution_jobs",
+            "reason": "The registry exposes pending, due, waiting, resolved, and invalid job guidance without executing resolvers.",
+            "requiredSignals": ["summary", "jobs", "agentAction", "executionBoundary"],
+            "downstreamRule": "Use due job commands only after explicit live resolver approval; the readback itself must not execute.",
+        },
+        {
+            "situation": "The agent needs the latest scheduler status before deciding to wait, execute, inspect, or stop.",
+            "preferredOperation": "resolution_scheduler_status",
+            "reason": "The status payload exposes the latest tick, queue states, shutdown/log path, execution mode, and next action.",
+            "requiredSignals": ["lastTick", "lastShutdown", "logPath", "executionMode", "nextRecommendedAction"],
+            "downstreamRule": "Use the status as read-only guidance; it must not start a scheduler, execute resolvers, or create outcomes.",
+        },
+        {
             "situation": "The agent needs to know whether a forecast has resolved before scoring or waiting.",
             "preferredOperation": "resolution_status",
             "reason": "Resolution status is smaller than a full bundle and carries source and quality-claim status.",
@@ -720,23 +765,11 @@ def validate_protocol_map(protocol_map: dict[str, Any]) -> None:
 
 
 def write_protocol_map(protocol_map: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    MAP_PATH.write_text(render_json(protocol_map), encoding="utf-8")
-    print("generated agent adapter protocol map")
+    write_generated(MAP_PATH, protocol_map, label="agent adapter protocol map", regen="python3 scripts/generate_agent_adapter_protocol_map.py --write")
 
 
 def check_protocol_map(protocol_map: dict[str, Any]) -> None:
-    expected = render_json(protocol_map)
-    if not MAP_PATH.exists():
-        print(f"missing agent adapter protocol map: {MAP_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_adapter_protocol_map.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = MAP_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"agent adapter protocol map drift: {MAP_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_agent_adapter_protocol_map.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked agent adapter protocol map")
+    check_generated(MAP_PATH, protocol_map, label="agent adapter protocol map", regen="python3 scripts/generate_agent_adapter_protocol_map.py --write")
 
 
 def main() -> None:

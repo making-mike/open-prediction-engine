@@ -1,0 +1,537 @@
+{
+  "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+  "generatedAt": "2026-05-28T12:00:00Z",
+  "setupStatus": "contract_ready_non_executing",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "domainSetupId": "domainsetup-003",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "transitMethodOptionsId": "transitmethodoptions-001",
+    "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+    "transitLiveEvidencePromotionId": "transitliveevidencepromotion-001",
+    "referenceDomainSetupPath": "spec/fixtures/generated/domain-setups/weather-transit-delays-domain-setup.generated.json",
+    "methodOptionsPath": "spec/fixtures/generated/transit-method-options/transit-method-options.generated.json",
+    "trackRecordGatePath": "spec/fixtures/generated/transit-baseline-track-record-gate/transit-baseline-track-record-gate.generated.json",
+    "liveEvidencePromotionPath": "spec/fixtures/generated/transit-live-evidence-promotion/transit-live-evidence-promotion.generated.json"
+  },
+  "forecastTemplate": {
+    "templateId": "repeatforecasttemplate-001",
+    "questionTemplate": "Will HSL surface transit delay risk exceed the declared threshold for {service_window} in {geography} on {service_date}?",
+    "outputType": "binary",
+    "domain": "weather-transit-delays",
+    "entityScope": {
+      "network": "hsl-surface",
+      "geography": "helsinki",
+      "serviceWindow": "morning_peak"
+    },
+    "forecastCloseRule": "Forecast must be created and closed before the target service window starts.",
+    "methodBoundary": "Use baseline-only execution until comparable resolved evidence reaches method-selection thresholds.",
+    "uniqueIdBoundary": "Milestone 92 campaign manifests must mint new IDs for every live campaign run."
+  },
+  "sourcePolicyBinding": {
+    "sourcePolicyId": "sourcepolicy-1201",
+    "allowedForecastTimeRoles": [
+      "weather_forecast",
+      "historical_delay_rows",
+      "static_schedule",
+      "planned_service_alerts"
+    ],
+    "resolutionOnlyRoles": [
+      "transit_delay_outcome",
+      "feed_health",
+      "trip_updates_after_window",
+      "post_window_delay_rows",
+      "resolution_outcome"
+    ],
+    "allowedConnectors": [
+      "committed_fixture",
+      "open_meteo_weather",
+      "manual_upload",
+      "local_file"
+    ],
+    "callerApprovalRequired": true,
+    "provenanceRequired": true,
+    "normalChecksMayFetchLiveNetwork": false,
+    "rawLocalArtifactsCommitted": false
+  },
+  "resolutionPolicy": {
+    "resolutionRole": "transit_delay_outcome",
+    "resolveAfterHorizon": true,
+    "resolutionDueRule": "Resolve only after the service window ends, then score against the baseline using declared resolution-only evidence.",
+    "resolverCommandBoundary": "Campaign runners may call checked resolver commands only after explicit local execution flags in later milestones.",
+    "scoringRule": "brier",
+    "ambiguousOutcomeHandling": "Ambiguous outcomes remain excluded from comparable track-record and calibration counts.",
+    "annulledOutcomeHandling": "Annulled service windows remain excluded with explicit reason codes."
+  },
+  "supportedSchedulePolicies": [
+    {
+      "policyKind": "fixed_count",
+      "description": "Run until a declared number of forecast windows has been created or skipped with explicit reasons.",
+      "durationExamples": [
+        "P1D",
+        "P1W"
+      ],
+      "endConditionKinds": [
+        "fixed_count",
+        "manual_stop"
+      ],
+      "requiresExplicitTimezone": true
+    },
+    {
+      "policyKind": "until_date",
+      "description": "Run on the declared recurrence until the setup reaches a final timestamp.",
+      "durationExamples": [
+        "P1D",
+        "P1W",
+        "P14D"
+      ],
+      "endConditionKinds": [
+        "until_date",
+        "manual_stop"
+      ],
+      "requiresExplicitTimezone": true
+    },
+    {
+      "policyKind": "open_ended",
+      "description": "Continue planning forecast windows until a caller stops, pauses, or a post-calibration policy applies.",
+      "durationExamples": [
+        "PT1H",
+        "P1D"
+      ],
+      "endConditionKinds": [
+        "open_ended",
+        "manual_stop",
+        "calibration_threshold"
+      ],
+      "requiresExplicitTimezone": true
+    },
+    {
+      "policyKind": "interval",
+      "description": "Use an explicit ISO-8601-like duration interval for hourly, multi-hour, daily, weekly, or custom runs.",
+      "durationExamples": [
+        "PT1H",
+        "PT3H",
+        "PT6H",
+        "P1D",
+        "P3D",
+        "P1W"
+      ],
+      "endConditionKinds": [
+        "fixed_count",
+        "until_date",
+        "manual_stop"
+      ],
+      "requiresExplicitTimezone": true
+    },
+    {
+      "policyKind": "selected_weekdays_window",
+      "description": "Run only on selected weekdays and named service windows while preserving explicit close and horizon rules.",
+      "durationExamples": [
+        "P1D",
+        "P1W"
+      ],
+      "endConditionKinds": [
+        "fixed_count",
+        "until_date",
+        "manual_stop"
+      ],
+      "requiresExplicitTimezone": true
+    },
+    {
+      "policyKind": "calibration_threshold",
+      "description": "Run until a declared comparable resolved threshold is reached for track-record or calibration readback.",
+      "durationExamples": [
+        "P1D",
+        "P1W"
+      ],
+      "endConditionKinds": [
+        "calibration_threshold",
+        "track_record_threshold",
+        "manual_stop"
+      ],
+      "requiresExplicitTimezone": true
+    }
+  ],
+  "postCalibrationPolicies": [
+    {
+      "action": "stop",
+      "delay": "none",
+      "nextCycleRule": "Stop the setup after the declared calibration threshold is reached.",
+      "automaticMethodChangeAllowed": false,
+      "notes": "Calibration measurement does not automatically tune or replace the forecasting method."
+    },
+    {
+      "action": "continue",
+      "delay": "none",
+      "nextCycleRule": "Keep collecting comparable evidence after calibration without changing method behavior.",
+      "automaticMethodChangeAllowed": false,
+      "notes": "Useful when the caller wants ongoing monitoring rather than a finite calibration campaign."
+    },
+    {
+      "action": "pause_then_resume_after",
+      "delay": "P14D",
+      "nextCycleRule": "Pause the next cycle for the declared delay, then resume with a new cycle identifier.",
+      "automaticMethodChangeAllowed": false,
+      "notes": "The campaign manifest milestone will define how pause and resume state is stored."
+    },
+    {
+      "action": "start_next_cycle_after",
+      "delay": "P30D",
+      "nextCycleRule": "Close the current cycle and start the next cycle after the declared delay.",
+      "automaticMethodChangeAllowed": false,
+      "notes": "This preserves calibration evidence by cycle instead of silently mixing cycles."
+    }
+  ],
+  "campaignExamples": [
+    {
+      "exampleId": "repeatingsetupexample-001",
+      "caseKey": "daily_100_run_transit_calibration",
+      "title": "Daily 100-run weather-transit-delay calibration campaign",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-001",
+        "policyKind": "fixed_count",
+        "interval": "P1D",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create one same-day morning-peak forecast at 02:00 local time for each service date.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the same-day morning peak transit window.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-11T00:00:00Z",
+        "targetCount": 100,
+        "selectedWindows": [
+          "morning_peak"
+        ]
+      },
+      "endConditions": [
+        {
+          "conditionKind": "fixed_count",
+          "behaviorWhenReached": "Stop planning after 100 forecast windows are created or explicitly skipped.",
+          "targetCount": 100
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "stop",
+        "delay": "none",
+        "nextCycleRule": "Stop the setup after the declared calibration threshold is reached.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "Calibration measurement does not automatically tune or replace the forecasting method."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "exampleId": "repeatingsetupexample-002",
+      "caseKey": "hourly_short_horizon_count",
+      "title": "Hourly short-horizon count-bounded campaign",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-002",
+        "policyKind": "interval",
+        "interval": "PT1H",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create the next forecast at the top of the hour when close time is still before the target horizon.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the next one-hour operating window after forecast close.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-10T09:00:00Z",
+        "targetCount": 24
+      },
+      "endConditions": [
+        {
+          "conditionKind": "fixed_count",
+          "behaviorWhenReached": "Stop after 24 hourly windows or explicit manual stop.",
+          "targetCount": 24
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "continue",
+        "delay": "none",
+        "nextCycleRule": "Keep collecting comparable evidence after calibration without changing method behavior.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "Useful when the caller wants ongoing monitoring rather than a finite calibration campaign."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "exampleId": "repeatingsetupexample-003",
+      "caseKey": "weekly_until_date_campaign",
+      "title": "Weekly until-date campaign",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-003",
+        "policyKind": "until_date",
+        "interval": "P1W",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create one weekly forecast before the declared weekly service window closes.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the named weekly service window.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-17T00:00:00Z",
+        "untilDate": "2026-09-30T20:59:59Z",
+        "selectedWindows": [
+          "weekday_peak"
+        ]
+      },
+      "endConditions": [
+        {
+          "conditionKind": "until_date",
+          "behaviorWhenReached": "Stop after the final eligible forecast window at or before the until timestamp.",
+          "targetDate": "2026-09-30T20:59:59Z"
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "stop",
+        "delay": "none",
+        "nextCycleRule": "Stop the setup after the declared calibration threshold is reached.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "Calibration measurement does not automatically tune or replace the forecasting method."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "exampleId": "repeatingsetupexample-004",
+      "caseKey": "open_ended_monitoring_campaign",
+      "title": "Open-ended daily monitoring campaign",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-004",
+        "policyKind": "open_ended",
+        "interval": "P1D",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create a daily forecast until the caller stops or a post-calibration policy applies.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the same-day service window chosen by the setup.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-11T00:00:00Z",
+        "selectedWindows": [
+          "morning_peak"
+        ],
+        "openEnded": true
+      },
+      "endConditions": [
+        {
+          "conditionKind": "open_ended",
+          "behaviorWhenReached": "Continue until manual stop, campaign pause, or calibration policy transition."
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "continue",
+        "delay": "none",
+        "nextCycleRule": "Keep collecting comparable evidence after calibration without changing method behavior.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "Useful when the caller wants ongoing monitoring rather than a finite calibration campaign."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "exampleId": "repeatingsetupexample-005",
+      "caseKey": "weekday_peak_window_campaign",
+      "title": "Selected weekday morning-peak campaign",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-005",
+        "policyKind": "selected_weekdays_window",
+        "interval": "P1D",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create forecasts only for selected weekday service windows.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the selected weekday morning peak window.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-11T00:00:00Z",
+        "targetCount": 30,
+        "selectedWeekdays": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday"
+        ],
+        "selectedWindows": [
+          "morning_peak"
+        ]
+      },
+      "endConditions": [
+        {
+          "conditionKind": "track_record_threshold",
+          "behaviorWhenReached": "Stop when 30 comparable resolved outcomes are appended or when the caller stops.",
+          "thresholdMetric": "comparable_resolved_outcomes",
+          "thresholdValue": 30
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "continue",
+        "delay": "none",
+        "nextCycleRule": "Keep collecting comparable evidence after calibration without changing method behavior.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "Useful when the caller wants ongoing monitoring rather than a finite calibration campaign."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    },
+    {
+      "exampleId": "repeatingsetupexample-006",
+      "caseKey": "post_calibration_restart_campaign",
+      "title": "Open-ended campaign that restarts after calibration",
+      "schedulePolicy": {
+        "schedulePolicyId": "repeatingschedulepolicy-006",
+        "policyKind": "calibration_threshold",
+        "interval": "P1D",
+        "timezone": "Europe/Helsinki",
+        "forecastCreateRule": "Create daily forecasts until the comparable calibration threshold is reached.",
+        "forecastCloseRule": "Create and close each forecast before the declared horizon starts; missed close times are skipped, not backfilled.",
+        "horizonRule": "Horizon covers the same-day morning peak transit window.",
+        "resolutionDueRule": "Resolution is eligible only after the service window ends and resolution-only evidence is available.",
+        "nextForecastCandidateAt": "2026-06-11T00:00:00Z",
+        "selectedWindows": [
+          "morning_peak"
+        ],
+        "thresholdMetric": "comparable_resolved_outcomes",
+        "thresholdValue": 100,
+        "openEnded": true
+      },
+      "endConditions": [
+        {
+          "conditionKind": "calibration_threshold",
+          "behaviorWhenReached": "Trigger the post-calibration restart policy after 100 comparable resolved outcomes.",
+          "thresholdMetric": "comparable_resolved_outcomes",
+          "thresholdValue": 100
+        }
+      ],
+      "postCalibrationPolicy": {
+        "action": "pause_then_resume_after",
+        "delay": "P14D",
+        "nextCycleRule": "Pause the next cycle for the declared delay, then resume with a new cycle identifier.",
+        "automaticMethodChangeAllowed": false,
+        "notes": "The campaign manifest milestone will define how pause and resume state is stored."
+      },
+      "requiredRunBoundaries": [
+        "forecast_before_close",
+        "resolve_after_horizon",
+        "source_policy_binding",
+        "resolution_only_evidence_excluded_from_forecast_inputs",
+        "unique_run_question_forecast_resolution_score_ids"
+      ],
+      "nextAction": "Use Milestone 92 campaign manifest planning before any runner creates forecast artifacts.",
+      "createsForecastArtifacts": false,
+      "mutatesCampaignState": false
+    }
+  ],
+  "nextRunReadback": {
+    "readbackStatus": "contract_only_example",
+    "nextForecastCandidateAt": "2026-06-11T00:00:00Z",
+    "nextResolutionEligibleAt": "2026-06-11T07:00:00Z",
+    "stopDecisionAvailable": true,
+    "requiresCampaignManifest": true,
+    "requiresRunner": true
+  },
+  "contractRequirements": [
+    {
+      "requirementId": "repeatingsetuprequirement-001",
+      "requirementKey": "forecast_before_close",
+      "description": "Every run must create and close its forecast before the target horizon starts; missed windows are skipped rather than backfilled.",
+      "enforcedByCurrentContract": true
+    },
+    {
+      "requirementId": "repeatingsetuprequirement-002",
+      "requirementKey": "resolve_after_horizon",
+      "description": "Resolution is eligible only after the declared horizon ends and the resolution source is allowed by policy.",
+      "enforcedByCurrentContract": true
+    },
+    {
+      "requirementId": "repeatingsetuprequirement-003",
+      "requirementKey": "source_policy_binding",
+      "description": "Each run must preserve the source policy ID, allowed forecast-time roles, and resolution-only role boundary.",
+      "enforcedByCurrentContract": true
+    },
+    {
+      "requirementId": "repeatingsetuprequirement-004",
+      "requirementKey": "resolution_only_evidence_boundary",
+      "description": "Post-window transit outcomes and feed-health rows can resolve or explain runs but cannot become forecast inputs.",
+      "enforcedByCurrentContract": true
+    },
+    {
+      "requirementId": "repeatingsetuprequirement-005",
+      "requirementKey": "unique_run_id_boundary",
+      "description": "Campaign manifests must mint unique run, question, forecast, resolution, and scoring IDs instead of reusing fixture IDs.",
+      "enforcedByCurrentContract": true
+    },
+    {
+      "requirementId": "repeatingsetuprequirement-006",
+      "requirementKey": "local_transport_neutral_boundary",
+      "description": "The setup names recurrence semantics without creating cron files, OS scheduler jobs, hosted workers, or transport-specific tasks.",
+      "enforcedByCurrentContract": true
+    }
+  ],
+  "summary": {
+    "supportedSchedulePolicyCount": 6,
+    "campaignExampleCount": 6,
+    "postCalibrationActionCount": 4,
+    "finiteCampaignSupported": true,
+    "untilDateCampaignSupported": true,
+    "openEndedCampaignSupported": true,
+    "calibrationThresholdSupported": true,
+    "runnerImplemented": false,
+    "campaignManifestImplemented": false,
+    "hostedSchedulerAllowed": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextMilestone": "Milestone 92: Local Prediction Campaign Manifest"
+  },
+  "executionBoundary": {
+    "readOnlyContract": true,
+    "createsForecastArtifacts": false,
+    "mutatesCampaignState": false,
+    "startsScheduler": false,
+    "installsOsScheduler": false,
+    "writesCron": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "hostedRuntimeAllowed": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This contract defines recurrence semantics only; it does not start forecasts, sleep, poll, resolve, score, or append evidence.",
+    "Live forecast-time source use remains opt-in and policy-bound; normal checks stay deterministic and offline.",
+    "Calibration thresholds describe when a readback may be generated, not permission to auto-tune methods or make public quality claims.",
+    "Campaign state, duplicate prevention, resume behavior, and append-only ledgers are deferred to later milestones."
+  ]
+}

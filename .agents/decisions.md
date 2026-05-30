@@ -1835,3 +1835,213 @@ OPE should be agent-native without making every normal read carry implementation
 - The protocol map now contains sixteen envelope-returning adapter operations plus the separate forecast-run tool.
 - The summary is read-only and must not execute adapter calls, read private data, create source manifests, create forecasts, resolve outcomes, score forecasts, fetch live data, store credentials, or create hosted runtime state.
 - The next milestone should add explicit size-budget checks for compact read surfaces so future generated evidence cannot silently become default agent payload.
+
+### DEC-068 — Add Adapter Read-Surface Size Budgets
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Declare byte budgets in the compact private setup adapter conformance summary and enforce them in summary, adapter, dispatcher, and hardening checks.
+- **Why:** Routine agent reads should stay compact and predictable while the full embedded-envelope matrix remains available only through an explicit implementer command.
+- **Alternatives rejected:** Relying only on generic `maxBytes` behavior, embedding full matrix excerpts in the compact summary.
+
+### DEC-069 — Add Resolution Readbacks To Agent Adapter
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Expose `resolution_jobs` and `resolution_scheduler_status` as read-only agent adapter and MCP operations backed by checked local fixtures.
+- **Why:** Agents need to decide whether to wait, execute an approved resolver, inspect invalid or failed work, or read resolved outputs without parsing local files or terminal scheduler output.
+- **Alternatives rejected:** Making agents read `.ope/live` state directly, starting the scheduler from a status read, or adding hosted/OS scheduler claims before the local loop is reliable.
+
+### DEC-070 — Add Resolution Readback Error Envelopes
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Represent missing live workspaces, unreadable state files, malformed scheduler logs, and oversized scheduler readbacks as generated sanitized agent-envelope error examples.
+- **Why:** Future adapters need checked failure shapes before OPE expands live scheduler/runtime behavior, and agents need safe next-action signals without raw local paths, state contents, log contents, or stack traces.
+- **Alternatives rejected:** Adding live workspace arguments to the read-only adapter operations, probing ignored local files during normal checks, or treating scheduler status reads as a scheduler runtime.
+
+### DEC-071 — Add Resolution Runtime Reliability Read Model
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `resolution-runtime-reliability` contract, generated fixture, CLI command, and checker for runtime failure taxonomy, retry and next-action guidance, provenance ledger rows, and live-capture/source-policy boundaries.
+- **Why:** Before expanding the public transport corpus, live source usage, or forecasting methods, agents need one deterministic read model that explains runtime failures and provenance without executing resolvers or reading ignored local files.
+- **Alternatives rejected:** Encoding failure semantics only in prose, treating scheduler logs as the provenance ledger, or allowing resolution outcome evidence to appear in forecast-time provenance.
+
+### DEC-072 — Add Transit Forward-Run Corpus Index
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-forward-run-corpus` contract, generated fixture, CLI command, and checker over one comparable scored weather-transit-delay run plus explicit exclusion examples.
+- **Why:** OPE needs to report how many public transport forward windows are comparable, scored, excluded, or below claim thresholds before producing track-record or calibration surfaces.
+- **Alternatives rejected:** Treating the single forward-run summary as a corpus, creating calibration output from one scored run, or reading ignored `.ope/live/` captures during normal checks.
+
+### DEC-073 — Add Transit Baseline Track-Record Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-track-record-gate` contract, generated fixture, CLI command, and checker over the transit forward-run corpus.
+- **Why:** Agents need a compact way to inspect current Brier score, baseline score, lift, sample size, exclusions, and horizon coverage while knowing whether baseline track-record or calibration claims are allowed.
+- **Alternatives rejected:** Emitting a normal calibration summary from one scored run, treating below-threshold performance as a public quality claim, or hiding the one-off score until thresholds are met.
+
+### DEC-074 — Add Transit MVP Method Options
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-method-options` contract, generated fixture, CLI command, and checker over the transit corpus and baseline track-record gate.
+- **Why:** OPE needs to explain why early public transport runs stay baseline-only, while still preserving evidence for the transparent weather-adjustment candidate and clearly parking richer method families until clean benchmarks exist.
+- **Alternatives rejected:** Enabling the weather-adjustment method from one positive fixture lift, adding trained or retrieval-assisted methods without benchmark evidence, or allowing same-window transit outcome rows into forecast-time method evidence.
+
+### DEC-075 — Add Policy-Bound Transit Live Evidence Promotion
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-live-evidence-promotion` contract, generated promotion fixture, sanitized promoted source-set fixture, CLI command, and checker for promoting selected ignored live weather drafts into forecast-time evidence.
+- **Why:** OPE needs a narrow way to use approved local live captures without committing raw `.ope/live/` artifacts, weakening provenance, or letting post-close and resolution-only captures leak into forecast evidence.
+- **Alternatives rejected:** Reading `.ope/live/` during normal checks, committing raw live captures, treating HSL TripUpdates outcome rows as forecast-time evidence, or adding a production live connector runtime before the local policy gate is explicit.
+
+### DEC-076 — Add Source Adapter Intake Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `source-adapter-intake` contract, generated conformance fixtures, CLI command, and checker for routing sanitized external connector outputs into source intake and method decisions.
+- **Why:** Agent-built connectors should be able to live outside OPE core while still handing OPE a standard manifest, mapping, provenance, and boundary record that OPE can accept, reject, or block without executing connector code.
+- **Alternatives rejected:** Moving connector implementations into OPE core for MVP, letting source-adapter outputs bypass source intake, or trying to repair unsafe credential/raw-row handoffs inside OPE.
+
+### DEC-077 — Add Local Private Setup Orchestrator Summary
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `private-setup-orchestrator` contract, generated summary fixture, CLI command, and checker that joins setup request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes over existing checked local records.
+- **Why:** Agents need one compact local MVP read surface for approved local-file and accepted source-adapter paths without manually chaining every lower-level command or losing the source-intake, benchmark, method-decision, and forecast-execution gates.
+- **Alternatives rejected:** Creating a runtime that executes private setup commands, letting adapter outputs produce forecasts directly, or hiding blocked paths such as missing approval, unconfirmed mappings, insufficient data, rejected sources, unsafe sources, and oversized readbacks.
+
+### DEC-078 — Declare The Local MVP Release Surface
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add an `mvpLocalRuntime` section to the release manifest, a compact `spec/mvp-local-runtime.md` runbook, and `scripts/check_mvp_release_surface.py` smoke checks for the local MVP happy path, blocked setup paths, agent-call readback, MCP protocol-map exposure, resolution jobs, and corpus claim gates.
+- **Why:** The MVP should be understandable and release-checkable as a local agent-native surface, with exact machine interfaces and claim boundaries recorded in a schema-bound artifact.
+- **Alternatives rejected:** Treating the README as the only MVP contract, declaring a hosted or HTTP/queue runtime before implementation, or allowing one-off resolved examples to imply calibration or broad quality claims.
+
+### DEC-079 — Add Agent Pilot Validation Pack
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `agent-pilot-validation` contract, generated fixture, CLI command, and checker for local MVP pilot protocol, task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries.
+- **Why:** Before adding runtime scope, OPE needs repeatable usability evidence that agents and supervising developers can understand setup paths, readbacks, blocked states, and claim boundaries without storing private data or raw transcripts.
+- **Alternatives rejected:** Treating roadmap text as the pilot protocol, storing raw interview transcripts in the repo, or expanding private-source/runtime behavior before measuring MVP comprehension.
+
+### DEC-080 — Add Local Usage Trace Read Model
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `local-usage-trace` contract, generated fixture, CLI command, and checker with synthetic local MVP event rows, trace fields, aggregate product metrics, and privacy boundaries.
+- **Why:** OPE needs a measurable local vocabulary for forecast completion, read success, blocked paths, response sizes, and elapsed times before adding opt-in runtime logs or hosted telemetry.
+- **Alternatives rejected:** Adding hosted analytics, writing runtime logs during normal checks, or treating synthetic local trace rows as real usage evidence.
+
+### DEC-081 — Add Transit Corpus Growth Loop
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `transit-corpus-growth` contract, generated fixture, CLI command, and checker for append-ready candidates, exclusion-ledger rows, due-run and post-resolution checklists, and threshold progress readback.
+- **Why:** The public transport wedge needs a repeatable way to inspect whether new resolved forward runs can grow the comparable corpus while preserving forecast-time versus resolution-only evidence boundaries and keeping quality claims blocked below threshold.
+- **Alternatives rejected:** Mutating the canonical corpus during normal checks, treating excluded runs as calibration evidence, or allowing one append-ready example to imply track-record or calibration quality.
+
+### DEC-082 — Add Source Quality Mapping Confidence Readback
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `source-quality` read model, generated fixture, CLI command, and checker over builder drafts, source-adapter intake, source-intake reports, and setup method decisions.
+- **Why:** Agents need compact guidance that explains whether connected data is forecast-usable, baseline-only usable, mapping-confirmation blocked, data-sparse, rejected, or unsafe before they proceed to method gates or explicit forecast execution.
+- **Alternatives rejected:** Letting source quality create forecast artifacts, executing source-builder or adapter code from the readback, or treating quality summaries as production-readiness or forecast-quality claims.
+
+### DEC-083 — Add Approved Local Source Runtime
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `local-source-runtime` contract, generated fixture, CLI command, and checker for one caller-approved local-folder runtime that routes accepted files through existing builder, intake, benchmark, method, and explicit forecast-execution gates to the `forecast-1102` card.
+- **Why:** The roadmap needs one concrete source runtime pattern that proves approved local data can reach a forecast readback while preserving approval, allow-list, size-limit, source-policy, and sanitized-diagnostic boundaries.
+- **Alternatives rejected:** Adding arbitrary private API or database parsing, storing credentials or raw rows, installing a hosted/local watcher, letting the runtime create forecast artifacts directly, or treating the narrow runtime as production connector support.
+
+### DEC-084 — Add Developer Adoption Surface
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `developer-adoption` contract, generated fixture, CLI command, and checker for quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision.
+- **Why:** The local MVP needs a fast, testable path to the first forecast card and lifecycle bundle so developers and agents can try OPE without misreading fixture-mode examples as hosted runtime or quality claims.
+- **Alternatives rejected:** Leaving onboarding only in prose, adding generated language-specific runtime types before adoption evidence justifies them, or letting an adoption guide execute setup commands, fetch live data, or create forecast artifacts.
+
+### DEC-085 — Add Expansion Readiness Gate
+- **Date:** 2026-05-27
+- **Status:** accepted
+- **Choice:** Add a checked `expansion-readiness` contract, generated fixture, CLI command, and checker over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types.
+- **Why:** After the local MVP adoption surface, OPE needs a disciplined way to decide what not to build yet, using pilot, usage, source-runtime, corpus, and track-record evidence before widening runtime scope.
+- **Alternatives rejected:** Starting hosted service work from roadmap enthusiasm alone, treating synthetic pilot notes or one comparable transit run as enough evidence for stronger methods, or generating runtime types before adoption friction shows they are worth maintaining.
+
+### DEC-086 — Add Pilot Evidence Ledger
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-evidence` contract, generated fixture, CLI command, and checker for sanitized pilot-session summary intake.
+- **Why:** The next roadmap step needs real agent/developer pilot evidence, but the repository needs a safe format first: dimension scores, sanitized findings, friction classes, and expansion signals without raw transcripts, private data, credentials, prompt logs, or participant identities.
+- **Alternatives rejected:** Storing raw pilot transcripts, counting synthetic examples as real adoption evidence, allowing private session details into checked fixtures, or letting pilot notes unblock hosted/runtime/type-generation work before real sanitized session thresholds are met.
+
+### DEC-087 — Add Pilot Session Packet
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-session-packet` contract, generated fixture, CLI command, and checker for running real local MVP pilot sessions safely.
+- **Why:** The pilot evidence ledger defines what can be stored, but agents and moderators also need a checked task packet, sanitization review, and stop conditions before real sessions begin.
+- **Alternatives rejected:** Running pilot sessions from ad hoc notes, storing raw transcripts for later redaction, letting the packet write ledger rows, or treating session collection readiness as expansion evidence.
+
+### DEC-088 — Add Pilot Summary Intake Classifier
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `pilot-summary-intake` contract, generated fixture, CLI command, and checker for classifying sanitized pilot summaries before ledger review.
+- **Why:** Real pilot sessions need one safe pre-ledger decision point that can accept ledger-ready summaries, request redaction, or block raw transcripts, private rows, credentials, participant identity, and quality overclaims.
+- **Alternatives rejected:** Letting moderators copy summaries directly into the ledger, storing unsafe notes for later cleanup, counting checked examples as real sessions, or letting accepted pilot summaries unblock expansion.
+
+### DEC-089 — Add Repeating Prediction Setup Contract
+- **Date:** 2026-05-28
+- **Status:** accepted
+- **Choice:** Add a checked `repeating-prediction-setup` contract, generated fixture, CLI command, and checker for recurrence policies, end conditions, and post-calibration behavior before campaign execution exists.
+- **Why:** Agents need a stable local-first way to describe finite, until-date, interval, open-ended, weekday/window, and calibration-threshold campaigns without inventing shell loops or implying a scheduler, hosted runtime, or quality claim.
+- **Alternatives rejected:** Starting with a foreground runner before the manifest contract, writing cron or OS scheduler configuration, mutating local campaign state during normal checks, or letting calibration thresholds auto-tune methods.
+
+### DEC-090 — Add Prediction Campaign Manifest
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-manifest` contract, generated fixture, CLI command, and checker that expands one repeating setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs.
+- **Why:** Before a terminal runner exists, agents need a resumable local manifest shape that can answer what is planned, what is due later, which duplicate keys are blocked, and where ignored local state will live without creating artifacts.
+- **Alternatives rejected:** Letting the first runner invent campaign IDs, writing `.ope/live/` campaign state during normal checks, reusing fixture forecast IDs for live campaign plans, or starting scheduler work before duplicate and status boundaries are checked.
+
+### DEC-091 — Add Prediction Campaign Runner Dry-Run Surface
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-runner` contract, generated fixture, CLI command, and checker for `prediction-campaign start` command semantics, recurrence flags, output modes, dry-run decisions, and non-execution boundaries.
+- **Why:** Agents need to see how a terminal campaign runner will behave before OPE creates forecast artifacts, sleeps or polls, writes ignored live state, fetches live data, runs resolvers, or implies calibration quality.
+- **Alternatives rejected:** Starting with an effectful foreground loop, letting normal checks write campaign state, hiding missed-run and duplicate policies in prose, or treating dry-run runner decisions as forecast or calibration evidence.
+
+### DEC-092 — Add Prediction Campaign Forecast Creation Handoff
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign-forecast-creation` contract, generated fixture, CLI command, and checker that binds a ready campaign runner decision to planned question, forecast, card, and lifecycle-bundle IDs.
+- **Why:** Before implementing artifact mutation, OPE needs a stable handoff that proves the next forecast can be selected, checked before close, bound to source policy and duplicate-key rules, and kept separate from live fetches, resolver execution, and quality claims.
+- **Alternatives rejected:** Creating ignored campaign artifacts during normal checks, letting the runner invent forecast paths at execution time, backfilling missed forecasts, or mixing forecast creation with due resolution and corpus append behavior.
+
+### DEC-093 — Add Checked Campaign Forecast Artifact Fixture
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign forecast-artifact` generator, fixture set, CLI readback, and checker that materializes `forecast-1301` as unresolved baseline-only question, evidence, artifact, and history records using existing lifecycle schemas.
+- **Why:** Agents need to see the actual OPE-standard forecast records that follow the campaign handoff before OPE implements ignored live-state mutation, live evidence capture, resolver execution, scoring, or corpus append behavior.
+- **Alternatives rejected:** Adding a campaign-specific forecast schema, writing `.ope/live/` campaign artifacts during normal checks, resolving and scoring the future run immediately, or selecting a non-baseline method before comparable transit evidence clears the gate.
+
+### DEC-094 — Add Prediction Campaign Forecast Write Plan
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign forecast-write` contract, generated fixture, CLI readback, and checker that bind the `forecast-1301` lifecycle records to intended ignored `.ope/live` target paths and write guards without executing the local write.
+- **Why:** Before effectful campaign state mutation exists, agents need a stable target-path, idempotency, source-policy, duplicate-key, and forecast-before-close plan they can inspect and validate.
+- **Alternatives rejected:** Copying fixtures into `.ope/live/` during normal checks, letting the future runner invent write paths at execution time, storing private rows or credentials, or mixing local writes with live fetch, resolution, scoring, corpus append, or quality claims.
+
+### DEC-095 — Add Campaign-Aware Resolution Job Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Extend the checked `resolution-jobs` registry with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that add the `forecast-1301` campaign wait state alongside existing forward-run jobs.
+- **Why:** Campaign-created forecasts need to appear in the same agent-facing resolution queue before campaign resolver execution, scheduler integration, resume, or corpus append behavior exists.
+- **Alternatives rejected:** Executing campaign resolvers from the registry, writing `.ope/live` campaign state during normal checks, inventing a separate campaign-only queue, or treating the waiting campaign forecast as resolution, scoring, corpus, or calibration evidence.
+
+### DEC-096 — Add Campaign-Aware Resolution Scheduler Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Extend the checked `resolution-scheduler` with `--campaign predictioncampaign-001`, a campaign fixture, CLI checks, and release-smoke wiring that include the `forecast-1301` campaign wait action in a dry-run scheduler tick.
+- **Why:** Agents need the same "keep checking later" surface for campaign-created forecasts before campaign resolver execution, campaign state mutation, resume, recovery, or corpus append behavior exists.
+- **Alternatives rejected:** Executing campaign resolvers from the scheduler, writing `.ope/live` campaign state during normal checks, creating hosted or OS scheduler files, or treating a scheduler wait action as resolution, scoring, corpus, or calibration evidence.
+
+### DEC-097 — Add Prediction Campaign Resume Readback
+- **Date:** 2026-05-29
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign resume` contract, generated fixture, CLI readback, and checker that join the campaign manifest, forecast-write plan, open forecast, and campaign resolution queue into safe recovery actions.
+- **Why:** Before effectful resume can survive terminal interruption, agents need one compact readback that shows bound state paths, overwrite boundaries, safe commands, and blocked future mutation steps without reading raw ignored state.
+- **Alternatives rejected:** Reading `.ope/live` during normal checks, writing campaign state from the resume command, executing campaign resolvers during resume, or treating resume guidance as resolution, scoring, corpus, or calibration evidence.

@@ -1,0 +1,304 @@
+{
+  "pilotSummaryIntakeId": "pilotsummaryintake-001",
+  "generatedAt": "2026-06-10T12:30:00Z",
+  "intakeMode": "checked_sanitized_pilot_summary_intake_classifier",
+  "bindings": {
+    "releaseManifestId": "releasemanifest-001",
+    "agentPilotValidationId": "agentpilotvalidation-001",
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "pilotEvidencePolicyId": "pilotevidencepolicy-001",
+    "pilotSessionReviewId": "pilotsessionreview-001"
+  },
+  "inputPolicy": {
+    "policyId": "pilotsummarypolicy-001",
+    "allowedFields": [
+      "Task IDs from the checked pilot validation pack.",
+      "Dimension ratings from 1 to 5 with short sanitized evidence notes.",
+      "Sanitized findings that omit participant identity, raw transcript text, private data, and credentials.",
+      "Friction classes and expansion signals from the checked vocabulary.",
+      "One next action for adoption, documentation, runtime selection, or evidence collection."
+    ],
+    "blockedSignals": [
+      "Raw transcripts, recordings, prompt logs, or full chat excerpts.",
+      "Private source rows, source credentials, customer names, internal table names, or unredacted identifiers.",
+      "Any pilot note that turns fixture success into quality, calibration, hosted-runtime, or production-readiness claims."
+    ],
+    "requiredReviewChecks": [
+      "No raw transcript, recording, prompt log, or full chat excerpt is included.",
+      "No private source rows, credentials, customer names, or participant identity are included.",
+      "All findings are summarized enough to be stored in the repository.",
+      "Dimension scores use the checked feedback dimensions and 1-5 scale.",
+      "Friction classes and expansion signals use the checked ledger vocabulary.",
+      "Claim-boundary confusion is recorded as a product signal, not as quality evidence.",
+      "The summary does not unblock hosted runtime, generated types, stronger methods, or broad source runtimes."
+    ],
+    "acceptedUse": "Ledger-ready summaries can be manually added as real pilot evidence only after review; this checked classifier does not write ledger rows."
+  },
+  "submissionCases": [
+    {
+      "caseId": "pilotsummarycase-001",
+      "caseKey": "accepted_local_setup_summary",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-001",
+        "agentpilottask-004"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": false,
+        "privateRowsDetected": false,
+        "credentialLikeTextDetected": false,
+        "participantIdentityDetected": false,
+        "unredactedSourceDetailDetected": false,
+        "claimOverreachDetected": false
+      },
+      "intakeDecision": "accept_for_ledger_review",
+      "ledgerReady": true,
+      "acceptedForAggregation": true,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "Summary has task refs, ratings, sanitized findings, friction classes, expansion signals, and no unsafe signals.",
+      "requiredFixes": [],
+      "nextAction": "Submit as a sanitized real-session summary only after moderator review confirms no unsafe details."
+    },
+    {
+      "caseId": "pilotsummarycase-002",
+      "caseKey": "accepted_claim_confusion_summary",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-005"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": false,
+        "privateRowsDetected": false,
+        "credentialLikeTextDetected": false,
+        "participantIdentityDetected": false,
+        "unredactedSourceDetailDetected": false,
+        "claimOverreachDetected": false
+      },
+      "intakeDecision": "accept_with_product_signal",
+      "ledgerReady": true,
+      "acceptedForAggregation": true,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "Claim-boundary confusion is safe to aggregate as a product signal when the note stays sanitized.",
+      "requiredFixes": [],
+      "nextAction": "Submit as a sanitized product signal and route follow-up toward claim-copy/readback improvements."
+    },
+    {
+      "caseId": "pilotsummarycase-003",
+      "caseKey": "needs_redaction_source_detail",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-002"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": false,
+        "privateRowsDetected": false,
+        "credentialLikeTextDetected": false,
+        "participantIdentityDetected": false,
+        "unredactedSourceDetailDetected": true,
+        "claimOverreachDetected": false
+      },
+      "intakeDecision": "needs_redaction",
+      "ledgerReady": false,
+      "acceptedForAggregation": false,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "The summary shape is usable, but unredacted source detail must be removed before ledger review.",
+      "requiredFixes": [
+        "Replace source names, table names, and private operational details with generic source-role language.",
+        "Re-run sanitization review before any ledger submission."
+      ],
+      "nextAction": "Redact source-specific details, then reclassify the summary."
+    },
+    {
+      "caseId": "pilotsummarycase-004",
+      "caseKey": "blocked_raw_transcript",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-001"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": true,
+        "privateRowsDetected": false,
+        "credentialLikeTextDetected": false,
+        "participantIdentityDetected": false,
+        "unredactedSourceDetailDetected": false,
+        "claimOverreachDetected": false
+      },
+      "intakeDecision": "block_raw_transcript",
+      "ledgerReady": false,
+      "acceptedForAggregation": false,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "Raw transcript text is never ledger-ready and must not be stored in checked fixtures.",
+      "requiredFixes": [
+        "Discard transcript text.",
+        "Create a new summarized finding with dimension scores and no quoted session content."
+      ],
+      "nextAction": "Block intake and request a sanitized summary instead of transcript text."
+    },
+    {
+      "caseId": "pilotsummarycase-005",
+      "caseKey": "blocked_private_rows",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-003"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": false,
+        "privateRowsDetected": true,
+        "credentialLikeTextDetected": true,
+        "participantIdentityDetected": true,
+        "unredactedSourceDetailDetected": false,
+        "claimOverreachDetected": false
+      },
+      "intakeDecision": "block_private_data",
+      "ledgerReady": false,
+      "acceptedForAggregation": false,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "Private rows, credentials, or participant identity block repository intake.",
+      "requiredFixes": [
+        "Discard private details and credential-like text.",
+        "Record only the blocked reason, safe next action, and sanitized comprehension signal."
+      ],
+      "nextAction": "Block intake and replace the submitted notes with a safe blocked-path summary."
+    },
+    {
+      "caseId": "pilotsummarycase-006",
+      "caseKey": "blocked_quality_claim",
+      "evidenceClass": "checked_intake_example",
+      "taskRefs": [
+        "agentpilottask-005"
+      ],
+      "submittedShape": {
+        "hasTaskRefs": true,
+        "hasDimensionRatings": true,
+        "hasSanitizedFindings": true,
+        "hasFrictionClasses": true,
+        "hasExpansionSignals": true,
+        "hasNextAction": true
+      },
+      "riskSignals": {
+        "rawTranscriptDetected": false,
+        "privateRowsDetected": false,
+        "credentialLikeTextDetected": false,
+        "participantIdentityDetected": false,
+        "unredactedSourceDetailDetected": false,
+        "claimOverreachDetected": true
+      },
+      "intakeDecision": "block_claim_overreach",
+      "ledgerReady": false,
+      "acceptedForAggregation": false,
+      "contributesRealSessionEvidence": false,
+      "reviewOutcome": "A summary that claims forecast quality, calibration, hosted readiness, or production runtime maturity is not ledger-ready.",
+      "requiredFixes": [
+        "Remove quality, calibration, hosted-runtime, and production-readiness claims.",
+        "Reframe the finding as usability evidence or claim-boundary confusion."
+      ],
+      "nextAction": "Block intake until the claim language is rewritten as a sanitized product signal."
+    }
+  ],
+  "decisionRules": [
+    {
+      "ruleId": "pilotsummaryrule-001",
+      "condition": "All required summary fields are present and no unsafe signal is detected.",
+      "decision": "Accept for ledger review.",
+      "effect": "The summary is ledger-ready after moderator review, but this classifier still records zero real sessions."
+    },
+    {
+      "ruleId": "pilotsummaryrule-002",
+      "condition": "Claim-boundary confusion is described without quality or hosted-runtime overclaiming.",
+      "decision": "Accept with product signal.",
+      "effect": "The finding can improve copy and readbacks but cannot count as forecast-quality evidence."
+    },
+    {
+      "ruleId": "pilotsummaryrule-003",
+      "condition": "Unredacted source details appear without raw transcripts or private rows.",
+      "decision": "Needs redaction.",
+      "effect": "The summary must be rewritten before ledger review."
+    },
+    {
+      "ruleId": "pilotsummaryrule-004",
+      "condition": "Raw transcripts, recordings, private rows, credentials, prompt logs, or participant identity appear.",
+      "decision": "Block intake.",
+      "effect": "Unsafe details must be discarded rather than stored for later cleanup."
+    },
+    {
+      "ruleId": "pilotsummaryrule-005",
+      "condition": "The summary claims calibration, forecast quality, hosted readiness, or production runtime maturity.",
+      "decision": "Block claim overreach.",
+      "effect": "The summary must be rewritten as usability evidence before it can be reviewed."
+    }
+  ],
+  "summary": {
+    "totalCaseCount": 6,
+    "acceptedLedgerReadyCount": 2,
+    "needsRedactionCount": 1,
+    "blockedCaseCount": 3,
+    "realSessionsRecorded": 0,
+    "ledgerRowsWritten": 0,
+    "intakeStatus": "ready_for_sanitized_real_summaries",
+    "expansionEvidenceReady": false,
+    "qualityClaimAllowed": false,
+    "hostedRuntimeAllowed": false
+  },
+  "executionBoundary": {
+    "readOnlyClassifier": true,
+    "usesCheckedExamplesOnly": true,
+    "runsPilotSessions": false,
+    "writesPilotEvidenceLedger": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "createsForecastArtifacts": false,
+    "startsHostedRuntime": false,
+    "fetchesLiveData": false,
+    "unblocksExpansion": false
+  },
+  "warnings": [
+    "This classifier contains checked examples only and does not record real pilot sessions.",
+    "Ledger-ready means safe for moderator review; it does not automatically write pilot evidence.",
+    "Blocked summaries must be discarded or rewritten before repository storage.",
+    "Accepted pilot summaries remain usability evidence, not forecast-quality or calibration evidence."
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "setupMethodDecisionId": "setupmethoddecision-1302",
+  "generatedAt": "2026-06-06T17:05:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceIntakeReportId": "sourceintakereport-1302",
+  "sourceManifestId": "sourcemanifest-1302",
+  "fieldMappingId": "fieldmapping-1302",
+  "intakeStatus": "needs_confirmation",
+  "decisionStatus": "needs_confirmation",
+  "selectedMethodClass": "none",
+  "selectedForecastMode": "blocked",
+  "selectedSetupBenchmarkGateId": null,
+  "setupPolicy": {
+    "baselineRequired": true,
+    "enabledMethodClasses": [
+      "historical_baseline",
+      "deterministic_statistical"
+    ],
+    "baselineComparisonRequired": true,
+    "leakageCheckRequired": true,
+    "methodDecisionRecordRequired": true
+  },
+  "sourceIntakeSummary": {
+    "canProduceForecast": false,
+    "forecastGenerationAllowed": false,
+    "usableSourceRoles": [],
+    "missingRequiredRoles": [],
+    "rejectedSourceRoles": [],
+    "proposedMappingCount": 10,
+    "sourceRejectionReasonCodes": []
+  },
+  "methodCandidates": [
+    {
+      "methodClass": "historical_baseline",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "not_required",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "missing_historical_baseline",
+        "source_intake_needs_confirmation"
+      ]
+    },
+    {
+      "methodClass": "historical_conditioned_frequency",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline"
+      ],
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "source_intake_needs_confirmation"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": "setupbenchmarkgate-1302",
+      "benchmarkQualityClaimStatus": "not_enough_comparable_benchmarks",
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "baseline_lift_positive",
+        "execution_sample_threshold_met",
+        "mapping_confirmation_required",
+        "missing_historical_baseline",
+        "missing_weather_forecast",
+        "quality_sample_threshold_not_met",
+        "source_intake_needs_confirmation"
+      ]
+    },
+    {
+      "methodClass": "model_assisted",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "missing_weather_forecast",
+        "source_intake_needs_confirmation"
+      ]
+    },
+    {
+      "methodClass": "external_reference",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "method_not_enabled_by_setup_policy",
+        "missing_weather_forecast",
+        "source_intake_needs_confirmation"
+      ]
+    },
+    {
+      "methodClass": "ensemble",
+      "sourceEligibilityStatus": "needs_confirmation",
+      "benchmarkEligibilityStatus": "rejected",
+      "finalEligibilityStatus": "needs_confirmation",
+      "setupBenchmarkGateId": null,
+      "benchmarkQualityClaimStatus": null,
+      "requiredSourceRoles": [
+        "historical_baseline",
+        "weather_forecast"
+      ],
+      "reasonCodes": [
+        "mapping_confirmation_required",
+        "method_not_enabled_by_setup_policy",
+        "missing_historical_baseline",
+        "missing_weather_forecast",
+        "source_intake_needs_confirmation"
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Confirm proposed field and alias mappings before forecast execution.",
+    "Confirm proposed mappings before selecting any forecast method."
+  ],
+  "qualityClaimBoundary": {
+    "qualityClaimAllowed": false,
+    "benchmarkClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "blockedClaims": [
+      "Live calibration claim",
+      "Production readiness claim",
+      "State-of-the-art performance claim",
+      "Universal domain coverage claim"
+    ]
+  },
+  "warnings": [
+    "Setup method decisions do not create forecast artifacts.",
+    "State-of-the-art and best-performance claims remain blocked until benchmark and resolved-outcome evidence meet claim thresholds.",
+    "Candidate eligibility is scoped to this domain setup and source intake report."
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "transitForwardRunCorpusId": "transitforwardruncorpus-001",
+  "generatedAt": "2026-05-27T13:00:00Z",
+  "domain": "weather-transit-delays",
+  "corpusMode": "checked_fixture_index",
+  "corpusScope": {
+    "network": "hsl-surface",
+    "geography": "helsinki",
+    "serviceWindow": "morning_peak",
+    "lateThresholdSeconds": 300,
+    "eventThresholdLateRatio": 0.2,
+    "minimumObservationCount": 10
+  },
+  "comparableWindowPolicy": {
+    "policyId": "transitforwardruncorpuspolicy-001",
+    "forecastTimingRule": "forecasted_at_must_be_at_or_before_close_at",
+    "resolutionTimingRule": "resolved_at_must_be_after_horizon_end",
+    "scoreTimingRule": "score_requires_resolved_outcome_and_baseline",
+    "minimumComparableResolvedForTrackRecord": 30,
+    "minimumComparableResolvedForCalibration": 100,
+    "acceptedRunStatuses": [
+      "scored"
+    ],
+    "requiredArtifactBindings": [
+      "forward_run_state",
+      "forecast_artifact",
+      "resolution_record",
+      "scoring_report"
+    ],
+    "excludedReasonCodes": [
+      "ambiguous",
+      "annulled",
+      "low_coverage",
+      "invalid_window",
+      "feed_unavailable",
+      "non_comparable"
+    ],
+    "forecastTimeEvidenceMayInclude": [
+      "weather_forecast",
+      "historical_delay_rows",
+      "static_schedule",
+      "planned_service_alerts"
+    ],
+    "resolutionOnlyEvidenceRoles": [
+      "trip_updates_after_window",
+      "post_window_delay_rows",
+      "resolution_outcome"
+    ]
+  },
+  "summary": {
+    "corpusCount": 7,
+    "comparableResolvedCount": 1,
+    "scoredCount": 1,
+    "excludedCount": 6,
+    "pendingCount": 0,
+    "minimumComparableResolvedForTrackRecord": 30,
+    "minimumComparableResolvedForCalibration": 100,
+    "qualityClaimStatus": "not_enough_resolved_comparable_outcomes",
+    "calibrationClaimStatus": "not_enough_resolved_comparable_outcomes"
+  },
+  "comparableRuns": [
+    {
+      "corpusRunId": "transitforwardruncorpusrun-001",
+      "forwardRunId": "transitdelayforwardrun-001",
+      "runStatus": "scored",
+      "serviceDate": "2026-06-10",
+      "serviceWindow": "morning_peak",
+      "forecastBinding": {
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "forecastedAt": "2026-06-10T02:00:00Z",
+        "closeAt": "2026-06-10T02:30:00Z",
+        "horizonStart": "2026-06-10T03:00:00Z",
+        "horizonEnd": "2026-06-10T07:00:00Z",
+        "forecastBeforeClose": true
+      },
+      "resolutionBinding": {
+        "resolutionRecordId": "resolution-1201",
+        "resolvedAt": "2026-06-10T08:15:00Z",
+        "resolutionStatus": "resolved",
+        "resolvedAfterHorizon": true,
+        "outcomeLabel": "yes",
+        "observationCount": 22,
+        "lateCount": 5,
+        "lateRatio": 0.2273
+      },
+      "scoreBinding": {
+        "scoringReportId": "scoring-1201",
+        "scoreStatus": "scored",
+        "scoringRule": "brier",
+        "primaryScore": 0.4489,
+        "baselineScore": 0.5625,
+        "baselineLift": 0.1136
+      },
+      "artifactPaths": {
+        "forwardRunSummaryPath": "spec/fixtures/generated/transit-delay-forward-run/weather-transit-delays-forward-run.generated.json",
+        "forecastArtifactPath": "spec/fixtures/generated/transit-delay-forecast/weather-transit-delays-artifact.generated.json",
+        "resolutionRecordPath": "spec/fixtures/generated/transit-delay-forecast/weather-transit-delays-resolution.generated.json",
+        "scoringReportPath": "spec/fixtures/generated/transit-delay-forecast/weather-transit-delays-scoring.generated.json"
+      },
+      "comparability": {
+        "comparable": true,
+        "reasonCodes": []
+      }
+    }
+  ],
+  "excludedRuns": [
+    {
+      "corpusRunId": "transitforwardruncorpusrun-002",
+      "forwardRunId": "transitdelayforwardrun-902",
+      "serviceDate": "2026-06-11",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "ambiguous",
+      "runStatus": "ambiguous",
+      "artifactPaths": [],
+      "nextAction": "exclude from scoring until the outcome can be resolved under declared criteria"
+    },
+    {
+      "corpusRunId": "transitforwardruncorpusrun-003",
+      "forwardRunId": "transitdelayforwardrun-903",
+      "serviceDate": "2026-06-12",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "annulled",
+      "runStatus": "annulled",
+      "artifactPaths": [],
+      "nextAction": "preserve the annulment reason and keep the run out of comparable counts"
+    },
+    {
+      "corpusRunId": "transitforwardruncorpusrun-004",
+      "forwardRunId": "transitdelayforwardrun-904",
+      "serviceDate": "2026-06-13",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "low_coverage",
+      "runStatus": "blocked",
+      "artifactPaths": [],
+      "nextAction": "do not score until the delay rows meet the minimum observation count"
+    },
+    {
+      "corpusRunId": "transitforwardruncorpusrun-005",
+      "forwardRunId": "transitdelayforwardrun-905",
+      "serviceDate": "2026-06-14",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "invalid_window",
+      "runStatus": "blocked",
+      "artifactPaths": [],
+      "nextAction": "repair the service window binding before adding the run to the corpus"
+    },
+    {
+      "corpusRunId": "transitforwardruncorpusrun-006",
+      "forwardRunId": "transitdelayforwardrun-906",
+      "serviceDate": "2026-06-15",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "feed_unavailable",
+      "runStatus": "blocked",
+      "artifactPaths": [],
+      "nextAction": "retry capture under the source policy or mark the window unavailable"
+    },
+    {
+      "corpusRunId": "transitforwardruncorpusrun-007",
+      "forwardRunId": "transitdelayforwardrun-907",
+      "serviceDate": "2026-06-16",
+      "serviceWindow": "morning_peak",
+      "exclusionReason": "non_comparable",
+      "runStatus": "excluded",
+      "artifactPaths": [],
+      "nextAction": "keep the run for audit but exclude it from morning-peak comparable counts"
+    }
+  ],
+  "claimBoundary": {
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "baselineTrackRecordAllowed": false,
+    "normalChecksUseLiveNetwork": false,
+    "liveCapturesCommitted": false,
+    "resolvedComparableOutcomes": 1
+  },
+  "readSurface": {
+    "command": "python3 scripts/ope.py transit-forward-run-corpus",
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false
+  },
+  "warnings": [
+    "This corpus is a checked local index and does not execute forward runs or fetch live sources.",
+    "One comparable scored run is useful implementation evidence, not a calibration or quality claim.",
+    "Excluded runs preserve audit reasons but do not count toward comparable resolved windows.",
+    "Resolution outcome rows are resolution-only evidence and must not become forecast-time provenance."
+  ]
+}

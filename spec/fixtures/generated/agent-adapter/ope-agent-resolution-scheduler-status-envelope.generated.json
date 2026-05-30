@@ -1,0 +1,223 @@
+{
+  "agentEnvelopeId": "agentenvelope-047",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "resolution_scheduler_status",
+  "adapterRequest": {
+    "operation": "resolution_scheduler_status",
+    "inputRecordType": "resolution_scheduler_status",
+    "inputRef": "resolutionschedulerstatus-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read the latest checked resolution scheduler status without starting a scheduler."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": null,
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "resolution_scheduler_status_readback",
+    "approvalStatus": "not_required",
+    "dataMode": "fixture_once",
+    "planStatus": "scheduler_status_readback",
+    "executionMode": "dry_run",
+    "sourceMode": "foreground_terminal_scheduler",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "due_pending",
+    "scoreStatus": "not_created",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "resolutionSchedulerStatusId": "resolutionschedulerstatus-001",
+    "resolutionSchedulerRunId": "resolutionschedulerrun-001",
+    "generatedAt": "2026-06-10T08:30:00Z",
+    "runtimeStatus": "scheduler_status_readback",
+    "schedulerMode": "fixture_once",
+    "executionMode": "dry_run",
+    "logPath": ".ope/live/resolution-scheduler/scheduler-runs.jsonl",
+    "schedulerRun": {
+      "resolutionSchedulerRunId": "resolutionschedulerrun-001",
+      "generatedAt": "2026-06-10T08:30:00Z",
+      "schedulerMode": "fixture_once",
+      "executionMode": "dry_run",
+      "pollSeconds": 60,
+      "tickCount": 1,
+      "ticks": [
+        {
+          "tickNumber": 1,
+          "startedAt": "2026-06-10T08:30:00Z",
+          "tickStatus": "due_pending",
+          "jobSummary": {
+            "jobCount": 3,
+            "pendingDueCount": 1,
+            "pendingNotDueCount": 1,
+            "alreadyResolvedCount": 1,
+            "invalidCount": 0
+          },
+          "resolverSummary": {
+            "ranResolver": false,
+            "executedCount": 0,
+            "failedCount": 0
+          },
+          "actions": [
+            {
+              "resolutionJobId": "resolutionjob-001",
+              "jobStatus": "pending_due",
+              "schedulerAction": "due_waiting_for_execute_flag",
+              "statePath": ".ope/live/transit-forward-run/fixture-due/forward-run-state.json"
+            },
+            {
+              "resolutionJobId": "resolutionjob-002",
+              "jobStatus": "pending_not_due",
+              "schedulerAction": "wait_until_due",
+              "statePath": ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json"
+            },
+            {
+              "resolutionJobId": "resolutionjob-003",
+              "jobStatus": "already_resolved",
+              "schedulerAction": "skip_already_resolved",
+              "statePath": ".ope/live/transit-forward-run/fixture-scored/forward-run-state.json"
+            }
+          ],
+          "nextPollSeconds": 0
+        }
+      ],
+      "executionBoundary": {
+        "normalChecksUseLiveNetwork": false,
+        "watchRequiresExplicitFlag": true,
+        "executeRequiresExplicitFlag": true,
+        "hostedSchedulerCreated": false,
+        "osSchedulerCreated": false,
+        "calibrationClaimAllowed": false
+      },
+      "warnings": [
+        "This is a foreground terminal scheduler, not a hosted service or OS scheduler.",
+        "Default and check modes perform one offline fixture tick.",
+        "Live watching requires --live --watch; resolver execution additionally requires --execute.",
+        "Agents that require machine-readable watch stdout should pass --output-format jsonl.",
+        "Scheduler execution may resolve due runs, but it never creates calibration claims."
+      ]
+    },
+    "lastTick": {
+      "tickNumber": 1,
+      "startedAt": "2026-06-10T08:30:00Z",
+      "tickStatus": "due_pending",
+      "jobSummary": {
+        "jobCount": 3,
+        "pendingDueCount": 1,
+        "pendingNotDueCount": 1,
+        "alreadyResolvedCount": 1,
+        "invalidCount": 0
+      },
+      "resolverSummary": {
+        "ranResolver": false,
+        "executedCount": 0,
+        "failedCount": 0
+      },
+      "actions": [
+        {
+          "resolutionJobId": "resolutionjob-001",
+          "jobStatus": "pending_due",
+          "schedulerAction": "due_waiting_for_execute_flag",
+          "statePath": ".ope/live/transit-forward-run/fixture-due/forward-run-state.json"
+        },
+        {
+          "resolutionJobId": "resolutionjob-002",
+          "jobStatus": "pending_not_due",
+          "schedulerAction": "wait_until_due",
+          "statePath": ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json"
+        },
+        {
+          "resolutionJobId": "resolutionjob-003",
+          "jobStatus": "already_resolved",
+          "schedulerAction": "skip_already_resolved",
+          "statePath": ".ope/live/transit-forward-run/fixture-scored/forward-run-state.json"
+        }
+      ],
+      "nextPollSeconds": 0
+    },
+    "lastShutdown": {
+      "shutdownReason": null,
+      "lastTickNumber": null,
+      "logFile": ".ope/live/resolution-scheduler/scheduler-runs.jsonl"
+    },
+    "queueStatusReadbacks": [
+      {
+        "queueState": "pending_due",
+        "count": 1,
+        "presentInLatestTick": true,
+        "nextRecommendedAction": "run_checked_resolver_when_approved"
+      },
+      {
+        "queueState": "pending_not_due",
+        "count": 1,
+        "presentInLatestTick": true,
+        "nextRecommendedAction": "wait_until_due"
+      },
+      {
+        "queueState": "already_resolved",
+        "count": 1,
+        "presentInLatestTick": true,
+        "nextRecommendedAction": "read_resolved_outputs"
+      },
+      {
+        "queueState": "invalid_state",
+        "count": 0,
+        "presentInLatestTick": false,
+        "nextRecommendedAction": "inspect_invalid_state"
+      },
+      {
+        "queueState": "failed",
+        "count": 0,
+        "presentInLatestTick": false,
+        "nextRecommendedAction": "inspect_failed_scheduler_tick"
+      },
+      {
+        "queueState": "empty_queue",
+        "count": 0,
+        "presentInLatestTick": false,
+        "nextRecommendedAction": "no_action_needed"
+      }
+    ],
+    "nextRecommendedAction": {
+      "recommendedAction": "run_checked_resolver_when_approved",
+      "reason": "at least one job is due, but this readback did not execute resolvers"
+    },
+    "executionBoundary": {
+      "statusReadExecutesScheduler": false,
+      "executesResolvers": false,
+      "fetchesLiveSources": false,
+      "createsForecastArtifacts": false,
+      "createsResolutionArtifacts": false,
+      "createsScoringRecords": false,
+      "hostedSchedulerCreated": false,
+      "osSchedulerCreated": false,
+      "calibrationClaimAllowed": false
+    },
+    "warnings": [
+      "This status readback is read-only and does not start a scheduler.",
+      "Use resolution_jobs before resolver execution, and use checked resolver commands only when execution is approved."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "This status readback is read-only and does not start a scheduler.",
+    "Use resolution_jobs before resolver execution, and use checked resolver commands only when execution is approved.",
+    "The adapter envelope is read-only and cannot execute due jobs."
+  ]
+}

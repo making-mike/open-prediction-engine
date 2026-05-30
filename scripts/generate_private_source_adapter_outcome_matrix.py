@@ -12,6 +12,7 @@ from typing import Any
 from generate_private_source_adapter_capabilities import build_capabilities
 from generate_private_setup_workflow import build_workflow
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,10 +48,6 @@ BLOCK_FORECAST_AND_SCORING = [
 
 class PrivateSourceAdapterOutcomeMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def outcome_class(
@@ -484,23 +481,11 @@ def validate_matrix(matrix: dict[str, Any], capability: dict[str, Any], workflow
 
 
 def write_matrix(matrix: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    MATRIX_PATH.write_text(render_json(matrix), encoding="utf-8")
-    print("generated private source adapter outcome matrix")
+    write_generated(MATRIX_PATH, matrix, label="private source adapter outcome matrix", regen="python3 scripts/generate_private_source_adapter_outcome_matrix.py --write")
 
 
 def check_matrix(matrix: dict[str, Any]) -> None:
-    expected = render_json(matrix)
-    if not MATRIX_PATH.exists():
-        print(f"missing private source adapter outcome matrix: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_adapter_outcome_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = MATRIX_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private source adapter outcome matrix drift: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_adapter_outcome_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private source adapter outcome matrix")
+    check_generated(MATRIX_PATH, matrix, label="private source adapter outcome matrix", regen="python3 scripts/generate_private_source_adapter_outcome_matrix.py --write")
 
 
 def main() -> None:

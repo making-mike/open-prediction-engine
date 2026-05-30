@@ -1,0 +1,350 @@
+{
+  "transitCorpusGrowthLoopId": "transitcorpusgrowthloop-001",
+  "generatedAt": "2026-06-10T07:15:00Z",
+  "domain": "weather-transit-delays",
+  "growthMode": "checked_append_readiness_loop",
+  "sourceCorpus": {
+    "transitForwardRunCorpusId": "transitforwardruncorpus-001",
+    "sourceCommand": "python3 scripts/ope.py transit-forward-run-corpus",
+    "corpusPath": "spec/fixtures/generated/transit-forward-run-corpus/transit-forward-run-corpus.generated.json",
+    "currentComparableResolved": 1,
+    "currentExcluded": 6,
+    "minimumComparableResolvedForTrackRecord": 30,
+    "minimumComparableResolvedForCalibration": 100
+  },
+  "appendProtocol": {
+    "appendProtocolId": "transitcorpusgrowthprotocol-001",
+    "appendReadinessCommand": "python3 scripts/ope.py transit-corpus-growth --case comparable_resolved",
+    "appendOnly": true,
+    "manualCorpusEditingRequired": false,
+    "canonicalCorpusMutationImplemented": false,
+    "normalChecksMutateCorpus": false,
+    "requiredBindings": [
+      "forward_run_state",
+      "forecast_artifact",
+      "resolution_record",
+      "scoring_report",
+      "source_policy",
+      "corpus_policy"
+    ],
+    "acceptanceChecks": [
+      "Forecast exists and was produced before close time.",
+      "Resolution exists and was produced after horizon end.",
+      "Scoring report binds forecast, question, resolution, and baseline.",
+      "Observation coverage satisfies the corpus policy.",
+      "Forecast-time evidence excludes post-close outcome rows.",
+      "Append action adds a row and does not edit existing corpus rows."
+    ]
+  },
+  "candidateUpdates": [
+    {
+      "candidateId": "transitcorpusgrowthcandidate-001",
+      "candidateCase": "comparable_resolved",
+      "forwardRunId": "transitdelayforwardrun-1301",
+      "forecastId": "forecast-1301",
+      "questionId": "question-1301",
+      "serviceDate": "2026-06-17",
+      "appendDecision": "append_ready",
+      "reasonCode": "none",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": true,
+      "resolvedAfterHorizon": true,
+      "scorePresent": true,
+      "forecastTimeEvidenceBoundaryPreserved": true,
+      "resolutionOnlyEvidenceBoundaryPreserved": true,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": true,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Append one new comparable row after the checked forward-run, resolution, and scoring records are present."
+    },
+    {
+      "candidateId": "transitcorpusgrowthcandidate-002",
+      "candidateCase": "missing_outcome",
+      "forwardRunId": "transitdelayforwardrun-1302",
+      "forecastId": "forecast-1302",
+      "questionId": "question-1302",
+      "serviceDate": "2026-06-18",
+      "appendDecision": "exclude_from_comparable",
+      "reasonCode": "missing_outcome",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": true,
+      "resolvedAfterHorizon": false,
+      "scorePresent": false,
+      "forecastTimeEvidenceBoundaryPreserved": true,
+      "resolutionOnlyEvidenceBoundaryPreserved": true,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": false,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Keep the run pending or excluded until the declared resolution source yields an outcome."
+    },
+    {
+      "candidateId": "transitcorpusgrowthcandidate-003",
+      "candidateCase": "stale_evidence",
+      "forwardRunId": "transitdelayforwardrun-1303",
+      "forecastId": "forecast-1303",
+      "questionId": "question-1303",
+      "serviceDate": "2026-06-19",
+      "appendDecision": "exclude_from_comparable",
+      "reasonCode": "stale_evidence",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": true,
+      "resolvedAfterHorizon": true,
+      "scorePresent": false,
+      "forecastTimeEvidenceBoundaryPreserved": false,
+      "resolutionOnlyEvidenceBoundaryPreserved": true,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": false,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Exclude the run and collect a fresh pre-close evidence set before another forecast attempt."
+    },
+    {
+      "candidateId": "transitcorpusgrowthcandidate-004",
+      "candidateCase": "leakage_risk",
+      "forwardRunId": "transitdelayforwardrun-1304",
+      "forecastId": "forecast-1304",
+      "questionId": "question-1304",
+      "serviceDate": "2026-06-20",
+      "appendDecision": "reject_from_corpus",
+      "reasonCode": "leakage_risk",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": false,
+      "resolvedAfterHorizon": true,
+      "scorePresent": false,
+      "forecastTimeEvidenceBoundaryPreserved": false,
+      "resolutionOnlyEvidenceBoundaryPreserved": false,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": false,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Reject the candidate because post-outcome or same-window outcome evidence may have entered forecast provenance."
+    },
+    {
+      "candidateId": "transitcorpusgrowthcandidate-005",
+      "candidateCase": "post_close_source",
+      "forwardRunId": "transitdelayforwardrun-1305",
+      "forecastId": "forecast-1305",
+      "questionId": "question-1305",
+      "serviceDate": "2026-06-21",
+      "appendDecision": "exclude_from_comparable",
+      "reasonCode": "post_close_source",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": false,
+      "resolvedAfterHorizon": true,
+      "scorePresent": false,
+      "forecastTimeEvidenceBoundaryPreserved": false,
+      "resolutionOnlyEvidenceBoundaryPreserved": true,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": false,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Retain for audit only; do not count the run as forecast-time comparable evidence."
+    },
+    {
+      "candidateId": "transitcorpusgrowthcandidate-006",
+      "candidateCase": "incomparable_window",
+      "forwardRunId": "transitdelayforwardrun-1306",
+      "forecastId": "forecast-1306",
+      "questionId": "question-1306",
+      "serviceDate": "2026-06-22",
+      "appendDecision": "exclude_from_comparable",
+      "reasonCode": "incomparable_window",
+      "requiredBindingsPresent": true,
+      "forecastBeforeClose": true,
+      "resolvedAfterHorizon": true,
+      "scorePresent": true,
+      "forecastTimeEvidenceBoundaryPreserved": true,
+      "resolutionOnlyEvidenceBoundaryPreserved": true,
+      "appendOnlyWrite": {
+        "wouldAppendCorpusRow": false,
+        "wouldModifyExistingRows": false,
+        "wouldCreateForecastArtifacts": false,
+        "wouldCreateResolutionRecords": false,
+        "wouldCreateScoringRecords": false,
+        "requiresManualCorpusEditing": false
+      },
+      "nextAction": "Keep the run outside the morning-peak comparable corpus and start a separate corpus if the window matters."
+    }
+  ],
+  "dueRunChecklist": [
+    {
+      "checkId": "transitcorpusgrowthcheck-001",
+      "check": "Forward run state exists and has not already been resolved.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Read resolution jobs before attempting resolver execution."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-002",
+      "check": "Forecast timestamp is at or before the declared close time.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Reject candidates whose forecast was created after close."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-003",
+      "check": "Resolution due time is reached after the horizon end.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Wait until the due time before resolving."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-004",
+      "check": "Resolver command uses declared resolution-only sources.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Keep TripUpdates and outcome rows out of forecast-time provenance."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-005",
+      "check": "Saved state and resolver output are sanitized and path-bounded.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Stop if ignored live workspace paths or raw payloads would be committed."
+    }
+  ],
+  "postResolutionChecklist": [
+    {
+      "checkId": "transitcorpusgrowthcheck-006",
+      "check": "Resolution record status is resolved and after horizon end.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Exclude ambiguous, annulled, or premature outcomes."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-007",
+      "check": "Scoring report is present and binds the forecast, question, resolution, and baseline.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Do not append comparable rows without score bindings."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-008",
+      "check": "Observation coverage meets the corpus minimum.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Route low-coverage runs to the exclusion ledger."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-009",
+      "check": "Forecast evidence excludes post-close outcome rows.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Reject leakage-risk candidates from the corpus."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-010",
+      "check": "Service window, network, geography, and threshold match the corpus scope.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Exclude incomparable windows from this corpus."
+    },
+    {
+      "checkId": "transitcorpusgrowthcheck-011",
+      "check": "Append operation adds a new row without modifying existing corpus rows.",
+      "requiredForAppend": true,
+      "preservesForecastTimeEvidenceBoundary": true,
+      "nextAction": "Preserve append-only corpus history."
+    }
+  ],
+  "exclusionLedger": [
+    {
+      "ledgerRowId": "transitcorpusgrowthledger-001",
+      "candidateCase": "missing_outcome",
+      "reasonCode": "missing_outcome",
+      "countsTowardComparableResolved": false,
+      "countsTowardCalibration": false,
+      "safeToRetainForAudit": true,
+      "nextAction": "Keep the run pending or excluded until the declared resolution source yields an outcome."
+    },
+    {
+      "ledgerRowId": "transitcorpusgrowthledger-002",
+      "candidateCase": "stale_evidence",
+      "reasonCode": "stale_evidence",
+      "countsTowardComparableResolved": false,
+      "countsTowardCalibration": false,
+      "safeToRetainForAudit": true,
+      "nextAction": "Exclude the run and collect a fresh pre-close evidence set before another forecast attempt."
+    },
+    {
+      "ledgerRowId": "transitcorpusgrowthledger-003",
+      "candidateCase": "leakage_risk",
+      "reasonCode": "leakage_risk",
+      "countsTowardComparableResolved": false,
+      "countsTowardCalibration": false,
+      "safeToRetainForAudit": false,
+      "nextAction": "Reject the candidate because post-outcome or same-window outcome evidence may have entered forecast provenance."
+    },
+    {
+      "ledgerRowId": "transitcorpusgrowthledger-004",
+      "candidateCase": "post_close_source",
+      "reasonCode": "post_close_source",
+      "countsTowardComparableResolved": false,
+      "countsTowardCalibration": false,
+      "safeToRetainForAudit": true,
+      "nextAction": "Retain for audit only; do not count the run as forecast-time comparable evidence."
+    },
+    {
+      "ledgerRowId": "transitcorpusgrowthledger-005",
+      "candidateCase": "incomparable_window",
+      "reasonCode": "incomparable_window",
+      "countsTowardComparableResolved": false,
+      "countsTowardCalibration": false,
+      "safeToRetainForAudit": true,
+      "nextAction": "Keep the run outside the morning-peak comparable corpus and start a separate corpus if the window matters."
+    }
+  ],
+  "progressReadback": {
+    "currentComparableResolved": 1,
+    "appendReadyComparableCount": 1,
+    "projectedComparableResolved": 2,
+    "remainingForTrackRecord": 28,
+    "remainingForCalibration": 98,
+    "progressToTrackRecord": 0.0667,
+    "progressToCalibration": 0.02,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "baselineTrackRecordAllowed": false
+  },
+  "executionBoundary": {
+    "executesAppend": false,
+    "appendOnlyContractDeclared": true,
+    "modifiesExistingCorpusRows": false,
+    "readsIgnoredLiveWorkspace": false,
+    "fetchesLiveData": false,
+    "createsForecastArtifacts": false,
+    "createsResolutionRecords": false,
+    "createsScoringRecords": false,
+    "storesCredentials": false,
+    "allowsQualityClaims": false,
+    "normalChecksDeterministicOffline": true
+  },
+  "warnings": [
+    "The growth loop is an append-readiness read model; normal checks do not mutate the canonical corpus.",
+    "Comparable candidates require forecast, resolution, score, source-policy, and corpus-policy bindings before append.",
+    "Excluded candidates preserve audit reasons but do not count toward track-record or calibration thresholds.",
+    "Projected progress remains below quality, baseline track-record, and calibration claim thresholds."
+  ]
+}

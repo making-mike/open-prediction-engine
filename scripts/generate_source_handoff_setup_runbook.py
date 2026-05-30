@@ -15,6 +15,7 @@ from ope_schema import SPEC, validate_record
 from resolve_source_handoff_outcome import build_outputs as build_resolution_outputs
 from run_source_handoff_forecast import build_outputs as build_forecast_outputs
 from run_source_handoff_forecast import output_prefix
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,10 +27,6 @@ GENERATED_AT = "2026-06-06T19:35:00Z"
 
 class SourceHandoffSetupRunbookError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def workflow_steps() -> list[dict[str, Any]]:
@@ -413,23 +410,11 @@ def validate_runbook(runbook: dict[str, Any]) -> None:
 
 
 def write_runbook(runbook: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    RUNBOOK_PATH.write_text(render_json(runbook), encoding="utf-8")
-    print("generated source-handoff setup runbook")
+    write_generated(RUNBOOK_PATH, runbook, label="source-handoff setup runbook", regen="python3 scripts/generate_source_handoff_setup_runbook.py --write")
 
 
 def check_runbook(runbook: dict[str, Any]) -> None:
-    expected = render_json(runbook)
-    if not RUNBOOK_PATH.exists():
-        print(f"missing source-handoff setup runbook: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_handoff_setup_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = RUNBOOK_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"source-handoff setup runbook drift: {RUNBOOK_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_source_handoff_setup_runbook.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked source-handoff setup runbook")
+    check_generated(RUNBOOK_PATH, runbook, label="source-handoff setup runbook", regen="python3 scripts/generate_source_handoff_setup_runbook.py --write")
 
 
 def main() -> None:

@@ -15,6 +15,7 @@ import connect_transit_api as transit_api
 import fetch_open_meteo_weather as open_meteo
 import run_transit_delay_forecast as transit_forecast
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,10 +28,6 @@ HELSINKI_TZ = ZoneInfo("Europe/Helsinki")
 
 class ForwardRunError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def utc_now() -> datetime:
@@ -50,7 +47,8 @@ def local_uri(path: Path) -> str:
         rel = path.resolve().relative_to(ROOT)
     except ValueError:
         rel = path.resolve()
-    return f"local://{str(rel).replace('\\', '/')}"
+    normalized = str(rel).replace("\\", "/")
+    return f"local://{normalized}"
 
 
 def workspace_path(path: Path) -> str:
@@ -491,23 +489,11 @@ def run_resolve_from_state(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def write_fixture(summary: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(render_json(summary), encoding="utf-8")
-    print("generated transit delay forward run")
+    write_generated(OUTPUT_PATH, summary, label="transit delay forward run", regen="python3 scripts/run_transit_delay_forward.py --write")
 
 
 def check_fixture(summary: dict[str, Any]) -> None:
-    expected = render_json(summary)
-    if not OUTPUT_PATH.exists():
-        print(f"missing transit delay forward run: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/run_transit_delay_forward.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = OUTPUT_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"transit delay forward run drift: {OUTPUT_PATH}", file=sys.stderr)
-        print("run `python3 scripts/run_transit_delay_forward.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked transit delay forward run")
+    check_generated(OUTPUT_PATH, summary, label="transit delay forward run", regen="python3 scripts/run_transit_delay_forward.py --write")
 
 
 def main() -> None:

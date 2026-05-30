@@ -32,6 +32,7 @@ from run_source_handoff_forecast import SourceHandoffForecastError
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
 from run_source_handoff_forecast import output_prefix as source_handoff_forecast_output_prefix
 from validate_forecast_request import load_json, validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +65,18 @@ PRIVATE_SOURCE_KIND_SELECTION_PATH = (
     / "private-source-kind-selection"
     / "ope-private-source-kind-selection-examples.generated.json"
 )
+RESOLUTION_JOB_REGISTRY_SCHEMA = SPEC / "resolution-job-registry.schema.json"
+RESOLUTION_JOB_REGISTRY_PATH = ROOT / "spec" / "fixtures" / "generated" / "resolution-jobs" / "resolution-jobs.generated.json"
+RESOLUTION_SCHEDULER_RUN_SCHEMA = SPEC / "resolution-scheduler-run.schema.json"
+RESOLUTION_SCHEDULER_RUN_PATH = (
+    ROOT
+    / "spec"
+    / "fixtures"
+    / "generated"
+    / "resolution-scheduler"
+    / "resolution-scheduler-run.generated.json"
+)
+RESOLUTION_SCHEDULER_LOG_PATH = ".ope/live/resolution-scheduler/scheduler-runs.jsonl"
 GENERATED_AT = "2026-06-06T12:20:00Z"
 FORECAST_ID = "forecast-602"
 QUESTION_ID = "question-601"
@@ -148,6 +161,12 @@ OUTPUT_FILES = {
     "private_setup_lifecycle_bundle_readback": "ope-agent-private-setup-lifecycle-bundle-readback-envelope.generated.json",
     "private_setup_resolution_status_readback": "ope-agent-private-setup-resolution-status-readback-envelope.generated.json",
     "private_setup_scoring_summary_readback": "ope-agent-private-setup-scoring-summary-readback-envelope.generated.json",
+    "resolution_jobs": "ope-agent-resolution-jobs-envelope.generated.json",
+    "resolution_scheduler_status": "ope-agent-resolution-scheduler-status-envelope.generated.json",
+    "resolution_jobs_missing_live_workspace_error": "ope-agent-resolution-jobs-missing-live-workspace-error-envelope.generated.json",
+    "resolution_jobs_unreadable_state_error": "ope-agent-resolution-jobs-unreadable-state-error-envelope.generated.json",
+    "resolution_scheduler_malformed_log_error": "ope-agent-resolution-scheduler-malformed-log-error-envelope.generated.json",
+    "resolution_scheduler_oversized_readback_error": "ope-agent-resolution-scheduler-oversized-readback-error-envelope.generated.json",
     "resolution_status": "ope-agent-resolution-status-envelope.generated.json",
     "scoring_summary": "ope-agent-scoring-summary-envelope.generated.json",
     "forecast_card_error": "ope-agent-sanitized-error-envelope.generated.json",
@@ -181,10 +200,6 @@ def source_handoff_forecast_outputs() -> dict[str, Any]:
 
 def source_handoff_forecast_outputs_cache_info() -> Any:
     return source_handoff_forecast_outputs.cache_info()
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def nullable_binding(**values: str | None) -> dict[str, str | None]:
@@ -428,6 +443,59 @@ def validate_payload_binding(item: dict[str, Any]) -> None:
         expect_equal("scoring summary question binding", payload["questionId"], binding["questionId"])
         expect_equal("scoring summary record binding", payload["scoringReportId"], binding["scoringReportId"])
         expect_equal("scoring summary state", payload["scoreStatus"], item["state"]["scoreStatus"])
+        return
+
+    if operation == "resolution_jobs":
+        registry = payload
+        expect_equal("resolution jobs input ref", registry["resolutionJobRegistryId"], request["inputRef"])
+        expect_equal("resolution jobs state", "pending_due", item["state"]["resolutionStatus"])
+        if registry["summary"]["pendingDueCount"] != 1:
+            raise AgentAdapterError("resolution jobs should expose one due fixture job")
+        if registry["executionBoundary"]["registryExecutesResolvers"] is not False:
+            raise AgentAdapterError("resolution jobs must not execute resolvers")
+        due_jobs = [job for job in registry["jobs"] if job["jobStatus"] == "pending_due"]
+        if due_jobs[0]["agentAction"]["recommendedAction"] != "call_resolver_execute":
+            raise AgentAdapterError("resolution jobs should route due jobs to checked resolver execution")
+        for job in registry["jobs"]:
+            boundary = job["claimBoundary"]
+            if boundary["createsForecastArtifacts"] or boundary["createsResolutionArtifacts"]:
+                raise AgentAdapterError("resolution jobs must not create forecast or resolution artifacts")
+            if boundary["calibrationClaimAllowed"]:
+                raise AgentAdapterError("resolution jobs must not create calibration claims")
+        return
+
+    if operation == "resolution_scheduler_status":
+        status = payload
+        tick = status["lastTick"]
+        queue_states = {row["queueState"]: row for row in status["queueStatusReadbacks"]}
+        expect_equal("resolution scheduler status input ref", status["resolutionSchedulerStatusId"], request["inputRef"])
+        expect_equal("resolution scheduler run binding", status["resolutionSchedulerRunId"], status["schedulerRun"]["resolutionSchedulerRunId"])
+        expect_equal("resolution scheduler state", tick["tickStatus"], item["state"]["resolutionStatus"])
+        if status["executionMode"] != "dry_run":
+            raise AgentAdapterError("resolution scheduler status fixture should expose dry-run execution mode")
+        if status["logPath"] != RESOLUTION_SCHEDULER_LOG_PATH:
+            raise AgentAdapterError("resolution scheduler status should expose the checked log path")
+        if tick["jobSummary"]["pendingDueCount"] != 1 or tick["tickStatus"] != "due_pending":
+            raise AgentAdapterError("resolution scheduler status should expose the latest due-pending tick")
+        if queue_states["pending_due"]["presentInLatestTick"] is not True:
+            raise AgentAdapterError("resolution scheduler status should include the pending due queue state")
+        for queue_state in ["pending_not_due", "already_resolved", "invalid_state", "failed", "empty_queue"]:
+            if queue_state not in queue_states:
+                raise AgentAdapterError(f"resolution scheduler status missing {queue_state} readback")
+        boundary = status["executionBoundary"]
+        for key in [
+            "statusReadExecutesScheduler",
+            "executesResolvers",
+            "fetchesLiveSources",
+            "createsForecastArtifacts",
+            "createsResolutionArtifacts",
+            "createsScoringRecords",
+            "hostedSchedulerCreated",
+            "osSchedulerCreated",
+            "calibrationClaimAllowed",
+        ]:
+            if boundary[key] is not False:
+                raise AgentAdapterError(f"resolution scheduler status boundary should keep {key} false")
         return
 
     if operation == "private_setup_bundle":
@@ -1259,6 +1327,352 @@ def build_private_setup_adapter_conformance_summary_envelope() -> dict[str, Any]
     )
 
 
+def load_resolution_job_registry() -> dict[str, Any]:
+    registry = json.loads(RESOLUTION_JOB_REGISTRY_PATH.read_text(encoding="utf-8"))
+    errors = validate_record(registry, RESOLUTION_JOB_REGISTRY_SCHEMA)
+    if errors:
+        raise AgentAdapterError(f"resolution job registry validation failed: {errors[0]}")
+    return registry
+
+
+def state_from_resolution_job_registry(registry: dict[str, Any]) -> dict[str, str | None]:
+    summary = registry["summary"]
+    if summary["pendingDueCount"] > 0:
+        resolution_status = "pending_due"
+    elif summary["pendingNotDueCount"] > 0:
+        resolution_status = "pending_not_due"
+    elif summary["invalidCount"] > 0:
+        resolution_status = "invalid_state"
+    else:
+        resolution_status = "idle"
+    return nullable_state(
+        decisionStatus="resolution_jobs_readback",
+        approvalStatus="not_required",
+        dataMode=registry["registryMode"],
+        planStatus="read_only_registry",
+        executionMode="read_only",
+        sourceMode=registry["sourceBinding"]["sourceKind"],
+        forecastStatus="not_created",
+        resolutionStatus=resolution_status,
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+
+
+def build_resolution_jobs_envelope() -> dict[str, Any]:
+    registry = load_resolution_job_registry()
+    return envelope(
+        "agentenvelope-046",
+        "resolution_jobs",
+        "read_only",
+        "resolution_job_registry",
+        registry["resolutionJobRegistryId"],
+        registry,
+        caller_intent="Read resolution job registry guidance without executing resolvers.",
+        record_binding=nullable_binding(),
+        state=state_from_resolution_job_registry(registry),
+        warnings=[
+            *registry["warnings"],
+            "The adapter envelope is read-only and cannot execute resolver commands.",
+        ],
+    )
+
+
+def load_resolution_scheduler_run() -> dict[str, Any]:
+    report = json.loads(RESOLUTION_SCHEDULER_RUN_PATH.read_text(encoding="utf-8"))
+    errors = validate_record(report, RESOLUTION_SCHEDULER_RUN_SCHEMA)
+    if errors:
+        raise AgentAdapterError(f"resolution scheduler run validation failed: {errors[0]}")
+    return report
+
+
+def next_scheduler_action(report: dict[str, Any]) -> dict[str, Any]:
+    tick = report["ticks"][-1]
+    if tick["tickStatus"] == "failed":
+        return {
+            "recommendedAction": "inspect_failed_scheduler_tick",
+            "reason": "the latest scheduler tick reported resolver failures",
+        }
+    if tick["tickStatus"] == "due_pending" and report["executionMode"] == "dry_run":
+        return {
+            "recommendedAction": "run_checked_resolver_when_approved",
+            "reason": "at least one job is due, but this readback did not execute resolvers",
+        }
+    if tick["tickStatus"] == "waiting":
+        return {
+            "recommendedAction": "wait_until_due",
+            "reason": "no jobs are due yet",
+        }
+    if tick["tickStatus"] == "executed":
+        return {
+            "recommendedAction": "read_resolved_outputs",
+            "reason": "the latest scheduler tick executed at least one resolver",
+        }
+    return {
+        "recommendedAction": "inspect_resolution_jobs",
+        "reason": "the scheduler is idle or all jobs are already resolved",
+    }
+
+
+def scheduler_queue_readbacks(tick: dict[str, Any]) -> list[dict[str, Any]]:
+    jobs = tick["jobSummary"]
+    failed_count = tick["resolverSummary"]["failedCount"]
+    return [
+        {
+            "queueState": "pending_due",
+            "count": jobs["pendingDueCount"],
+            "presentInLatestTick": jobs["pendingDueCount"] > 0,
+            "nextRecommendedAction": "run_checked_resolver_when_approved",
+        },
+        {
+            "queueState": "pending_not_due",
+            "count": jobs["pendingNotDueCount"],
+            "presentInLatestTick": jobs["pendingNotDueCount"] > 0,
+            "nextRecommendedAction": "wait_until_due",
+        },
+        {
+            "queueState": "already_resolved",
+            "count": jobs["alreadyResolvedCount"],
+            "presentInLatestTick": jobs["alreadyResolvedCount"] > 0,
+            "nextRecommendedAction": "read_resolved_outputs",
+        },
+        {
+            "queueState": "invalid_state",
+            "count": jobs["invalidCount"],
+            "presentInLatestTick": jobs["invalidCount"] > 0,
+            "nextRecommendedAction": "inspect_invalid_state",
+        },
+        {
+            "queueState": "failed",
+            "count": failed_count,
+            "presentInLatestTick": failed_count > 0 or tick["tickStatus"] == "failed",
+            "nextRecommendedAction": "inspect_failed_scheduler_tick",
+        },
+        {
+            "queueState": "empty_queue",
+            "count": 0 if jobs["jobCount"] else 1,
+            "presentInLatestTick": jobs["jobCount"] == 0,
+            "nextRecommendedAction": "no_action_needed",
+        },
+    ]
+
+
+def resolution_scheduler_status_payload(report: dict[str, Any]) -> dict[str, Any]:
+    tick = report["ticks"][-1]
+    shutdown = report.get("shutdown")
+    return {
+        "resolutionSchedulerStatusId": "resolutionschedulerstatus-001",
+        "resolutionSchedulerRunId": report["resolutionSchedulerRunId"],
+        "generatedAt": report["generatedAt"],
+        "runtimeStatus": "scheduler_status_readback",
+        "schedulerMode": report["schedulerMode"],
+        "executionMode": report["executionMode"],
+        "logPath": RESOLUTION_SCHEDULER_LOG_PATH,
+        "schedulerRun": report,
+        "lastTick": {
+            "tickNumber": tick["tickNumber"],
+            "startedAt": tick["startedAt"],
+            "tickStatus": tick["tickStatus"],
+            "jobSummary": tick["jobSummary"],
+            "resolverSummary": tick["resolverSummary"],
+            "actions": tick["actions"],
+            "nextPollSeconds": tick["nextPollSeconds"],
+        },
+        "lastShutdown": {
+            "shutdownReason": shutdown["shutdownReason"] if shutdown else None,
+            "lastTickNumber": shutdown["lastTickNumber"] if shutdown else None,
+            "logFile": shutdown["logFile"] if shutdown else RESOLUTION_SCHEDULER_LOG_PATH,
+        },
+        "queueStatusReadbacks": scheduler_queue_readbacks(tick),
+        "nextRecommendedAction": next_scheduler_action(report),
+        "executionBoundary": {
+            "statusReadExecutesScheduler": False,
+            "executesResolvers": False,
+            "fetchesLiveSources": False,
+            "createsForecastArtifacts": False,
+            "createsResolutionArtifacts": False,
+            "createsScoringRecords": False,
+            "hostedSchedulerCreated": False,
+            "osSchedulerCreated": False,
+            "calibrationClaimAllowed": False,
+        },
+        "warnings": [
+            "This status readback is read-only and does not start a scheduler.",
+            "Use resolution_jobs before resolver execution, and use checked resolver commands only when execution is approved.",
+        ],
+    }
+
+
+def state_from_resolution_scheduler_status(payload: dict[str, Any]) -> dict[str, str | None]:
+    report = payload["schedulerRun"]
+    return nullable_state(
+        decisionStatus="resolution_scheduler_status_readback",
+        approvalStatus="not_required",
+        dataMode=report["schedulerMode"],
+        planStatus=payload["runtimeStatus"],
+        executionMode=report["executionMode"],
+        sourceMode="foreground_terminal_scheduler",
+        forecastStatus="not_created",
+        resolutionStatus=payload["lastTick"]["tickStatus"],
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+
+
+def build_resolution_scheduler_status_envelope() -> dict[str, Any]:
+    payload = resolution_scheduler_status_payload(load_resolution_scheduler_run())
+    return envelope(
+        "agentenvelope-047",
+        "resolution_scheduler_status",
+        "read_only",
+        "resolution_scheduler_status",
+        payload["resolutionSchedulerStatusId"],
+        payload,
+        caller_intent="Read the latest checked resolution scheduler status without starting a scheduler.",
+        record_binding=nullable_binding(),
+        state=state_from_resolution_scheduler_status(payload),
+        warnings=[
+            *payload["warnings"],
+            "The adapter envelope is read-only and cannot execute due jobs.",
+        ],
+    )
+
+
+def resolution_readback_error_envelope(
+    *,
+    envelope_id: str,
+    operation: str,
+    input_record_type: str,
+    input_ref: str,
+    caller_intent: str,
+    error_code: str,
+    message: str,
+    retryable: bool,
+    state: dict[str, str | None],
+) -> dict[str, Any]:
+    return envelope(
+        envelope_id,
+        operation,
+        "read_only",
+        input_record_type,
+        input_ref,
+        None,
+        caller_intent=caller_intent,
+        record_binding=nullable_binding(),
+        state=state,
+        status="error",
+        error={
+            "code": error_code,
+            "message": message,
+            "retryable": retryable,
+        },
+        warnings=[
+            "Error payload is sanitized and does not expose absolute local paths, raw state-file contents, scheduler log contents, or stack traces.",
+            "Resolution readback error examples are conformance fixtures only and do not execute resolvers or start schedulers.",
+        ],
+    )
+
+
+def build_resolution_jobs_missing_live_workspace_error_envelope() -> dict[str, Any]:
+    return resolution_readback_error_envelope(
+        envelope_id="agentenvelope-048",
+        operation="resolution_jobs",
+        input_record_type="resolution_job_registry",
+        input_ref="resolutionjobregistry-998",
+        caller_intent="Read resolution jobs from a missing live workspace to demonstrate sanitized errors.",
+        error_code="not_found",
+        message="Live resolution workspace was not found.",
+        retryable=True,
+        state=nullable_state(
+            decisionStatus="resolution_jobs_readback_blocked",
+            approvalStatus="not_required",
+            dataMode="live_registry",
+            planStatus="missing_live_workspace",
+            executionMode="read_only",
+            sourceMode="forward_run_state",
+            forecastStatus="not_created",
+            resolutionStatus="not_started",
+            scoreStatus="not_created",
+            qualityClaimStatus="not_allowed",
+        ),
+    )
+
+
+def build_resolution_jobs_unreadable_state_error_envelope() -> dict[str, Any]:
+    return resolution_readback_error_envelope(
+        envelope_id="agentenvelope-049",
+        operation="resolution_jobs",
+        input_record_type="resolution_job_registry",
+        input_ref="resolutionjobregistry-997",
+        caller_intent="Read resolution jobs from an unreadable state file to demonstrate sanitized errors.",
+        error_code="access_denied",
+        message="Resolution state file could not be read.",
+        retryable=True,
+        state=nullable_state(
+            decisionStatus="resolution_jobs_readback_blocked",
+            approvalStatus="not_required",
+            dataMode="live_registry",
+            planStatus="unreadable_state_file",
+            executionMode="read_only",
+            sourceMode="forward_run_state",
+            forecastStatus="not_created",
+            resolutionStatus="invalid_state",
+            scoreStatus="not_created",
+            qualityClaimStatus="not_allowed",
+        ),
+    )
+
+
+def build_resolution_scheduler_malformed_log_error_envelope() -> dict[str, Any]:
+    return resolution_readback_error_envelope(
+        envelope_id="agentenvelope-050",
+        operation="resolution_scheduler_status",
+        input_record_type="resolution_scheduler_status",
+        input_ref="resolutionschedulerstatus-998",
+        caller_intent="Read scheduler status from a malformed scheduler log to demonstrate sanitized errors.",
+        error_code="validation_failed",
+        message="Resolution scheduler log could not be parsed as checked JSONL.",
+        retryable=True,
+        state=nullable_state(
+            decisionStatus="resolution_scheduler_status_blocked",
+            approvalStatus="not_required",
+            dataMode="live_watch",
+            planStatus="malformed_scheduler_log",
+            executionMode="read_only",
+            sourceMode="foreground_terminal_scheduler",
+            forecastStatus="not_created",
+            resolutionStatus="failed",
+            scoreStatus="not_created",
+            qualityClaimStatus="not_allowed",
+        ),
+    )
+
+
+def build_resolution_scheduler_oversized_readback_error_envelope() -> dict[str, Any]:
+    return resolution_readback_error_envelope(
+        envelope_id="agentenvelope-051",
+        operation="resolution_scheduler_status",
+        input_record_type="resolution_scheduler_status",
+        input_ref="resolutionschedulerstatus-997",
+        caller_intent="Read an oversized scheduler status payload to demonstrate sanitized size-limit errors.",
+        error_code="response_too_large",
+        message="Resolution scheduler status readback exceeds configured size limit.",
+        retryable=True,
+        state=nullable_state(
+            decisionStatus="resolution_scheduler_status_blocked",
+            approvalStatus="not_required",
+            dataMode="live_watch",
+            planStatus="oversized_readback",
+            executionMode="read_only",
+            sourceMode="foreground_terminal_scheduler",
+            forecastStatus="not_created",
+            resolutionStatus="not_started",
+            scoreStatus="not_created",
+            qualityClaimStatus="not_allowed",
+        ),
+    )
+
+
 def private_source_adapter_guidance_payload() -> dict[str, Any]:
     capability = build_private_source_adapter_capabilities()
     matrix = build_private_source_adapter_outcome_matrix()
@@ -2049,6 +2463,8 @@ def build_envelopes() -> dict[str, dict[str, Any]]:
         OUTPUT_FILES["lifecycle_bundle"]: build_lifecycle_bundle_envelope(card_response, bundle_response),
         OUTPUT_FILES["resolution_status"]: build_resolution_status_envelope(card_response, bundle_response),
         OUTPUT_FILES["scoring_summary"]: build_scoring_summary_envelope(card_response, bundle_response),
+        OUTPUT_FILES["resolution_jobs"]: build_resolution_jobs_envelope(),
+        OUTPUT_FILES["resolution_scheduler_status"]: build_resolution_scheduler_status_envelope(),
         OUTPUT_FILES["private_setup_bundle"]: build_private_setup_bundle_envelope(),
         OUTPUT_FILES["private_setup_adapter_runbook"]: build_private_setup_adapter_runbook_envelope(),
         OUTPUT_FILES["private_setup_adapter_conformance_summary"]: build_private_setup_adapter_conformance_summary_envelope(),
@@ -2159,6 +2575,10 @@ def build_envelopes() -> dict[str, dict[str, Any]]:
         OUTPUT_FILES["forecast_card_error"]: build_error_envelope(),
         OUTPUT_FILES["private_setup_bundle_error"]: build_private_setup_bundle_error_envelope(),
         OUTPUT_FILES["private_setup_source_builder_error"]: build_private_setup_source_builder_error_envelope(),
+        OUTPUT_FILES["resolution_jobs_missing_live_workspace_error"]: build_resolution_jobs_missing_live_workspace_error_envelope(),
+        OUTPUT_FILES["resolution_jobs_unreadable_state_error"]: build_resolution_jobs_unreadable_state_error_envelope(),
+        OUTPUT_FILES["resolution_scheduler_malformed_log_error"]: build_resolution_scheduler_malformed_log_error_envelope(),
+        OUTPUT_FILES["resolution_scheduler_oversized_readback_error"]: build_resolution_scheduler_oversized_readback_error_envelope(),
     }
     for filename, item in envelopes.items():
         errors = validate_record(item, SCHEMA)

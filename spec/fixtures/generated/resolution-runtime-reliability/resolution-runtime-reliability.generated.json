@@ -1,0 +1,413 @@
+{
+  "resolutionRuntimeReliabilityId": "resolutionruntimereliability-001",
+  "generatedAt": "2026-05-27T12:30:00Z",
+  "domain": "weather-transit-delays",
+  "reliabilityMode": "checked_fixture_read_model",
+  "runtimeScope": "resolution_runtime_reliability",
+  "failureTaxonomy": [
+    {
+      "failureClass": "source_availability",
+      "failureCategory": "source",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolution_outcome_capture"
+      ],
+      "retryable": true,
+      "retryAfter": "PT10M",
+      "nextAction": "retry_after_backoff",
+      "sanitizedDiagnostic": "The declared source was unavailable or returned no usable response.",
+      "safeSignals": [
+        "source_unavailable",
+        "no_successful_connector_result"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "empty_sources",
+      "failureCategory": "source",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolution_outcome_capture"
+      ],
+      "retryable": true,
+      "retryAfter": "PT30M",
+      "nextAction": "provide_fresh_source",
+      "sanitizedDiagnostic": "The source was readable but did not contain rows usable for the declared window.",
+      "safeSignals": [
+        "empty_result_set",
+        "no_window_rows"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "decode_failures",
+      "failureCategory": "decode",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolution_outcome_capture"
+      ],
+      "retryable": true,
+      "retryAfter": "PT10M",
+      "nextAction": "retry_after_backoff",
+      "sanitizedDiagnostic": "The local source payload could not be decoded into the expected checked shape.",
+      "safeSignals": [
+        "decode_error",
+        "unsupported_payload_shape"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "schedule_join_failures",
+      "failureCategory": "join",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolver_attempt"
+      ],
+      "retryable": false,
+      "retryAfter": null,
+      "nextAction": "rerun_schedule_join",
+      "sanitizedDiagnostic": "Transit rows could not be joined to the declared schedule reference.",
+      "safeSignals": [
+        "missing_trip_id",
+        "static_schedule_join_failed"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "coverage_gaps",
+      "failureCategory": "coverage",
+      "runtimeStages": [
+        "forward_forecast_run",
+        "resolver_attempt"
+      ],
+      "retryable": false,
+      "retryAfter": null,
+      "nextAction": "stop_and_request_confirmation",
+      "sanitizedDiagnostic": "The resolved or forecast-time sample did not meet the declared comparable-window coverage.",
+      "safeSignals": [
+        "below_minimum_rows",
+        "non_comparable_window"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "resolver_failures",
+      "failureCategory": "resolver",
+      "runtimeStages": [
+        "resolver_attempt"
+      ],
+      "retryable": true,
+      "retryAfter": "PT5M",
+      "nextAction": "retry_after_backoff",
+      "sanitizedDiagnostic": "The checked resolver attempt failed before producing resolution or scoring artifacts.",
+      "safeSignals": [
+        "resolver_exit_nonzero",
+        "resolver_output_missing"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "stale_state",
+      "failureCategory": "state",
+      "runtimeStages": [
+        "resolution_job_scan",
+        "scheduler_tick"
+      ],
+      "retryable": true,
+      "retryAfter": "PT60M",
+      "nextAction": "wait_for_next_tick",
+      "sanitizedDiagnostic": "Saved forward-run state is older than the accepted freshness window for the next action.",
+      "safeSignals": [
+        "state_generated_before_current_policy",
+        "freshness_window_expired"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "invalid_state",
+      "failureCategory": "state",
+      "runtimeStages": [
+        "resolution_job_scan",
+        "scheduler_tick"
+      ],
+      "retryable": false,
+      "retryAfter": null,
+      "nextAction": "inspect_invalid_state",
+      "sanitizedDiagnostic": "Saved forward-run state is missing required forecast or resolution metadata.",
+      "safeSignals": [
+        "missing_forecast_id",
+        "missing_resolve_at"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "network_timeouts",
+      "failureCategory": "network",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolution_outcome_capture"
+      ],
+      "retryable": true,
+      "retryAfter": "PT15M",
+      "nextAction": "retry_after_backoff",
+      "sanitizedDiagnostic": "The approved live source request timed out without exposing raw transport details.",
+      "safeSignals": [
+        "request_timeout",
+        "no_response_before_deadline"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "failureClass": "rate_limits",
+      "failureCategory": "policy",
+      "runtimeStages": [
+        "forecast_live_capture",
+        "resolution_outcome_capture"
+      ],
+      "retryable": true,
+      "retryAfter": "PT60M",
+      "nextAction": "retry_after_backoff",
+      "sanitizedDiagnostic": "The approved source indicated rate limiting or quota exhaustion.",
+      "safeSignals": [
+        "rate_limited",
+        "quota_exhausted"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    }
+  ],
+  "provenanceLedger": [
+    {
+      "runtimeActionId": "resolutionruntimeaction-001",
+      "actionType": "forecast_live_capture",
+      "command": "python3 scripts/ope.py transit-api-connector --schedule-join",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "hsl_gtfs_rt",
+      "sourceRole": "forecast_time_transit_feed",
+      "evidenceClassification": "forecast_time",
+      "forecastTimeEvidence": true,
+      "resolutionOnlyEvidence": false,
+      "allowedArtifactPaths": [
+        "spec/fixtures/generated/transit-api-connector/hsl-transit-api-connector.generated.json"
+      ],
+      "artifactHashStatus": "paths_only",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "ok",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    },
+    {
+      "runtimeActionId": "resolutionruntimeaction-002",
+      "actionType": "forward_forecast_run",
+      "command": "python3 scripts/ope.py transit-delay-forward-run",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "fixture_replay",
+      "sourceRole": "forecast_time_weather",
+      "evidenceClassification": "forecast_time",
+      "forecastTimeEvidence": true,
+      "resolutionOnlyEvidence": false,
+      "allowedArtifactPaths": [
+        "spec/fixtures/generated/transit-delay-forward-run/weather-transit-delays-forward-run.generated.json"
+      ],
+      "artifactHashStatus": "paths_only",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "ok",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    },
+    {
+      "runtimeActionId": "resolutionruntimeaction-003",
+      "actionType": "resolution_job_scan",
+      "command": "python3 scripts/ope.py resolution-jobs",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "fixture_replay",
+      "sourceRole": "forward_run_state",
+      "evidenceClassification": "runtime_control",
+      "forecastTimeEvidence": false,
+      "resolutionOnlyEvidence": false,
+      "allowedArtifactPaths": [
+        "spec/fixtures/generated/resolution-jobs/resolution-jobs.generated.json"
+      ],
+      "artifactHashStatus": "paths_only",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "ok",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    },
+    {
+      "runtimeActionId": "resolutionruntimeaction-004",
+      "actionType": "scheduler_tick",
+      "command": "python3 scripts/ope.py resolution-scheduler",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "local_scheduler",
+      "sourceRole": "scheduler_control",
+      "evidenceClassification": "runtime_control",
+      "forecastTimeEvidence": false,
+      "resolutionOnlyEvidence": false,
+      "allowedArtifactPaths": [
+        "spec/fixtures/generated/resolution-scheduler/resolution-scheduler-run.generated.json"
+      ],
+      "artifactHashStatus": "paths_only",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "ok",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    },
+    {
+      "runtimeActionId": "resolutionruntimeaction-005",
+      "actionType": "resolver_attempt",
+      "command": "python3 scripts/ope.py resolve-due-forward-runs",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "fixture_replay",
+      "sourceRole": "resolution_outcome",
+      "evidenceClassification": "resolution_only",
+      "forecastTimeEvidence": false,
+      "resolutionOnlyEvidence": true,
+      "allowedArtifactPaths": [
+        "spec/fixtures/generated/transit-forward-run-resolver/resolve-due-forward-runs.generated.json"
+      ],
+      "artifactHashStatus": "paths_only",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "ok",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    },
+    {
+      "runtimeActionId": "resolutionruntimeaction-006",
+      "actionType": "shutdown_readback",
+      "command": "python3 scripts/ope.py agent-call --operation resolution_scheduler_status",
+      "timestamp": "2026-05-27T12:30:00Z",
+      "sourceProvider": "local_scheduler",
+      "sourceRole": "runtime_log",
+      "evidenceClassification": "runtime_control",
+      "forecastTimeEvidence": false,
+      "resolutionOnlyEvidence": false,
+      "allowedArtifactPaths": [],
+      "artifactHashStatus": "not_applicable",
+      "diagnostics": {
+        "diagnosticLevel": "sanitized_summary",
+        "status": "not_run",
+        "rawDiagnosticsExposed": false,
+        "stackTraceExposed": false
+      }
+    }
+  ],
+  "executionBoundary": {
+    "readModelDoesNotExecute": true,
+    "normalChecksUseLiveNetwork": false,
+    "usesPostCloseOutcomeAsForecastEvidence": false,
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "createsHostedRuntime": false,
+    "createsOsScheduler": false,
+    "createsCalibrationClaims": false
+  },
+  "sourcePolicyBoundary": {
+    "liveCapturesAreLocalOnly": true,
+    "liveCaptureRequiresExplicitFlag": true,
+    "liveCaptureWorkspace": ".ope/live/",
+    "liveCaptureFilesCommitted": false,
+    "outcomeDataIsResolutionOnly": true,
+    "resolutionOutcomeMayEnterForecastProvenance": false,
+    "sourcePolicyRequiredBeforeHostedRuntime": true
+  },
+  "warnings": [
+    "This reliability record is a checked read model; it does not execute scheduler or resolver commands.",
+    "Outcome data is resolution-only and must not be reused as forecast-time provenance.",
+    "Live captures remain ignored local artifacts under .ope/live/ and require explicit live flags.",
+    "Failure diagnostics are sanitized categories and safe signals, not raw source contents or stack traces.",
+    "Calibration claims remain blocked until enough comparable resolved windows exist."
+  ]
+}

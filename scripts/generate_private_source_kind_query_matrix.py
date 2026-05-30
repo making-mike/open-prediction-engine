@@ -21,6 +21,7 @@ from generate_private_source_kind_selection_examples import SOURCE_KIND_ORDER, b
 from ope_schema import SPEC, validate_record
 from plan_auto_evidence import DEFAULT_REQUEST
 from read_ope_record import DEFAULT_MAX_BYTES
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ UNSUPPORTED_SOURCE_KIND = "spreadsheet_macro"
 
 class PrivateSourceKindQueryMatrixError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def dispatcher_args(source_kind: str | None) -> argparse.Namespace:
@@ -268,23 +265,11 @@ def validate_matrix(
 
 
 def write_matrix(matrix: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    MATRIX_PATH.write_text(render_json(matrix), encoding="utf-8")
-    print("generated private source-kind query matrix")
+    write_generated(MATRIX_PATH, matrix, label="private source-kind query matrix", regen="python3 scripts/generate_private_source_kind_query_matrix.py --write")
 
 
 def check_matrix(matrix: dict[str, Any]) -> None:
-    expected = render_json(matrix)
-    if not MATRIX_PATH.exists():
-        print(f"missing private source-kind query matrix: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_kind_query_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = MATRIX_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private source-kind query matrix drift: {MATRIX_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_source_kind_query_matrix.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private source-kind query matrix")
+    check_generated(MATRIX_PATH, matrix, label="private source-kind query matrix", regen="python3 scripts/generate_private_source_kind_query_matrix.py --write")
 
 
 def main() -> None:

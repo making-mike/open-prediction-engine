@@ -2206,6 +2206,256 @@
       ]
     },
     {
+      "operation": "resolution_jobs",
+      "inputRecordType": "resolution_job_registry",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation resolution_jobs",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_resolution_jobs",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-job readbacks accept no credentials in prompt-visible arguments and return only checked registry guidance."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/resolution-jobs",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-job readbacks accept no credentials in prompt-visible arguments and return only checked registry guidance."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.resolution_jobs.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-job readbacks accept no credentials in prompt-visible arguments and return only checked registry guidance."
+      },
+      "usageGuidance": "Use when an agent needs pending, due, resolved, invalid, and waiting resolution-job guidance without reading local state files or executing resolvers.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "resolution_scheduler_status",
+      "inputRecordType": "resolution_scheduler_status",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation resolution_scheduler_status",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_resolution_scheduler_status",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-scheduler status reads accept no credentials in prompt-visible arguments and return only checked scheduler readback guidance."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/resolution-scheduler-status",
+        "argumentFields": [
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-scheduler status reads accept no credentials in prompt-visible arguments and return only checked scheduler readback guidance."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.resolution_scheduler_status.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Resolution-scheduler status reads accept no credentials in prompt-visible arguments and return only checked scheduler readback guidance."
+      },
+      "usageGuidance": "Use when an agent needs the last scheduler tick, shutdown reason, log path, execution mode, queue state readbacks, and next action without starting a scheduler.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
       "operation": "resolution_status",
       "inputRecordType": "resolution_status",
       "sideEffectLevel": "status_read",
@@ -2773,6 +3023,31 @@
         "forecastId"
       ],
       "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API."
+    },
+    {
+      "situation": "The agent needs to know whether any forward-run forecasts are due for outcome resolution.",
+      "preferredOperation": "resolution_jobs",
+      "reason": "The registry exposes pending, due, waiting, resolved, and invalid job guidance without executing resolvers.",
+      "requiredSignals": [
+        "summary",
+        "jobs",
+        "agentAction",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use due job commands only after explicit live resolver approval; the readback itself must not execute."
+    },
+    {
+      "situation": "The agent needs the latest scheduler status before deciding to wait, execute, inspect, or stop.",
+      "preferredOperation": "resolution_scheduler_status",
+      "reason": "The status payload exposes the latest tick, queue states, shutdown/log path, execution mode, and next action.",
+      "requiredSignals": [
+        "lastTick",
+        "lastShutdown",
+        "logPath",
+        "executionMode",
+        "nextRecommendedAction"
+      ],
+      "downstreamRule": "Use the status as read-only guidance; it must not start a scheduler, execute resolvers, or create outcomes."
     },
     {
       "situation": "The agent needs to know whether a forecast has resolved before scoring or waiting.",

@@ -1,0 +1,70 @@
+{
+  "resolutionSchedulerRunId": "resolutionschedulerrun-001",
+  "generatedAt": "2026-06-10T08:30:00Z",
+  "schedulerMode": "campaign_fixture_once",
+  "executionMode": "dry_run",
+  "pollSeconds": 60,
+  "tickCount": 1,
+  "ticks": [
+    {
+      "tickNumber": 1,
+      "startedAt": "2026-06-10T08:30:00Z",
+      "tickStatus": "due_pending",
+      "jobSummary": {
+        "jobCount": 4,
+        "pendingDueCount": 1,
+        "pendingNotDueCount": 2,
+        "alreadyResolvedCount": 1,
+        "invalidCount": 0
+      },
+      "resolverSummary": {
+        "ranResolver": false,
+        "executedCount": 0,
+        "failedCount": 0
+      },
+      "actions": [
+        {
+          "resolutionJobId": "resolutionjob-001",
+          "jobStatus": "pending_due",
+          "schedulerAction": "due_waiting_for_execute_flag",
+          "statePath": ".ope/live/transit-forward-run/fixture-due/forward-run-state.json"
+        },
+        {
+          "resolutionJobId": "resolutionjob-002",
+          "jobStatus": "pending_not_due",
+          "schedulerAction": "wait_until_due",
+          "statePath": ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json"
+        },
+        {
+          "resolutionJobId": "resolutionjob-003",
+          "jobStatus": "already_resolved",
+          "schedulerAction": "skip_already_resolved",
+          "statePath": ".ope/live/transit-forward-run/fixture-scored/forward-run-state.json"
+        },
+        {
+          "resolutionJobId": "resolutionjob-004",
+          "jobStatus": "pending_not_due",
+          "schedulerAction": "wait_until_due",
+          "statePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json"
+        }
+      ],
+      "nextPollSeconds": 0
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksUseLiveNetwork": false,
+    "watchRequiresExplicitFlag": true,
+    "executeRequiresExplicitFlag": true,
+    "hostedSchedulerCreated": false,
+    "osSchedulerCreated": false,
+    "calibrationClaimAllowed": false
+  },
+  "warnings": [
+    "This is a foreground terminal scheduler, not a hosted service or OS scheduler.",
+    "Default and check modes perform one offline fixture tick.",
+    "Live watching requires --live --watch; resolver execution additionally requires --execute.",
+    "Agents that require machine-readable watch stdout should pass --output-format jsonl.",
+    "Scheduler execution may resolve due runs, but it never creates calibration claims.",
+    "Campaign-aware scheduler ticks read checked campaign jobs but do not execute campaign resolvers or write campaign state."
+  ]
+}

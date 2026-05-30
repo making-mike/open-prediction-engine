@@ -11,6 +11,7 @@ from typing import Any
 
 from generate_agent_adapter_protocol_map import build_protocol_map
 from ope_schema import SPEC, validate_record
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,14 +24,13 @@ MATRIX_ID = "privatesetupadapterconformancematrix-001"
 SUMMARY_ID = "privatesetupadapterconformancesummary-001"
 GENERATED_FORECAST_ID = "forecast-1102"
 GENERATED_QUESTION_ID = "question-1102"
+COMPACT_SUMMARY_PAYLOAD_MAX_BYTES = 12000
+COMPACT_AGENT_ENVELOPE_MAX_BYTES = 16000
+FULL_MATRIX_REFERENCE_MAX_BYTES = 600000
 
 
 class PrivateSetupAdapterConformanceSummaryError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def execution_boundary() -> dict[str, bool]:
@@ -240,6 +240,18 @@ def build_summary() -> dict[str, Any]:
             "mcpTool": "ope_private_setup_adapter_conformance_summary",
             "recommendedForRoutineAgents": True,
         },
+        "sizeBudget": {
+            "compactSummaryPayloadMaxBytes": COMPACT_SUMMARY_PAYLOAD_MAX_BYTES,
+            "compactAgentEnvelopeMaxBytes": COMPACT_AGENT_ENVELOPE_MAX_BYTES,
+            "fullMatrixReferenceMaxBytes": FULL_MATRIX_REFERENCE_MAX_BYTES,
+            "fullMatrixRequiresExplicitCommand": True,
+            "oversizedAdapterErrorCode": "response_too_large",
+            "shapeGuards": {
+                "embedsEnvelopeRows": False,
+                "embedsOperationCases": False,
+                "matrixPathOnly": True,
+            },
+        },
         "executionBoundary": execution_boundary(),
         "warnings": [
             "This summary is read-only conformance guidance and does not execute adapter calls.",
@@ -276,6 +288,26 @@ def validate_summary(summary: dict[str, Any]) -> None:
         raise PrivateSetupAdapterConformanceSummaryError("summary should not execute")
     if summary["executionBoundary"]["summaryDoesNotEmbedEnvelopes"] is not True:
         raise PrivateSetupAdapterConformanceSummaryError("summary should not embed envelopes")
+    if "operationCases" in summary:
+        raise PrivateSetupAdapterConformanceSummaryError("summary should not embed matrix operation cases")
+    if "envelopes" in summary:
+        raise PrivateSetupAdapterConformanceSummaryError("summary should not embed generated envelopes")
+    budget = summary["sizeBudget"]
+    if len(render_json(summary).encode("utf-8")) > budget["compactSummaryPayloadMaxBytes"]:
+        raise PrivateSetupAdapterConformanceSummaryError("summary payload exceeds compact size budget")
+    if budget["compactSummaryPayloadMaxBytes"] >= budget["compactAgentEnvelopeMaxBytes"]:
+        raise PrivateSetupAdapterConformanceSummaryError("agent envelope budget should exceed payload budget")
+    if budget["fullMatrixReferenceMaxBytes"] <= budget["compactAgentEnvelopeMaxBytes"]:
+        raise PrivateSetupAdapterConformanceSummaryError("full matrix budget should be larger than compact envelope budget")
+    if budget["fullMatrixRequiresExplicitCommand"] is not True:
+        raise PrivateSetupAdapterConformanceSummaryError("full matrix should require an explicit command")
+    if budget["oversizedAdapterErrorCode"] != "response_too_large":
+        raise PrivateSetupAdapterConformanceSummaryError("oversized adapter reads should use response_too_large")
+    guards = budget["shapeGuards"]
+    if guards["embedsEnvelopeRows"] is not False or guards["embedsOperationCases"] is not False:
+        raise PrivateSetupAdapterConformanceSummaryError("summary shape guards should block embedded rows")
+    if guards["matrixPathOnly"] is not True:
+        raise PrivateSetupAdapterConformanceSummaryError("summary should reference the matrix by path only")
     for key in [
         "readsPrivateData",
         "runsCommands",
@@ -296,6 +328,12 @@ def validate_against_matrix(summary: dict[str, Any]) -> None:
     if not MATRIX_PATH.exists():
         return
     matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    matrix_bytes = MATRIX_PATH.stat().st_size
+    summary_bytes = len(render_json(summary).encode("utf-8"))
+    if matrix_bytes <= summary_bytes:
+        raise PrivateSetupAdapterConformanceSummaryError("full matrix should remain larger than compact summary")
+    if matrix_bytes > summary["sizeBudget"]["fullMatrixReferenceMaxBytes"]:
+        raise PrivateSetupAdapterConformanceSummaryError("full matrix exceeds declared reference size budget")
     if matrix["privateSetupAdapterConformanceMatrixId"] != summary["bindings"]["privateSetupAdapterConformanceMatrixId"]:
         raise PrivateSetupAdapterConformanceSummaryError("summary should bind the generated conformance matrix")
     cases = matrix["operationCases"]
@@ -316,23 +354,11 @@ def validate_against_matrix(summary: dict[str, Any]) -> None:
 
 
 def write_summary(summary: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    SUMMARY_PATH.write_text(render_json(summary), encoding="utf-8")
-    print("generated private setup adapter conformance summary")
+    write_generated(SUMMARY_PATH, summary, label="private setup adapter conformance summary", regen="python3 scripts/generate_private_setup_adapter_conformance_summary.py --write")
 
 
 def check_summary(summary: dict[str, Any]) -> None:
-    expected = render_json(summary)
-    if not SUMMARY_PATH.exists():
-        print(f"missing private setup adapter conformance summary: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_summary.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = SUMMARY_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"private setup adapter conformance summary drift: {SUMMARY_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_private_setup_adapter_conformance_summary.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked private setup adapter conformance summary")
+    check_generated(SUMMARY_PATH, summary, label="private setup adapter conformance summary", regen="python3 scripts/generate_private_setup_adapter_conformance_summary.py --write")
 
 
 def main() -> None:

@@ -20,10 +20,13 @@ from build_agent_adapter_fixtures import (
     load_private_setup_adapter_conformance_summary,
     load_private_setup_adapter_runbook,
     load_private_source_kind_selection_examples,
+    load_resolution_job_registry,
+    load_resolution_scheduler_run,
     nullable_binding,
     nullable_state,
     private_source_adapter_guidance_payload as build_private_source_adapter_guidance_payload,
     render_json,
+    resolution_scheduler_status_payload as build_resolution_scheduler_status_payload,
     SOURCE_BUILDER_CASES,
     SOURCE_HANDOFF_CASES,
     METHOD_GATE_CASES,
@@ -36,6 +39,8 @@ from build_agent_adapter_fixtures import (
     state_from_private_setup_adapter_runbook,
     state_from_private_source_adapter_guidance,
     state_from_private_source_kind_selection,
+    state_from_resolution_job_registry,
+    state_from_resolution_scheduler_status,
     state_from_source_builder_payload,
     state_from_source_handoff_payload,
     state_from_card,
@@ -77,6 +82,8 @@ CAPABILITY_BY_OPERATION = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "resolution_jobs": "read_only",
+    "resolution_scheduler_status": "read_only",
     "resolution_status": "resolution_check",
     "scoring_summary": "scoring_read",
 }
@@ -95,6 +102,8 @@ INPUT_TYPE_BY_OPERATION = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "resolution_jobs": "resolution_job_registry",
+    "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
     "scoring_summary": "scoring_summary",
 }
@@ -177,6 +186,12 @@ def input_ref_for(args: argparse.Namespace) -> str:
     if args.operation == "private_setup_forecast_execution":
         payload = forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"]
+    if args.operation == "resolution_jobs":
+        registry = load_resolution_job_registry()
+        return registry["resolutionJobRegistryId"]
+    if args.operation == "resolution_scheduler_status":
+        payload = build_resolution_scheduler_status_payload(load_resolution_scheduler_run())
+        return payload["resolutionSchedulerStatusId"]
     raise AgentCallError("bad_request", "Unsupported agent operation.")
 
 
@@ -616,6 +631,32 @@ def private_setup_forecast_execution_payload(
     )
 
 
+def resolution_jobs_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    registry = load_resolution_job_registry()
+    return (
+        registry,
+        nullable_binding(),
+        state_from_resolution_job_registry(registry),
+        [
+            *registry["warnings"],
+            "The adapter envelope is read-only and cannot execute resolver commands.",
+        ],
+    )
+
+
+def resolution_scheduler_status_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = build_resolution_scheduler_status_payload(load_resolution_scheduler_run())
+    return (
+        payload,
+        nullable_binding(),
+        state_from_resolution_scheduler_status(payload),
+        [
+            *payload["warnings"],
+            "The adapter envelope is read-only and cannot execute due jobs.",
+        ],
+    )
+
+
 def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
     if args.operation == "forecast_request_validation":
         payload, binding, state, warnings = request_validation_payload(args.request)
@@ -665,6 +706,12 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "private_setup_forecast_execution":
         payload, binding, state, warnings = private_setup_forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"], payload, binding, state, warnings
+    if args.operation == "resolution_jobs":
+        payload, binding, state, warnings = resolution_jobs_payload()
+        return payload["resolutionJobRegistryId"], payload, binding, state, warnings
+    if args.operation == "resolution_scheduler_status":
+        payload, binding, state, warnings = resolution_scheduler_status_adapter_payload()
+        return payload["resolutionSchedulerStatusId"], payload, binding, state, warnings
     raise AgentCallError("bad_request", "Unsupported agent operation.")
 
 
@@ -754,6 +801,10 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "sourcehandoffmethodgate-000"
     if args.operation == "private_setup_forecast_execution":
         return "setupforecastrun-000"
+    if args.operation == "resolution_jobs":
+        return "resolutionjobregistry-001"
+    if args.operation == "resolution_scheduler_status":
+        return "resolutionschedulerstatus-001"
     try:
         return input_ref_for(args)
     except Exception:

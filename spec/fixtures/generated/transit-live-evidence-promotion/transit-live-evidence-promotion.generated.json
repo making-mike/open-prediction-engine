@@ -1,0 +1,334 @@
+{
+  "transitLiveEvidencePromotionId": "transitliveevidencepromotion-001",
+  "generatedAt": "2026-06-10T02:12:00Z",
+  "domain": "weather-transit-delays",
+  "promotionMode": "checked_policy_bound_live_evidence_promotion",
+  "forecastWindow": {
+    "forecastId": "forecast-1201",
+    "questionId": "question-1201",
+    "forecastedAt": "2026-06-10T02:00:00Z",
+    "forecastCloseAt": "2026-06-10T02:30:00Z",
+    "horizon": {
+      "startsAt": "2026-06-10T03:00:00Z",
+      "endsAt": "2026-06-10T07:00:00Z",
+      "label": "same-day-morning-peak"
+    },
+    "network": "hsl-surface",
+    "geography": "helsinki",
+    "serviceDate": "2026-06-10",
+    "serviceWindow": "morning_peak"
+  },
+  "policyBinding": {
+    "sourcePolicyId": "sourcepolicy-1201",
+    "approvalRequired": true,
+    "allowedForecastTimeRoles": [
+      "weather_forecast",
+      "historical_delay_rows",
+      "static_schedule",
+      "planned_service_alerts"
+    ],
+    "resolutionOnlyRoles": [
+      "transit_delay_outcome",
+      "feed_health",
+      "trip_updates_after_window",
+      "post_window_delay_rows",
+      "resolution_outcome"
+    ],
+    "allowedConnectors": [
+      "committed_fixture",
+      "open_meteo_weather",
+      "manual_upload",
+      "local_file"
+    ],
+    "maxFreshnessSeconds": 7200,
+    "retention": {
+      "rawLocalWorkspace": ".ope/live/",
+      "rawLocalArtifactsCommitted": false,
+      "rawPreviewStored": false,
+      "sanitizedNormalizedRecordsCommitted": true,
+      "contentHashesStored": true
+    },
+    "credentialUseAllowed": false,
+    "normalChecksMayReadLiveWorkspace": false,
+    "normalChecksMayFetchLiveNetwork": false
+  },
+  "intakeGate": {
+    "gateId": "transitlivepromotiongate-001",
+    "requiredChecksBeforePromotion": [
+      "source_policy",
+      "capture_timestamp",
+      "forecast_close_time",
+      "freshness",
+      "retention",
+      "source_role",
+      "leakage",
+      "provenance_binding"
+    ],
+    "rejectedAsForecastTimeEvidence": [
+      "post_close_capture",
+      "resolution_only_source_role",
+      "missing_source_policy",
+      "failed_freshness_check",
+      "raw_rows_committed",
+      "credential_bearing_capture"
+    ],
+    "rawLocalWorkspace": ".ope/live/",
+    "promotedSourceSetPath": "spec/fixtures/generated/transit-live-evidence-promotion/weather-transit-delays-promoted-source-set.generated.json"
+  },
+  "promotionCases": [
+    {
+      "promotionCaseId": "transitlivepromotioncase-001",
+      "surfaceType": "committed_fixture",
+      "sourceRole": "weather_forecast",
+      "connector": "committed_fixture",
+      "promotionStatus": "already_committed_fixture",
+      "inputBinding": {
+        "sourcePath": "spec/fixtures/local-source-files/transit-weather-forecast.json",
+        "sourcePathCommitted": true,
+        "localLiveWorkspace": false,
+        "captureTimestamp": "2026-06-10T02:00:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "sourcePolicyId": "sourcepolicy-1201"
+      },
+      "gateChecks": {
+        "sourcePolicyStatus": "not_required_committed_fixture",
+        "captureTimingStatus": "not_applicable",
+        "freshnessStatus": "not_applicable",
+        "freshnessSeconds": 0,
+        "maxFreshnessSeconds": 7200,
+        "retentionStatus": "passed_metadata_only",
+        "sourceRoleStatus": "fixture_reference",
+        "leakageStatus": "not_applicable",
+        "provenanceStatus": "fixture_reference",
+        "allEvidenceClaimed": false
+      },
+      "sanitizedBinding": {
+        "bindingStatus": "fixture_reference",
+        "forecastTimeSourceSetBound": false,
+        "normalizedRecordCount": 1,
+        "rawRowsIncluded": false,
+        "rawLocalPathCommitted": false,
+        "sanitizedArtifactCommitted": true,
+        "contentHashStored": true,
+        "normalChecksReadRawLocalPath": false
+      },
+      "rejectionReasons": [],
+      "agentNextAction": "Use the committed fixture path for fixture-mode runs; no local live promotion is needed."
+    },
+    {
+      "promotionCaseId": "transitlivepromotioncase-002",
+      "surfaceType": "local_live_draft",
+      "sourceRole": "weather_forecast",
+      "connector": "open_meteo_weather",
+      "promotionStatus": "pending_approval",
+      "inputBinding": {
+        "sourcePath": ".ope/live/transit-forward-run/2026-06-10T020500Z/weather/transit-weather-forecast.json",
+        "sourcePathCommitted": false,
+        "localLiveWorkspace": true,
+        "captureTimestamp": "2026-06-10T02:05:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "sourcePolicyId": "sourcepolicy-1201"
+      },
+      "gateChecks": {
+        "sourcePolicyStatus": "pending_approval",
+        "captureTimingStatus": "pre_close",
+        "freshnessStatus": "pending_approval",
+        "freshnessSeconds": 1500,
+        "maxFreshnessSeconds": 7200,
+        "retentionStatus": "pending_approval",
+        "sourceRoleStatus": "pending_approval",
+        "leakageStatus": "pending_approval",
+        "provenanceStatus": "not_bound_pending_approval",
+        "allEvidenceClaimed": false
+      },
+      "sanitizedBinding": {
+        "bindingStatus": "draft_not_bound",
+        "forecastTimeSourceSetBound": false,
+        "normalizedRecordCount": 0,
+        "rawRowsIncluded": false,
+        "rawLocalPathCommitted": false,
+        "sanitizedArtifactCommitted": false,
+        "contentHashStored": false,
+        "normalChecksReadRawLocalPath": false
+      },
+      "rejectionReasons": [],
+      "agentNextAction": "Confirm source policy, freshness, retention, and role before producing a sanitized source set."
+    },
+    {
+      "promotionCaseId": "transitlivepromotioncase-003",
+      "surfaceType": "promoted_forecast_time_evidence",
+      "sourceRole": "weather_forecast",
+      "connector": "open_meteo_weather",
+      "promotionStatus": "promoted",
+      "inputBinding": {
+        "sourcePath": ".ope/live/transit-forward-run/2026-06-10T020000Z/weather/transit-weather-forecast.json",
+        "sourcePathCommitted": false,
+        "localLiveWorkspace": true,
+        "captureTimestamp": "2026-06-10T02:00:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "sourcePolicyId": "sourcepolicy-1201"
+      },
+      "gateChecks": {
+        "sourcePolicyStatus": "passed",
+        "captureTimingStatus": "pre_close",
+        "freshnessStatus": "within_policy",
+        "freshnessSeconds": 1800,
+        "maxFreshnessSeconds": 7200,
+        "retentionStatus": "passed_metadata_only",
+        "sourceRoleStatus": "forecast_time_allowed",
+        "leakageStatus": "passed",
+        "provenanceStatus": "bound",
+        "allEvidenceClaimed": false
+      },
+      "sanitizedBinding": {
+        "bindingStatus": "bound_promoted_source_set",
+        "forecastTimeSourceSetBound": true,
+        "normalizedRecordCount": 1,
+        "rawRowsIncluded": false,
+        "rawLocalPathCommitted": false,
+        "sanitizedArtifactCommitted": true,
+        "contentHashStored": true,
+        "normalChecksReadRawLocalPath": false,
+        "evidenceSourceSetId": "evidencesourceset-1201",
+        "sourceSetPath": "spec/fixtures/generated/transit-live-evidence-promotion/weather-transit-delays-promoted-source-set.generated.json"
+      },
+      "rejectionReasons": [],
+      "agentNextAction": "Use the promoted evidence source-set binding for forecast-time weather evidence."
+    },
+    {
+      "promotionCaseId": "transitlivepromotioncase-004",
+      "surfaceType": "local_live_draft",
+      "sourceRole": "weather_forecast",
+      "connector": "open_meteo_weather",
+      "promotionStatus": "rejected",
+      "inputBinding": {
+        "sourcePath": ".ope/live/transit-forward-run/2026-06-10T041500Z/weather/transit-weather-forecast.json",
+        "sourcePathCommitted": false,
+        "localLiveWorkspace": true,
+        "captureTimestamp": "2026-06-10T04:15:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "sourcePolicyId": "sourcepolicy-1201"
+      },
+      "gateChecks": {
+        "sourcePolicyStatus": "rejected",
+        "captureTimingStatus": "post_close",
+        "freshnessStatus": "outside_policy",
+        "freshnessSeconds": 6300,
+        "maxFreshnessSeconds": 7200,
+        "retentionStatus": "passed_metadata_only",
+        "sourceRoleStatus": "forecast_time_allowed",
+        "leakageStatus": "rejected_post_close",
+        "provenanceStatus": "not_bound_rejected",
+        "allEvidenceClaimed": false
+      },
+      "sanitizedBinding": {
+        "bindingStatus": "rejected_not_bound",
+        "forecastTimeSourceSetBound": false,
+        "normalizedRecordCount": 0,
+        "rawRowsIncluded": false,
+        "rawLocalPathCommitted": false,
+        "sanitizedArtifactCommitted": false,
+        "contentHashStored": true,
+        "normalChecksReadRawLocalPath": false
+      },
+      "rejectionReasons": [
+        "capture_after_forecast_close",
+        "post_close_forecast_evidence_blocked"
+      ],
+      "agentNextAction": "Keep the capture as local diagnostics or resolution support; do not use it as forecast-time evidence."
+    },
+    {
+      "promotionCaseId": "transitlivepromotioncase-005",
+      "surfaceType": "resolution_only_evidence",
+      "sourceRole": "transit_delay_outcome",
+      "connector": "hsl_gtfs_rt_trip_updates",
+      "promotionStatus": "rejected",
+      "inputBinding": {
+        "sourcePath": ".ope/live/transit-api/hsl-2026-06-10-trip-updates.csv",
+        "sourcePathCommitted": false,
+        "localLiveWorkspace": true,
+        "captureTimestamp": "2026-06-10T07:20:00Z",
+        "forecastCloseAt": "2026-06-10T02:30:00Z",
+        "sourcePolicyId": "sourcepolicy-1201"
+      },
+      "gateChecks": {
+        "sourcePolicyStatus": "rejected",
+        "captureTimingStatus": "post_close",
+        "freshnessStatus": "outside_policy",
+        "freshnessSeconds": 17400,
+        "maxFreshnessSeconds": 7200,
+        "retentionStatus": "passed_metadata_only",
+        "sourceRoleStatus": "resolution_only_rejected",
+        "leakageStatus": "rejected_resolution_only",
+        "provenanceStatus": "not_bound_rejected",
+        "allEvidenceClaimed": false
+      },
+      "sanitizedBinding": {
+        "bindingStatus": "rejected_not_bound",
+        "forecastTimeSourceSetBound": false,
+        "normalizedRecordCount": 0,
+        "rawRowsIncluded": false,
+        "rawLocalPathCommitted": false,
+        "sanitizedArtifactCommitted": false,
+        "contentHashStored": true,
+        "normalChecksReadRawLocalPath": false
+      },
+      "rejectionReasons": [
+        "source_role_resolution_only",
+        "same_window_outcome_leakage",
+        "capture_after_forecast_close"
+      ],
+      "agentNextAction": "Use this evidence only through resolution and scoring paths after the service window."
+    }
+  ],
+  "readbackSummary": {
+    "surfaceCounts": {
+      "committedFixtures": 1,
+      "localLiveDrafts": 2,
+      "promotedForecastTimeEvidence": 1,
+      "resolutionOnlyEvidence": 1,
+      "postCloseRejected": 2,
+      "resolutionOnlyRejected": 1
+    },
+    "promotedEvidenceSourceSetId": "evidencesourceset-1201",
+    "promotedEvidenceSourceSetPath": "spec/fixtures/generated/transit-live-evidence-promotion/weather-transit-delays-promoted-source-set.generated.json",
+    "promotedEvidenceReadCommand": "python3 scripts/ope.py read --record-type evidence-source-set --id evidencesourceset-1201",
+    "distinctionRules": [
+      "Committed fixtures are already checked inputs and do not require live promotion.",
+      "Local live drafts remain ignored under .ope/live/ until an explicit approval binds sanitized fields.",
+      "Promoted forecast-time evidence must be captured before close and bound to a source policy.",
+      "Resolution-only evidence can resolve or score an outcome, but must not become forecast-time evidence."
+    ]
+  },
+  "claimBoundary": {
+    "normalChecksUseLiveNetwork": false,
+    "normalChecksReadLiveWorkspace": false,
+    "rawLiveCapturesCommitted": false,
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "fetchesLiveData": false,
+    "storesCredentials": false,
+    "promotesPostCloseEvidence": false,
+    "promotesResolutionOnlyEvidence": false,
+    "productionLiveRuntimeClaimAllowed": false,
+    "allEvidenceClaimAllowed": false
+  },
+  "readSurface": {
+    "command": "python3 scripts/ope.py transit-live-evidence-promotion",
+    "distinguishesEvidenceSurfaces": true,
+    "returnsPromotedSourceSetBinding": true,
+    "executesPromotion": false,
+    "readsIgnoredLiveWorkspace": false,
+    "fetchesLiveData": false,
+    "createsForecastArtifacts": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false
+  },
+  "warnings": [
+    "This read surface defines the gate and checked examples; it does not fetch or inspect live files.",
+    "Only sanitized normalized fields may be committed; raw .ope/live captures remain ignored.",
+    "Post-close and resolution-only transit captures must not be promoted as forecast-time evidence.",
+    "The promoted source set is local evidence plumbing, not a production live connector or quality claim."
+  ]
+}

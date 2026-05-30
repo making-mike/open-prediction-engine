@@ -1,0 +1,40 @@
+{
+  "forecastId": "forecast-1301",
+  "questionId": "question-1301",
+  "questionStatus": "open",
+  "domain": "weather-transit-delays",
+  "horizon": {
+    "startsAt": "2026-06-11T05:00:00Z",
+    "endsAt": "2026-06-11T07:00:00Z",
+    "label": "same-day-morning-peak"
+  },
+  "forecastedAt": "2026-06-11T00:00:00Z",
+  "closedAt": "2026-06-11T04:45:00Z",
+  "outputType": "binary",
+  "forecastOutput": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "baselineForecast": {
+    "outputType": "binary",
+    "probability": 0.25
+  },
+  "model": {
+    "modelId": "model-1301",
+    "version": "weather-transit-delay-campaign-baseline-v0",
+    "trainingCutoff": "2026-06-11T04:45:00Z",
+    "configurationHash": "sha256-campaign-baseline-v0"
+  },
+  "evidencePacketId": "evidence-1301",
+  "resolutionPlan": {
+    "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-11 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
+    "resolutionAuthority": "OPE local transit delay resolver",
+    "primaryResolutionSource": {
+      "sourceId": "source-1304",
+      "name": "Future transit delay outcome capture",
+      "sourceType": "public_dataset"
+    },
+    "fallbackResolutionSources": [],
+    "scheduledResolutionAt": "2026-06-11T07:00:00Z"
+  }
+}

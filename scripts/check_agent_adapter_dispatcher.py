@@ -172,10 +172,89 @@ def main() -> None:
         raise AssertionError("private-setup-adapter-conformance-summary agent call should expose matrix case totals")
     if adapter_conformance_record["readSurface"]["compactSummaryDoesNotEmbedEnvelopes"] is not True:
         raise AssertionError("private-setup-adapter-conformance-summary agent call should stay compact")
+    size_budget = adapter_conformance_record["sizeBudget"]
+    if len(adapter_conformance_summary.stdout.encode("utf-8")) > size_budget["compactAgentEnvelopeMaxBytes"]:
+        raise AssertionError("private-setup-adapter-conformance-summary agent call should fit compact envelope budget")
+    if size_budget["fullMatrixRequiresExplicitCommand"] is not True:
+        raise AssertionError("private-setup-adapter-conformance-summary should keep full matrix reads explicit")
+    if size_budget["oversizedAdapterErrorCode"] != "response_too_large":
+        raise AssertionError("private-setup-adapter-conformance-summary should declare response_too_large for oversized reads")
+    if "operationCases" in adapter_conformance_record:
+        raise AssertionError("private-setup-adapter-conformance-summary should not embed full matrix rows")
+    bounded_adapter_conformance_summary = run_dispatcher(
+        "--operation",
+        "private_setup_adapter_conformance_summary",
+        "--max-bytes",
+        str(size_budget["compactAgentEnvelopeMaxBytes"]),
+    )
+    if bounded_adapter_conformance_summary.returncode != 0:
+        raise AssertionError("private-setup-adapter-conformance-summary should fit declared maxBytes budget")
+    oversized_adapter_conformance_summary = assert_error(
+        run_dispatcher(
+            "--operation",
+            "private_setup_adapter_conformance_summary",
+            "--max-bytes",
+            "1000",
+        ),
+        exit_code=5,
+        error_code="response_too_large",
+    )
+    if oversized_adapter_conformance_summary["payload"] is not None:
+        raise AssertionError("oversized conformance summary envelope should not include the compact payload")
     if adapter_conformance_record["executionBoundary"]["summaryDoesNotExecute"] is not True:
         raise AssertionError("private-setup-adapter-conformance-summary agent call should not execute")
     if adapter_conformance_record["executionBoundary"]["createsForecastArtifacts"] is not False:
         raise AssertionError("private-setup-adapter-conformance-summary agent call should not create forecasts")
+
+    resolution_jobs = run_dispatcher(
+        "--operation",
+        "resolution_jobs",
+    )
+    resolution_jobs_payload = payload(resolution_jobs)
+    if resolution_jobs.returncode != 0:
+        raise AssertionError(f"resolution-jobs agent call should succeed: {resolution_jobs.stderr}")
+    resolution_jobs_record = resolution_jobs_payload["payload"]
+    if resolution_jobs_record["summary"]["pendingDueCount"] != 1:
+        raise AssertionError("resolution-jobs agent call should expose one due job")
+    if resolution_jobs_record["executionBoundary"]["registryExecutesResolvers"] is not False:
+        raise AssertionError("resolution-jobs agent call must not execute resolvers")
+    due_jobs = [job for job in resolution_jobs_record["jobs"] if job["jobStatus"] == "pending_due"]
+    if due_jobs[0]["agentAction"]["recommendedAction"] != "call_resolver_execute":
+        raise AssertionError("resolution-jobs agent call should route due jobs to resolver execution")
+
+    scheduler_status = run_dispatcher(
+        "--operation",
+        "resolution_scheduler_status",
+    )
+    scheduler_status_payload = payload(scheduler_status)
+    if scheduler_status.returncode != 0:
+        raise AssertionError(f"resolution-scheduler-status agent call should succeed: {scheduler_status.stderr}")
+    scheduler_status_record = scheduler_status_payload["payload"]
+    if scheduler_status_record["executionMode"] != "dry_run":
+        raise AssertionError("resolution-scheduler-status agent call should expose dry-run mode")
+    if scheduler_status_record["lastTick"]["tickStatus"] != "due_pending":
+        raise AssertionError("resolution-scheduler-status agent call should expose the last due-pending tick")
+    if scheduler_status_record["logPath"] != ".ope/live/resolution-scheduler/scheduler-runs.jsonl":
+        raise AssertionError("resolution-scheduler-status agent call should expose the log path")
+    scheduler_queue_states = {row["queueState"]: row for row in scheduler_status_record["queueStatusReadbacks"]}
+    if scheduler_queue_states["failed"]["presentInLatestTick"] is not False:
+        raise AssertionError("resolution-scheduler-status fixture should show no failed queue work")
+    if scheduler_status_record["executionBoundary"]["statusReadExecutesScheduler"] is not False:
+        raise AssertionError("resolution-scheduler-status agent call must not start the scheduler")
+    if scheduler_status_record["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("resolution-scheduler-status agent call must not execute resolvers")
+    oversized_scheduler_status = assert_error(
+        run_dispatcher(
+            "--operation",
+            "resolution_scheduler_status",
+            "--max-bytes",
+            "1000",
+        ),
+        exit_code=5,
+        error_code="response_too_large",
+    )
+    if oversized_scheduler_status["payload"] is not None:
+        raise AssertionError("oversized scheduler-status envelope should not include the readback payload")
 
     source_guidance = run_dispatcher(
         "--operation",

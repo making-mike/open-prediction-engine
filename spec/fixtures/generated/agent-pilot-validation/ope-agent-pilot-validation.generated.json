@@ -1,0 +1,498 @@
+{
+  "agentPilotValidationId": "agentpilotvalidation-001",
+  "generatedAt": "2026-06-10T06:15:00Z",
+  "scope": "local_mvp_validation",
+  "runtimeStatus": "checked_pilot_protocol_only",
+  "bindings": {
+    "mvpRunbookPath": "spec/mvp-local-runtime.md",
+    "releaseManifestId": "releasemanifest-001",
+    "privateSetupOrchestratorId": "privatesetuporchestrator-001",
+    "forecastRunCommand": "python3 scripts/ope.py forecast-run",
+    "claimGateCommand": "python3 scripts/ope.py transit-track-record-gate"
+  },
+  "pilotProtocol": {
+    "protocolId": "agentpilotprotocol-001",
+    "minimumSessions": 3,
+    "targetSessions": 5,
+    "participantProfiles": [
+      "Agent developer integrating an OPE-compatible forecasting loop.",
+      "Supervising developer deciding whether an agent can use OPE output for decision support."
+    ],
+    "sessionLengthMinutes": 45,
+    "setupMode": "moderated_local_cli",
+    "moderationSteps": [
+      "Start with the local MVP runbook and no product explanation beyond repository docs.",
+      "Ask the participant to complete task scenarios using CLI output or agent-call readbacks.",
+      "Ask the participant to explain source, forecast, resolution, scoring, and claim-boundary fields aloud.",
+      "Record only sanitized notes, dimension scores, and follow-up classification.",
+      "Separate usability confusion from missing runtime capability before changing the roadmap."
+    ],
+    "privacyBoundary": {
+      "storesRawTranscripts": false,
+      "storesPrivateData": false,
+      "storesCredentials": false,
+      "storesPromptLogs": false,
+      "requiresSanitizedSummaries": true,
+      "usesSyntheticExamplesOnly": true
+    }
+  },
+  "taskScenarios": [
+    {
+      "taskId": "agentpilottask-001",
+      "scenarioKey": "local_file_setup_readback",
+      "title": "Approved local-file setup readback",
+      "interface": "cli",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
+      "participantPrompt": "Use the local MVP to inspect an approved local-file setup path. Explain what forecast was produced, how it was scored, and why the quality claim is still blocked.",
+      "expectedOutcomeClass": "completed_forecast_readback",
+      "expectedReadback": {
+        "statusPath": "orchestratorStatus",
+        "expectedStatus": "completed_forecast_readback",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "nextAction": "read_forecast_card",
+        "qualityClaimAllowed": false,
+        "forecastArtifactsCreated": true
+      },
+      "measures": [
+        "task_completion",
+        "forecast_card_comprehension",
+        "lifecycle_bundle_comprehension",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support"
+      ],
+      "successCriteria": [
+        "Participant identifies forecast-1102 and question-1102.",
+        "Participant can state that the readback is resolved and scored.",
+        "Participant does not convert the scored fixture into a calibration or quality claim."
+      ]
+    },
+    {
+      "taskId": "agentpilottask-002",
+      "scenarioKey": "accepted_adapter_output_ready",
+      "title": "Accepted adapter output stops before forecast execution",
+      "interface": "cli",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case source_adapter_output_accepted",
+      "participantPrompt": "Inspect the accepted source-adapter-output path. Decide whether forecast artifacts already exist and name the next safe step.",
+      "expectedOutcomeClass": "ready_for_forecast_execution",
+      "expectedReadback": {
+        "statusPath": "orchestratorStatus",
+        "expectedStatus": "ready_for_forecast_execution",
+        "forecastId": null,
+        "questionId": null,
+        "nextAction": "run_explicit_setup_forecast_execution",
+        "qualityClaimAllowed": false,
+        "forecastArtifactsCreated": false
+      },
+      "measures": [
+        "task_completion",
+        "source_intake_comprehension",
+        "lifecycle_bundle_comprehension",
+        "runtime_gap_classification"
+      ],
+      "successCriteria": [
+        "Participant sees source intake and method gate as complete.",
+        "Participant explains that explicit setup forecast execution is still required.",
+        "Participant does not invent forecast IDs for the ready-but-not-run path."
+      ]
+    },
+    {
+      "taskId": "agentpilottask-003",
+      "scenarioKey": "unsafe_source_block",
+      "title": "Unsafe source is stopped before intake",
+      "interface": "cli",
+      "command": "python3 scripts/ope.py private-setup-orchestrator --case unsafe_source",
+      "participantPrompt": "Inspect the unsafe-source path. Explain why OPE stops and what should happen before any source intake or forecast work.",
+      "expectedOutcomeClass": "blocked_unsafe",
+      "expectedReadback": {
+        "statusPath": "orchestratorStatus",
+        "expectedStatus": "blocked_unsafe",
+        "forecastId": null,
+        "questionId": null,
+        "nextAction": "stop_unsafe_connector",
+        "qualityClaimAllowed": false,
+        "forecastArtifactsCreated": false
+      },
+      "measures": [
+        "task_completion",
+        "blocked_path_comprehension",
+        "source_intake_comprehension",
+        "claim_boundary_comprehension"
+      ],
+      "successCriteria": [
+        "Participant names the unsafe connector boundary.",
+        "Participant sees that no source-intake report, forecast, or score is created.",
+        "Participant routes to source replacement or safety review rather than repair inside OPE."
+      ]
+    },
+    {
+      "taskId": "agentpilottask-004",
+      "scenarioKey": "forecast_run_readback",
+      "title": "Fixture-safe forecast-run readback",
+      "interface": "cli",
+      "command": "python3 scripts/ope.py forecast-run",
+      "participantPrompt": "Run the fixture-safe forecast-run summary. Explain the produced forecast card, evidence trace, lifecycle bundle, resolution, and scoring bindings.",
+      "expectedOutcomeClass": "completed_forecast_run",
+      "expectedReadback": {
+        "statusPath": "runStatus",
+        "expectedStatus": "completed",
+        "forecastId": "forecast-602",
+        "questionId": "question-601",
+        "nextAction": null,
+        "qualityClaimAllowed": false,
+        "forecastArtifactsCreated": true
+      },
+      "measures": [
+        "task_completion",
+        "forecast_card_comprehension",
+        "lifecycle_bundle_comprehension",
+        "trust_for_agent_decision_support"
+      ],
+      "successCriteria": [
+        "Participant identifies the completed forecast-run binding.",
+        "Participant can find forecast card, evidence trace, bundle, resolution, and score links.",
+        "Participant recognizes the quality claim remains provisional."
+      ]
+    },
+    {
+      "taskId": "agentpilottask-005",
+      "scenarioKey": "claim_gate_readback",
+      "title": "Transit claim gate stays below threshold",
+      "interface": "cli",
+      "command": "python3 scripts/ope.py transit-track-record-gate",
+      "participantPrompt": "Inspect the public transport baseline track-record gate. Decide whether OPE may claim calibration or broad method quality yet.",
+      "expectedOutcomeClass": "claim_gate_readback",
+      "expectedReadback": {
+        "statusPath": "claimBoundary.qualityClaimAllowed",
+        "expectedStatus": "false",
+        "forecastId": null,
+        "questionId": null,
+        "nextAction": null,
+        "qualityClaimAllowed": false,
+        "forecastArtifactsCreated": false
+      },
+      "measures": [
+        "task_completion",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support",
+        "runtime_gap_classification"
+      ],
+      "successCriteria": [
+        "Participant states that calibration and broad quality claims are blocked.",
+        "Participant can separate one scored run from a claim-ready corpus.",
+        "Participant names more comparable resolved outcomes as the evidence needed."
+      ]
+    }
+  ],
+  "feedbackSchema": {
+    "feedbackSchemaId": "agentpilotfeedback-001",
+    "ratingScale": {
+      "minimumScore": 1,
+      "maximumScore": 5,
+      "anchors": [
+        "1 means blocked or misunderstood.",
+        "3 means completed with notable help or uncertainty.",
+        "5 means completed independently with correct claim-boundary understanding."
+      ]
+    },
+    "dimensions": [
+      {
+        "dimensionId": "task_completion",
+        "question": "Could the participant complete the task without moderator correction?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "forecast_card_comprehension",
+        "question": "Can the participant explain probability, baseline, resolution, score, and quality-claim fields?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "lifecycle_bundle_comprehension",
+        "question": "Can the participant explain the record bindings and provenance trail?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "source_intake_comprehension",
+        "question": "Can the participant distinguish accepted, ready, blocked, and rejected source-intake paths?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "blocked_path_comprehension",
+        "question": "Can the participant explain why a blocked path creates no forecast artifacts?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "claim_boundary_comprehension",
+        "question": "Can the participant state what OPE is not allowed to claim from the local MVP?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "trust_for_agent_decision_support",
+        "question": "Would the participant trust this output enough for supervised agent decision support?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "setup_friction",
+        "question": "How much friction did the participant encounter while moving from setup to readback?",
+        "responseType": "rating_1_to_5",
+        "required": true
+      },
+      {
+        "dimensionId": "runtime_gap_classification",
+        "question": "Was the issue a usability gap, a missing runtime feature, a data gap, or no issue?",
+        "responseType": "short_text",
+        "required": true
+      }
+    ]
+  },
+  "comprehensionRubric": [
+    {
+      "rubricId": "agentpilotrubric-001",
+      "surface": "forecast_card",
+      "passingScore": 4,
+      "taskRefs": [
+        "agentpilottask-001",
+        "agentpilottask-004"
+      ],
+      "passingSignals": [
+        "Identifies forecast ID, question ID, probability, baseline, resolution status, and score status.",
+        "Explains that a forecast card is compact readback, not the full provenance trail.",
+        "Notices quality claim status before recommending agent use."
+      ],
+      "failureSignals": [
+        "Treats the probability as deterministic advice.",
+        "Misses the baseline or quality-claim status."
+      ]
+    },
+    {
+      "rubricId": "agentpilotrubric-002",
+      "surface": "lifecycle_bundle",
+      "passingScore": 4,
+      "taskRefs": [
+        "agentpilottask-001",
+        "agentpilottask-002",
+        "agentpilottask-004"
+      ],
+      "passingSignals": [
+        "Can name the linked source, method, forecast, resolution, and scoring records.",
+        "Understands that accepted adapter output still needs explicit forecast execution before readback.",
+        "Separates generated read surfaces from private source data."
+      ],
+      "failureSignals": [
+        "Assumes every accepted source path already has a lifecycle bundle.",
+        "Cannot distinguish readback records from execution steps."
+      ]
+    },
+    {
+      "rubricId": "agentpilotrubric-003",
+      "surface": "source_intake",
+      "passingScore": 4,
+      "taskRefs": [
+        "agentpilottask-002",
+        "agentpilottask-003"
+      ],
+      "passingSignals": [
+        "Explains accepted, needs-confirmation, insufficient-data, rejected, and unsafe outcomes.",
+        "Keeps source intake as a pre-forecast gate.",
+        "Does not let adapter output bypass mapping, provenance, or method-gate checks."
+      ],
+      "failureSignals": [
+        "Lets accepted adapter output create forecasts directly.",
+        "Tries to repair unsafe connector output inside OPE."
+      ]
+    },
+    {
+      "rubricId": "agentpilotrubric-004",
+      "surface": "blocked_path",
+      "passingScore": 4,
+      "taskRefs": [
+        "agentpilottask-002",
+        "agentpilottask-003"
+      ],
+      "passingSignals": [
+        "Can state the blocked reason and the next safe action.",
+        "Confirms no forecast, resolution, or scoring artifacts were created.",
+        "Distinguishes usability confusion from a missing runtime feature."
+      ],
+      "failureSignals": [
+        "Reads a blocked path as a failed forecast.",
+        "Asks OPE to fetch private data or store credentials to continue."
+      ]
+    },
+    {
+      "rubricId": "agentpilotrubric-005",
+      "surface": "claim_boundary",
+      "passingScore": 4,
+      "taskRefs": [
+        "agentpilottask-001",
+        "agentpilottask-003",
+        "agentpilottask-005"
+      ],
+      "passingSignals": [
+        "States that one scored fixture is not calibration evidence.",
+        "Explains sample-size, comparable-outcome, and live-source boundaries.",
+        "Keeps public transport method quality claims blocked below threshold."
+      ],
+      "failureSignals": [
+        "Turns local fixture success into a production or quality claim.",
+        "Treats live connector availability as live calibration."
+      ]
+    }
+  ],
+  "examplePilotSummaries": [
+    {
+      "exampleId": "agentpilotexample-001",
+      "taskId": "agentpilottask-001",
+      "participantType": "agent_developer",
+      "isSyntheticExample": true,
+      "rawTranscriptStored": false,
+      "privateDataStored": false,
+      "sanitizedSummary": "Synthetic participant completed the local-file readback, identified forecast-1102, and correctly kept the quality claim blocked after seeing the scored fixture.",
+      "observedSignals": [
+        "Found forecast and question bindings without file browsing.",
+        "Explained score status and quality claim status separately."
+      ],
+      "ratings": [
+        {
+          "dimensionId": "task_completion",
+          "score": 5
+        },
+        {
+          "dimensionId": "forecast_card_comprehension",
+          "score": 5
+        },
+        {
+          "dimensionId": "claim_boundary_comprehension",
+          "score": 5
+        },
+        {
+          "dimensionId": "trust_for_agent_decision_support",
+          "score": 4
+        }
+      ],
+      "followUpClassification": "passed"
+    },
+    {
+      "exampleId": "agentpilotexample-002",
+      "taskId": "agentpilottask-002",
+      "participantType": "supervising_developer",
+      "isSyntheticExample": true,
+      "rawTranscriptStored": false,
+      "privateDataStored": false,
+      "sanitizedSummary": "Synthetic participant understood the accepted adapter output was source-intake ready, but first expected a forecast ID until the explicit forecast-execution gate was pointed out.",
+      "observedSignals": [
+        "Classified the issue as a comprehension gap, not a missing connector runtime.",
+        "After correction, named run_explicit_setup_forecast_execution as the next action."
+      ],
+      "ratings": [
+        {
+          "dimensionId": "task_completion",
+          "score": 4
+        },
+        {
+          "dimensionId": "source_intake_comprehension",
+          "score": 4
+        },
+        {
+          "dimensionId": "lifecycle_bundle_comprehension",
+          "score": 3
+        },
+        {
+          "dimensionId": "runtime_gap_classification",
+          "score": 4
+        }
+      ],
+      "followUpClassification": "usability_gap"
+    },
+    {
+      "exampleId": "agentpilotexample-003",
+      "taskId": "agentpilottask-003",
+      "participantType": "agent_developer",
+      "isSyntheticExample": true,
+      "rawTranscriptStored": false,
+      "privateDataStored": false,
+      "sanitizedSummary": "Synthetic participant stopped at the unsafe source boundary and correctly refused to route unsafe connector output into source intake or forecast execution.",
+      "observedSignals": [
+        "Named stop_unsafe_connector as the safe next action.",
+        "Confirmed no source-intake, forecast, or scoring artifacts should exist."
+      ],
+      "ratings": [
+        {
+          "dimensionId": "task_completion",
+          "score": 5
+        },
+        {
+          "dimensionId": "blocked_path_comprehension",
+          "score": 5
+        },
+        {
+          "dimensionId": "source_intake_comprehension",
+          "score": 5
+        },
+        {
+          "dimensionId": "claim_boundary_comprehension",
+          "score": 5
+        }
+      ],
+      "followUpClassification": "passed"
+    }
+  ],
+  "successMetrics": {
+    "minimumSessions": 3,
+    "targetSessions": 5,
+    "minimumTaskCompletionRate": 0.8,
+    "minimumMedianTrustScore": 4,
+    "minimumClaimBoundaryMedianScore": 4,
+    "usabilityGapReviewThreshold": 3
+  },
+  "decisionRules": [
+    {
+      "decisionRuleId": "agentpilotdecision-001",
+      "signal": "Task completion and claim-boundary scores meet thresholds with no repeated confusion.",
+      "decision": "continue_mvp_validation",
+      "nextAction": "Run more sessions or proceed to local usage and trace events."
+    },
+    {
+      "decisionRuleId": "agentpilotdecision-002",
+      "signal": "Participants complete tasks but misunderstand forecast card, lifecycle bundle, or blocked path semantics.",
+      "decision": "fix_comprehension_gap",
+      "nextAction": "Improve read surfaces, labels, examples, or runbook wording before adding runtime scope."
+    },
+    {
+      "decisionRuleId": "agentpilotdecision-003",
+      "signal": "Participants understand the surfaces but cannot finish because an explicitly planned runtime is missing.",
+      "decision": "prioritize_runtime_gap",
+      "nextAction": "Use pilot notes to rank local usage events, corpus growth, source quality, or narrow real-source runtime work."
+    },
+    {
+      "decisionRuleId": "agentpilotdecision-004",
+      "signal": "Any participant reads scored fixture output as calibration, production readiness, or broad quality proof.",
+      "decision": "pause_quality_claims",
+      "nextAction": "Tighten claim-boundary copy and gates before publishing stronger MVP messaging."
+    }
+  ],
+  "executionBoundary": {
+    "runsPilotSessions": false,
+    "recruitsParticipants": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "createsForecastArtifacts": false,
+    "claimsForecastQuality": false,
+    "usesExistingCheckedFixturesOnly": true,
+    "storesSyntheticExamplesOnly": true
+  },
+  "warnings": [
+    "The pilot validation pack is a checked protocol and rubric; it does not run sessions or collect telemetry.",
+    "Example pilot summaries are synthetic and sanitized; do not replace them with raw private transcripts.",
+    "Pilot success may support usability confidence, but it is not calibration or broad forecast-quality evidence.",
+    "Missing arbitrary private API/database parsing should be classified as runtime scope, not hidden MVP failure."
+  ]
+}

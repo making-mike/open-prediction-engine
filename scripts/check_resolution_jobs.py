@@ -10,8 +10,13 @@ class Args:
     live = False
     workspace = ".ope/live/transit-forward-run"
     run_state: list[str] = []
+    campaign = None
     now = None
     limit = 50
+
+
+class CampaignArgs(Args):
+    campaign = "predictioncampaign-001"
 
 
 def main() -> None:
@@ -34,6 +39,34 @@ def main() -> None:
         raise AssertionError("resolution job registry must not execute resolver commands")
     if registry["executionBoundary"]["calibrationClaimAllowed"]:
         raise AssertionError("resolution job registry must keep calibration claims blocked")
+
+    campaign_registry = build_registry(CampaignArgs())
+    campaign_summary = campaign_registry["summary"]
+    campaign_jobs = [
+        job for job in campaign_registry["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    if campaign_registry["registryMode"] != "campaign_fixture_registry":
+        raise AssertionError("campaign-aware resolution jobs should use campaign fixture mode")
+    if campaign_registry["sourceBinding"]["sourceKind"] != "forward_run_state_and_campaign_manifest":
+        raise AssertionError("campaign-aware resolution jobs should bind the campaign manifest")
+    if campaign_summary["jobCount"] != 4:
+        raise AssertionError("campaign-aware resolution jobs should include the campaign forecast")
+    if campaign_summary["pendingNotDueCount"] != 2:
+        raise AssertionError("campaign-aware resolution jobs should add one waiting campaign job")
+    if len(campaign_jobs) != 1:
+        raise AssertionError("campaign-aware resolution jobs should expose exactly one campaign job")
+    campaign_job = campaign_jobs[0]
+    if campaign_job["target"]["campaignRunId"] != "predictionrun-1301":
+        raise AssertionError("campaign resolution job run binding drifted")
+    if campaign_job["target"]["forecastId"] != "forecast-1301":
+        raise AssertionError("campaign resolution job forecast binding drifted")
+    if campaign_job["jobStatus"] != "pending_not_due":
+        raise AssertionError("campaign resolution job should not be due in the checked fixture")
+    if campaign_job["agentAction"]["recommendedAction"] != "wait":
+        raise AssertionError("campaign resolution job should tell agents to wait")
+    if campaign_job["claimBoundary"]["createsResolutionArtifacts"]:
+        raise AssertionError("campaign resolution job must not create resolution artifacts")
     print("checked resolution jobs")
 
 

@@ -199,6 +199,18 @@
     "mcpTool": "ope_private_setup_adapter_conformance_summary",
     "recommendedForRoutineAgents": true
   },
+  "sizeBudget": {
+    "compactSummaryPayloadMaxBytes": 12000,
+    "compactAgentEnvelopeMaxBytes": 16000,
+    "fullMatrixReferenceMaxBytes": 600000,
+    "fullMatrixRequiresExplicitCommand": true,
+    "oversizedAdapterErrorCode": "response_too_large",
+    "shapeGuards": {
+      "embedsEnvelopeRows": false,
+      "embedsOperationCases": false,
+      "matrixPathOnly": true
+    }
+  },
   "executionBoundary": {
     "summaryDoesNotExecute": true,
     "summaryDoesNotEmbedEnvelopes": true,

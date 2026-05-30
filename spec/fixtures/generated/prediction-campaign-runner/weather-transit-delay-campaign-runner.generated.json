@@ -1,0 +1,165 @@
+{
+  "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+  "generatedAt": "2026-05-29T00:15:00Z",
+  "runnerStatus": "dry_run_ready_non_executing",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "manifestPath": "spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json"
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign start",
+    "acceptsSetupJson": true,
+    "acceptsManifestJson": true,
+    "flags": [
+      "--domain",
+      "--service-window",
+      "--interval",
+      "--count",
+      "--until",
+      "--calibration-target",
+      "--post-calibration-action",
+      "--post-calibration-delay",
+      "--setup-json",
+      "--manifest-json",
+      "--live-weather",
+      "--execute-resolvers",
+      "--output-format"
+    ],
+    "requiresExplicitLiveFetchFlag": true,
+    "requiresExplicitResolverExecutionFlag": true,
+    "defaultMissedRunPolicy": "skip_if_forecast_close_passed"
+  },
+  "supportedRecurrenceModes": [
+    {
+      "mode": "fixed_count",
+      "flagBinding": "--count",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    },
+    {
+      "mode": "until_date",
+      "flagBinding": "--until",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    },
+    {
+      "mode": "open_ended",
+      "flagBinding": "--count omitted with explicit stop policy",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    },
+    {
+      "mode": "interval",
+      "flagBinding": "--interval",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    },
+    {
+      "mode": "calibration_threshold",
+      "flagBinding": "--calibration-target",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    },
+    {
+      "mode": "post_calibration_restart",
+      "flagBinding": "--post-calibration-action pause_then_resume_after",
+      "supportedByDryRun": true,
+      "createsForecastArtifacts": false
+    }
+  ],
+  "runnerDecisions": [
+    {
+      "decisionId": "predictionrunnerdecision-001",
+      "runId": "predictionrun-1301",
+      "decisionStatus": "ready_to_create_forecast",
+      "reason": "Dry-run clock is at the first candidate create time and forecast close has not passed.",
+      "nextAction": "A later effectful runner may create the forecast only with explicit local execution.",
+      "forecastArtifactsCreated": false,
+      "liveFetchRequired": false,
+      "resolverExecutionRequired": false,
+      "writesLiveState": false
+    },
+    {
+      "decisionId": "predictionrunnerdecision-002",
+      "runId": "predictionrun-1302",
+      "decisionStatus": "wait_until_create_time",
+      "reason": "The second candidate is planned but not due at the dry-run readback time.",
+      "nextAction": "Wait until forecastCreateAt before creating the run.",
+      "forecastArtifactsCreated": false,
+      "liveFetchRequired": false,
+      "resolverExecutionRequired": false,
+      "writesLiveState": false
+    },
+    {
+      "decisionId": "predictionrunnerdecision-003",
+      "runId": "predictionrun-1303",
+      "decisionStatus": "skip_missed_close",
+      "reason": "The missed-run policy is defined for cases where forecastCloseAt has already passed.",
+      "nextAction": "Record a skipped or missed state instead of backfilling a forecast.",
+      "forecastArtifactsCreated": false,
+      "liveFetchRequired": false,
+      "resolverExecutionRequired": false,
+      "writesLiveState": false
+    },
+    {
+      "decisionId": "predictionrunnerdecision-004",
+      "runId": "predictionrun-1304",
+      "decisionStatus": "blocked_duplicate",
+      "reason": "The duplicate key policy blocks a second forecast for the same campaign date/window key.",
+      "nextAction": "Keep the original run and do not create a duplicate forecast artifact.",
+      "forecastArtifactsCreated": false,
+      "liveFetchRequired": false,
+      "resolverExecutionRequired": false,
+      "writesLiveState": false
+    }
+  ],
+  "outputModes": {
+    "interactiveTerminalMode": "compact_human_status_lines",
+    "capturedStdoutMode": "jsonl",
+    "jsonlExample": "{\"event\":\"campaign_runner_decision\",\"runId\":\"predictionrun-1301\",\"decisionStatus\":\"ready_to_create_forecast\"}",
+    "humanLineExample": "predictionrun-1301 ready_to_create_forecast forecastCloseAt=2026-06-11T04:45:00Z"
+  },
+  "progress": {
+    "plannedRunCount": 4,
+    "readyToCreateForecastCount": 1,
+    "forecastArtifactsCreated": 0,
+    "resolvedComparableOutcomes": 0,
+    "nextForecastRunId": "predictionrun-1301",
+    "nextAction": "Implement the effectful local runner loop that creates the next forecast before close."
+  },
+  "summary": {
+    "terminalRunnerSurfaceImplemented": true,
+    "dryRunOnly": true,
+    "forecastCreationImplemented": false,
+    "resolverExecutionImplemented": false,
+    "writesLiveState": false,
+    "normalChecksUseLiveNetwork": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextMilestone": "Milestone 93 effectful local forecast creation"
+  },
+  "executionBoundary": {
+    "readOnlyDryRun": true,
+    "createsForecastArtifacts": false,
+    "executesForecastRunner": false,
+    "sleepsOrPolls": false,
+    "writesIgnoredLiveState": false,
+    "fetchesLiveData": false,
+    "executesResolvers": false,
+    "appendsCorpusEvidence": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "hostedRuntimeAllowed": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This runner readback checks command semantics only; it does not start a foreground loop.",
+    "Forecast creation remains a later effectful milestone and must preserve forecast-before-close boundaries.",
+    "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
+    "No calibration or quality claim is allowed from dry-run runner decisions."
+  ]
+}

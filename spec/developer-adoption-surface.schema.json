@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/developer-adoption-surface.schema.json",
+  "title": "Developer Adoption Surface",
+  "description": "Checked local MVP quickstart, example scenario, integration notes, release notes, and type-generation decision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "developerAdoptionSurfaceId",
+    "generatedAt",
+    "surfaceStatus",
+    "audience",
+    "bindings",
+    "quickstart",
+    "exampleScenario",
+    "integrationNotes",
+    "releaseNotes",
+    "typeGenerationDecision",
+    "successChecks",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "developerAdoptionSurfaceId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "surfaceStatus": {
+      "type": "string",
+      "enum": ["local_mvp_adoption_ready"]
+    },
+    "audience": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "string",
+        "enum": ["developer", "agent", "mcp_host", "maintainer"]
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseManifestId",
+        "mvpRunbookPath",
+        "localSourceRuntimeId",
+        "forecastId",
+        "questionId",
+        "forecastCardId",
+        "forecastBundleId"
+      ],
+      "properties": {
+        "releaseManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "mvpRunbookPath": { "$ref": "#/$defs/boundedString" },
+        "localSourceRuntimeId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastCardId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastBundleId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "quickstart": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/quickstartStep" }
+    },
+    "exampleScenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenarioId", "title", "goal", "steps", "expectedFinalState"],
+      "properties": {
+        "scenarioId": { "$ref": "common.schema.json#/$defs/id" },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "goal": { "$ref": "#/$defs/boundedString" },
+        "steps": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/scenarioStep" }
+        },
+        "expectedFinalState": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "forecastId",
+            "questionId",
+            "forecastCardAvailable",
+            "lifecycleBundleAvailable",
+            "resolutionStatus",
+            "scoreStatus",
+            "qualityClaimAllowed"
+          ],
+          "properties": {
+            "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+            "questionId": { "$ref": "common.schema.json#/$defs/id" },
+            "forecastCardAvailable": { "type": "boolean" },
+            "lifecycleBundleAvailable": { "type": "boolean" },
+            "resolutionStatus": { "$ref": "#/$defs/boundedString" },
+            "scoreStatus": { "$ref": "#/$defs/boundedString" },
+            "qualityClaimAllowed": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "integrationNotes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/integrationNote" }
+    },
+    "releaseNotes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/releaseNoteSection" }
+    },
+    "typeGenerationDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionStatus",
+        "currentContractSource",
+        "rationale",
+        "triggerToRevisit",
+        "generatedTypesIncluded"
+      ],
+      "properties": {
+        "decisionStatus": {
+          "type": "string",
+          "enum": ["defer_until_adoption_evidence"]
+        },
+        "currentContractSource": { "$ref": "#/$defs/boundedString" },
+        "rationale": { "$ref": "#/$defs/boundedString" },
+        "triggerToRevisit": { "$ref": "#/$defs/boundedString" },
+        "generatedTypesIncluded": { "type": "boolean" }
+      }
+    },
+    "successChecks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/successCheck" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quickstartStepCount",
+        "scenarioStepCount",
+        "integrationCount",
+        "implementedNoteCount",
+        "fixtureOnlyNoteCount",
+        "nonGoalNoteCount",
+        "firstForecastId",
+        "qualityClaimAllowed",
+        "generatedTypesIncluded"
+      ],
+      "properties": {
+        "quickstartStepCount": { "type": "integer", "minimum": 0 },
+        "scenarioStepCount": { "type": "integer", "minimum": 0 },
+        "integrationCount": { "type": "integer", "minimum": 0 },
+        "implementedNoteCount": { "type": "integer", "minimum": 0 },
+        "fixtureOnlyNoteCount": { "type": "integer", "minimum": 0 },
+        "nonGoalNoteCount": { "type": "integer", "minimum": 0 },
+        "firstForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "generatedTypesIncluded": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyGuide",
+        "normalChecksDeterministicOffline",
+        "executesCommands",
+        "createsForecastArtifacts",
+        "fetchesLiveData",
+        "storesCredentials",
+        "storesPrivateRows",
+        "hostedRuntime",
+        "productionSdk",
+        "languageTypesGenerated",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyGuide": { "type": "boolean" },
+        "normalChecksDeterministicOffline": { "type": "boolean" },
+        "executesCommands": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "hostedRuntime": { "type": "boolean" },
+        "productionSdk": { "type": "boolean" },
+        "languageTypesGenerated": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    },
+    "quickstartStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepId", "order", "title", "command", "expected", "timeBudgetSeconds"],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expected": { "$ref": "#/$defs/boundedString" },
+        "timeBudgetSeconds": { "type": "integer", "minimum": 1, "maximum": 3600 }
+      }
+    },
+    "scenarioStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "phase",
+        "command",
+        "expectedStatus",
+        "forecastId",
+        "questionId",
+        "createsArtifacts",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "source_setup",
+            "runtime_gate",
+            "forecast_readback",
+            "lifecycle_bundle",
+            "resolution_scoring",
+            "claim_review"
+          ]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedStatus": { "$ref": "#/$defs/boundedString" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "createsArtifacts": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "integrationNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interface",
+        "implementedStatus",
+        "minimumInput",
+        "exampleCommand",
+        "expectedOutput",
+        "boundary"
+      ],
+      "properties": {
+        "interface": {
+          "type": "string",
+          "enum": ["cli", "agent_call", "mcp_stdio"]
+        },
+        "implementedStatus": {
+          "type": "string",
+          "enum": ["implemented_local", "local_scaffold"]
+        },
+        "minimumInput": { "$ref": "#/$defs/boundedString" },
+        "exampleCommand": { "$ref": "#/$defs/boundedString" },
+        "expectedOutput": { "$ref": "#/$defs/boundedString" },
+        "boundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "releaseNoteSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "items"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["implemented", "fixture_only", "non_goal"]
+        },
+        "items": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "successCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "command", "expected"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expected": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    }
+  }
+}

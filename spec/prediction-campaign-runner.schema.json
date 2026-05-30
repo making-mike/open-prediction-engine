@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-runner.schema.json",
+  "title": "Prediction Campaign Runner",
+  "description": "Checked local terminal runner readback for prediction campaigns before foreground execution creates forecast artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignRunnerId",
+    "generatedAt",
+    "runnerStatus",
+    "domain",
+    "bindings",
+    "commandSurface",
+    "supportedRecurrenceModes",
+    "runnerDecisions",
+    "outputModes",
+    "progress",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "runnerStatus": {
+      "type": "string",
+      "enum": ["dry_run_ready_non_executing"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "supportedRecurrenceModes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/recurrenceMode" }
+    },
+    "runnerDecisions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/runnerDecision" }
+    },
+    "outputModes": { "$ref": "#/$defs/outputModes" },
+    "progress": { "$ref": "#/$defs/progress" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "repeatingPredictionSetupId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId",
+        "manifestPath"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "manifestPath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptsSetupJson",
+        "acceptsManifestJson",
+        "flags",
+        "requiresExplicitLiveFetchFlag",
+        "requiresExplicitResolverExecutionFlag",
+        "defaultMissedRunPolicy"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptsSetupJson": { "type": "boolean" },
+        "acceptsManifestJson": { "type": "boolean" },
+        "flags": { "$ref": "#/$defs/boundedStringList" },
+        "requiresExplicitLiveFetchFlag": { "type": "boolean" },
+        "requiresExplicitResolverExecutionFlag": { "type": "boolean" },
+        "defaultMissedRunPolicy": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "recurrenceMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "flagBinding", "supportedByDryRun", "createsForecastArtifacts"],
+      "properties": {
+        "mode": { "$ref": "#/$defs/boundedString" },
+        "flagBinding": { "$ref": "#/$defs/boundedString" },
+        "supportedByDryRun": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "runnerDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionId",
+        "runId",
+        "decisionStatus",
+        "reason",
+        "nextAction",
+        "forecastArtifactsCreated",
+        "liveFetchRequired",
+        "resolverExecutionRequired",
+        "writesLiveState"
+      ],
+      "properties": {
+        "decisionId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "decisionStatus": {
+          "type": "string",
+          "enum": [
+            "ready_to_create_forecast",
+            "wait_until_create_time",
+            "skip_missed_close",
+            "blocked_duplicate",
+            "manual_stop_requested"
+          ]
+        },
+        "reason": { "$ref": "#/$defs/boundedString" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "liveFetchRequired": { "type": "boolean" },
+        "resolverExecutionRequired": { "type": "boolean" },
+        "writesLiveState": { "type": "boolean" }
+      }
+    },
+    "outputModes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["interactiveTerminalMode", "capturedStdoutMode", "jsonlExample", "humanLineExample"],
+      "properties": {
+        "interactiveTerminalMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "jsonlExample": { "$ref": "#/$defs/boundedString" },
+        "humanLineExample": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plannedRunCount",
+        "readyToCreateForecastCount",
+        "forecastArtifactsCreated",
+        "resolvedComparableOutcomes",
+        "nextForecastRunId",
+        "nextAction"
+      ],
+      "properties": {
+        "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "readyToCreateForecastCount": { "type": "integer", "minimum": 0 },
+        "forecastArtifactsCreated": { "type": "integer", "minimum": 0 },
+        "resolvedComparableOutcomes": { "type": "integer", "minimum": 0 },
+        "nextForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terminalRunnerSurfaceImplemented",
+        "dryRunOnly",
+        "forecastCreationImplemented",
+        "resolverExecutionImplemented",
+        "writesLiveState",
+        "normalChecksUseLiveNetwork",
+        "qualityClaimAllowed",
+        "recommendedNextMilestone"
+      ],
+      "properties": {
+        "terminalRunnerSurfaceImplemented": { "type": "boolean" },
+        "dryRunOnly": { "type": "boolean" },
+        "forecastCreationImplemented": { "type": "boolean" },
+        "resolverExecutionImplemented": { "type": "boolean" },
+        "writesLiveState": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyDryRun",
+        "createsForecastArtifacts",
+        "executesForecastRunner",
+        "sleepsOrPolls",
+        "writesIgnoredLiveState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "appendsCorpusEvidence",
+        "storesCredentials",
+        "storesPrivateRows",
+        "hostedRuntimeAllowed",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyDryRun": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "executesForecastRunner": { "type": "boolean" },
+        "sleepsOrPolls": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

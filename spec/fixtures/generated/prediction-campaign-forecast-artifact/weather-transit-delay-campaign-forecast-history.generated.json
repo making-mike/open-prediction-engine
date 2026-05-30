@@ -1,0 +1,26 @@
+{
+  "historyId": "history-1301",
+  "questionId": "question-1301",
+  "entries": [
+    {
+      "forecastId": "forecast-1301",
+      "forecastedAt": "2026-06-11T00:00:00Z",
+      "state": "active",
+      "sourceClass": "baseline",
+      "model": {
+        "modelId": "model-1301",
+        "version": "weather-transit-delay-campaign-baseline-v0",
+        "trainingCutoff": "2026-06-11T04:45:00Z",
+        "configurationHash": "sha256-campaign-baseline-v0"
+      },
+      "forecastOutput": {
+        "outputType": "binary",
+        "probability": 0.25
+      },
+      "rationaleSummary": "The checked campaign fixture creates an unresolved baseline-only forecast artifact from the ready runner decision. It binds the campaign manifest, forecast-creation handoff, source policy, and historical delay fixture without live fetches or resolver execution.",
+      "evidencePacketId": "evidence-1301"
+    }
+  ],
+  "createdAt": "2026-06-11T00:00:00Z",
+  "updatedAt": "2026-06-11T00:00:00Z"
+}

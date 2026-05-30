@@ -20,6 +20,7 @@ from source_connector_catalog import (
     SOURCE_CONNECTOR_REGISTRY_ID,
     SOURCE_CONNECTOR_RESULT_SET_ID,
 )
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,10 +32,6 @@ GENERATED_AT = "2026-06-06T14:25:00Z"
 
 class LiveReadinessError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def default_service_date() -> str:
@@ -259,23 +256,11 @@ def integration_live_fetch(
 
 
 def write_readiness(record: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    READINESS_PATH.write_text(render_json(record), encoding="utf-8")
-    print("generated live connector readiness")
+    write_generated(READINESS_PATH, record, label="live connector readiness", regen="python3 scripts/generate_live_connector_readiness.py --write")
 
 
 def check_readiness(record: dict[str, Any]) -> None:
-    expected = render_json(record)
-    if not READINESS_PATH.exists():
-        print(f"missing live connector readiness: {READINESS_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_live_connector_readiness.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = READINESS_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"live connector readiness drift: {READINESS_PATH}", file=sys.stderr)
-        print("run `python3 scripts/generate_live_connector_readiness.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked live connector readiness")
+    check_generated(READINESS_PATH, record, label="live connector readiness", regen="python3 scripts/generate_live_connector_readiness.py --write")
 
 
 def main() -> None:

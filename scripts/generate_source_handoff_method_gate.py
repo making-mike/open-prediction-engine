@@ -13,6 +13,7 @@ from generate_setup_benchmark_gate import build_gate
 from generate_source_intake_handoff import CASE_ORDER, build_handoffs
 from ope_schema import SPEC, validate_record
 from select_setup_method import build_decision
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,10 +48,6 @@ DECISION_IDS = {
 
 class SourceHandoffMethodGateError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def case_slug(case: str) -> str:

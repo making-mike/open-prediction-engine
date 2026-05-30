@@ -1,0 +1,39 @@
+{
+  "questionId": "question-1301",
+  "title": "Will hsl-surface in helsinki exceed the beta delay threshold during morning_peak on 2026-06-11?",
+  "background": "Created as a checked prediction campaign fixture from the ready runner decision. It uses the baseline-only campaign method because transit method options still block non-baseline selection below the comparable-outcome threshold.",
+  "domain": "weather-transit-delays",
+  "outputType": "binary",
+  "status": "open",
+  "openAt": "2026-06-11T00:00:00Z",
+  "closeAt": "2026-06-11T04:45:00Z",
+  "resolveAt": "2026-06-11T07:00:00Z",
+  "horizon": {
+    "startsAt": "2026-06-11T05:00:00Z",
+    "endsAt": "2026-06-11T07:00:00Z",
+    "label": "same-day-morning-peak"
+  },
+  "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-11 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
+  "resolutionAuthority": "OPE local transit delay resolver",
+  "resolutionMode": "automated_measurement",
+  "primaryResolutionSource": {
+    "sourceId": "source-1304",
+    "name": "Future transit delay outcome capture",
+    "sourceType": "public_dataset"
+  },
+  "fallbackResolutionSources": [],
+  "validOutcomeSpace": {
+    "description": "Binary outcome: Yes if the network late-observation ratio meets the declared threshold; No otherwise.",
+    "labels": [
+      "yes",
+      "no"
+    ]
+  },
+  "clarificationHistory": [],
+  "incentiveRiskReview": {
+    "riskLevel": "minimal",
+    "notes": "Local transit delay campaign fixture; no passenger-level, fare, enforcement, or public-safety use."
+  },
+  "createdAt": "2026-06-11T00:00:00Z",
+  "updatedAt": "2026-06-11T00:00:00Z"
+}

@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-forecast-write.schema.json",
+  "title": "Prediction Campaign Forecast Write Plan",
+  "description": "Checked non-mutating plan for writing campaign forecast lifecycle records into ignored local campaign state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignForecastWriteId",
+    "generatedAt",
+    "writeStatus",
+    "domain",
+    "bindings",
+    "sourceArtifacts",
+    "targetState",
+    "writeGuards",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignForecastWriteId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "writeStatus": {
+      "type": "string",
+      "enum": ["ready_for_explicit_local_write"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "sourceArtifacts": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/sourceArtifact" }
+    },
+    "targetState": { "$ref": "#/$defs/targetState" },
+    "writeGuards": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/writeGuard" }
+    },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignForecastCreationId",
+        "repeatingPredictionSetupId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "runnerDecisionId",
+        "questionId",
+        "forecastId",
+        "evidencePacketId",
+        "historyId",
+        "sourcePolicyId",
+        "manifestPath",
+        "forecastCreationPath",
+        "forecastArtifactFixtureDirectory"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignForecastCreationId": { "$ref": "common.schema.json#/$defs/id" },
+        "repeatingPredictionSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "runnerDecisionId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "historyId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "manifestPath": { "$ref": "#/$defs/boundedString" },
+        "forecastCreationPath": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactFixtureDirectory": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "sourceArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordType",
+        "recordId",
+        "fixturePath",
+        "targetPath",
+        "contentHash",
+        "schemaFile"
+      ],
+      "properties": {
+        "recordType": {
+          "type": "string",
+          "enum": ["forecast_question", "evidence_packet", "forecast_artifact", "forecast_history"]
+        },
+        "recordId": { "$ref": "common.schema.json#/$defs/id" },
+        "fixturePath": { "$ref": "#/$defs/boundedString" },
+        "targetPath": { "$ref": "#/$defs/boundedString" },
+        "contentHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        "schemaFile": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "targetState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceRoot",
+        "campaignStatePath",
+        "runStatePath",
+        "artifactDirectory",
+        "questionPath",
+        "evidencePacketPath",
+        "forecastArtifactPath",
+        "forecastHistoryPath",
+        "idempotencyKey",
+        "relativePathsOnly",
+        "gitIgnored",
+        "normalChecksWriteLiveState",
+        "credentialsStored",
+        "privateRowsStored",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "workspaceRoot": { "$ref": "#/$defs/boundedString" },
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "runStatePath": { "$ref": "#/$defs/boundedString" },
+        "artifactDirectory": { "$ref": "#/$defs/boundedString" },
+        "questionPath": { "$ref": "#/$defs/boundedString" },
+        "evidencePacketPath": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "forecastHistoryPath": { "$ref": "#/$defs/boundedString" },
+        "idempotencyKey": { "$ref": "#/$defs/boundedString" },
+        "relativePathsOnly": { "type": "boolean" },
+        "gitIgnored": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "privateRowsStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "writeGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "guardStatus", "requiredBeforeWrite", "blocksWrite", "message"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "guardStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredBeforeWrite": { "type": "boolean" },
+        "blocksWrite": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitWriteFlagRequired",
+        "normalChecksExecuteWrite"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteFlagRequired": { "type": "boolean" },
+        "normalChecksExecuteWrite": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastWritePlanImplemented",
+        "effectfulLocalWriteImplemented",
+        "lifecycleRecordCount",
+        "writeGuardCount",
+        "writesIgnoredLiveStateInNormalChecks",
+        "normalChecksUseLiveNetwork",
+        "resolverExecutionImplemented",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "forecastWritePlanImplemented": { "type": "boolean" },
+        "effectfulLocalWriteImplemented": { "type": "boolean" },
+        "lifecycleRecordCount": { "type": "integer", "minimum": 0 },
+        "writeGuardCount": { "type": "integer", "minimum": 0 },
+        "writesIgnoredLiveStateInNormalChecks": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "resolverExecutionImplemented": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyWritePlan",
+        "createsCheckedLifecycleFixtures",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesForecastMethod",
+        "executesResolvers",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "storesCredentials",
+        "storesPrivateRows",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyWritePlan": { "type": "boolean" },
+        "createsCheckedLifecycleFixtures": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesForecastMethod": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

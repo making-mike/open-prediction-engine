@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/transit-corpus-growth-loop.schema.json",
+  "title": "Transit Corpus Growth Loop",
+  "description": "Checked append-readiness loop for growing the weather-transit-delay forward-run corpus while preserving evidence boundaries and claim gates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitCorpusGrowthLoopId",
+    "generatedAt",
+    "domain",
+    "growthMode",
+    "sourceCorpus",
+    "appendProtocol",
+    "candidateUpdates",
+    "dueRunChecklist",
+    "postResolutionChecklist",
+    "exclusionLedger",
+    "progressReadback",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "transitCorpusGrowthLoopId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "domain": { "const": "weather-transit-delays" },
+    "growthMode": {
+      "type": "string",
+      "enum": ["checked_append_readiness_loop"]
+    },
+    "sourceCorpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transitForwardRunCorpusId",
+        "sourceCommand",
+        "corpusPath",
+        "currentComparableResolved",
+        "currentExcluded",
+        "minimumComparableResolvedForTrackRecord",
+        "minimumComparableResolvedForCalibration"
+      ],
+      "properties": {
+        "transitForwardRunCorpusId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceCommand": { "$ref": "#/$defs/boundedString" },
+        "corpusPath": { "$ref": "#/$defs/boundedString" },
+        "currentComparableResolved": { "type": "integer", "minimum": 0 },
+        "currentExcluded": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForTrackRecord": { "type": "integer", "minimum": 1 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "appendProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appendProtocolId",
+        "appendReadinessCommand",
+        "appendOnly",
+        "manualCorpusEditingRequired",
+        "canonicalCorpusMutationImplemented",
+        "normalChecksMutateCorpus",
+        "requiredBindings",
+        "acceptanceChecks"
+      ],
+      "properties": {
+        "appendProtocolId": { "$ref": "common.schema.json#/$defs/id" },
+        "appendReadinessCommand": { "$ref": "#/$defs/boundedString" },
+        "appendOnly": { "type": "boolean" },
+        "manualCorpusEditingRequired": { "type": "boolean" },
+        "canonicalCorpusMutationImplemented": { "type": "boolean" },
+        "normalChecksMutateCorpus": { "type": "boolean" },
+        "requiredBindings": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "forward_run_state",
+              "forecast_artifact",
+              "resolution_record",
+              "scoring_report",
+              "source_policy",
+              "corpus_policy"
+            ]
+          }
+        },
+        "acceptanceChecks": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "candidateUpdates": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/candidateUpdate" }
+    },
+    "dueRunChecklist": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/checklistItem" }
+    },
+    "postResolutionChecklist": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/checklistItem" }
+    },
+    "exclusionLedger": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/exclusionLedgerRow" }
+    },
+    "progressReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentComparableResolved",
+        "appendReadyComparableCount",
+        "projectedComparableResolved",
+        "remainingForTrackRecord",
+        "remainingForCalibration",
+        "progressToTrackRecord",
+        "progressToCalibration",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "baselineTrackRecordAllowed"
+      ],
+      "properties": {
+        "currentComparableResolved": { "type": "integer", "minimum": 0 },
+        "appendReadyComparableCount": { "type": "integer", "minimum": 0 },
+        "projectedComparableResolved": { "type": "integer", "minimum": 0 },
+        "remainingForTrackRecord": { "type": "integer", "minimum": 0 },
+        "remainingForCalibration": { "type": "integer", "minimum": 0 },
+        "progressToTrackRecord": { "type": "number", "minimum": 0, "maximum": 1 },
+        "progressToCalibration": { "type": "number", "minimum": 0, "maximum": 1 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "baselineTrackRecordAllowed": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executesAppend",
+        "appendOnlyContractDeclared",
+        "modifiesExistingCorpusRows",
+        "readsIgnoredLiveWorkspace",
+        "fetchesLiveData",
+        "createsForecastArtifacts",
+        "createsResolutionRecords",
+        "createsScoringRecords",
+        "storesCredentials",
+        "allowsQualityClaims",
+        "normalChecksDeterministicOffline"
+      ],
+      "properties": {
+        "executesAppend": { "type": "boolean" },
+        "appendOnlyContractDeclared": { "type": "boolean" },
+        "modifiesExistingCorpusRows": { "type": "boolean" },
+        "readsIgnoredLiveWorkspace": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "createsResolutionRecords": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "allowsQualityClaims": { "type": "boolean" },
+        "normalChecksDeterministicOffline": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 420
+    },
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "candidateCase": {
+      "type": "string",
+      "enum": [
+        "comparable_resolved",
+        "missing_outcome",
+        "stale_evidence",
+        "leakage_risk",
+        "post_close_source",
+        "incomparable_window"
+      ]
+    },
+    "appendDecision": {
+      "type": "string",
+      "enum": ["append_ready", "exclude_from_comparable", "reject_from_corpus"]
+    },
+    "reasonCode": {
+      "type": "string",
+      "enum": [
+        "none",
+        "missing_outcome",
+        "stale_evidence",
+        "leakage_risk",
+        "post_close_source",
+        "incomparable_window"
+      ]
+    },
+    "candidateUpdate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateCase",
+        "forwardRunId",
+        "forecastId",
+        "questionId",
+        "serviceDate",
+        "appendDecision",
+        "reasonCode",
+        "requiredBindingsPresent",
+        "forecastBeforeClose",
+        "resolvedAfterHorizon",
+        "scorePresent",
+        "forecastTimeEvidenceBoundaryPreserved",
+        "resolutionOnlyEvidenceBoundaryPreserved",
+        "appendOnlyWrite",
+        "nextAction"
+      ],
+      "properties": {
+        "candidateId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateCase": { "$ref": "#/$defs/candidateCase" },
+        "forwardRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "#/$defs/nullableId" },
+        "questionId": { "$ref": "#/$defs/nullableId" },
+        "serviceDate": { "type": "string", "format": "date" },
+        "appendDecision": { "$ref": "#/$defs/appendDecision" },
+        "reasonCode": { "$ref": "#/$defs/reasonCode" },
+        "requiredBindingsPresent": { "type": "boolean" },
+        "forecastBeforeClose": { "type": "boolean" },
+        "resolvedAfterHorizon": { "type": "boolean" },
+        "scorePresent": { "type": "boolean" },
+        "forecastTimeEvidenceBoundaryPreserved": { "type": "boolean" },
+        "resolutionOnlyEvidenceBoundaryPreserved": { "type": "boolean" },
+        "appendOnlyWrite": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wouldAppendCorpusRow",
+            "wouldModifyExistingRows",
+            "wouldCreateForecastArtifacts",
+            "wouldCreateResolutionRecords",
+            "wouldCreateScoringRecords",
+            "requiresManualCorpusEditing"
+          ],
+          "properties": {
+            "wouldAppendCorpusRow": { "type": "boolean" },
+            "wouldModifyExistingRows": { "type": "boolean" },
+            "wouldCreateForecastArtifacts": { "type": "boolean" },
+            "wouldCreateResolutionRecords": { "type": "boolean" },
+            "wouldCreateScoringRecords": { "type": "boolean" },
+            "requiresManualCorpusEditing": { "type": "boolean" }
+          }
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "checklistItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "check",
+        "requiredForAppend",
+        "preservesForecastTimeEvidenceBoundary",
+        "nextAction"
+      ],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "check": { "$ref": "#/$defs/boundedString" },
+        "requiredForAppend": { "type": "boolean" },
+        "preservesForecastTimeEvidenceBoundary": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "exclusionLedgerRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledgerRowId",
+        "candidateCase",
+        "reasonCode",
+        "countsTowardComparableResolved",
+        "countsTowardCalibration",
+        "safeToRetainForAudit",
+        "nextAction"
+      ],
+      "properties": {
+        "ledgerRowId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateCase": { "$ref": "#/$defs/candidateCase" },
+        "reasonCode": { "$ref": "#/$defs/reasonCode" },
+        "countsTowardComparableResolved": { "type": "boolean" },
+        "countsTowardCalibration": { "type": "boolean" },
+        "safeToRetainForAudit": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    }
+  }
+}

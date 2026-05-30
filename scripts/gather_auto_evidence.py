@@ -20,6 +20,7 @@ from source_connector_catalog import (
     connector_binding,
 )
 from validate_forecast_request import load_json
+from ope_fixtures import check_generated, render_json, write_generated
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,10 +42,6 @@ UNSAFE_SOURCE_PHRASES = [
 
 class EvidenceGatheringError(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def fixture_label(path: Path) -> str:
@@ -313,23 +310,11 @@ def build_source_set(
 
 
 def write_source_set(source_set: dict[str, Any]) -> None:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    SOURCE_SET_PATH.write_text(render_json(source_set), encoding="utf-8")
-    print("generated auto-evidence source set")
+    write_generated(SOURCE_SET_PATH, source_set, label="auto-evidence source set", regen="python3 scripts/gather_auto_evidence.py --write")
 
 
 def check_source_set(source_set: dict[str, Any]) -> None:
-    expected = render_json(source_set)
-    if not SOURCE_SET_PATH.exists():
-        print(f"missing auto-evidence source set: {SOURCE_SET_PATH}", file=sys.stderr)
-        print("run `python3 scripts/gather_auto_evidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    actual = SOURCE_SET_PATH.read_text(encoding="utf-8")
-    if actual != expected:
-        print(f"auto-evidence source set drift: {SOURCE_SET_PATH}", file=sys.stderr)
-        print("run `python3 scripts/gather_auto_evidence.py --write`", file=sys.stderr)
-        raise SystemExit(1)
-    print("checked auto-evidence source set")
+    check_generated(SOURCE_SET_PATH, source_set, label="auto-evidence source set", regen="python3 scripts/gather_auto_evidence.py --write")
 
 
 def main() -> None:

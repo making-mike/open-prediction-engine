@@ -1,0 +1,437 @@
+{
+  "sourceAdapterOutputId": "sourceadapteroutput-1302",
+  "generatedAt": "2026-06-10T04:20:00Z",
+  "outputStatus": "needs_confirmation",
+  "adapter": {
+    "adapterId": "sourceadapter-1302",
+    "displayName": "Weather logistics external adapter needs-confirmation fixture",
+    "adapterVersion": "external-intake-v0",
+    "implementationLocation": "external_agent",
+    "sourceKind": "agent_extraction",
+    "ownsForecastSemantics": false
+  },
+  "execution": {
+    "adapterRunId": "sourceadapterrun-1302",
+    "executionMode": "external_runtime_capture",
+    "startedAt": "2026-06-10T04:20:00Z",
+    "completedAt": "2026-06-10T04:20:00Z",
+    "normalChecksOffline": true,
+    "liveFetchPerformed": false,
+    "credentialsUsed": false,
+    "credentialsStored": false
+  },
+  "domainBinding": {
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "questionTemplateId": "template-001",
+    "sourceRoles": [
+      "weather_forecast",
+      "historical_baseline",
+      "declared_operations_outcome"
+    ]
+  },
+  "sourceManifest": {
+    "sourceManifestId": "sourcemanifest-1302",
+    "createdAt": "2026-06-02T10:00:00Z",
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "forecastParameters": {
+      "questionTemplateId": "template-001",
+      "horizonLabel": "1-day",
+      "forecastCloseTime": "2026-06-02T12:00:00Z",
+      "geography": "Warsaw",
+      "serviceDate": "2026-06-03",
+      "assetIdentifier": null,
+      "location": null,
+      "targetWindow": null
+    },
+    "sources": [
+      {
+        "sourceId": "manifestsource-13021",
+        "sourceRole": "weather_forecast",
+        "displayName": "Agent Extracted Weather Table",
+        "connectorType": "agent_extraction",
+        "sourceClass": "public_dataset",
+        "sourceRef": "local://agent-extraction/weather-table.json",
+        "contentHash": "hash-weather-confirm-001",
+        "rowCount": 1,
+        "positiveOutcomeCount": null,
+        "retrieval": {
+          "retrievedAt": "2026-06-02T09:30:00Z",
+          "availableBeforeForecastClose": true,
+          "maxSourceAgeHours": 24
+        },
+        "coverage": {
+          "geographies": [
+            "Warsaw"
+          ],
+          "serviceDateStart": "2026-06-03",
+          "serviceDateEnd": "2026-06-03",
+          "entityIdentifiers": []
+        },
+        "privacy": {
+          "privacyClass": "public",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "city",
+            "observedType": "string",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "date",
+            "observedType": "date",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "loaded_at",
+            "observedType": "date_time",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "rain_mm",
+            "observedType": "number",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          }
+        ]
+      },
+      {
+        "sourceId": "manifestsource-13022",
+        "sourceRole": "historical_baseline",
+        "displayName": "Agent Extracted Historical Rows",
+        "connectorType": "agent_extraction",
+        "sourceClass": "internal_dataset",
+        "sourceRef": "local://agent-extraction/history-table.json",
+        "contentHash": "hash-history-confirm-001",
+        "rowCount": 60,
+        "positiveOutcomeCount": 7,
+        "retrieval": {
+          "retrievedAt": "2026-06-01T18:00:00Z",
+          "availableBeforeForecastClose": true,
+          "maxSourceAgeHours": 8760
+        },
+        "coverage": {
+          "geographies": [
+            "Warsaw"
+          ],
+          "serviceDateStart": "2026-01-01",
+          "serviceDateEnd": "2026-06-01",
+          "entityIdentifiers": []
+        },
+        "privacy": {
+          "privacyClass": "internal",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "date",
+            "observedType": "date",
+            "sampleCount": 60,
+            "nonNullCount": 60,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "city",
+            "observedType": "string",
+            "sampleCount": 60,
+            "nonNullCount": 60,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "disrupted",
+            "observedType": "boolean",
+            "sampleCount": 60,
+            "nonNullCount": 60,
+            "exampleValuesStored": false
+          }
+        ]
+      },
+      {
+        "sourceId": "manifestsource-13023",
+        "sourceRole": "declared_operations_outcome",
+        "displayName": "Agent Proposed Outcome Table",
+        "connectorType": "agent_extraction",
+        "sourceClass": "internal_dataset",
+        "sourceRef": "local://agent-extraction/outcome-table.json",
+        "contentHash": "hash-outcome-confirm-001",
+        "rowCount": 1,
+        "positiveOutcomeCount": 1,
+        "retrieval": {
+          "retrievedAt": null,
+          "availableBeforeForecastClose": false,
+          "maxSourceAgeHours": 8760
+        },
+        "coverage": {
+          "geographies": [
+            "Warsaw"
+          ],
+          "serviceDateStart": "2026-06-03",
+          "serviceDateEnd": "2026-06-03",
+          "entityIdentifiers": []
+        },
+        "privacy": {
+          "privacyClass": "internal",
+          "containsSecrets": false,
+          "containsPersonalData": false,
+          "approvalRequired": false,
+          "rawRetention": "metadata_only"
+        },
+        "fieldInventory": [
+          {
+            "fieldName": "date",
+            "observedType": "date",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "city",
+            "observedType": "string",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          },
+          {
+            "fieldName": "disrupted",
+            "observedType": "boolean",
+            "sampleCount": 1,
+            "nonNullCount": 1,
+            "exampleValuesStored": false
+          }
+        ]
+      }
+    ]
+  },
+  "fieldMapping": {
+    "fieldMappingId": "fieldmapping-1302",
+    "createdAt": "2026-06-02T10:00:00Z",
+    "domainSetupId": "domainsetup-001",
+    "domain": "weather-logistics",
+    "sourceManifestId": "sourcemanifest-1302",
+    "mappings": [
+      {
+        "mappingId": "mapping-13021",
+        "sourceId": "manifestsource-13021",
+        "sourceRole": "weather_forecast",
+        "sourceField": "city",
+        "targetField": "geography",
+        "targetFieldType": "string",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13022",
+        "sourceId": "manifestsource-13021",
+        "sourceRole": "weather_forecast",
+        "sourceField": "date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13023",
+        "sourceId": "manifestsource-13021",
+        "sourceRole": "weather_forecast",
+        "sourceField": "loaded_at",
+        "targetField": "retrieved_at",
+        "targetFieldType": "date_time",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13024",
+        "sourceId": "manifestsource-13021",
+        "sourceRole": "weather_forecast",
+        "sourceField": "rain_mm",
+        "targetField": "forecast_daily_precipitation_mm",
+        "targetFieldType": "number",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13025",
+        "sourceId": "manifestsource-13022",
+        "sourceRole": "historical_baseline",
+        "sourceField": "date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13026",
+        "sourceId": "manifestsource-13022",
+        "sourceRole": "historical_baseline",
+        "sourceField": "city",
+        "targetField": "geography",
+        "targetFieldType": "string",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13027",
+        "sourceId": "manifestsource-13022",
+        "sourceRole": "historical_baseline",
+        "sourceField": "disrupted",
+        "targetField": "disruption_observed",
+        "targetFieldType": "boolean",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13028",
+        "sourceId": "manifestsource-13023",
+        "sourceRole": "declared_operations_outcome",
+        "sourceField": "date",
+        "targetField": "service_date",
+        "targetFieldType": "date",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-13029",
+        "sourceId": "manifestsource-13023",
+        "sourceRole": "declared_operations_outcome",
+        "sourceField": "city",
+        "targetField": "geography",
+        "targetFieldType": "string",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      },
+      {
+        "mappingId": "mapping-130210",
+        "sourceId": "manifestsource-13023",
+        "sourceRole": "declared_operations_outcome",
+        "sourceField": "disrupted",
+        "targetField": "disruption_observed",
+        "targetFieldType": "boolean",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "confidence": 0.76,
+        "requiresConfirmation": true,
+        "validationNotes": [
+          "Agent-inferred mapping must be confirmed before forecast execution."
+        ]
+      }
+    ],
+    "aliasMappings": [
+      {
+        "aliasMappingId": "aliasmapping-13021",
+        "entityType": "geography",
+        "sourceValue": "Warsaw",
+        "canonicalValue": "warsaw",
+        "mappingOrigin": "agent_inferred",
+        "mappingStatus": "proposed",
+        "requiresConfirmation": true
+      }
+    ]
+  },
+  "handoffBoundary": {
+    "canEnterSourceIntake": true,
+    "sourceIntakeRequired": true,
+    "mappingConfirmationRequired": true,
+    "createsForecastArtifacts": false,
+    "createsScoringRecords": false,
+    "allowedNextCommands": [
+      "python3 scripts/ope.py source-adapter-intake --check",
+      "python3 scripts/ope.py source-intake --check"
+    ]
+  },
+  "provenanceSummary": {
+    "sourceCount": 3,
+    "rowCount": 62,
+    "contentHashesStored": true,
+    "rawRowsIncluded": false,
+    "allEvidenceClaimed": false,
+    "diagnostics": [
+      {
+        "diagnosticId": "sourceadapterdiagnostic-13021",
+        "level": "info",
+        "message": "External adapter output was normalized into OPE source manifest and field mapping contracts.",
+        "rawDetailIncluded": false
+      },
+      {
+        "diagnosticId": "sourceadapterdiagnostic-13022",
+        "level": "warning",
+        "message": "Agent-inferred field mappings require caller confirmation before forecast execution.",
+        "rawDetailIncluded": false
+      }
+    ]
+  },
+  "controls": {
+    "readOnly": true,
+    "forecastGenerationAllowed": false,
+    "forecastArtifactsCreated": false,
+    "sourceIntakeAlreadyRun": false,
+    "credentialStorageImplemented": false,
+    "promptVisibleCredentialsAccepted": false,
+    "rawPrivateRowsStored": false,
+    "sanitizedErrorsOnly": true
+  },
+  "nextAction": "ask_mapping_confirmation",
+  "warnings": [
+    "Source adapter outputs do not create forecast artifacts or scoring records.",
+    "Connector execution, credentials, and live fetching stay outside OPE core for this MVP path."
+  ]
+}

@@ -19,6 +19,7 @@ from build_live_weather_evidence import (
 from fetch_open_meteo_weather import build_url, load_fixture, normalize_response
 from ope_schema import SPEC, validate_file
 from validate_forecast_request import validate_request
+from ope_fixtures import render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +34,6 @@ GENERATED_AT = "2026-06-02T10:01:00Z"
 
 class PipelineRejected(Exception):
     pass
-
-
-def render_json(data: Any) -> str:
-    return json.dumps(data, indent=2, sort_keys=False) + "\n"
 
 
 def write_json(path: Path, data: Any) -> None:

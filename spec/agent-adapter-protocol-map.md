@@ -46,6 +46,8 @@ Every mapped operation returns `spec/agent-envelope.schema.json`. The local MCP 
 | `private_setup_source_handoff` | dry-run generation | Implemented | `ope_private_setup_source_handoff` |
 | `private_setup_method_gate` | dry-run generation | Implemented | `ope_private_setup_method_gate` |
 | `private_setup_forecast_execution` | forecast execution | Implemented | `ope_private_setup_forecast_execution` |
+| `resolution_jobs` | read-only | Implemented | `ope_resolution_jobs` |
+| `resolution_scheduler_status` | read-only | Implemented | `ope_resolution_scheduler_status` |
 | `resolution_status` | status-read | Implemented | `ope_resolution_status` |
 | `scoring_summary` | scoring-read | Implemented | `ope_scoring_summary` |
 
@@ -53,7 +55,7 @@ Every mapped operation returns `spec/agent-envelope.schema.json`. The local MCP 
 
 The generated map assigns deterministic tool names such as `ope_forecast_card` and `ope_scoring_summary`. The local MCP stdio scaffold exposes one tool per operation, keeps arguments minimal, and returns the same agent envelope object as `structuredContent` plus serialized JSON text content.
 
-The scaffold also exposes `ope_forecast_run` for the local fixture-safe run orchestrator. Unlike the sixteen mapped adapter operations, this tool returns `spec/forecast-run-summary.schema.json` instead of an agent envelope.
+The scaffold also exposes `ope_forecast_run` for the local fixture-safe run orchestrator. Unlike the eighteen mapped adapter operations, this tool returns `spec/forecast-run-summary.schema.json` instead of an agent envelope.
 
 Credentials must remain in MCP server configuration or host-controlled credential stores. They must not appear in prompt-visible tool arguments, forecast artifacts, provenance metadata, warnings, or returned records. The current scaffold exposes only validation, dry-run, read, status, scoring, setup-guidance, and fixture-safe orchestration tools; it does not expose paid, private-source execution, or production live-fetch work.
 
@@ -106,10 +108,14 @@ Use `private_setup_forecast_execution` when a method gate explicitly allows setu
 
 After `private_setup_forecast_execution` returns a generated forecast, use the returned `forecastId` and `questionId` with `forecast_card`, `lifecycle_bundle`, `resolution_status`, and `scoring_summary`. Do not add a private setup read API for forecast records.
 
+Use `resolution_jobs` when an agent needs pending, due, waiting, resolved, or invalid forward-run resolution-job guidance without reading local state files or executing resolver commands.
+
+Use `resolution_scheduler_status` when an agent needs the latest scheduler tick, shutdown reason, log path, execution mode, compact queue-state readbacks, and next recommended action without starting a scheduler or executing due jobs.
+
 Use `resolution_status` before treating a forecast as resolved or before normal scoring.
 
 Use `scoring_summary` before making quality, baseline-lift, or calibration-sensitive decisions.
 
 ## Boundary
 
-This document and the generated map claim only local MCP stdio scaffold support for the sixteen mapped tools. They do not claim HTTP API support, queue support, hosted service support, production live fetching, production agent adapter readiness, private source execution, or state-of-the-art forecast quality. They are implementation instructions for future adapters and a checked guard against protocol drift.
+This document and the generated map claim only local MCP stdio scaffold support for the eighteen mapped tools. They do not claim HTTP API support, queue support, hosted service support, production live fetching, production agent adapter readiness, private source execution, or state-of-the-art forecast quality. They are implementation instructions for future adapters and a checked guard against protocol drift.

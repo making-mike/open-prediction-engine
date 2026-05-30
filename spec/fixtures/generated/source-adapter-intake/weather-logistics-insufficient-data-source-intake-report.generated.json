@@ -1,0 +1,372 @@
+{
+  "sourceIntakeReportId": "sourceintakereport-1303",
+  "generatedAt": "2026-06-06T16:20:00Z",
+  "domainSetupId": "domainsetup-001",
+  "domain": "weather-logistics",
+  "sourceManifestId": "sourcemanifest-1303",
+  "fieldMappingId": "fieldmapping-1303",
+  "intakeStatus": "rejected",
+  "canProduceForecast": false,
+  "forecastGenerationAllowed": false,
+  "roleCoverage": [
+    {
+      "sourceRole": "weather_forecast",
+      "requiredForForecast": true,
+      "status": "present",
+      "sourceIds": [
+        "manifestsource-13031"
+      ]
+    },
+    {
+      "sourceRole": "historical_baseline",
+      "requiredForForecast": true,
+      "status": "rejected",
+      "sourceIds": [
+        "manifestsource-13032"
+      ]
+    },
+    {
+      "sourceRole": "declared_operations_outcome",
+      "requiredForForecast": false,
+      "status": "present",
+      "sourceIds": [
+        "manifestsource-13033"
+      ]
+    }
+  ],
+  "sourceDecisions": [
+    {
+      "sourceId": "manifestsource-13031",
+      "sourceRole": "weather_forecast",
+      "decision": "usable",
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "no_post_outcome_evidence_detected",
+        "not_baseline_source",
+        "privacy_boundary_ok",
+        "source_fresh_enough",
+        "types_compatible"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "passed",
+          "reasonCodes": [
+            "all_required_fields_mapped"
+          ]
+        },
+        "typeParsing": {
+          "status": "passed",
+          "reasonCodes": [
+            "types_compatible"
+          ]
+        },
+        "entityMatch": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_fresh_enough"
+          ]
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected"
+          ]
+        },
+        "sampleSize": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "not_baseline_source"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    },
+    {
+      "sourceId": "manifestsource-13032",
+      "sourceRole": "historical_baseline",
+      "decision": "rejected",
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "available_before_forecast_close",
+        "entity_scope_matches",
+        "insufficient_comparable_rows",
+        "insufficient_positive_outcomes",
+        "no_post_outcome_evidence_detected",
+        "privacy_boundary_ok",
+        "source_fresh_enough",
+        "types_compatible"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "passed",
+          "reasonCodes": [
+            "all_required_fields_mapped"
+          ]
+        },
+        "typeParsing": {
+          "status": "passed",
+          "reasonCodes": [
+            "types_compatible"
+          ]
+        },
+        "entityMatch": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "passed",
+          "reasonCodes": [
+            "available_before_forecast_close"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "passed",
+          "reasonCodes": [
+            "source_fresh_enough"
+          ]
+        },
+        "leakageRisk": {
+          "status": "passed",
+          "reasonCodes": [
+            "no_post_outcome_evidence_detected"
+          ]
+        },
+        "sampleSize": {
+          "status": "failed",
+          "reasonCodes": [
+            "insufficient_comparable_rows",
+            "insufficient_positive_outcomes"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    },
+    {
+      "sourceId": "manifestsource-13033",
+      "sourceRole": "declared_operations_outcome",
+      "decision": "usable",
+      "reasonCodes": [
+        "all_required_fields_mapped",
+        "entity_scope_matches",
+        "not_baseline_source",
+        "privacy_boundary_ok",
+        "resolution_role_not_forecast_time",
+        "source_role_resolution_only",
+        "types_compatible"
+      ],
+      "checks": {
+        "requiredFields": {
+          "status": "passed",
+          "reasonCodes": [
+            "all_required_fields_mapped"
+          ]
+        },
+        "typeParsing": {
+          "status": "passed",
+          "reasonCodes": [
+            "types_compatible"
+          ]
+        },
+        "entityMatch": {
+          "status": "passed",
+          "reasonCodes": [
+            "entity_scope_matches"
+          ]
+        },
+        "timestampAvailability": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time"
+          ]
+        },
+        "sourceFreshness": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "resolution_role_not_forecast_time"
+          ]
+        },
+        "leakageRisk": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "source_role_resolution_only"
+          ]
+        },
+        "sampleSize": {
+          "status": "not_applicable",
+          "reasonCodes": [
+            "not_baseline_source"
+          ]
+        },
+        "privacy": {
+          "status": "passed",
+          "reasonCodes": [
+            "privacy_boundary_ok"
+          ]
+        }
+      }
+    }
+  ],
+  "mappingDecisions": [
+    {
+      "mappingId": "mapping-13031",
+      "sourceId": "manifestsource-13031",
+      "targetField": "geography",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13032",
+      "sourceId": "manifestsource-13031",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13033",
+      "sourceId": "manifestsource-13031",
+      "targetField": "retrieved_at",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13034",
+      "sourceId": "manifestsource-13031",
+      "targetField": "forecast_daily_precipitation_mm",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13035",
+      "sourceId": "manifestsource-13032",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13036",
+      "sourceId": "manifestsource-13032",
+      "targetField": "geography",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13037",
+      "sourceId": "manifestsource-13032",
+      "targetField": "disruption_observed",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13038",
+      "sourceId": "manifestsource-13033",
+      "targetField": "service_date",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-13039",
+      "sourceId": "manifestsource-13033",
+      "targetField": "geography",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    },
+    {
+      "mappingId": "mapping-130310",
+      "sourceId": "manifestsource-13033",
+      "targetField": "disruption_observed",
+      "decision": "accepted",
+      "mappingOrigin": "user_provided",
+      "requiresConfirmation": false,
+      "reasonCodes": [
+        "mapping_confirmed"
+      ]
+    }
+  ],
+  "methodEligibility": [
+    {
+      "methodClass": "historical_baseline",
+      "eligible": false,
+      "reasonCodes": [
+        "missing_usable_historical_baseline",
+        "source_rejected"
+      ]
+    },
+    {
+      "methodClass": "deterministic_statistical",
+      "eligible": false,
+      "reasonCodes": [
+        "missing_usable_historical_baseline",
+        "source_rejected"
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Remove or replace rejected source manifestsource-13032 for role historical_baseline."
+  ],
+  "warnings": [
+    "Source intake reports do not produce forecast artifacts.",
+    "Rejected intake must not bind generated forecast outputs."
+  ]
+}
