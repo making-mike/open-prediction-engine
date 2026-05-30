@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import io
+import json
 import tempfile
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
-from ope_fixtures import check_generated, compact_json, render_json, write_generated
+from ope_fixtures import check_generated, compact_json, render_json, validate_and_emit, write_generated
 
 
 def require(condition: bool, message: str) -> None:
@@ -67,6 +68,43 @@ def main() -> None:
             raised = exc.code == 1
         require(raised, "check_generated must SystemExit(1) when the file is missing")
         require("missing example record:" in err.getvalue(), "missing message must name the label")
+
+        schema_path = Path(tmp) / "thing.schema.json"
+        schema_path.write_text(
+            json.dumps(
+                {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {"name": {"type": "string"}},
+                    "additionalProperties": False,
+                }
+            ),
+            encoding="utf-8",
+        )
+        thing_path = Path(tmp) / "thing.generated.json"
+        valid = {"name": "ok"}
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            validate_and_emit(valid, schema_path, thing_path, write=True, label="thing", regen=regen)
+        require(
+            thing_path.read_text(encoding="utf-8") == render_json(valid),
+            "validate_and_emit must write validated data",
+        )
+        require(out.getvalue() == "generated thing\n", "validate_and_emit must announce a write")
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            validate_and_emit(valid, schema_path, thing_path, write=False, label="thing", regen=regen)
+        require(out.getvalue() == "checked thing\n", "validate_and_emit must check validated data")
+
+        raised = False
+        with redirect_stdout(io.StringIO()):
+            try:
+                validate_and_emit({"name": 123}, schema_path, thing_path, write=False, label="thing", regen=regen)
+            except SystemExit as exc:
+                raised = exc.code == 1
+        require(raised, "validate_and_emit must SystemExit(1) on schema-invalid data")
 
     print("checked shared fixture helpers")
 

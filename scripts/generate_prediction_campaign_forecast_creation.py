@@ -12,7 +12,7 @@ from typing import Any
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_prediction_campaign_runner import build_prediction_campaign_runner
 from ope_schema import SPEC, validate_record
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import render_json, validate_and_emit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -206,15 +206,7 @@ def print_view(creation: dict[str, Any], view: str) -> None:
 
 
 def check_or_write(data: dict[str, Any], *, write: bool) -> None:
-    errors = validate_record(data, SCHEMA)
-    if errors:
-        for error in errors:
-            print(error)
-        raise SystemExit(1)
-    if write:
-        write_generated(OUTPUT_PATH, data, label="prediction campaign forecast creation", regen="python3 scripts/generate_prediction_campaign_forecast_creation.py --write")
-    else:
-        check_generated(OUTPUT_PATH, data, label="prediction campaign forecast creation", regen="python3 scripts/generate_prediction_campaign_forecast_creation.py --write")
+    validate_and_emit(data, SCHEMA, OUTPUT_PATH, write=write, label="prediction campaign forecast creation", regen="python3 scripts/generate_prediction_campaign_forecast_creation.py --write")
 
 
 def main() -> None:
