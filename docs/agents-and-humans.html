@@ -394,7 +394,7 @@
           A compact orientation page for people and coding agents working on OPE. Use it to find the current scope, trusted commands, claim boundaries, and the documents that must stay synchronized as milestones land.
         </p>
         <div class="meta" aria-label="Page facts">
-          <span class="pill">Last reviewed: 2026-05-28</span>
+          <span class="pill">Last reviewed: 2026-05-31</span>
           <span class="pill">Runtime: Python 3.12+ standard library</span>
           <span class="pill">Release mode: local fixture-ready MVP</span>
         </div>
@@ -462,7 +462,7 @@
       <div class="grid three">
         <article class="card">
           <h3>What OPE does now</h3>
-          <p>It validates contracts, generates checked fixtures, reads forecast cards and bundles, runs local forecast paths, resolves outcomes, scores forecasts, and exposes agent-readable envelopes.</p>
+          <p>It validates contracts, generates checked fixtures, reads forecast cards and bundles, runs local forecast paths, resolves outcomes, scores forecasts, explains recurring campaign state, and exposes agent-readable envelopes.</p>
         </article>
         <article class="card">
           <h3>What OPE does not claim</h3>
@@ -470,7 +470,7 @@
         </article>
         <article class="card">
           <h3>Reference wedges</h3>
-          <p>Weather-logistics proves the core lifecycle. Weather-transit-delays now anchors checked recurring setup, runner, and forecast-creation handoff contracts for future evidence-producing campaigns.</p>
+          <p>Weather-logistics proves the core lifecycle. Weather-transit-delays now anchors checked recurring setup, runner, campaign explain, and forecast-creation handoff contracts for future evidence-producing campaigns.</p>
         </article>
       </div>
     </section>
@@ -497,6 +497,7 @@
           <pre><code>python3 --version
 python3 scripts/run_checks.py
 python3 scripts/ope.py check</code></pre>
+          <p>Release readiness adds dev-only <code>ruff</code>/<code>mypy</code> static analysis; normal checks remain standard-library only.</p>
         </article>
       </div>
       <div class="callout warning" style="margin-top: 1rem;">
@@ -530,7 +531,10 @@ python3 scripts/ope.py check</code></pre>
 
 python3 scripts/ope.py agent-call \
   --operation private_setup_bundle \
-  --private-setup-request-id privatesetuprequest-001</code></pre>
+  --private-setup-request-id privatesetuprequest-001
+
+python3 scripts/ope.py agent-call \
+  --operation campaign_status</code></pre>
         </article>
       </div>
       <div class="callout" style="margin-top: 1rem;">
@@ -629,12 +633,16 @@ python3 scripts/ope.py agent-call \
           <span>Checked recurrence policies, post-calibration actions, and non-execution boundary.</span>
         </li>
         <li>
+          <strong><a href="../spec/repeating-prediction-pilot-runbook.md">repeating-prediction-pilot-runbook.md</a></strong>
+          <span>Checked local pilot workflow for 100-run and open-ended recurring campaigns.</span>
+        </li>
+        <li>
           <strong><a href="../spec/prediction-campaign-manifest.md">prediction-campaign-manifest.md</a></strong>
           <span>Checked dry-run campaign plan, unique run IDs, duplicate keys, and status readbacks.</span>
         </li>
         <li>
           <strong><a href="../spec/prediction-campaign-runner.md">prediction-campaign-runner.md</a></strong>
-          <span>Checked terminal runner start semantics, normalized campaign input, missed-run exclusion policy, and explicit guarded local forecast creation.</span>
+          <span>Checked terminal runner start semantics, normalized campaign input, forecast scheduling plan, bounded foreground ticks, runner-clock next-due scheduling, missed-run exclusion policy, and explicit guarded local forecast creation.</span>
         </li>
         <li>
           <strong><a href="../spec/prediction-campaign-forecast-creation.md">prediction-campaign-forecast-creation.md</a></strong>
@@ -647,6 +655,38 @@ python3 scripts/ope.py agent-call \
         <li>
           <strong><a href="../spec/prediction-campaign-forecast-write.md">prediction-campaign-forecast-write.md</a></strong>
           <span>Checked forecast lifecycle write plan, local-state guards, and explicit idempotent write path.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-resolution-attempt.md">prediction-campaign-resolution-attempt.md</a></strong>
+          <span>Checked campaign resolver-attempt readback with failure, retry, source-fetch, diagnostics, and non-mutation boundaries.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-doctor.md">prediction-campaign-doctor.md</a></strong>
+          <span>Checked compact campaign health, queue, duplicate, recovery, and next-action readback.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-resume.md">prediction-campaign-resume.md</a></strong>
+          <span>Checked campaign resume readback with interrupted-state inspection and overwrite guards.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-evidence-ledger.md">prediction-campaign-evidence-ledger.md</a></strong>
+          <span>Checked append-only campaign evidence ledger readback with comparable and excluded rows.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-calibration-status.md">prediction-campaign-calibration-status.md</a></strong>
+          <span>Checked campaign calibration status and post-calibration continuation readback.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-method-update-gate.md">prediction-campaign-method-update-gate.md</a></strong>
+          <span>Checked read-only method-update gate before calibration can influence method selection.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-method-update-plan.md">prediction-campaign-method-update-plan.md</a></strong>
+          <span>Checked approval, command-shape, rollback, and preflight plan for future method updates.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/prediction-campaign-explain.md">prediction-campaign-explain.md</a></strong>
+          <span>Checked pilot readback for next forecast, next resolution, evidence threshold, agent readbacks, and claim boundary.</span>
         </li>
         <li>
           <strong><a href="../spec/release-manifest.md">release-manifest.md</a></strong>

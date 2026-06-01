@@ -34,6 +34,7 @@
         "agentPilotValidationId",
         "pilotEvidenceLedgerId",
         "developerAdoptionSurfaceId",
+        "predictionCampaignExplainId",
         "pilotProtocolId",
         "pilotEvidencePolicyId"
       ],
@@ -42,6 +43,7 @@
         "agentPilotValidationId": { "$ref": "common.schema.json#/$defs/id" },
         "pilotEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
         "developerAdoptionSurfaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignExplainId": { "$ref": "common.schema.json#/$defs/id" },
         "pilotProtocolId": { "$ref": "common.schema.json#/$defs/id" },
         "pilotEvidencePolicyId": { "$ref": "common.schema.json#/$defs/id" }
       }
@@ -83,8 +85,8 @@
     },
     "taskCards": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "items": { "$ref": "#/$defs/taskCard" }
     },
     "evidenceTemplate": {
@@ -258,7 +260,8 @@
             "accepted_adapter_output_ready",
             "unsafe_source_block",
             "forecast_run_readback",
-            "claim_gate_readback"
+            "claim_gate_readback",
+            "repeating_prediction_campaign"
           ]
         },
         "title": { "$ref": "#/$defs/boundedString" },

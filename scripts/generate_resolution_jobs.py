@@ -8,7 +8,6 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 from generate_prediction_campaign_forecast_artifact import build_prediction_campaign_forecast_artifact
@@ -34,8 +33,8 @@ def parse_utc(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
-def resolver_args(args: argparse.Namespace) -> SimpleNamespace:
-    return SimpleNamespace(
+def resolver_args(args: argparse.Namespace) -> argparse.Namespace:
+    return argparse.Namespace(
         live=args.live,
         execute=False,
         workspace=args.workspace,
@@ -100,15 +99,21 @@ def campaign_action_for_job(
     reason: str,
 ) -> dict[str, Any]:
     scan = f"python3 scripts/ope.py resolution-jobs --campaign {campaign_id}"
+    attempt = f"python3 scripts/ope.py prediction-campaign resolve --run-id {run_id}"
+    execute_attempt = f"{attempt} --execute-resolvers"
+    execute_write = (
+        f"{execute_attempt} --outcome-csv "
+        f".ope/live/prediction-campaigns/{campaign_id}/{run_id}/outcome.csv --write-local"
+    )
     read_forecast = (
         "python3 scripts/ope.py read --record-type forecast-card "
         f"--id {forecast_id} --question-id {question_id}"
     )
     if status == "pending_due":
         return {
-            "recommendedAction": "wait_for_campaign_resolver",
-            "reason": "campaign forecast is due, but campaign resolver execution is a later milestone",
-            "commands": [scan, read_forecast],
+            "recommendedAction": "call_campaign_resolver_attempt",
+            "reason": "campaign forecast is due; inspect the readback, then run the explicit local resolver write with a declared outcome source",
+            "commands": [scan, attempt, execute_attempt, execute_write, read_forecast],
         }
     if status == "pending_not_due":
         return {

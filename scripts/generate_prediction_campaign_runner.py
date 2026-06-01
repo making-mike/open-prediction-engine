@@ -5,11 +5,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from generate_prediction_campaign_manifest import DEFAULT_CASE, build_prediction_campaign_manifest, find_case
+from generate_prediction_campaign_manifest import (
+    DEFAULT_CASE,
+    build_prediction_campaign_manifest,
+    find_case,
+    target_count_for_case,
+)
 from generate_repeating_prediction_setup import EXAMPLE_ORDER, build_repeating_prediction_setup
+from generate_transit_method_options import BASELINE_METHOD_ID, WEATHER_ADJUSTMENT_METHOD_ID
 from ope_schema import SPEC, validate_record
 from ope_fixtures import compact_json, render_json, validate_and_emit
 
@@ -51,6 +59,12 @@ def default_args() -> argparse.Namespace:
         manifest_json=None,
         live_weather=False,
         execute_resolvers=False,
+        full_materialization=False,
+        write_local=False,
+        watch=False,
+        max_ticks=None,
+        poll_seconds=60,
+        now=None,
     )
 
 
@@ -77,37 +91,73 @@ def runner_decision(index: int, run: dict[str, Any], status: str, reason: str, n
     }
 
 
-def build_runner_decisions(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+def parse_utc(value: str) -> datetime:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError as exc:
+        raise SystemExit(f"Invalid UTC timestamp: {value}") from exc
+
+
+def clock_decision(index: int, run: dict[str, Any], runner_clock: datetime) -> dict[str, Any]:
+    forecast_create = parse_utc(run["forecastCreateAt"])
+    forecast_close = parse_utc(run["forecastCloseAt"])
+    if runner_clock < forecast_create:
+        return runner_decision(
+            index,
+            run,
+            "wait_until_create_time",
+            "Runner clock is before forecastCreateAt for this campaign run.",
+            "Wait until forecastCreateAt before creating the run.",
+        )
+    if runner_clock > forecast_close:
+        return runner_decision(
+            index,
+            run,
+            "skip_missed_close",
+            "Runner clock is after forecastCloseAt and the missed-run policy blocks backfill.",
+            "Record a missed state instead of backfilling a forecast.",
+        )
+    return runner_decision(
+        index,
+        run,
+        "ready_to_create_forecast",
+        "Runner clock is inside the forecast creation window for this campaign run.",
+        "Create the forecast only with explicit local execution.",
+    )
+
+
+def build_runner_decisions(manifest: dict[str, Any], runner_clock: datetime | None = None) -> list[dict[str, Any]]:
     planned = manifest["plannedRuns"]
-    return [
-        runner_decision(
-            1,
-            planned[0],
+    if runner_clock is not None:
+        return [
+            clock_decision(index, run, runner_clock)
+            for index, run in enumerate(planned, start=1)
+        ]
+    templates = [
+        (
             "ready_to_create_forecast",
             "Dry-run clock is at the first candidate create time and forecast close has not passed.",
             "A later effectful runner may create the forecast only with explicit local execution.",
         ),
-        runner_decision(
-            2,
-            planned[1],
+        (
             "wait_until_create_time",
             "The second candidate is planned but not due at the dry-run readback time.",
             "Wait until forecastCreateAt before creating the run.",
         ),
-        runner_decision(
-            3,
-            planned[2],
+        (
             "skip_missed_close",
             "The missed-run policy is defined for cases where forecastCloseAt has already passed.",
             "Record a skipped or missed state instead of backfilling a forecast.",
         ),
-        runner_decision(
-            4,
-            planned[3],
+        (
             "blocked_duplicate",
             "The duplicate key policy blocks a second forecast for the same campaign date/window key.",
             "Keep the original run and do not create a duplicate forecast artifact.",
         ),
+    ]
+    return [
+        runner_decision(index, run, templates[index - 1][0], templates[index - 1][1], templates[index - 1][2])
+        for index, run in enumerate(planned[: len(templates)], start=1)
     ]
 
 
@@ -125,6 +175,81 @@ def missed_run_policy() -> dict[str, Any]:
         "createsScoringRecords": False,
         "appendsCorpusEvidence": False,
         "nextAction": "Record a missed run state and plan the next eligible window instead of backfilling a forecast.",
+    }
+
+
+def schedule_action(status: str) -> str:
+    if status == "ready_to_create_forecast":
+        return "create_with_explicit_write_local"
+    if status == "wait_until_create_time":
+        return "wait_until_forecast_create_at"
+    if status == "skip_missed_close":
+        return "record_missed_without_forecast"
+    if status == "blocked_duplicate":
+        return "block_duplicate_without_forecast"
+    return "inspect_manual_status"
+
+
+def build_forecast_schedule(
+    manifest: dict[str, Any],
+    decisions: list[dict[str, Any]],
+    *,
+    runner_clock: str | None = None,
+) -> dict[str, Any]:
+    runs = {run["runId"]: run for run in manifest["plannedRuns"]}
+    first_run = manifest["plannedRuns"][0]
+    next_row = None
+    rows = []
+    for decision in decisions:
+        run = runs[decision["runId"]]
+        row = {
+            "runId": run["runId"],
+            "decisionStatus": decision["decisionStatus"],
+            "scheduleAction": schedule_action(decision["decisionStatus"]),
+            "forecastCreateAt": run["forecastCreateAt"],
+            "forecastCloseAt": run["forecastCloseAt"],
+            "createsForecastArtifacts": False,
+            "writesCampaignState": False,
+            "nextAction": decision["nextAction"],
+        }
+        rows.append(row)
+        if next_row is None and row["decisionStatus"] in ("ready_to_create_forecast", "wait_until_create_time"):
+            next_row = row
+    if next_row is None:
+        next_row = rows[0]
+    return {
+        "scheduleMode": "foreground_tick_plan",
+        "runnerClock": runner_clock or first_run["forecastCreateAt"],
+        "tickPolicy": "Create the ready forecast before close only when --write-local is explicit; wait, miss, or block all other candidate states.",
+        "readyRunId": next_row["runId"],
+        "nextForecastCreateAt": next_row["forecastCreateAt"],
+        "nextForecastCloseAt": next_row["forecastCloseAt"],
+        "creationCommand": "python3 scripts/ope.py prediction-campaign start --write-local --output-format jsonl",
+        "capturedOutputMode": "jsonl",
+        "scheduleRows": rows,
+        "normalChecksWriteLiveState": False,
+        "requiresExplicitWriteLocal": True,
+        "createsForecastArtifactsInDryRun": False,
+        "nextAction": "Use --now to inspect later due windows and --write-local to create the next due forecast; long-running polling remains separate.",
+    }
+
+
+def method_selection_binding(manifest: dict[str, Any]) -> dict[str, Any]:
+    campaign_id = manifest["campaign"]["campaignId"]
+    root = f".ope/live/prediction-campaigns/{campaign_id}"
+    return {
+        "bindingStatus": "baseline_default_no_local_override",
+        "defaultMethodId": BASELINE_METHOD_ID,
+        "activeMethodId": BASELINE_METHOD_ID,
+        "candidateMethodId": WEATHER_ADJUSTMENT_METHOD_ID,
+        "methodBindingPath": f"{root}/method-binding.json",
+        "applyCommand": "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --write-local",
+        "rollbackCommand": "python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --write-local",
+        "requiresApprovedLocalBinding": True,
+        "normalChecksReadLocalBinding": False,
+        "normalChecksChangeMethod": False,
+        "futureForecastsOnly": True,
+        "priorForecastHistoryRewriteAllowed": False,
     }
 
 
@@ -236,13 +361,17 @@ def build_campaign_creation_request(
 def build_runner_inputs(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     if args.setup_json and args.manifest_json:
         raise SystemExit("--setup-json and --manifest-json cannot be combined")
-    if args.plan_count < 4 or args.plan_count > 12:
-        raise SystemExit("--plan-count for the runner must be between 4 and 12")
+    if args.plan_count < 2 or args.plan_count > 12:
+        raise SystemExit("--plan-count for the runner must be between 2 and 12")
+    if args.count is not None and (args.count < 1 or args.count > 100):
+        raise SystemExit("--count for the runner must be between 1 and 100")
 
     if args.manifest_json:
+        if args.full_materialization:
+            raise SystemExit("--full-materialization cannot be combined with --manifest-json")
         manifest = load_json_record(args.manifest_json, MANIFEST_SCHEMA, "manifest JSON")
-        if len(manifest["plannedRuns"]) < 4:
-            raise SystemExit("manifest JSON must include at least 4 planned runs for the runner readback")
+        if len(manifest["plannedRuns"]) < 2:
+            raise SystemExit("manifest JSON must include at least 2 planned runs for the runner readback")
         try:
             case = find_case(build_repeating_prediction_setup(), manifest["campaign"]["recurrenceCaseKey"])
         except Exception:
@@ -255,7 +384,16 @@ def build_runner_inputs(args: argparse.Namespace) -> tuple[dict[str, Any], dict[
         setup = load_json_record(args.setup_json, SETUP_SCHEMA, "setup JSON")
         input_mode = "setup_json"
     case = find_case(setup, args.case)
-    manifest = build_prediction_campaign_manifest(case_key=args.case, plan_count=args.plan_count, setup=setup)
+    target_count = args.count
+    if args.full_materialization and target_count is None:
+        target_count = target_count_for_case(case)
+    manifest = build_prediction_campaign_manifest(
+        case_key=args.case,
+        plan_count=args.plan_count,
+        target_count=target_count,
+        full_materialization=args.full_materialization,
+        setup=setup,
+    )
     return manifest, build_campaign_creation_request(manifest, case, args, input_mode=input_mode)
 
 
@@ -264,7 +402,8 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         args = default_args()
     manifest, creation_request = build_runner_inputs(args)
     first_run = manifest["plannedRuns"][0]
-    decisions = build_runner_decisions(manifest)
+    runner_clock = parse_utc(args.now) if args.now else None
+    decisions = build_runner_decisions(manifest, runner_clock=runner_clock)
     return {
         "predictionCampaignRunnerId": "predictioncampaignrunner-001",
         "generatedAt": GENERATED_AT,
@@ -297,6 +436,11 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
                 "--manifest-json",
                 "--live-weather",
                 "--execute-resolvers",
+                "--full-materialization",
+                "--watch",
+                "--max-ticks",
+                "--poll-seconds",
+                "--now",
                 "--write-local",
                 "--output-format",
             ],
@@ -305,6 +449,8 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
             "defaultMissedRunPolicy": "skip_if_forecast_close_passed",
         },
         "campaignCreationRequest": creation_request,
+        "forecastSchedule": build_forecast_schedule(manifest, decisions, runner_clock=args.now),
+        "methodSelectionBinding": method_selection_binding(manifest),
         "supportedRecurrenceModes": [
             recurrence_mode("fixed_count", "--count"),
             recurrence_mode("until_date", "--until"),
@@ -323,21 +469,24 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         },
         "progress": {
             "plannedRunCount": manifest["progress"]["plannedRunCount"],
-            "readyToCreateForecastCount": 1,
+            "readyToCreateForecastCount": sum(
+                1 for decision in decisions if decision["decisionStatus"] == "ready_to_create_forecast"
+            ),
+            "materializedRunCount": len(manifest["plannedRuns"]),
             "forecastArtifactsCreated": 0,
             "resolvedComparableOutcomes": 0,
-            "nextForecastRunId": first_run["runId"],
-            "nextAction": "Use --write-local for the ready-run creation tick; future-window scheduling remains next.",
+            "nextForecastRunId": runner_next_forecast_run_id(decisions, first_run),
+            "nextAction": "Use --write-local for the next due creation tick; future-window polling remains separate.",
         },
         "summary": {
             "terminalRunnerSurfaceImplemented": True,
             "dryRunOnly": True,
-            "forecastCreationImplemented": False,
+            "forecastCreationImplemented": True,
             "resolverExecutionImplemented": False,
             "writesLiveState": False,
             "normalChecksUseLiveNetwork": False,
             "qualityClaimAllowed": False,
-            "recommendedNextMilestone": "Milestone 93 forecast scheduling after explicit local creation",
+            "recommendedNextMilestone": "Milestone 105 campaign outcome resolver execution",
         },
         "executionBoundary": {
             "readOnlyDryRun": True,
@@ -354,8 +503,8 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
             "qualityClaimAllowed": False,
         },
         "warnings": [
-            "This runner readback checks command semantics by default; --write-local performs one ready-run creation tick.",
-            "Forecast scheduling across future windows remains a later effectful milestone and must preserve forecast-before-close boundaries.",
+            "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+            "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
             "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
             "No calibration or quality claim is allowed from dry-run runner decisions.",
         ],
@@ -402,8 +551,240 @@ def build_local_start_result(runner: dict[str, Any], write_result: dict[str, Any
     }
 
 
+def runner_next_forecast_run_id(decisions: list[dict[str, Any]], fallback_run: dict[str, Any]) -> str:
+    for decision in decisions:
+        if decision["decisionStatus"] in ("ready_to_create_forecast", "wait_until_create_time"):
+            return str(decision["runId"])
+    return str(fallback_run["runId"])
+
+
+def ready_run_id_for_write(runner: dict[str, Any]) -> str:
+    for row in runner["forecastSchedule"]["scheduleRows"]:
+        if row["scheduleAction"] == "create_with_explicit_write_local":
+            return str(row["runId"])
+    raise SystemExit("No campaign run is currently ready for --write-local")
+
+
+def local_run_state_path(runner: dict[str, Any], run_id: str) -> Path:
+    campaign_id = runner["bindings"]["campaignId"]
+    return ROOT / ".ope" / "live" / "prediction-campaigns" / campaign_id / f"{run_id}.json"
+
+
+def local_run_state_exists(runner: dict[str, Any], run_id: str) -> bool:
+    return local_run_state_path(runner, run_id).exists()
+
+
+def build_resolution_attempts_for_tick(
+    runner: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    execute_resolvers: bool,
+) -> list[dict[str, Any]]:
+    if not execute_resolvers:
+        return []
+    from generate_prediction_campaign_resolution_attempt import build_prediction_campaign_resolution_attempt
+
+    runs = {run["runId"]: run for run in manifest["plannedRuns"]}
+    runner_clock = runner["forecastSchedule"]["runnerClock"]
+    attempts = []
+    for row in runner["forecastSchedule"]["scheduleRows"]:
+        run = runs[row["runId"]]
+        if parse_utc(runner_clock) < parse_utc(run["resolutionEligibleAt"]):
+            continue
+        attempts.append(
+            build_prediction_campaign_resolution_attempt(
+                run_id=row["runId"],
+                now=runner_clock,
+                execute_resolvers=True,
+            )
+        )
+    return attempts
+
+
+def build_foreground_tick(
+    runner: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    tick_number: int,
+    execute_local_write: bool,
+    execute_resolvers: bool,
+) -> dict[str, Any]:
+    write_result = None
+    selected_run_id = None
+    actions = []
+    resolution_attempts = build_resolution_attempts_for_tick(
+        runner,
+        manifest,
+        execute_resolvers=execute_resolvers,
+    )
+    for row in runner["forecastSchedule"]["scheduleRows"]:
+        existing_state = execute_local_write and local_run_state_exists(runner, row["runId"])
+        if existing_state:
+            action_status = "already_created_waiting_resolution"
+            forecast_created = False
+            writes_campaign_state = False
+        elif row["scheduleAction"] == "create_with_explicit_write_local":
+            if selected_run_id is not None:
+                action_status = "ready_deferred_after_one_creation"
+                forecast_created = False
+                writes_campaign_state = False
+            elif execute_local_write:
+                from prediction_campaign_forecast_write_runtime import execute_local_forecast_write
+
+                write_result = execute_local_forecast_write(
+                    run_id=row["runId"],
+                    manifest=manifest,
+                    runner=runner,
+                )
+                selected_run_id = row["runId"]
+                action_status = write_result["writeStatus"]
+                forecast_created = write_result["summary"]["forecastArtifactsCreated"] > 0
+                writes_campaign_state = write_result["executionBoundary"]["writesCampaignState"]
+            else:
+                selected_run_id = row["runId"]
+                action_status = "dry_run_ready_for_write_local"
+                forecast_created = False
+                writes_campaign_state = False
+        elif row["scheduleAction"] == "wait_until_forecast_create_at":
+            action_status = "waiting_for_create_time"
+            forecast_created = False
+            writes_campaign_state = False
+        elif row["scheduleAction"] == "record_missed_without_forecast":
+            action_status = "missed_record_not_written"
+            forecast_created = False
+            writes_campaign_state = False
+        else:
+            action_status = "blocked_without_write"
+            forecast_created = False
+            writes_campaign_state = False
+        actions.append(
+            {
+                "runId": row["runId"],
+                "decisionStatus": row["decisionStatus"],
+                "scheduleAction": row["scheduleAction"],
+                "actionStatus": action_status,
+                "forecastCreated": forecast_created,
+                "writesCampaignState": writes_campaign_state,
+            }
+        )
+
+    return {
+        "tickNumber": tick_number,
+        "startedAt": write_result["generatedAt"] if write_result else runner["generatedAt"],
+        "tickStatus": (
+            "local_forecast_created"
+            if write_result
+            else ("no_due_forecast_created" if execute_local_write else "dry_run_ready")
+        ),
+        "runnerClock": runner["forecastSchedule"]["runnerClock"],
+        "readyRunId": selected_run_id or runner["forecastSchedule"]["readyRunId"],
+        "actions": actions,
+        "writeResult": write_result or "none",
+        "resolutionAttempts": resolution_attempts,
+        "nextPollSeconds": 0,
+    }
+
+
+def build_foreground_result(
+    runner: dict[str, Any],
+    ticks: list[dict[str, Any]],
+    *,
+    execute_local_write: bool,
+    execute_resolvers: bool,
+    poll_seconds: int,
+) -> dict[str, Any]:
+    created_count = sum(1 for tick in ticks for action in tick["actions"] if action["forecastCreated"])
+    resolution_attempt_count = sum(len(tick["resolutionAttempts"]) for tick in ticks)
+    return {
+        "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
+        "generatedAt": ticks[-1]["startedAt"],
+        "runnerStatus": "foreground_forecast_ticks_completed",
+        "domain": runner["domain"],
+        "executionMode": (
+            "explicit_local_write_and_resolver_attempt"
+            if execute_local_write and execute_resolvers
+            else "explicit_resolver_attempt"
+            if execute_resolvers
+            else "explicit_local_write"
+            if execute_local_write
+            else "dry_run"
+        ),
+        "tickCount": len(ticks),
+        "pollSeconds": poll_seconds,
+        "ticks": ticks,
+        "summary": {
+            "foregroundExecutionImplemented": True,
+            "boundedForegroundSchedulingImplemented": True,
+            "nextDueRunSchedulingImplemented": True,
+            "futureWindowPollingImplemented": False,
+            "forecastArtifactsCreated": created_count,
+            "writesCampaignState": execute_local_write and created_count > 0,
+            "resolutionAttemptCount": resolution_attempt_count,
+            "resolverExecutionRequested": execute_resolvers,
+            "resolverExecutionImplemented": False,
+            "fetchesLiveData": False,
+            "appendsCorpusEvidence": False,
+            "qualityClaimAllowed": False,
+            "nextAction": (
+                "Attach a checked campaign outcome source before any campaign resolver can create resolution or scoring records."
+                if resolution_attempt_count
+                else "Use campaign-aware resolution jobs after the created forecast reaches its resolution window."
+            ),
+        },
+        "executionBoundary": {
+            "writesIgnoredLiveState": execute_local_write and created_count > 0,
+            "writesCampaignState": execute_local_write and created_count > 0,
+            "fetchesLiveData": False,
+            "executesResolvers": False,
+            "appendsCorpusEvidence": False,
+            "storesCredentials": False,
+            "storesPrivateRows": False,
+            "hostedRuntimeAllowed": False,
+            "qualityClaimAllowed": False,
+        },
+    }
+
+
+def run_foreground_ticks(runner: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    if args.watch and args.max_ticks is None:
+        raise SystemExit("--watch requires --max-ticks for this bounded campaign runner slice")
+    if args.max_ticks is not None and args.max_ticks < 1:
+        raise SystemExit("--max-ticks must be at least 1")
+    if args.poll_seconds < 1:
+        raise SystemExit("--poll-seconds must be at least 1")
+
+    max_ticks = args.max_ticks if args.max_ticks is not None else 1
+    manifest, _creation_request = build_runner_inputs(args)
+    ticks = []
+    for tick_number in range(1, max_ticks + 1):
+        tick = build_foreground_tick(
+            runner,
+            manifest,
+            tick_number=tick_number,
+            execute_local_write=args.write_local and tick_number == 1,
+            execute_resolvers=args.execute_resolvers,
+        )
+        tick["nextPollSeconds"] = args.poll_seconds if tick_number < max_ticks else 0
+        ticks.append(tick)
+        if tick_number < max_ticks:
+            time.sleep(args.poll_seconds)
+    return build_foreground_result(
+        runner,
+        ticks,
+        execute_local_write=args.write_local,
+        execute_resolvers=args.execute_resolvers,
+        poll_seconds=args.poll_seconds,
+    )
+
+
 def print_start_result(result: dict[str, Any], output_format: str | None) -> None:
     if output_format == "human":
+        if result.get("runnerStatus") == "foreground_forecast_ticks_completed":
+            print(
+                f"forecast scheduler {result['executionMode']} "
+                f"ticks={result['tickCount']} created={result['summary']['forecastArtifactsCreated']}"
+            )
+            return
         print(
             f"{result['runId']} {result['writeStatus']} "
             f"forecastId={result['forecastId']} newFiles={result['summary']['newFileWriteCount']}"
@@ -419,6 +800,7 @@ def print_view(runner: dict[str, Any], view: str) -> None:
     views = {
         "runner": runner,
         "campaign-creation": runner["campaignCreationRequest"],
+        "forecast-schedule": runner["forecastSchedule"],
         "decisions": runner["runnerDecisions"],
         "missed-run-policy": runner["missedRunPolicy"],
         "summary": runner["summary"],
@@ -460,6 +842,15 @@ def main() -> None:
     parser.add_argument("--live-weather", action="store_true", help="record an explicit future live-weather request")
     parser.add_argument("--execute-resolvers", action="store_true", help="record an explicit future resolver request")
     parser.add_argument(
+        "--full-materialization",
+        action="store_true",
+        help="expand the complete local pilot plan before foreground scheduling",
+    )
+    parser.add_argument("--watch", action="store_true", help="run bounded foreground forecast scheduling ticks")
+    parser.add_argument("--max-ticks", type=int, help="number of foreground scheduling ticks to run")
+    parser.add_argument("--poll-seconds", type=int, default=60, help="seconds between foreground scheduling ticks")
+    parser.add_argument("--now", help="UTC runner clock for forecast scheduling decisions")
+    parser.add_argument(
         "--write-local",
         action="store_true",
         help="explicitly create the ready campaign forecast in ignored local state",
@@ -472,7 +863,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--view",
-        choices=["runner", "campaign-creation", "decisions", "missed-run-policy", "summary", "boundary"],
+        choices=["runner", "campaign-creation", "forecast-schedule", "decisions", "missed-run-policy", "summary", "boundary"],
         default="runner",
         help="print one prediction campaign runner view",
     )
@@ -481,20 +872,32 @@ def main() -> None:
     if args.write or args.check:
         if args.write_local:
             raise SystemExit("--write-local cannot be combined with --write or --check")
-        if args.setup_json or args.manifest_json or flag_overrides(args):
+        if args.setup_json or args.manifest_json or args.now or args.full_materialization or flag_overrides(args):
             raise SystemExit("custom campaign inputs cannot be combined with --write or --check")
         runner = build_prediction_campaign_runner(args)
         check_or_write(runner, write=args.write)
         return
     runner = build_prediction_campaign_runner(args)
+    if args.watch or args.max_ticks is not None:
+        try:
+            result = run_foreground_ticks(runner, args)
+        except Exception as exc:
+            raise SystemExit(str(exc)) from exc
+        print_start_result(result, args.output_format)
+        return
     if args.write_local:
-        from generate_prediction_campaign_forecast_write import (
+        from prediction_campaign_forecast_write_runtime import (
             PredictionCampaignForecastWriteError,
             execute_local_forecast_write,
         )
 
         try:
-            write_result = execute_local_forecast_write()
+            manifest, _creation_request = build_runner_inputs(args)
+            write_result = execute_local_forecast_write(
+                run_id=ready_run_id_for_write(runner),
+                manifest=manifest,
+                runner=runner,
+            )
         except PredictionCampaignForecastWriteError as exc:
             raise SystemExit(str(exc)) from exc
         print_start_result(build_local_start_result(runner, write_result), args.output_format)

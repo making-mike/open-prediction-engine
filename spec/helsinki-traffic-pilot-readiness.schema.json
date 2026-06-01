@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/helsinki-traffic-pilot-readiness.schema.json",
+  "title": "Helsinki Traffic Pilot Readiness",
+  "description": "Checked local launch-readiness readback for the 100-run Helsinki traffic disturbance pilot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "helsinkiTrafficPilotReadinessId",
+    "generatedAt",
+    "readinessStatus",
+    "domain",
+    "bindings",
+    "readinessSummary",
+    "readinessChecks",
+    "manualPrerequisites",
+    "launchCommands",
+    "blockedActions",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "helsinkiTrafficPilotReadinessId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "readinessStatus": {
+      "type": "string",
+      "enum": ["checked_ready_for_operator_launch"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "readinessSummary": { "$ref": "#/$defs/readinessSummary" },
+    "readinessChecks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/readinessCheck" }
+    },
+    "manualPrerequisites": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/manualPrerequisite" }
+    },
+    "launchCommands": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/launchCommand" }
+    },
+    "blockedActions": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/blockedAction" }
+    },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": { "$ref": "#/$defs/boundedStringList" }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "helsinkiTrafficDisturbancePilotRunbookId",
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "helsinkiTrafficDisturbancePilotRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "readinessSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetRunCount",
+        "miniSmokeRunCount",
+        "plannedRunCount",
+        "duplicateConflictCount",
+        "bestAvailableMethodId",
+        "bestAvailableMethodName",
+        "localWorkspace",
+        "launchCommand",
+        "nextRecommendedCommand",
+        "explicitWriteRequired",
+        "manualLivePrerequisitesRequired",
+        "normalChecksMutateState",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "targetRunCount": { "type": "integer", "minimum": 1 },
+        "miniSmokeRunCount": { "type": "integer", "minimum": 2, "maximum": 3 },
+        "plannedRunCount": { "type": "integer", "minimum": 1 },
+        "duplicateConflictCount": { "type": "integer", "minimum": 0 },
+        "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "bestAvailableMethodName": { "$ref": "#/$defs/boundedString" },
+        "localWorkspace": { "$ref": "#/$defs/boundedString" },
+        "launchCommand": { "$ref": "#/$defs/boundedString" },
+        "nextRecommendedCommand": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteRequired": { "type": "boolean" },
+        "manualLivePrerequisitesRequired": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "readinessCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "checkKey",
+        "checkStatus",
+        "blocksLaunch",
+        "message",
+        "evidenceCommand"
+      ],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkKey": { "$ref": "#/$defs/boundedString" },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "manual_required"]
+        },
+        "blocksLaunch": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" },
+        "evidenceCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "manualPrerequisite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prerequisiteId", "prerequisiteKey", "requirement", "confirmation", "whyManual"],
+      "properties": {
+        "prerequisiteId": { "$ref": "common.schema.json#/$defs/id" },
+        "prerequisiteKey": { "$ref": "#/$defs/boundedString" },
+        "requirement": { "$ref": "#/$defs/boundedString" },
+        "confirmation": { "$ref": "#/$defs/boundedString" },
+        "whyManual": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "launchCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commandId", "commandKey", "command", "expected", "mutatesState", "requiresOperatorSupervision"],
+      "properties": {
+        "commandId": { "$ref": "common.schema.json#/$defs/id" },
+        "commandKey": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expected": { "$ref": "#/$defs/boundedString" },
+        "mutatesState": { "type": "boolean" },
+        "requiresOperatorSupervision": { "type": "boolean" }
+      }
+    },
+    "blockedAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blockedActionId", "actionKey", "reason", "safeAlternative"],
+      "properties": {
+        "blockedActionId": { "$ref": "common.schema.json#/$defs/id" },
+        "actionKey": { "$ref": "#/$defs/boundedString" },
+        "reason": { "$ref": "#/$defs/boundedString" },
+        "safeAlternative": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "acceptedViews", "defaultView", "capturedStdoutMode", "normalChecksWriteLiveState"],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedViews": { "$ref": "#/$defs/boundedStringList" },
+        "defaultView": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "normalChecksWriteLiveState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pilotReadinessImplemented",
+        "checkedPrerequisitesPassed",
+        "manualPrerequisitesRequired",
+        "launchCommandReady",
+        "miniSmokeFirst",
+        "bestAvailableMethodId",
+        "qualityClaimAllowed",
+        "recommendedNextCommand"
+      ],
+      "properties": {
+        "pilotReadinessImplemented": { "type": "boolean" },
+        "checkedPrerequisitesPassed": { "type": "boolean" },
+        "manualPrerequisitesRequired": { "type": "boolean" },
+        "launchCommandReady": { "type": "boolean" },
+        "miniSmokeFirst": { "type": "boolean" },
+        "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyReadback",
+        "normalChecksWriteLiveState",
+        "normalChecksUseLiveNetwork",
+        "startsPilot",
+        "createsForecastArtifacts",
+        "executesResolvers",
+        "appendsLedgerRows",
+        "changesForecastMethod",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyReadback": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "startsPilot": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsLedgerRows": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

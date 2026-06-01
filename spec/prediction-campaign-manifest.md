@@ -9,14 +9,21 @@ Run it locally with:
 ```bash
 python3 scripts/ope.py prediction-campaign
 python3 scripts/ope.py prediction-campaign plan
+python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization
 python3 scripts/ope.py prediction-campaign status
 python3 scripts/ope.py prediction-campaign --check
 ```
+
+The default `plan` view remains a bounded preview for normal local checks. The explicit
+`--full-materialization` mode expands the Helsinki pilot target to all 100 planned
+runs, including the first and final run IDs/service dates and a duplicate-key audit,
+without creating forecasts or writing campaign state.
 
 Required boundaries:
 
 - campaign state paths are relative and rooted under ignored `.ope/live/prediction-campaigns/`;
 - normal checks do not write ignored campaign state;
+- bounded previews remain the default; full 100-run materialization requires an explicit flag;
 - planned runs mint unique run, question, forecast, resolution, and scoring IDs instead of reusing fixture IDs;
 - duplicate service date/window keys are explicit before any runner exists;
 - skipped, missed, canceled, failed, manually stopped, and duplicate-blocked states have safe next actions;

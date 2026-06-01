@@ -378,8 +378,6 @@ def main() -> None:
         if args.draft_source_set:
             draft = build_draft_source_set(result_set=result_set, request_path=args.request)
             if args.write:
-                connector_result = successful_open_meteo_result(result_set)
-                source_ref = connector_result["provenance"]["sourceRef"]
                 location = "warsaw"
                 service_date = draft["serviceDate"]
                 output = args.output or default_draft_path(DEFAULT_WORKSPACE, location, service_date)

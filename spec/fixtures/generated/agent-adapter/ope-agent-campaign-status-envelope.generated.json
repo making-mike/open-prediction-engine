@@ -1,0 +1,325 @@
+{
+  "agentEnvelopeId": "agentenvelope-053",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "campaign_status",
+  "adapterRequest": {
+    "operation": "campaign_status",
+    "inputRecordType": "prediction_campaign_explain",
+    "inputRef": "predictioncampaignexplain-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Explain campaign status, next forecast, next resolution, and claim boundaries."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": "sourcepolicy-1201",
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "checked_pilot_readback",
+    "approvalStatus": "not_required",
+    "dataMode": "fixture",
+    "planStatus": "campaign_status_readback",
+    "executionMode": "read_only",
+    "sourceMode": "weather-transit-delays",
+    "forecastStatus": "planned_forecast_pending",
+    "resolutionStatus": "due_run_requires_checked_outcome_source",
+    "scoreStatus": "not_scored",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "predictionCampaignExplainId": "predictioncampaignexplain-001",
+    "generatedAt": "2026-05-31T04:00:00Z",
+    "explainStatus": "checked_pilot_readback",
+    "domain": "weather-transit-delays",
+    "bindings": {
+      "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+      "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+      "predictionCampaignDoctorId": "predictioncampaigndoctor-001",
+      "predictionCampaignEvidenceLedgerId": "predictioncampaignledger-001",
+      "predictionCampaignCalibrationStatusId": "predictioncampaigncalibrationstatus-001",
+      "campaignId": "predictioncampaign-001",
+      "cycleId": "predictioncycle-001",
+      "runId": "predictionrun-1301",
+      "forecastId": "forecast-1301",
+      "questionId": "question-1301",
+      "sourcePolicyId": "sourcepolicy-1201"
+    },
+    "campaignSnapshot": {
+      "recurrenceCaseKey": "daily_100_run_transit_calibration",
+      "plannedRunCount": 4,
+      "nextForecastRunId": "predictionrun-1301",
+      "nextQuestionId": "question-1301",
+      "nextForecastId": "forecast-1301",
+      "nextForecastCreateAt": "2026-06-11T00:00:00Z",
+      "nextForecastCloseAt": "2026-06-11T04:45:00Z",
+      "nextResolutionEligibleAt": "2026-06-11T07:15:00Z",
+      "currentCampaignHealth": "due_run_requires_checked_outcome_source",
+      "appendReadiness": "exclusion_audit_append_ready",
+      "resolvedComparableSampleSize": 1,
+      "minimumComparableResolvedForCalibration": 100,
+      "postCalibrationAction": "continue_collecting_until_threshold",
+      "qualityClaimAllowed": false,
+      "calibrationClaimAllowed": false
+    },
+    "explanationPrompts": [
+      {
+        "promptId": "campaignexplainprompt-001",
+        "promptKey": "next_forecast",
+        "question": "What is the next forecast the campaign would create?",
+        "answer": "The next checked candidate is predictionrun-1301 with forecast-1301/question-1301, created no earlier than 2026-06-11T00:00:00Z and before 2026-06-11T04:45:00Z.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign status"
+      },
+      {
+        "promptId": "campaignexplainprompt-002",
+        "promptKey": "next_resolution",
+        "question": "When can the next forecast be resolved?",
+        "answer": "Resolution for predictionrun-1301 is eligible at 2026-06-11T07:15:00Z, after the service window ends.",
+        "sourceCommand": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001"
+      },
+      {
+        "promptId": "campaignexplainprompt-003",
+        "promptKey": "evidence_threshold",
+        "question": "How much comparable evidence is needed before calibration claims?",
+        "answer": "The checked calibration threshold is 100 comparable resolved outcomes; this readback has 1.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign calibration-status --view thresholds"
+      },
+      {
+        "promptId": "campaignexplainprompt-004",
+        "promptKey": "append_boundary",
+        "question": "Can this run append comparable evidence yet?",
+        "answer": "No. The default ledger case is an excluded audit row because checked outcome and scoring records are missing.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign append-ready"
+      },
+      {
+        "promptId": "campaignexplainprompt-005",
+        "promptKey": "claim_boundary",
+        "question": "Can OPE claim forecast quality or calibration from this campaign?",
+        "answer": "No. The campaign readbacks are local, fixture-safe, and below the declared calibration threshold.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign explain --view claims"
+      }
+    ],
+    "workflowRunbook": [
+      {
+        "stepId": "campaignexplainstep-001",
+        "stepKey": "start_100_calibration_sessions",
+        "command": "python3 scripts/ope.py prediction-campaign start --count 100 --calibration-target 100 --output-format jsonl",
+        "expectedReadback": "Print bounded runner decisions for a 100-run calibration campaign without writing local state.",
+        "mutatesCampaignState": false,
+        "fetchesLiveData": false,
+        "executesResolvers": false,
+        "claimBoundary": "A planned 100-run campaign is not evidence; only later comparable resolved outcomes count."
+      },
+      {
+        "stepId": "campaignexplainstep-002",
+        "stepKey": "explain_current_campaign",
+        "command": "python3 scripts/ope.py prediction-campaign explain",
+        "expectedReadback": "Summarize next forecast, next resolution, append readiness, calibration threshold, and claim boundary.",
+        "mutatesCampaignState": false,
+        "fetchesLiveData": false,
+        "executesResolvers": false,
+        "claimBoundary": "The explain readback is descriptive and cannot create forecasts, resolve outcomes, or append evidence."
+      },
+      {
+        "stepId": "campaignexplainstep-003",
+        "stepKey": "inspect_append_readiness",
+        "command": "python3 scripts/ope.py prediction-campaign append-ready --ledger-case comparable_scored",
+        "expectedReadback": "Show which checks must pass before a campaign run becomes comparable evidence.",
+        "mutatesCampaignState": false,
+        "fetchesLiveData": false,
+        "executesResolvers": false,
+        "claimBoundary": "Comparable rows still require explicit append and do not by themselves prove calibration."
+      },
+      {
+        "stepId": "campaignexplainstep-004",
+        "stepKey": "pause_after_calibration",
+        "command": "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle",
+        "expectedReadback": "Show the post-calibration pause and next-cycle readback without mutating campaign state.",
+        "mutatesCampaignState": false,
+        "fetchesLiveData": false,
+        "executesResolvers": false,
+        "claimBoundary": "Post-calibration restart planning does not tune models or change methods automatically."
+      },
+      {
+        "stepId": "campaignexplainstep-005",
+        "stepKey": "resume_after_interruption",
+        "command": "python3 scripts/ope.py prediction-campaign resume --from-local",
+        "expectedReadback": "Inspect ignored local campaign state only when explicitly requested by the caller.",
+        "mutatesCampaignState": false,
+        "fetchesLiveData": false,
+        "executesResolvers": false,
+        "claimBoundary": "Resume is a recovery readback unless a later effectful command writes campaign state."
+      }
+    ],
+    "pilotTaskCard": {
+      "taskId": "pilotsessiontask-006",
+      "scenarioKey": "repeating_prediction_campaign",
+      "title": "Explain a repeating prediction campaign",
+      "command": "python3 scripts/ope.py prediction-campaign explain",
+      "expectedOutcomeClass": "campaign_explain_readback",
+      "measures": [
+        "task_completion",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support",
+        "runtime_gap_classification"
+      ],
+      "moderatorPrompt": "Use the campaign explain readback to identify the next forecast, next resolution, evidence threshold, and claim boundary without treating the campaign as quality or calibration evidence."
+    },
+    "agentReadbacks": [
+      {
+        "readbackId": "campaignagentreadback-001",
+        "operation": "plan",
+        "cliCommand": "python3 scripts/ope.py prediction-campaign plan",
+        "statusPath": "plannedRuns",
+        "agentAdapterOperation": "campaign_plan",
+        "implementedInAgentAdapter": true
+      },
+      {
+        "readbackId": "campaignagentreadback-002",
+        "operation": "status",
+        "cliCommand": "python3 scripts/ope.py prediction-campaign status",
+        "statusPath": "campaignSnapshot",
+        "agentAdapterOperation": "campaign_status",
+        "implementedInAgentAdapter": true
+      },
+      {
+        "readbackId": "campaignagentreadback-003",
+        "operation": "health",
+        "cliCommand": "python3 scripts/ope.py prediction-campaign doctor --view health",
+        "statusPath": "health",
+        "agentAdapterOperation": "campaign_health",
+        "implementedInAgentAdapter": true
+      },
+      {
+        "readbackId": "campaignagentreadback-004",
+        "operation": "append_readiness",
+        "cliCommand": "python3 scripts/ope.py prediction-campaign append-ready",
+        "statusPath": "appendCandidate",
+        "agentAdapterOperation": "campaign_append_readiness",
+        "implementedInAgentAdapter": true
+      },
+      {
+        "readbackId": "campaignagentreadback-005",
+        "operation": "calibration_status",
+        "cliCommand": "python3 scripts/ope.py prediction-campaign calibration-status",
+        "statusPath": "calibrationStatus",
+        "agentAdapterOperation": "campaign_calibration_status",
+        "implementedInAgentAdapter": true
+      }
+    ],
+    "sanitizedErrorEnvelopes": [
+      {
+        "errorEnvelopeId": "campaignexplainerror-001",
+        "errorCode": "invalid_interval",
+        "message": "The requested recurrence interval is not supported by the local campaign runner.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Choose a checked ISO-8601 interval such as P1D."
+      },
+      {
+        "errorEnvelopeId": "campaignexplainerror-002",
+        "errorCode": "missed_forecast_close",
+        "message": "Forecast close time passed before a forecast artifact could be created.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Mark the run missed and plan the next eligible run."
+      },
+      {
+        "errorEnvelopeId": "campaignexplainerror-003",
+        "errorCode": "unavailable_live_source",
+        "message": "The requested live source is unavailable or not enabled for normal checks.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Use fixture mode or an explicit opt-in live readiness command."
+      },
+      {
+        "errorEnvelopeId": "campaignexplainerror-004",
+        "errorCode": "duplicate_campaign",
+        "message": "A campaign with the same duplicate key already exists in the checked cycle.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Read the existing campaign or choose a distinct date/window key."
+      },
+      {
+        "errorEnvelopeId": "campaignexplainerror-005",
+        "errorCode": "unsafe_source_policy",
+        "message": "The source policy would allow unsafe or unapproved evidence.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Stop intake and replace the source policy before forecast work."
+      },
+      {
+        "errorEnvelopeId": "campaignexplainerror-006",
+        "errorCode": "unsupported_post_calibration_action",
+        "message": "The requested post-calibration action is not supported by the local MVP.",
+        "sanitized": true,
+        "storesPrivateData": false,
+        "safeToShowCaller": true,
+        "nextAction": "Use stop, continue, pause_then_resume_after, or start_next_cycle_after."
+      }
+    ],
+    "claimBoundary": {
+      "qualityClaimAllowed": false,
+      "calibrationClaimAllowed": false,
+      "hostedRuntimeAllowed": false,
+      "methodUpdateAllowed": false,
+      "whyBlocked": "Campaign readbacks are local and below the declared comparable-outcome threshold; they explain workflow state but do not establish forecast quality."
+    },
+    "summary": {
+      "campaignExplainImplemented": true,
+      "pilotTaskCardReady": true,
+      "runbookReady": true,
+      "agentAdapterReadbacksImplemented": true,
+      "sanitizedErrorEnvelopeExamples": 6,
+      "usageTraceEventsSpecified": 10,
+      "writesCampaignState": false,
+      "recommendedNextAction": "Use the pilot task card to test whether agents can explain campaign state and claim boundaries."
+    },
+    "executionBoundary": {
+      "readOnlyReadback": true,
+      "createsForecastArtifacts": false,
+      "writesCampaignState": false,
+      "readsIgnoredLiveState": false,
+      "writesIgnoredLiveState": false,
+      "fetchesLiveData": false,
+      "executesResolvers": false,
+      "appendsCorpusEvidence": false,
+      "updatesCalibration": false,
+      "changesForecastMethod": false,
+      "startsHostedRuntime": false,
+      "qualityClaimAllowed": false
+    },
+    "warnings": [
+      "Campaign explain is a checked local readback; it does not start polling, create forecasts, or resolve outcomes.",
+      "The default evidence ledger row is excluded until checked outcome and scoring records exist.",
+      "Calibration summaries are measurement-only and cannot update probabilities or methods automatically."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Campaign explain is a checked local readback; it does not start polling, create forecasts, or resolve outcomes.",
+    "The default evidence ledger row is excluded until checked outcome and scoring records exist.",
+    "Calibration summaries are measurement-only and cannot update probabilities or methods automatically.",
+    "The adapter envelope is read-only and does not create campaign forecasts."
+  ]
+}

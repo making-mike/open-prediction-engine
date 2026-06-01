@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 86,
+    "schemaFileCount": 96,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -50,6 +50,8 @@
       "spec/forecast-request.schema.json",
       "spec/forecast-run-intake-matrix.schema.json",
       "spec/forecast-run-summary.schema.json",
+      "spec/helsinki-traffic-disturbance-pilot-runbook.schema.json",
+      "spec/helsinki-traffic-pilot-readiness.schema.json",
       "spec/live-connector-readiness.schema.json",
       "spec/local-source-runtime.schema.json",
       "spec/local-usage-trace.schema.json",
@@ -60,9 +62,17 @@
       "spec/pilot-session-packet.schema.json",
       "spec/pilot-summary-intake.schema.json",
       "spec/pipeline-run.schema.json",
+      "spec/prediction-campaign-calibration-status.schema.json",
+      "spec/prediction-campaign-doctor.schema.json",
+      "spec/prediction-campaign-evidence-ledger.schema.json",
+      "spec/prediction-campaign-explain.schema.json",
       "spec/prediction-campaign-forecast-creation.schema.json",
       "spec/prediction-campaign-forecast-write.schema.json",
       "spec/prediction-campaign-manifest.schema.json",
+      "spec/prediction-campaign-method-update-action.schema.json",
+      "spec/prediction-campaign-method-update-gate.schema.json",
+      "spec/prediction-campaign-method-update-plan.schema.json",
+      "spec/prediction-campaign-resolution-attempt.schema.json",
       "spec/prediction-campaign-resume.schema.json",
       "spec/prediction-campaign-runner.schema.json",
       "spec/private-setup-adapter-chain-runbook.schema.json",
@@ -170,12 +180,47 @@
         "python3 scripts/ope.py prediction-campaign plan",
         "python3 scripts/ope.py prediction-campaign start",
         "python3 scripts/ope.py prediction-campaign start --view campaign-creation",
+        "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+        "python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl",
+        "python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl",
         "python3 scripts/ope.py prediction-campaign forecast-create",
         "python3 scripts/ope.py prediction-campaign forecast-artifact",
         "python3 scripts/ope.py prediction-campaign forecast-write",
+        "python3 scripts/ope.py prediction-campaign resolve",
+        "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers",
+        "python3 scripts/ope.py prediction-campaign resolve --attempt-case blocked_duplicate --execute-resolvers",
+        "python3 scripts/ope.py prediction-campaign doctor",
         "python3 scripts/ope.py prediction-campaign resume",
+        "python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state",
+        "python3 scripts/ope.py prediction-campaign append-ready",
+        "python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary",
+        "python3 scripts/ope.py prediction-campaign calibration-status",
+        "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle",
+        "python3 scripts/ope.py prediction-campaign method-update-gate",
+        "python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view decision",
+        "python3 scripts/ope.py prediction-campaign method-update-plan",
+        "python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command",
+        "python3 scripts/ope.py prediction-campaign apply-method-update",
+        "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view summary",
+        "python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --view summary",
+        "python3 scripts/ope.py prediction-campaign explain",
+        "python3 scripts/ope.py prediction-campaign explain --view task",
+        "python3 scripts/ope.py prediction-campaign pilot-runbook",
+        "python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke",
+        "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
+        "python3 scripts/ope.py prediction-campaign pilot-readiness",
+        "python3 scripts/ope.py prediction-campaign pilot-readiness --view commands",
+        "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+        "python3 scripts/ope.py agent-call --operation campaign_plan",
+        "python3 scripts/ope.py agent-call --operation campaign_status",
+        "python3 scripts/ope.py agent-call --operation campaign_health",
+        "python3 scripts/ope.py agent-call --operation campaign_append_readiness",
+        "python3 scripts/ope.py agent-call --operation campaign_calibration_status",
+        "python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001",
         "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+        "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
         "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
+        "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
         "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
         "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
         "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102"
@@ -269,6 +314,21 @@
         "expected": "prediction campaign start normalizes default, flag, setup JSON, and manifest JSON inputs without writing campaign state."
       },
       {
+        "checkId": "mvp-smoke-prediction-campaign-forecast-schedule",
+        "command": "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+        "expected": "prediction campaign start maps ready, waiting, missed, and duplicate forecast schedule actions without writing campaign state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-foreground-tick",
+        "command": "python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl",
+        "expected": "prediction campaign start runs one bounded foreground forecast scheduling tick without writing campaign state unless --write-local is explicit."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-next-due-tick",
+        "command": "python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl",
+        "expected": "prediction campaign start can move the runner clock and choose predictionrun-1302 as the next due forecast without writing campaign state."
+      },
+      {
         "checkId": "mvp-smoke-prediction-campaign-forecast-create",
         "command": "python3 scripts/ope.py prediction-campaign forecast-create",
         "expected": "prediction campaign forecast-create exposes the ready run and planned artifact IDs without writing campaign state or creating forecasts."
@@ -284,9 +344,119 @@
         "expected": "prediction campaign forecast-write exposes the guarded ignored-local-state write plan without executing the write during normal checks."
       },
       {
+        "checkId": "mvp-smoke-prediction-campaign-resolution-attempt",
+        "command": "python3 scripts/ope.py prediction-campaign resolve",
+        "expected": "prediction campaign resolve exposes a due dry-run campaign resolver attempt without creating resolution or scoring records."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-resolution-execute-request",
+        "command": "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers",
+        "expected": "prediction campaign resolve records an explicit resolver request and blocks on the missing checked outcome source without executing resolvers."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-resolution-duplicate-block",
+        "command": "python3 scripts/ope.py prediction-campaign resolve --attempt-case blocked_duplicate --execute-resolvers",
+        "expected": "prediction campaign resolve blocks duplicate resolution and duplicate scoring without creating artifacts."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-doctor",
+        "command": "python3 scripts/ope.py prediction-campaign doctor",
+        "expected": "prediction campaign doctor exposes due, waiting, failed, blocked, append-ready, duplicate, and recovery readbacks without reading or writing ignored campaign state."
+      },
+      {
         "checkId": "mvp-smoke-prediction-campaign-resume",
         "command": "python3 scripts/ope.py prediction-campaign resume",
         "expected": "prediction campaign resume exposes checked recovery actions after interruption without reading or writing ignored live state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-interrupted-resume",
+        "command": "python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state",
+        "expected": "prediction campaign resume can inspect interrupted run state and idempotency counts while preserving prior evidence."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-append-ready",
+        "command": "python3 scripts/ope.py prediction-campaign append-ready",
+        "expected": "prediction campaign append-ready exposes exclusion-audit append rows and comparable append blockers without writing ignored state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-append-comparable",
+        "command": "python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary",
+        "expected": "prediction campaign append dry-run exposes the comparable scored row shape and idempotent write boundary."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-calibration-status",
+        "command": "python3 scripts/ope.py prediction-campaign calibration-status",
+        "expected": "prediction campaign calibration-status reports below-threshold evidence without generating calibration summaries."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-post-calibration-restart",
+        "command": "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle",
+        "expected": "prediction campaign calibration-status reports the pause-and-resume continuation decision without mutating cycle state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-gate",
+        "command": "python3 scripts/ope.py prediction-campaign method-update-gate",
+        "expected": "prediction campaign method-update gate blocks below-threshold updates without changing probabilities, methods, or campaign state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-approved-plan",
+        "command": "python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view decision",
+        "expected": "prediction campaign method-update gate can report a plan-ready approved case while still requiring a future explicit effectful command."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-plan",
+        "command": "python3 scripts/ope.py prediction-campaign method-update-plan",
+        "expected": "prediction campaign method-update plan records the approval and rollback blockers without writing plan artifacts."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-plan-ready",
+        "command": "python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command",
+        "expected": "prediction campaign method-update plan reports the guarded effectful command shape while keeping it out of normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-apply",
+        "command": "python3 scripts/ope.py prediction-campaign apply-method-update",
+        "expected": "prediction campaign apply-method-update blocks by default without writing method bindings."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-apply-ready",
+        "command": "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view summary",
+        "expected": "prediction campaign apply-method-update reports the eligible weather-adjustment target only after a plan-ready readback."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-method-update-rollback-ready",
+        "command": "python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --view summary",
+        "expected": "prediction campaign rollback-method-update reports the baseline restore target without mutating state unless --write-local is explicit."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-explain",
+        "command": "python3 scripts/ope.py prediction-campaign explain",
+        "expected": "prediction campaign explain reports next forecast, next resolution, evidence threshold, pilot task, adapter readbacks, and claim boundary."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-pilot-runbook",
+        "command": "python3 scripts/ope.py prediction-campaign pilot-runbook",
+        "expected": "prediction campaign pilot-runbook reports the 100-run Helsinki procedure, 3-run smoke path, operator status, success criteria, abort criteria, and baseline-first method boundary."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-pilot-readiness",
+        "command": "python3 scripts/ope.py prediction-campaign pilot-readiness",
+        "expected": "prediction campaign pilot-readiness reports checked launch prerequisites, manual confirmations, launch commands, blocked actions, and the baseline-first method boundary without starting the pilot."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-mini-smoke",
+        "command": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+        "expected": "prediction campaign mini smoke runs one bounded 3-run foreground tick without writing local state unless --write-local is explicit."
+      },
+      {
+        "checkId": "mvp-smoke-agent-campaign-status",
+        "command": "python3 scripts/ope.py agent-call --operation campaign_status",
+        "expected": "agent-call returns a read-only campaign explain envelope for forecast-1301 without creating campaign artifacts."
+      },
+      {
+        "checkId": "mvp-smoke-transit-track-record-campaign-ledger",
+        "command": "python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001",
+        "expected": "transit track-record gate explicitly includes campaign ledger rows while preserving below-threshold claim boundaries."
       },
       {
         "checkId": "mvp-smoke-campaign-resolution-jobs",
@@ -294,9 +464,19 @@
         "expected": "campaign-aware resolution jobs include the checked forecast-1301 run and tell agents to wait without executing resolvers."
       },
       {
+        "checkId": "mvp-smoke-campaign-resolution-jobs-due",
+        "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
+        "expected": "campaign-aware resolution jobs route the due forecast-1301 run to the checked prediction-campaign resolve command without executing resolvers."
+      },
+      {
         "checkId": "mvp-smoke-campaign-resolution-scheduler",
         "command": "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001",
         "expected": "campaign-aware resolution scheduler ticks include the checked forecast-1301 wait action without executing campaign resolvers."
+      },
+      {
+        "checkId": "mvp-smoke-campaign-resolution-scheduler-due",
+        "command": "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
+        "expected": "campaign-aware resolution scheduler ticks expose the checked campaign resolver-attempt-ready action without executing campaign resolvers."
       },
       {
         "checkId": "mvp-smoke-forecast-run",
@@ -506,6 +686,15 @@
     "transit_method_options_execution",
     "transit_method_options_non_baseline_selection",
     "transit_method_options_live_fetch",
+    "prediction_campaign_method_update_gate_probability_update",
+    "prediction_campaign_method_update_gate_method_change",
+    "prediction_campaign_method_update_gate_registry_write",
+    "prediction_campaign_method_update_plan_artifact_write",
+    "prediction_campaign_method_update_plan_effectful_command",
+    "prediction_campaign_method_update_plan_rollback_rewrite",
+    "prediction_campaign_method_update_action_normal_check_mutation",
+    "prediction_campaign_method_update_action_prior_history_rewrite",
+    "prediction_campaign_method_update_action_registry_write",
     "transit_live_evidence_promotion_live_fetch",
     "transit_live_evidence_promotion_live_workspace_reads",
     "transit_live_evidence_promotion_post_close_forecast_evidence",

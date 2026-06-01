@@ -2066,3 +2066,199 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add a schema-bound campaign creation request to the terminal runner readback that normalizes CLI flags, setup JSON, manifest JSON, and explicit future live/resolver requests without mutating local campaign state.
 - **Why:** Milestone 93 needs one command shape that agents can call from flags or a checked setup file before the foreground scheduler exists; the request needs to be inspectable and deterministic while normal checks remain non-mutating.
 - **Alternatives rejected:** Ignoring accepted CLI flags, requiring agents to edit raw scheduler syntax, writing a new campaign manifest during normal checks, or letting setup JSON bypass schema validation.
+
+### DEC-101 — Add Campaign Forecast Schedule Readback
+- **Date:** 2026-05-30
+- **Status:** accepted
+- **Choice:** Add a schema-bound forecast scheduling plan to the terminal runner readback that maps ready, waiting, missed, and duplicate campaign candidates to explicit local-write or non-mutating next actions.
+- **Why:** The foreground campaign runner needs a checked forecast scheduling surface before adding long-running polling; agents must see which run can be created before close, which runs wait, and which runs cannot become comparable forecast evidence.
+- **Alternatives rejected:** Hiding scheduling decisions inside prose, treating the resolution scheduler as sufficient for forecast creation, starting a long-running watch loop before the candidate actions are schema-bound, or letting normal checks write campaign state.
+
+### DEC-102 — Add Bounded Campaign Foreground Ticks
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign start --watch --max-ticks` as a bounded foreground forecast scheduling mode that reports ready, waiting, missed, and duplicate actions, and only writes the ready forecast when `--write-local` is explicit.
+- **Why:** Milestone 93 needs the terminal runner to move beyond static readbacks while normal checks remain deterministic and non-mutating; bounded ticks prove the foreground execution contract before long-running future-window polling exists.
+- **Alternatives rejected:** Starting an unbounded watch loop in normal checks, creating future-run forecast artifacts before their lifecycle records exist, writing missed-run state during dry-run ticks, or merging forecast scheduling with resolver execution and corpus append.
+
+### DEC-103 — Add Next-Due Campaign Forecast Scheduling
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add runner-clock `--now` scheduling to `prediction-campaign start` and parameterize local campaign forecast creation/write helpers so a bounded foreground tick can create the next due run, skip already-created run state, and keep normal checks dry-run.
+- **Why:** Milestone 93 needs forecast scheduling, not only a first ready-run write; agents must be able to advance the campaign clock and create the next due forecast before close without backfilling missed windows, fetching live data, running resolvers, or appending calibration evidence.
+- **Alternatives rejected:** Treating the first ready-run write as complete scheduling, writing all future run artifacts at once, relying on ignored local state during normal checks, or adding unbounded polling before next-due idempotency exists.
+
+### DEC-104 — Add Checked Campaign Resolution Attempts
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign resolve` contract, generated fixture, CLI readback, runner call path, and resolution job/scheduler routing that record due campaign resolver attempts without creating resolution or scoring records.
+- **Why:** Milestone 94 needs campaign-created forecasts to enter the resolution path with machine-readable failure category, retry, source-fetch, diagnostics, and explicit-execution boundaries before effectful campaign outcome sources exist.
+- **Alternatives rejected:** Executing campaign resolvers from the runner, registry, or scheduler during normal checks; writing `.ope/live` campaign state from the attempt readback; creating resolution/scoring artifacts without a checked outcome source; or leaving due campaign jobs on a vague future placeholder action.
+
+### DEC-105 — Add Campaign Doctor Readback
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign doctor` contract, generated fixture, CLI readback, and checker that summarize campaign health, due/waiting/failed/blocked/append-ready queues, duplicate protection, recovery posture, and next action.
+- **Why:** Agents need one compact campaign status surface before effectful resume, resolver execution, and ledger append exist; the readback should answer whether to wait, retry, resolve, append, or stop without reading raw ignored campaign state.
+- **Alternatives rejected:** Asking agents to combine raw `.ope/live` files, resolution-job output, resume output, and resolver-attempt output themselves; writing a repair command before idempotent mutation exists; or making doctor execution create resolution, scoring, corpus, or calibration artifacts.
+
+### DEC-106 — Add Campaign Resolution Duplicate-Safety Cases
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Extend `prediction-campaign resolve` with checked `--attempt-case` readbacks for already resolved, ambiguous, annulled, missed, and duplicate campaign runs, plus a duplicate-safety section that blocks duplicate resolution, duplicate scoring, and prior-evidence overwrite.
+- **Why:** Milestone 94 needs agents to distinguish due unresolved runs from terminal or excluded runs before effectful resolver execution exists; the safety rule must be machine-readable, not only roadmap prose.
+- **Alternatives rejected:** Letting terminal or duplicate cases fall through to the missing-outcome-source block, relying on the doctor summary alone, writing synthetic resolution/scoring artifacts for safety cases, or reading ignored live campaign state during normal checks.
+
+### DEC-107 — Add Campaign Resume Local-State Readback
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Extend `prediction-campaign resume` with checked interrupted-state and explicit `--from-local` readbacks that report local run-state counts, idempotency-key counts, and overwrite guards while keeping the command non-mutating.
+- **Why:** Milestone 94 needs terminal campaigns to survive interruption by continuing from campaign state; agents need a compact way to confirm existing evidence before calling the next explicit local-write tick.
+- **Alternatives rejected:** Reading ignored `.ope/live` state during normal checks, adding an automatic repair write to the resume command, overwriting existing run evidence, or coupling resume inspection to resolver, scoring, corpus, or calibration-ledger mutation.
+
+### DEC-108 — Add Campaign Evidence Ledger Readback
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign append-ready` and `prediction-campaign append` evidence-ledger contract that separates comparable rows from excluded audit rows, records append checks, and keeps local appends explicit and idempotent.
+- **Why:** Milestone 95 needs resolved campaign runs to grow local calibration evidence without hand-editing corpus JSON, while current unresolved runs still need durable exclusion rows and no quality or calibration claims.
+- **Alternatives rejected:** Appending to the checked transit corpus during normal checks, merging excluded rows into comparable evidence, overwriting prior ledger rows, or letting append execution create resolver, scoring, live-source, or calibration artifacts.
+
+### DEC-109 — Include Campaign Ledgers In Track-Record Gate Explicitly
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Extend the transit baseline track-record gate with explicit `--campaign` and checked ledger-case inclusion so campaign comparable or excluded rows can affect sample readbacks without changing normal fixture checks.
+- **Why:** Milestone 95 needs campaign evidence ledgers to feed track-record and calibration thresholds, but only when an agent intentionally selects a campaign ledger and while below-threshold quality/calibration claims remain blocked.
+- **Alternatives rejected:** Reading campaign ledgers by default, reading ignored local ledger files during release checks, counting excluded audit rows as comparable evidence, or allowing campaign rows to unlock calibration summaries below the declared threshold.
+
+### DEC-110 — Add Campaign Calibration Status Readback
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign calibration-status` contract with below-threshold, threshold-met, too-many-exclusions, and post-calibration-restart cases, including measurement-only calibration summaries and read-only cycle continuation decisions.
+- **Why:** Milestone 96 needs agents to know when campaign evidence can support calibration and which post-calibration policy applies, without silently tuning probabilities, changing methods, or mutating campaign cycle state.
+- **Alternatives rejected:** Generating calibration summaries below threshold, treating high-exclusion evidence as claim-ready, changing forecast method behavior automatically after calibration, or starting/pause/resume cycles from the readback command.
+
+### DEC-111 — Add Repeating Prediction Pilot Readbacks
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add a checked `prediction-campaign explain` contract, pilot runbook, pilot-session task card, campaign adapter/MCP readbacks, sanitized campaign error envelopes, and local usage trace events for recurring campaign evaluation.
+- **Why:** Milestone 97 needs agents to explain and monitor repeating campaigns during pilot sessions without custom glue code, hosted scheduling, live-source fetching, resolver execution, or quality claims.
+- **Alternatives rejected:** Sending pilot agents to raw campaign manifests and separate status commands, adding hosted scheduler behavior before pilot evidence, treating planned campaigns as calibration evidence, or leaving campaign error cases as unstructured prose.
+
+### DEC-112 — Harden Local Campaign Writes And Parallelize Checks
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Keep `render_json` and `compact_json` centralized in `ope_fixtures`, harden `ensure_safe_local_path` against symlink escapes from `.ope/live/prediction-campaigns`, add regression coverage for symlinked child/root paths, and replace the serial `run_checks.py` chain with a captured parallel runner.
+- **Why:** Milestone 98 needs safer explicit local writes and a faster normal check loop without changing generated fixture semantics or adding runtime dependencies.
+- **Alternatives rejected:** Trusting lexical path checks alone, allowing a symlinked campaign state root to redirect writes outside the workspace, keeping the nested `generate-fixtures` call inside `check_cli.py`, or introducing third-party task runners before the stdlib check runner is exhausted.
+
+### DEC-113 — Add Dev-Only Static Analysis Gate
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `scripts/check_static_analysis.py`, `ruff` config for the `scripts/` tree, scoped `mypy` config for the current quality-tooling and campaign-write type surface, and CI installation of `ruff`/`mypy` before `scripts/release_check.py`.
+- **Why:** Milestone 98 needs release-time lint and type enforcement, but OPE's runtime and normal checks should remain Python standard-library only while the broader script tree is incrementally typed.
+- **Alternatives rejected:** Adding `ruff`/`mypy` as runtime dependencies, pretending full-repo mypy is currently clean, disabling meaningful mypy checks globally, or leaving static analysis as an undocumented local-only command outside release readiness.
+
+### DEC-114 — Centralize Generated Fixture Emission
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `emit_generated` in `ope_fixtures.py` and route `write_generated`, `check_generated`, and `validate_and_emit` through it, then migrate representative single-output generators to call the shared write/check branch directly.
+- **Why:** Milestone 98 needs less duplicated fixture-scaffold code while preserving the exact generated JSON format, drift messages, and standard-library runtime boundary.
+- **Alternatives rejected:** Rewriting every generator in one broad mechanical sweep, leaving schema-validated and non-schema generated records on separate write/check branches, or adding a third-party fixture-generation framework.
+
+### DEC-115 — Split Campaign Write Runtime From Plan Generation
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Move explicit local campaign forecast write execution, safe-path checks, source-artifact validation, idempotent artifact/state writes, and campaign/run state builders into `prediction_campaign_forecast_write_runtime.py`; keep `generate_prediction_campaign_forecast_write.py` focused on the checked write plan and CLI views. Add shared `ope.py` command-building helpers for prediction-campaign subcommand routing.
+- **Why:** Milestone 98 needs smaller, easier-to-review modules without changing forecast-write semantics, local-state safety, or CLI behavior.
+- **Alternatives rejected:** Leaving effectful local writes inside the generated-plan module, splitting every campaign generator at once, or moving command routing into a package structure before the single-file CLI is otherwise ready.
+
+### DEC-116 — Convert Product Status Prose To Additive Bullets
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Replace the monolithic README public-beta wedge paragraph and PRODUCT current-state/public-beta/blocker paragraphs with grouped additive bullet lists while preserving the offline, opt-in live, non-mutating, and claim-boundary language.
+- **Why:** Milestone 98 needs future roadmap work to update one focused status bullet at a time instead of repeatedly rewriting broad product-summary prose and risking accidental quality or runtime overclaims.
+- **Alternatives rejected:** Leaving the lockstep paragraphs in place, generating these sections before the status taxonomy stabilizes, or dropping boundary details to make the docs shorter.
+
+### DEC-117 — Add Read-Only Campaign Method Update Gate
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign method-update-gate` as a schema-bound, checked readback that joins campaign calibration status with transit method options and reports below-threshold, approval-needed, approved-plan-ready, and regression-risk cases without applying any update.
+- **Why:** Calibration readbacks should not silently change forecast probabilities, method weights, forecast methods, or method registries; agents need a compact gate that says what evidence and approvals are missing before any future effectful method-update command exists.
+- **Alternatives rejected:** Letting calibration-status imply method selection, adding an effectful method-update command before the approval/audit shape is checked, auto-selecting the weather-adjustment candidate once calibration crosses a threshold, or hiding regression and approval blockers in prose.
+
+### DEC-118 — Add Non-Effectful Campaign Method Update Plan
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign method-update-plan` as a schema-bound readback that records the approval artifact, future `apply-method-update` command shape, rollback record, and preflight checks after the method-update gate, while keeping the command unimplemented and non-mutating.
+- **Why:** The gate says whether a method update can be planned; agents also need the exact approval and rollback material required before a future effectful runtime can safely exist without rewriting forecast history or silently changing methods.
+- **Alternatives rejected:** Implementing the effectful update immediately, treating approval prose as sufficient, omitting rollback requirements, allowing normal checks to run future update commands, or letting a plan-ready state write method registries or campaign state.
+
+### DEC-119 — Expand Scoped Type Gate To Method Update Surfaces
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add the campaign method-update gate and method-update plan generator/checker scripts to the scoped `mypy` release-time file list, raising the typed surface from 11 to 15 files.
+- **Why:** The new method-update surfaces are command-routing and contract-shape code; keeping them outside the static gate would let future signature drift or unchecked dictionary assumptions bypass the release-time quality guard.
+- **Alternatives rejected:** Waiting for full-repo mypy, checking only the runtime write module, or relying on CLI/runtime checks alone for the new method-update scripts.
+
+### DEC-120 — Expand Scoped Type Gate To Campaign Readbacks
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add the campaign resolution-attempt, doctor, evidence-ledger, calibration-status, and explain generator/checker scripts to the scoped `mypy` release-time file list, and fix the transit/resolution helper type shapes surfaced through their imports.
+- **Why:** The recurring-campaign readbacks are now the main agent-facing status surfaces; checking their contract construction and imported helper argument shapes prevents quiet drift while OPE keeps normal runtime dependencies standard-library only.
+- **Alternatives rejected:** Leaving these readbacks covered only by runtime fixtures, waiting for full-repo mypy before expanding coverage, ignoring imported helper errors, or widening the scope by suppressing type failures instead of fixing them.
+
+### DEC-121 — Add Explicit Full Helsinki Pilot Materialization
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign plan --count 100 --full-materialization` as an explicit full-count manifest expansion for the Helsinki traffic-disturbance pilot while keeping the default campaign plan as a bounded, non-mutating preview.
+- **Why:** The 100-prediction pilot needs all planned run, question, forecast, resolution, scoring, duplicate-key, and local-state identifiers to be inspectable before effectful runner work starts; normal checks should still avoid large default outputs and ignored local-state writes.
+- **Alternatives rejected:** Making every campaign plan print 100 runs by default, starting effectful runner work before the full identity plan is checked, storing the full pilot under `.ope/live` during normal checks, or treating the 100-run plan as calibration evidence before outcomes exist.
+
+### DEC-122 — Let The Foreground Runner Use Full Pilot Materialization
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `--full-materialization` to `prediction-campaign start` so bounded foreground ticks can inspect all 100 Helsinki pilot runs, select the due run by `--now`, and use the existing guarded `--write-local` forecast-write runtime for the selected run.
+- **Why:** After the full campaign identity plan exists, the runner must be able to schedule later windows such as `predictionrun-1400` without requiring agents to hand-slice manifests; forecast writes still need to remain explicit, idempotent, local-only, and baseline-only.
+- **Alternatives rejected:** Keeping the runner limited to 4-12 preview rows, making `--write-local` ignore the runner clock, creating forecasts by default during normal checks, or adding resolver/scoring/corpus append behavior before the local forecast runner boundary is stable.
+
+### DEC-123 — Add Guarded Local Campaign Resolver Execution
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign resolve --execute-resolvers --outcome-csv ... --write-local` plus `--missing-outcome` as the explicit local campaign resolver runtime, writing resolution/scoring records and campaign/run state only under ignored `.ope/live` paths after `resolutionEligibleAt`.
+- **Why:** The Helsinki pilot needs a real path from due forecasts to scored outcomes before ledger append and calibration can be meaningful, but outcome rows must remain resolution-only evidence and normal checks must stay non-mutating.
+- **Alternatives rejected:** Appending ledger rows in the resolver, resolving without a local forecast artifact, treating a missing outcome source as a fabricated comparable outcome, letting normal checks mutate ignored state, or auto-updating calibration/methods after one scored run.
+
+### DEC-124 — Append Local Campaign Evidence From Resolved State
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Make `prediction-campaign append --from-local --write-local` derive comparable or excluded ledger rows from the local run state, forecast artifact, evidence packet, forecast history, resolution record, and scoring report, then let `transit-track-record-gate --campaign ... --from-local-ledger` count those rows only when explicitly selected.
+- **Why:** The Helsinki pilot needs scored local outcomes to become append-only threshold evidence without hand-editing JSON, while excluded rows must stay visible for audit and never inflate comparable sample counts.
+- **Alternatives rejected:** Continuing to write fixture-shaped rows during local append, reading ignored ledgers by default in the track-record gate, counting excluded rows as calibration evidence, overwriting prior ledger rows, or letting append create resolver/scoring artifacts.
+
+### DEC-125 — Read Local Campaign Calibration Without Updating Methods
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign calibration-status --campaign ... --from-local-ledger` as an explicit ignored-ledger readback that computes measurement-only calibration stats after 100 comparable rows, blocks below-threshold, high-exclusion, and incomplete-provenance evidence, and reports pilot claim boundaries.
+- **Why:** The Helsinki pilot needs a concrete answer after 100 predictions, but calibration measurement must stay separate from method updates, probability recalibration, campaign-state mutation, and broader quality claims.
+- **Alternatives rejected:** Reading local ledgers during normal checks, generating calibration summaries below threshold, ignoring exclusion or provenance blockers, automatically changing the forecast method after calibration, or treating implementation evidence as a public quality claim.
+
+### DEC-126 — Guard Effectful Campaign Method Updates Behind Local Apply/Rollback
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Implement `prediction-campaign apply-method-update` and `rollback-method-update` as guarded commands that write only ignored local method-binding and audit artifacts behind `--write-local`, after the method-update gate and plan are ready, approvals are present, benchmark and anti-leakage evidence are favorable, and a rollback record exists.
+- **Why:** The Helsinki pilot needs a reversible way to let future forecasts use the transparent weather-adjustment candidate after 100 comparable outcomes, while preserving baseline defaults, prior forecast histories, old probabilities, and normal-check non-mutation.
+- **Alternatives rejected:** Updating the method registry, letting the runner switch methods without an approved local binding, rewriting previous forecasts, applying richer methods before the transparent weather adjustment, or making rollback delete the original apply audit artifact.
+
+### DEC-127 — Require A Three-Run Smoke Before The Helsinki Pilot
+- **Date:** 2026-05-31
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign pilot-runbook` as the checked local operations readback for the 100-run Helsinki traffic disturbance pilot, and extend the campaign runner to support a 3-run dry-run smoke slice before real local campaign writes.
+- **Why:** The pilot now has enough local write surfaces to run, resolve, append, calibrate, and update methods, so operators need one exact command sequence, status surface, success criteria, abort criteria, and a small preflight that exercises planning and foreground scheduling without mutating state.
+- **Alternatives rejected:** Starting with the 100-run local write path directly, keeping the pilot procedure only in prose, using the default 4-run preview as the smoke test, omitting abort criteria, or allowing normal checks to read live state or change methods.
+
+### DEC-128 — Add A Read-Only Helsinki Pilot Launch Gate
+- **Date:** 2026-06-01
+- **Status:** accepted
+- **Choice:** Add `prediction-campaign pilot-readiness` as a checked, read-only launch gate that joins the pilot runbook, mini-smoke path, full 100-run materialization, baseline method boundary, manual prerequisites, launch commands, and blocked actions.
+- **Why:** The runbook explains the procedure, but an operator also needs a compact go/no-go readback before the first effectful `--write-local` launch command; live source availability, local clock, terminal supervision, outcome paths, and workspace capacity must stay explicit manual confirmations rather than fixture claims.
+- **Alternatives rejected:** Starting the pilot directly from the runbook, treating live source readiness as a committed fixture fact, adding OS scheduler automation, folding readiness into the broad `doctor` readback, or making normal checks execute the launch path.

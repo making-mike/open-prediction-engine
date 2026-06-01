@@ -37,6 +37,7 @@ def main() -> None:
     local_state = manifest["localStatePolicy"]
     campaign = manifest["campaign"]
     planning = manifest["planningWindow"]
+    materialization = manifest["materialization"]
     planned_runs = manifest["plannedRuns"]
     progress = manifest["progress"]
     summary = manifest["summary"]
@@ -64,6 +65,18 @@ def main() -> None:
     require(planning["statusesHandled"] == RUN_STATUSES, "handled statuses drifted")
     for status in ["skipped", "missed", "canceled", "failed", "manually_stopped", "blocked_duplicate"]:
         require(status in planning["statusesHandled"], f"{status} status should be handled")
+
+    require(materialization["materializationMode"] == "bounded_preview", "default materialization mode drifted")
+    require(materialization["targetRunCount"] == 100, "default pilot target count drifted")
+    require(materialization["materializedRunCount"] == len(planned_runs), "materialized run count drifted")
+    require(materialization["boundedPreview"] is True, "default manifest should be a bounded preview")
+    require(materialization["fullMaterializationRequested"] is False, "default manifest should not request full materialization")
+    require(materialization["fullMaterializationAvailable"] is True, "full materialization should be available")
+    require(materialization["duplicateConflictCount"] == 0, "default duplicate audit should be clean")
+    require(materialization["duplicateAuditStatus"] == "unique_duplicate_keys", "default duplicate audit status drifted")
+    require(materialization["createsForecastArtifacts"] is False, "materialization must not create forecasts")
+    require(materialization["writesCampaignState"] is False, "materialization must not write campaign state")
+    require(materialization["normalChecksWriteLiveState"] is False, "normal checks must not write live state")
 
     run_ids = {item["runId"] for item in planned_runs}
     question_ids = {item["questionId"] for item in planned_runs}
@@ -105,7 +118,9 @@ def main() -> None:
 
     require(summary["campaignManifestImplemented"] is True, "campaign manifest should be implemented")
     require(summary["dryRunPlannerImplemented"] is True, "dry-run planner summary drifted")
+    require(summary["fullMaterializationImplemented"] is True, "full materialization summary drifted")
     require(summary["runnerImplemented"] is False, "runner summary must remain false")
+    require(summary["targetRunCount"] == 100, "summary target run count drifted")
     require(summary["uniqueRunIdsMinted"] is True, "unique run IDs should be minted")
     require(summary["duplicatePreventionEnabled"] is True, "duplicate prevention should be enabled")
     require(summary["mutatesLiveState"] is False, "summary must not mutate live state")
@@ -117,6 +132,28 @@ def main() -> None:
         if key == "readOnlyDryRun":
             continue
         require(value is False, f"execution boundary {key} should remain false")
+
+    full_manifest = build_prediction_campaign_manifest(full_materialization=True)
+    full_materialization = full_manifest["materialization"]
+    full_runs = full_manifest["plannedRuns"]
+    full_duplicate_keys = {item["duplicateKey"] for item in full_runs}
+    require(full_materialization["materializationMode"] == "full_100_run_pilot", "full materialization mode drifted")
+    require(full_materialization["targetRunCount"] == 100, "full target count drifted")
+    require(full_materialization["materializedRunCount"] == 100, "full materialized count drifted")
+    require(full_materialization["boundedPreview"] is False, "full materialization should not be bounded")
+    require(full_materialization["fullMaterializationRequested"] is True, "full materialization request drifted")
+    require(len(full_runs) == 100, "full pilot manifest should materialize 100 runs")
+    require(len(full_duplicate_keys) == 100, "full pilot duplicate keys should be unique")
+    require(full_runs[0]["runId"] == "predictionrun-1301", "full pilot first run drifted")
+    require(full_runs[-1]["runId"] == "predictionrun-1400", "full pilot final run drifted")
+    require(full_runs[0]["serviceDate"] == "2026-06-11", "full pilot first service date drifted")
+    require(full_runs[-1]["serviceDate"] == "2026-09-18", "full pilot final service date drifted")
+    require(full_materialization["finalRunId"] == full_runs[-1]["runId"], "full final run readback drifted")
+    require(full_materialization["finalServiceDate"] == full_runs[-1]["serviceDate"], "full final service date drifted")
+    for run in full_runs:
+        require_local_live_path(run["plannedStatePath"])
+        require(parse_utc(run["forecastCloseAt"]) < parse_utc(run["horizonStartsAt"]), "full forecast must close before horizon")
+        require(parse_utc(run["horizonEndsAt"]) < parse_utc(run["resolutionEligibleAt"]), "full resolution must wait for horizon end")
 
     print("checked prediction campaign manifest")
 

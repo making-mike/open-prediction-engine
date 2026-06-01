@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-doctor.schema.json",
+  "title": "Prediction Campaign Doctor",
+  "description": "Compact checked campaign health and next-action readback for agents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignDoctorId",
+    "generatedAt",
+    "doctorStatus",
+    "domain",
+    "bindings",
+    "health",
+    "queueReadbacks",
+    "duplicateProtection",
+    "recoveryPosture",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignDoctorId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "doctorStatus": {
+      "type": "string",
+      "enum": ["actionable_due_run", "waiting", "blocked", "healthy_no_action"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "health": { "$ref": "#/$defs/health" },
+    "queueReadbacks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/queueReadback" }
+    },
+    "duplicateProtection": { "$ref": "#/$defs/duplicateProtection" },
+    "recoveryPosture": { "$ref": "#/$defs/recoveryPosture" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "idList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignForecastWriteId",
+        "predictionCampaignResolutionAttemptId",
+        "predictionCampaignResumeId",
+        "resolutionJobRegistryId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "forecastId",
+        "questionId",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignForecastWriteId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignResolutionAttemptId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignResumeId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionJobRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignHealth",
+        "now",
+        "plannedRunCount",
+        "checkedRunCount",
+        "dueRunCount",
+        "waitingRunCount",
+        "failedRunCount",
+        "blockedRunCount",
+        "appendReadyRunCount",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "campaignHealth": { "$ref": "#/$defs/boundedString" },
+        "now": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "checkedRunCount": { "type": "integer", "minimum": 0 },
+        "dueRunCount": { "type": "integer", "minimum": 0 },
+        "waitingRunCount": { "type": "integer", "minimum": 0 },
+        "failedRunCount": { "type": "integer", "minimum": 0 },
+        "blockedRunCount": { "type": "integer", "minimum": 0 },
+        "appendReadyRunCount": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "queueReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queueName",
+        "queueStatus",
+        "runCount",
+        "runIds",
+        "nextAction",
+        "commands",
+        "mutatesState",
+        "executesResolver",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence"
+      ],
+      "properties": {
+        "queueName": {
+          "type": "string",
+          "enum": ["due_runs", "waiting_runs", "failed_runs", "blocked_runs", "append_ready_runs"]
+        },
+        "queueStatus": {
+          "type": "string",
+          "enum": ["actionable", "waiting", "empty", "blocked"]
+        },
+        "runCount": { "type": "integer", "minimum": 0 },
+        "runIds": { "$ref": "#/$defs/idList" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "commands": { "$ref": "#/$defs/boundedStringList" },
+        "mutatesState": { "type": "boolean" },
+        "executesResolver": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" }
+      }
+    },
+    "duplicateProtection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "duplicatePolicy",
+        "duplicateKeysInspected",
+        "duplicateRiskCount",
+        "duplicateResolutionBlocked",
+        "duplicateScoringBlocked",
+        "priorEvidenceOverwriteAllowed",
+        "alreadyTerminalRunHandling"
+      ],
+      "properties": {
+        "duplicatePolicy": { "$ref": "#/$defs/boundedString" },
+        "duplicateKeysInspected": { "type": "integer", "minimum": 0 },
+        "duplicateRiskCount": { "type": "integer", "minimum": 0 },
+        "duplicateResolutionBlocked": { "type": "boolean" },
+        "duplicateScoringBlocked": { "type": "boolean" },
+        "priorEvidenceOverwriteAllowed": { "type": "boolean" },
+        "alreadyTerminalRunHandling": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "recoveryPosture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resumeReadbackAvailable",
+        "effectfulResumeImplemented",
+        "interruptedRunStateFound",
+        "safeReadbackCommands",
+        "nextRecoveryAction"
+      ],
+      "properties": {
+        "resumeReadbackAvailable": { "type": "boolean" },
+        "effectfulResumeImplemented": { "type": "boolean" },
+        "interruptedRunStateFound": { "type": "boolean" },
+        "safeReadbackCommands": { "$ref": "#/$defs/boundedStringList" },
+        "nextRecoveryAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "acceptedFlags", "defaultMode", "capturedStdoutMode", "normalChecksMutateState"],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "doctorReadbackImplemented",
+        "agentQueueReadbacksImplemented",
+        "dueRunReadbackImplemented",
+        "failedRunReadbackImplemented",
+        "appendReadyReadbackImplemented",
+        "effectfulResolutionImplemented",
+        "effectfulResumeImplemented",
+        "nextRecommendedCommand"
+      ],
+      "properties": {
+        "doctorReadbackImplemented": { "type": "boolean" },
+        "agentQueueReadbacksImplemented": { "type": "boolean" },
+        "dueRunReadbackImplemented": { "type": "boolean" },
+        "failedRunReadbackImplemented": { "type": "boolean" },
+        "appendReadyReadbackImplemented": { "type": "boolean" },
+        "effectfulResolutionImplemented": { "type": "boolean" },
+        "effectfulResumeImplemented": { "type": "boolean" },
+        "nextRecommendedCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "overwritesPriorEvidence",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "overwritesPriorEvidence": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/helsinki-traffic-disturbance-pilot-runbook.schema.json",
+  "title": "Helsinki Traffic Disturbance Pilot Runbook",
+  "description": "Checked local operations runbook for the 100-run Helsinki traffic disturbance prediction pilot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "helsinkiTrafficDisturbancePilotRunbookId",
+    "generatedAt",
+    "runbookStatus",
+    "domain",
+    "bindings",
+    "pilotScope",
+    "operatorStatus",
+    "runbookSteps",
+    "miniCampaignSmoke",
+    "successCriteria",
+    "abortCriteria",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "helsinkiTrafficDisturbancePilotRunbookId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "runbookStatus": {
+      "type": "string",
+      "enum": ["checked_local_pilot_operations_runbook"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "pilotScope": { "$ref": "#/$defs/pilotScope" },
+    "operatorStatus": { "$ref": "#/$defs/operatorStatus" },
+    "runbookSteps": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/runbookStep" }
+    },
+    "miniCampaignSmoke": { "$ref": "#/$defs/miniCampaignSmoke" },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/criterion" }
+    },
+    "abortCriteria": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/abortCriterion" }
+    },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": { "$ref": "#/$defs/boundedStringList" }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignDoctorId",
+        "predictionCampaignEvidenceLedgerId",
+        "predictionCampaignCalibrationStatusId",
+        "predictionCampaignMethodUpdatePlanId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignDoctorId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignCalibrationStatusId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignMethodUpdatePlanId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "pilotScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geography",
+        "network",
+        "serviceWindow",
+        "timezone",
+        "targetRunCount",
+        "miniSmokeRunCount",
+        "firstServiceDate",
+        "finalServiceDate",
+        "bestAvailableMethodId",
+        "bestAvailableMethodName",
+        "nonBaselineMethodGate",
+        "fullMaterializationCommand",
+        "miniSmokeCommand",
+        "normalChecksUseLiveNetwork",
+        "normalChecksWriteLocalState"
+      ],
+      "properties": {
+        "geography": { "$ref": "#/$defs/boundedString" },
+        "network": { "$ref": "#/$defs/boundedString" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "timezone": { "$ref": "#/$defs/boundedString" },
+        "targetRunCount": { "type": "integer", "minimum": 1 },
+        "miniSmokeRunCount": { "type": "integer", "minimum": 2, "maximum": 3 },
+        "firstServiceDate": { "type": "string", "format": "date" },
+        "finalServiceDate": { "type": "string", "format": "date" },
+        "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "bestAvailableMethodName": { "$ref": "#/$defs/boundedString" },
+        "nonBaselineMethodGate": { "$ref": "#/$defs/boundedString" },
+        "fullMaterializationCommand": { "$ref": "#/$defs/boundedString" },
+        "miniSmokeCommand": { "$ref": "#/$defs/boundedString" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "normalChecksWriteLocalState": { "type": "boolean" }
+      }
+    },
+    "operatorStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "nextForecastRunId",
+        "nextForecastCreateAt",
+        "nextResolutionRunId",
+        "nextResolutionEligibleAt",
+        "dueResolverJobCount",
+        "appendReadyRunCount",
+        "ledgerComparableRowCount",
+        "ledgerExcludedRowCount",
+        "exclusionRate",
+        "calibrationComparableCount",
+        "calibrationThreshold",
+        "calibrationProgressPercent",
+        "statusCommands"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/boundedString" },
+        "nextForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextForecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "nextResolutionRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextResolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "dueResolverJobCount": { "type": "integer", "minimum": 0 },
+        "appendReadyRunCount": { "type": "integer", "minimum": 0 },
+        "ledgerComparableRowCount": { "type": "integer", "minimum": 0 },
+        "ledgerExcludedRowCount": { "type": "integer", "minimum": 0 },
+        "exclusionRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "calibrationComparableCount": { "type": "integer", "minimum": 0 },
+        "calibrationThreshold": { "type": "integer", "minimum": 1 },
+        "calibrationProgressPercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "statusCommands": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 14,
+          "items": { "$ref": "#/$defs/statusCommand" }
+        }
+      }
+    },
+    "statusCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandId",
+        "commandKey",
+        "command",
+        "answers",
+        "statusPath",
+        "mutatesState",
+        "requiresLiveOptIn"
+      ],
+      "properties": {
+        "commandId": { "$ref": "common.schema.json#/$defs/id" },
+        "commandKey": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "answers": { "$ref": "#/$defs/boundedString" },
+        "statusPath": { "$ref": "#/$defs/boundedString" },
+        "mutatesState": { "type": "boolean" },
+        "requiresLiveOptIn": { "type": "boolean" }
+      }
+    },
+    "runbookStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "stepNumber",
+        "stepKey",
+        "phase",
+        "command",
+        "operatorCheck",
+        "successSignal",
+        "recoveryAction",
+        "mutatesState",
+        "requiresLiveOptIn",
+        "claimBoundary"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "stepNumber": { "type": "integer", "minimum": 1 },
+        "stepKey": { "$ref": "#/$defs/boundedString" },
+        "phase": {
+          "type": "string",
+          "enum": ["setup", "smoke", "forecast", "monitor", "resolve", "append", "calibrate", "recover", "stop"]
+        },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "operatorCheck": { "$ref": "#/$defs/boundedString" },
+        "successSignal": { "$ref": "#/$defs/boundedString" },
+        "recoveryAction": { "$ref": "#/$defs/boundedString" },
+        "mutatesState": { "type": "boolean" },
+        "requiresLiveOptIn": { "type": "boolean" },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "miniCampaignSmoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "smokeStatus",
+        "runCount",
+        "targetRunCount",
+        "expectedRunIds",
+        "commands",
+        "checks",
+        "passCondition",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "smokeStatus": {
+          "type": "string",
+          "enum": ["checked_three_run_smoke_ready"]
+        },
+        "runCount": { "type": "integer", "const": 3 },
+        "targetRunCount": { "type": "integer", "const": 3 },
+        "expectedRunIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/statusCommand" }
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/smokeCheck" }
+        },
+        "passCondition": { "$ref": "#/$defs/boundedString" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "smokeCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "checkKey", "expected", "sourceCommand"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkKey": { "$ref": "#/$defs/boundedString" },
+        "expected": { "$ref": "#/$defs/boundedString" },
+        "sourceCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterionId", "criterionKey", "requirement", "measurementCommand", "passCondition", "blocksClaim"],
+      "properties": {
+        "criterionId": { "$ref": "common.schema.json#/$defs/id" },
+        "criterionKey": { "$ref": "#/$defs/boundedString" },
+        "requirement": { "$ref": "#/$defs/boundedString" },
+        "measurementCommand": { "$ref": "#/$defs/boundedString" },
+        "passCondition": { "$ref": "#/$defs/boundedString" },
+        "blocksClaim": { "type": "boolean" }
+      }
+    },
+    "abortCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterionId", "criterionKey", "trigger", "detectionCommand", "requiredAction", "restartAllowed"],
+      "properties": {
+        "criterionId": { "$ref": "common.schema.json#/$defs/id" },
+        "criterionKey": { "$ref": "#/$defs/boundedString" },
+        "trigger": { "$ref": "#/$defs/boundedString" },
+        "detectionCommand": { "$ref": "#/$defs/boundedString" },
+        "requiredAction": { "$ref": "#/$defs/boundedString" },
+        "restartAllowed": { "type": "boolean" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "acceptedViews", "defaultView", "capturedStdoutMode", "normalChecksWriteLiveState"],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedViews": { "$ref": "#/$defs/boundedStringList" },
+        "defaultView": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "normalChecksWriteLiveState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbookReady",
+        "miniCampaignSmokeReady",
+        "operatorStatusReady",
+        "successCriteriaCount",
+        "abortCriteriaCount",
+        "bestAvailableMethodId",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "recommendedNextCommand"
+      ],
+      "properties": {
+        "runbookReady": { "type": "boolean" },
+        "miniCampaignSmokeReady": { "type": "boolean" },
+        "operatorStatusReady": { "type": "boolean" },
+        "successCriteriaCount": { "type": "integer", "minimum": 0 },
+        "abortCriteriaCount": { "type": "integer", "minimum": 0 },
+        "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "recommendedNextCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyRunbook",
+        "normalChecksWriteLiveState",
+        "normalChecksUseLiveNetwork",
+        "startsLongRunningRunner",
+        "executesResolvers",
+        "appendsLedgerRows",
+        "changesForecastMethod",
+        "hostedRuntimeAllowed",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyRunbook": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "startsLongRunningRunner": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsLedgerRows": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

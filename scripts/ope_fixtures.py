@@ -19,13 +19,14 @@ def compact_json(data: Any) -> str:
     return json.dumps(data, separators=(",", ":"), sort_keys=False) + "\n"
 
 
-def write_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_json(data), encoding="utf-8")
-    print(f"generated {label}")
+def emit_generated(path: Path, data: Any, *, write: bool, label: str, regen: str) -> None:
+    """Write a generated record or check it for drift."""
+    if write:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(render_json(data), encoding="utf-8")
+        print(f"generated {label}")
+        return
 
-
-def check_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
     expected = render_json(data)
     if not path.exists():
         print(f"missing {label}: {path}", file=sys.stderr)
@@ -36,6 +37,14 @@ def check_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
         print(f"run `{regen}`", file=sys.stderr)
         raise SystemExit(1)
     print(f"checked {label}")
+
+
+def write_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
+    emit_generated(path, data, write=True, label=label, regen=regen)
+
+
+def check_generated(path: Path, data: Any, *, label: str, regen: str) -> None:
+    emit_generated(path, data, write=False, label=label, regen=regen)
 
 
 def validate_and_emit(
@@ -53,7 +62,4 @@ def validate_and_emit(
         for error in errors:
             print(error)
         raise SystemExit(1)
-    if write:
-        write_generated(path, data, label=label, regen=regen)
-    else:
-        check_generated(path, data, label=label, regen=regen)
+    emit_generated(path, data, write=write, label=label, regen=regen)

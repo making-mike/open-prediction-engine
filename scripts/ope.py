@@ -26,7 +26,7 @@ def run(command: list[str]) -> None:
     except subprocess.CalledProcessError as exc:
         if exc.returncode in (130, -2):
             raise SystemExit(130) from exc
-        raise
+        raise SystemExit(exc.returncode) from None
 
 
 def run_forwarding_output(command: list[str], *, check: bool) -> int:
@@ -48,6 +48,32 @@ def run_forwarding_output(command: list[str], *, check: bool) -> int:
             stderr=completed.stderr,
         )
     return completed.returncode
+
+
+def append_flag(command: list[str], args: argparse.Namespace, attr: str, flag: str | None = None) -> None:
+    if getattr(args, attr):
+        command.append(flag or f"--{attr.replace('_', '-')}")
+
+
+def append_value(command: list[str], args: argparse.Namespace, attr: str, flag: str | None = None) -> None:
+    value = getattr(args, attr)
+    if value is not None:
+        command.extend([flag or f"--{attr.replace('_', '-')}", str(value)])
+
+
+def script_command(
+    script: str,
+    args: argparse.Namespace,
+    *,
+    flags: tuple[str, ...] = (),
+    values: tuple[str, ...] = (),
+) -> list[str]:
+    command = [sys.executable, script]
+    for attr in flags:
+        append_flag(command, args, attr)
+    for attr in values:
+        append_value(command, args, attr)
+    return command
 
 
 def cmd_check(_args: argparse.Namespace) -> None:
@@ -130,7 +156,35 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         sys.executable,
         "scripts/generate_prediction_campaign_forecast_write.py",
     ]
+    prediction_campaign_resolution_attempt_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_resolution_attempt.py",
+    ]
+    prediction_campaign_doctor_command = [sys.executable, "scripts/generate_prediction_campaign_doctor.py"]
     prediction_campaign_resume_command = [sys.executable, "scripts/generate_prediction_campaign_resume.py"]
+    prediction_campaign_evidence_ledger_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_evidence_ledger.py",
+    ]
+    prediction_campaign_calibration_status_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_calibration_status.py",
+    ]
+    prediction_campaign_method_update_gate_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_method_update_gate.py",
+    ]
+    prediction_campaign_method_update_plan_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_method_update_plan.py",
+    ]
+    prediction_campaign_method_update_action_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_method_update_action.py",
+    ]
+    prediction_campaign_explain_command = [sys.executable, "scripts/generate_prediction_campaign_explain.py"]
+    helsinki_pilot_runbook_command = [sys.executable, "scripts/generate_helsinki_traffic_pilot_runbook.py"]
+    helsinki_pilot_readiness_command = [sys.executable, "scripts/generate_helsinki_traffic_pilot_readiness.py"]
     private_setup_adapter_runbook_command = [sys.executable, "scripts/generate_private_setup_adapter_chain_runbook.py"]
     private_setup_adapter_conformance_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_matrix.py"]
     private_setup_adapter_conformance_summary_command = [sys.executable, "scripts/generate_private_setup_adapter_conformance_summary.py"]
@@ -208,7 +262,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_forecast_creation_command.append("--write")
         prediction_campaign_forecast_artifact_command.append("--write")
         prediction_campaign_forecast_write_command.append("--write")
+        prediction_campaign_resolution_attempt_command.append("--write")
+        prediction_campaign_doctor_command.append("--write")
         prediction_campaign_resume_command.append("--write")
+        prediction_campaign_evidence_ledger_command.append("--write")
+        prediction_campaign_calibration_status_command.append("--write")
+        prediction_campaign_method_update_gate_command.append("--write")
+        prediction_campaign_method_update_plan_command.append("--write")
+        prediction_campaign_method_update_action_command.append("--write")
+        prediction_campaign_explain_command.append("--write")
+        helsinki_pilot_runbook_command.append("--write")
+        helsinki_pilot_readiness_command.append("--write")
         private_setup_adapter_runbook_command.append("--write")
         private_setup_adapter_conformance_command.append("--write")
         private_setup_adapter_conformance_summary_command.append("--write")
@@ -279,7 +343,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_forecast_creation_command.append("--check")
         prediction_campaign_forecast_artifact_command.append("--check")
         prediction_campaign_forecast_write_command.append("--check")
+        prediction_campaign_resolution_attempt_command.append("--check")
+        prediction_campaign_doctor_command.append("--check")
         prediction_campaign_resume_command.append("--check")
+        prediction_campaign_evidence_ledger_command.append("--check")
+        prediction_campaign_calibration_status_command.append("--check")
+        prediction_campaign_method_update_gate_command.append("--check")
+        prediction_campaign_method_update_plan_command.append("--check")
+        prediction_campaign_method_update_action_command.append("--check")
+        prediction_campaign_explain_command.append("--check")
+        helsinki_pilot_runbook_command.append("--check")
+        helsinki_pilot_readiness_command.append("--check")
         private_setup_adapter_runbook_command.append("--check")
         private_setup_adapter_conformance_command.append("--check")
         private_setup_adapter_conformance_summary_command.append("--check")
@@ -290,83 +364,102 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         forecast_runbook_command.append("--check")
         agent_envelopes_command.append("--check")
         agent_protocol_map_command.append("--check")
-    run(reports_command)
-    run(loop_command)
-    run(live_outcome_command)
-    run(auto_evidence_command)
-    run(auto_evidence_gather_command)
-    run(source_connectors_command)
-    run(live_readiness_command)
-    run(transit_api_connector_command)
-    run(domain_setups_command)
-    run(transit_delay_forecast_command)
-    run(transit_delay_forward_command)
-    run(transit_forward_resolver_command)
-    run(resolution_jobs_command)
-    run(resolution_scheduler_command)
-    run(resolution_runtime_reliability_command)
-    run(transit_forward_run_corpus_command)
-    run(transit_corpus_growth_command)
-    run(transit_track_record_gate_command)
-    run(transit_method_options_command)
-    run(transit_live_evidence_promotion_command)
-    run(source_intake_command)
-    run(source_builder_command)
-    run(source_adapter_output_command)
-    run(source_adapter_intake_command)
-    run(source_quality_command)
-    run(source_handoff_command)
-    run(source_handoff_method_command)
-    run(auto_evidence_forecast_command)
-    run(auto_evidence_resolution_command)
-    run(historical_forecast_command)
-    run(method_comparison_command)
-    run(method_selection_command)
-    run(setup_benchmark_command)
-    run(setup_method_command)
-    run(setup_forecast_command)
-    run(source_handoff_forecast_command)
-    run(local_source_runtime_command)
-    run(source_handoff_resolution_command)
-    run(source_handoff_runbook_command)
-    run(private_setup_workflow_command)
-    run(private_source_adapters_command)
-    run(private_source_adapter_outcomes_command)
-    run(private_source_adapter_bridge_command)
-    run(private_setup_requests_command)
-    run(private_setup_actions_command)
-    run(private_setup_action_runbook_command)
-    run(private_setup_agent_bundles_command)
-    run(private_setup_orchestrator_command)
-    run(agent_pilot_validation_command)
-    run(pilot_evidence_command)
-    run(pilot_session_packet_command)
-    run(pilot_summary_intake_command)
-    run(local_usage_trace_command)
-    run(developer_adoption_command)
-    run(expansion_readiness_command)
-    run(repeating_prediction_setup_command)
-    run(prediction_campaign_manifest_command)
-    run(prediction_campaign_runner_command)
-    run(prediction_campaign_forecast_creation_command)
-    run(prediction_campaign_forecast_artifact_command)
-    run(prediction_campaign_forecast_write_command)
-    run(prediction_campaign_resume_command)
-    run(private_setup_adapter_runbook_command)
-    run(private_setup_adapter_conformance_command)
-    run(private_setup_adapter_conformance_summary_command)
-    run(private_source_kind_selection_command)
-    run(private_source_kind_query_matrix_command)
-    run(recalculation_command)
-    run(forecast_run_command)
-    run(forecast_run_matrix_command)
-    run(forecast_runbook_command)
-    run(agent_envelopes_command)
-    run(agent_protocol_map_command)
-    run(pipeline_command)
-    run(pipeline_resolution_command)
-    run(index_command)
-    run(manifest_command)
+    commands = [
+        reports_command,
+        loop_command,
+        live_outcome_command,
+        auto_evidence_command,
+        auto_evidence_gather_command,
+        source_connectors_command,
+        live_readiness_command,
+        transit_api_connector_command,
+        domain_setups_command,
+        transit_delay_forecast_command,
+        transit_delay_forward_command,
+        transit_forward_resolver_command,
+        resolution_jobs_command,
+        resolution_scheduler_command,
+        resolution_runtime_reliability_command,
+        transit_forward_run_corpus_command,
+        transit_corpus_growth_command,
+        transit_track_record_gate_command,
+        transit_method_options_command,
+        transit_live_evidence_promotion_command,
+        source_intake_command,
+        source_builder_command,
+        source_adapter_output_command,
+        source_adapter_intake_command,
+        source_quality_command,
+        source_handoff_command,
+        source_handoff_method_command,
+        auto_evidence_forecast_command,
+        auto_evidence_resolution_command,
+        historical_forecast_command,
+        method_comparison_command,
+        method_selection_command,
+        setup_benchmark_command,
+        setup_method_command,
+        setup_forecast_command,
+        source_handoff_forecast_command,
+        local_source_runtime_command,
+        source_handoff_resolution_command,
+        source_handoff_runbook_command,
+        private_setup_workflow_command,
+        private_source_adapters_command,
+        private_source_adapter_outcomes_command,
+        private_source_adapter_bridge_command,
+        private_setup_requests_command,
+        private_setup_actions_command,
+        private_setup_action_runbook_command,
+        private_setup_agent_bundles_command,
+        private_setup_orchestrator_command,
+        agent_pilot_validation_command,
+        pilot_evidence_command,
+        pilot_session_packet_command,
+        pilot_summary_intake_command,
+        local_usage_trace_command,
+        developer_adoption_command,
+        expansion_readiness_command,
+        repeating_prediction_setup_command,
+        prediction_campaign_manifest_command,
+        prediction_campaign_runner_command,
+        prediction_campaign_forecast_creation_command,
+        prediction_campaign_forecast_artifact_command,
+        prediction_campaign_forecast_write_command,
+        prediction_campaign_resolution_attempt_command,
+        prediction_campaign_doctor_command,
+        prediction_campaign_resume_command,
+        prediction_campaign_evidence_ledger_command,
+        prediction_campaign_calibration_status_command,
+        prediction_campaign_method_update_gate_command,
+        prediction_campaign_method_update_plan_command,
+        prediction_campaign_method_update_action_command,
+        prediction_campaign_explain_command,
+        helsinki_pilot_runbook_command,
+        helsinki_pilot_readiness_command,
+        private_setup_adapter_runbook_command,
+        private_setup_adapter_conformance_command,
+        private_setup_adapter_conformance_summary_command,
+        private_source_kind_selection_command,
+        private_source_kind_query_matrix_command,
+        recalculation_command,
+        forecast_run_command,
+        forecast_run_matrix_command,
+        forecast_runbook_command,
+        agent_envelopes_command,
+        agent_protocol_map_command,
+        pipeline_command,
+        pipeline_resolution_command,
+        index_command,
+        manifest_command,
+    ]
+    if args.list:
+        for index, command in enumerate(commands, start=1):
+            print(f"{index:03d} {' '.join(command)}")
+        print(f"{len(commands)} fixture commands")
+        return
+    for command in commands:
+        run(command)
 
 
 def cmd_read(args: argparse.Namespace) -> None:
@@ -711,6 +804,8 @@ def cmd_resolution_scheduler(args: argparse.Namespace) -> None:
         command.extend(["--run-state", run_state])
     if args.campaign:
         command.extend(["--campaign", args.campaign])
+    if args.now:
+        command.extend(["--now", args.now])
     if args.limit is not None:
         command.extend(["--limit", str(args.limit)])
     if args.poll_seconds is not None:
@@ -777,6 +872,12 @@ def cmd_transit_track_record_gate(args: argparse.Namespace) -> None:
         command.append("--check")
     if args.write:
         command.append("--write")
+    if args.campaign:
+        command.extend(["--campaign", args.campaign])
+    if args.from_local_ledger:
+        command.append("--from-local-ledger")
+    if args.ledger_case:
+        command.extend(["--ledger-case", args.ledger_case])
     run(command)
 
 
@@ -1259,85 +1360,229 @@ def cmd_repeating_prediction_setup(args: argparse.Namespace) -> None:
 
 def cmd_prediction_campaign(args: argparse.Namespace) -> None:
     if args.action == "start":
-        command = [sys.executable, "scripts/generate_prediction_campaign_runner.py"]
-        if args.check:
-            command.append("--check")
-        if args.write:
-            command.append("--write")
-        if args.case:
-            command.extend(["--case", args.case])
-        if args.plan_count is not None:
-            command.extend(["--plan-count", str(args.plan_count)])
-        if args.domain:
-            command.extend(["--domain", args.domain])
-        if args.service_window:
-            command.extend(["--service-window", args.service_window])
-        if args.interval:
-            command.extend(["--interval", args.interval])
-        if args.count is not None:
-            command.extend(["--count", str(args.count)])
-        if args.until:
-            command.extend(["--until", args.until])
-        if args.calibration_target is not None:
-            command.extend(["--calibration-target", str(args.calibration_target)])
-        if args.post_calibration_action:
-            command.extend(["--post-calibration-action", args.post_calibration_action])
-        if args.post_calibration_delay:
-            command.extend(["--post-calibration-delay", args.post_calibration_delay])
-        if args.setup_json:
-            command.extend(["--setup-json", args.setup_json])
-        if args.manifest_json:
-            command.extend(["--manifest-json", args.manifest_json])
-        if args.live_weather:
-            command.append("--live-weather")
-        if args.execute_resolvers:
-            command.append("--execute-resolvers")
-        if args.write_local:
-            command.append("--write-local")
-        if args.output_format:
-            command.extend(["--output-format", args.output_format])
-        if args.view:
-            command.extend(["--view", args.view])
+        runner_views = {
+            "runner",
+            "campaign-creation",
+            "forecast-schedule",
+            "decisions",
+            "missed-run-policy",
+            "summary",
+            "boundary",
+        }
+        if args.view and args.view not in runner_views:
+            raise SystemExit(f"--view {args.view} is only available for prediction-campaign resolve")
+        command = script_command(
+            "scripts/generate_prediction_campaign_runner.py",
+            args,
+            flags=(
+                "check",
+                "write",
+                "live_weather",
+                "execute_resolvers",
+                "full_materialization",
+                "watch",
+                "write_local",
+            ),
+            values=(
+                "case",
+                "plan_count",
+                "domain",
+                "service_window",
+                "interval",
+                "count",
+                "until",
+                "calibration_target",
+                "post_calibration_action",
+                "post_calibration_delay",
+                "setup_json",
+                "manifest_json",
+                "max_ticks",
+                "poll_seconds",
+                "now",
+                "output_format",
+                "view",
+            ),
+        )
         run(command)
         return
     if args.action == "forecast-create":
-        command = [sys.executable, "scripts/generate_prediction_campaign_forecast_creation.py"]
-        if args.check:
-            command.append("--check")
-        if args.write:
-            command.append("--write")
+        command = script_command(
+            "scripts/generate_prediction_campaign_forecast_creation.py",
+            args,
+            flags=("check", "write"),
+        )
         run(command)
         return
     if args.action == "forecast-artifact":
-        command = [sys.executable, "scripts/generate_prediction_campaign_forecast_artifact.py"]
-        if args.check:
-            command.append("--check")
-        if args.write:
-            command.append("--write")
+        command = script_command(
+            "scripts/generate_prediction_campaign_forecast_artifact.py",
+            args,
+            flags=("check", "write"),
+        )
         run(command)
         return
     if args.action == "forecast-write":
-        command = [sys.executable, "scripts/generate_prediction_campaign_forecast_write.py"]
-        if args.check:
-            command.append("--check")
-        if args.write:
-            command.append("--write")
-        if args.run_id:
-            command.extend(["--run-id", args.run_id])
-        if args.manifest_json:
-            command.extend(["--manifest-json", args.manifest_json])
-        if args.write_local:
-            command.append("--write-local")
-        if args.output_format:
-            command.extend(["--output-format", args.output_format])
+        command = script_command(
+            "scripts/generate_prediction_campaign_forecast_write.py",
+            args,
+            flags=("check", "write", "write_local"),
+            values=("run_id", "manifest_json", "output_format"),
+        )
+        run(command)
+        return
+    if args.action == "resolve":
+        attempt_views = {"attempt", "target", "guards", "result", "summary", "boundary"}
+        if args.view and args.view not in attempt_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign resolve")
+        command = script_command(
+            "scripts/generate_prediction_campaign_resolution_attempt.py",
+            args,
+            flags=("check", "write", "execute_resolvers", "write_local", "missing_outcome"),
+            values=("run_id", "now", "outcome_csv", "output_format", "view"),
+        )
+        append_value(command, args, "attempt_case", "--case")
+        run(command)
+        return
+    if args.action == "doctor":
+        doctor_views = {"doctor", "health", "queues", "duplicates", "recovery", "summary", "boundary"}
+        if args.view and args.view not in doctor_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign doctor")
+        command = script_command(
+            "scripts/generate_prediction_campaign_doctor.py",
+            args,
+            flags=("check", "write"),
+            values=("now", "output_format", "view"),
+        )
         run(command)
         return
     if args.action == "resume":
-        command = [sys.executable, "scripts/generate_prediction_campaign_resume.py"]
-        if args.check:
-            command.append("--check")
-        if args.write:
-            command.append("--write")
+        resume_views = {"resume", "state", "checks", "actions", "summary", "boundary"}
+        if args.view and args.view not in resume_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign resume")
+        command = script_command(
+            "scripts/generate_prediction_campaign_resume.py",
+            args,
+            flags=("check", "write", "from_local"),
+            values=("resume_case", "output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action in {"append-ready", "append"}:
+        ledger_views = {"ledger", "policy", "candidate", "checks", "rows", "result", "summary", "boundary"}
+        if args.view and args.view not in ledger_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign {args.action}")
+        command = script_command(
+            "scripts/generate_prediction_campaign_evidence_ledger.py",
+            args,
+            flags=("check", "write", "from_local", "write_local"),
+            values=("run_id", "ledger_case", "output_format", "view"),
+        )
+        if not args.check and not args.write:
+            command.extend(["--mode", args.action])
+        run(command)
+        return
+    if args.action == "calibration-status":
+        calibration_views = {"calibration", "thresholds", "readback", "pilot", "policy", "cycle", "summary", "boundary"}
+        if args.view and args.view not in calibration_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign calibration-status")
+        command = script_command(
+            "scripts/generate_prediction_campaign_calibration_status.py",
+            args,
+            flags=("check", "write", "from_local_ledger"),
+            values=("campaign", "calibration_case", "output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action == "method-update-gate":
+        method_update_views = {"gate", "evidence", "proposal", "approval", "decision", "summary", "boundary"}
+        if args.view and args.view not in method_update_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign method-update-gate")
+        command = script_command(
+            "scripts/generate_prediction_campaign_method_update_gate.py",
+            args,
+            flags=("check", "write"),
+            values=("method_update_case", "output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action == "method-update-plan":
+        method_update_plan_views = {"plan", "approval", "command", "rollback", "preflight", "decision", "summary", "boundary"}
+        if args.view and args.view not in method_update_plan_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign method-update-plan")
+        command = script_command(
+            "scripts/generate_prediction_campaign_method_update_plan.py",
+            args,
+            flags=("check", "write"),
+            values=("method_update_plan_case", "output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action in {"apply-method-update", "rollback-method-update"}:
+        method_update_action_views = {"plan", "approval", "command", "rollback", "preflight", "decision", "summary", "boundary"}
+        if args.view and args.view not in method_update_action_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign {args.action}")
+        operation = "rollback" if args.action == "rollback-method-update" else "apply"
+        command = script_command(
+            "scripts/generate_prediction_campaign_method_update_action.py",
+            args,
+            flags=("check", "write", "write_local"),
+            values=("method_update_plan_id", "method_update_plan_case", "output_format", "view"),
+        )
+        command.extend(["--operation", operation])
+        run(command)
+        return
+    if args.action == "explain":
+        explain_views = {"explain", "snapshot", "task", "workflow", "errors", "agent", "claims", "summary", "boundary"}
+        if args.view and args.view not in explain_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign explain")
+        command = script_command(
+            "scripts/generate_prediction_campaign_explain.py",
+            args,
+            flags=("check", "write"),
+            values=("output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action == "pilot-runbook":
+        pilot_runbook_views = {
+            "runbook",
+            "scope",
+            "operator-status",
+            "smoke",
+            "steps",
+            "success",
+            "abort",
+            "summary",
+            "boundary",
+        }
+        if args.view and args.view not in pilot_runbook_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign pilot-runbook")
+        command = script_command(
+            "scripts/generate_helsinki_traffic_pilot_runbook.py",
+            args,
+            flags=("check", "write"),
+            values=("output_format", "view"),
+        )
+        run(command)
+        return
+    if args.action == "pilot-readiness":
+        pilot_readiness_views = {
+            "readiness",
+            "checks",
+            "manual",
+            "commands",
+            "blocked",
+            "summary",
+            "boundary",
+        }
+        if args.view and args.view not in pilot_readiness_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign pilot-readiness")
+        command = script_command(
+            "scripts/generate_helsinki_traffic_pilot_readiness.py",
+            args,
+            flags=("check", "write"),
+            values=("output_format", "view"),
+        )
         run(command)
         return
 
@@ -1348,6 +1593,10 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
         command.extend(["--case", args.case])
     if args.plan_count is not None:
         command.extend(["--plan-count", str(args.plan_count)])
+    if args.count is not None:
+        command.extend(["--count", str(args.count)])
+    if args.full_materialization:
+        command.append("--full-materialization")
     if args.check:
         command.append("--check")
     if args.write:
@@ -1503,6 +1752,7 @@ def build_parser() -> argparse.ArgumentParser:
     release_check.set_defaults(func=cmd_release_check)
 
     generate = subparsers.add_parser("generate-fixtures", help="check or refresh generated fixtures")
+    generate.add_argument("--list", action="store_true", help="list fixture generator commands without running them")
     generate.add_argument("--write", action="store_true", help="refresh generated fixtures")
     generate.set_defaults(func=cmd_generate_fixtures)
 
@@ -1762,6 +2012,7 @@ def build_parser() -> argparse.ArgumentParser:
     resolution_scheduler.add_argument("--workspace", help="ignored local forward-run workspace")
     resolution_scheduler.add_argument("--run-state", action="append", help="specific forward-run-state.json to watch")
     resolution_scheduler.add_argument("--campaign", help="include a checked prediction campaign in scheduler ticks")
+    resolution_scheduler.add_argument("--now", help="override current timestamp for deterministic scheduler ticks")
     resolution_scheduler.add_argument("--limit", type=int)
     resolution_scheduler.add_argument("--poll-seconds", type=int)
     resolution_scheduler.add_argument("--max-ticks", type=int)
@@ -1855,6 +2106,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--write",
         action="store_true",
         help="refresh generated transit baseline track-record gate fixture",
+    )
+    transit_track_record_gate.add_argument("--campaign", help="explicit campaign ledger id to include")
+    transit_track_record_gate.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="explicitly read the ignored local campaign evidence ledger",
+    )
+    transit_track_record_gate.add_argument(
+        "--ledger-case",
+        choices=["excluded_missing_outcome", "comparable_scored"],
+        help="checked campaign evidence-ledger case to include",
     )
     transit_track_record_gate.set_defaults(func=cmd_transit_track_record_gate)
 
@@ -2474,6 +2736,7 @@ def build_parser() -> argparse.ArgumentParser:
             "unsafe_source_block",
             "forecast_run_readback",
             "claim_gate_readback",
+            "repeating_prediction_campaign",
         ],
         help="print one pilot session task card",
     )
@@ -2544,6 +2807,16 @@ def build_parser() -> argparse.ArgumentParser:
             "response_too_large_readback",
             "claim_gate_readback",
             "agent_pilot_validation_read",
+            "campaign_start",
+            "campaign_forecast_created",
+            "campaign_resolve_due",
+            "campaign_resolver_executed",
+            "campaign_append_ready",
+            "campaign_appended",
+            "campaign_calibration_threshold_met",
+            "campaign_paused",
+            "campaign_resumed",
+            "campaign_stopped",
         ],
         help="print one usage trace event",
     )
@@ -2651,7 +2924,19 @@ def build_parser() -> argparse.ArgumentParser:
             "forecast-create",
             "forecast-artifact",
             "forecast-write",
+            "resolve",
+            "doctor",
             "resume",
+            "append-ready",
+            "append",
+            "calibration-status",
+            "method-update-gate",
+            "method-update-plan",
+            "apply-method-update",
+            "rollback-method-update",
+            "explain",
+            "pilot-runbook",
+            "pilot-readiness",
         ],
         default="manifest",
         help="print the full manifest, one campaign readback, or a dry-run runner/forecast artifact readback",
@@ -2677,17 +2962,23 @@ def build_parser() -> argparse.ArgumentParser:
     prediction_campaign.add_argument("--service-window", help="dry-run runner service window selector")
     prediction_campaign.add_argument("--interval", help="dry-run runner recurrence interval")
     prediction_campaign.add_argument("--count", type=int, help="dry-run runner finite run count")
+    prediction_campaign.add_argument(
+        "--full-materialization",
+        action="store_true",
+        help="expand the complete local pilot plan for prediction-campaign plan",
+    )
     prediction_campaign.add_argument("--until", help="dry-run runner until-date boundary")
     prediction_campaign.add_argument("--calibration-target", type=int, help="dry-run runner calibration target")
     prediction_campaign.add_argument("--post-calibration-action", help="dry-run runner post-calibration action")
     prediction_campaign.add_argument("--post-calibration-delay", help="dry-run runner post-calibration delay")
     prediction_campaign.add_argument("--setup-json", help="dry-run runner setup JSON input path")
     prediction_campaign.add_argument("--manifest-json", help="dry-run runner manifest JSON input path")
+    prediction_campaign.add_argument("--campaign", help="explicit campaign id for local campaign readbacks")
     prediction_campaign.add_argument("--run-id", help="dry-run forecast creation run ID")
     prediction_campaign.add_argument(
         "--write-local",
         action="store_true",
-        help="future explicit local forecast write flag; checked readbacks remain non-mutating",
+        help="explicit local campaign write flag; checked readbacks remain non-mutating",
     )
     prediction_campaign.add_argument(
         "--live-weather",
@@ -2699,14 +2990,145 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="dry-run flag for future explicit resolver execution",
     )
+    prediction_campaign.add_argument("--outcome-csv", help="approved local transit outcome CSV/JSON for campaign resolution")
+    prediction_campaign.add_argument(
+        "--missing-outcome",
+        action="store_true",
+        help="write an explicit missing-outcome campaign resolution exclusion",
+    )
+    prediction_campaign.add_argument(
+        "--watch",
+        action="store_true",
+        help="run bounded foreground forecast scheduling ticks",
+    )
+    prediction_campaign.add_argument(
+        "--max-ticks",
+        type=int,
+        help="number of bounded foreground forecast scheduling ticks",
+    )
+    prediction_campaign.add_argument(
+        "--poll-seconds",
+        type=int,
+        help="seconds between bounded foreground forecast scheduling ticks",
+    )
+    prediction_campaign.add_argument(
+        "--now",
+        help="UTC runner clock for bounded forecast scheduling decisions",
+    )
+    prediction_campaign.add_argument(
+        "--attempt-case",
+        choices=["due_open", "already_resolved", "ambiguous", "annulled", "missed", "blocked_duplicate"],
+        help="checked prediction-campaign resolve case",
+    )
+    prediction_campaign.add_argument(
+        "--resume-case",
+        choices=["checked_fixture_bundle", "interrupted_after_forecast_write"],
+        help="checked prediction-campaign resume case",
+    )
+    prediction_campaign.add_argument(
+        "--ledger-case",
+        choices=["excluded_missing_outcome", "comparable_scored"],
+        help="checked prediction-campaign evidence-ledger case",
+    )
+    prediction_campaign.add_argument(
+        "--calibration-case",
+        choices=["below_threshold", "threshold_met", "too_many_exclusions", "post_calibration_restart"],
+        help="checked prediction-campaign calibration-status case",
+    )
+    prediction_campaign.add_argument(
+        "--method-update-case",
+        choices=[
+            "below_threshold",
+            "threshold_met_needs_approval",
+            "approved_plan_ready",
+            "regression_risk",
+        ],
+        help="checked prediction-campaign method-update gate case",
+    )
+    prediction_campaign.add_argument(
+        "--method-update-plan-case",
+        choices=["gate_blocked", "regression_risk", "approval_missing", "rollback_missing", "plan_ready"],
+        help="checked prediction-campaign method-update plan case",
+    )
+    prediction_campaign.add_argument(
+        "--method-update-plan-id",
+        help="checked method-update plan id for apply or rollback commands",
+    )
+    prediction_campaign.add_argument(
+        "--from-local",
+        action="store_true",
+        help="explicitly inspect ignored local campaign state for resume or evidence-ledger append",
+    )
+    prediction_campaign.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="explicitly inspect the ignored local campaign evidence ledger",
+    )
     prediction_campaign.add_argument(
         "--output-format",
-        choices=["jsonl", "human"],
+        choices=["json", "jsonl", "human"],
         help="dry-run runner output format",
     )
     prediction_campaign.add_argument(
         "--view",
-        choices=["runner", "campaign-creation", "decisions", "missed-run-policy", "summary", "boundary"],
+        choices=[
+            "runner",
+            "campaign-creation",
+            "forecast-schedule",
+            "decisions",
+            "missed-run-policy",
+            "attempt",
+            "target",
+            "guards",
+            "result",
+            "doctor",
+            "health",
+            "queues",
+            "duplicates",
+            "recovery",
+            "resume",
+            "state",
+            "checks",
+            "actions",
+            "ledger",
+            "policy",
+            "candidate",
+            "rows",
+            "gate",
+            "evidence",
+            "proposal",
+            "approval",
+            "decision",
+            "plan",
+            "command",
+            "rollback",
+            "preflight",
+            "calibration",
+            "thresholds",
+            "readback",
+            "pilot",
+            "cycle",
+            "explain",
+            "snapshot",
+            "task",
+            "workflow",
+            "errors",
+            "agent",
+            "claims",
+            "runbook",
+            "scope",
+            "operator-status",
+            "smoke",
+            "steps",
+            "success",
+            "abort",
+            "readiness",
+            "manual",
+            "commands",
+            "blocked",
+            "summary",
+            "boundary",
+        ],
         help="print one start readback view",
     )
     prediction_campaign.add_argument(
@@ -2802,6 +3224,11 @@ def build_parser() -> argparse.ArgumentParser:
             "private_setup_source_handoff",
             "private_setup_method_gate",
             "private_setup_forecast_execution",
+            "campaign_plan",
+            "campaign_status",
+            "campaign_health",
+            "campaign_append_readiness",
+            "campaign_calibration_status",
             "resolution_jobs",
             "resolution_scheduler_status",
             "resolution_status",

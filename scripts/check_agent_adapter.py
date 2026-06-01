@@ -33,6 +33,11 @@ REQUIRED_SUCCESS_OPERATIONS = {
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "campaign_plan",
+    "campaign_status",
+    "campaign_health",
+    "campaign_append_readiness",
+    "campaign_calibration_status",
     "resolution_jobs",
     "resolution_scheduler_status",
     "resolution_status",
@@ -61,8 +66,8 @@ def main() -> None:
     envelopes = build_envelopes()
     if set(envelopes) != set(OUTPUT_FILES.values()):
         raise AssertionError("agent adapter should emit the expected fixed envelope filenames")
-    if len(envelopes) != 51:
-        raise AssertionError("agent adapter should emit forty-four success envelopes and seven error envelopes")
+    if len(envelopes) != 56:
+        raise AssertionError("agent adapter should emit forty-nine success envelopes and seven error envelopes")
     cache_info = source_handoff_forecast_outputs_cache_info()
     if cache_info.misses != 1 or cache_info.hits < len(FORECAST_EXECUTION_ENVELOPE_CASES) - 1:
         raise AssertionError("agent adapter should reuse source-handoff forecast outputs across execution cases")
@@ -71,8 +76,8 @@ def main() -> None:
     error = [item for item in envelopes.values() if item["status"] == "error"]
     if {item["operation"] for item in success} != REQUIRED_SUCCESS_OPERATIONS:
         raise AssertionError("agent adapter success envelopes should cover every required operation")
-    if len(success) != 44:
-        raise AssertionError("agent adapter should include exactly forty-four success examples")
+    if len(success) != 49:
+        raise AssertionError("agent adapter should include exactly forty-nine success examples")
     if len(error) != 7:
         raise AssertionError("agent adapter should include exactly seven sanitized error examples")
     if any(item["exitCode"] != 0 for item in success):
@@ -232,6 +237,40 @@ def main() -> None:
         raise AssertionError("resolution-scheduler-status envelope should mark due work present")
     if scheduler_status_payload["executionBoundary"]["executesResolvers"] is not False:
         raise AssertionError("resolution-scheduler-status envelope must not execute resolvers")
+
+    campaign_plan = success_envelope("campaign_plan")
+    if campaign_plan["payload"]["predictionCampaignManifestId"] != "predictioncampaignmanifest-001":
+        raise AssertionError("campaign-plan envelope should return the checked manifest")
+    if campaign_plan["payload"]["plannedRuns"][0]["forecastId"] != "forecast-1301":
+        raise AssertionError("campaign-plan envelope should expose the next campaign forecast")
+    if campaign_plan["payload"]["localStatePolicy"]["normalChecksWriteLiveState"] is not False:
+        raise AssertionError("campaign-plan envelope must keep normal checks non-mutating")
+
+    campaign_status = success_envelope("campaign_status")
+    if campaign_status["payload"]["predictionCampaignExplainId"] != "predictioncampaignexplain-001":
+        raise AssertionError("campaign-status envelope should return the explain readback")
+    if campaign_status["payload"]["campaignSnapshot"]["nextForecastId"] != "forecast-1301":
+        raise AssertionError("campaign-status envelope should expose the next forecast id")
+    if campaign_status["payload"]["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("campaign-status envelope must keep quality claims blocked")
+
+    campaign_health = success_envelope("campaign_health")
+    if campaign_health["payload"]["predictionCampaignDoctorId"] != "predictioncampaigndoctor-001":
+        raise AssertionError("campaign-health envelope should return the doctor readback")
+    if campaign_health["payload"]["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("campaign-health envelope must not execute resolvers")
+
+    campaign_append = success_envelope("campaign_append_readiness")
+    if campaign_append["payload"]["appendCandidate"]["comparableAppendReady"] is not False:
+        raise AssertionError("campaign-append-readiness default envelope should not be comparable-ready")
+    if campaign_append["payload"]["executionBoundary"]["appendsCorpusEvidence"] is not False:
+        raise AssertionError("campaign-append-readiness envelope must not append corpus evidence")
+
+    campaign_calibration = success_envelope("campaign_calibration_status")
+    if campaign_calibration["payload"]["calibrationStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("campaign-calibration-status envelope should expose below-threshold status")
+    if campaign_calibration["payload"]["executionBoundary"]["updatesForecastProbabilities"] is not False:
+        raise AssertionError("campaign-calibration-status envelope must not update probabilities")
 
     setup_card = success_envelope("forecast_card", "forecast-1102")
     setup_card_record = setup_card["payload"]["record"]

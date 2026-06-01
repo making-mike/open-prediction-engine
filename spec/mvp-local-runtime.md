@@ -17,16 +17,53 @@ python3 scripts/ope.py pilot-summary-intake --section rules
 python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary
 python3 scripts/ope.py prediction-campaign plan
+python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization
 python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign start --view campaign-creation
+python3 scripts/ope.py prediction-campaign start --view forecast-schedule
 python3 scripts/ope.py prediction-campaign start --view missed-run-policy
+python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-09-18T00:00:00Z --count 100 --full-materialization --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
 python3 scripts/ope.py prediction-campaign forecast-write --write-local --output-format jsonl
+python3 scripts/ope.py prediction-campaign resolve
+python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers
+python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local
+python3 scripts/ope.py prediction-campaign resolve --attempt-case blocked_duplicate --execute-resolvers
+python3 scripts/ope.py prediction-campaign doctor
 python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state
+python3 scripts/ope.py prediction-campaign append-ready
+python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary
+python3 scripts/ope.py prediction-campaign append-ready --from-local --run-id predictionrun-1301
+python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local
+python3 scripts/ope.py prediction-campaign calibration-status
+python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view readback
+python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot
+python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle
+python3 scripts/ope.py prediction-campaign method-update-gate
+python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view decision
+python3 scripts/ope.py prediction-campaign method-update-plan
+python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command
+python3 scripts/ope.py prediction-campaign apply-method-update
+python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view summary
+python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --view summary
+python3 scripts/ope.py prediction-campaign explain
+python3 scripts/ope.py prediction-campaign pilot-runbook
+python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke
+python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status
+python3 scripts/ope.py prediction-campaign pilot-readiness
+python3 scripts/ope.py prediction-campaign pilot-readiness --view commands
+python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001
+python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001 --from-local-ledger
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z
 ```
 
 2. Run the private setup summary for the checked local-file path:
@@ -63,7 +100,12 @@ python3 scripts/ope.py resolution-runtime-reliability
 ## Machine Interfaces
 
 - CLI: `python3 scripts/ope.py` is the minimum local interface for checks, setup summaries, forecast runs, reads, resolution, scoring, corpus gates, and release manifests.
-- Agent envelope: `python3 scripts/ope.py agent-call` returns one schema-bound envelope with status, exit code, record binding, and payload.
+- Agent envelope: `python3 scripts/ope.py agent-call` returns one schema-bound envelope with status, exit code, record binding, and payload, including campaign plan/status/health/append-readiness/calibration-status readbacks.
+- Campaign method-update gate: `python3 scripts/ope.py prediction-campaign method-update-gate` reports method-update readiness without changing probabilities, methods, method weights, registries, or campaign state.
+- Campaign method-update plan: `python3 scripts/ope.py prediction-campaign method-update-plan` reports approval, guarded command, rollback, and preflight requirements without mutating state.
+- Campaign method-update action: `python3 scripts/ope.py prediction-campaign apply-method-update` and `rollback-method-update` expose guarded local method-binding writes only when `--write-local` is explicit.
+- Helsinki pilot runbook: `python3 scripts/ope.py prediction-campaign pilot-runbook` reports the 100-run local pilot sequence, 3-run smoke path, operator status commands, success criteria, abort criteria, and baseline-first method boundary.
+- Helsinki pilot readiness: `python3 scripts/ope.py prediction-campaign pilot-readiness` reports checked launch prerequisites, manual operator confirmations, launch commands, and blocked actions before any effectful local pilot write.
 - MCP stdio: `python3 scripts/ope.py mcp-stdio` exposes the local dispatcher as MCP tools for MCP-capable hosts.
 
 ## Blocked Paths

@@ -23,10 +23,11 @@ def main() -> None:
     require(surface["surfaceStatus"] == "local_mvp_adoption_ready", "adoption surface status drifted")
     require(surface["bindings"]["forecastId"] == "forecast-1102", "adoption surface should bind forecast-1102")
     require(surface["bindings"]["forecastBundleId"] == "forecastbundle-forecast-1102", "adoption bundle binding drifted")
-    require([item["order"] for item in quickstart] == [1, 2, 3, 4, 5, 6], "quickstart order drifted")
+    require([item["order"] for item in quickstart] == [1, 2, 3, 4, 5, 6, 7], "quickstart order drifted")
     require(quickstart[0]["command"] == "python3 --version", "quickstart should start with Python setup")
     require(quickstart[1]["command"] == "python3 scripts/run_checks.py", "quickstart should include canonical checks")
     require("local-source-runtime" in quickstart[2]["command"], "quickstart should expose local source runtime")
+    require("prediction-campaign explain" in quickstart[-1]["command"], "quickstart should evaluate recurring campaigns")
 
     require([item["phase"] for item in scenario["steps"]] == SCENARIO_PHASES, "scenario phase order drifted")
     require(scenario["expectedFinalState"]["forecastCardAvailable"] is True, "scenario should reach forecast card")
@@ -47,12 +48,16 @@ def main() -> None:
     require(any("fixture" in item.lower() for item in notes["fixture_only"]), "fixture-only notes should be explicit")
     require(any("No hosted service" in item for item in notes["non_goal"]), "non-goal notes should block hosted service claims")
     require(any("No generated language-specific" in item for item in notes["non_goal"]), "non-goal notes should defer generated types")
+    require(
+        any("hosted scheduling" in item for item in notes["non_goal"]),
+        "non-goal notes should defer hosted scheduling before recurring setup evidence",
+    )
 
     decision = surface["typeGenerationDecision"]
     require(decision["decisionStatus"] == "defer_until_adoption_evidence", "type-generation decision drifted")
     require(decision["generatedTypesIncluded"] is False, "generated runtime types should not be included yet")
 
-    require(summary["quickstartStepCount"] == 6, "quickstart count drifted")
+    require(summary["quickstartStepCount"] == 7, "quickstart count drifted")
     require(summary["scenarioStepCount"] == 6, "scenario count drifted")
     require(summary["integrationCount"] == 3, "integration count drifted")
     require(summary["qualityClaimAllowed"] is False, "summary must block quality claims")

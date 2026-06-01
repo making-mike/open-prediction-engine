@@ -1,0 +1,225 @@
+{
+  "helsinkiTrafficPilotReadinessId": "helsinkireadiness-001",
+  "generatedAt": "2026-06-01T00:00:00Z",
+  "readinessStatus": "checked_ready_for_operator_launch",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "helsinkiTrafficDisturbancePilotRunbookId": "helsinkipilotrunbook-001",
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201"
+  },
+  "readinessSummary": {
+    "targetRunCount": 100,
+    "miniSmokeRunCount": 3,
+    "plannedRunCount": 100,
+    "duplicateConflictCount": 0,
+    "bestAvailableMethodId": "transitmethod-100",
+    "bestAvailableMethodName": "baseline historical transit-delay frequency",
+    "localWorkspace": ".ope/live/prediction-campaigns/predictioncampaign-001",
+    "launchCommand": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
+    "nextRecommendedCommand": "python3 scripts/ope.py prediction-campaign pilot-readiness --view commands",
+    "explicitWriteRequired": true,
+    "manualLivePrerequisitesRequired": true,
+    "normalChecksMutateState": false,
+    "qualityClaimAllowed": false
+  },
+  "readinessChecks": [
+    {
+      "checkId": "helsinkireadinesscheck-001",
+      "checkKey": "runbook_ready",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The checked operations runbook is available.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view summary"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-002",
+      "checkKey": "mini_smoke_ready",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The 3-run smoke schedule exposes ready, waiting, and missed-run policies.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-003",
+      "checkKey": "full_materialization_unique",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The full 100-run materialization has no duplicate campaign date/window keys.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-004",
+      "checkKey": "baseline_method_default",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The launch path stays on the baseline method until an approved prospective method update exists.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign method-update-gate"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-005",
+      "checkKey": "forecast_before_close_policy",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The runner policy marks missed windows instead of backfilling forecasts after forecastCloseAt.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign start --view missed-run-policy"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-006",
+      "checkKey": "operator_source_confirmation",
+      "checkStatus": "manual_required",
+      "blocksLaunch": false,
+      "message": "The operator must confirm opt-in source availability and outcome evidence location before effectful writes.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign pilot-readiness --view manual"
+    }
+  ],
+  "manualPrerequisites": [
+    {
+      "prerequisiteId": "helsinkireadinessprereq-001",
+      "prerequisiteKey": "terminal_supervision",
+      "requirement": "Run the pilot from a supervised terminal session with logs retained outside the generated fixture tree.",
+      "confirmation": "Operator confirms foreground terminal supervision before using --write-local.",
+      "whyManual": "Normal checks cannot supervise a long-running local terminal."
+    },
+    {
+      "prerequisiteId": "helsinkireadinessprereq-002",
+      "prerequisiteKey": "clock_sync",
+      "requirement": "Confirm the local clock is synchronized before each forecast creation window.",
+      "confirmation": "Operator confirms the clock before running the launch command.",
+      "whyManual": "Clock drift is environmental and cannot be asserted by committed fixtures."
+    },
+    {
+      "prerequisiteId": "helsinkireadinessprereq-003",
+      "prerequisiteKey": "source_availability",
+      "requirement": "Confirm opt-in weather and HSL transit outcome sources are available under the declared source policy.",
+      "confirmation": "Operator confirms source availability and policy fit before effectful forecast or resolution commands.",
+      "whyManual": "Normal checks stay offline and do not fetch live source data."
+    },
+    {
+      "prerequisiteId": "helsinkireadinessprereq-004",
+      "prerequisiteKey": "outcome_path",
+      "requirement": "Prepare the approved outcome CSV/JSON path for each due resolution.",
+      "confirmation": "Operator confirms outcome files contain only resolution-time evidence.",
+      "whyManual": "Outcome evidence is local pilot data and must not be committed as a generated fixture."
+    },
+    {
+      "prerequisiteId": "helsinkireadinessprereq-005",
+      "prerequisiteKey": "workspace_capacity",
+      "requirement": "Confirm the ignored .ope/live workspace has enough local disk headroom for 100 run states and logs.",
+      "confirmation": "Operator confirms capacity before starting the 100-run pilot.",
+      "whyManual": "Disk capacity is machine-local and not stable enough for committed fixture assertions."
+    }
+  ],
+  "launchCommands": [
+    {
+      "commandId": "helsinkireadinesscommand-001",
+      "commandKey": "readiness",
+      "command": "python3 scripts/ope.py prediction-campaign pilot-readiness",
+      "expected": "Read the launch gate and manual prerequisites.",
+      "mutatesState": false,
+      "requiresOperatorSupervision": false
+    },
+    {
+      "commandId": "helsinkireadinesscommand-002",
+      "commandKey": "mini_smoke",
+      "command": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+      "expected": "Run one non-mutating 3-run smoke tick.",
+      "mutatesState": false,
+      "requiresOperatorSupervision": false
+    },
+    {
+      "commandId": "helsinkireadinesscommand-003",
+      "commandKey": "full_plan",
+      "command": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization",
+      "expected": "Inspect all 100 planned runs and duplicate keys.",
+      "mutatesState": false,
+      "requiresOperatorSupervision": false
+    },
+    {
+      "commandId": "helsinkireadinesscommand-004",
+      "commandKey": "launch_first_write",
+      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
+      "expected": "Create exactly one next-due local campaign forecast before forecastCloseAt.",
+      "mutatesState": true,
+      "requiresOperatorSupervision": true
+    },
+    {
+      "commandId": "helsinkireadinesscommand-005",
+      "commandKey": "operator_status",
+      "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
+      "expected": "Inspect next forecast, next resolution, append readiness, ledger counts, and calibration progress.",
+      "mutatesState": false,
+      "requiresOperatorSupervision": false
+    }
+  ],
+  "blockedActions": [
+    {
+      "blockedActionId": "helsinkireadinessblocked-001",
+      "actionKey": "normal_check_launch",
+      "reason": "Normal checks must remain offline and non-mutating.",
+      "safeAlternative": "Use pilot-readiness and mini-smoke readbacks during normal checks."
+    },
+    {
+      "blockedActionId": "helsinkireadinessblocked-002",
+      "actionKey": "forecast_after_close",
+      "reason": "Backfilled forecasts would violate forecast-before-outcome evidence boundaries.",
+      "safeAlternative": "Record the run as missed and continue with the next eligible service window."
+    },
+    {
+      "blockedActionId": "helsinkireadinessblocked-003",
+      "actionKey": "method_switch_without_gate",
+      "reason": "Changing methods before calibration, benchmark, approval, and rollback gates would rewrite the pilot premise.",
+      "safeAlternative": "Continue with transitmethod-100 until apply-method-update is explicitly approved and written prospectively."
+    },
+    {
+      "blockedActionId": "helsinkireadinessblocked-004",
+      "actionKey": "ledger_append_without_resolution",
+      "reason": "Unresolved or unscored rows cannot be comparable evidence.",
+      "safeAlternative": "Resolve and score the local run first, or append only an explicit exclusion audit row."
+    }
+  ],
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign pilot-readiness",
+    "acceptedViews": [
+      "readiness",
+      "checks",
+      "manual",
+      "commands",
+      "blocked",
+      "summary",
+      "boundary"
+    ],
+    "defaultView": "readiness",
+    "capturedStdoutMode": "json",
+    "normalChecksWriteLiveState": false
+  },
+  "summary": {
+    "pilotReadinessImplemented": true,
+    "checkedPrerequisitesPassed": true,
+    "manualPrerequisitesRequired": true,
+    "launchCommandReady": true,
+    "miniSmokeFirst": true,
+    "bestAvailableMethodId": "transitmethod-100",
+    "qualityClaimAllowed": false,
+    "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl"
+  },
+  "executionBoundary": {
+    "readOnlyReadback": true,
+    "normalChecksWriteLiveState": false,
+    "normalChecksUseLiveNetwork": false,
+    "startsPilot": false,
+    "createsForecastArtifacts": false,
+    "executesResolvers": false,
+    "appendsLedgerRows": false,
+    "changesForecastMethod": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This readiness readback does not start the pilot; effectful launch still requires --write-local.",
+    "Manual source, clock, terminal, outcome-path, and workspace-capacity confirmations remain outside normal checks.",
+    "The pilot starts on transitmethod-100; method updates remain prospective and approval-gated."
+  ]
+}

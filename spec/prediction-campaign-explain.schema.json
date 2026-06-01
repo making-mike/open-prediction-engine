@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-explain.schema.json",
+  "title": "Prediction Campaign Explain",
+  "description": "Checked readback that explains a repeating prediction campaign's next forecast, next resolution, evidence threshold, and claim boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignExplainId",
+    "generatedAt",
+    "explainStatus",
+    "domain",
+    "bindings",
+    "campaignSnapshot",
+    "explanationPrompts",
+    "workflowRunbook",
+    "pilotTaskCard",
+    "agentReadbacks",
+    "sanitizedErrorEnvelopes",
+    "claimBoundary",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignExplainId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "explainStatus": {
+      "type": "string",
+      "enum": ["checked_pilot_readback"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "campaignSnapshot": { "$ref": "#/$defs/campaignSnapshot" },
+    "explanationPrompts": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/explanationPrompt" }
+    },
+    "workflowRunbook": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/workflowStep" }
+    },
+    "pilotTaskCard": { "$ref": "#/$defs/pilotTaskCard" },
+    "agentReadbacks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/agentReadback" }
+    },
+    "sanitizedErrorEnvelopes": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/errorEnvelope" }
+    },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 760
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignDoctorId",
+        "predictionCampaignEvidenceLedgerId",
+        "predictionCampaignCalibrationStatusId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "forecastId",
+        "questionId",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignDoctorId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignCalibrationStatusId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "campaignSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recurrenceCaseKey",
+        "plannedRunCount",
+        "nextForecastRunId",
+        "nextQuestionId",
+        "nextForecastId",
+        "nextForecastCreateAt",
+        "nextForecastCloseAt",
+        "nextResolutionEligibleAt",
+        "currentCampaignHealth",
+        "appendReadiness",
+        "resolvedComparableSampleSize",
+        "minimumComparableResolvedForCalibration",
+        "postCalibrationAction",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed"
+      ],
+      "properties": {
+        "recurrenceCaseKey": { "$ref": "#/$defs/boundedString" },
+        "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "nextForecastRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextQuestionId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextForecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "nextForecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "nextResolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "currentCampaignHealth": { "$ref": "#/$defs/boundedString" },
+        "appendReadiness": { "$ref": "#/$defs/boundedString" },
+        "resolvedComparableSampleSize": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 1 },
+        "postCalibrationAction": { "$ref": "#/$defs/boundedString" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "explanationPrompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["promptId", "promptKey", "question", "answer", "sourceCommand"],
+      "properties": {
+        "promptId": { "$ref": "common.schema.json#/$defs/id" },
+        "promptKey": { "$ref": "#/$defs/boundedString" },
+        "question": { "$ref": "#/$defs/boundedString" },
+        "answer": { "$ref": "#/$defs/boundedString" },
+        "sourceCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "stepKey",
+        "command",
+        "expectedReadback",
+        "mutatesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "claimBoundary"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "stepKey": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedReadback": { "$ref": "#/$defs/boundedString" },
+        "mutatesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "pilotTaskCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "scenarioKey",
+        "title",
+        "command",
+        "expectedOutcomeClass",
+        "measures",
+        "moderatorPrompt"
+      ],
+      "properties": {
+        "taskId": { "$ref": "common.schema.json#/$defs/id" },
+        "scenarioKey": {
+          "type": "string",
+          "enum": ["repeating_prediction_campaign"]
+        },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedOutcomeClass": { "$ref": "#/$defs/boundedString" },
+        "measures": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 9,
+          "items": {
+            "type": "string",
+            "enum": [
+              "task_completion",
+              "claim_boundary_comprehension",
+              "trust_for_agent_decision_support",
+              "runtime_gap_classification"
+            ]
+          }
+        },
+        "moderatorPrompt": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "agentReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackId", "operation", "cliCommand", "statusPath", "agentAdapterOperation", "implementedInAgentAdapter"],
+      "properties": {
+        "readbackId": { "$ref": "common.schema.json#/$defs/id" },
+        "operation": {
+          "type": "string",
+          "enum": ["plan", "status", "health", "append_readiness", "calibration_status"]
+        },
+        "cliCommand": { "$ref": "#/$defs/boundedString" },
+        "statusPath": { "$ref": "#/$defs/boundedString" },
+        "agentAdapterOperation": { "$ref": "#/$defs/boundedString" },
+        "implementedInAgentAdapter": { "type": "boolean" }
+      }
+    },
+    "errorEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "errorEnvelopeId",
+        "errorCode",
+        "message",
+        "sanitized",
+        "storesPrivateData",
+        "safeToShowCaller",
+        "nextAction"
+      ],
+      "properties": {
+        "errorEnvelopeId": { "$ref": "common.schema.json#/$defs/id" },
+        "errorCode": {
+          "type": "string",
+          "enum": [
+            "invalid_interval",
+            "missed_forecast_close",
+            "unavailable_live_source",
+            "duplicate_campaign",
+            "unsafe_source_policy",
+            "unsupported_post_calibration_action"
+          ]
+        },
+        "message": { "$ref": "#/$defs/boundedString" },
+        "sanitized": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "safeToShowCaller": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "hostedRuntimeAllowed",
+        "methodUpdateAllowed",
+        "whyBlocked"
+      ],
+      "properties": {
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "methodUpdateAllowed": { "type": "boolean" },
+        "whyBlocked": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignExplainImplemented",
+        "pilotTaskCardReady",
+        "runbookReady",
+        "agentAdapterReadbacksImplemented",
+        "sanitizedErrorEnvelopeExamples",
+        "usageTraceEventsSpecified",
+        "writesCampaignState",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "campaignExplainImplemented": { "type": "boolean" },
+        "pilotTaskCardReady": { "type": "boolean" },
+        "runbookReady": { "type": "boolean" },
+        "agentAdapterReadbacksImplemented": { "type": "boolean" },
+        "sanitizedErrorEnvelopeExamples": { "type": "integer", "minimum": 0 },
+        "usageTraceEventsSpecified": { "type": "integer", "minimum": 0 },
+        "writesCampaignState": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyReadback",
+        "createsForecastArtifacts",
+        "writesCampaignState",
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "appendsCorpusEvidence",
+        "updatesCalibration",
+        "changesForecastMethod",
+        "startsHostedRuntime",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readOnlyReadback": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "updatesCalibration": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

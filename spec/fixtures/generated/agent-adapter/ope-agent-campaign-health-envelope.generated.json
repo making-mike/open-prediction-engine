@@ -1,0 +1,228 @@
+{
+  "agentEnvelopeId": "agentenvelope-054",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "campaign_health",
+  "adapterRequest": {
+    "operation": "campaign_health",
+    "inputRecordType": "prediction_campaign_doctor",
+    "inputRef": "predictioncampaigndoctor-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read campaign health and queue guidance without executing recovery actions."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": "sourcepolicy-1201",
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "actionable_due_run",
+    "approvalStatus": "not_required",
+    "dataMode": "fixture",
+    "planStatus": "campaign_health_readback",
+    "executionMode": "read_only",
+    "sourceMode": "weather-transit-delays",
+    "forecastStatus": "waiting_resolution",
+    "resolutionStatus": "due_run_requires_checked_outcome_source",
+    "scoreStatus": "not_scored",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "predictionCampaignDoctorId": "predictioncampaigndoctor-001",
+    "generatedAt": "2026-05-31T01:00:00Z",
+    "doctorStatus": "actionable_due_run",
+    "domain": "weather-transit-delays",
+    "bindings": {
+      "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+      "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+      "predictionCampaignForecastWriteId": "predictioncampaignforecastwrite-001",
+      "predictionCampaignResolutionAttemptId": "predictioncampaignresolutionattempt-1301",
+      "predictionCampaignResumeId": "predictioncampaignresume-001",
+      "resolutionJobRegistryId": "resolutionjobregistry-001",
+      "campaignId": "predictioncampaign-001",
+      "cycleId": "predictioncycle-001",
+      "runId": "predictionrun-1301",
+      "forecastId": "forecast-1301",
+      "questionId": "question-1301",
+      "sourcePolicyId": "sourcepolicy-1201"
+    },
+    "health": {
+      "campaignHealth": "due_run_requires_checked_outcome_source",
+      "now": "2026-06-11T07:15:00Z",
+      "plannedRunCount": 4,
+      "checkedRunCount": 1,
+      "dueRunCount": 1,
+      "waitingRunCount": 0,
+      "failedRunCount": 0,
+      "blockedRunCount": 1,
+      "appendReadyRunCount": 0,
+      "qualityClaimAllowed": false
+    },
+    "queueReadbacks": [
+      {
+        "queueName": "due_runs",
+        "queueStatus": "actionable",
+        "runCount": 1,
+        "runIds": [
+          "predictionrun-1301"
+        ],
+        "nextAction": "Inspect the checked campaign resolution attempt, then execute with --write-local after attaching an outcome source.",
+        "commands": [
+          "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
+          "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301",
+          "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers",
+          "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local"
+        ],
+        "mutatesState": false,
+        "executesResolver": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "appendsCorpusEvidence": false
+      },
+      {
+        "queueName": "waiting_runs",
+        "queueStatus": "empty",
+        "runCount": 0,
+        "runIds": [],
+        "nextAction": "Wait until resolutionEligibleAt before attempting campaign resolution.",
+        "commands": [
+          "python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001"
+        ],
+        "mutatesState": false,
+        "executesResolver": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "appendsCorpusEvidence": false
+      },
+      {
+        "queueName": "failed_runs",
+        "queueStatus": "empty",
+        "runCount": 0,
+        "runIds": [],
+        "nextAction": "No checked campaign failures are present in the fixture readback.",
+        "commands": [
+          "python3 scripts/ope.py prediction-campaign resume --view actions"
+        ],
+        "mutatesState": false,
+        "executesResolver": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "appendsCorpusEvidence": false
+      },
+      {
+        "queueName": "blocked_runs",
+        "queueStatus": "blocked",
+        "runCount": 1,
+        "runIds": [
+          "predictionrun-1301"
+        ],
+        "nextAction": "Attach a checked campaign outcome source before resolution or scoring can proceed.",
+        "commands": [
+          "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers"
+        ],
+        "mutatesState": false,
+        "executesResolver": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "appendsCorpusEvidence": false
+      },
+      {
+        "queueName": "append_ready_runs",
+        "queueStatus": "empty",
+        "runCount": 0,
+        "runIds": [],
+        "nextAction": "No campaign run has both resolution and scoring records ready for ledger append.",
+        "commands": [
+          "python3 scripts/ope.py transit-corpus-growth"
+        ],
+        "mutatesState": false,
+        "executesResolver": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "appendsCorpusEvidence": false
+      }
+    ],
+    "duplicateProtection": {
+      "duplicatePolicy": "Block a candidate when the duplicate key already exists for the campaign cycle.",
+      "duplicateKeysInspected": 4,
+      "duplicateRiskCount": 0,
+      "duplicateResolutionBlocked": true,
+      "duplicateScoringBlocked": true,
+      "priorEvidenceOverwriteAllowed": false,
+      "alreadyTerminalRunHandling": "Already resolved, annulled, canceled, failed, missed, or blocked duplicate runs must be read, not resolved or scored again."
+    },
+    "recoveryPosture": {
+      "resumeReadbackAvailable": true,
+      "effectfulResumeImplemented": false,
+      "interruptedRunStateFound": false,
+      "safeReadbackCommands": [
+        "python3 scripts/ope.py prediction-campaign resume",
+        "python3 scripts/ope.py prediction-campaign status",
+        "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001"
+      ],
+      "nextRecoveryAction": "Run prediction-campaign resume --from-local after an interrupted local campaign write to inspect ignored campaign state."
+    },
+    "commandSurface": {
+      "command": "python3 scripts/ope.py prediction-campaign doctor",
+      "acceptedFlags": [
+        "--now",
+        "--output-format",
+        "--view"
+      ],
+      "defaultMode": "checked_campaign_health_readback",
+      "capturedStdoutMode": "json",
+      "normalChecksMutateState": false
+    },
+    "summary": {
+      "doctorReadbackImplemented": true,
+      "agentQueueReadbacksImplemented": true,
+      "dueRunReadbackImplemented": true,
+      "failedRunReadbackImplemented": true,
+      "appendReadyReadbackImplemented": true,
+      "effectfulResolutionImplemented": true,
+      "effectfulResumeImplemented": false,
+      "nextRecommendedCommand": "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local"
+    },
+    "executionBoundary": {
+      "readsIgnoredLiveState": false,
+      "writesIgnoredLiveState": false,
+      "writesCampaignState": false,
+      "fetchesLiveData": false,
+      "executesResolvers": false,
+      "createsResolutionArtifacts": false,
+      "createsScoringRecords": false,
+      "appendsCorpusEvidence": false,
+      "overwritesPriorEvidence": false,
+      "qualityClaimAllowed": false
+    },
+    "warnings": [
+      "This doctor readback is generated from checked fixtures and does not inspect ignored live campaign state.",
+      "Due campaign runs route to checked resolver commands; normal doctor readbacks do not create resolution or scoring records.",
+      "Append-ready campaign evidence remains empty until a run has checked resolution and scoring records.",
+      "Duplicate resolution, duplicate scoring, and prior-evidence overwrite remain blocked by this readback."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "This doctor readback is generated from checked fixtures and does not inspect ignored live campaign state.",
+    "Due campaign runs route to checked resolver commands; normal doctor readbacks do not create resolution or scoring records.",
+    "Append-ready campaign evidence remains empty until a run has checked resolution and scoring records.",
+    "Duplicate resolution, duplicate scoring, and prior-evidence overwrite remain blocked by this readback.",
+    "The adapter envelope is read-only and cannot execute recovery or resolver commands."
+  ]
+}

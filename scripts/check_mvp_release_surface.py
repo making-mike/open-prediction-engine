@@ -59,7 +59,7 @@ def main() -> None:
     require(local_runtime["summary"]["qualityClaimAllowed"] is False, "local source runtime must keep quality claims blocked")
 
     adoption = run_cli("developer-adoption")
-    require(adoption["summary"]["quickstartStepCount"] == 6, "developer adoption quickstart count drifted")
+    require(adoption["summary"]["quickstartStepCount"] == 7, "developer adoption quickstart count drifted")
     require(adoption["bindings"]["forecastId"] == "forecast-1102", "developer adoption forecast binding drifted")
     require(adoption["summary"]["qualityClaimAllowed"] is False, "developer adoption must keep quality claims blocked")
     require(adoption["summary"]["generatedTypesIncluded"] is False, "developer adoption should defer generated runtime types")
@@ -71,7 +71,7 @@ def main() -> None:
     require(pilot_evidence["summary"]["qualityClaimAllowed"] is False, "pilot evidence must keep quality claims blocked")
 
     pilot_session = run_cli("pilot-session-packet")
-    require(pilot_session["collectionSummary"]["taskCardCount"] == 5, "pilot session packet should expose five task cards")
+    require(pilot_session["collectionSummary"]["taskCardCount"] == 6, "pilot session packet should expose six task cards")
     require(pilot_session["collectionSummary"]["realSessionsRecorded"] == 0, "pilot session packet must not record real sessions")
     require(pilot_session["collectionSummary"]["ledgerSubmissionReady"] is True, "pilot session packet should be ledger-submission ready")
     require(pilot_session["collectionSummary"]["expansionEvidenceReady"] is False, "pilot session packet must not unblock expansion")
@@ -102,7 +102,7 @@ def main() -> None:
     campaign_runner = run_cli("prediction-campaign", "start")
     require(campaign_runner["runnerStatus"] == "dry_run_ready_non_executing", "prediction campaign runner status drifted")
     require(campaign_runner["summary"]["terminalRunnerSurfaceImplemented"] is True, "prediction campaign runner surface should be implemented")
-    require(campaign_runner["summary"]["forecastCreationImplemented"] is False, "prediction campaign runner must not create forecasts yet")
+    require(campaign_runner["summary"]["forecastCreationImplemented"] is True, "prediction campaign runner should expose explicit local forecast creation")
     require(campaign_runner["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign runner must not write live state")
 
     campaign_forecast_creation = run_cli("prediction-campaign", "forecast-create")
@@ -131,12 +131,68 @@ def main() -> None:
     require(campaign_forecast_write["summary"]["effectfulLocalWriteImplemented"] is False, "prediction campaign forecast write should remain a plan")
     require(campaign_forecast_write["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign forecast write must not mutate state")
 
+    campaign_resolution_attempt = run_cli("prediction-campaign", "resolve")
+    require(campaign_resolution_attempt["attemptStatus"] == "dry_run_due_ready", "prediction campaign resolution attempt status drifted")
+    require(campaign_resolution_attempt["bindings"]["forecastId"] == "forecast-1301", "prediction campaign resolution attempt binding drifted")
+    require(campaign_resolution_attempt["attemptResult"]["failureCategory"] == "none", "dry-run resolution attempt should not fail")
+    require(campaign_resolution_attempt["executionBoundary"]["executesResolvers"] is False, "resolution attempt must not execute resolvers")
+
+    campaign_resolution_execute = run_cli("prediction-campaign", "resolve", "--run-id", "predictionrun-1301", "--execute-resolvers")
+    require(campaign_resolution_execute["attemptStatus"] == "blocked_missing_outcome_source", "explicit resolution attempt status drifted")
+    require(campaign_resolution_execute["attemptResult"]["failureCategory"] == "source_unavailable", "explicit resolution attempt failure category drifted")
+    require(campaign_resolution_execute["summary"]["resolverExecutionImplemented"] is True, "resolver execution runtime should be implemented")
+    require(campaign_resolution_execute["duplicateSafety"]["duplicateScoringBlocked"] is True, "resolution attempt must block duplicate scoring")
+
+    campaign_resolution_source_ready = run_cli(
+        "prediction-campaign",
+        "resolve",
+        "--run-id",
+        "predictionrun-1301",
+        "--execute-resolvers",
+        "--outcome-csv",
+        ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv",
+    )
+    require(
+        campaign_resolution_source_ready["attemptStatus"] == "dry_run_execute_ready",
+        "declared outcome source should make resolution ready for explicit write",
+    )
+    require(
+        campaign_resolution_source_ready["summary"]["resolutionArtifactsCreated"] is False,
+        "source-ready resolution readback must remain non-mutating",
+    )
+
+    campaign_resolution_duplicate = run_cli("prediction-campaign", "resolve", "--attempt-case", "blocked_duplicate", "--execute-resolvers")
+    require(campaign_resolution_duplicate["attemptStatus"] == "blocked_duplicate_run", "duplicate resolution attempt status drifted")
+    require(campaign_resolution_duplicate["attemptResult"]["failureCategory"] == "duplicate_blocked", "duplicate resolution failure category drifted")
+    require(campaign_resolution_duplicate["attemptResult"]["scoringRecordsCreated"] is False, "duplicate resolution attempt must not create scoring")
+
+    campaign_doctor = run_cli("prediction-campaign", "doctor")
+    require(campaign_doctor["doctorStatus"] == "actionable_due_run", "prediction campaign doctor status drifted")
+    require(campaign_doctor["health"]["dueRunCount"] == 1, "prediction campaign doctor should expose one due run")
+    require(campaign_doctor["health"]["blockedRunCount"] == 1, "prediction campaign doctor should expose one blocked resolver path")
+    require(campaign_doctor["duplicateProtection"]["priorEvidenceOverwriteAllowed"] is False, "doctor must block prior evidence overwrite")
+    require(campaign_doctor["summary"]["appendReadyReadbackImplemented"] is True, "doctor should expose append-ready readback")
+    require(campaign_doctor["executionBoundary"]["writesIgnoredLiveState"] is False, "doctor must not write ignored state")
+
     campaign_resume = run_cli("prediction-campaign", "resume")
     require(campaign_resume["resumeStatus"] == "checked_resume_plan_non_mutating", "prediction campaign resume status drifted")
     require(campaign_resume["bindings"]["forecastId"] == "forecast-1301", "prediction campaign resume forecast binding drifted")
     require(campaign_resume["observedState"]["priorEvidenceOverwriteAllowed"] is False, "prediction campaign resume must not allow overwrite")
     require(campaign_resume["summary"]["effectfulResumeImplemented"] is False, "prediction campaign resume must remain non-effectful")
     require(campaign_resume["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign resume must not write live state")
+
+    campaign_resume_state = run_cli("prediction-campaign", "resume", "--resume-case", "interrupted_after_forecast_write", "--view", "state")
+    require(campaign_resume_state["sourceKind"] == "simulated_interrupted_campaign_state", "interrupted resume source kind drifted")
+    require(campaign_resume_state["localRunStateCount"] == 1, "interrupted resume should find one run state")
+    require(campaign_resume_state["priorEvidenceOverwriteAllowed"] is False, "interrupted resume must not allow overwrite")
+
+    campaign_append_ready = run_cli("prediction-campaign", "append-ready")
+    require(campaign_append_ready["ledgerStatus"] == "checked_exclusion_append_ready", "append-ready ledger status drifted")
+    require(campaign_append_ready["summary"]["excludedRowCount"] == 1, "append-ready should expose one exclusion row")
+    require(campaign_append_ready["executionBoundary"]["writesIgnoredLiveState"] is False, "append-ready must stay dry-run")
+    campaign_append_summary = run_cli("prediction-campaign", "append", "--ledger-case", "comparable_scored", "--view", "summary")
+    require(campaign_append_summary["comparableRowCount"] == 1, "append dry-run should expose one comparable row")
+    require(campaign_append_summary["writesIgnoredLiveState"] is False, "append dry-run must not write ignored state")
 
     adapter = run_cli("private-setup-orchestrator", "--case", "source_adapter_output_accepted")
     require(adapter["orchestratorStatus"] == "ready_for_forecast_execution", "accepted adapter path should stop before forecast execution")
@@ -196,6 +252,20 @@ def main() -> None:
     require(campaign_jobs[0]["agentAction"]["recommendedAction"] == "wait", "campaign resolution job should tell agents to wait")
     require(campaign_resolution_jobs["executionBoundary"]["registryExecutesResolvers"] is False, "campaign resolution jobs must not execute resolvers")
 
+    due_campaign_resolution_jobs = run_cli(
+        "resolution-jobs",
+        "--campaign",
+        "predictioncampaign-001",
+        "--now",
+        "2026-06-11T07:15:00Z",
+    )
+    due_campaign_jobs = [
+        job for job in due_campaign_resolution_jobs["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    require(due_campaign_jobs[0]["agentAction"]["recommendedAction"] == "call_campaign_resolver_attempt", "due campaign job should route to resolver attempt")
+    require(due_campaign_resolution_jobs["executionBoundary"]["registryExecutesResolvers"] is False, "due campaign resolution jobs must not execute resolvers")
+
     campaign_scheduler = run_cli("resolution-scheduler", "--campaign", "predictioncampaign-001")
     campaign_actions = [
         action for action in campaign_scheduler["ticks"][0]["actions"]
@@ -207,10 +277,126 @@ def main() -> None:
     require(campaign_scheduler["executionMode"] == "dry_run", "campaign scheduler fixture should stay dry-run")
     require(campaign_scheduler["executionBoundary"]["hostedSchedulerCreated"] is False, "campaign scheduler must not create hosted schedulers")
 
+    due_campaign_scheduler = run_cli(
+        "resolution-scheduler",
+        "--campaign",
+        "predictioncampaign-001",
+        "--now",
+        "2026-06-11T07:15:00Z",
+    )
+    due_campaign_actions = [
+        action for action in due_campaign_scheduler["ticks"][0]["actions"]
+        if action["statePath"].startswith(".ope/live/prediction-campaigns/")
+    ]
+    require(due_campaign_actions[0]["schedulerAction"] == "campaign_resolver_attempt_ready", "due campaign scheduler action drifted")
+    require(due_campaign_scheduler["ticks"][0]["resolverSummary"]["ranResolver"] is False, "due campaign scheduler must not run resolvers")
+
     track_gate = run_cli("transit-track-record-gate")
     require(track_gate["claimBoundary"]["qualityClaimAllowed"] is False, "MVP transit gate must block quality claims")
     require(track_gate["claimBoundary"]["calibrationClaimAllowed"] is False, "MVP transit gate must block calibration claims")
     require(track_gate["calibrationGate"]["summaryGenerated"] is False, "MVP transit gate must not generate calibration below threshold")
+    campaign_track_gate = run_cli("transit-track-record-gate", "--campaign", "predictioncampaign-001")
+    require(campaign_track_gate["campaignLedger"]["included"] is True, "MVP transit gate should include explicit campaign ledger")
+    require(campaign_track_gate["sampleSummary"]["excludedSampleSize"] == 7, "campaign ledger should add excluded audit rows")
+    campaign_comparable_gate = run_cli(
+        "transit-track-record-gate",
+        "--campaign",
+        "predictioncampaign-001",
+        "--ledger-case",
+        "comparable_scored",
+    )
+    require(campaign_comparable_gate["sampleSummary"]["resolvedComparableSampleSize"] == 2, "campaign comparable ledger should add sample")
+    require(campaign_comparable_gate["claimBoundary"]["calibrationClaimAllowed"] is False, "campaign ledger must not unlock calibration below threshold")
+    campaign_calibration = run_cli("prediction-campaign", "calibration-status")
+    require(
+        campaign_calibration["calibrationStatus"] == "not_enough_resolved_comparable_outcomes",
+        "campaign calibration default should stay below threshold",
+    )
+    require(campaign_calibration["calibrationReadback"]["summaryGenerated"] is False, "below-threshold calibration must not summarize")
+    campaign_restart = run_cli(
+        "prediction-campaign",
+        "calibration-status",
+        "--calibration-case",
+        "post_calibration_restart",
+        "--view",
+        "cycle",
+    )
+    require(campaign_restart["postCalibrationAction"] == "pause_then_resume_after", "post-calibration restart action drifted")
+    require(campaign_restart["writesCampaignState"] is False, "post-calibration restart readback must not mutate state")
+    campaign_method_gate = run_cli("prediction-campaign", "method-update-gate")
+    require(
+        campaign_method_gate["gateStatus"] == "blocked_insufficient_calibration_evidence",
+        "campaign method-update gate default should stay below threshold",
+    )
+    require(
+        campaign_method_gate["decision"]["effectfulUpdateAllowedNow"] is False,
+        "campaign method-update gate must not allow effectful updates",
+    )
+    require(
+        campaign_method_gate["executionBoundary"]["changesForecastMethod"] is False,
+        "campaign method-update gate must not change forecast methods",
+    )
+    campaign_method_plan = run_cli("prediction-campaign", "method-update-plan")
+    require(
+        campaign_method_plan["planStatus"] == "blocked_by_method_update_gate",
+        "campaign method-update plan default should be gate-blocked",
+    )
+    require(
+        campaign_method_plan["decision"]["effectfulUpdateAllowedNow"] is False,
+        "campaign method-update plan must not allow effectful updates",
+    )
+    require(
+        campaign_method_plan["futureEffectfulCommand"]["implementedNow"] is True,
+        "campaign method-update plan should expose the guarded effectful command",
+    )
+    campaign_method_apply = run_cli("prediction-campaign", "apply-method-update")
+    require(
+        campaign_method_apply["actionStatus"] == "blocked_by_method_update_plan",
+        "campaign method-update apply default should be plan-blocked",
+    )
+    require(
+        campaign_method_apply["executionBoundary"]["writesMethodBinding"] is False,
+        "campaign method-update apply dry run must not write method bindings",
+    )
+    campaign_explain = run_cli("prediction-campaign", "explain")
+    require(campaign_explain["predictionCampaignExplainId"] == "predictioncampaignexplain-001", "campaign explain ID drifted")
+    require(campaign_explain["campaignSnapshot"]["nextForecastId"] == "forecast-1301", "campaign explain next forecast drifted")
+    require(campaign_explain["claimBoundary"]["qualityClaimAllowed"] is False, "campaign explain must block quality claims")
+    require(campaign_explain["summary"]["agentAdapterReadbacksImplemented"] is True, "campaign explain should expose adapter readbacks")
+    campaign_pilot_runbook = run_cli("prediction-campaign", "pilot-runbook")
+    require(
+        campaign_pilot_runbook["pilotScope"]["targetRunCount"] == 100,
+        "campaign pilot runbook target count drifted",
+    )
+    require(
+        campaign_pilot_runbook["miniCampaignSmoke"]["runCount"] == 3,
+        "campaign pilot runbook mini smoke count drifted",
+    )
+    require(
+        campaign_pilot_runbook["summary"]["bestAvailableMethodId"] == "transitmethod-100",
+        "campaign pilot runbook best method drifted",
+    )
+    require(
+        campaign_pilot_runbook["executionBoundary"]["normalChecksWriteLiveState"] is False,
+        "campaign pilot runbook must not write local state",
+    )
+    campaign_pilot_readiness = run_cli("prediction-campaign", "pilot-readiness")
+    require(
+        campaign_pilot_readiness["readinessStatus"] == "checked_ready_for_operator_launch",
+        "campaign pilot readiness status drifted",
+    )
+    require(
+        campaign_pilot_readiness["summary"]["checkedPrerequisitesPassed"] is True,
+        "campaign pilot readiness checked prerequisites should pass",
+    )
+    require(
+        campaign_pilot_readiness["executionBoundary"]["startsPilot"] is False,
+        "campaign pilot readiness must not start the pilot",
+    )
+    campaign_agent = run_cli("agent-call", "--operation", "campaign_status")
+    require(campaign_agent["status"] == "ok", "campaign status agent-call should return ok")
+    require(campaign_agent["payload"]["campaignSnapshot"]["nextForecastId"] == "forecast-1301", "campaign status agent-call next forecast drifted")
+    require(campaign_agent["payload"]["executionBoundary"]["createsForecastArtifacts"] is False, "campaign status agent-call must not create artifacts")
 
     print("checked MVP release surface")
 

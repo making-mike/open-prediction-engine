@@ -3,7 +3,14 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
+
 from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+from prediction_campaign_forecast_write_runtime import (
+    PredictionCampaignForecastWriteError,
+    ensure_safe_local_path,
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -11,7 +18,63 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def require_raises(callable_obj, message: str) -> None:
+    try:
+        callable_obj()
+    except PredictionCampaignForecastWriteError:
+        return
+    raise AssertionError(message)
+
+
+def check_safe_local_path_guards() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        workspace = Path(temp_dir) / "workspace"
+        state_root = workspace / ".ope" / "live" / "prediction-campaigns"
+        state_root.mkdir(parents=True)
+        outside = Path(temp_dir) / "outside"
+        outside.mkdir()
+
+        safe_value = ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json"
+        safe_path = ensure_safe_local_path(safe_value, workspace_root=workspace)
+        require(safe_path == workspace / safe_value, "safe local campaign path should stay under workspace root")
+
+        require_raises(
+            lambda: ensure_safe_local_path("/tmp/forecast-1301.json", workspace_root=workspace),
+            "absolute paths should be rejected",
+        )
+        require_raises(
+            lambda: ensure_safe_local_path(".ope/live/prediction-campaigns/../forecast-1301.json", workspace_root=workspace),
+            "parent traversal should be rejected",
+        )
+
+        symlink_child = state_root / "escape-child"
+        symlink_child.symlink_to(outside, target_is_directory=True)
+        require_raises(
+            lambda: ensure_safe_local_path(
+                ".ope/live/prediction-campaigns/escape-child/forecast-1301.json",
+                workspace_root=workspace,
+            ),
+            "symlinked child paths outside campaign state root should be rejected",
+        )
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        workspace = Path(temp_dir) / "workspace"
+        live_root = workspace / ".ope" / "live"
+        live_root.mkdir(parents=True)
+        outside = Path(temp_dir) / "outside-root"
+        outside.mkdir()
+        (live_root / "prediction-campaigns").symlink_to(outside, target_is_directory=True)
+        require_raises(
+            lambda: ensure_safe_local_path(
+                ".ope/live/prediction-campaigns/forecast-1301.json",
+                workspace_root=workspace,
+            ),
+            "symlinked campaign state root outside the workspace should be rejected",
+        )
+
+
 def main() -> None:
+    check_safe_local_path_guards()
     plan = build_prediction_campaign_forecast_write()
     bindings = plan["bindings"]
     target = plan["targetState"]

@@ -17,10 +17,12 @@ def main() -> None:
     track = gate["trackRecordSummary"]
     calibration = gate["calibrationGate"]
     coverage = gate["coverageSummary"]["horizonWindowCoverage"]
+    campaign_ledger = gate["campaignLedger"]
     boundary = gate["claimBoundary"]
     read_surface = gate["readSurface"]
 
     require(gate["gateMode"] == "checked_fixture_gate", "gate should be a checked fixture read model")
+    require(campaign_ledger["included"] is False, "default gate should not include campaign ledger rows")
     require(samples["resolvedComparableSampleSize"] == 1, "gate should expose one comparable resolved run")
     require(samples["scoredSampleSize"] == 1, "gate should expose one scored run")
     require(samples["excludedSampleSize"] == 6, "gate should expose six excluded runs")
@@ -80,6 +82,38 @@ def main() -> None:
     )
     require(not read_surface["fetchesLiveData"], "gate must not fetch live data")
     require(not read_surface["storesCredentials"], "gate must not store credentials")
+
+    campaign_gate = build_gate(campaign="predictioncampaign-001")
+    campaign_samples = campaign_gate["sampleSummary"]
+    campaign_coverage = campaign_gate["coverageSummary"]["horizonWindowCoverage"]
+    campaign_ledger = campaign_gate["campaignLedger"]
+    require(
+        campaign_gate["gateMode"] == "checked_fixture_plus_campaign_ledger",
+        "campaign gate should declare explicit campaign-ledger mode",
+    )
+    require(campaign_ledger["included"] is True, "campaign gate should include campaign ledger rows")
+    require(campaign_ledger["excludedRowCount"] == 1, "campaign gate should include one excluded campaign row")
+    require(
+        campaign_samples["resolvedComparableSampleSize"] == 1,
+        "excluded-only campaign ledger must not increase comparable sample size",
+    )
+    require(campaign_samples["excludedSampleSize"] == 7, "campaign gate should include campaign exclusion rows")
+    require(
+        campaign_coverage["excludedServiceDates"].count("2026-06-11") == 2,
+        "campaign gate should include campaign excluded service date",
+    )
+
+    comparable_campaign_gate = build_gate(campaign="predictioncampaign-001", ledger_case="comparable_scored")
+    comparable_samples = comparable_campaign_gate["sampleSummary"]
+    comparable_track = comparable_campaign_gate["trackRecordSummary"]
+    comparable_ledger = comparable_campaign_gate["campaignLedger"]
+    require(comparable_ledger["comparableRowCount"] == 1, "comparable campaign gate should include one campaign row")
+    require(comparable_samples["resolvedComparableSampleSize"] == 2, "comparable campaign gate should increase sample size")
+    require(len(comparable_track["scoreRows"]) == 2, "comparable campaign gate should include campaign score row")
+    require(
+        comparable_campaign_gate["claimBoundary"]["calibrationClaimAllowed"] is False,
+        "campaign ledger below threshold must not unlock calibration claims",
+    )
     print("checked transit baseline track-record gate")
 
 

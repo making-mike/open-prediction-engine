@@ -1,0 +1,468 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-evidence-ledger.schema.json",
+  "title": "Prediction Campaign Evidence Ledger",
+  "description": "Checked append-only local campaign evidence ledger readback.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignEvidenceLedgerId",
+    "generatedAt",
+    "ledgerStatus",
+    "ledgerMode",
+    "domain",
+    "bindings",
+    "ledgerPolicy",
+    "appendCandidate",
+    "appendChecks",
+    "comparableRows",
+    "excludedRows",
+    "duplicateProtection",
+    "localWriteResult",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "ledgerStatus": {
+      "type": "string",
+      "enum": [
+        "checked_exclusion_append_ready",
+        "checked_comparable_append_ready",
+        "local_exclusion_append_ready",
+        "local_comparable_append_ready",
+        "local_append_written",
+        "local_append_already_present"
+      ]
+    },
+    "ledgerMode": {
+      "type": "string",
+      "enum": ["append-ready", "append"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "ledgerPolicy": { "$ref": "#/$defs/ledgerPolicy" },
+    "appendCandidate": { "$ref": "#/$defs/appendCandidate" },
+    "appendChecks": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/appendCheck" }
+    },
+    "comparableRows": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/ledgerRow" }
+    },
+    "excludedRows": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/ledgerRow" }
+    },
+    "duplicateProtection": { "$ref": "#/$defs/duplicateProtection" },
+    "localWriteResult": { "$ref": "#/$defs/localWriteResult" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "nullableNumber": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "null" }
+      ]
+    },
+    "nullableInteger": {
+      "oneOf": [
+        { "type": "integer" },
+        { "type": "null" }
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignResolutionAttemptId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "questionId",
+        "forecastId",
+        "resolutionId",
+        "scoringReportId",
+        "sourcePolicyId",
+        "ledgerPath"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignResolutionAttemptId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionId": { "$ref": "common.schema.json#/$defs/id" },
+        "scoringReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "ledgerPath": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "ledgerPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appendOnly",
+        "comparableRowsSeparated",
+        "excludedRowsSeparated",
+        "explicitWriteRequired",
+        "normalChecksWriteLiveState",
+        "minimumObservationCount",
+        "minimumComparableResolvedForTrackRecord",
+        "minimumComparableResolvedForCalibration",
+        "excludedReasonCodes",
+        "noPostCloseEvidenceLeakage"
+      ],
+      "properties": {
+        "appendOnly": { "type": "boolean" },
+        "comparableRowsSeparated": { "type": "boolean" },
+        "excludedRowsSeparated": { "type": "boolean" },
+        "explicitWriteRequired": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "minimumObservationCount": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForTrackRecord": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 0 },
+        "excludedReasonCodes": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "enum": [
+              "missed_close",
+              "missing_outcome",
+              "low_coverage",
+              "feed_unavailable",
+              "invalid_window",
+              "leakage_risk",
+              "ambiguous",
+              "annulled",
+              "non_comparable"
+            ]
+          }
+        },
+        "noPostCloseEvidenceLeakage": { "type": "boolean" }
+      }
+    },
+    "appendCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateStatus",
+        "ledgerCase",
+        "runId",
+        "forecastId",
+        "comparableAppendReady",
+        "exclusionAppendReady",
+        "nextAction"
+      ],
+      "properties": {
+        "candidateStatus": {
+          "type": "string",
+          "enum": ["comparable_append_ready", "exclusion_audit_append_ready"]
+        },
+        "ledgerCase": {
+          "type": "string",
+          "enum": ["excluded_missing_outcome", "comparable_scored", "local_resolved_state"]
+        },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "comparableAppendReady": { "type": "boolean" },
+        "exclusionAppendReady": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "appendCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "checkName",
+        "checkStatus",
+        "requiredForComparableAppend",
+        "blocksComparableAppend",
+        "message"
+      ],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkName": {
+          "type": "string",
+          "enum": [
+            "forecast_before_close",
+            "source_policy_binding",
+            "no_post_close_evidence_leakage",
+            "resolution_after_horizon",
+            "score_binding",
+            "observation_coverage",
+            "comparable_scope",
+            "duplicate_ledger_row"
+          ]
+        },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredForComparableAppend": { "type": "boolean" },
+        "blocksComparableAppend": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "ledgerRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rowId",
+        "rowKind",
+        "rowKey",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "questionId",
+        "forecastId",
+        "evidencePacketId",
+        "historyId",
+        "serviceDate",
+        "serviceWindow",
+        "sourcePolicyId",
+        "runStatus",
+        "runStatePath",
+        "forecastArtifactPath",
+        "evidencePacketPath",
+        "forecastHistoryPath",
+        "resolutionRecordPath",
+        "scoringReportPath",
+        "forecastedAt",
+        "forecastCloseAt",
+        "horizonStartsAt",
+        "horizonEndsAt",
+        "resolutionEligibleAt",
+        "forecastProbability",
+        "baselineProbability",
+        "resolutionRecordId",
+        "scoringReportId",
+        "outcomeLabel",
+        "outcomeValue",
+        "observationCount",
+        "lateCount",
+        "lateRatio",
+        "scoreStatus",
+        "primaryScore",
+        "baselineScore",
+        "exclusionReason",
+        "appendReadiness"
+      ],
+      "properties": {
+        "rowId": { "$ref": "common.schema.json#/$defs/id" },
+        "rowKind": {
+          "type": "string",
+          "enum": ["comparable", "excluded"]
+        },
+        "rowKey": { "$ref": "#/$defs/boundedString" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidencePacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "historyId": { "$ref": "common.schema.json#/$defs/id" },
+        "serviceDate": { "type": "string", "format": "date" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "runStatus": { "$ref": "#/$defs/boundedString" },
+        "runStatePath": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "evidencePacketPath": { "$ref": "#/$defs/boundedString" },
+        "forecastHistoryPath": { "$ref": "#/$defs/boundedString" },
+        "resolutionRecordPath": { "$ref": "#/$defs/boundedString" },
+        "scoringReportPath": { "$ref": "#/$defs/boundedString" },
+        "forecastedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonStartsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "horizonEndsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "resolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "baselineProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "resolutionRecordId": { "$ref": "#/$defs/boundedString" },
+        "scoringReportId": { "$ref": "#/$defs/boundedString" },
+        "outcomeLabel": { "$ref": "#/$defs/boundedString" },
+        "outcomeValue": { "$ref": "#/$defs/nullableInteger" },
+        "observationCount": { "type": "integer", "minimum": 0 },
+        "lateCount": { "type": "integer", "minimum": 0 },
+        "lateRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scoreStatus": { "$ref": "#/$defs/boundedString" },
+        "primaryScore": { "$ref": "#/$defs/nullableNumber" },
+        "baselineScore": { "$ref": "#/$defs/nullableNumber" },
+        "exclusionReason": {
+          "type": "string",
+          "enum": [
+            "none",
+            "missed_close",
+            "missing_outcome",
+            "low_coverage",
+            "feed_unavailable",
+            "invalid_window",
+            "leakage_risk",
+            "ambiguous",
+            "annulled",
+            "non_comparable"
+          ]
+        },
+        "appendReadiness": {
+          "type": "string",
+          "enum": ["comparable_append_ready", "exclusion_audit_append_ready"]
+        }
+      }
+    },
+    "duplicateProtection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rowKeysInspected",
+        "idempotencyRule",
+        "duplicateAppendBlocked",
+        "priorEvidenceOverwriteAllowed"
+      ],
+      "properties": {
+        "rowKeysInspected": { "type": "integer", "minimum": 0 },
+        "idempotencyRule": { "$ref": "#/$defs/boundedString" },
+        "duplicateAppendBlocked": { "type": "boolean" },
+        "priorEvidenceOverwriteAllowed": { "type": "boolean" }
+      }
+    },
+    "localWriteResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writeStatus",
+        "ledgerPath",
+        "appendedRowCount",
+        "alreadyPresentCount",
+        "writesIgnoredLiveState"
+      ],
+      "properties": {
+        "writeStatus": {
+          "type": "string",
+          "enum": ["not_requested", "local_append_written", "local_append_already_present"]
+        },
+        "ledgerPath": { "$ref": "#/$defs/boundedString" },
+        "appendedRowCount": { "type": "integer", "minimum": 0 },
+        "alreadyPresentCount": { "type": "integer", "minimum": 0 },
+        "writesIgnoredLiveState": { "type": "boolean" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitWriteFlagRequired",
+        "normalChecksWriteLiveState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteFlagRequired": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appendReadyCommandImplemented",
+        "appendCommandImplemented",
+        "localAppendImplemented",
+        "idempotentAppendImplemented",
+        "comparableAppendReady",
+        "exclusionAppendReady",
+        "comparableRowCount",
+        "excludedRowCount",
+        "writesIgnoredLiveState",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "appendReadyCommandImplemented": { "type": "boolean" },
+        "appendCommandImplemented": { "type": "boolean" },
+        "localAppendImplemented": { "type": "boolean" },
+        "idempotentAppendImplemented": { "type": "boolean" },
+        "comparableAppendReady": { "type": "boolean" },
+        "exclusionAppendReady": { "type": "boolean" },
+        "comparableRowCount": { "type": "integer", "minimum": 0 },
+        "excludedRowCount": { "type": "integer", "minimum": 0 },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "overwritesPriorEvidence",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed"
+      ],
+      "properties": {
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "overwritesPriorEvidence": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

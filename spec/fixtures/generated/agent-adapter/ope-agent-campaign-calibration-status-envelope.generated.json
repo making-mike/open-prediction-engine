@@ -1,0 +1,153 @@
+{
+  "agentEnvelopeId": "agentenvelope-056",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "campaign_calibration_status",
+  "adapterRequest": {
+    "operation": "campaign_calibration_status",
+    "inputRecordType": "prediction_campaign_calibration_status",
+    "inputRef": "predictioncampaigncalibrationstatus-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read campaign calibration status without tuning probabilities or methods."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": null,
+    "forecastId": null,
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": "sourcepolicy-1201",
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "not_enough_resolved_comparable_outcomes",
+    "approvalStatus": "not_required",
+    "dataMode": "fixture",
+    "planStatus": "campaign_calibration_status",
+    "executionMode": "read_only",
+    "sourceMode": "weather-transit-delays",
+    "forecastStatus": "not_created",
+    "resolutionStatus": "not_enough_resolved_comparable_outcomes",
+    "scoreStatus": "scored",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "predictionCampaignCalibrationStatusId": "predictioncampaigncalibrationstatus-001",
+    "generatedAt": "2026-05-31T03:00:00Z",
+    "calibrationStatus": "not_enough_resolved_comparable_outcomes",
+    "calibrationCase": "below_threshold",
+    "domain": "weather-transit-delays",
+    "bindings": {
+      "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+      "repeatingPredictionSetupId": "repeatingpredictionsetup-001",
+      "transitBaselineTrackRecordGateId": "transitbaselinetrackrecordgate-001",
+      "campaignId": "predictioncampaign-001",
+      "cycleId": "predictioncycle-001",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "recurrenceCaseKey": "daily_100_run_transit_calibration"
+    },
+    "thresholdReadback": {
+      "resolvedComparableSampleSize": 1,
+      "scoredSampleSize": 1,
+      "excludedSampleSize": 7,
+      "minimumComparableResolvedForTrackRecord": 30,
+      "minimumComparableResolvedForCalibration": 100,
+      "maxExclusionRateForCalibrationClaim": 0.25,
+      "exclusionRate": 0.875,
+      "sourceOutcomeProvenanceComplete": true,
+      "campaignLedgerPath": ".ope/live/prediction-campaigns/predictioncampaign-001/evidence-ledger.json",
+      "trackRecordStatus": "not_enough_resolved_comparable_outcomes",
+      "calibrationStatus": "not_enough_resolved_comparable_outcomes",
+      "campaignLedgerIncluded": true,
+      "campaignLedgerCase": "excluded_missing_outcome"
+    },
+    "calibrationReadback": {
+      "summaryGenerated": false,
+      "reasonCode": "not_enough_resolved_comparable_outcomes",
+      "calibrationSummary": null,
+      "measurementOnly": true,
+      "automaticModelTuningAllowed": false,
+      "automaticMethodChangeAllowed": false
+    },
+    "pilotSummary": {
+      "implementationEvidence": "Campaign execution evidence exists only as local implementation evidence until appended rows are reviewed.",
+      "trackRecordEvidence": "Track-record sample threshold is not met for the selected campaign evidence.",
+      "calibrationEvidence": "Calibration evidence is blocked with status not_enough_resolved_comparable_outcomes.",
+      "qualityClaim": "Quality and calibration claims remain blocked."
+    },
+    "postCalibrationPolicy": {
+      "action": "stop",
+      "delay": "none",
+      "nextCycleRule": "Stop the setup after the declared calibration threshold is reached.",
+      "automaticMethodChangeAllowed": false
+    },
+    "cycleState": {
+      "cycleState": "collecting_evidence",
+      "thresholdReached": false,
+      "thresholdReachedAt": "none",
+      "postCalibrationAction": "continue_collecting_until_threshold",
+      "pauseUntil": "none",
+      "nextCycleId": "none",
+      "writesCampaignState": false
+    },
+    "commandSurface": {
+      "command": "python3 scripts/ope.py prediction-campaign calibration-status",
+      "acceptedFlags": [
+        "--campaign",
+        "--from-local-ledger",
+        "--calibration-case",
+        "--output-format",
+        "--view"
+      ],
+      "defaultMode": "checked_calibration_status_readback",
+      "capturedStdoutMode": "json",
+      "normalChecksMutateState": false
+    },
+    "summary": {
+      "calibrationStatusReadbackImplemented": true,
+      "calibrationSummaryGenerated": false,
+      "postCalibrationContinuationDecisionImplemented": true,
+      "methodUpdateImplemented": false,
+      "writesCampaignState": false,
+      "qualityClaimAllowed": false,
+      "calibrationClaimAllowed": false,
+      "recommendedNextAction": "Continue collecting comparable resolved outcomes."
+    },
+    "executionBoundary": {
+      "readsIgnoredLiveState": false,
+      "writesIgnoredLiveState": false,
+      "writesCampaignState": false,
+      "fetchesLiveData": false,
+      "executesResolvers": false,
+      "createsCalibrationSummaryBelowThreshold": false,
+      "updatesForecastProbabilities": false,
+      "changesForecastMethod": false,
+      "startsNextCycle": false
+    },
+    "warnings": [
+      "Calibration status is a readback and does not tune, retrain, or update forecast probabilities.",
+      "Normal checks do not read ignored local ledgers or mutate campaign cycle state.",
+      "Stronger method selection remains behind a later explicit method-update gate.",
+      "Comparable resolved sample size is below the declared calibration threshold."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Calibration status is a readback and does not tune, retrain, or update forecast probabilities.",
+    "Normal checks do not read ignored local ledgers or mutate campaign cycle state.",
+    "Stronger method selection remains behind a later explicit method-update gate.",
+    "Comparable resolved sample size is below the declared calibration threshold.",
+    "The adapter envelope is read-only and does not tune, retrain, or update probabilities."
+  ]
+}

@@ -123,7 +123,7 @@ For OPE, keep the reusable contract-first, security, review, commit, and decisio
 
 ## Development Commands
 
-The current project runtime is Python 3.12+ standard library. There is no required package install step and no third-party dependency.
+The current project runtime is Python 3.12+ standard library. There is no required package install step for normal checks and no third-party runtime dependency. Release readiness also runs dev-only static analysis with `ruff` and `mypy`; install them in an activated virtual environment for local release checks when the system Python is externally managed.
 
 Canonical setup check:
 
@@ -141,6 +141,7 @@ python3 scripts/ope.py check
 Canonical release-readiness command:
 
 ```bash
+python3 -m pip install "ruff>=0.8,<1" "mypy>=1.13,<2"
 python3 scripts/release_check.py
 python3 scripts/ope.py release-check
 ```

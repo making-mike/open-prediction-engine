@@ -15,6 +15,7 @@
     "campaign",
     "idNamespace",
     "planningWindow",
+    "materialization",
     "plannedRuns",
     "statusExamples",
     "progress",
@@ -35,10 +36,11 @@
     "campaign": { "$ref": "#/$defs/campaign" },
     "idNamespace": { "$ref": "#/$defs/idNamespace" },
     "planningWindow": { "$ref": "#/$defs/planningWindow" },
+    "materialization": { "$ref": "#/$defs/materialization" },
     "plannedRuns": {
       "type": "array",
       "minItems": 1,
-      "maxItems": 12,
+      "maxItems": 100,
       "items": { "$ref": "#/$defs/plannedRun" }
     },
     "statusExamples": {
@@ -209,6 +211,64 @@
         }
       }
     },
+    "materialization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "materializationMode",
+        "targetRunCount",
+        "materializedRunCount",
+        "boundedPreview",
+        "boundedPreviewMaxCount",
+        "fullMaterializationRequested",
+        "fullMaterializationAvailable",
+        "firstRunId",
+        "nextRunId",
+        "finalRunId",
+        "firstServiceDate",
+        "finalServiceDate",
+        "duplicateKeyCount",
+        "duplicateConflictCount",
+        "duplicateAuditStatus",
+        "createsForecastArtifacts",
+        "writesCampaignState",
+        "normalChecksWriteLiveState",
+        "nextAction"
+      ],
+      "properties": {
+        "materializationMode": {
+          "type": "string",
+          "enum": ["bounded_preview", "full_100_run_pilot"]
+        },
+        "targetRunCount": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "materializedRunCount": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "boundedPreview": { "type": "boolean" },
+        "boundedPreviewMaxCount": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "fullMaterializationRequested": { "type": "boolean" },
+        "fullMaterializationAvailable": { "type": "boolean" },
+        "firstRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "finalRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "firstServiceDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "finalServiceDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "duplicateKeyCount": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "duplicateConflictCount": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "duplicateAuditStatus": {
+          "type": "string",
+          "enum": ["unique_duplicate_keys", "duplicate_conflicts"]
+        },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
     "plannedRun": {
       "type": "object",
       "additionalProperties": false,
@@ -306,8 +366,10 @@
       "required": [
         "campaignManifestImplemented",
         "dryRunPlannerImplemented",
+        "fullMaterializationImplemented",
         "runnerImplemented",
         "plannedRunCount",
+        "targetRunCount",
         "uniqueRunIdsMinted",
         "duplicatePreventionEnabled",
         "mutatesLiveState",
@@ -318,8 +380,10 @@
       "properties": {
         "campaignManifestImplemented": { "type": "boolean" },
         "dryRunPlannerImplemented": { "type": "boolean" },
+        "fullMaterializationImplemented": { "type": "boolean" },
         "runnerImplemented": { "type": "boolean" },
         "plannedRunCount": { "type": "integer", "minimum": 0 },
+        "targetRunCount": { "type": "integer", "minimum": 1, "maximum": 100 },
         "uniqueRunIdsMinted": { "type": "boolean" },
         "duplicatePreventionEnabled": { "type": "boolean" },
         "mutatesLiveState": { "type": "boolean" },

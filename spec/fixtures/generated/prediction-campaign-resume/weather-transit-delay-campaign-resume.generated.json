@@ -22,6 +22,8 @@
     "sourceKind": "checked_fixture_bundle",
     "liveStateRead": false,
     "ignoredLiveStateRequired": false,
+    "localRunStateCount": 0,
+    "createdRunIdempotencyKeyCount": 0,
     "forecastWritePlanReady": true,
     "forecastArtifactOpen": true,
     "campaignJobStatus": "pending_not_due",
@@ -65,7 +67,14 @@
       "checkStatus": "warn",
       "requiredBeforeResume": false,
       "blocksResume": false,
-      "message": "Effectful resume and campaign resolver execution are not implemented yet; this readback only tells agents the safe next action."
+      "message": "Effectful resume is not implemented; campaign resolver execution is available as a separate explicit resolve command."
+    },
+    {
+      "checkId": "campaignresumecheck-006",
+      "checkStatus": "pass",
+      "requiredBeforeResume": true,
+      "blocksResume": false,
+      "message": "Existing idempotency keys and run-state paths are preserved; resume must continue with a new due run instead of overwriting prior evidence."
     }
   ],
   "recoveryActions": [
@@ -113,9 +122,9 @@
   "commandSurface": {
     "command": "python3 scripts/ope.py prediction-campaign resume",
     "acceptedFlags": [
-      "--manifest-json",
-      "--run-id",
-      "--execute-resolvers",
+      "--from-local",
+      "--resume-case",
+      "--view",
       "--output-format"
     ],
     "defaultMode": "checked_resume_plan",
@@ -126,13 +135,14 @@
   },
   "summary": {
     "resumeReadbackImplemented": true,
+    "localResumeReadbackImplemented": false,
     "effectfulResumeImplemented": false,
     "safeToResumeReadback": true,
     "writesIgnoredLiveState": false,
     "executesResolvers": false,
     "qualityClaimAllowed": false,
-    "recommendedNextAction": "Implement guarded local campaign state writes before enabling effectful resume after interruption.",
-    "recommendedNextMilestone": "Milestone 94 effectful campaign resume and resolver attempts"
+    "recommendedNextAction": "Run prediction-campaign resume --from-local after an interrupted local campaign write to inspect ignored campaign state.",
+    "recommendedNextMilestone": "Milestone 106 campaign evidence ledger append runtime"
   },
   "executionBoundary": {
     "readOnlyResumePlan": true,
@@ -150,8 +160,8 @@
   },
   "warnings": [
     "This resume readback is checked and non-mutating; it does not continue a live loop.",
-    "Future effectful resume must preserve existing forecast evidence and idempotency keys before writing .ope/live state.",
-    "Campaign resolver execution remains separate and requires explicit future resolver support.",
+    "Resume preserves existing forecast evidence and idempotency keys before any later explicit local write.",
+    "Campaign resolver execution remains separate and requires explicit resolve --execute-resolvers --write-local.",
     "No scoring, corpus append, calibration, or quality claim is created by this readback."
   ]
 }

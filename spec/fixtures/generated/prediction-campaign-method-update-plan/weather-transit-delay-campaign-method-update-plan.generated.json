@@ -1,0 +1,104 @@
+{
+  "predictionCampaignMethodUpdatePlanId": "predictioncampaignmethodupdateplan-001",
+  "generatedAt": "2026-05-31T04:30:00Z",
+  "planCase": "gate_blocked",
+  "planStatus": "blocked_by_method_update_gate",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignMethodUpdateGateId": "predictioncampaignmethodupdategate-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "currentMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101"
+  },
+  "approvalArtifact": {
+    "approvalArtifactId": "methodupdateapproval-001",
+    "approvalStatus": "not_ready",
+    "requiredApprovals": [
+      "method_owner_approval",
+      "calibration_review_approval",
+      "source_policy_review"
+    ],
+    "receivedApprovals": [],
+    "approvedAt": "none",
+    "auditTrailStatus": "not_ready",
+    "missingItems": [
+      "method_update_gate_plan_ready"
+    ]
+  },
+  "futureEffectfulCommand": {
+    "commandShape": "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-id predictioncampaignmethodupdateplan-001 --method-update-plan-case plan_ready --write-local",
+    "dryRunPreviewCommand": "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view command",
+    "targetMethodId": "transitmethod-101",
+    "requiresWriteFlag": true,
+    "requiresApprovalArtifact": true,
+    "requiresRollbackRecord": true,
+    "implementedNow": true,
+    "normalChecksMayRun": false,
+    "writesMethodRegistry": false,
+    "writesCampaignState": true,
+    "updatesForecastProbabilities": false,
+    "changesForecastMethod": true
+  },
+  "rollbackRecord": {
+    "rollbackRecordId": "methodupdaterollback-001",
+    "rollbackStatus": "not_ready",
+    "rollbackCommandShape": "none",
+    "restoresMethodId": "transitmethod-100",
+    "preservesForecastHistory": true,
+    "requiresApprovalBeforeRollback": true,
+    "missingItems": [
+      "method_update_gate_plan_ready"
+    ]
+  },
+  "preflightChecks": {
+    "methodUpdateGateReady": false,
+    "approvalArtifactReady": false,
+    "rollbackRecordReady": false,
+    "auditTrailReady": false,
+    "effectfulCommandBlockedInNormalChecks": true,
+    "blockingReasons": [
+      "method_update_gate_not_plan_ready"
+    ]
+  },
+  "decision": {
+    "methodUpdatePlanReady": false,
+    "effectfulUpdateAllowedNow": false,
+    "automaticUpdateAllowed": false,
+    "futureEffectfulCommandRequired": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Keep collecting comparable evidence until the method-update gate is plan-ready."
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign method-update-plan",
+    "acceptedFlags": [
+      "--method-update-plan-case",
+      "--output-format",
+      "--view"
+    ],
+    "defaultMode": "checked_method_update_plan_readback",
+    "capturedStdoutMode": "json",
+    "normalChecksMutateState": false
+  },
+  "executionBoundary": {
+    "readsIgnoredLiveState": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesResolvers": false,
+    "createsForecastArtifacts": false,
+    "updatesForecastProbabilities": false,
+    "changesForecastMethod": false,
+    "changesMethodWeights": false,
+    "writesMethodRegistry": false,
+    "writesPlanArtifact": false,
+    "startsNextCycle": false
+  },
+  "warnings": [
+    "This plan is a readback and never applies a method update.",
+    "The effectful command is implemented only behind an explicit --write-local action command.",
+    "Rollback records must preserve forecast history and cannot rewrite prior forecasts."
+  ]
+}

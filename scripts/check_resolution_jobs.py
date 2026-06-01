@@ -19,6 +19,10 @@ class CampaignArgs(Args):
     campaign = "predictioncampaign-001"
 
 
+class DueCampaignArgs(CampaignArgs):
+    now = "2026-06-11T07:15:00Z"
+
+
 def main() -> None:
     registry = build_registry(Args())
     summary = registry["summary"]
@@ -67,6 +71,23 @@ def main() -> None:
         raise AssertionError("campaign resolution job should tell agents to wait")
     if campaign_job["claimBoundary"]["createsResolutionArtifacts"]:
         raise AssertionError("campaign resolution job must not create resolution artifacts")
+
+    due_campaign_registry = build_registry(DueCampaignArgs())
+    due_campaign_jobs = [
+        job for job in due_campaign_registry["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    if len(due_campaign_jobs) != 1:
+        raise AssertionError("due campaign registry should expose exactly one campaign job")
+    due_campaign_job = due_campaign_jobs[0]
+    if due_campaign_job["jobStatus"] != "pending_due":
+        raise AssertionError("due campaign resolution job should be pending due")
+    if due_campaign_job["agentAction"]["recommendedAction"] != "call_campaign_resolver_attempt":
+        raise AssertionError("due campaign job should route agents to the checked campaign resolver attempt")
+    if "prediction-campaign resolve --run-id predictionrun-1301" not in " ".join(due_campaign_job["agentAction"]["commands"]):
+        raise AssertionError("due campaign job should include the resolution-attempt command")
+    if due_campaign_job["claimBoundary"]["createsResolutionArtifacts"]:
+        raise AssertionError("due campaign resolution job must stay non-mutating")
     print("checked resolution jobs")
 
 

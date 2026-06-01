@@ -1,0 +1,406 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-method-update-action.schema.json",
+  "title": "Prediction Campaign Method Update Action",
+  "description": "Guarded apply and rollback command readback for campaign method updates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignMethodUpdateActionId",
+    "generatedAt",
+    "operation",
+    "actionStatus",
+    "domain",
+    "bindings",
+    "planReadback",
+    "approvalArtifact",
+    "rollbackRecord",
+    "candidateEvidence",
+    "methodBinding",
+    "preflightChecks",
+    "writePlan",
+    "writeResult",
+    "decision",
+    "commandSurface",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignMethodUpdateActionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "operation": {
+      "type": "string",
+      "enum": ["apply", "rollback"]
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": [
+        "blocked_by_method_update_plan",
+        "blocked_candidate_regression_risk",
+        "blocked_missing_approval_artifact",
+        "blocked_missing_rollback_record",
+        "blocked_plan_id_mismatch",
+        "ready_for_explicit_local_apply",
+        "ready_for_explicit_local_rollback",
+        "local_apply_completed",
+        "local_apply_already_present",
+        "local_rollback_completed",
+        "local_rollback_already_present"
+      ]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "planReadback": { "$ref": "#/$defs/planReadback" },
+    "approvalArtifact": { "$ref": "#/$defs/approvalArtifact" },
+    "rollbackRecord": { "$ref": "#/$defs/rollbackRecord" },
+    "candidateEvidence": { "$ref": "#/$defs/candidateEvidence" },
+    "methodBinding": { "$ref": "#/$defs/methodBinding" },
+    "preflightChecks": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/preflightCheck" }
+    },
+    "writePlan": { "$ref": "#/$defs/writePlan" },
+    "writeResult": { "$ref": "#/$defs/writeResult" },
+    "decision": { "$ref": "#/$defs/decision" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignMethodUpdatePlanId",
+        "predictionCampaignMethodUpdateGateId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId",
+        "currentMethodId",
+        "candidateMethodId",
+        "requestedMethodUpdatePlanId"
+      ],
+      "properties": {
+        "predictionCampaignMethodUpdatePlanId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignMethodUpdateGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "currentMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestedMethodUpdatePlanId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "planReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planCase",
+        "planStatus",
+        "gateStatus",
+        "methodUpdatePlanReady",
+        "blockingReasons"
+      ],
+      "properties": {
+        "planCase": {
+          "type": "string",
+          "enum": ["gate_blocked", "regression_risk", "approval_missing", "rollback_missing", "plan_ready"]
+        },
+        "planStatus": { "$ref": "#/$defs/boundedString" },
+        "gateStatus": { "$ref": "#/$defs/boundedString" },
+        "methodUpdatePlanReady": { "type": "boolean" },
+        "blockingReasons": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "approvalArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvalArtifactId",
+        "approvalStatus",
+        "requiredApprovals",
+        "receivedApprovals",
+        "approvedAt",
+        "auditTrailStatus",
+        "missingItems"
+      ],
+      "properties": {
+        "approvalArtifactId": { "$ref": "common.schema.json#/$defs/id" },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_ready", "missing", "approved"]
+        },
+        "requiredApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "receivedApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "approvedAt": { "$ref": "#/$defs/boundedString" },
+        "auditTrailStatus": { "$ref": "#/$defs/boundedString" },
+        "missingItems": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "rollbackRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollbackRecordId",
+        "rollbackStatus",
+        "rollbackCommandShape",
+        "restoresMethodId",
+        "preservesForecastHistory",
+        "requiresApprovalBeforeRollback",
+        "missingItems"
+      ],
+      "properties": {
+        "rollbackRecordId": { "$ref": "common.schema.json#/$defs/id" },
+        "rollbackStatus": {
+          "type": "string",
+          "enum": ["not_ready", "missing", "present"]
+        },
+        "rollbackCommandShape": { "$ref": "#/$defs/boundedString" },
+        "restoresMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "preservesForecastHistory": { "type": "boolean" },
+        "requiresApprovalBeforeRollback": { "type": "boolean" },
+        "missingItems": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "candidateEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateBenchmarkStatus",
+        "candidateBaselineLift",
+        "cleanAntiLeakageEvidence",
+        "comparableEvidenceReady",
+        "approvalStatus",
+        "evidenceSupportsCandidate"
+      ],
+      "properties": {
+        "candidateBenchmarkStatus": { "$ref": "#/$defs/boundedString" },
+        "candidateBaselineLift": { "type": "number" },
+        "cleanAntiLeakageEvidence": { "type": "boolean" },
+        "comparableEvidenceReady": { "type": "boolean" },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_requested", "missing", "approved"]
+        },
+        "evidenceSupportsCandidate": { "type": "boolean" }
+      }
+    },
+    "methodBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentMethodId",
+        "candidateMethodId",
+        "targetMethodId",
+        "methodBindingPath",
+        "methodUpdateArtifactPath",
+        "rollbackArtifactPath",
+        "effectiveScope",
+        "runnerCanUseAfterWrite",
+        "normalChecksReadLocalBinding",
+        "priorForecastHistoryRewriteAllowed",
+        "priorForecastProbabilityRewriteAllowed"
+      ],
+      "properties": {
+        "currentMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodBindingPath": { "$ref": "#/$defs/boundedString" },
+        "methodUpdateArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "rollbackArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "effectiveScope": { "$ref": "#/$defs/boundedString" },
+        "runnerCanUseAfterWrite": { "type": "boolean" },
+        "normalChecksReadLocalBinding": { "type": "boolean" },
+        "priorForecastHistoryRewriteAllowed": { "type": "boolean" },
+        "priorForecastProbabilityRewriteAllowed": { "type": "boolean" }
+      }
+    },
+    "preflightCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "checkStatus", "requiredBeforeWrite", "blocksWrite", "message"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredBeforeWrite": { "type": "boolean" },
+        "blocksWrite": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "writePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignStatePath",
+        "methodUpdateDirectory",
+        "requiresWriteLocal",
+        "writeLocalRequested",
+        "minimumComparableResolvedForApply",
+        "idempotent",
+        "normalChecksWriteLocal",
+        "preservesForecastHistory"
+      ],
+      "properties": {
+        "campaignStatePath": { "$ref": "#/$defs/boundedString" },
+        "methodUpdateDirectory": { "$ref": "#/$defs/boundedString" },
+        "requiresWriteLocal": { "type": "boolean" },
+        "writeLocalRequested": { "type": "boolean" },
+        "minimumComparableResolvedForApply": { "type": "integer", "minimum": 1 },
+        "idempotent": { "type": "boolean" },
+        "normalChecksWriteLocal": { "type": "boolean" },
+        "preservesForecastHistory": { "type": "boolean" }
+      }
+    },
+    "writeResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writeStatus",
+        "artifactWrites",
+        "stateWrites",
+        "newFileWriteCount",
+        "alreadyPresentCount",
+        "sanitizedDiagnostics"
+      ],
+      "properties": {
+        "writeStatus": {
+          "type": "string",
+          "enum": [
+            "not_run",
+            "local_apply_completed",
+            "local_apply_already_present",
+            "local_rollback_completed",
+            "local_rollback_already_present"
+          ]
+        },
+        "artifactWrites": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/writeRow" }
+        },
+        "stateWrites": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/writeRow" }
+        },
+        "newFileWriteCount": { "type": "integer", "minimum": 0 },
+        "alreadyPresentCount": { "type": "integer", "minimum": 0 },
+        "sanitizedDiagnostics": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "writeRow": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["targetPath", "writeStatus"],
+      "properties": {
+        "recordType": { "$ref": "#/$defs/boundedString" },
+        "stateType": { "$ref": "#/$defs/boundedString" },
+        "targetPath": { "$ref": "#/$defs/boundedString" },
+        "writeStatus": {
+          "type": "string",
+          "enum": ["written", "updated", "already_present"]
+        },
+        "contentHash": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localWriteEligible",
+        "effectfulUpdateAllowedNow",
+        "automaticUpdateAllowed",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "localWriteEligible": { "type": "boolean" },
+        "effectfulUpdateAllowedNow": { "type": "boolean" },
+        "automaticUpdateAllowed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitWriteFlagRequired",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteFlagRequired": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsForecastArtifacts",
+        "updatesForecastProbabilities",
+        "changesForecastMethod",
+        "changesMethodWeights",
+        "writesMethodRegistry",
+        "writesMethodBinding",
+        "rewritesPriorForecastHistories",
+        "startsNextCycle",
+        "normalChecksMutateState",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "updatesForecastProbabilities": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "changesMethodWeights": { "type": "boolean" },
+        "writesMethodRegistry": { "type": "boolean" },
+        "writesMethodBinding": { "type": "boolean" },
+        "rewritesPriorForecastHistories": { "type": "boolean" },
+        "startsNextCycle": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

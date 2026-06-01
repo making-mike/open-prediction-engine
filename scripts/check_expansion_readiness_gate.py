@@ -61,11 +61,20 @@ def main() -> None:
         "track-record evidence must be below threshold",
     )
     require(evidence["approved local-folder source runtime"]["status"] == "met", "local runtime evidence should be met")
+    require(
+        evidence["repeating prediction campaign explain"]["status"] == "met",
+        "recurring prediction setup evidence should be met",
+    )
+    require(
+        "nextForecastId=forecast-1301" in evidence["repeating prediction campaign explain"]["observedValue"],
+        "recurring prediction evidence should expose the next forecast",
+    )
 
     require(criteria["local MVP adoption"]["ready"] is True, "local MVP adoption criterion should be ready")
     require(criteria["real pilot evidence"]["ready"] is False, "real pilot evidence should not be ready")
     require(criteria["public transit track record"]["ready"] is False, "transit track record should not be ready")
     require(criteria["generated type evidence"]["ready"] is False, "generated type evidence should not be ready")
+    require(criteria["recurring prediction setup"]["ready"] is True, "recurring prediction setup should be locally evaluated")
 
     require(summary["readyOptionCount"] == 0, "ready option count must remain zero")
     require(summary["blockedOptionCount"] == 5, "blocked option count drifted")

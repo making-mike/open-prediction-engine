@@ -309,8 +309,28 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "prediction-campaign-forecast-creation.schema.json"
     if name.endswith("campaign-forecast-write.generated.json"):
         return spec_root / "prediction-campaign-forecast-write.schema.json"
+    if name.endswith("campaign-resolution-attempt.generated.json"):
+        return spec_root / "prediction-campaign-resolution-attempt.schema.json"
+    if name.endswith("campaign-doctor.generated.json"):
+        return spec_root / "prediction-campaign-doctor.schema.json"
     if name.endswith("campaign-resume.generated.json"):
         return spec_root / "prediction-campaign-resume.schema.json"
+    if name.endswith("campaign-evidence-ledger.generated.json"):
+        return spec_root / "prediction-campaign-evidence-ledger.schema.json"
+    if name.endswith("campaign-calibration-status.generated.json"):
+        return spec_root / "prediction-campaign-calibration-status.schema.json"
+    if name.endswith("campaign-method-update-gate.generated.json"):
+        return spec_root / "prediction-campaign-method-update-gate.schema.json"
+    if name.endswith("campaign-method-update-plan.generated.json"):
+        return spec_root / "prediction-campaign-method-update-plan.schema.json"
+    if name.endswith("campaign-method-update-action.generated.json"):
+        return spec_root / "prediction-campaign-method-update-action.schema.json"
+    if name.endswith("campaign-explain.generated.json"):
+        return spec_root / "prediction-campaign-explain.schema.json"
+    if name.endswith("helsinki-traffic-disturbance-pilot-runbook.generated.json"):
+        return spec_root / "helsinki-traffic-disturbance-pilot-runbook.schema.json"
+    if name.endswith("helsinki-traffic-pilot-readiness.generated.json"):
+        return spec_root / "helsinki-traffic-pilot-readiness.schema.json"
     if name.endswith("-setup-benchmark-gate.generated.json"):
         return spec_root / "setup-benchmark-gate.schema.json"
     if name.endswith("-setup-method-decision.generated.json"):

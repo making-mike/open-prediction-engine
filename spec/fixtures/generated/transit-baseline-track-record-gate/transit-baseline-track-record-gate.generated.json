@@ -10,6 +10,15 @@
     "policyId": "transitforwardruncorpuspolicy-001",
     "sourceCommand": "python3 scripts/ope.py transit-forward-run-corpus"
   },
+  "campaignLedger": {
+    "included": false,
+    "campaignId": "none",
+    "ledgerCase": "none",
+    "ledgerPath": "none",
+    "comparableRowCount": 0,
+    "excludedRowCount": 0,
+    "sourceCommand": "none"
+  },
   "coverageSummary": {
     "network": "hsl-surface",
     "geography": "helsinki",
@@ -86,6 +95,7 @@
   "readSurface": {
     "command": "python3 scripts/ope.py transit-track-record-gate",
     "sourceCommand": "python3 scripts/ope.py transit-forward-run-corpus",
+    "campaignLedgerCommand": "none",
     "createsForecastArtifacts": false,
     "createsResolutionArtifacts": false,
     "createsScoringRecords": false,
@@ -97,6 +107,7 @@
     "This gate reads the checked forward-run corpus and does not execute new forecasts, resolutions, or scores.",
     "One comparable scored transit run is implementation evidence, not a baseline track record or calibration claim.",
     "Calibration summaries are withheld until the declared comparable resolved sample threshold is met.",
-    "Excluded corpus rows are audit evidence and do not count toward resolved comparable samples."
+    "Excluded corpus rows are audit evidence and do not count toward resolved comparable samples.",
+    "Campaign ledgers are included only when --campaign is explicit; ignored local ledgers also require --from-local-ledger."
   ]
 }

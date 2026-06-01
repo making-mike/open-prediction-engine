@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-05-28
+Last updated: 2026-06-01
 
 ## Purpose
 
@@ -124,22 +124,36 @@ Done:
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 - Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
 - Prediction campaign manifests now expose a checked dry-run campaign plan with unique campaign, cycle, run, question, forecast, resolution, and scoring IDs, duplicate keys, ignored local-state path policy, and status readbacks through `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`.
-- Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, normalized campaign creation from flags or setup JSON, output modes, dry-run run decisions, a checked missed-run policy, and an explicit guarded `--write-local` creation tick for the ready run.
+- Prediction campaign runner readbacks now expose `python3 scripts/ope.py prediction-campaign start` command semantics, recurrence flags, normalized campaign creation from flags or setup JSON, a checked forecast scheduling plan, bounded foreground forecast ticks, runner-clock `--now` scheduling, output modes, dry-run run decisions, a checked missed-run policy, and explicit guarded `--write-local` creation for the next due run.
 - Prediction campaign forecast-creation handoffs now bind a ready runner decision to planned question, forecast, card, and bundle IDs through `python3 scripts/ope.py prediction-campaign forecast-create`, without creating artifacts or writing campaign state.
 - Prediction campaign forecast artifacts now materialize `forecast-1301` as an unresolved baseline-only checked fixture through `python3 scripts/ope.py prediction-campaign forecast-artifact`, using the standard question, evidence, artifact, and history contracts without live fetches, resolver execution, scoring, or campaign-state writes.
 - Prediction campaign forecast-write plans now bind the checked `forecast-1301` lifecycle records to ignored `.ope/live` target paths and required guards through `python3 scripts/ope.py prediction-campaign forecast-write`; explicit `--write-local` copies those records and minimal campaign/run state idempotently while normal checks stay non-mutating.
 - Prediction campaign resume readbacks now join the checked campaign manifest, forecast-write plan, open forecast, and campaign resolution queue through `python3 scripts/ope.py prediction-campaign resume`, without reading or writing ignored live state.
 - Resolution job registries now have a campaign-aware readback through `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait state without executing campaign resolvers or mutating campaign state.
 - Resolution scheduler readbacks now have a campaign-aware dry-run tick through `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`, adding the checked `forecast-1301` wait action without executing campaign resolvers or writing campaign state.
+- Prediction campaign resolution-attempt, doctor, evidence-ledger, calibration-status, and explain readbacks now give agents checked campaign due-resolution, health, append-readiness, threshold, pilot-task, error-envelope, and claim-boundary surfaces.
+- Campaign plan, status, health, append-readiness, and calibration-status now have checked transport-neutral agent adapter and local MCP readbacks.
+- Local usage trace, developer adoption, expansion-readiness, pilot-session packet, and MVP runtime surfaces now include recurring prediction campaign pilot evaluation before hosted scheduling or broader runtime promotion.
+- Prediction campaign method-update gate readbacks now block automatic method updates by default, expose approval-needed and approved-plan-ready cases, and keep probability updates, method changes, method weights, method registry writes, and campaign state mutation non-effectful.
+- Prediction campaign method-update plan readbacks now define the approval artifact, future effectful command shape, rollback record, and preflight checks needed after the method-update gate, without implementing or running the update.
+- Scoped static analysis now includes the campaign method-update, resolution-attempt, resolver runtime, doctor, evidence-ledger, calibration-status, and explain generator/checker surfaces, with type-shape fixes for imported transit and resolution helpers; the gate reports 26 checked source files.
+- Prediction campaign manifests now support explicit full 100-run Helsinki pilot materialization through `python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization`, while default previews remain bounded and non-mutating.
+- The prediction campaign foreground runner now accepts the full 100-run materialized Helsinki plan, selects the due run by runner clock, exposes `predictionrun-1400` scheduling for the final pilot window, and keeps explicit local forecast writes guarded behind `--write-local`.
+- Prediction campaign resolver execution now supports explicit local resolution/scoring writes through `prediction-campaign resolve --execute-resolvers --outcome-csv ... --write-local` or `--missing-outcome`, while keeping outcome rows resolution-only.
+- Campaign evidence ledger append now writes idempotent ignored local ledger rows from resolved campaign outcomes through `python3 scripts/ope.py prediction-campaign append --from-local --run-id ... --write-local`.
+- Campaign calibration status now reads explicit local campaign ledgers and reports below-threshold, threshold-met, and blocked calibration states through `python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger`.
+- Campaign method-update apply and rollback now exist as guarded explicit local commands that require plan-ready evidence and approvals before writing ignored method-binding/audit state.
+- The Helsinki 100-run pilot operations runbook now defines setup review, 3-run smoke, foreground runner operation, daily checks, resolution, append, calibration readback, recovery, success criteria, and abort criteria through `python3 scripts/ope.py prediction-campaign pilot-runbook`.
+- The Helsinki pilot launch-readiness gate now joins the runbook, mini-smoke path, full 100-run materialization, baseline method boundary, manual prerequisites, launch commands, and blocked actions through `python3 scripts/ope.py prediction-campaign pilot-readiness`.
 
 Not started:
 
 - Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
-- Effectful agent-facing repeating prediction runner that schedules future forecasts automatically beyond the current explicit one-tick checked forecast creation.
-- Local campaign runner execution for finite count, until-date, open-ended, threshold-targeted, and post-calibration restart policies.
-- Append-only local corpus mutation from resolved live campaign runs into a calibration evidence ledger.
+- Actual supervised 100-run Helsinki traffic-disturbance pilot execution and real outcome collection beyond the checked launch-readiness surfaces.
+- Long-running automatic future-window polling beyond bounded local foreground ticks.
+- Local campaign runner execution for automated resolver attempts, resume mutation, finite count completion, until-date stopping, threshold-targeted stopping, and post-calibration restart policies.
 - Runtime forecast execution that consumes newly provided ignored local live drafts beyond the checked promotion fixture.
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
 - OS scheduler installation.
@@ -150,20 +164,22 @@ Not started:
 
 In progress:
 
-- Milestone 93 terminal campaign runner: explicit one-tick local forecast creation, normalized flag/setup-JSON campaign input, and the missed-run skip policy exist; forecast scheduling across future recurrence windows remains in progress.
+- None. Milestone 110 completed the read-only Helsinki pilot launch-readiness gate.
 
 Next:
 
-1. Extend the current explicit `prediction-campaign start --write-local` creation tick into a foreground runner that can schedule future forecasts, wait for due resolution, score outcomes, and report progress toward track-record and calibration thresholds.
-2. Run real agent/developer pilot sessions against that campaign flow using the checked pilot session packet, classify summaries through pilot summary intake, and record sanitized accepted summaries through the pilot evidence ledger before hosted or broad runtime work.
-3. Continue public transit forward-run corpus growth toward track-record and calibration thresholds.
-4. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
+1. Run `python3 scripts/ope.py prediction-campaign pilot-readiness --view commands`, confirm the manual prerequisites, run the 3-run smoke path, then start the supervised 100-run Helsinki pilot only through the explicit `--write-local` launch command.
+2. Keep `transitmethod-100` historical-frequency baseline as the default method until at least 30 comparable resolved outcomes exist for non-baseline selection evidence and 100 comparable resolved outcomes exist for calibration.
+3. During the pilot, use the checked resolve, append, track-record, calibration-status, doctor, and explain readbacks to preserve forecast-before-outcome guarantees and separate implementation evidence from quality claims.
+4. Consider `apply-method-update` only after real campaign evidence, approvals, benchmark evidence, source-policy review, and rollback records make the method-update gate and plan eligible.
+5. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
 
 MVP path:
 
 - Milestones 72-80 define the minimum local, agent-native OPE product: connect approved or adapter-provided data, forecast before the outcome, preserve provenance, recalculate from pre-close evidence, resolve later, score against a baseline, and expose the whole loop through agent-readable surfaces.
 - Milestones 81-90 should validate that product with real agent/developer use, add local measurement, grow evidence toward claim thresholds, and improve adoption before expanding into hosted or broad private-source runtimes.
-- Milestones 91-97 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, and calibration readbacks without hosted scheduling.
+- Milestones 91-102 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, calibration readbacks, a non-effectful method-update gate, a non-effectful update plan, and release-time static coverage for the campaign readbacks without hosted scheduling.
+- Milestones 103-110 turn the Helsinki campaign from checked readbacks into a local pilot that can materialize 100 planned baseline predictions, collect them, resolve and score them, append evidence, report calibration readiness, and pass a launch-readiness gate before any hosted scheduler or default non-baseline method exists.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -2841,14 +2857,14 @@ Completed outputs:
 
 ## Milestone 93: Terminal Campaign Runner
 
-Status: In Progress.
+Status: Complete.
 
 Goal: make one foreground terminal command create future forecasts on schedule, then leave due resolutions to the checked resolver path.
 
 Tasks:
 
 - [x] Add a checked dry-run `python3 scripts/ope.py prediction-campaign start` readback before effectful foreground execution.
-- [ ] Turn `python3 scripts/ope.py prediction-campaign start` into local foreground execution.
+- [x] Turn `python3 scripts/ope.py prediction-campaign start` into local foreground execution.
 - [x] Support dry-run campaign creation input from flags and from a setup JSON file.
 - [x] Expose finite count, until date, open-ended, interval, and calibration-threshold modes from the same command surface in the dry-run readback.
 - [x] Expose `--interval`, `--count`, `--until`, `--calibration-target`, `--post-calibration-action`, and `--post-calibration-delay` without requiring agents to write raw scheduler syntax.
@@ -2856,7 +2872,7 @@ Tasks:
 - [x] Add a checked unresolved campaign forecast artifact for the ready run using the standard lifecycle contracts.
 - [x] Add a checked non-mutating campaign forecast write plan before effectful ignored-state mutation.
 - [x] Add explicit guarded `--write-local` execution for the ready run that writes lifecycle records plus minimal campaign/run state under ignored `.ope/live/prediction-campaigns/`.
-- [ ] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
+- [x] Add forecast scheduling, not only resolution scheduling: the runner must create the next forecast before close when the recurrence policy says it is due.
 - [x] Add a missed-run policy: default to skip if the forecast close time has passed, and record why the missed run is excluded from comparable evidence.
 - [x] Document JSONL captured output and compact human status line expectations in the dry-run runner readback.
 - [x] Keep dry-run execution local and explicit: live fetches and resolver execution are named future flags, not normal-check behavior.
@@ -2898,6 +2914,9 @@ Completed outputs so far:
 - checked fixture at `spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json`
 - CLI readback `python3 scripts/ope.py prediction-campaign start`
 - CLI normalized campaign input view `python3 scripts/ope.py prediction-campaign start --view campaign-creation`
+- CLI forecast scheduling view `python3 scripts/ope.py prediction-campaign start --view forecast-schedule`
+- bounded foreground tick `python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl`
+- next-due foreground tick `python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl`
 - CLI missed-run policy view `python3 scripts/ope.py prediction-campaign start --view missed-run-policy`
 - `spec/prediction-campaign-forecast-creation.schema.json`
 - `spec/prediction-campaign-forecast-creation.md`
@@ -2922,18 +2941,18 @@ Completed outputs so far:
 
 ## Milestone 94: Campaign Resolution, Scoring, And Recovery
 
-Status: Planned.
+Status: Complete.
 
 Goal: connect campaign-created forecasts to due resolution, scoring, retry, and recovery without manual per-run commands.
 
 Tasks:
 
 - [x] Extend the existing resolution job registry to read campaign manifests as well as standalone forward-run states.
-- [ ] Let the campaign runner call the checked resolver for due runs when `--execute-resolvers` is explicit.
-- [ ] Record per-run resolver attempts, failure categories, retry eligibility, source fetch metadata, and sanitized diagnostics.
-- [ ] Avoid duplicate resolution and duplicate scoring for runs that are already resolved, ambiguous, annulled, blocked, or excluded.
-- [ ] Add resume behavior after terminal interruption: the runner should continue from campaign state and never overwrite prior run evidence.
-- [ ] Add compact agent readbacks for campaign health, due runs, failed runs, append-ready runs, and next action.
+- [x] Let the campaign runner call the checked resolver-attempt readback for due runs when `--execute-resolvers` is explicit.
+- [x] Record per-run resolver attempts, failure categories, retry eligibility, source fetch metadata, and sanitized diagnostics.
+- [x] Avoid duplicate resolution and duplicate scoring for runs that are already resolved, ambiguous, annulled, blocked, or excluded.
+- [x] Add resume behavior after terminal interruption: the runner should continue from campaign state and never overwrite prior run evidence.
+- [x] Add compact agent readbacks for campaign health, due runs, failed runs, append-ready runs, and next action.
 
 Exit criteria:
 
@@ -2944,35 +2963,53 @@ Expected outputs:
 
 - campaign-aware `python3 scripts/ope.py resolution-jobs --campaign ...`
 - campaign-aware `python3 scripts/ope.py resolution-scheduler --campaign ...`
+- `python3 scripts/ope.py prediction-campaign resolve`
 - `python3 scripts/ope.py prediction-campaign resume`
+- `python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state`
 - `python3 scripts/ope.py prediction-campaign doctor`
 
 Completed outputs so far:
 
 - `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`
+- `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z`
 - `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001`
+- `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z`
+- `python3 scripts/ope.py prediction-campaign resolve`
+- `python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers`
+- `python3 scripts/ope.py prediction-campaign resolve --attempt-case blocked_duplicate --execute-resolvers`
+- `python3 scripts/ope.py prediction-campaign doctor`
+- `python3 scripts/ope.py prediction-campaign doctor --view queues`
+- `python3 scripts/ope.py prediction-campaign start --now 2026-06-11T07:15:00Z --execute-resolvers --max-ticks 1 --output-format jsonl`
 - `python3 scripts/ope.py prediction-campaign resume`
+- `python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state`
 - checked campaign-aware fixture at `spec/fixtures/generated/resolution-jobs/resolution-jobs-campaign.generated.json`
 - checked campaign-aware scheduler fixture at `spec/fixtures/generated/resolution-scheduler/resolution-scheduler-campaign-run.generated.json`
+- checked campaign resolution-attempt fixture at `spec/fixtures/generated/prediction-campaign-resolution-attempt/weather-transit-delay-campaign-resolution-attempt.generated.json`
+- checked campaign doctor fixture at `spec/fixtures/generated/prediction-campaign-doctor/weather-transit-delay-campaign-doctor.generated.json`
 - checked campaign resume fixture at `spec/fixtures/generated/prediction-campaign-resume/weather-transit-delay-campaign-resume.generated.json`
 - source binding from forward-run state plus checked campaign manifest, campaign forecast artifact, and forecast-write plan
-- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for campaign-aware resolution job, scheduler, and resume readbacks
+- due campaign resolution jobs route to the checked `prediction-campaign resolve` command instead of a generic future placeholder
+- bounded campaign foreground ticks call the checked resolution-attempt readback for due runs when `--execute-resolvers` is explicit
+- checked resolution-attempt safety cases block already resolved, ambiguous, annulled, missed, and duplicate runs from duplicate resolution or duplicate scoring
+- compact doctor readback joins campaign health, due/waiting/failed/blocked/append-ready queues, duplicate protection, recovery posture, and next action without ignored-state reads
+- resume readback can inspect simulated interrupted state or explicit ignored local state, reports local run-state/idempotency counts, and keeps continuation behind explicit local writes
+- release-manifest, MVP-smoke, CLI, docs, roadmap, and decision-log wiring for campaign-aware resolution job, scheduler, resolution-attempt, doctor, and resume readbacks
 
 ## Milestone 95: Append-Only Calibration Evidence Ledger
 
-Status: Planned.
+Status: Complete.
 
 Goal: turn resolved campaign runs into local comparable evidence without manual corpus editing.
 
 Tasks:
 
-- [ ] Add an append-only local campaign evidence ledger that stores comparable scored rows and exclusion rows separately.
-- [ ] Add append checks for forecast-before-close, resolution-after-horizon, score binding, source-policy binding, observation coverage, comparable scope, and no post-close evidence leakage.
-- [ ] Make append idempotent: the same resolved run can be inspected repeatedly without creating duplicate corpus rows.
-- [ ] Preserve excluded rows for audit with reason codes such as missed close, missing outcome, low coverage, feed unavailable, invalid window, leakage risk, ambiguous, annulled, and non-comparable.
-- [ ] Add `prediction-campaign append-ready` and `prediction-campaign append` commands, with dry-run default and explicit mutation for ignored local ledgers.
-- [ ] Let track-record and calibration gates read the checked fixture corpus plus selected local campaign ledgers when `--live` or `--campaign` is explicit.
-- [ ] Keep normal release checks deterministic and offline.
+- [x] Add an append-only local campaign evidence ledger that stores comparable scored rows and exclusion rows separately.
+- [x] Add append checks for forecast-before-close, resolution-after-horizon, score binding, source-policy binding, observation coverage, comparable scope, and no post-close evidence leakage.
+- [x] Make append idempotent: the same resolved run can be inspected repeatedly without creating duplicate corpus rows.
+- [x] Preserve excluded rows for audit with reason codes such as missed close, missing outcome, low coverage, feed unavailable, invalid window, leakage risk, ambiguous, annulled, and non-comparable.
+- [x] Add `prediction-campaign append-ready` and `prediction-campaign append` commands, with dry-run default and explicit mutation for ignored local ledgers.
+- [x] Let track-record and calibration gates read the checked fixture corpus plus selected local campaign ledgers when `--live` or `--campaign` is explicit.
+- [x] Keep normal release checks deterministic and offline.
 
 Exit criteria:
 
@@ -2985,22 +3022,36 @@ Expected outputs:
 - `spec/prediction-campaign-evidence-ledger.md`
 - `python3 scripts/ope.py prediction-campaign append-ready`
 - `python3 scripts/ope.py prediction-campaign append`
+- `python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001`
+
+Completed outputs so far:
+
+- checked campaign evidence-ledger fixture at `spec/fixtures/generated/prediction-campaign-evidence-ledger/weather-transit-delay-campaign-evidence-ledger.generated.json`
+- `python3 scripts/ope.py prediction-campaign append-ready`
+- `python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary`
+- `python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001`
+- `python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001 --ledger-case comparable_scored`
+- `python3 scripts/generate_prediction_campaign_evidence_ledger.py --check`
+- `python3 scripts/check_prediction_campaign_evidence_ledger.py`
+- append checks for forecast timing, source policy, no-leakage, resolution timing, score binding, coverage, comparable scope, and duplicate row keys
+- explicit append-only `--write-local` path under ignored `.ope/live/prediction-campaigns/.../evidence-ledger.json`, with stable row keys that skip already-present rows
+- transit track-record gate campaign mode includes excluded or comparable campaign ledger rows while preserving below-threshold claim boundaries
 
 ## Milestone 96: Calibration Gate And Post-Calibration Continuation
 
-Status: Planned.
+Status: Complete.
 
 Goal: once a campaign reaches enough comparable outcomes, generate calibration readbacks and follow the configured continuation policy.
 
 Tasks:
 
-- [ ] Extend the transit track-record and calibration gate to read campaign evidence ledgers and produce threshold-aware local readbacks.
-- [ ] Generate calibration summaries only when the declared comparable resolved threshold is met.
-- [ ] Distinguish calibration measurement from automatic model tuning: the first implementation reports calibration and does not silently change method behavior.
-- [ ] Add campaign cycle state so post-calibration policies can stop, continue collecting evidence, pause, or start the next cycle after a configured delay.
-- [ ] Support open-ended campaigns that have no count but pause and resume after calibration according to `postCalibrationPolicy`.
-- [ ] Add warnings when a campaign has enough runs but too many exclusions, horizon gaps, source failures, or non-comparable windows to support a calibration claim.
-- [ ] Keep stronger method selection, recalibration of probabilities, and model updates behind a later explicit method-update gate.
+- [x] Extend the transit track-record and calibration gate to read campaign evidence ledgers and produce threshold-aware local readbacks.
+- [x] Generate calibration summaries only when the declared comparable resolved threshold is met.
+- [x] Distinguish calibration measurement from automatic model tuning: the first implementation reports calibration and does not silently change method behavior.
+- [x] Add campaign cycle state so post-calibration policies can stop, continue collecting evidence, pause, or start the next cycle after a configured delay.
+- [x] Support open-ended campaigns that have no count but pause and resume after calibration according to `postCalibrationPolicy`.
+- [x] Add warnings when a campaign has enough runs but too many exclusions, horizon gaps, source failures, or non-comparable windows to support a calibration claim.
+- [x] Keep stronger method selection, recalibration of probabilities, and model updates behind a later explicit method-update gate.
 
 Exit criteria:
 
@@ -3013,20 +3064,33 @@ Expected outputs:
 - `python3 scripts/ope.py transit-track-record-gate --campaign ...`
 - checked examples for below-threshold, threshold-met, too-many-exclusions, and post-calibration-restart cases
 
+Completed outputs:
+
+- `spec/prediction-campaign-calibration-status.schema.json`
+- `spec/prediction-campaign-calibration-status.md`
+- checked calibration-status fixture at `spec/fixtures/generated/prediction-campaign-calibration-status/weather-transit-delay-campaign-calibration-status.generated.json`
+- `python3 scripts/ope.py prediction-campaign calibration-status`
+- `python3 scripts/ope.py prediction-campaign calibration-status --calibration-case threshold_met --view readback`
+- `python3 scripts/ope.py prediction-campaign calibration-status --calibration-case too_many_exclusions --view summary`
+- `python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle`
+- `python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001`
+- checked below-threshold, threshold-met, too-many-exclusions, and post-calibration-restart cases
+- explicit method-update boundary: calibration readbacks never tune, retrain, update probabilities, change forecast methods, or start cycles during normal checks
+
 ## Milestone 97: Repeating Prediction Pilot Experience
 
-Status: Planned.
+Status: Complete.
 
 Goal: make repeated prediction setup simple enough for Codex or another agent to run during pilot sessions without custom glue code.
 
 Tasks:
 
-- [ ] Add a pilot task card for starting a repeating prediction campaign and explaining the next forecast, next resolution, evidence threshold, and claim boundary.
-- [ ] Add a short runbook for "start 100 calibration sessions in a terminal" and "start an open-ended campaign that pauses after calibration and resumes later."
-- [ ] Add agent adapter and MCP readbacks for campaign plan, status, health, append-readiness, and calibration status.
-- [ ] Add sanitized error envelopes for invalid interval, missed forecast close, unavailable live source, duplicate campaign, unsafe source policy, and unsupported post-calibration action.
-- [ ] Add local usage trace events for campaign start, forecast-created, resolve-due, resolver-executed, append-ready, appended, calibration-threshold-met, paused, resumed, and stopped.
-- [ ] Update developer adoption and expansion-readiness surfaces so recurring prediction setup is evaluated before hosted scheduling or broader runtime work.
+- [x] Add a pilot task card for starting a repeating prediction campaign and explaining the next forecast, next resolution, evidence threshold, and claim boundary.
+- [x] Add a short runbook for "start 100 calibration sessions in a terminal" and "start an open-ended campaign that pauses after calibration and resumes later."
+- [x] Add agent adapter and MCP readbacks for campaign plan, status, health, append-readiness, and calibration status.
+- [x] Add sanitized error envelopes for invalid interval, missed forecast close, unavailable live source, duplicate campaign, unsafe source policy, and unsupported post-calibration action.
+- [x] Add local usage trace events for campaign start, forecast-created, resolve-due, resolver-executed, append-ready, appended, calibration-threshold-met, paused, resumed, and stopped.
+- [x] Update developer adoption and expansion-readiness surfaces so recurring prediction setup is evaluated before hosted scheduling or broader runtime work.
 
 Exit criteria:
 
@@ -3036,25 +3100,32 @@ Exit criteria:
 Expected outputs:
 
 - `spec/repeating-prediction-pilot-runbook.md`
+- `spec/prediction-campaign-explain.schema.json`
+- `spec/prediction-campaign-explain.md`
+- checked campaign explain fixture at `spec/fixtures/generated/prediction-campaign-explain/weather-transit-delay-campaign-explain.generated.json`
 - `python3 scripts/ope.py prediction-campaign explain`
-- agent adapter operations for campaign plan/status/calibration readbacks
+- `python3 scripts/ope.py prediction-campaign explain --view task`
+- `python3 scripts/ope.py prediction-campaign explain --view errors`
+- agent adapter operations for campaign plan/status/health/append-readiness/calibration-status readbacks
 - pilot-session-packet task card for repeating prediction setup
+- local usage trace campaign lifecycle events
+- developer-adoption, expansion-readiness, release-manifest, MVP runtime, docs, roadmap, and decision-log wiring for recurring prediction pilot evaluation
 
 ## Milestone 98: Codebase Quality And Tooling Hardening
 
-Status: In progress.
+Status: Complete.
 
 Goal: act on the comprehensive repository review — finish consolidating the residual fixture-scaffold duplication, add automated lint/type and a security hardening, and improve check-suite developer experience, without changing runtime behavior or generated fixtures.
 
 Tasks:
 
-- [ ] Deduplicate the remaining `compact_json` copy: import it from `ope_fixtures` in `run_resolution_scheduler.py` instead of redefining it (so `render_json` and `compact_json` each live once, in `ope_fixtures.py`).
-- [ ] Harden `ensure_safe_local_path` in `generate_prediction_campaign_forecast_write.py` to resolve the target and confirm it stays under `.ope/live/prediction-campaigns`, defeating symlink escape (the path already rejects absolute paths and `..`).
-- [ ] Parallelize `run_checks.py` so the ~170 subprocess checks fan out across workers, cutting local wall-time without losing coverage.
-- [ ] Add a dev-only lint and type gate (`ruff` + `mypy`) to `release_check.py` and CI, enforcing the existing type hints while keeping the runtime stdlib-only.
-- [ ] Extract a shared validate+write/check helper so the delegating `check_or_write` wrappers and similar single-output generators share one path.
-- [ ] Split oversized modules: lift the `--write-local` runtime out of `generate_prediction_campaign_forecast_write.py`, and group `ope.py` command handlers.
-- [ ] Reduce documentation lockstep churn: convert the monolithic README/PRODUCT wedge paragraphs to additive bullet lists or generated sections.
+- [x] Deduplicate the remaining `compact_json` copy: import it from `ope_fixtures` in `run_resolution_scheduler.py` instead of redefining it (so `render_json` and `compact_json` each live once, in `ope_fixtures.py`).
+- [x] Harden `ensure_safe_local_path` in `generate_prediction_campaign_forecast_write.py` to resolve the target and confirm it stays under `.ope/live/prediction-campaigns`, defeating symlink escape (the path already rejects absolute paths and `..`).
+- [x] Parallelize `run_checks.py` so the ~170 subprocess checks fan out across workers, cutting local wall-time without losing coverage.
+- [x] Add a dev-only lint and scoped type gate (`ruff` + `mypy`) to `release_check.py` and CI, enforcing the current quality-tooling/campaign-write type surface while keeping the runtime stdlib-only.
+- [x] Extract a shared validate+write/check helper so the delegating `check_or_write` wrappers and similar single-output generators share one path.
+- [x] Split oversized modules: lift the `--write-local` runtime out of `generate_prediction_campaign_forecast_write.py`, and group `ope.py` command handlers.
+- [x] Reduce documentation lockstep churn: convert the monolithic README/PRODUCT wedge paragraphs to additive bullet lists or generated sections.
 
 Exit criteria:
 
@@ -3067,8 +3138,381 @@ Expected outputs:
 
 - shared `ope_fixtures` helper covering validate+write/check
 - a parallel `run_checks.py`
-- `ruff`/`mypy` configuration and a CI step
-- a smaller `generate_prediction_campaign_forecast_write.py`
+- `python3 scripts/run_checks.py --workers 8` passes 181 checks in 754.19 seconds
+- `python3 scripts/ope.py generate-fixtures --list` provides a cheap aggregate fixture command inventory for CLI smoke tests
+- `python3 scripts/release_check.py` passes 181 checks with 8 workers in 746.26 seconds, then passes `ruff` over `scripts/` and scoped `mypy`; the current scoped mypy surface now covers 15 source files
+- `ruff`/`mypy` configuration, `scripts/check_static_analysis.py`, and a CI install step
+- `emit_generated` in `ope_fixtures.py` backs `write_generated`, `check_generated`, and `validate_and_emit`, with direct migrations for auto-evidence, transit method options, private setup orchestrator, and local usage trace single-output generators
+- `prediction_campaign_forecast_write_runtime.py` owns guarded local campaign forecast writes, leaving `generate_prediction_campaign_forecast_write.py` at 377 lines for plan generation and CLI views
+- shared `ope.py` command-building helpers reduce repeated prediction-campaign subcommand flag plumbing
+- README and PRODUCT public-beta/current-state surfaces are additive bullet lists instead of monolithic status paragraphs
+
+## Milestone 99: Campaign Method Update Gate
+
+Status: Complete.
+
+Goal: close the post-calibration method-update boundary with a checked read-only gate before any forecast probabilities, method weights, method selections, or method registries can change.
+
+Tasks:
+
+- [x] Add a schema-bound method-update gate record that binds campaign manifest, calibration status, and transit method options.
+- [x] Cover below-threshold, threshold-met-needs-approval, approved-plan-ready, and regression-risk cases.
+- [x] Add CLI views for evidence, proposal, approval, decision, summary, and execution boundary.
+- [x] Keep automatic updates, effectful updates, probability recalibration, method changes, method-weight changes, method-registry writes, live fetches, resolver execution, and campaign-state writes disabled.
+- [x] Wire schema coverage, generator checks, CLI checks, MVP release-surface checks, release manifest, docs, roadmap, and decision log.
+
+Exit criteria:
+
+- `python3 scripts/ope.py prediction-campaign method-update-gate` blocks below-threshold updates.
+- `python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view decision` can report a plan-ready case while still requiring a future explicit effectful command.
+- Normal checks validate the generated gate fixture against `spec/prediction-campaign-method-update-gate.schema.json`.
+
+Expected outputs:
+
+- `spec/prediction-campaign-method-update-gate.schema.json`
+- `spec/prediction-campaign-method-update-gate.md`
+- checked fixture at `spec/fixtures/generated/prediction-campaign-method-update-gate/weather-transit-delay-campaign-method-update-gate.generated.json`
+- `scripts/generate_prediction_campaign_method_update_gate.py`
+- `scripts/check_prediction_campaign_method_update_gate.py`
+- `python3 scripts/ope.py prediction-campaign method-update-gate`
+- `python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case threshold_met_needs_approval --view decision`
+- `python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view proposal`
+- `python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case regression_risk --view evidence`
+- release-manifest, MVP-smoke, CLI, spec docs, README/PRODUCT, roadmap, and decision-log wiring for the method-update gate
+
+## Milestone 100: Campaign Method Update Plan
+
+Status: Complete.
+
+Goal: define the approval artifact, future effectful command shape, rollback record, and preflight checks required after a method-update gate is plan-ready, without applying any method update.
+
+Tasks:
+
+- [x] Add a schema-bound method-update plan record that binds the campaign manifest and method-update gate.
+- [x] Cover gate-blocked, approval-missing, rollback-missing, and plan-ready cases.
+- [x] Add CLI views for plan, approval, future command, rollback, preflight, decision, summary, and execution boundary.
+- [x] Keep the future effectful command unimplemented and out of normal checks.
+- [x] Keep plan reads from writing plan artifacts, campaign state, method registries, probabilities, method weights, forecast methods, live data, resolver outputs, or campaign cycles.
+- [x] Wire schema coverage, generator checks, CLI checks, MVP release-surface checks, release manifest, docs, roadmap, and decision log.
+
+Exit criteria:
+
+- `python3 scripts/ope.py prediction-campaign method-update-plan` blocks when the method-update gate is not ready.
+- `python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command` returns the future command shape while marking it unimplemented and unavailable to normal checks.
+- Normal checks validate the generated plan fixture against `spec/prediction-campaign-method-update-plan.schema.json`.
+
+Expected outputs:
+
+- `spec/prediction-campaign-method-update-plan.schema.json`
+- `spec/prediction-campaign-method-update-plan.md`
+- checked fixture at `spec/fixtures/generated/prediction-campaign-method-update-plan/weather-transit-delay-campaign-method-update-plan.generated.json`
+- `scripts/generate_prediction_campaign_method_update_plan.py`
+- `scripts/check_prediction_campaign_method_update_plan.py`
+- `python3 scripts/ope.py prediction-campaign method-update-plan`
+- `python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case approval_missing --view approval`
+- `python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case rollback_missing --view rollback`
+- `python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command`
+- release-manifest, MVP-smoke, CLI, spec docs, README/PRODUCT, roadmap, and decision-log wiring for the method-update plan
+
+## Milestone 101: Static Coverage For Method Update Surfaces
+
+Status: Complete.
+
+Goal: make the new campaign method-update gate and plan scripts part of the release-time scoped type gate instead of leaving them covered only by runtime checks.
+
+Tasks:
+
+- [x] Add `scripts/generate_prediction_campaign_method_update_gate.py` to the scoped mypy files.
+- [x] Add `scripts/generate_prediction_campaign_method_update_plan.py` to the scoped mypy files.
+- [x] Add `scripts/check_prediction_campaign_method_update_gate.py` to the scoped mypy files.
+- [x] Add `scripts/check_prediction_campaign_method_update_plan.py` to the scoped mypy files.
+- [x] Verify the dev-only static gate still passes.
+
+Exit criteria:
+
+- `python3 scripts/check_static_analysis.py` passes with the expanded scoped mypy file list.
+- The static gate reports 15 checked source files.
+
+Expected outputs:
+
+- `pyproject.toml` scoped mypy file list includes the method-update gate and plan generator/checker scripts.
+- `.venv-static/bin/python scripts/check_static_analysis.py` reports `Success: no issues found in 15 source files`.
+
+## Milestone 102: Static Coverage For Campaign Readbacks
+
+Status: Complete.
+
+Goal: make the campaign resolution-attempt, doctor, evidence-ledger, calibration-status, and explain scripts part of the release-time scoped type gate, and fix the imported helper type shapes that gate exposes.
+
+Tasks:
+
+- [x] Add the campaign resolution-attempt, doctor, evidence-ledger, calibration-status, and explain generators to the scoped mypy files.
+- [x] Add the matching campaign semantic checker scripts to the scoped mypy files.
+- [x] Replace ad hoc local argument objects with `argparse.Namespace` where typed helper APIs require it.
+- [x] Clarify transit connector protobuf, service-date, schedule-key, and source-adapter-output types without changing generated contract semantics.
+- [x] Verify the dev-only static gate and targeted runtime checks still pass.
+
+Exit criteria:
+
+- `python3 scripts/check_static_analysis.py` passes with the expanded scoped mypy file list.
+- The static gate reports 25 checked source files.
+- Transit connector, transit forward-run, resolution jobs, campaign resume, and campaign doctor checks pass.
+
+Expected outputs:
+
+- `pyproject.toml` scoped mypy file list includes the campaign readback generator/checker scripts.
+- `scripts/connect_transit_api.py` has explicit type shapes for decoded protobuf values, exception dates, schedule keys, and generated adapter outputs.
+- `scripts/run_transit_delay_forward.py`, `scripts/generate_resolution_jobs.py`, `scripts/generate_prediction_campaign_resume.py`, and `scripts/generate_prediction_campaign_doctor.py` use `argparse.Namespace` for typed helper argument objects.
+- `.venv-static/bin/python scripts/check_static_analysis.py` reports `Success: no issues found in 25 source files`.
+
+## Milestone 103: Full Helsinki 100-Run Campaign Materialization
+
+Status: Complete.
+
+Goal: materialize the full local 100-run Helsinki traffic-disturbance pilot plan instead of only previewing bounded 4-12 run windows.
+
+Tasks:
+
+- [x] Treat the existing `daily_100_run_transit_calibration` setup as the pilot target for `weather-transit-delays`, `hsl-surface`, `helsinki`, `morning_peak`, and `Europe/Helsinki`.
+- [x] Add a checked full-count campaign manifest view that can enumerate all 100 planned service dates, run IDs, question IDs, forecast IDs, resolution IDs, scoring IDs, duplicate keys, and local-state paths.
+- [x] Keep the default CLI preview bounded, but add an explicit full-materialization command for the pilot so agents can inspect all 100 planned runs before any forecast artifact is created.
+- [x] Add duplicate detection across the full 100-run manifest and expose duplicate conflicts before later local-state overlap checks.
+- [x] Preserve the forecast-before-close boundary, missed-run policy, and source-policy binding for every run.
+
+Exit criteria:
+
+- `python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization` prints a 100-run local pilot manifest without creating forecast, resolution, scoring, or ledger records.
+- The generated manifest exposes the first, next, and final planned run and makes duplicate keys auditable.
+- Normal checks continue to use bounded fixture previews and do not write ignored local state.
+
+Expected outputs:
+
+- Full 100-run Helsinki campaign manifest readback and schema/checker coverage.
+- CLI docs for bounded preview versus explicit full materialization.
+- Updated pilot runbook step for reviewing the full 100-run plan.
+
+## Milestone 104: Effectful Local Campaign Forecast Runner
+
+Status: Complete.
+
+Goal: create due forecast artifacts for the Helsinki pilot from local campaign state, one run at a time or through bounded foreground ticks, while preserving forecast-before-outcome guarantees.
+
+Tasks:
+
+- [x] Extend `prediction-campaign start --watch --write-local` so it can read the materialized local 100-run campaign, select the next due forecast before `forecastCloseAt`, and update campaign/run state idempotently through the existing safe write path.
+- [x] Keep default runner readbacks non-mutating while exposing bounded foreground ticks over the full materialized plan.
+- [x] Keep the default pilot method as `transitmethod-100` historical-frequency baseline until method gates allow otherwise.
+- [x] Record sanitized runner diagnostics for waiting, ready, missed, duplicate, already-created, and dry-run actions.
+- [x] Keep live forecast-time source fetching optional and explicit; baseline-only forecast creation works without live network access.
+
+Exit criteria:
+
+- A foreground local runner can select a due `forecast-N` artifact from the materialized Helsinki campaign and create it only with `--write-local`.
+- The runner never backfills forecasts after close time and does not create a second forecast when matching run state already exists.
+- Dry-run foreground ticks can inspect all 100 planned Helsinki actions and select the final planned run, `predictionrun-1400`, at its forecast window.
+
+Expected outputs:
+
+- Effectful local campaign forecast runner command with `--full-materialization` support.
+- Updated runner schema/checks for 100-row forecast schedules and runner decisions.
+- Regression checks for full-plan due-run selection, dry-run non-mutation, missed-run blocking, and explicit local-write availability.
+
+## Milestone 105: Campaign Outcome Resolver Execution
+
+Status: Complete.
+
+Goal: resolve Helsinki pilot forecasts after their service windows using declared resolution-only outcome sources, then write resolution and scoring records for each campaign run.
+
+Tasks:
+
+- [x] Add an effectful `prediction-campaign resolve --execute-resolvers --write-local` path that only runs after `resolutionEligibleAt`.
+- [x] Bind each resolution to declared HSL/transit outcome rows or a checked missing-outcome exclusion, never to forecast-time evidence.
+- [x] Write resolution records, scoring reports, and sanitized provenance into ignored local campaign state.
+- [x] Preserve ambiguous, annulled, missing-outcome, duplicate, and missed-run exclusion cases as audit rows instead of comparable evidence.
+- [x] Update resolution jobs and scheduler readbacks so due campaign jobs can execute locally when explicitly approved.
+
+Exit criteria:
+
+- A due campaign run can be resolved and scored locally from an allowed outcome source.
+- Missing or unsafe outcome sources produce excluded audit records, not fabricated comparable outcomes.
+- Resolution-only trip updates and post-window delay rows are blocked from becoming forecast-time evidence.
+
+Expected outputs:
+
+- Effectful campaign resolver runtime with schema/checker coverage.
+- Campaign resolution and scoring local-state records.
+- Updated doctor, resume, resolution-jobs, and scheduler readbacks for executed resolver outcomes.
+
+## Milestone 106: Campaign Evidence Ledger Append Runtime
+
+Status: Complete.
+
+Goal: append resolved Helsinki campaign outcomes into a local evidence ledger so the pilot can count toward track-record and calibration thresholds.
+
+Tasks:
+
+- [x] Implement explicit `prediction-campaign append --write-local` for comparable scored rows and excluded audit rows.
+- [x] Keep the ledger append-only, idempotent by campaign/run/forecast/scoring IDs, and stored under ignored local state unless a sanitized promotion path is explicitly added later.
+- [x] Include enough provenance to trace every row back to the forecast, evidence packet, resolution record, scoring report, source policy, and runner state.
+- [x] Update `transit-track-record-gate --campaign` so it can read the local ledger only when explicitly requested.
+- [x] Keep excluded rows out of comparable sample counts and report exclusion rate.
+
+Exit criteria:
+
+- Resolved and scored campaign runs can be appended locally without overwriting prior evidence.
+- Track-record gates count comparable campaign rows only when the campaign ledger is explicitly selected.
+- Excluded rows remain visible for audit and blocker diagnosis but do not unlock quality or calibration claims.
+
+Expected outputs:
+
+- Local campaign evidence ledger writer.
+- Ledger schema/checker updates for comparable and excluded rows.
+- Track-record gate readback with campaign-ledger inclusion and threshold progress.
+
+Completed outputs:
+
+- `python3 scripts/ope.py prediction-campaign append-ready --from-local --run-id predictionrun-1301`
+- `python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local`
+- `python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001 --from-local-ledger`
+- local evidence-ledger rows now include run-state, forecast-artifact, evidence-packet, forecast-history, resolution-record, and scoring-report paths
+- temp-state checker coverage for comparable scored appends, missing-outcome excluded appends, idempotent repeated appends, and explicit local-ledger track-record inclusion
+
+## Milestone 107: Helsinki Calibration Readback From 100 Comparable Outcomes
+
+Status: Complete.
+
+Goal: generate a calibration and track-record readback once the Helsinki pilot reaches 100 comparable resolved outcomes, without automatically changing methods or probabilities.
+
+Tasks:
+
+- [x] Add a calibration summary over the explicit campaign ledger once `resolvedComparableSampleSize >= 100`.
+- [x] Report Brier score, baseline score, baseline lift, reliability bins, event rate, forecast probability buckets, exclusion rate, and confidence caveats.
+- [x] Keep calibration summaries measurement-only until a separate method-update approval gate passes.
+- [x] Block calibration claims when comparable sample size is below 100, exclusion rate is above policy, or source/outcome provenance is incomplete.
+- [x] Add a human-readable pilot summary that distinguishes implementation evidence, track-record evidence, calibration evidence, and quality claims.
+
+Exit criteria:
+
+- `python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger` can report below-threshold, threshold-met, and blocked calibration states from local pilot evidence.
+- Calibration summaries do not mutate forecast probabilities, method registry entries, or future campaign methods.
+- The default method remains baseline unless a later explicit method-update command is approved.
+
+Expected outputs:
+
+- Local campaign calibration summary readback.
+- Updated calibration-status schema/checker coverage.
+- Pilot summary docs explaining what can and cannot be claimed after 100 comparable outcomes.
+
+Completed outputs:
+
+- `python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view readback`
+- `python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot`
+- local-ledger calibration status blocks below-threshold, high-exclusion-rate, and incomplete-provenance evidence
+- measurement-only local calibration summaries include Brier score, baseline score, baseline lift, event rate, 10 reliability/probability buckets, and confidence caveats
+- checker coverage for 99 comparable rows, 100 comparable rows, too many exclusions, and incomplete provenance
+
+## Milestone 108: Evidence-Backed Method Update Apply And Rollback
+
+Status: Complete.
+
+Goal: allow a non-baseline method only after the campaign ledger, calibration summary, benchmark evidence, source-policy review, and explicit approvals make the existing method-update gate plan-ready.
+
+Tasks:
+
+- [x] Implement an explicit `prediction-campaign apply-method-update` command only after `method-update-gate` and `method-update-plan` return plan-ready.
+- [x] Require method-owner approval, calibration-review approval, source-policy review, benchmark evidence, anti-leakage checks, and a rollback record.
+- [x] Start with the transparent weather-adjustment candidate only if evidence remains favorable after the threshold is met.
+- [x] Preserve prior forecast histories and keep method changes prospective; never rewrite old forecasts.
+- [x] Implement `rollback-method-update` for the approved update artifact before enabling any stronger method in the runner.
+
+Exit criteria:
+
+- The baseline remains the default until evidence and approvals explicitly allow a method update.
+- Method updates are auditable, reversible, prospective-only, and blocked in normal checks.
+- If evidence does not support the candidate, the pilot continues on `transitmethod-100`.
+
+Expected outputs:
+
+- Effectful method update and rollback command designs with schema/checker coverage.
+- Updated runner method-selection binding for future campaign runs after approval.
+- Decision-log entry documenting the first approved or rejected method update.
+
+Completed outputs:
+
+- `python3 scripts/ope.py prediction-campaign apply-method-update` blocks by default.
+- `python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view summary` reports the eligible `transitmethod-101` weather-adjustment target without writing local state.
+- `python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --view summary` reports the baseline rollback target.
+- `--write-local` apply/rollback writes only ignored local campaign method-binding and audit artifacts, requires local campaign state with at least 100 comparable resolved outcomes for apply, and remains idempotent in checker coverage.
+- The runner now reports the future `.ope/live/prediction-campaigns/{campaign}/method-binding.json` path while keeping normal checks baseline-only.
+
+## Milestone 109: 100-Run Helsinki Pilot Operations Runbook
+
+Status: Complete.
+
+Goal: give a human or agent the exact local procedure to run, monitor, recover, resolve, score, append, and summarize the Helsinki 100-prediction pilot.
+
+Tasks:
+
+- [x] Write a step-by-step runbook for the local pilot covering setup review, full materialization, foreground runner operation, daily checks, resolution, append, calibration readback, and stop/restart conditions.
+- [x] Add smoke checks that exercise a miniature local campaign with two or three runs before running the real 100-run pilot.
+- [x] Add operator-facing status commands for next forecast, next resolution, due resolver jobs, append readiness, ledger counts, exclusion rate, and calibration threshold progress.
+- [x] Define pilot success criteria: 100 comparable outcomes, acceptable exclusion rate, no forecast-after-close violations, no duplicate forecasts, and complete provenance.
+- [x] Define abort criteria for source outages, unsafe evidence, clock drift, path-safety failures, or repeated missed windows.
+
+Exit criteria:
+
+- A developer can run a miniature campaign end to end locally before starting the 100-run Helsinki pilot.
+- The 100-run pilot has one documented command sequence and one recovery sequence.
+- The runbook states that the best available method is baseline until gates permit otherwise.
+
+Expected outputs:
+
+- `spec/helsinki-traffic-disturbance-pilot-runbook.md`
+- Mini-campaign smoke fixture and checks.
+- Updated README/PRODUCT/MVP-runtime references for the local 100-run pilot boundary.
+
+Completed outputs:
+
+- `python3 scripts/ope.py prediction-campaign pilot-runbook`
+- `python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke`
+- `python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status`
+- `python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl`
+- checked schema/fixture coverage for `spec/fixtures/generated/helsinki-traffic-pilot-runbook/helsinki-traffic-disturbance-pilot-runbook.generated.json`
+- documented baseline-first pilot method boundary: `transitmethod-100` remains best available until method-update gates, approvals, benchmark evidence, and rollback are ready.
+
+## Milestone 110: Helsinki Pilot Launch Readiness Gate
+
+Status: Complete.
+
+Goal: give operators a final read-only gate that answers whether the checked local surfaces are ready to start the 100-run Helsinki pilot and which manual confirmations remain outside normal checks.
+
+Tasks:
+
+- [x] Add a `prediction-campaign pilot-readiness` readback that joins the runbook, 3-run smoke path, full 100-run materialization, and baseline method boundary.
+- [x] Report checked launch prerequisites, manual prerequisites, launch command sequence, and blocked actions.
+- [x] Keep live source availability, local clock, terminal supervision, outcome paths, and workspace capacity as explicit manual confirmations.
+- [x] Keep the readiness gate non-mutating: no pilot start, no live fetches, no resolver execution, no ledger append, no method change, and no quality claim.
+- [x] Add schema, generated fixture, checker, CLI, release surface, and documentation coverage.
+
+Exit criteria:
+
+- A developer can run one command to see the launch status and the next safe command before the 100-run pilot.
+- The gate confirms checked prerequisites while refusing to overclaim machine-local live readiness.
+- The launch command remains explicit and supervised through `--write-local`.
+
+Expected outputs:
+
+- `spec/helsinki-traffic-pilot-readiness.md`
+- `python3 scripts/ope.py prediction-campaign pilot-readiness`
+- `python3 scripts/ope.py prediction-campaign pilot-readiness --view commands`
+
+Completed outputs:
+
+- `python3 scripts/ope.py prediction-campaign pilot-readiness`
+- `python3 scripts/ope.py prediction-campaign pilot-readiness --view checks`
+- `python3 scripts/ope.py prediction-campaign pilot-readiness --view manual`
+- `python3 scripts/ope.py prediction-campaign pilot-readiness --view commands`
+- checked schema/fixture coverage for `spec/fixtures/generated/helsinki-traffic-pilot-readiness/helsinki-traffic-pilot-readiness.generated.json`
 
 ## Open Decisions
 
@@ -3085,7 +3529,7 @@ Expected outputs:
 - Should benchmark mode support LLM forecasters in the first implementation, or only deterministic/statistical models?
 - What minimal recurrence syntax should OPE expose so agents can express hourly, daily, weekly, until-date, count-bounded, threshold-targeted, and open-ended campaigns without writing raw scheduler configuration?
 - Should local campaign evidence ledgers remain ignored artifacts only, or should sanitized append summaries have a committed promotion path?
-- After calibration is measured, what explicit gate should be required before OPE updates forecast probabilities, changes method weights, or selects stronger methods automatically?
+- When, if ever, should OPE implement the future effectful `apply-method-update` and `rollback-method-update` commands after real campaign evidence and approvals exist?
 
 ## Claim Discipline
 

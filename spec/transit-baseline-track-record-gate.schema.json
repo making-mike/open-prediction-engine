@@ -11,6 +11,7 @@
     "domain",
     "gateMode",
     "sourceCorpus",
+    "campaignLedger",
     "coverageSummary",
     "sampleSummary",
     "trackRecordSummary",
@@ -25,7 +26,7 @@
     "domain": { "const": "weather-transit-delays" },
     "gateMode": {
       "type": "string",
-      "enum": ["checked_fixture_gate"]
+      "enum": ["checked_fixture_gate", "checked_fixture_plus_campaign_ledger"]
     },
     "sourceCorpus": {
       "type": "object",
@@ -45,6 +46,28 @@
           "enum": ["checked_fixture_index"]
         },
         "policyId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceCommand": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    },
+    "campaignLedger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "included",
+        "campaignId",
+        "ledgerCase",
+        "ledgerPath",
+        "comparableRowCount",
+        "excludedRowCount",
+        "sourceCommand"
+      ],
+      "properties": {
+        "included": { "type": "boolean" },
+        "campaignId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "ledgerCase": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "ledgerPath": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "comparableRowCount": { "type": "integer", "minimum": 0 },
+        "excludedRowCount": { "type": "integer", "minimum": 0 },
         "sourceCommand": { "type": "string", "minLength": 1, "maxLength": 240 }
       }
     },
@@ -224,6 +247,7 @@
       "required": [
         "command",
         "sourceCommand",
+        "campaignLedgerCommand",
         "createsForecastArtifacts",
         "createsResolutionArtifacts",
         "createsScoringRecords",
@@ -234,6 +258,7 @@
       "properties": {
         "command": { "type": "string", "minLength": 1, "maxLength": 240 },
         "sourceCommand": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "campaignLedgerCommand": { "type": "string", "minLength": 1, "maxLength": 240 },
         "createsForecastArtifacts": { "type": "boolean" },
         "createsResolutionArtifacts": { "type": "boolean" },
         "createsScoringRecords": { "type": "boolean" },

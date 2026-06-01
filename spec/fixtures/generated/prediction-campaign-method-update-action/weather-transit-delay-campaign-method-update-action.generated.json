@@ -1,0 +1,192 @@
+{
+  "predictionCampaignMethodUpdateActionId": "predictioncampaignmethodupdateaction-001",
+  "generatedAt": "2026-05-31T05:00:00Z",
+  "operation": "apply",
+  "actionStatus": "blocked_by_method_update_plan",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignMethodUpdatePlanId": "predictioncampaignmethodupdateplan-001",
+    "predictionCampaignMethodUpdateGateId": "predictioncampaignmethodupdategate-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "currentMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101",
+    "requestedMethodUpdatePlanId": "predictioncampaignmethodupdateplan-001"
+  },
+  "planReadback": {
+    "planCase": "gate_blocked",
+    "planStatus": "blocked_by_method_update_gate",
+    "gateStatus": "blocked_insufficient_calibration_evidence",
+    "methodUpdatePlanReady": false,
+    "blockingReasons": [
+      "method_update_gate_not_plan_ready"
+    ]
+  },
+  "approvalArtifact": {
+    "approvalArtifactId": "methodupdateapproval-001",
+    "approvalStatus": "not_ready",
+    "requiredApprovals": [
+      "method_owner_approval",
+      "calibration_review_approval",
+      "source_policy_review"
+    ],
+    "receivedApprovals": [],
+    "approvedAt": "none",
+    "auditTrailStatus": "not_ready",
+    "missingItems": [
+      "method_update_gate_plan_ready"
+    ]
+  },
+  "rollbackRecord": {
+    "rollbackRecordId": "methodupdaterollback-001",
+    "rollbackStatus": "not_ready",
+    "rollbackCommandShape": "none",
+    "restoresMethodId": "transitmethod-100",
+    "preservesForecastHistory": true,
+    "requiresApprovalBeforeRollback": true,
+    "missingItems": [
+      "method_update_gate_plan_ready"
+    ]
+  },
+  "candidateEvidence": {
+    "candidateBenchmarkStatus": "benchmarked_fixture_only",
+    "candidateBaselineLift": 0.1136,
+    "cleanAntiLeakageEvidence": false,
+    "comparableEvidenceReady": false,
+    "approvalStatus": "not_requested",
+    "evidenceSupportsCandidate": false
+  },
+  "methodBinding": {
+    "currentMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101",
+    "targetMethodId": "transitmethod-101",
+    "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+    "methodUpdateArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-updates/predictioncampaignmethodupdateaction-001.json",
+    "rollbackArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-updates/predictioncampaignmethodupdaterollback-001.json",
+    "effectiveScope": "future_campaign_forecasts_only",
+    "runnerCanUseAfterWrite": true,
+    "normalChecksReadLocalBinding": false,
+    "priorForecastHistoryRewriteAllowed": false,
+    "priorForecastProbabilityRewriteAllowed": false
+  },
+  "preflightChecks": [
+    {
+      "checkId": "methodupdateactioncheck-001",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "The requested method-update plan id must match the checked plan readback."
+    },
+    {
+      "checkId": "methodupdateactioncheck-002",
+      "checkStatus": "block",
+      "requiredBeforeWrite": true,
+      "blocksWrite": true,
+      "message": "The method-update plan must be plan-ready before any local method binding can change."
+    },
+    {
+      "checkId": "methodupdateactioncheck-003",
+      "checkStatus": "block",
+      "requiredBeforeWrite": true,
+      "blocksWrite": true,
+      "message": "Method-owner, calibration-review, and source-policy approvals must be present."
+    },
+    {
+      "checkId": "methodupdateactioncheck-004",
+      "checkStatus": "block",
+      "requiredBeforeWrite": true,
+      "blocksWrite": true,
+      "message": "A rollback record must be present before apply or rollback commands are eligible."
+    },
+    {
+      "checkId": "methodupdateactioncheck-005",
+      "checkStatus": "block",
+      "requiredBeforeWrite": true,
+      "blocksWrite": true,
+      "message": "Candidate benchmark lift, comparable calibration evidence, and anti-leakage evidence must remain favorable."
+    },
+    {
+      "checkId": "methodupdateactioncheck-006",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "The first non-baseline candidate is limited to the transparent weather-adjustment method."
+    },
+    {
+      "checkId": "methodupdateactioncheck-007",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Method changes are prospective-only and never rewrite prior forecast histories or probabilities."
+    },
+    {
+      "checkId": "methodupdateactioncheck-008",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": false,
+      "blocksWrite": false,
+      "message": "Rollback restores the prior baseline method binding without deleting the original apply artifact."
+    }
+  ],
+  "writePlan": {
+    "campaignStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/campaign-manifest.json",
+    "methodUpdateDirectory": ".ope/live/prediction-campaigns/predictioncampaign-001/method-updates",
+    "requiresWriteLocal": true,
+    "writeLocalRequested": false,
+    "minimumComparableResolvedForApply": 100,
+    "idempotent": true,
+    "normalChecksWriteLocal": false,
+    "preservesForecastHistory": true
+  },
+  "writeResult": {
+    "writeStatus": "not_run",
+    "artifactWrites": [],
+    "stateWrites": [],
+    "newFileWriteCount": 0,
+    "alreadyPresentCount": 0,
+    "sanitizedDiagnostics": "Dry-run readback only; add --write-local after the plan is ready to mutate ignored local state."
+  },
+  "decision": {
+    "localWriteEligible": false,
+    "effectfulUpdateAllowedNow": false,
+    "automaticUpdateAllowed": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Keep the baseline method until the method-update plan is ready."
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign apply-method-update",
+    "acceptedFlags": [
+      "--method-update-plan-id",
+      "--method-update-plan-case",
+      "--write-local",
+      "--output-format",
+      "--view"
+    ],
+    "defaultMode": "checked_method_update_action_readback",
+    "capturedStdoutMode": "json",
+    "explicitWriteFlagRequired": true,
+    "normalChecksMutateState": false
+  },
+  "executionBoundary": {
+    "readsIgnoredLiveState": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesResolvers": false,
+    "createsForecastArtifacts": false,
+    "updatesForecastProbabilities": false,
+    "changesForecastMethod": false,
+    "changesMethodWeights": false,
+    "writesMethodRegistry": false,
+    "writesMethodBinding": false,
+    "rewritesPriorForecastHistories": false,
+    "startsNextCycle": false,
+    "normalChecksMutateState": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "Normal checks never apply or roll back a campaign method update.",
+    "The baseline remains the default unless an approved local method binding is written explicitly.",
+    "Apply and rollback preserve prior forecast histories and never rewrite old probabilities."
+  ]
+}

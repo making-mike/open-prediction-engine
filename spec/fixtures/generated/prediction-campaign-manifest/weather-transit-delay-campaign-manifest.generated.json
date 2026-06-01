@@ -70,6 +70,27 @@
       "blocked_duplicate"
     ]
   },
+  "materialization": {
+    "materializationMode": "bounded_preview",
+    "targetRunCount": 100,
+    "materializedRunCount": 4,
+    "boundedPreview": true,
+    "boundedPreviewMaxCount": 12,
+    "fullMaterializationRequested": false,
+    "fullMaterializationAvailable": true,
+    "firstRunId": "predictionrun-1301",
+    "nextRunId": "predictionrun-1301",
+    "finalRunId": "predictionrun-1304",
+    "firstServiceDate": "2026-06-11",
+    "finalServiceDate": "2026-06-14",
+    "duplicateKeyCount": 4,
+    "duplicateConflictCount": 0,
+    "duplicateAuditStatus": "unique_duplicate_keys",
+    "createsForecastArtifacts": false,
+    "writesCampaignState": false,
+    "normalChecksWriteLiveState": false,
+    "nextAction": "Use --full-materialization with --count 100 to inspect the complete Helsinki pilot plan."
+  },
   "plannedRuns": [
     {
       "runId": "predictionrun-1301",
@@ -250,8 +271,10 @@
   "summary": {
     "campaignManifestImplemented": true,
     "dryRunPlannerImplemented": true,
+    "fullMaterializationImplemented": true,
     "runnerImplemented": false,
     "plannedRunCount": 4,
+    "targetRunCount": 100,
     "uniqueRunIdsMinted": true,
     "duplicatePreventionEnabled": true,
     "mutatesLiveState": false,

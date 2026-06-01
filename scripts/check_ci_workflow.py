@@ -26,6 +26,8 @@ def main() -> None:
         "actions/setup-python@v5",
         'python-version: "3.12"',
         "python3 --version",
+        "Install dev-only static analysis tools",
+        'python3 -m pip install "ruff>=0.8,<1" "mypy>=1.13,<2"',
         "python3 scripts/release_check.py",
         "python3 -m py_compile scripts/*.py",
     ]

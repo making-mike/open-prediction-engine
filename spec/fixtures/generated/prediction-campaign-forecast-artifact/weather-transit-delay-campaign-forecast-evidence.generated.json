@@ -34,7 +34,7 @@
       "name": "Prediction campaign manifest fixture",
       "sourceType": "other",
       "uri": "local://spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
-      "contentHash": "781fca03e9f722acb5ec0a493541a13455a08f3dde41355638475b1c7d0ac3a6",
+      "contentHash": "c2614b769575cc4fc79c89017f56fe1c1b104a1c31425e116b6183c48596143a",
       "retrievedAt": "2026-05-29T00:45:00Z"
     },
     {

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -14,6 +13,7 @@ from generate_developer_adoption_surface import build_developer_adoption_surface
 from generate_local_source_runtime import build_runtime
 from generate_local_usage_trace import build_local_usage_trace
 from generate_pilot_evidence_ledger import build_pilot_evidence_ledger
+from generate_prediction_campaign_explain import build_prediction_campaign_explain
 from generate_release_manifest import build_manifest
 from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_corpus_growth_loop import build_growth_loop
@@ -115,6 +115,7 @@ def build_evidence_inputs(
     growth: dict[str, Any],
     track_gate: dict[str, Any],
     runtime: dict[str, Any],
+    campaign_explain: dict[str, Any],
 ) -> list[dict[str, Any]]:
     sample = track_gate["sampleSummary"]
     return [
@@ -190,6 +191,14 @@ def build_evidence_inputs(
             "blocked",
             "Expansion must start with readiness gates and narrow specs, not production runtime claims.",
         ),
+        evidence_input(
+            10,
+            "repeating prediction campaign explain",
+            f"nextForecastId={campaign_explain['campaignSnapshot']['nextForecastId']}; pilotTaskReady={campaign_explain['summary']['pilotTaskCardReady']}",
+            "recurring setup can explain next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling",
+            "met",
+            "Recurring prediction setup has a checked local readback and pilot task before hosted scheduling or broader runtime work.",
+        ),
     ]
 
 
@@ -202,16 +211,18 @@ def build_options(growth: dict[str, Any], track_gate: dict[str, Any]) -> list[di
             "blocked_pending_evidence",
             [
                 "3-5 real pilot sessions identify a hosted-runtime need that local CLI cannot satisfy.",
+                "Recurring prediction setup pilot evidence shows local terminal scheduling is insufficient.",
                 "Hosted auth, tenancy, job state, scheduler, and provenance boundaries are specified before implementation.",
             ],
             ["hosted_service", "network_api", "production_agent_adapter_runtime"],
-            "Run real pilot sessions against the current local MVP and classify friction before designing a hosted runtime.",
+            "Run the repeating prediction pilot task and real pilot sessions before designing a hosted scheduler.",
         ),
         expansion_option(
             "broader_private_sources",
             "blocked_pending_evidence",
             [
                 "Repeated pilot or usage evidence shows the approved local-folder runtime is insufficient.",
+                "Recurring campaign source-policy and append-readiness readbacks identify a bounded source gap.",
                 "One next source kind can be bounded with approval, allow-listing, size limits, and sanitized diagnostics.",
             ],
             ["generic_private_api_database_runtime", "credential_storage", "raw_private_row_retention"],
@@ -261,27 +272,34 @@ def build_sequence() -> list[dict[str, Any]]:
         ),
         sequence_step(
             2,
+            "Recurring Prediction Setup Pilot",
+            "Campaign explain and pilot-session task card are checked.",
+            "Evaluate next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling.",
+            False,
+        ),
+        sequence_step(
+            3,
             "Transit Corpus Growth",
             "Public transport corpus has append-ready candidate guidance.",
             "Add comparable forward runs without broad quality or calibration claims.",
             False,
         ),
         sequence_step(
-            3,
+            4,
             "One Next Source Runtime Choice",
             "Pilot evidence shows a repeated source-kind blocker.",
             "Specify one bounded runtime path before writing execution code.",
             False,
         ),
         sequence_step(
-            4,
+            5,
             "Generated Types Decision",
             "Adoption evidence shows repeated schema friction.",
             "Generate checked helper types only if JSON Schema remains the source of truth.",
             False,
         ),
         sequence_step(
-            5,
+            6,
             "Hosted Runtime Boundary",
             "Local pilots and corpus evidence justify service work.",
             "Write hosted runtime contracts and threat boundaries before hosted implementation.",
@@ -342,6 +360,13 @@ def build_success_criteria(
             "Repeated integration friction that generated types would directly reduce.",
             False,
         ),
+        success_criterion(
+            7,
+            "recurring prediction setup",
+            "campaign explain, pilot task card, adapter readbacks, and usage trace events are checked locally",
+            "Agents can explain recurring campaign state before hosted scheduling or broader runtime work.",
+            True,
+        ),
     ]
 
 
@@ -354,7 +379,18 @@ def build_expansion_readiness_gate() -> dict[str, Any]:
     growth = build_growth_loop()
     track_gate = build_gate()
     runtime = build_runtime()
-    evidence = build_evidence_inputs(manifest, adoption, pilot, pilot_evidence, usage, growth, track_gate, runtime)
+    campaign_explain = build_prediction_campaign_explain()
+    evidence = build_evidence_inputs(
+        manifest,
+        adoption,
+        pilot,
+        pilot_evidence,
+        usage,
+        growth,
+        track_gate,
+        runtime,
+        campaign_explain,
+    )
     options = build_options(growth, track_gate)
     criteria = build_success_criteria(pilot, pilot_evidence, usage, growth, track_gate, runtime)
     gate = {
@@ -385,7 +421,7 @@ def build_expansion_readiness_gate() -> dict[str, Any]:
             "optionCount": len(options),
             "readyOptionCount": 0,
             "blockedOptionCount": len(options),
-            "recommendedNextMilestone": "Milestone 88: Pilot Evidence Ledger, then real pilot sessions and transit corpus growth before hosted or broader runtime work.",
+            "recommendedNextMilestone": "Milestone 97: repeating prediction pilot evidence, then real pilot sessions and transit corpus growth before hosted or broader runtime work.",
             "qualityClaimAllowed": False,
             "hostedRuntimeAllowed": False,
             "generatedTypesIncluded": False,
@@ -408,6 +444,7 @@ def build_expansion_readiness_gate() -> dict[str, Any]:
             "Hosted runtime, production network APIs, and broad private-source runtimes remain non-goals until evidence unblocks them.",
             "Stronger methods and calibration claims remain blocked by comparable resolved sample thresholds.",
             "Generated runtime types remain deferred until adoption evidence shows they reduce integration friction.",
+            "Recurring prediction setup must be evaluated with the local pilot task before hosted scheduling is designed.",
         ],
     }
     validate_gate(gate)

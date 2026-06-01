@@ -65,6 +65,14 @@
       "command": "python3 scripts/ope.py transit-track-record-gate",
       "expected": "The public transport gate remains below track-record and calibration thresholds.",
       "timeBudgetSeconds": 20
+    },
+    {
+      "stepId": "adoptionquickstart-007",
+      "order": 7,
+      "title": "Evaluate recurring campaign readiness",
+      "command": "python3 scripts/ope.py prediction-campaign explain",
+      "expected": "The campaign explain readback names the next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling work.",
+      "timeBudgetSeconds": 30
     }
   ],
   "exampleScenario": {
@@ -158,7 +166,7 @@
       "minimumInput": "Operation name plus IDs such as forecastId=forecast-1102 and questionId=question-1102.",
       "exampleCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
       "expectedOutput": "One transport-neutral envelope with status, exitCode, recordBinding, payload, and sanitized errors.",
-      "boundary": "Agent-call is a local dispatcher, not a hosted API or production protocol service."
+      "boundary": "Agent-call is a local dispatcher, not a hosted API or production protocol service; campaign readbacks must be evaluated before hosted scheduling."
     },
     {
       "interface": "mcp_stdio",
@@ -176,7 +184,8 @@
         "Local CLI checks, readbacks, forecast cards, lifecycle bundles, and generated record validation.",
         "Approved local-folder source runtime for checked CSV/JSON fixture files under path and size limits.",
         "Transport-neutral agent-call envelopes and local MCP stdio scaffold over the same dispatcher.",
-        "Resolution, scoring, source-handoff, setup method, source-quality, usage-trace, and pilot-validation readbacks."
+        "Resolution, scoring, source-handoff, setup method, source-quality, usage-trace, and pilot-validation readbacks.",
+        "Repeating prediction campaign explain, adapter, MCP, and pilot task readbacks for local campaign comprehension."
       ]
     },
     {
@@ -184,7 +193,8 @@
       "items": [
         "Weather-logistics source-handoff forecast, resolution, and scoring remain checked fixture-mode paths.",
         "Public transport corpus growth, method options, track-record gates, and live evidence promotion remain below claim thresholds.",
-        "Usage traces and pilot summaries are synthetic checked examples, not real hosted telemetry."
+        "Usage traces and pilot summaries are synthetic checked examples, not real hosted telemetry.",
+        "Recurring campaign events are checked local readbacks and do not create hosted schedules or production watchers."
       ]
     },
     {
@@ -193,7 +203,8 @@
         "No hosted service, network API, production SDK, or production agent adapter runtime is implemented.",
         "No arbitrary private API/database parsing, credential storage, raw private-row retention, or hosted watcher exists.",
         "No calibration, broad forecast-quality, or production connector claim is allowed from the current examples.",
-        "No generated language-specific runtime types are included before adoption evidence shows they reduce setup friction."
+        "No generated language-specific runtime types are included before adoption evidence shows they reduce setup friction.",
+        "No hosted scheduling or broader private-source runtime should be promoted before recurring prediction setup is evaluated."
       ]
     }
   ],
@@ -232,17 +243,22 @@
     },
     {
       "checkId": "adoptioncheck-006",
+      "command": "python3 scripts/ope.py prediction-campaign explain --view summary",
+      "expected": "recurring prediction campaign readback explains local status"
+    },
+    {
+      "checkId": "adoptioncheck-007",
       "command": "python3 scripts/run_checks.py",
       "expected": "canonical dependency-free check suite passes"
     }
   ],
   "summary": {
-    "quickstartStepCount": 6,
+    "quickstartStepCount": 7,
     "scenarioStepCount": 6,
     "integrationCount": 3,
-    "implementedNoteCount": 4,
-    "fixtureOnlyNoteCount": 3,
-    "nonGoalNoteCount": 4,
+    "implementedNoteCount": 5,
+    "fixtureOnlyNoteCount": 4,
+    "nonGoalNoteCount": 5,
     "firstForecastId": "forecast-1102",
     "qualityClaimAllowed": false,
     "generatedTypesIncluded": false

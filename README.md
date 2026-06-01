@@ -28,7 +28,7 @@ Open `docs/agents-and-humans.html` for a compact role-oriented guide for human c
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, local source runtimes, developer adoption surfaces, private setup requests, first actions, orchestrators, runbooks, agent pilot validation, local usage traces, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, local source runtimes, developer adoption surfaces, private setup requests, first actions, orchestrators, runbooks, agent pilot validation, local usage traces, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, prediction campaign readbacks, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
@@ -40,7 +40,7 @@ The repository currently contains:
 - a generated method-selection record that explains baseline fallback when comparable method evidence is insufficient
 - a schema-bound agent adapter envelope contract with local examples for request validation, evidence planning, evidence-trace reads, card reads, bundle reads, private setup bundle reads, private setup adapter-chain runbook reads, private setup conformance-summary reads, private source adapter guidance reads, private source-kind selection reads, local-file source-builder drafts, source-handoff next actions, method-gate guidance, forecast-execution runs, generated private setup forecast readbacks, resolution status, scoring summary, and sanitized errors
 - a local single-operation `agent-call` dispatcher that returns one schema-bound envelope with standardized exit codes
-- a local MCP stdio scaffold that exposes the sixteen agent adapter operations as tools and returns the same schema-bound envelopes
+- a local MCP stdio scaffold that exposes the checked agent adapter operations as tools and returns the same schema-bound envelopes
 - a local fixture-safe `forecast-run` orchestrator that returns one bound forecast-run summary for agents
 - a checked forecast-run intake matrix covering accepted, rejected, blocked, canceled, unsupported-fixture-path, and response-too-large outcomes
 - a checked agent forecast runbook that maps forecast-run outcomes to safe next actions and read surfaces
@@ -97,7 +97,7 @@ The repository currently contains:
 - a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, and zero real sessions counted so far
 - a checked pilot session packet with task cards, moderator and participant checklists, sanitized evidence template, sanitization review, and stop conditions for real local MVP pilot sessions
 - a checked pilot summary intake classifier that marks sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions
-- a checked local usage trace read model with synthetic local MVP event rows, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
+- a checked local usage trace read model with synthetic local MVP event rows, campaign lifecycle events, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
 - a checked developer adoption surface with a quickstart, one complete local source setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision
 - a checked private setup bundle adapter operation that returns the same guidance through the transport-neutral agent envelope and local MCP scaffold without executing setup commands
 - a checked private setup source-builder adapter operation that inspects only caller-approved local CSV/JSON files and returns draft manifest/mapping guidance without creating forecast or score records
@@ -109,6 +109,7 @@ The repository currently contains:
 - a checked private setup adapter-chain runbook adapter operation that returns that sequence guidance through the transport-neutral envelope and local MCP scaffold without executing adapter calls
 - a checked private source adapter guidance adapter operation that joins capability, outcome, and intake-bridge guidance through the transport-neutral envelope and local MCP scaffold without executing source reads
 - a checked private source-kind selection adapter operation that returns compact source-kind path examples, or one selected source-kind recommendation, through the same envelope and MCP surfaces without executing the selected path
+- checked campaign plan, status, health, append-readiness, and calibration-status adapter operations through the same transport-neutral envelope and MCP surfaces without starting campaign execution
 - source manifest and field mapping intake fixtures that classify data as accepted, accepted-partial, needs-confirmation, or rejected before forecasting
 - source-quality and mapping-confidence readbacks that explain freshness, coverage, role fit, entity scope, leakage, missingness, outcome availability, and mapping confidence before method gates
 - setup-specific benchmark gates that allow deterministic fixture execution only when source intake, benchmark binding, anti-leakage controls, and execution thresholds pass
@@ -152,7 +153,21 @@ The initial question shape is:
 Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?
 ```
 
-This wedge now has a local custom-file prototype, a checked forward-run workflow, a checked forward-run corpus index, a checked corpus growth loop, a checked baseline track-record and calibration gate, checked MVP method options, a policy-bound live evidence promotion gate, an agent-facing resolution job registry, a foreground terminal scheduler, a local resolver-agent scan, a checked runtime reliability read model, a checked repeating prediction setup contract, a checked dry-run prediction campaign manifest, a checked terminal campaign runner readback with normalized campaign input, missed-run policy, and an explicit guarded `--write-local` creation tick, a checked dry-run campaign forecast-creation handoff, a checked unresolved campaign forecast artifact for `forecast-1301`, a checked campaign forecast write plan with explicit guarded local writes, a checked non-mutating campaign resume readback, and an opt-in HSL GTFS-RT TripUpdates connector. The prototype can forecast from approved CSV/JSON weather and historical delay files, optionally resolve against a trip-update outcome file, and emit schema-bound forecast, resolution, and scoring records. The forward-run workflow binds the pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary. The corpus index reports comparable and excluded run counts without making calibration claims. The growth loop classifies append-ready comparable runs, exclusion-ledger rows, and projected progress toward track-record and calibration thresholds while keeping normal checks non-mutating. The track-record gate reports current Brier score, baseline score, baseline lift, sample sizes, and horizon/window coverage while keeping track-record and calibration claims below threshold. The method options keep baseline-only execution as the default, record the transparent weather-adjustment method as evidence-only, and keep richer methods proposed-only. The live evidence promotion gate shows how selected ignored live weather drafts can become sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; it rejects post-close and resolution-only transit captures as forecast evidence. The repeating prediction setup contract defines finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart policies without starting a runner or scheduler. The prediction campaign manifest expands that setup into unique dry-run campaign, cycle, run, question, forecast, resolution, and scoring IDs with duplicate keys and status readbacks, without writing live state or creating forecast artifacts. By default, the campaign runner exposes `prediction-campaign start` command semantics, recurrence flags, dry-run decisions, normalized flag/setup-JSON campaign creation input, JSONL output expectations, a `missed_forecast_close` exclusion policy, and the non-execution boundary without sleeping, polling, fetching live data, writing state, or creating forecast artifacts; with `start --write-local`, it performs one ready-run creation tick under ignored `.ope/live/prediction-campaigns/`. The campaign forecast-creation handoff binds the ready runner decision to the planned question, forecast, card, and bundle IDs while keeping normal checks read-only and non-fetching. The campaign forecast artifact materializes that ready run as an unresolved baseline-only checked fixture and leaves resolution, scoring, and corpus append for later steps. The campaign forecast write plan binds those lifecycle records to ignored `.ope/live` target paths and guard checks; `forecast-write --write-local` executes the guarded copy idempotently and refuses mismatched overwrites. The campaign resume readback joins the manifest, write plan, open forecast, and resolution queue into recovery actions while forbidding ignored-state reads during normal checks, resolver execution, and prior-evidence overwrite. The resolution job registry tells agents whether to wait, execute the resolver, or read resolved outputs; with `--campaign predictioncampaign-001`, it also reads the checked campaign forecast and reports the `forecast-1301` resolution wait state without executing campaign resolvers. The scheduler lets an agent keep a local terminal polling those jobs and, with `--campaign predictioncampaign-001`, includes the campaign wait action in a dry-run tick without executing campaign resolvers; with explicit `--execute`, it can call only the checked due forward-run resolver path. The resolver-agent command scans saved run state, decides what is due, and can explicitly execute the checked resolver command. The reliability read model records sanitized failure categories, retry/next-action guidance, and provenance boundaries. The connector can capture public TripUpdates into the ignored local workspace, decode explicit delay rows when the feed supplies them, or derive delay rows by joining predicted stop times to HSL's static GTFS schedule package.
+Current checked transit surfaces are grouped here so new work can be added as a small bullet instead of rewriting one status paragraph:
+
+- Local prototype: `transit-delay-forecast` reads approved CSV/JSON weather and historical delay files, optionally resolves against a trip-update outcome file, and emits schema-bound forecast, resolution, and scoring records.
+- Opt-in connector: `transit-api-connector` captures public HSL GTFS-RT TripUpdates into the ignored local workspace and can derive delay rows through the static GTFS schedule join.
+- Forward-run loop: `transit-delay-forward-run` binds pre-window forecast, later outcome capture, resolution, scoring, and claim boundary into one summary.
+- Corpus growth: `transit-forward-run-corpus` reports comparable and excluded counts; `transit-corpus-growth` classifies append-ready comparable candidates, exclusion-ledger rows, due-run checklists, and progress toward track-record and calibration thresholds without mutating the canonical corpus during normal checks.
+- Track record and methods: `transit-track-record-gate` reports Brier score, baseline score, baseline lift, sample sizes, horizon/window coverage, optional checked campaign ledger inclusion with `--campaign`, and ignored local ledger inclusion only with `--from-local-ledger`; calibration claims stay below-threshold. `transit-method-options` keeps baseline-only execution as the default, records transparent weather adjustment as evidence-only, and keeps richer methods proposed-only.
+- Live evidence promotion: `transit-live-evidence-promotion` turns selected ignored live weather drafts into sanitized forecast-time source sets only after source-policy, freshness, retention, role, leakage, and provenance checks; post-close and resolution-only captures are rejected as forecast evidence.
+- Resolution runtime: `resolution-jobs`, `resolution-scheduler`, `resolve-due-forward-runs`, and `resolution-runtime-reliability` expose read-only job guidance, foreground terminal polling, explicit due-run execution, sanitized failure categories, retry guidance, provenance, and live-capture boundaries.
+- Repeating setup: `repeating-prediction-setup` defines finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart policies without starting a runner or scheduler.
+- Campaign manifest and runner: `prediction-campaign plan`, `status`, and `start` expose unique dry-run campaign/cycle/run/question/forecast/resolution/scoring IDs, duplicate keys, bounded default previews, explicit 100-run Helsinki pilot materialization with `--full-materialization`, normalized flag/setup-JSON campaign input, forecast schedule rows, bounded foreground ticks, runner-clock `--now`, missed-run policy, JSONL output expectations, and guarded `--write-local` creation for the next due run.
+- Campaign forecast lifecycle: `prediction-campaign forecast-create`, `forecast-artifact`, and `forecast-write` bind the ready runner decision to planned IDs, materialize unresolved `forecast-1301` as a baseline-only checked fixture, and copy lifecycle records plus minimal campaign/run state idempotently only when `--write-local` is explicit.
+- Campaign recovery and evidence: `prediction-campaign resolve`, `doctor`, `resume`, `append-ready`, `append`, `calibration-status`, `method-update-gate`, `method-update-plan`, `apply-method-update`, `rollback-method-update`, `explain`, `pilot-runbook`, and `pilot-readiness` expose due-resolution attempts, guarded local resolution/scoring writes from outcome-only transit rows, missing-outcome exclusions, health queues, interrupted-state recovery, append-readiness, provenance-rich local ledger rows, local-ledger calibration readbacks with reliability buckets and caveats, method-update readiness, approval/rollback plan shape, explicit local method-binding apply/rollback, pilot-task guidance, a 3-run smoke path, operator status, launch readiness, success/abort criteria, sanitized error envelopes, and claim boundaries without changing methods or calibration claims during normal checks.
+
+Normal checks stay offline and non-mutating. Effectful local writes require explicit flags, live connector calls remain opt-in, campaign resolver execution is separated from forecast writing and ledger append, and quality/calibration claims remain blocked until enough comparable outcomes exist.
 
 Run the checked fixture path:
 
@@ -168,13 +183,48 @@ python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign start --view campaign-creation
+python3 scripts/ope.py prediction-campaign start --view forecast-schedule
 python3 scripts/ope.py prediction-campaign start --view missed-run-policy
+python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-09-18T00:00:00Z --count 100 --full-materialization --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
+python3 scripts/ope.py prediction-campaign resolve
+python3 scripts/ope.py prediction-campaign resolve --execute-resolvers
+python3 scripts/ope.py prediction-campaign resolve --attempt-case blocked_duplicate --execute-resolvers
+python3 scripts/ope.py prediction-campaign doctor
 python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state
+python3 scripts/ope.py prediction-campaign append-ready
+python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary
+python3 scripts/ope.py prediction-campaign append-ready --from-local --run-id predictionrun-1301
+python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local
+python3 scripts/ope.py prediction-campaign calibration-status
+python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view readback
+python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot
+python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle
+python3 scripts/ope.py prediction-campaign method-update-gate
+python3 scripts/ope.py prediction-campaign method-update-gate --method-update-case approved_plan_ready --view decision
+python3 scripts/ope.py prediction-campaign method-update-plan
+python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command
+python3 scripts/ope.py prediction-campaign apply-method-update
+python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --view summary
+python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --view summary
+python3 scripts/ope.py prediction-campaign explain
+python3 scripts/ope.py prediction-campaign pilot-runbook
+python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke
+python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status
+python3 scripts/ope.py prediction-campaign pilot-readiness
+python3 scripts/ope.py prediction-campaign pilot-readiness --view commands
+python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001
+python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001 --from-local-ledger
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z
 python3 scripts/ope.py resolution-jobs
 python3 scripts/ope.py resolution-scheduler
 python3 scripts/ope.py resolution-runtime-reliability
@@ -214,6 +264,17 @@ python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
 python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state
+python3 scripts/ope.py prediction-campaign append-ready
+python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary
+python3 scripts/ope.py prediction-campaign calibration-status
+python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle
+python3 scripts/ope.py prediction-campaign method-update-gate
+python3 scripts/ope.py prediction-campaign method-update-plan
+python3 scripts/ope.py prediction-campaign apply-method-update
+python3 scripts/ope.py prediction-campaign rollback-method-update
+python3 scripts/ope.py prediction-campaign explain
+python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001
 ```
 
 Start an explicit local live forward forecast:
@@ -240,6 +301,8 @@ Scan saved live forward runs without executing anything:
 ```bash
 python3 scripts/ope.py resolution-jobs --live
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
+python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers
+python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
 python3 scripts/ope.py resolve-due-forward-runs --live
 ```
@@ -328,7 +391,7 @@ This shows the contract an agent-built connector should produce before OPE sourc
 
 ## Checks
 
-The current project runtime is Python 3.12+ standard library. There is no required package install step.
+The current project runtime is Python 3.12+ standard library. There is no required package install step for normal local checks or CLI use.
 
 The current bootstrap check uses only the Python 3 standard library:
 
@@ -336,6 +399,8 @@ The current bootstrap check uses only the Python 3 standard library:
 python3 scripts/run_checks.py
 python3 scripts/ope.py check
 ```
+
+`scripts/run_checks.py` runs subprocess checks in parallel by default. Use `--workers N` or `OPE_CHECK_WORKERS=N` to choose concurrency, and `--list` to print the checked command inventory without running it.
 
 Individual checks:
 
@@ -466,8 +531,18 @@ python3 scripts/generate_prediction_campaign_forecast_artifact.py --check
 python3 scripts/check_prediction_campaign_forecast_artifact.py
 python3 scripts/generate_prediction_campaign_forecast_write.py --check
 python3 scripts/check_prediction_campaign_forecast_write.py
+python3 scripts/generate_prediction_campaign_resolution_attempt.py --check
+python3 scripts/check_prediction_campaign_resolution_attempt.py
+python3 scripts/generate_prediction_campaign_doctor.py --check
+python3 scripts/check_prediction_campaign_doctor.py
 python3 scripts/generate_prediction_campaign_resume.py --check
 python3 scripts/check_prediction_campaign_resume.py
+python3 scripts/generate_prediction_campaign_evidence_ledger.py --check
+python3 scripts/check_prediction_campaign_evidence_ledger.py
+python3 scripts/generate_prediction_campaign_calibration_status.py --check
+python3 scripts/check_prediction_campaign_calibration_status.py
+python3 scripts/generate_prediction_campaign_explain.py --check
+python3 scripts/check_prediction_campaign_explain.py
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --check
 python3 scripts/check_private_setup_adapter_chain_runbook.py
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --check
@@ -512,9 +587,13 @@ python3 scripts/check_fixtures.py
 Release-readiness wrapper:
 
 ```bash
+python3 -m pip install "ruff>=0.8,<1" "mypy>=1.13,<2"
 python3 scripts/release_check.py
 python3 scripts/ope.py release-check
 ```
+
+`scripts/release_check.py` runs the normal check suite and then `scripts/check_static_analysis.py`. The static gate is dev-only: CI installs `ruff` and `mypy`, while the runtime dependency list stays empty.
+For local release checks, install the dev-only tools in an activated virtual environment if your Python install does not allow global package installs.
 
 Read an artifact:
 
@@ -728,9 +807,23 @@ python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign status
 python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign start --view campaign-creation
+python3 scripts/ope.py prediction-campaign start --view forecast-schedule
 python3 scripts/ope.py prediction-campaign start --view missed-run-policy
+python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-09-18T00:00:00Z --count 100 --full-materialization --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state
+python3 scripts/ope.py prediction-campaign append-ready
+python3 scripts/ope.py prediction-campaign calibration-status
+python3 scripts/ope.py prediction-campaign method-update-gate
+python3 scripts/ope.py prediction-campaign method-update-plan
+python3 scripts/ope.py prediction-campaign apply-method-update
+python3 scripts/ope.py prediction-campaign rollback-method-update
+python3 scripts/ope.py prediction-campaign explain
+python3 scripts/ope.py prediction-campaign pilot-runbook
+python3 scripts/ope.py prediction-campaign pilot-readiness
 python3 scripts/ope.py private-setup-adapter-runbook
 python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
@@ -793,6 +886,11 @@ python3 scripts/ope.py agent-call --operation forecast_card --forecast-id foreca
 python3 scripts/ope.py agent-call --operation lifecycle_bundle --forecast-id forecast-1102 --question-id question-1102
 python3 scripts/ope.py agent-call --operation resolution_status --forecast-id forecast-1102 --question-id question-1102
 python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102
+python3 scripts/ope.py agent-call --operation campaign_plan
+python3 scripts/ope.py agent-call --operation campaign_status
+python3 scripts/ope.py agent-call --operation campaign_health
+python3 scripts/ope.py agent-call --operation campaign_append_readiness
+python3 scripts/ope.py agent-call --operation campaign_calibration_status
 python3 scripts/ope.py read --record-type forecast-card --id forecast-602 --question-id question-601
 ```
 
@@ -831,6 +929,7 @@ Check the release manifest:
 
 ```bash
 python3 scripts/ope.py manifest
+python3 scripts/ope.py generate-fixtures --list
 python3 scripts/check_mvp_release_surface.py
 python3 scripts/check_agent_pilot_validation.py
 python3 scripts/check_pilot_session_packet.py
@@ -841,11 +940,22 @@ python3 scripts/ope.py repeating-prediction-setup --section summary
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign start
 python3 scripts/ope.py prediction-campaign start --view campaign-creation
+python3 scripts/ope.py prediction-campaign start --view forecast-schedule
 python3 scripts/ope.py prediction-campaign start --view missed-run-policy
+python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl
+python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write
 python3 scripts/ope.py prediction-campaign resume
+python3 scripts/ope.py prediction-campaign resume --resume-case interrupted_after_forecast_write --view state
+python3 scripts/ope.py prediction-campaign append-ready
+python3 scripts/ope.py prediction-campaign calibration-status
+python3 scripts/ope.py prediction-campaign method-update-gate
+python3 scripts/ope.py prediction-campaign method-update-plan
+python3 scripts/ope.py prediction-campaign apply-method-update
+python3 scripts/ope.py prediction-campaign rollback-method-update
+python3 scripts/ope.py prediction-campaign explain
 ```
 
 CI release gate:
@@ -853,6 +963,8 @@ CI release gate:
 ```text
 .github/workflows/release-check.yml
 ```
+
+The workflow installs dev-only `ruff`/`mypy`, runs `python3 scripts/release_check.py`, and compiles `scripts/*.py`; it does not add runtime dependencies.
 
 Generated fixture reports can be refreshed with:
 
@@ -909,7 +1021,12 @@ python3 scripts/generate_prediction_campaign_runner.py --write
 python3 scripts/generate_prediction_campaign_forecast_creation.py --write
 python3 scripts/generate_prediction_campaign_forecast_artifact.py --write
 python3 scripts/generate_prediction_campaign_forecast_write.py --write
+python3 scripts/generate_prediction_campaign_resolution_attempt.py --write
+python3 scripts/generate_prediction_campaign_doctor.py --write
 python3 scripts/generate_prediction_campaign_resume.py --write
+python3 scripts/generate_prediction_campaign_evidence_ledger.py --write
+python3 scripts/generate_prediction_campaign_calibration_status.py --write
+python3 scripts/generate_prediction_campaign_explain.py --write
 python3 scripts/generate_private_setup_adapter_chain_runbook.py --write
 python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write
 python3 scripts/generate_private_setup_adapter_conformance_summary.py --write

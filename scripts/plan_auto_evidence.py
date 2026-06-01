@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -17,7 +16,7 @@ from source_connector_catalog import (
     connector_policy_checks,
 )
 from validate_forecast_request import load_json, question_hash, validate_request
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import emit_generated, render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -236,14 +235,6 @@ def build_plan(request_path: Path = DEFAULT_REQUEST) -> dict[str, Any]:
     return plan
 
 
-def write_plan(plan: dict[str, Any]) -> None:
-    write_generated(PLAN_PATH, plan, label="auto-evidence plan", regen="python3 scripts/plan_auto_evidence.py --write")
-
-
-def check_plan(plan: dict[str, Any]) -> None:
-    check_generated(PLAN_PATH, plan, label="auto-evidence plan", regen="python3 scripts/plan_auto_evidence.py --write")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", type=Path, default=DEFAULT_REQUEST)
@@ -255,10 +246,8 @@ def main() -> None:
     except EvidencePlanError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc
-    if args.write:
-        write_plan(plan)
-    elif args.check:
-        check_plan(plan)
+    if args.write or args.check:
+        emit_generated(PLAN_PATH, plan, write=args.write, label="auto-evidence plan", regen="python3 scripts/plan_auto_evidence.py --write")
     else:
         sys.stdout.write(render_json(plan))
 

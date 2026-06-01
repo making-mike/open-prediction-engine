@@ -13,6 +13,8 @@
     "bindings",
     "commandSurface",
     "campaignCreationRequest",
+    "forecastSchedule",
+    "methodSelectionBinding",
     "supportedRecurrenceModes",
     "runnerDecisions",
     "missedRunPolicy",
@@ -33,6 +35,8 @@
     "bindings": { "$ref": "#/$defs/bindings" },
     "commandSurface": { "$ref": "#/$defs/commandSurface" },
     "campaignCreationRequest": { "$ref": "#/$defs/campaignCreationRequest" },
+    "forecastSchedule": { "$ref": "#/$defs/forecastSchedule" },
+    "methodSelectionBinding": { "$ref": "#/$defs/methodSelectionBinding" },
     "supportedRecurrenceModes": {
       "type": "array",
       "minItems": 5,
@@ -41,8 +45,8 @@
     },
     "runnerDecisions": {
       "type": "array",
-      "minItems": 4,
-      "maxItems": 12,
+      "minItems": 2,
+      "maxItems": 100,
       "items": { "$ref": "#/$defs/runnerDecision" }
     },
     "missedRunPolicy": { "$ref": "#/$defs/missedRunPolicy" },
@@ -66,7 +70,7 @@
     "boundedStringList": {
       "type": "array",
       "minItems": 1,
-      "maxItems": 16,
+      "maxItems": 24,
       "items": { "$ref": "#/$defs/boundedString" }
     },
     "optionalStringList": {
@@ -162,6 +166,110 @@
         "resolverExecutionRequested": { "type": "boolean" },
         "acceptedForDryRun": { "type": "boolean" },
         "createsCampaignManifest": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "forecastSchedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheduleMode",
+        "runnerClock",
+        "tickPolicy",
+        "readyRunId",
+        "nextForecastCreateAt",
+        "nextForecastCloseAt",
+        "creationCommand",
+        "capturedOutputMode",
+        "scheduleRows",
+        "normalChecksWriteLiveState",
+        "requiresExplicitWriteLocal",
+        "createsForecastArtifactsInDryRun",
+        "nextAction"
+      ],
+      "properties": {
+        "scheduleMode": { "$ref": "#/$defs/boundedString" },
+        "runnerClock": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "tickPolicy": { "$ref": "#/$defs/boundedString" },
+        "readyRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextForecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "nextForecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "creationCommand": { "$ref": "#/$defs/boundedString" },
+        "capturedOutputMode": { "$ref": "#/$defs/boundedString" },
+        "scheduleRows": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/forecastScheduleRow" }
+        },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "requiresExplicitWriteLocal": { "type": "boolean" },
+        "createsForecastArtifactsInDryRun": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "methodSelectionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bindingStatus",
+        "defaultMethodId",
+        "activeMethodId",
+        "candidateMethodId",
+        "methodBindingPath",
+        "applyCommand",
+        "rollbackCommand",
+        "requiresApprovedLocalBinding",
+        "normalChecksReadLocalBinding",
+        "normalChecksChangeMethod",
+        "futureForecastsOnly",
+        "priorForecastHistoryRewriteAllowed"
+      ],
+      "properties": {
+        "bindingStatus": { "$ref": "#/$defs/boundedString" },
+        "defaultMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "activeMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodBindingPath": { "$ref": "#/$defs/boundedString" },
+        "applyCommand": { "$ref": "#/$defs/boundedString" },
+        "rollbackCommand": { "$ref": "#/$defs/boundedString" },
+        "requiresApprovedLocalBinding": { "type": "boolean" },
+        "normalChecksReadLocalBinding": { "type": "boolean" },
+        "normalChecksChangeMethod": { "type": "boolean" },
+        "futureForecastsOnly": { "type": "boolean" },
+        "priorForecastHistoryRewriteAllowed": { "type": "boolean" }
+      }
+    },
+    "forecastScheduleRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "decisionStatus",
+        "scheduleAction",
+        "forecastCreateAt",
+        "forecastCloseAt",
+        "createsForecastArtifacts",
+        "writesCampaignState",
+        "nextAction"
+      ],
+      "properties": {
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "decisionStatus": {
+          "type": "string",
+          "enum": [
+            "ready_to_create_forecast",
+            "wait_until_create_time",
+            "skip_missed_close",
+            "blocked_duplicate",
+            "manual_stop_requested"
+          ]
+        },
+        "scheduleAction": { "$ref": "#/$defs/boundedString" },
+        "forecastCreateAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "createsForecastArtifacts": { "type": "boolean" },
         "writesCampaignState": { "type": "boolean" },
         "nextAction": { "$ref": "#/$defs/boundedString" }
       }
@@ -267,6 +375,7 @@
       "required": [
         "plannedRunCount",
         "readyToCreateForecastCount",
+        "materializedRunCount",
         "forecastArtifactsCreated",
         "resolvedComparableOutcomes",
         "nextForecastRunId",
@@ -275,6 +384,7 @@
       "properties": {
         "plannedRunCount": { "type": "integer", "minimum": 0 },
         "readyToCreateForecastCount": { "type": "integer", "minimum": 0 },
+        "materializedRunCount": { "type": "integer", "minimum": 0, "maximum": 100 },
         "forecastArtifactsCreated": { "type": "integer", "minimum": 0 },
         "resolvedComparableOutcomes": { "type": "integer", "minimum": 0 },
         "nextForecastRunId": { "$ref": "common.schema.json#/$defs/id" },

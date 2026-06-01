@@ -24,6 +24,9 @@ jobs:
       - name: Show Python version
         run: python3 --version
 
+      - name: Install dev-only static analysis tools
+        run: python3 -m pip install "ruff>=0.8,<1" "mypy>=1.13,<2"
+
       - name: Run release check
         run: python3 scripts/release_check.py
 

@@ -35,7 +35,7 @@
       "recordId": "evidence-1301",
       "fixturePath": "spec/fixtures/generated/prediction-campaign-forecast-artifact/weather-transit-delay-campaign-forecast-evidence.generated.json",
       "targetPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/evidence-1301.json",
-      "contentHash": "b0637aaede3722b7010bba307a626c576d7da3ba31ce3fe0a2df3d4bc920f31e",
+      "contentHash": "3fceabf9a8cda09c34a292f6f118e0b43170c8cb4993d5a93cfa08d8247076f5",
       "schemaFile": "spec/evidence-packet.schema.json"
     },
     {

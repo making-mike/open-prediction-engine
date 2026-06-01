@@ -1,0 +1,508 @@
+{
+  "helsinkiTrafficDisturbancePilotRunbookId": "helsinkipilotrunbook-001",
+  "generatedAt": "2026-05-31T05:00:00Z",
+  "runbookStatus": "checked_local_pilot_operations_runbook",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "predictionCampaignDoctorId": "predictioncampaigndoctor-001",
+    "predictionCampaignEvidenceLedgerId": "predictioncampaignledger-001",
+    "predictionCampaignCalibrationStatusId": "predictioncampaigncalibrationstatus-001",
+    "predictionCampaignMethodUpdatePlanId": "predictioncampaignmethodupdateplan-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201"
+  },
+  "pilotScope": {
+    "geography": "helsinki",
+    "network": "hsl-surface",
+    "serviceWindow": "morning_peak",
+    "timezone": "Europe/Helsinki",
+    "targetRunCount": 100,
+    "miniSmokeRunCount": 3,
+    "firstServiceDate": "2026-06-11",
+    "finalServiceDate": "2026-09-18",
+    "bestAvailableMethodId": "transitmethod-100",
+    "bestAvailableMethodName": "baseline historical transit-delay frequency",
+    "nonBaselineMethodGate": "Use transitmethod-101 only after the method-update gate, plan, approvals, benchmark evidence, and rollback record are ready.",
+    "fullMaterializationCommand": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization",
+    "miniSmokeCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+    "normalChecksUseLiveNetwork": false,
+    "normalChecksWriteLocalState": false
+  },
+  "operatorStatus": {
+    "status": "ready_for_three_run_smoke_before_real_pilot",
+    "nextForecastRunId": "predictionrun-1301",
+    "nextForecastCreateAt": "2026-06-11T00:00:00Z",
+    "nextResolutionRunId": "predictionrun-1301",
+    "nextResolutionEligibleAt": "2026-06-11T07:15:00Z",
+    "dueResolverJobCount": 1,
+    "appendReadyRunCount": 0,
+    "ledgerComparableRowCount": 0,
+    "ledgerExcludedRowCount": 1,
+    "exclusionRate": 0.875,
+    "calibrationComparableCount": 1,
+    "calibrationThreshold": 100,
+    "calibrationProgressPercent": 1.0,
+    "statusCommands": [
+      {
+        "commandId": "helsinkipilotcommand-001",
+        "commandKey": "next_forecast",
+        "command": "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+        "answers": "Next forecast run, create time, close time, and dry-run schedule action.",
+        "statusPath": "forecastSchedule",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-002",
+        "commandKey": "next_resolution",
+        "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+        "answers": "Next campaign run waiting for or due for resolution.",
+        "statusPath": "jobs[*].target.campaignRunId",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-003",
+        "commandKey": "due_resolver_jobs",
+        "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z",
+        "answers": "Due resolver jobs and the exact checked resolve command to inspect before execution.",
+        "statusPath": "jobs[*].jobStatus",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-004",
+        "commandKey": "append_readiness",
+        "command": "python3 scripts/ope.py prediction-campaign append-ready",
+        "answers": "Whether a run can append comparable evidence or only an exclusion audit row.",
+        "statusPath": "appendCandidate",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-005",
+        "commandKey": "ledger_counts",
+        "command": "python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored --view summary",
+        "answers": "Comparable and excluded row counts for the checked append row shape.",
+        "statusPath": "summary",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-006",
+        "commandKey": "exclusion_rate",
+        "command": "python3 scripts/ope.py prediction-campaign calibration-status --view thresholds",
+        "answers": "Current exclusion rate and maximum exclusion rate allowed before calibration claims.",
+        "statusPath": "thresholdReadback.exclusionRate",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-007",
+        "commandKey": "calibration_threshold_progress",
+        "command": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot",
+        "answers": "Comparable resolved count against the 100-outcome calibration threshold when local ledger review is explicit.",
+        "statusPath": "pilotReadback",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      }
+    ]
+  },
+  "runbookSteps": [
+    {
+      "stepId": "helsinkipilotstep-001",
+      "stepNumber": 1,
+      "stepKey": "review_scope",
+      "phase": "setup",
+      "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view scope",
+      "operatorCheck": "Confirm geography, service window, 100-run target, source policy, and baseline method boundary.",
+      "successSignal": "Runbook scope reports targetRunCount=100 and bestAvailableMethodId=transitmethod-100.",
+      "recoveryAction": "Stop and review source policy or domain setup before any campaign write.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Scope review is not forecast evidence."
+    },
+    {
+      "stepId": "helsinkipilotstep-002",
+      "stepNumber": 2,
+      "stepKey": "run_three_run_smoke_plan",
+      "phase": "smoke",
+      "command": "python3 scripts/ope.py prediction-campaign plan --plan-count 3 --count 3",
+      "operatorCheck": "Confirm exactly three planned runs and no duplicate keys.",
+      "successSignal": "predictionrun-1301 through predictionrun-1303 are present.",
+      "recoveryAction": "Fix planning input before the real 100-run campaign.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Mini smoke records are operational checks, not calibration evidence."
+    },
+    {
+      "stepId": "helsinkipilotstep-003",
+      "stepNumber": 3,
+      "stepKey": "run_three_run_smoke_tick",
+      "phase": "smoke",
+      "command": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+      "operatorCheck": "Confirm the foreground tick reports dry_run_ready and zero forecast artifacts created.",
+      "successSignal": "JSONL tick returns without writing state.",
+      "recoveryAction": "Do not start the real pilot until the mini tick passes.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Dry-run smoke output must not be counted as pilot evidence."
+    },
+    {
+      "stepId": "helsinkipilotstep-004",
+      "stepNumber": 4,
+      "stepKey": "review_full_100_plan",
+      "phase": "setup",
+      "command": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization",
+      "operatorCheck": "Confirm 100 unique planned runs, first/final service dates, and duplicate audit status.",
+      "successSignal": "materializationMode is full_100_run_pilot and duplicateConflictCount is zero.",
+      "recoveryAction": "Do not write local state; repair plan inputs first.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "A full plan is not evidence until forecasts are created before close and later resolved."
+    },
+    {
+      "stepId": "helsinkipilotstep-005",
+      "stepNumber": 5,
+      "stepKey": "create_next_forecast",
+      "phase": "forecast",
+      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
+      "operatorCheck": "Run only inside the forecast creation window and keep stdout/logs.",
+      "successSignal": "One ready forecast is created idempotently in .ope/live for the next due run.",
+      "recoveryAction": "If close time has passed, record missed and advance; never backfill.",
+      "mutatesState": true,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Forecast creation still uses the baseline method until method-update gates permit otherwise."
+    },
+    {
+      "stepId": "helsinkipilotstep-006",
+      "stepNumber": 6,
+      "stepKey": "daily_operator_status",
+      "phase": "monitor",
+      "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
+      "operatorCheck": "Read next forecast, next resolution, due resolver jobs, append readiness, ledger counts, exclusion rate, and calibration progress.",
+      "successSignal": "Operator status remains internally consistent and below-threshold claims stay blocked.",
+      "recoveryAction": "Use doctor/resume when queues disagree or an interrupted state is reported.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Status readbacks do not mutate campaign state or imply model quality."
+    },
+    {
+      "stepId": "helsinkipilotstep-007",
+      "stepNumber": 7,
+      "stepKey": "resolve_due_run",
+      "phase": "resolve",
+      "command": "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local",
+      "operatorCheck": "Attach only outcome evidence that is eligible after the horizon ends.",
+      "successSignal": "Resolution and scoring artifacts are written for the due run.",
+      "recoveryAction": "If outcome evidence is missing, write an explicit missing-outcome exclusion instead of inventing data.",
+      "mutatesState": true,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Outcome rows must be resolution-only and must not change the original forecast."
+    },
+    {
+      "stepId": "helsinkipilotstep-008",
+      "stepNumber": 8,
+      "stepKey": "append_scored_row",
+      "phase": "append",
+      "command": "python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local",
+      "operatorCheck": "Confirm comparable append checks and provenance are complete.",
+      "successSignal": "Append-only ledger has one more comparable or exclusion row with a stable row key.",
+      "recoveryAction": "If checks fail, append an exclusion audit row or leave the run out of comparable evidence.",
+      "mutatesState": true,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Ledger append grows evidence but does not itself allow a calibration claim."
+    },
+    {
+      "stepId": "helsinkipilotstep-009",
+      "stepNumber": 9,
+      "stepKey": "review_calibration_threshold",
+      "phase": "calibrate",
+      "command": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot",
+      "operatorCheck": "Confirm comparable count, exclusion rate, provenance completeness, reliability buckets, and confidence caveats.",
+      "successSignal": "At 100 comparable outcomes with acceptable exclusions and provenance, measurement-only calibration is ready.",
+      "recoveryAction": "Continue collecting or review exclusions until the threshold is met without unsafe evidence.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Calibration readback is measurement-only and does not update probabilities."
+    },
+    {
+      "stepId": "helsinkipilotstep-010",
+      "stepNumber": 10,
+      "stepKey": "review_method_update_after_threshold",
+      "phase": "calibrate",
+      "command": "python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command",
+      "operatorCheck": "Only after calibration, benchmark, anti-leakage, source-policy, approval, and rollback checks pass.",
+      "successSignal": "Plan-ready command targets transitmethod-101 prospectively and keeps rollback available.",
+      "recoveryAction": "If evidence is weak or approvals are missing, continue on transitmethod-100.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "The best available method is baseline until an explicit local apply command is approved."
+    },
+    {
+      "stepId": "helsinkipilotstep-011",
+      "stepNumber": 11,
+      "stepKey": "recover_or_resume",
+      "phase": "recover",
+      "command": "python3 scripts/ope.py prediction-campaign resume --from-local",
+      "operatorCheck": "Inspect interrupted state, idempotency keys, queue state, and next safe action.",
+      "successSignal": "Resume readback points to one safe next command without overwriting prior evidence.",
+      "recoveryAction": "Escalate manually if duplicate keys, unsafe paths, or malformed local state are present.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Recovery must preserve prior forecasts and append-only evidence."
+    },
+    {
+      "stepId": "helsinkipilotstep-012",
+      "stepNumber": 12,
+      "stepKey": "stop_or_abort",
+      "phase": "stop",
+      "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view abort",
+      "operatorCheck": "Apply abort criteria for source outages, unsafe evidence, clock drift, path failures, and repeated missed windows.",
+      "successSignal": "Stop condition is documented before any restart.",
+      "recoveryAction": "Restart only from a clean mini smoke and explicit resume/readback sequence.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "An aborted pilot cannot support quality or calibration claims."
+    }
+  ],
+  "miniCampaignSmoke": {
+    "smokeStatus": "checked_three_run_smoke_ready",
+    "runCount": 3,
+    "targetRunCount": 3,
+    "expectedRunIds": [
+      "predictionrun-1301",
+      "predictionrun-1302",
+      "predictionrun-1303"
+    ],
+    "commands": [
+      {
+        "commandId": "helsinkipilotcommand-101",
+        "commandKey": "mini_plan",
+        "command": "python3 scripts/ope.py prediction-campaign plan --plan-count 3 --count 3",
+        "answers": "Three planned Helsinki morning-peak runs with unique duplicate keys.",
+        "statusPath": "plannedRuns",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-102",
+        "commandKey": "mini_runner_schedule",
+        "command": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --view forecast-schedule",
+        "answers": "Three schedule rows covering ready, waiting, and missed-run policies.",
+        "statusPath": "forecastSchedule.scheduleRows",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-103",
+        "commandKey": "mini_foreground_tick",
+        "command": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+        "answers": "One bounded foreground tick that does not write state without --write-local.",
+        "statusPath": "ticks[0].actions",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-104",
+        "commandKey": "mini_resolution_queue",
+        "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --limit 3",
+        "answers": "Campaign-aware resolver queue readback before any resolver execution.",
+        "statusPath": "jobs",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      },
+      {
+        "commandId": "helsinkipilotcommand-105",
+        "commandKey": "mini_append_readiness",
+        "command": "python3 scripts/ope.py prediction-campaign append-ready --view candidate",
+        "answers": "Append-readiness gate for the first checked campaign run.",
+        "statusPath": "appendCandidate",
+        "mutatesState": false,
+        "requiresLiveOptIn": false
+      }
+    ],
+    "checks": [
+      {
+        "checkId": "helsinkipilotsmokecheck-001",
+        "checkKey": "three_run_materialization",
+        "expected": "Mini plan contains exactly predictionrun-1301 through predictionrun-1303.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign plan --plan-count 3 --count 3"
+      },
+      {
+        "checkId": "helsinkipilotsmokecheck-002",
+        "checkKey": "forecast_before_close",
+        "expected": "Ready forecast action is only available before forecastCloseAt.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --view forecast-schedule"
+      },
+      {
+        "checkId": "helsinkipilotsmokecheck-003",
+        "checkKey": "no_normal_write",
+        "expected": "Mini smoke commands do not write ignored campaign state unless --write-local is explicit.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl"
+      },
+      {
+        "checkId": "helsinkipilotsmokecheck-004",
+        "checkKey": "resolution_queue_visible",
+        "expected": "Resolver jobs are visible before outcome execution and remain non-executing.",
+        "sourceCommand": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001 --limit 3"
+      },
+      {
+        "checkId": "helsinkipilotsmokecheck-005",
+        "checkKey": "append_gate_visible",
+        "expected": "Append readiness is visible and cannot count evidence without resolution and scoring records.",
+        "sourceCommand": "python3 scripts/ope.py prediction-campaign append-ready --view candidate"
+      }
+    ],
+    "passCondition": "All five mini-smoke commands return valid JSON or JSONL and no command writes campaign state without --write-local.",
+    "normalChecksMutateState": false
+  },
+  "successCriteria": [
+    {
+      "criterionId": "helsinkipilotcriterion-001",
+      "criterionKey": "hundred_comparable_outcomes",
+      "requirement": "The pilot has at least 100 comparable resolved and scored outcomes.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot",
+      "passCondition": "resolvedComparableSampleSize >= 100.",
+      "blocksClaim": true
+    },
+    {
+      "criterionId": "helsinkipilotcriterion-002",
+      "criterionKey": "acceptable_exclusion_rate",
+      "requirement": "The exclusion rate is at or below the declared 0.25 maximum.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view readback",
+      "passCondition": "exclusionRate <= maxExclusionRateForCalibrationClaim.",
+      "blocksClaim": true
+    },
+    {
+      "criterionId": "helsinkipilotcriterion-003",
+      "criterionKey": "forecast_before_close",
+      "requirement": "Every counted forecast was created before forecastCloseAt.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign doctor --view duplicates",
+      "passCondition": "No missed-close or backfilled forecast is counted as comparable evidence.",
+      "blocksClaim": true
+    },
+    {
+      "criterionId": "helsinkipilotcriterion-004",
+      "criterionKey": "no_duplicate_forecasts",
+      "requirement": "No campaign date/window duplicate key produced a second forecast.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign doctor --view duplicates",
+      "passCondition": "duplicateRiskCount == 0 and duplicateAppendBlocked remains true.",
+      "blocksClaim": true
+    },
+    {
+      "criterionId": "helsinkipilotcriterion-005",
+      "criterionKey": "complete_provenance",
+      "requirement": "Every comparable row has forecast, evidence, history, resolution, scoring, and source-policy paths.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view readback",
+      "passCondition": "sourceOutcomeProvenanceComplete is true.",
+      "blocksClaim": true
+    },
+    {
+      "criterionId": "helsinkipilotcriterion-006",
+      "criterionKey": "baseline_until_gate",
+      "requirement": "The pilot uses transitmethod-100 until a method-update plan is explicitly approved and applied.",
+      "measurementCommand": "python3 scripts/ope.py prediction-campaign method-update-gate",
+      "passCondition": "methodUpdateAllowed remains false unless plan-ready evidence and approvals exist.",
+      "blocksClaim": true
+    }
+  ],
+  "abortCriteria": [
+    {
+      "criterionId": "helsinkipilotabort-001",
+      "criterionKey": "source_outage",
+      "trigger": "Required weather or transit outcome sources are unavailable for repeated due windows.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign doctor --view queues",
+      "requiredAction": "Pause new writes, append explicit exclusions where appropriate, and resume only after source readiness is restored.",
+      "restartAllowed": true
+    },
+    {
+      "criterionId": "helsinkipilotabort-002",
+      "criterionKey": "unsafe_evidence",
+      "trigger": "A source policy would allow post-close evidence, private rows, credentials, or unapproved inputs.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
+      "requiredAction": "Stop the pilot and replace the source policy before any further forecast or resolution work.",
+      "restartAllowed": false
+    },
+    {
+      "criterionId": "helsinkipilotabort-003",
+      "criterionKey": "clock_drift",
+      "trigger": "Runner clock drift causes repeated missed forecast windows or forecast-after-close risk.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+      "requiredAction": "Stop foreground execution and restart only after time synchronization and a clean mini smoke.",
+      "restartAllowed": true
+    },
+    {
+      "criterionId": "helsinkipilotabort-004",
+      "criterionKey": "path_safety_failure",
+      "trigger": "Any local write target escapes the ignored .ope/live prediction-campaign workspace.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign forecast-write",
+      "requiredAction": "Stop immediately; do not write or append until path safety is repaired.",
+      "restartAllowed": false
+    },
+    {
+      "criterionId": "helsinkipilotabort-005",
+      "criterionKey": "duplicate_or_overwrite_attempt",
+      "trigger": "Duplicate keys, duplicate row keys, or overwrite attempts appear in campaign state.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign doctor --view duplicates",
+      "requiredAction": "Preserve existing records, block the duplicate, and resume only from the next unique window.",
+      "restartAllowed": true
+    },
+    {
+      "criterionId": "helsinkipilotabort-006",
+      "criterionKey": "repeated_missed_windows",
+      "trigger": "Repeated missed forecast-close windows prevent a meaningful 100-comparable-outcome pilot.",
+      "detectionCommand": "python3 scripts/ope.py prediction-campaign resume --from-local",
+      "requiredAction": "Stop the current cycle, summarize exclusions, and restart a fresh cycle after fixing scheduling.",
+      "restartAllowed": true
+    }
+  ],
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign pilot-runbook",
+    "acceptedViews": [
+      "runbook",
+      "scope",
+      "operator-status",
+      "smoke",
+      "steps",
+      "success",
+      "abort",
+      "summary",
+      "boundary"
+    ],
+    "defaultView": "runbook",
+    "capturedStdoutMode": "json",
+    "normalChecksWriteLiveState": false
+  },
+  "summary": {
+    "runbookReady": true,
+    "miniCampaignSmokeReady": true,
+    "operatorStatusReady": true,
+    "successCriteriaCount": 6,
+    "abortCriteriaCount": 6,
+    "bestAvailableMethodId": "transitmethod-100",
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke"
+  },
+  "executionBoundary": {
+    "readOnlyRunbook": true,
+    "normalChecksWriteLiveState": false,
+    "normalChecksUseLiveNetwork": false,
+    "startsLongRunningRunner": false,
+    "executesResolvers": false,
+    "appendsLedgerRows": false,
+    "changesForecastMethod": false,
+    "hostedRuntimeAllowed": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This runbook is a checked local operations readback; it does not start the real pilot by itself.",
+    "The three-run smoke path must pass before the 100-run pilot is started with explicit local writes.",
+    "The best available method remains transitmethod-100 until evidence and approvals explicitly permit a prospective method update.",
+    "Calibration after 100 comparable outcomes is measurement-only and does not rewrite historical forecasts or probabilities."
+  ]
+}

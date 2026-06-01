@@ -329,16 +329,336 @@
         "credentialsStored": false
       },
       "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-011",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --calibration-target 100",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "prediction-campaign-runner",
+        "recordId": "predictioncampaignrunner-001",
+        "sourceCase": "campaign_start"
+      },
+      "trace": {
+        "elapsedMs": 310,
+        "exitCode": 0,
+        "responseBytes": 3900,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-012",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign forecast-create",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "prediction-campaign-forecast-creation",
+        "recordId": "predictioncampaignforecastcreation-001",
+        "sourceCase": "campaign_forecast_created"
+      },
+      "trace": {
+        "elapsedMs": 280,
+        "exitCode": 0,
+        "responseBytes": 2600,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-013",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "resolution-job-registry",
+        "recordId": "resolutionjobregistry-001",
+        "sourceCase": "campaign_resolve_due"
+      },
+      "trace": {
+        "elapsedMs": 240,
+        "exitCode": 0,
+        "responseBytes": 2100,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-014",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "prediction-campaign-resolution-attempt",
+        "recordId": "predictioncampaignresolutionattempt-1301",
+        "sourceCase": "campaign_resolver_executed"
+      },
+      "trace": {
+        "elapsedMs": 330,
+        "exitCode": 0,
+        "responseBytes": 2600,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-015",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign append-ready",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "prediction-campaign-evidence-ledger",
+        "recordId": "predictioncampaignledger-001",
+        "sourceCase": "campaign_append_ready"
+      },
+      "trace": {
+        "elapsedMs": 230,
+        "exitCode": 0,
+        "responseBytes": 2700,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-016",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1301",
+        "questionId": "question-1301",
+        "recordType": "prediction-campaign-evidence-ledger",
+        "recordId": "predictioncampaignledger-001",
+        "sourceCase": "campaign_appended"
+      },
+      "trace": {
+        "elapsedMs": 250,
+        "exitCode": 0,
+        "responseBytes": 2850,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-017",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case threshold_met",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "prediction-campaign-calibration-status",
+        "recordId": "predictioncampaigncalibrationstatus-001",
+        "sourceCase": "campaign_calibration_threshold_met"
+      },
+      "trace": {
+        "elapsedMs": 260,
+        "exitCode": 0,
+        "responseBytes": 2400,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-018",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "prediction-campaign-calibration-status",
+        "recordId": "predictioncampaigncalibrationstatus-001",
+        "sourceCase": "campaign_paused"
+      },
+      "trace": {
+        "elapsedMs": 260,
+        "exitCode": 0,
+        "responseBytes": 1700,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-019",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign resume --from-local",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "prediction-campaign-resume",
+        "recordId": "predictioncampaignresume-001",
+        "sourceCase": "campaign_resumed"
+      },
+      "trace": {
+        "elapsedMs": 270,
+        "exitCode": 0,
+        "responseBytes": 2200,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-020",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "campaign",
+      "command": "python3 scripts/ope.py prediction-campaign calibration-status --calibration-case threshold_met --view policy",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "prediction-campaign-calibration-status",
+        "recordId": "predictioncampaigncalibrationstatus-001",
+        "sourceCase": "campaign_stopped"
+      },
+      "trace": {
+        "elapsedMs": 260,
+        "exitCode": 0,
+        "responseBytes": 1500,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
     }
   ],
   "traceSummary": [
     {
       "interface": "cli",
-      "eventCount": 6,
-      "successCount": 4,
+      "eventCount": 16,
+      "successCount": 14,
       "blockedCount": 2,
       "sanitizedErrorCount": 2,
-      "averageElapsedMs": 292,
+      "averageElapsedMs": 277,
       "maxResponseBytes": 4200
     },
     {
@@ -370,14 +690,14 @@
     }
   ],
   "aggregateReadbacks": {
-    "totalEvents": 10,
-    "successfulEvents": 8,
+    "totalEvents": 20,
+    "successfulEvents": 18,
     "blockedEvents": 2,
     "sanitizedErrorEvents": 2,
-    "localOnlyEvents": 10,
+    "localOnlyEvents": 20,
     "forecastCompletionRate": 1.0,
     "agentReadSuccessRate": 0.6667,
-    "blockedPathFrequency": 0.2,
+    "blockedPathFrequency": 0.1,
     "normalChecksUseLiveNetwork": false,
     "hostedTelemetryEnabled": false
   },
@@ -402,15 +722,15 @@
       "metricId": "blocked_path_frequency",
       "description": "Share of checked local events that intentionally stop before forecast or readback completion.",
       "numerator": 2,
-      "denominator": 10,
-      "value": 0.2,
+      "denominator": 20,
+      "value": 0.1,
       "interpretation": "Blocked path frequency is a usability signal, not a runtime failure rate."
     },
     {
       "metricId": "local_only_privacy_rate",
       "description": "Share of checked trace events that stay local-only and store no private rows, credentials, prompts, or transcripts.",
-      "numerator": 10,
-      "denominator": 10,
+      "numerator": 20,
+      "denominator": 20,
       "value": 1.0,
       "interpretation": "The checked trace model remains local-only and privacy-preserving."
     }

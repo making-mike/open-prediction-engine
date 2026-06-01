@@ -256,6 +256,34 @@ def main() -> None:
     if oversized_scheduler_status["payload"] is not None:
         raise AssertionError("oversized scheduler-status envelope should not include the readback payload")
 
+    campaign_status = run_dispatcher(
+        "--operation",
+        "campaign_status",
+    )
+    campaign_status_payload = payload(campaign_status)
+    if campaign_status.returncode != 0:
+        raise AssertionError(f"campaign-status agent call should succeed: {campaign_status.stderr}")
+    campaign_status_record = campaign_status_payload["payload"]
+    if campaign_status_record["predictionCampaignExplainId"] != "predictioncampaignexplain-001":
+        raise AssertionError("campaign-status agent call should return the explain readback")
+    if campaign_status_record["campaignSnapshot"]["nextForecastId"] != "forecast-1301":
+        raise AssertionError("campaign-status agent call should expose forecast-1301")
+    if campaign_status_record["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("campaign-status agent call must keep quality claims blocked")
+
+    campaign_calibration = run_dispatcher(
+        "--operation",
+        "campaign_calibration_status",
+    )
+    campaign_calibration_payload = payload(campaign_calibration)
+    if campaign_calibration.returncode != 0:
+        raise AssertionError(f"campaign-calibration-status agent call should succeed: {campaign_calibration.stderr}")
+    campaign_calibration_record = campaign_calibration_payload["payload"]
+    if campaign_calibration_record["calibrationStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("campaign-calibration-status should expose below-threshold status")
+    if campaign_calibration_record["executionBoundary"]["updatesForecastProbabilities"] is not False:
+        raise AssertionError("campaign-calibration-status must not update probabilities")
+
     source_guidance = run_dispatcher(
         "--operation",
         "private_source_adapter_guidance",

@@ -9,7 +9,7 @@ import tempfile
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
-from ope_fixtures import check_generated, compact_json, render_json, validate_and_emit, write_generated
+from ope_fixtures import check_generated, compact_json, emit_generated, render_json, validate_and_emit, write_generated
 
 
 def require(condition: bool, message: str) -> None:
@@ -45,6 +45,16 @@ def main() -> None:
         with redirect_stdout(out):
             check_generated(path, sample, label="example record", regen=regen)
         require(out.getvalue() == "checked example record\n", "check_generated must announce a clean check")
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            emit_generated(path, sample, write=False, label="example record", regen=regen)
+        require(out.getvalue() == "checked example record\n", "emit_generated must check when write is false")
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            emit_generated(path, sample, write=True, label="example record", regen=regen)
+        require(out.getvalue() == "generated example record\n", "emit_generated must write when write is true")
 
         path.write_text("drifted\n", encoding="utf-8")
         err = io.StringIO()

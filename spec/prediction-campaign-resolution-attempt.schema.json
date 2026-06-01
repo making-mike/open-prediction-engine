@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-resolution-attempt.schema.json",
+  "title": "Prediction Campaign Resolution Attempt",
+  "description": "Checked readback for an explicit campaign resolver attempt before campaign resolution mutation exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignResolutionAttemptId",
+    "generatedAt",
+    "attemptCase",
+    "attemptStatus",
+    "executionMode",
+    "domain",
+    "bindings",
+    "resolverTarget",
+    "attemptGuards",
+    "attemptResult",
+    "duplicateSafety",
+    "sourceFetchMetadata",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignResolutionAttemptId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "attemptCase": { "$ref": "#/$defs/attemptCase" },
+    "attemptStatus": {
+      "type": "string",
+      "enum": [
+        "dry_run_due_ready",
+        "dry_run_execute_ready",
+        "not_due_wait",
+        "blocked_missing_outcome_source",
+        "blocked_already_terminal",
+        "blocked_excluded_run",
+        "blocked_duplicate_run"
+      ]
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["dry_run", "execute_requested"]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "resolverTarget": { "$ref": "#/$defs/resolverTarget" },
+    "attemptGuards": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/attemptGuard" }
+    },
+    "attemptResult": { "$ref": "#/$defs/attemptResult" },
+    "duplicateSafety": { "$ref": "#/$defs/duplicateSafety" },
+    "sourceFetchMetadata": { "$ref": "#/$defs/sourceFetchMetadata" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignRunnerId",
+        "predictionCampaignForecastWriteId",
+        "campaignId",
+        "cycleId",
+        "runId",
+        "questionId",
+        "forecastId",
+        "resolutionId",
+        "scoringReportId",
+        "sourcePolicyId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignForecastWriteId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionId": { "$ref": "common.schema.json#/$defs/id" },
+        "scoringReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "attemptCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["caseKey", "description", "simulatedReadback"],
+      "properties": {
+        "caseKey": { "$ref": "#/$defs/boundedString" },
+        "description": { "$ref": "#/$defs/boundedString" },
+        "simulatedReadback": { "type": "boolean" }
+      }
+    },
+    "resolverTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runStatePath",
+        "forecastArtifactPath",
+        "resolutionEligibleAt",
+        "now",
+        "due",
+        "runStatus",
+        "questionStatus",
+        "serviceDate",
+        "serviceWindow"
+      ],
+      "properties": {
+        "runStatePath": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "resolutionEligibleAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "now": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "due": { "type": "boolean" },
+        "runStatus": { "$ref": "#/$defs/boundedString" },
+        "questionStatus": { "$ref": "#/$defs/boundedString" },
+        "serviceDate": { "$ref": "#/$defs/boundedString" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "attemptGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guardId",
+        "guardStatus",
+        "requiredBeforeResolve",
+        "blocksResolve",
+        "message"
+      ],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "guardStatus": {
+          "type": "string",
+          "enum": ["pass", "warn", "block"]
+        },
+        "requiredBeforeResolve": { "type": "boolean" },
+        "blocksResolve": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "attemptResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resultStatus",
+        "failureCategory",
+        "retryable",
+        "retryAfter",
+        "sanitizedDiagnostics",
+        "resolutionArtifactsCreated",
+        "scoringRecordsCreated"
+      ],
+      "properties": {
+        "resultStatus": {
+          "type": "string",
+          "enum": ["not_run", "dry_run_ready", "blocked"]
+        },
+        "failureCategory": {
+          "type": "string",
+          "enum": ["none", "not_due", "source_unavailable", "already_terminal", "excluded_run", "duplicate_blocked"]
+        },
+        "retryable": { "type": "boolean" },
+        "retryAfter": { "$ref": "#/$defs/boundedString" },
+        "sanitizedDiagnostics": { "$ref": "#/$defs/boundedString" },
+        "resolutionArtifactsCreated": { "type": "boolean" },
+        "scoringRecordsCreated": { "type": "boolean" }
+      }
+    },
+    "duplicateSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terminalRunStatuses",
+        "excludedRunStatuses",
+        "duplicateRunStatus",
+        "terminalResolutionBlocked",
+        "terminalScoringBlocked",
+        "excludedResolutionBlocked",
+        "duplicateResolutionBlocked",
+        "duplicateScoringBlocked",
+        "priorEvidenceOverwriteAllowed"
+      ],
+      "properties": {
+        "terminalRunStatuses": { "$ref": "#/$defs/boundedStringList" },
+        "excludedRunStatuses": { "$ref": "#/$defs/boundedStringList" },
+        "duplicateRunStatus": { "$ref": "#/$defs/boundedString" },
+        "terminalResolutionBlocked": { "type": "boolean" },
+        "terminalScoringBlocked": { "type": "boolean" },
+        "excludedResolutionBlocked": { "type": "boolean" },
+        "duplicateResolutionBlocked": { "type": "boolean" },
+        "duplicateScoringBlocked": { "type": "boolean" },
+        "priorEvidenceOverwriteAllowed": { "type": "boolean" }
+      }
+    },
+    "sourceFetchMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fetchAttempted",
+        "sourceProvider",
+        "sourceRole",
+        "liveNetworkUsed",
+        "localOutcomePath",
+        "sanitizedOnly"
+      ],
+      "properties": {
+        "fetchAttempted": { "type": "boolean" },
+        "sourceProvider": { "$ref": "#/$defs/boundedString" },
+        "sourceRole": { "$ref": "#/$defs/boundedString" },
+        "liveNetworkUsed": { "type": "boolean" },
+        "localOutcomePath": { "$ref": "#/$defs/boundedString" },
+        "sanitizedOnly": { "type": "boolean" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "explicitResolverFlagRequired",
+        "normalChecksExecuteResolver"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "explicitResolverFlagRequired": { "type": "boolean" },
+        "normalChecksExecuteResolver": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolutionAttemptReadbackImplemented",
+        "dueRunSelected",
+        "resolverExecutionRequested",
+        "resolverExecutionImplemented",
+        "duplicateSafetyImplemented",
+        "resolutionArtifactsCreated",
+        "scoringRecordsCreated",
+        "retryable",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "resolutionAttemptReadbackImplemented": { "type": "boolean" },
+        "dueRunSelected": { "type": "boolean" },
+        "resolverExecutionRequested": { "type": "boolean" },
+        "resolverExecutionImplemented": { "type": "boolean" },
+        "duplicateSafetyImplemented": { "type": "boolean" },
+        "resolutionArtifactsCreated": { "type": "boolean" },
+        "scoringRecordsCreated": { "type": "boolean" },
+        "retryable": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksUseLiveNetwork",
+        "requiresExplicitResolverFlag",
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsResolutionArtifacts",
+        "createsScoringRecords",
+        "appendsCorpusEvidence",
+        "storesCredentials",
+        "storesPrivateRows",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "requiresExplicitResolverFlag": { "type": "boolean" },
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsResolutionArtifacts": { "type": "boolean" },
+        "createsScoringRecords": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

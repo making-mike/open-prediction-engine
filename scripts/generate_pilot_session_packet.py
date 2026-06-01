@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
 
 from generate_agent_pilot_validation import build_agent_pilot_validation
 from generate_developer_adoption_surface import build_developer_adoption_surface
+from generate_prediction_campaign_explain import build_prediction_campaign_explain
 from generate_pilot_evidence_ledger import build_pilot_evidence_ledger
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
@@ -133,6 +133,21 @@ def build_task_cards(pilot: dict[str, Any]) -> list[dict[str, Any]]:
     return [task_card(task) for task in pilot["taskScenarios"]]
 
 
+def campaign_task_card(explain: dict[str, Any]) -> dict[str, Any]:
+    card = explain["pilotTaskCard"]
+    return task_card(
+        {
+            "taskId": card["taskId"],
+            "scenarioKey": card["scenarioKey"],
+            "title": card["title"],
+            "command": card["command"],
+            "expectedOutcomeClass": card["expectedOutcomeClass"],
+            "measures": card["measures"],
+            "participantPrompt": card["moderatorPrompt"],
+        }
+    )
+
+
 def build_evidence_template() -> dict[str, Any]:
     return {
         "templateId": "pilotsessiontemplate-001",
@@ -216,7 +231,8 @@ def build_pilot_session_packet() -> dict[str, Any]:
     pilot = build_agent_pilot_validation()
     ledger = build_pilot_evidence_ledger()
     adoption = build_developer_adoption_surface()
-    task_cards = build_task_cards(pilot)
+    campaign_explain = build_prediction_campaign_explain()
+    task_cards = [*build_task_cards(pilot), campaign_task_card(campaign_explain)]
     packet = {
         "pilotSessionPacketId": "pilotsessionpacket-001",
         "generatedAt": GENERATED_AT,
@@ -226,6 +242,7 @@ def build_pilot_session_packet() -> dict[str, Any]:
             "agentPilotValidationId": pilot["agentPilotValidationId"],
             "pilotEvidenceLedgerId": ledger["pilotEvidenceLedgerId"],
             "developerAdoptionSurfaceId": adoption["developerAdoptionSurfaceId"],
+            "predictionCampaignExplainId": campaign_explain["predictionCampaignExplainId"],
             "pilotProtocolId": pilot["pilotProtocol"]["protocolId"],
             "pilotEvidencePolicyId": ledger["intakePolicy"]["policyId"],
         },
@@ -283,6 +300,7 @@ def validate_packet(packet: dict[str, Any]) -> None:
         "unsafe_source_block",
         "forecast_run_readback",
         "claim_gate_readback",
+        "repeating_prediction_campaign",
     ]
     if [item["scenarioKey"] for item in task_cards] != expected_order:
         raise PilotSessionPacketError("pilot session task order drifted")
@@ -365,6 +383,7 @@ def main() -> None:
             "unsafe_source_block",
             "forecast_run_readback",
             "claim_gate_readback",
+            "repeating_prediction_campaign",
         ],
         help="print one pilot session task card",
     )

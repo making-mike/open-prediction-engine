@@ -1,0 +1,96 @@
+{
+  "predictionCampaignMethodUpdateGateId": "predictioncampaignmethodupdategate-001",
+  "generatedAt": "2026-05-31T04:00:00Z",
+  "gateCase": "below_threshold",
+  "gateStatus": "blocked_insufficient_calibration_evidence",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignCalibrationStatusId": "predictioncampaigncalibrationstatus-001",
+    "transitMethodOptionsId": "transitmethodoptions-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "currentMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101"
+  },
+  "evidenceReadback": {
+    "resolvedComparableSampleSize": 1,
+    "minimumComparableResolvedForCalibration": 100,
+    "exclusionRate": 0.875,
+    "calibrationStatus": "not_enough_resolved_comparable_outcomes",
+    "calibrationSummaryGenerated": false,
+    "calibrationMeasurementOnly": true,
+    "candidateBenchmarkStatus": "benchmarked_fixture_only",
+    "candidateBaselineLift": 0.1136,
+    "cleanAntiLeakageEvidence": false,
+    "comparableEvidenceReady": false,
+    "approvalStatus": "not_requested"
+  },
+  "methodUpdateProposal": {
+    "currentMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101",
+    "proposedChange": "none",
+    "candidateSelectionEligibility": "blocked",
+    "probabilityRecalibrationProposed": false,
+    "methodWeightChangeProposed": false,
+    "automaticUpdateAllowed": false,
+    "explicitApprovalRequired": true,
+    "proposalStatus": "blocked",
+    "rejectionReasons": [
+      "resolved_comparable_sample_below_calibration_threshold",
+      "calibration_summary_missing",
+      "explicit_method_update_approval_not_requested"
+    ]
+  },
+  "approvalGate": {
+    "requiredApprovals": [
+      "method_owner_approval",
+      "calibration_review_approval",
+      "source_policy_review"
+    ],
+    "receivedApprovals": [],
+    "approvalStatus": "not_requested",
+    "policyStatus": "pending_source_policy_review",
+    "benchmarkStatus": "blocked_insufficient_calibration_evidence",
+    "antiLeakageStatus": "not_ready",
+    "auditTrailStatus": "missing"
+  },
+  "decision": {
+    "methodUpdatePlanReady": false,
+    "effectfulUpdateAllowedNow": false,
+    "automaticUpdateAllowed": false,
+    "requiresFutureEffectfulCommand": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Keep the baseline method and continue collecting comparable resolved outcomes."
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign method-update-gate",
+    "acceptedFlags": [
+      "--method-update-case",
+      "--output-format",
+      "--view"
+    ],
+    "defaultMode": "checked_method_update_gate_readback",
+    "capturedStdoutMode": "json",
+    "normalChecksMutateState": false
+  },
+  "executionBoundary": {
+    "readsIgnoredLiveState": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesResolvers": false,
+    "createsForecastArtifacts": false,
+    "updatesForecastProbabilities": false,
+    "changesForecastMethod": false,
+    "changesMethodWeights": false,
+    "writesMethodRegistry": false,
+    "startsNextCycle": false
+  },
+  "warnings": [
+    "This gate is a readback and never applies a method update.",
+    "Automatic probability recalibration and automatic method changes remain disallowed.",
+    "A plan-ready result still requires a future explicit effectful update command with an audit trail."
+  ]
+}

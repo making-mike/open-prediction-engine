@@ -111,7 +111,7 @@
                     "wait_until_due",
                     "resolver_execute_requested",
                     "due_waiting_for_execute_flag",
-                    "campaign_resolver_not_implemented",
+                    "campaign_resolver_attempt_ready",
                     "skip_already_resolved",
                     "inspect_invalid_state"
                   ]

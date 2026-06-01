@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -14,7 +13,7 @@ from generate_private_setup_requests import build_request_set, render_json
 from generate_source_adapter_intake import build_records as build_source_adapter_intake_records
 from generate_source_handoff_method_gate import build_records as build_source_handoff_method_records
 from generate_source_intake_handoff import build_handoffs
-from ope_fixtures import check_generated, write_generated
+from ope_fixtures import emit_generated
 from ope_schema import SPEC, validate_record
 from read_ope_record import read_record
 from run_source_handoff_forecast import build_outputs as build_source_handoff_forecast_outputs
@@ -373,14 +372,6 @@ def summary(orchestrator: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def write_orchestrator(orchestrator: dict[str, Any]) -> None:
-    write_generated(ORCHESTRATOR_PATH, orchestrator, label="private setup orchestrator", regen="python3 scripts/generate_private_setup_orchestrator.py --write")
-
-
-def check_orchestrator(orchestrator: dict[str, Any]) -> None:
-    check_generated(ORCHESTRATOR_PATH, orchestrator, label="private setup orchestrator", regen="python3 scripts/generate_private_setup_orchestrator.py --write")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one orchestrator run")
@@ -392,10 +383,8 @@ def main() -> None:
     except PrivateSetupOrchestratorError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc
-    if args.write:
-        write_orchestrator(orchestrator)
-    elif args.check:
-        check_orchestrator(orchestrator)
+    if args.write or args.check:
+        emit_generated(ORCHESTRATOR_PATH, orchestrator, write=args.write, label="private setup orchestrator", regen="python3 scripts/generate_private_setup_orchestrator.py --write")
     elif args.case:
         run = next(item for item in orchestrator["orchestratorRuns"] if item["runCase"] == args.case)
         sys.stdout.write(render_json(run))

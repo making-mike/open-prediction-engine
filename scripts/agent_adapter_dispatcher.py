@@ -9,12 +9,16 @@ from pathlib import Path
 from typing import Any
 
 from build_agent_adapter_fixtures import (
-    EXIT_CODES,
     SCHEMA,
     AgentAdapterError,
     FORECAST_EXECUTION_CASES,
     binding_from_card,
     binding_from_trace,
+    campaign_append_readiness_adapter_payload,
+    campaign_calibration_status_adapter_payload,
+    campaign_health_adapter_payload,
+    campaign_plan_adapter_payload,
+    campaign_status_adapter_payload,
     envelope,
     forecast_execution_result_payload,
     load_private_setup_adapter_conformance_summary,
@@ -82,6 +86,11 @@ CAPABILITY_BY_OPERATION = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "campaign_plan": "read_only",
+    "campaign_status": "read_only",
+    "campaign_health": "read_only",
+    "campaign_append_readiness": "read_only",
+    "campaign_calibration_status": "read_only",
     "resolution_jobs": "read_only",
     "resolution_scheduler_status": "read_only",
     "resolution_status": "resolution_check",
@@ -102,6 +111,11 @@ INPUT_TYPE_BY_OPERATION = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "campaign_plan": "prediction_campaign_manifest",
+    "campaign_status": "prediction_campaign_explain",
+    "campaign_health": "prediction_campaign_doctor",
+    "campaign_append_readiness": "prediction_campaign_evidence_ledger",
+    "campaign_calibration_status": "prediction_campaign_calibration_status",
     "resolution_jobs": "resolution_job_registry",
     "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
@@ -186,6 +200,21 @@ def input_ref_for(args: argparse.Namespace) -> str:
     if args.operation == "private_setup_forecast_execution":
         payload = forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"]
+    if args.operation == "campaign_plan":
+        payload, _binding, _state, _warnings = campaign_plan_adapter_payload()
+        return payload["predictionCampaignManifestId"]
+    if args.operation == "campaign_status":
+        payload, _binding, _state, _warnings = campaign_status_adapter_payload()
+        return payload["predictionCampaignExplainId"]
+    if args.operation == "campaign_health":
+        payload, _binding, _state, _warnings = campaign_health_adapter_payload()
+        return payload["predictionCampaignDoctorId"]
+    if args.operation == "campaign_append_readiness":
+        payload, _binding, _state, _warnings = campaign_append_readiness_adapter_payload()
+        return payload["predictionCampaignEvidenceLedgerId"]
+    if args.operation == "campaign_calibration_status":
+        payload, _binding, _state, _warnings = campaign_calibration_status_adapter_payload()
+        return payload["predictionCampaignCalibrationStatusId"]
     if args.operation == "resolution_jobs":
         registry = load_resolution_job_registry()
         return registry["resolutionJobRegistryId"]
@@ -706,6 +735,21 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "private_setup_forecast_execution":
         payload, binding, state, warnings = private_setup_forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"], payload, binding, state, warnings
+    if args.operation == "campaign_plan":
+        payload, binding, state, warnings = campaign_plan_adapter_payload()
+        return payload["predictionCampaignManifestId"], payload, binding, state, warnings
+    if args.operation == "campaign_status":
+        payload, binding, state, warnings = campaign_status_adapter_payload()
+        return payload["predictionCampaignExplainId"], payload, binding, state, warnings
+    if args.operation == "campaign_health":
+        payload, binding, state, warnings = campaign_health_adapter_payload()
+        return payload["predictionCampaignDoctorId"], payload, binding, state, warnings
+    if args.operation == "campaign_append_readiness":
+        payload, binding, state, warnings = campaign_append_readiness_adapter_payload()
+        return payload["predictionCampaignEvidenceLedgerId"], payload, binding, state, warnings
+    if args.operation == "campaign_calibration_status":
+        payload, binding, state, warnings = campaign_calibration_status_adapter_payload()
+        return payload["predictionCampaignCalibrationStatusId"], payload, binding, state, warnings
     if args.operation == "resolution_jobs":
         payload, binding, state, warnings = resolution_jobs_payload()
         return payload["resolutionJobRegistryId"], payload, binding, state, warnings
@@ -801,6 +845,16 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "sourcehandoffmethodgate-000"
     if args.operation == "private_setup_forecast_execution":
         return "setupforecastrun-000"
+    if args.operation == "campaign_plan":
+        return "predictioncampaignmanifest-001"
+    if args.operation == "campaign_status":
+        return "predictioncampaignexplain-001"
+    if args.operation == "campaign_health":
+        return "predictioncampaigndoctor-001"
+    if args.operation == "campaign_append_readiness":
+        return "predictioncampaignevidenceledger-001"
+    if args.operation == "campaign_calibration_status":
+        return "predictioncampaigncalibrationstatus-001"
     if args.operation == "resolution_jobs":
         return "resolutionjobregistry-001"
     if args.operation == "resolution_scheduler_status":

@@ -19,10 +19,11 @@ Campaign-aware checked fixture:
 
 ```bash
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001
+python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --now 2026-06-11T07:15:00Z
 python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001 --check
 ```
 
-The campaign fixture reads the checked campaign manifest, `forecast-1301` artifact, and campaign forecast-write plan through the resolution job registry. It adds the campaign wait action to the scheduler tick, but it does not execute campaign resolvers, write campaign state, create resolution or scoring records, or append corpus evidence.
+The campaign fixture reads the checked campaign manifest, `forecast-1301` artifact, and campaign forecast-write plan through the resolution job registry. It adds the campaign wait action before the resolution time and a `campaign_resolver_attempt_ready` action once `--now` reaches `resolutionEligibleAt`, routing agents to the explicit `prediction-campaign resolve --execute-resolvers --outcome-csv ... --write-local` command. The scheduler readback does not itself write campaign state, create resolution or scoring records, or append corpus evidence.
 
 One live dry-run tick:
 
@@ -101,4 +102,4 @@ When watch mode is stopped with `Ctrl+C`, the scheduler exits with code 130 and 
 
 Normal checks perform one offline fixture tick. `--campaign predictioncampaign-001` performs a separate offline campaign-aware fixture tick. Live watching requires `--live --watch`. Resolver execution additionally requires `--execute`.
 
-The scheduler can execute due standalone forward-run resolver commands only through `resolve-due-forward-runs`, preserving the existing source policy, resolution logic, scoring boundary, and sample-size claim boundary. Campaign jobs remain read-only until an explicit campaign resolver path exists. It does not create hosted schedulers, OS scheduler files, forecast artifacts, calibration claims, or production runtime claims.
+The scheduler can execute due standalone forward-run resolver commands only through `resolve-due-forward-runs`, preserving the existing source policy, resolution logic, scoring boundary, and sample-size claim boundary. Campaign jobs route to the guarded `prediction-campaign resolve` surface when due; effectful campaign resolution still requires that command's explicit `--execute-resolvers --write-local` approval and an outcome source or missing-outcome exclusion. It does not create hosted schedulers, OS scheduler files, forecast artifacts, calibration claims, or production runtime claims.

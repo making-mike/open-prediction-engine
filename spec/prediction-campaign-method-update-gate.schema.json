@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-method-update-gate.schema.json",
+  "title": "Prediction Campaign Method Update Gate",
+  "description": "Checked read-only gate before campaign calibration can influence method updates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignMethodUpdateGateId",
+    "generatedAt",
+    "gateCase",
+    "gateStatus",
+    "domain",
+    "bindings",
+    "evidenceReadback",
+    "methodUpdateProposal",
+    "approvalGate",
+    "decision",
+    "commandSurface",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignMethodUpdateGateId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "gateCase": {
+      "type": "string",
+      "enum": [
+        "below_threshold",
+        "threshold_met_needs_approval",
+        "approved_plan_ready",
+        "regression_risk"
+      ]
+    },
+    "gateStatus": {
+      "type": "string",
+      "enum": [
+        "blocked_insufficient_calibration_evidence",
+        "review_required",
+        "plan_ready",
+        "blocked_regression_risk"
+      ]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "evidenceReadback": { "$ref": "#/$defs/evidenceReadback" },
+    "methodUpdateProposal": { "$ref": "#/$defs/methodUpdateProposal" },
+    "approvalGate": { "$ref": "#/$defs/approvalGate" },
+    "decision": { "$ref": "#/$defs/decision" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignCalibrationStatusId",
+        "transitMethodOptionsId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId",
+        "currentMethodId",
+        "candidateMethodId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignCalibrationStatusId": { "$ref": "common.schema.json#/$defs/id" },
+        "transitMethodOptionsId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "currentMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "evidenceReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolvedComparableSampleSize",
+        "minimumComparableResolvedForCalibration",
+        "exclusionRate",
+        "calibrationStatus",
+        "calibrationSummaryGenerated",
+        "calibrationMeasurementOnly",
+        "candidateBenchmarkStatus",
+        "candidateBaselineLift",
+        "cleanAntiLeakageEvidence",
+        "comparableEvidenceReady",
+        "approvalStatus"
+      ],
+      "properties": {
+        "resolvedComparableSampleSize": { "type": "integer", "minimum": 0 },
+        "minimumComparableResolvedForCalibration": { "type": "integer", "minimum": 1 },
+        "exclusionRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "calibrationStatus": { "$ref": "#/$defs/boundedString" },
+        "calibrationSummaryGenerated": { "type": "boolean" },
+        "calibrationMeasurementOnly": { "type": "boolean" },
+        "candidateBenchmarkStatus": { "$ref": "#/$defs/boundedString" },
+        "candidateBaselineLift": { "type": "number" },
+        "cleanAntiLeakageEvidence": { "type": "boolean" },
+        "comparableEvidenceReady": { "type": "boolean" },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_requested", "missing", "approved"]
+        }
+      }
+    },
+    "methodUpdateProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentMethodId",
+        "candidateMethodId",
+        "proposedChange",
+        "candidateSelectionEligibility",
+        "probabilityRecalibrationProposed",
+        "methodWeightChangeProposed",
+        "automaticUpdateAllowed",
+        "explicitApprovalRequired",
+        "proposalStatus",
+        "rejectionReasons"
+      ],
+      "properties": {
+        "currentMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "proposedChange": { "$ref": "#/$defs/boundedString" },
+        "candidateSelectionEligibility": {
+          "type": "string",
+          "enum": ["blocked", "requires_review", "eligible_for_explicit_plan"]
+        },
+        "probabilityRecalibrationProposed": { "type": "boolean" },
+        "methodWeightChangeProposed": { "type": "boolean" },
+        "automaticUpdateAllowed": { "type": "boolean" },
+        "explicitApprovalRequired": { "type": "boolean" },
+        "proposalStatus": {
+          "type": "string",
+          "enum": ["blocked", "needs_approval", "ready_for_explicit_update_plan"]
+        },
+        "rejectionReasons": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "approvalGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredApprovals",
+        "receivedApprovals",
+        "approvalStatus",
+        "policyStatus",
+        "benchmarkStatus",
+        "antiLeakageStatus",
+        "auditTrailStatus"
+      ],
+      "properties": {
+        "requiredApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "receivedApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_requested", "missing", "approved"]
+        },
+        "policyStatus": { "$ref": "#/$defs/boundedString" },
+        "benchmarkStatus": { "$ref": "#/$defs/boundedString" },
+        "antiLeakageStatus": { "$ref": "#/$defs/boundedString" },
+        "auditTrailStatus": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodUpdatePlanReady",
+        "effectfulUpdateAllowedNow",
+        "automaticUpdateAllowed",
+        "requiresFutureEffectfulCommand",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "methodUpdatePlanReady": { "type": "boolean" },
+        "effectfulUpdateAllowedNow": { "type": "boolean" },
+        "automaticUpdateAllowed": { "type": "boolean" },
+        "requiresFutureEffectfulCommand": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsForecastArtifacts",
+        "updatesForecastProbabilities",
+        "changesForecastMethod",
+        "changesMethodWeights",
+        "writesMethodRegistry",
+        "startsNextCycle"
+      ],
+      "properties": {
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "updatesForecastProbabilities": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "changesMethodWeights": { "type": "boolean" },
+        "writesMethodRegistry": { "type": "boolean" },
+        "startsNextCycle": { "type": "boolean" }
+      }
+    }
+  }
+}

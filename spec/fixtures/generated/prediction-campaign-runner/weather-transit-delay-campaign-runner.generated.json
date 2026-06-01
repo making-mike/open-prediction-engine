@@ -30,6 +30,11 @@
       "--manifest-json",
       "--live-weather",
       "--execute-resolvers",
+      "--full-materialization",
+      "--watch",
+      "--max-ticks",
+      "--poll-seconds",
+      "--now",
       "--write-local",
       "--output-format"
     ],
@@ -57,6 +62,76 @@
     "createsCampaignManifest": false,
     "writesCampaignState": false,
     "nextAction": "Review the normalized campaign request; use --write-local only when creating the ready forecast in ignored local state."
+  },
+  "forecastSchedule": {
+    "scheduleMode": "foreground_tick_plan",
+    "runnerClock": "2026-06-11T00:00:00Z",
+    "tickPolicy": "Create the ready forecast before close only when --write-local is explicit; wait, miss, or block all other candidate states.",
+    "readyRunId": "predictionrun-1301",
+    "nextForecastCreateAt": "2026-06-11T00:00:00Z",
+    "nextForecastCloseAt": "2026-06-11T04:45:00Z",
+    "creationCommand": "python3 scripts/ope.py prediction-campaign start --write-local --output-format jsonl",
+    "capturedOutputMode": "jsonl",
+    "scheduleRows": [
+      {
+        "runId": "predictionrun-1301",
+        "decisionStatus": "ready_to_create_forecast",
+        "scheduleAction": "create_with_explicit_write_local",
+        "forecastCreateAt": "2026-06-11T00:00:00Z",
+        "forecastCloseAt": "2026-06-11T04:45:00Z",
+        "createsForecastArtifacts": false,
+        "writesCampaignState": false,
+        "nextAction": "A later effectful runner may create the forecast only with explicit local execution."
+      },
+      {
+        "runId": "predictionrun-1302",
+        "decisionStatus": "wait_until_create_time",
+        "scheduleAction": "wait_until_forecast_create_at",
+        "forecastCreateAt": "2026-06-12T00:00:00Z",
+        "forecastCloseAt": "2026-06-12T04:45:00Z",
+        "createsForecastArtifacts": false,
+        "writesCampaignState": false,
+        "nextAction": "Wait until forecastCreateAt before creating the run."
+      },
+      {
+        "runId": "predictionrun-1303",
+        "decisionStatus": "skip_missed_close",
+        "scheduleAction": "record_missed_without_forecast",
+        "forecastCreateAt": "2026-06-13T00:00:00Z",
+        "forecastCloseAt": "2026-06-13T04:45:00Z",
+        "createsForecastArtifacts": false,
+        "writesCampaignState": false,
+        "nextAction": "Record a skipped or missed state instead of backfilling a forecast."
+      },
+      {
+        "runId": "predictionrun-1304",
+        "decisionStatus": "blocked_duplicate",
+        "scheduleAction": "block_duplicate_without_forecast",
+        "forecastCreateAt": "2026-06-14T00:00:00Z",
+        "forecastCloseAt": "2026-06-14T04:45:00Z",
+        "createsForecastArtifacts": false,
+        "writesCampaignState": false,
+        "nextAction": "Keep the original run and do not create a duplicate forecast artifact."
+      }
+    ],
+    "normalChecksWriteLiveState": false,
+    "requiresExplicitWriteLocal": true,
+    "createsForecastArtifactsInDryRun": false,
+    "nextAction": "Use --now to inspect later due windows and --write-local to create the next due forecast; long-running polling remains separate."
+  },
+  "methodSelectionBinding": {
+    "bindingStatus": "baseline_default_no_local_override",
+    "defaultMethodId": "transitmethod-100",
+    "activeMethodId": "transitmethod-100",
+    "candidateMethodId": "transitmethod-101",
+    "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+    "applyCommand": "python3 scripts/ope.py prediction-campaign apply-method-update --method-update-plan-case plan_ready --write-local",
+    "rollbackCommand": "python3 scripts/ope.py prediction-campaign rollback-method-update --method-update-plan-case plan_ready --write-local",
+    "requiresApprovedLocalBinding": true,
+    "normalChecksReadLocalBinding": false,
+    "normalChecksChangeMethod": false,
+    "futureForecastsOnly": true,
+    "priorForecastHistoryRewriteAllowed": false
   },
   "supportedRecurrenceModes": [
     {
@@ -165,20 +240,21 @@
   "progress": {
     "plannedRunCount": 4,
     "readyToCreateForecastCount": 1,
+    "materializedRunCount": 4,
     "forecastArtifactsCreated": 0,
     "resolvedComparableOutcomes": 0,
     "nextForecastRunId": "predictionrun-1301",
-    "nextAction": "Use --write-local for the ready-run creation tick; future-window scheduling remains next."
+    "nextAction": "Use --write-local for the next due creation tick; future-window polling remains separate."
   },
   "summary": {
     "terminalRunnerSurfaceImplemented": true,
     "dryRunOnly": true,
-    "forecastCreationImplemented": false,
+    "forecastCreationImplemented": true,
     "resolverExecutionImplemented": false,
     "writesLiveState": false,
     "normalChecksUseLiveNetwork": false,
     "qualityClaimAllowed": false,
-    "recommendedNextMilestone": "Milestone 93 forecast scheduling after explicit local creation"
+    "recommendedNextMilestone": "Milestone 105 campaign outcome resolver execution"
   },
   "executionBoundary": {
     "readOnlyDryRun": true,
@@ -195,8 +271,8 @@
     "qualityClaimAllowed": false
   },
   "warnings": [
-    "This runner readback checks command semantics by default; --write-local performs one ready-run creation tick.",
-    "Forecast scheduling across future windows remains a later effectful milestone and must preserve forecast-before-close boundaries.",
+    "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+    "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
     "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
     "No calibration or quality claim is allowed from dry-run runner decisions."
   ]

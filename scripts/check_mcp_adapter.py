@@ -116,7 +116,7 @@ def assert_forecast_run_result(
 def main() -> None:
     matrix, _summaries = build_matrix()
     expected_outcomes = {item["outcomeClass"]: item for item in matrix["outcomes"]}
-    forecast_run_start_id = 18
+    forecast_run_start_id = 23
     forecast_run_ids = {
         case.outcome_class: forecast_run_start_id + index
         for index, case in enumerate(CASES)
@@ -289,6 +289,46 @@ def main() -> None:
                 "tools/call",
                 {
                     "name": "ope_resolution_scheduler_status",
+                    "arguments": {},
+                },
+            ),
+            message(
+                18,
+                "tools/call",
+                {
+                    "name": "ope_campaign_plan",
+                    "arguments": {},
+                },
+            ),
+            message(
+                19,
+                "tools/call",
+                {
+                    "name": "ope_campaign_status",
+                    "arguments": {},
+                },
+            ),
+            message(
+                20,
+                "tools/call",
+                {
+                    "name": "ope_campaign_health",
+                    "arguments": {},
+                },
+            ),
+            message(
+                21,
+                "tools/call",
+                {
+                    "name": "ope_campaign_append_readiness",
+                    "arguments": {},
+                },
+            ),
+            message(
+                22,
+                "tools/call",
+                {
+                    "name": "ope_campaign_calibration_status",
                     "arguments": {},
                 },
             ),
@@ -563,6 +603,64 @@ def main() -> None:
         raise AssertionError("resolution-scheduler-status MCP tool should expose dry-run mode")
     if scheduler_status_payload["executionBoundary"]["executesResolvers"] is not False:
         raise AssertionError("resolution-scheduler-status MCP tool must not execute resolvers")
+
+    campaign_plan = indexed[18]["result"]
+    if campaign_plan.get("isError"):
+        raise AssertionError("campaign-plan MCP tool should succeed")
+    campaign_plan_envelope = campaign_plan["structuredContent"]
+    assert_envelope(campaign_plan_envelope)
+    if campaign_plan_envelope["operation"] != "campaign_plan":
+        raise AssertionError("campaign-plan MCP tool returned the wrong operation")
+    if campaign_plan_envelope["payload"]["predictionCampaignManifestId"] != "predictioncampaignmanifest-001":
+        raise AssertionError("campaign-plan MCP tool should return the campaign manifest")
+    if campaign_plan_envelope["payload"]["localStatePolicy"]["normalChecksWriteLiveState"] is not False:
+        raise AssertionError("campaign-plan MCP tool must keep normal checks non-mutating")
+
+    campaign_status = indexed[19]["result"]
+    if campaign_status.get("isError"):
+        raise AssertionError("campaign-status MCP tool should succeed")
+    campaign_status_envelope = campaign_status["structuredContent"]
+    assert_envelope(campaign_status_envelope)
+    if campaign_status_envelope["operation"] != "campaign_status":
+        raise AssertionError("campaign-status MCP tool returned the wrong operation")
+    if campaign_status_envelope["payload"]["campaignSnapshot"]["nextForecastId"] != "forecast-1301":
+        raise AssertionError("campaign-status MCP tool should expose forecast-1301")
+    if campaign_status_envelope["payload"]["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("campaign-status MCP tool must keep quality claims blocked")
+
+    campaign_health = indexed[20]["result"]
+    if campaign_health.get("isError"):
+        raise AssertionError("campaign-health MCP tool should succeed")
+    campaign_health_envelope = campaign_health["structuredContent"]
+    assert_envelope(campaign_health_envelope)
+    if campaign_health_envelope["operation"] != "campaign_health":
+        raise AssertionError("campaign-health MCP tool returned the wrong operation")
+    if campaign_health_envelope["payload"]["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("campaign-health MCP tool must not execute resolvers")
+
+    campaign_append = indexed[21]["result"]
+    if campaign_append.get("isError"):
+        raise AssertionError("campaign-append-readiness MCP tool should succeed")
+    campaign_append_envelope = campaign_append["structuredContent"]
+    assert_envelope(campaign_append_envelope)
+    if campaign_append_envelope["operation"] != "campaign_append_readiness":
+        raise AssertionError("campaign-append-readiness MCP tool returned the wrong operation")
+    if campaign_append_envelope["payload"]["appendCandidate"]["comparableAppendReady"] is not False:
+        raise AssertionError("campaign-append-readiness MCP tool should keep comparable append blocked")
+    if campaign_append_envelope["payload"]["executionBoundary"]["appendsCorpusEvidence"] is not False:
+        raise AssertionError("campaign-append-readiness MCP tool must not append corpus evidence")
+
+    campaign_calibration = indexed[22]["result"]
+    if campaign_calibration.get("isError"):
+        raise AssertionError("campaign-calibration-status MCP tool should succeed")
+    campaign_calibration_envelope = campaign_calibration["structuredContent"]
+    assert_envelope(campaign_calibration_envelope)
+    if campaign_calibration_envelope["operation"] != "campaign_calibration_status":
+        raise AssertionError("campaign-calibration-status MCP tool returned the wrong operation")
+    if campaign_calibration_envelope["payload"]["calibrationStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("campaign-calibration-status MCP tool should expose below-threshold status")
+    if campaign_calibration_envelope["payload"]["executionBoundary"]["updatesForecastProbabilities"] is not False:
+        raise AssertionError("campaign-calibration-status MCP tool must not update probabilities")
 
     for case in CASES:
         result = indexed[forecast_run_ids[case.outcome_class]]["result"]

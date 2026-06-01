@@ -135,7 +135,7 @@ def resolver_args(args: argparse.Namespace, now: str | None, execute: bool) -> S
 def scheduler_action(job: dict[str, Any], execute_due: bool) -> str:
     status = job["jobStatus"]
     if job["target"].get("campaignId") and status == "pending_due":
-        return "campaign_resolver_not_implemented"
+        return "campaign_resolver_attempt_ready"
     if status == "pending_due":
         return "resolver_execute_requested" if execute_due else "due_waiting_for_execute_flag"
     if status == "pending_not_due":
@@ -158,7 +158,7 @@ def tick_status(job_summary: dict[str, int], resolver_summary: dict[str, Any]) -
 
 
 def build_tick(args: argparse.Namespace, tick_number: int) -> dict[str, Any]:
-    now = None if args.live else resolver.FIXTURE_NOW
+    now = args.now if getattr(args, "now", None) else (None if args.live else resolver.FIXTURE_NOW)
     registry = generate_resolution_jobs.build_registry(registry_args(args, now))
     executable_due = [
         job for job in registry["jobs"]
@@ -236,7 +236,7 @@ def build_report(
     }
     if args.campaign:
         report["warnings"].append(
-            "Campaign-aware scheduler ticks read checked campaign jobs but do not execute campaign resolvers or write campaign state."
+            "Campaign-aware scheduler ticks route due campaign jobs to explicit prediction-campaign resolve --write-local commands."
         )
     if shutdown_reason is not None:
         report["shutdown"] = {
@@ -332,6 +332,7 @@ def main() -> None:
     parser.add_argument("--workspace", default=str(resolver.LIVE_WORKSPACE))
     parser.add_argument("--run-state", action="append", default=[])
     parser.add_argument("--campaign", help="include a checked prediction campaign in scheduler ticks")
+    parser.add_argument("--now", help="override current timestamp for deterministic scheduler ticks")
     parser.add_argument("--limit", type=int, default=50)
     parser.add_argument("--poll-seconds", type=int, default=60)
     parser.add_argument("--max-ticks", type=int)

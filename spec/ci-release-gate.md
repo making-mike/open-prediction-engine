@@ -16,6 +16,7 @@ It performs:
 
 ```bash
 python3 --version
+python3 -m pip install "ruff>=0.8,<1" "mypy>=1.13,<2"
 python3 scripts/release_check.py
 python3 -m py_compile scripts/*.py
 ```
@@ -28,8 +29,8 @@ The workflow is checked by:
 python3 scripts/check_ci_workflow.py
 ```
 
-That checker verifies the expected release commands, read-only repository permissions, Python version setup, and the absence of deployment, publishing, secret, or arbitrary network command snippets.
+That checker verifies the expected release commands, dev-only static analysis installation, read-only repository permissions, Python version setup, and the absence of deployment, publishing, secret, or arbitrary network command snippets.
 
 ## Boundary
 
-This is a release-readiness gate for the local fixture-ready repository. It is not a hosted service deployment workflow.
+This is a release-readiness gate for the local fixture-ready repository. It is not a hosted service deployment workflow, and the `ruff`/`mypy` installation is not a runtime dependency.

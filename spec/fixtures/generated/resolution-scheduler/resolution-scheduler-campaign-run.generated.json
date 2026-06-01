@@ -65,6 +65,6 @@
     "Live watching requires --live --watch; resolver execution additionally requires --execute.",
     "Agents that require machine-readable watch stdout should pass --output-format jsonl.",
     "Scheduler execution may resolve due runs, but it never creates calibration claims.",
-    "Campaign-aware scheduler ticks read checked campaign jobs but do not execute campaign resolvers or write campaign state."
+    "Campaign-aware scheduler ticks route due campaign jobs to explicit prediction-campaign resolve --write-local commands."
   ]
 }

@@ -29,7 +29,7 @@
     {
       "inputId": "expansionevidence-002",
       "source": "developer adoption surface",
-      "observedValue": "quickstartSteps=6; scenarioSteps=6",
+      "observedValue": "quickstartSteps=7; scenarioSteps=6",
       "threshold": "checked quickstart and full scenario",
       "status": "met",
       "implication": "Developers and agents have a local path to first forecast card and lifecycle bundle."
@@ -53,7 +53,7 @@
     {
       "inputId": "expansionevidence-005",
       "source": "local usage trace",
-      "observedValue": "events=10; forecastCompletionRate=1.0",
+      "observedValue": "events=20; forecastCompletionRate=1.0",
       "threshold": "local deterministic usage signals without hosted telemetry",
       "status": "met",
       "implication": "Local measurement exists, but it is not a substitute for real hosted telemetry or support evidence."
@@ -89,6 +89,14 @@
       "threshold": "explicit non-goals remain enforced before expansion work",
       "status": "blocked",
       "implication": "Expansion must start with readiness gates and narrow specs, not production runtime claims."
+    },
+    {
+      "inputId": "expansionevidence-010",
+      "source": "repeating prediction campaign explain",
+      "observedValue": "nextForecastId=forecast-1301; pilotTaskReady=True",
+      "threshold": "recurring setup can explain next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling",
+      "status": "met",
+      "implication": "Recurring prediction setup has a checked local readback and pilot task before hosted scheduling or broader runtime work."
     }
   ],
   "expansionOptions": [
@@ -97,6 +105,7 @@
       "status": "blocked_pending_evidence",
       "evidenceRequired": [
         "3-5 real pilot sessions identify a hosted-runtime need that local CLI cannot satisfy.",
+        "Recurring prediction setup pilot evidence shows local terminal scheduling is insufficient.",
         "Hosted auth, tenancy, job state, scheduler, and provenance boundaries are specified before implementation."
       ],
       "blockedBy": [
@@ -104,13 +113,14 @@
         "network_api",
         "production_agent_adapter_runtime"
       ],
-      "nextLocalStep": "Run real pilot sessions against the current local MVP and classify friction before designing a hosted runtime."
+      "nextLocalStep": "Run the repeating prediction pilot task and real pilot sessions before designing a hosted scheduler."
     },
     {
       "area": "broader_private_sources",
       "status": "blocked_pending_evidence",
       "evidenceRequired": [
         "Repeated pilot or usage evidence shows the approved local-folder runtime is insufficient.",
+        "Recurring campaign source-policy and append-readiness readbacks identify a bounded source gap.",
         "One next source kind can be bounded with approval, allow-listing, size limits, and sanitized diagnostics."
       ],
       "blockedBy": [
@@ -169,27 +179,34 @@
     },
     {
       "order": 2,
+      "milestoneName": "Recurring Prediction Setup Pilot",
+      "trigger": "Campaign explain and pilot-session task card are checked.",
+      "workBoundary": "Evaluate next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling.",
+      "createsProductionRuntime": false
+    },
+    {
+      "order": 3,
       "milestoneName": "Transit Corpus Growth",
       "trigger": "Public transport corpus has append-ready candidate guidance.",
       "workBoundary": "Add comparable forward runs without broad quality or calibration claims.",
       "createsProductionRuntime": false
     },
     {
-      "order": 3,
+      "order": 4,
       "milestoneName": "One Next Source Runtime Choice",
       "trigger": "Pilot evidence shows a repeated source-kind blocker.",
       "workBoundary": "Specify one bounded runtime path before writing execution code.",
       "createsProductionRuntime": false
     },
     {
-      "order": 4,
+      "order": 5,
       "milestoneName": "Generated Types Decision",
       "trigger": "Adoption evidence shows repeated schema friction.",
       "workBoundary": "Generate checked helper types only if JSON Schema remains the source of truth.",
       "createsProductionRuntime": false
     },
     {
-      "order": 5,
+      "order": 6,
       "milestoneName": "Hosted Runtime Boundary",
       "trigger": "Local pilots and corpus evidence justify service work.",
       "workBoundary": "Write hosted runtime contracts and threat boundaries before hosted implementation.",
@@ -200,7 +217,7 @@
     {
       "criterionId": "expansioncriterion-001",
       "area": "local MVP adoption",
-      "currentStatus": "quickstart validated; usage events=10",
+      "currentStatus": "quickstart validated; usage events=20",
       "target": "A new developer or agent reaches forecast-1102 card and bundle locally.",
       "ready": true
     },
@@ -238,14 +255,21 @@
       "currentStatus": "no recurring real adoption friction recorded yet",
       "target": "Repeated integration friction that generated types would directly reduce.",
       "ready": false
+    },
+    {
+      "criterionId": "expansioncriterion-007",
+      "area": "recurring prediction setup",
+      "currentStatus": "campaign explain, pilot task card, adapter readbacks, and usage trace events are checked locally",
+      "target": "Agents can explain recurring campaign state before hosted scheduling or broader runtime work.",
+      "ready": true
     }
   ],
   "summary": {
-    "evidenceInputCount": 9,
+    "evidenceInputCount": 10,
     "optionCount": 5,
     "readyOptionCount": 0,
     "blockedOptionCount": 5,
-    "recommendedNextMilestone": "Milestone 88: Pilot Evidence Ledger, then real pilot sessions and transit corpus growth before hosted or broader runtime work.",
+    "recommendedNextMilestone": "Milestone 97: repeating prediction pilot evidence, then real pilot sessions and transit corpus growth before hosted or broader runtime work.",
     "qualityClaimAllowed": false,
     "hostedRuntimeAllowed": false,
     "generatedTypesIncluded": false
@@ -267,6 +291,7 @@
     "The gate does not execute commands named in recommendations.",
     "Hosted runtime, production network APIs, and broad private-source runtimes remain non-goals until evidence unblocks them.",
     "Stronger methods and calibration claims remain blocked by comparable resolved sample thresholds.",
-    "Generated runtime types remain deferred until adoption evidence shows they reduce integration friction."
+    "Generated runtime types remain deferred until adoption evidence shows they reduce integration friction.",
+    "Recurring prediction setup must be evaluated with the local pilot task before hosted scheduling is designed."
   ]
 }

@@ -51,7 +51,15 @@ def agent_call_setup_readback(operation: str) -> dict[str, object]:
 
 
 def main() -> None:
-    run_cli("generate-fixtures")
+    generate_fixtures_list = run_cli("generate-fixtures", "--list")
+    if "scripts/generate_prediction_campaign_explain.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the campaign explain generator")
+    if "scripts/generate_helsinki_traffic_pilot_runbook.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the Helsinki pilot runbook generator")
+    if "scripts/generate_helsinki_traffic_pilot_readiness.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the Helsinki pilot readiness generator")
+    if "fixture commands" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures list output drifted")
     run_cli("resolve-live")
     run_cli("evidence-plan")
     run_cli("gather-evidence")
@@ -218,8 +226,8 @@ def main() -> None:
         raise AssertionError("CLI pilot-evidence check output drifted")
     pilot_session_packet = run_cli("pilot-session-packet")
     pilot_session_packet_payload = json.loads(pilot_session_packet.stdout)
-    if pilot_session_packet_payload["collectionSummary"]["taskCardCount"] != 5:
-        raise AssertionError("CLI pilot-session-packet should expose five task cards")
+    if pilot_session_packet_payload["collectionSummary"]["taskCardCount"] != 6:
+        raise AssertionError("CLI pilot-session-packet should expose six task cards")
     if pilot_session_packet_payload["collectionSummary"]["realSessionsRecorded"] != 0:
         raise AssertionError("CLI pilot-session-packet should not record real sessions")
     if pilot_session_packet_payload["collectionSummary"]["expansionEvidenceReady"] is not False:
@@ -229,6 +237,8 @@ def main() -> None:
     }
     if pilot_session_tasks["claim_gate_readback"]["claimBoundaryRequired"] is not True:
         raise AssertionError("CLI pilot-session-packet should require claim-boundary capture for claim gate")
+    if pilot_session_tasks["repeating_prediction_campaign"]["claimBoundaryRequired"] is not True:
+        raise AssertionError("CLI pilot-session-packet should require claim-boundary capture for repeating campaign")
     pilot_session_template = run_cli("pilot-session-packet", "--section", "template")
     pilot_session_template_payload = json.loads(pilot_session_template.stdout)
     if not pilot_session_template_payload["ledgerSubmissionShape"]["canSubmitToPilotEvidence"]:
@@ -262,8 +272,8 @@ def main() -> None:
         raise AssertionError("CLI pilot-summary-intake check output drifted")
     local_usage_trace = run_cli("local-usage-trace")
     local_usage_trace_payload = json.loads(local_usage_trace.stdout)
-    if local_usage_trace_payload["totalEvents"] != 10:
-        raise AssertionError("CLI local-usage-trace should expose ten events")
+    if local_usage_trace_payload["totalEvents"] != 20:
+        raise AssertionError("CLI local-usage-trace should expose twenty events")
     if local_usage_trace_payload["forecastCompletionRate"] != 1.0:
         raise AssertionError("CLI local-usage-trace forecast completion rate drifted")
     if local_usage_trace_payload["hostedTelemetryEnabled"] is not False:
@@ -275,13 +285,15 @@ def main() -> None:
         raise AssertionError("CLI local-usage-trace should include unsafe blocked path")
     if usage_events["response_too_large_readback"]["sanitizedErrorClass"] != "response_too_large":
         raise AssertionError("CLI local-usage-trace should expose sanitized oversized readback")
+    if usage_events["campaign_calibration_threshold_met"]["eventClass"] != "campaign":
+        raise AssertionError("CLI local-usage-trace should expose campaign lifecycle events")
     local_usage_trace_check = run_cli("local-usage-trace", "--check")
     if "checked local usage trace" not in local_usage_trace_check.stdout:
         raise AssertionError("CLI local-usage-trace check output drifted")
     developer_adoption = run_cli("developer-adoption")
     developer_adoption_payload = json.loads(developer_adoption.stdout)
-    if developer_adoption_payload["summary"]["quickstartStepCount"] != 6:
-        raise AssertionError("CLI developer-adoption should expose six quickstart steps")
+    if developer_adoption_payload["summary"]["quickstartStepCount"] != 7:
+        raise AssertionError("CLI developer-adoption should expose seven quickstart steps")
     if developer_adoption_payload["bindings"]["forecastId"] != "forecast-1102":
         raise AssertionError("CLI developer-adoption should bind forecast-1102")
     adoption_interfaces = {
@@ -295,6 +307,8 @@ def main() -> None:
     developer_quickstart_payload = json.loads(developer_quickstart.stdout)
     if developer_quickstart_payload[0]["command"] != "python3 --version":
         raise AssertionError("CLI developer-adoption quickstart should begin with Python setup")
+    if "prediction-campaign explain" not in developer_quickstart_payload[-1]["command"]:
+        raise AssertionError("CLI developer-adoption quickstart should evaluate recurring campaigns")
     developer_adoption_check = run_cli("developer-adoption", "--check")
     if "checked developer adoption surface" not in developer_adoption_check.stdout:
         raise AssertionError("CLI developer-adoption check output drifted")
@@ -323,6 +337,11 @@ def main() -> None:
         raise AssertionError("CLI expansion-readiness should block hosted runtime")
     if expansion_options["generated_runtime_types"]["status"] != "deferred_pending_adoption_evidence":
         raise AssertionError("CLI expansion-readiness should defer generated runtime types")
+    expansion_evidence = {
+        item["source"]: item for item in expansion_readiness_payload["evidenceInputs"]
+    }
+    if expansion_evidence["repeating prediction campaign explain"]["status"] != "met":
+        raise AssertionError("CLI expansion-readiness should evaluate recurring prediction setup")
     expansion_option_section = run_cli("expansion-readiness", "--section", "options")
     expansion_option_payload = json.loads(expansion_option_section.stdout)
     if expansion_option_payload[0]["area"] != "hosted_runtime":
@@ -358,6 +377,8 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign manifest status drifted")
     if prediction_campaign_payload["summary"]["plannedRunCount"] != 4:
         raise AssertionError("CLI prediction-campaign should expose four dry-run planned runs")
+    if prediction_campaign_payload["summary"]["targetRunCount"] != 100:
+        raise AssertionError("CLI prediction-campaign should expose the 100-run pilot target")
     if prediction_campaign_payload["summary"]["runnerImplemented"] is not False:
         raise AssertionError("CLI prediction-campaign must not implement a runner")
     if prediction_campaign_payload["executionBoundary"]["createsForecastArtifacts"] is not False:
@@ -368,6 +389,18 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign plan first run ID drifted")
     if campaign_plan_payload["plannedRuns"][0]["forecastId"] == "forecast-1102":
         raise AssertionError("CLI prediction-campaign plan must not reuse fixture forecast IDs")
+    if campaign_plan_payload["materialization"]["materializationMode"] != "bounded_preview":
+        raise AssertionError("CLI prediction-campaign plan should default to bounded preview")
+    campaign_full_plan = run_cli("prediction-campaign", "plan", "--count", "100", "--full-materialization")
+    campaign_full_plan_payload = json.loads(campaign_full_plan.stdout)
+    if campaign_full_plan_payload["materialization"]["materializationMode"] != "full_100_run_pilot":
+        raise AssertionError("CLI prediction-campaign full materialization mode drifted")
+    if len(campaign_full_plan_payload["plannedRuns"]) != 100:
+        raise AssertionError("CLI prediction-campaign full materialization should expose 100 runs")
+    if campaign_full_plan_payload["plannedRuns"][-1]["runId"] != "predictionrun-1400":
+        raise AssertionError("CLI prediction-campaign full materialization final run drifted")
+    if campaign_full_plan_payload["materialization"]["duplicateConflictCount"] != 0:
+        raise AssertionError("CLI prediction-campaign full materialization duplicate audit drifted")
     campaign_status = run_cli("prediction-campaign", "status")
     campaign_status_payload = json.loads(campaign_status.stdout)
     if campaign_status_payload["progress"]["nextResolutionRunId"] != "none":
@@ -379,16 +412,20 @@ def main() -> None:
     prediction_campaign_start_payload = json.loads(prediction_campaign_start.stdout)
     if prediction_campaign_start_payload["runnerStatus"] != "dry_run_ready_non_executing":
         raise AssertionError("CLI prediction-campaign start status drifted")
-    if prediction_campaign_start_payload["summary"]["forecastCreationImplemented"] is not False:
-        raise AssertionError("CLI prediction-campaign start must not create forecasts yet")
+    if prediction_campaign_start_payload["summary"]["forecastCreationImplemented"] is not True:
+        raise AssertionError("CLI prediction-campaign start should expose explicit local forecast creation")
     if prediction_campaign_start_payload["progress"]["nextForecastRunId"] != "predictionrun-1301":
         raise AssertionError("CLI prediction-campaign start next forecast run drifted")
+    if prediction_campaign_start_payload["progress"]["materializedRunCount"] != 4:
+        raise AssertionError("CLI prediction-campaign start materialized count drifted")
     if prediction_campaign_start_payload["outputModes"]["capturedStdoutMode"] != "jsonl":
         raise AssertionError("CLI prediction-campaign start captured output mode drifted")
     if prediction_campaign_start_payload["campaignCreationRequest"]["inputMode"] != "default_fixture":
         raise AssertionError("CLI prediction-campaign start default input mode drifted")
     if prediction_campaign_start_payload["campaignCreationRequest"]["targetCount"] != "100":
         raise AssertionError("CLI prediction-campaign start target count drifted")
+    if prediction_campaign_start_payload["forecastSchedule"]["readyRunId"] != "predictionrun-1301":
+        raise AssertionError("CLI prediction-campaign start forecast schedule ready run drifted")
     if prediction_campaign_start_payload["missedRunPolicy"]["recordedRunStatus"] != "missed":
         raise AssertionError("CLI prediction-campaign start missed-run status drifted")
     if prediction_campaign_start_payload["missedRunPolicy"]["excludedFromComparableEvidence"] is not True:
@@ -399,6 +436,84 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign missed-run policy reason drifted")
     if prediction_campaign_missed_policy_payload["appendsCorpusEvidence"] is not False:
         raise AssertionError("CLI prediction-campaign missed-run policy must not append corpus evidence")
+    prediction_campaign_forecast_schedule = run_cli("prediction-campaign", "start", "--view", "forecast-schedule")
+    prediction_campaign_forecast_schedule_payload = json.loads(prediction_campaign_forecast_schedule.stdout)
+    if prediction_campaign_forecast_schedule_payload["creationCommand"] != "python3 scripts/ope.py prediction-campaign start --write-local --output-format jsonl":
+        raise AssertionError("CLI prediction-campaign forecast schedule command drifted")
+    if prediction_campaign_forecast_schedule_payload["createsForecastArtifactsInDryRun"] is not False:
+        raise AssertionError("CLI prediction-campaign forecast schedule must remain dry-run non-mutating")
+    prediction_campaign_foreground = run_cli(
+        "prediction-campaign",
+        "start",
+        "--watch",
+        "--max-ticks",
+        "1",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_foreground_payload = json.loads(prediction_campaign_foreground.stdout)
+    if prediction_campaign_foreground_payload["runnerStatus"] != "foreground_forecast_ticks_completed":
+        raise AssertionError("CLI prediction-campaign foreground tick status drifted")
+    if prediction_campaign_foreground_payload["executionMode"] != "dry_run":
+        raise AssertionError("CLI prediction-campaign foreground tick should default to dry-run")
+    if prediction_campaign_foreground_payload["summary"]["boundedForegroundSchedulingImplemented"] is not True:
+        raise AssertionError("CLI prediction-campaign foreground tick should expose bounded foreground scheduling")
+    if prediction_campaign_foreground_payload["summary"]["futureWindowPollingImplemented"] is not False:
+        raise AssertionError("CLI prediction-campaign foreground tick should not claim future-window polling")
+    if prediction_campaign_foreground_payload["executionBoundary"]["writesCampaignState"] is not False:
+        raise AssertionError("CLI prediction-campaign foreground dry-run must not write campaign state")
+    prediction_campaign_next_due = run_cli(
+        "prediction-campaign",
+        "start",
+        "--now",
+        "2026-06-12T00:00:00Z",
+        "--watch",
+        "--max-ticks",
+        "1",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_next_due_payload = json.loads(prediction_campaign_next_due.stdout)
+    if prediction_campaign_next_due_payload["ticks"][0]["readyRunId"] != "predictionrun-1302":
+        raise AssertionError("CLI prediction-campaign next-due scheduling run drifted")
+    if prediction_campaign_next_due_payload["summary"]["nextDueRunSchedulingImplemented"] is not True:
+        raise AssertionError("CLI prediction-campaign foreground tick should expose next-due scheduling")
+    prediction_campaign_mini_smoke = run_cli(
+        "prediction-campaign",
+        "start",
+        "--plan-count",
+        "3",
+        "--count",
+        "3",
+        "--view",
+        "forecast-schedule",
+    )
+    prediction_campaign_mini_smoke_payload = json.loads(prediction_campaign_mini_smoke.stdout)
+    if len(prediction_campaign_mini_smoke_payload["scheduleRows"]) != 3:
+        raise AssertionError("CLI prediction-campaign mini smoke should expose three schedule rows")
+    if prediction_campaign_mini_smoke_payload["scheduleRows"][-1]["runId"] != "predictionrun-1303":
+        raise AssertionError("CLI prediction-campaign mini smoke final run drifted")
+    prediction_campaign_full_next_due = run_cli(
+        "prediction-campaign",
+        "start",
+        "--now",
+        "2026-09-18T00:00:00Z",
+        "--count",
+        "100",
+        "--full-materialization",
+        "--watch",
+        "--max-ticks",
+        "1",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_full_next_due_payload = json.loads(prediction_campaign_full_next_due.stdout)
+    if prediction_campaign_full_next_due_payload["ticks"][0]["readyRunId"] != "predictionrun-1400":
+        raise AssertionError("CLI prediction-campaign full materialized scheduling run drifted")
+    if len(prediction_campaign_full_next_due_payload["ticks"][0]["actions"]) != 100:
+        raise AssertionError("CLI prediction-campaign full materialized tick should inspect 100 actions")
+    if prediction_campaign_full_next_due_payload["executionBoundary"]["writesCampaignState"] is not False:
+        raise AssertionError("CLI prediction-campaign full materialized dry-run must not write campaign state")
     prediction_campaign_start_flags = run_cli(
         "prediction-campaign",
         "start",
@@ -516,6 +631,89 @@ def main() -> None:
     prediction_campaign_forecast_write_check = run_cli("prediction-campaign", "forecast-write", "--check")
     if "checked prediction campaign forecast write" not in prediction_campaign_forecast_write_check.stdout:
         raise AssertionError("CLI prediction-campaign forecast-write check output drifted")
+    prediction_campaign_resolution_attempt = run_cli("prediction-campaign", "resolve")
+    prediction_campaign_resolution_attempt_payload = json.loads(prediction_campaign_resolution_attempt.stdout)
+    if prediction_campaign_resolution_attempt_payload["attemptStatus"] != "dry_run_due_ready":
+        raise AssertionError("CLI prediction-campaign resolve status drifted")
+    if prediction_campaign_resolution_attempt_payload["bindings"]["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-campaign resolve forecast binding drifted")
+    if prediction_campaign_resolution_attempt_payload["executionBoundary"]["executesResolvers"] is not False:
+        raise AssertionError("CLI prediction-campaign resolve must not execute resolvers by default")
+    prediction_campaign_resolution_execute = run_cli(
+        "prediction-campaign",
+        "resolve",
+        "--run-id",
+        "predictionrun-1301",
+        "--execute-resolvers",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_resolution_execute_payload = json.loads(prediction_campaign_resolution_execute.stdout)
+    if prediction_campaign_resolution_execute_payload["attemptStatus"] != "blocked_missing_outcome_source":
+        raise AssertionError("CLI prediction-campaign resolve explicit execution should block on missing outcome source")
+    if prediction_campaign_resolution_execute_payload["attemptResult"]["failureCategory"] != "source_unavailable":
+        raise AssertionError("CLI prediction-campaign resolve failure category drifted")
+    prediction_campaign_resolution_source_ready = run_cli(
+        "prediction-campaign",
+        "resolve",
+        "--run-id",
+        "predictionrun-1301",
+        "--execute-resolvers",
+        "--outcome-csv",
+        ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_resolution_source_ready_payload = json.loads(prediction_campaign_resolution_source_ready.stdout)
+    if prediction_campaign_resolution_source_ready_payload["attemptStatus"] != "dry_run_execute_ready":
+        raise AssertionError("CLI prediction-campaign resolve should be ready when an outcome source is declared")
+    if prediction_campaign_resolution_source_ready_payload["summary"]["resolutionArtifactsCreated"] is not False:
+        raise AssertionError("CLI prediction-campaign resolve source-ready readback must remain non-mutating")
+    prediction_campaign_resolution_duplicate = run_cli(
+        "prediction-campaign",
+        "resolve",
+        "--attempt-case",
+        "blocked_duplicate",
+        "--execute-resolvers",
+        "--output-format",
+        "jsonl",
+    )
+    prediction_campaign_resolution_duplicate_payload = json.loads(prediction_campaign_resolution_duplicate.stdout)
+    if prediction_campaign_resolution_duplicate_payload["attemptStatus"] != "blocked_duplicate_run":
+        raise AssertionError("CLI prediction-campaign resolve duplicate case should block")
+    if prediction_campaign_resolution_duplicate_payload["attemptResult"]["failureCategory"] != "duplicate_blocked":
+        raise AssertionError("CLI prediction-campaign resolve duplicate failure category drifted")
+    if prediction_campaign_resolution_duplicate_payload["duplicateSafety"]["duplicateScoringBlocked"] is not True:
+        raise AssertionError("CLI prediction-campaign resolve duplicate safety should block duplicate scoring")
+    prediction_campaign_resolution_attempt_check = run_cli("prediction-campaign", "resolve", "--check")
+    if "checked prediction campaign resolution attempt" not in prediction_campaign_resolution_attempt_check.stdout:
+        raise AssertionError("CLI prediction-campaign resolve check output drifted")
+    prediction_campaign_doctor = run_cli("prediction-campaign", "doctor")
+    prediction_campaign_doctor_payload = json.loads(prediction_campaign_doctor.stdout)
+    if prediction_campaign_doctor_payload["doctorStatus"] != "actionable_due_run":
+        raise AssertionError("CLI prediction-campaign doctor status drifted")
+    if prediction_campaign_doctor_payload["health"]["dueRunCount"] != 1:
+        raise AssertionError("CLI prediction-campaign doctor should expose one due run")
+    if prediction_campaign_doctor_payload["health"]["blockedRunCount"] != 1:
+        raise AssertionError("CLI prediction-campaign doctor should expose the blocked resolver path")
+    if prediction_campaign_doctor_payload["duplicateProtection"]["priorEvidenceOverwriteAllowed"] is not False:
+        raise AssertionError("CLI prediction-campaign doctor must block prior-evidence overwrite")
+    if prediction_campaign_doctor_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign doctor must not write ignored state")
+    prediction_campaign_doctor_waiting = run_cli(
+        "prediction-campaign",
+        "doctor",
+        "--now",
+        "2026-06-11T07:14:59Z",
+        "--view",
+        "health",
+    )
+    prediction_campaign_doctor_waiting_payload = json.loads(prediction_campaign_doctor_waiting.stdout)
+    if prediction_campaign_doctor_waiting_payload["waitingRunCount"] != 1:
+        raise AssertionError("CLI prediction-campaign doctor waiting view drifted")
+    prediction_campaign_doctor_check = run_cli("prediction-campaign", "doctor", "--check")
+    if "checked prediction campaign doctor" not in prediction_campaign_doctor_check.stdout:
+        raise AssertionError("CLI prediction-campaign doctor check output drifted")
     prediction_campaign_resume = run_cli("prediction-campaign", "resume")
     prediction_campaign_resume_payload = json.loads(prediction_campaign_resume.stdout)
     if prediction_campaign_resume_payload["resumeStatus"] != "checked_resume_plan_non_mutating":
@@ -526,9 +724,212 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign resume must remain non-effectful")
     if prediction_campaign_resume_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
         raise AssertionError("CLI prediction-campaign resume must not write ignored live state")
+    prediction_campaign_interrupted_resume = run_cli(
+        "prediction-campaign",
+        "resume",
+        "--resume-case",
+        "interrupted_after_forecast_write",
+        "--view",
+        "state",
+    )
+    prediction_campaign_interrupted_resume_payload = json.loads(prediction_campaign_interrupted_resume.stdout)
+    if prediction_campaign_interrupted_resume_payload["sourceKind"] != "simulated_interrupted_campaign_state":
+        raise AssertionError("CLI prediction-campaign interrupted resume source kind drifted")
+    if prediction_campaign_interrupted_resume_payload["localRunStateCount"] != 1:
+        raise AssertionError("CLI prediction-campaign interrupted resume should find one local run state")
+    if prediction_campaign_interrupted_resume_payload["priorEvidenceOverwriteAllowed"] is not False:
+        raise AssertionError("CLI prediction-campaign interrupted resume must not allow overwrite")
     prediction_campaign_resume_check = run_cli("prediction-campaign", "resume", "--check")
     if "checked prediction campaign resume" not in prediction_campaign_resume_check.stdout:
         raise AssertionError("CLI prediction-campaign resume check output drifted")
+    prediction_campaign_append_ready = run_cli("prediction-campaign", "append-ready")
+    prediction_campaign_append_ready_payload = json.loads(prediction_campaign_append_ready.stdout)
+    if prediction_campaign_append_ready_payload["ledgerStatus"] != "checked_exclusion_append_ready":
+        raise AssertionError("CLI prediction-campaign append-ready status drifted")
+    if prediction_campaign_append_ready_payload["summary"]["excludedRowCount"] != 1:
+        raise AssertionError("CLI prediction-campaign append-ready excluded row count drifted")
+    if prediction_campaign_append_ready_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign append-ready must not write ignored state")
+    prediction_campaign_append_comparable = run_cli(
+        "prediction-campaign",
+        "append",
+        "--ledger-case",
+        "comparable_scored",
+        "--view",
+        "summary",
+    )
+    prediction_campaign_append_comparable_payload = json.loads(prediction_campaign_append_comparable.stdout)
+    if prediction_campaign_append_comparable_payload["comparableRowCount"] != 1:
+        raise AssertionError("CLI prediction-campaign append comparable row count drifted")
+    if prediction_campaign_append_comparable_payload["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign append dry run must not write ignored state")
+    prediction_campaign_ledger_check = run_cli("prediction-campaign", "append-ready", "--check")
+    if "checked prediction campaign evidence ledger" not in prediction_campaign_ledger_check.stdout:
+        raise AssertionError("CLI prediction-campaign evidence ledger check output drifted")
+    prediction_campaign_calibration = run_cli("prediction-campaign", "calibration-status")
+    prediction_campaign_calibration_payload = json.loads(prediction_campaign_calibration.stdout)
+    if prediction_campaign_calibration_payload["calibrationStatus"] != "not_enough_resolved_comparable_outcomes":
+        raise AssertionError("CLI prediction-campaign calibration-status default drifted")
+    if prediction_campaign_calibration_payload["calibrationReadback"]["summaryGenerated"]:
+        raise AssertionError("CLI prediction-campaign calibration-status must not summarize below threshold")
+    prediction_campaign_calibration_threshold = run_cli(
+        "prediction-campaign",
+        "calibration-status",
+        "--calibration-case",
+        "threshold_met",
+        "--view",
+        "readback",
+    )
+    prediction_campaign_calibration_threshold_payload = json.loads(prediction_campaign_calibration_threshold.stdout)
+    if prediction_campaign_calibration_threshold_payload["summaryGenerated"] is not True:
+        raise AssertionError("CLI prediction-campaign calibration threshold case should generate a summary")
+    if prediction_campaign_calibration_threshold_payload["automaticMethodChangeAllowed"]:
+        raise AssertionError("CLI prediction-campaign calibration must not allow automatic method changes")
+    prediction_campaign_calibration_restart = run_cli(
+        "prediction-campaign",
+        "calibration-status",
+        "--calibration-case",
+        "post_calibration_restart",
+        "--view",
+        "cycle",
+    )
+    prediction_campaign_calibration_restart_payload = json.loads(prediction_campaign_calibration_restart.stdout)
+    if prediction_campaign_calibration_restart_payload["postCalibrationAction"] != "pause_then_resume_after":
+        raise AssertionError("CLI prediction-campaign calibration restart action drifted")
+    prediction_campaign_calibration_check = run_cli("prediction-campaign", "calibration-status", "--check")
+    if "checked prediction campaign calibration status" not in prediction_campaign_calibration_check.stdout:
+        raise AssertionError("CLI prediction-campaign calibration status check output drifted")
+    prediction_campaign_method_gate = run_cli("prediction-campaign", "method-update-gate")
+    prediction_campaign_method_gate_payload = json.loads(prediction_campaign_method_gate.stdout)
+    if prediction_campaign_method_gate_payload["gateStatus"] != "blocked_insufficient_calibration_evidence":
+        raise AssertionError("CLI prediction-campaign method-update gate default drifted")
+    if prediction_campaign_method_gate_payload["decision"]["methodUpdatePlanReady"]:
+        raise AssertionError("CLI prediction-campaign method-update gate must not be plan-ready below threshold")
+    if prediction_campaign_method_gate_payload["executionBoundary"]["changesForecastMethod"]:
+        raise AssertionError("CLI prediction-campaign method-update gate must not change methods")
+    prediction_campaign_method_gate_approved = run_cli(
+        "prediction-campaign",
+        "method-update-gate",
+        "--method-update-case",
+        "approved_plan_ready",
+        "--view",
+        "decision",
+    )
+    prediction_campaign_method_gate_approved_payload = json.loads(prediction_campaign_method_gate_approved.stdout)
+    if prediction_campaign_method_gate_approved_payload["methodUpdatePlanReady"] is not True:
+        raise AssertionError("CLI prediction-campaign method-update approved case should be plan-ready")
+    if prediction_campaign_method_gate_approved_payload["effectfulUpdateAllowedNow"]:
+        raise AssertionError("CLI prediction-campaign method-update gate must remain non-effectful")
+    prediction_campaign_method_gate_check = run_cli("prediction-campaign", "method-update-gate", "--check")
+    if "checked prediction campaign method update gate" not in prediction_campaign_method_gate_check.stdout:
+        raise AssertionError("CLI prediction-campaign method-update gate check output drifted")
+    prediction_campaign_method_plan = run_cli("prediction-campaign", "method-update-plan")
+    prediction_campaign_method_plan_payload = json.loads(prediction_campaign_method_plan.stdout)
+    if prediction_campaign_method_plan_payload["planStatus"] != "blocked_by_method_update_gate":
+        raise AssertionError("CLI prediction-campaign method-update plan default drifted")
+    if prediction_campaign_method_plan_payload["decision"]["methodUpdatePlanReady"]:
+        raise AssertionError("CLI prediction-campaign method-update plan must not be ready when gate-blocked")
+    if prediction_campaign_method_plan_payload["executionBoundary"]["writesPlanArtifact"]:
+        raise AssertionError("CLI prediction-campaign method-update plan must not write plan artifacts")
+    prediction_campaign_method_plan_ready = run_cli(
+        "prediction-campaign",
+        "method-update-plan",
+        "--method-update-plan-case",
+        "plan_ready",
+        "--view",
+        "command",
+    )
+    prediction_campaign_method_plan_ready_payload = json.loads(prediction_campaign_method_plan_ready.stdout)
+    if not prediction_campaign_method_plan_ready_payload["implementedNow"]:
+        raise AssertionError("CLI prediction-campaign method-update plan should expose the implemented explicit command")
+    if prediction_campaign_method_plan_ready_payload["normalChecksMayRun"]:
+        raise AssertionError("CLI prediction-campaign method-update plan future command must stay out of normal checks")
+    prediction_campaign_method_plan_check = run_cli("prediction-campaign", "method-update-plan", "--check")
+    if "checked prediction campaign method update plan" not in prediction_campaign_method_plan_check.stdout:
+        raise AssertionError("CLI prediction-campaign method-update plan check output drifted")
+    prediction_campaign_method_apply = run_cli("prediction-campaign", "apply-method-update")
+    prediction_campaign_method_apply_payload = json.loads(prediction_campaign_method_apply.stdout)
+    if prediction_campaign_method_apply_payload["actionStatus"] != "blocked_by_method_update_plan":
+        raise AssertionError("CLI prediction-campaign method-update apply default drifted")
+    if prediction_campaign_method_apply_payload["executionBoundary"]["writesMethodBinding"]:
+        raise AssertionError("CLI prediction-campaign method-update apply default must not write bindings")
+    prediction_campaign_method_apply_ready = run_cli(
+        "prediction-campaign",
+        "apply-method-update",
+        "--method-update-plan-case",
+        "plan_ready",
+        "--view",
+        "summary",
+    )
+    prediction_campaign_method_apply_ready_payload = json.loads(prediction_campaign_method_apply_ready.stdout)
+    if prediction_campaign_method_apply_ready_payload["localWriteEligible"] is not True:
+        raise AssertionError("CLI prediction-campaign method-update apply should be eligible when plan-ready")
+    if prediction_campaign_method_apply_ready_payload["targetMethodId"] != "transitmethod-101":
+        raise AssertionError("CLI prediction-campaign method-update apply target drifted")
+    prediction_campaign_method_rollback_ready = run_cli(
+        "prediction-campaign",
+        "rollback-method-update",
+        "--method-update-plan-case",
+        "plan_ready",
+        "--view",
+        "summary",
+    )
+    prediction_campaign_method_rollback_ready_payload = json.loads(prediction_campaign_method_rollback_ready.stdout)
+    if prediction_campaign_method_rollback_ready_payload["targetMethodId"] != "transitmethod-100":
+        raise AssertionError("CLI prediction-campaign method-update rollback target drifted")
+    prediction_campaign_method_action_check = run_cli("prediction-campaign", "apply-method-update", "--check")
+    if "checked prediction campaign method update action" not in prediction_campaign_method_action_check.stdout:
+        raise AssertionError("CLI prediction-campaign method-update action check output drifted")
+    prediction_campaign_explain = run_cli("prediction-campaign", "explain")
+    prediction_campaign_explain_payload = json.loads(prediction_campaign_explain.stdout)
+    if prediction_campaign_explain_payload["campaignSnapshot"]["nextForecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-campaign explain next forecast drifted")
+    if prediction_campaign_explain_payload["summary"]["agentAdapterReadbacksImplemented"] is not True:
+        raise AssertionError("CLI prediction-campaign explain should expose agent adapter readbacks")
+    prediction_campaign_explain_check = run_cli("prediction-campaign", "explain", "--check")
+    if "checked prediction campaign explain" not in prediction_campaign_explain_check.stdout:
+        raise AssertionError("CLI prediction-campaign explain check output drifted")
+    prediction_campaign_pilot_runbook = run_cli("prediction-campaign", "pilot-runbook")
+    prediction_campaign_pilot_runbook_payload = json.loads(prediction_campaign_pilot_runbook.stdout)
+    if prediction_campaign_pilot_runbook_payload["pilotScope"]["targetRunCount"] != 100:
+        raise AssertionError("CLI prediction-campaign pilot runbook target drifted")
+    if prediction_campaign_pilot_runbook_payload["summary"]["bestAvailableMethodId"] != "transitmethod-100":
+        raise AssertionError("CLI prediction-campaign pilot runbook best method drifted")
+    if prediction_campaign_pilot_runbook_payload["executionBoundary"]["normalChecksWriteLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign pilot runbook must not write local state")
+    prediction_campaign_pilot_status = run_cli("prediction-campaign", "pilot-runbook", "--view", "operator-status")
+    prediction_campaign_pilot_status_payload = json.loads(prediction_campaign_pilot_status.stdout)
+    if prediction_campaign_pilot_status_payload["calibrationThreshold"] != 100:
+        raise AssertionError("CLI prediction-campaign pilot status calibration threshold drifted")
+    if len(prediction_campaign_pilot_status_payload["statusCommands"]) != 7:
+        raise AssertionError("CLI prediction-campaign pilot status command count drifted")
+    prediction_campaign_pilot_smoke = run_cli("prediction-campaign", "pilot-runbook", "--view", "smoke")
+    prediction_campaign_pilot_smoke_payload = json.loads(prediction_campaign_pilot_smoke.stdout)
+    if prediction_campaign_pilot_smoke_payload["expectedRunIds"][-1] != "predictionrun-1303":
+        raise AssertionError("CLI prediction-campaign pilot smoke final run drifted")
+    prediction_campaign_pilot_runbook_check = run_cli("prediction-campaign", "pilot-runbook", "--check")
+    if "checked Helsinki traffic pilot runbook" not in prediction_campaign_pilot_runbook_check.stdout:
+        raise AssertionError("CLI prediction-campaign pilot runbook check output drifted")
+    prediction_campaign_pilot_readiness = run_cli("prediction-campaign", "pilot-readiness")
+    prediction_campaign_pilot_readiness_payload = json.loads(prediction_campaign_pilot_readiness.stdout)
+    if prediction_campaign_pilot_readiness_payload["readinessSummary"]["targetRunCount"] != 100:
+        raise AssertionError("CLI prediction-campaign pilot readiness target drifted")
+    if prediction_campaign_pilot_readiness_payload["summary"]["checkedPrerequisitesPassed"] is not True:
+        raise AssertionError("CLI prediction-campaign pilot readiness checked prerequisites should pass")
+    if prediction_campaign_pilot_readiness_payload["executionBoundary"]["startsPilot"] is not False:
+        raise AssertionError("CLI prediction-campaign pilot readiness must not start the pilot")
+    prediction_campaign_pilot_readiness_commands = run_cli(
+        "prediction-campaign",
+        "pilot-readiness",
+        "--view",
+        "commands",
+    )
+    prediction_campaign_pilot_readiness_commands_payload = json.loads(prediction_campaign_pilot_readiness_commands.stdout)
+    if prediction_campaign_pilot_readiness_commands_payload[3]["commandKey"] != "launch_first_write":
+        raise AssertionError("CLI prediction-campaign pilot readiness launch command drifted")
+    prediction_campaign_pilot_readiness_check = run_cli("prediction-campaign", "pilot-readiness", "--check")
+    if "checked Helsinki traffic pilot readiness" not in prediction_campaign_pilot_readiness_check.stdout:
+        raise AssertionError("CLI prediction-campaign pilot readiness check output drifted")
     run_cli("private-setup-adapter-runbook", "--check")
     run_cli("private-setup-adapter-conformance", "--check")
     run_cli("private-setup-adapter-conformance-summary", "--check")
@@ -892,6 +1293,22 @@ def main() -> None:
         raise AssertionError("CLI campaign resolution-jobs forecast binding drifted")
     if campaign_jobs[0]["agentAction"]["recommendedAction"] != "wait":
         raise AssertionError("CLI campaign resolution-jobs should tell agents to wait")
+    due_campaign_resolution_jobs = run_cli(
+        "resolution-jobs",
+        "--campaign",
+        "predictioncampaign-001",
+        "--now",
+        "2026-06-11T07:15:00Z",
+    )
+    due_campaign_resolution_jobs_payload = json.loads(due_campaign_resolution_jobs.stdout)
+    due_campaign_jobs = [
+        job for job in due_campaign_resolution_jobs_payload["jobs"]
+        if job["target"].get("campaignId") == "predictioncampaign-001"
+    ]
+    if due_campaign_jobs[0]["agentAction"]["recommendedAction"] != "call_campaign_resolver_attempt":
+        raise AssertionError("CLI due campaign resolution-jobs should route to the checked resolver attempt")
+    if "prediction-campaign resolve" not in " ".join(due_campaign_jobs[0]["agentAction"]["commands"]):
+        raise AssertionError("CLI due campaign resolution-jobs should include the resolver-attempt command")
     campaign_resolution_jobs_check = run_cli("resolution-jobs", "--campaign", "predictioncampaign-001", "--check")
     if "checked resolution jobs" not in campaign_resolution_jobs_check.stdout:
         raise AssertionError("CLI campaign resolution-jobs --check did not check generated output")
@@ -929,6 +1346,20 @@ def main() -> None:
         raise AssertionError("CLI campaign resolution-scheduler should expose one campaign action")
     if campaign_actions[0]["schedulerAction"] != "wait_until_due":
         raise AssertionError("CLI campaign resolution-scheduler should wait for the campaign resolution time")
+    due_campaign_scheduler = run_cli(
+        "resolution-scheduler",
+        "--campaign",
+        "predictioncampaign-001",
+        "--now",
+        "2026-06-11T07:15:00Z",
+    )
+    due_campaign_scheduler_payload = json.loads(due_campaign_scheduler.stdout)
+    due_campaign_actions = [
+        action for action in due_campaign_scheduler_payload["ticks"][0]["actions"]
+        if action["statePath"].startswith(".ope/live/prediction-campaigns/")
+    ]
+    if due_campaign_actions[0]["schedulerAction"] != "campaign_resolver_attempt_ready":
+        raise AssertionError("CLI due campaign scheduler should route to the checked resolver attempt")
     campaign_scheduler_check = run_cli("resolution-scheduler", "--campaign", "predictioncampaign-001", "--check")
     if "checked resolution scheduler" not in campaign_scheduler_check.stdout:
         raise AssertionError("CLI campaign resolution-scheduler --check did not check generated output")
@@ -1015,6 +1446,24 @@ def main() -> None:
         raise AssertionError("CLI transit-track-record-gate must reject one-off calibration evidence")
     if transit_track_gate_payload["readSurface"]["fetchesLiveData"]:
         raise AssertionError("CLI transit-track-record-gate read surface must not fetch live data")
+    transit_track_campaign_gate = run_cli("transit-track-record-gate", "--campaign", "predictioncampaign-001")
+    transit_track_campaign_payload = json.loads(transit_track_campaign_gate.stdout)
+    if transit_track_campaign_payload["campaignLedger"]["included"] is not True:
+        raise AssertionError("CLI transit-track-record-gate --campaign should include campaign ledger")
+    if transit_track_campaign_payload["sampleSummary"]["excludedSampleSize"] != 7:
+        raise AssertionError("CLI transit-track-record-gate --campaign should include campaign excluded row")
+    transit_track_campaign_comparable_gate = run_cli(
+        "transit-track-record-gate",
+        "--campaign",
+        "predictioncampaign-001",
+        "--ledger-case",
+        "comparable_scored",
+    )
+    transit_track_campaign_comparable_payload = json.loads(transit_track_campaign_comparable_gate.stdout)
+    if transit_track_campaign_comparable_payload["sampleSummary"]["resolvedComparableSampleSize"] != 2:
+        raise AssertionError("CLI transit-track-record-gate campaign comparable sample size drifted")
+    if transit_track_campaign_comparable_payload["claimBoundary"]["calibrationClaimAllowed"]:
+        raise AssertionError("CLI transit-track-record-gate campaign ledger must not unlock calibration below threshold")
     transit_track_gate_check = run_cli("transit-track-record-gate", "--check")
     if "checked transit baseline track-record gate" not in transit_track_gate_check.stdout:
         raise AssertionError("CLI transit-track-record-gate --check did not check generated output")
@@ -1922,8 +2371,8 @@ def main() -> None:
 
     agent_envelopes = run_cli("agent-envelopes")
     agent_envelopes_payload = json.loads(agent_envelopes.stdout)
-    if agent_envelopes_payload["count"] != 51:
-        raise AssertionError("CLI agent-envelopes should return forty-four success envelopes and seven error envelopes")
+    if agent_envelopes_payload["count"] != 56:
+        raise AssertionError("CLI agent-envelopes should return forty-nine success envelopes and seven error envelopes")
     success_operations = {
         item["operation"]
         for item in agent_envelopes_payload["envelopes"]
@@ -1944,6 +2393,11 @@ def main() -> None:
         or "private_setup_forecast_execution" not in success_operations
         or "resolution_jobs" not in success_operations
         or "resolution_scheduler_status" not in success_operations
+        or "campaign_plan" not in success_operations
+        or "campaign_status" not in success_operations
+        or "campaign_health" not in success_operations
+        or "campaign_append_readiness" not in success_operations
+        or "campaign_calibration_status" not in success_operations
     ):
         raise AssertionError("CLI agent-envelopes should expose card, evidence trace, scoring, and private setup operations")
     readback_cards = [
@@ -1977,7 +2431,7 @@ def main() -> None:
 
     agent_protocol_map = run_cli("agent-protocol-map")
     agent_protocol_map_payload = json.loads(agent_protocol_map.stdout)
-    if len(agent_protocol_map_payload["operations"]) != 18:
+    if len(agent_protocol_map_payload["operations"]) != 23:
         raise AssertionError("CLI agent-protocol-map should expose every agent operation")
     protocol_runtime = agent_protocol_map_payload["adapterContract"]["protocolRuntimeImplemented"]
     if protocol_runtime is not True:
@@ -2008,6 +2462,10 @@ def main() -> None:
         raise AssertionError("CLI agent-protocol-map should expose scheduler status readbacks")
     if protocol_operations["resolution_scheduler_status"]["sideEffectLevel"] != "read_only":
         raise AssertionError("CLI agent-protocol-map should keep scheduler status read-only")
+    if protocol_operations["campaign_status"]["inputRecordType"] != "prediction_campaign_explain":
+        raise AssertionError("CLI agent-protocol-map should expose campaign status readbacks")
+    if protocol_operations["campaign_calibration_status"]["sideEffectLevel"] != "read_only":
+        raise AssertionError("CLI agent-protocol-map should keep campaign calibration status read-only")
 
     agent_call = run_cli(
         "agent-call",
@@ -2117,6 +2575,20 @@ def main() -> None:
         raise AssertionError("CLI resolution-scheduler-status agent-call should expose the log path")
     if scheduler_status_record["executionBoundary"]["executesResolvers"] is not False:
         raise AssertionError("CLI resolution-scheduler-status agent-call should not execute resolvers")
+
+    campaign_status_call = run_cli(
+        "agent-call",
+        "--operation",
+        "campaign_status",
+    )
+    campaign_status_call_payload = json.loads(campaign_status_call.stdout)
+    if campaign_status_call_payload["status"] != "ok":
+        raise AssertionError("CLI campaign-status agent-call should return an ok envelope")
+    campaign_status_record = campaign_status_call_payload["payload"]
+    if campaign_status_record["campaignSnapshot"]["nextForecastId"] != "forecast-1301":
+        raise AssertionError("CLI campaign-status agent-call should expose forecast-1301")
+    if campaign_status_record["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI campaign-status agent-call should keep quality claims blocked")
 
     source_guidance_call = run_cli(
         "agent-call",

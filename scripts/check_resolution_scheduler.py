@@ -13,6 +13,7 @@ class Args:
     workspace = ".ope/live/transit-forward-run"
     run_state: list[str] = []
     campaign = None
+    now = None
     limit = 50
     poll_seconds = 60
     max_ticks = 1
@@ -29,6 +30,10 @@ class Args:
 
 class CampaignArgs(Args):
     campaign = "predictioncampaign-001"
+
+
+class DueCampaignArgs(CampaignArgs):
+    now = "2026-06-11T07:15:00Z"
 
 
 def main() -> None:
@@ -77,6 +82,23 @@ def main() -> None:
         raise AssertionError("campaign scheduler fixture must not run resolver execution")
     if not any("Campaign-aware scheduler" in warning for warning in campaign_report["warnings"]):
         raise AssertionError("campaign scheduler should document the campaign non-execution boundary")
+
+    due_campaign_report = run_scheduler(DueCampaignArgs())
+    if due_campaign_report is None:
+        raise AssertionError("due campaign scheduler fixture should produce a report")
+    due_campaign_tick = due_campaign_report["ticks"][0]
+    due_campaign_actions = [
+        action for action in due_campaign_tick["actions"]
+        if action["statePath"].startswith(".ope/live/prediction-campaigns/")
+    ]
+    if len(due_campaign_actions) != 1:
+        raise AssertionError("due campaign scheduler should expose one campaign action")
+    if due_campaign_tick["jobSummary"]["pendingDueCount"] != 2:
+        raise AssertionError("due campaign scheduler should add one due campaign job")
+    if due_campaign_actions[0]["schedulerAction"] != "campaign_resolver_attempt_ready":
+        raise AssertionError("due campaign scheduler should route to the checked campaign resolver attempt")
+    if due_campaign_tick["resolverSummary"]["ranResolver"] or due_campaign_tick["resolverSummary"]["executedCount"]:
+        raise AssertionError("campaign scheduler must not execute the campaign resolver attempt in normal checks")
     print("checked resolution scheduler")
 
 

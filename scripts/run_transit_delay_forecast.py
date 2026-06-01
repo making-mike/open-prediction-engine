@@ -267,8 +267,8 @@ def resolve_trip_updates(
     min_observations: int,
 ) -> dict[str, Any]:
     scoped = [row for row in rows if matches_scope(row, network, geography, service_window, service_date)]
-    delays = [parse_float(row.get("delay_seconds")) for row in scoped]
-    delays = [delay for delay in delays if delay is not None]
+    parsed_delays = [parse_float(row.get("delay_seconds")) for row in scoped]
+    delays = [delay for delay in parsed_delays if delay is not None]
     observation_count = len(delays)
     late_count = sum(1 for delay in delays if delay >= late_seconds)
     late_ratio = round(late_count / observation_count, 4) if observation_count else 0.0

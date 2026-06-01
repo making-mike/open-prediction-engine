@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -36,6 +35,11 @@ OPERATIONS = [
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "campaign_plan",
+    "campaign_status",
+    "campaign_health",
+    "campaign_append_readiness",
+    "campaign_calibration_status",
     "resolution_jobs",
     "resolution_scheduler_status",
     "resolution_status",
@@ -57,6 +61,11 @@ INPUT_RECORD_TYPES = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "campaign_plan": "prediction_campaign_manifest",
+    "campaign_status": "prediction_campaign_explain",
+    "campaign_health": "prediction_campaign_doctor",
+    "campaign_append_readiness": "prediction_campaign_evidence_ledger",
+    "campaign_calibration_status": "prediction_campaign_calibration_status",
     "resolution_jobs": "resolution_job_registry",
     "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
@@ -78,6 +87,11 @@ SIDE_EFFECT_LEVELS = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "campaign_plan": "read_only",
+    "campaign_status": "read_only",
+    "campaign_health": "read_only",
+    "campaign_append_readiness": "read_only",
+    "campaign_calibration_status": "read_only",
     "resolution_jobs": "read_only",
     "resolution_scheduler_status": "read_only",
     "resolution_status": "status_read",
@@ -99,6 +113,11 @@ USAGE_GUIDANCE = {
     "private_setup_source_handoff": "Use after source-builder guidance to inspect checked source-handoff next actions and confirmation gates.",
     "private_setup_method_gate": "Use after confirmed source-handoff guidance to inspect setup benchmark and method-decision readiness.",
     "private_setup_forecast_execution": "Use only after method-gate readiness to run checked setup forecast execution and return artifacts for allowed cases; read generated forecasts through normal read operations.",
+    "campaign_plan": "Use when an agent needs the checked repeating campaign plan and candidate run IDs without starting a runner.",
+    "campaign_status": "Use when an agent needs the campaign explain readback for next forecast, next resolution, evidence threshold, and claim boundary without creating campaign artifacts.",
+    "campaign_health": "Use when an agent needs campaign doctor health, queue, duplicate, and recovery guidance without executing resolvers.",
+    "campaign_append_readiness": "Use when an agent needs campaign evidence append-readiness without appending corpus evidence.",
+    "campaign_calibration_status": "Use when an agent needs campaign calibration threshold and post-calibration policy status without tuning probabilities or methods.",
     "resolution_jobs": "Use when an agent needs pending, due, resolved, invalid, and waiting resolution-job guidance without reading local state files or executing resolvers.",
     "resolution_scheduler_status": "Use when an agent needs the last scheduler tick, shutdown reason, log path, execution mode, queue state readbacks, and next action without starting a scheduler.",
     "resolution_status": "Use when an agent needs to decide whether a normal or setup-generated forecast is resolved, pending, ambiguous, or annulled.",
@@ -120,6 +139,11 @@ HTTP_PATHS = {
     "private_setup_source_handoff": "/agent/private-setup-source-handoff",
     "private_setup_method_gate": "/agent/private-setup-method-gate",
     "private_setup_forecast_execution": "/agent/private-setup-forecast-execution",
+    "campaign_plan": "/agent/campaign-plan",
+    "campaign_status": "/agent/campaign-status",
+    "campaign_health": "/agent/campaign-health",
+    "campaign_append_readiness": "/agent/campaign-append-readiness",
+    "campaign_calibration_status": "/agent/campaign-calibration-status",
     "resolution_jobs": "/agent/resolution-jobs",
     "resolution_scheduler_status": "/agent/resolution-scheduler-status",
     "resolution_status": "/agent/resolution-status",
@@ -217,6 +241,16 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
             *common,
         ]
     if operation == "resolution_scheduler_status":
+        return [
+            *common,
+        ]
+    if operation in {
+        "campaign_plan",
+        "campaign_status",
+        "campaign_health",
+        "campaign_append_readiness",
+        "campaign_calibration_status",
+    }:
         return [
             *common,
         ]
@@ -411,6 +445,14 @@ def cli_command(operation: str) -> str:
             "--private-setup-request-id privatesetuprequest-001 "
             "--forecast-execution-case confirmed_builder_draft"
         )
+    if operation in {
+        "campaign_plan",
+        "campaign_status",
+        "campaign_health",
+        "campaign_append_readiness",
+        "campaign_calibration_status",
+    }:
+        return f"python3 scripts/ope.py agent-call --operation {operation}"
     return (
         "python3 scripts/ope.py agent-call "
         f"--operation {operation} "
@@ -447,6 +489,11 @@ def approval_gate(operation: str) -> str:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "campaign_plan",
+        "campaign_status",
+        "campaign_health",
+        "campaign_append_readiness",
+        "campaign_calibration_status",
         "resolution_jobs",
         "resolution_scheduler_status",
         "resolution_status",
@@ -485,6 +532,14 @@ def credential_boundary(operation: str) -> str:
         return "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
     if operation == "private_setup_forecast_execution":
         return "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+    if operation in {
+        "campaign_plan",
+        "campaign_status",
+        "campaign_health",
+        "campaign_append_readiness",
+        "campaign_calibration_status",
+    }:
+        return "Campaign readbacks accept no credentials in prompt-visible arguments and return only checked local campaign guidance payloads."
     if operation == "resolution_jobs":
         return "Resolution-job readbacks accept no credentials in prompt-visible arguments and return only checked registry guidance."
     if operation == "resolution_scheduler_status":

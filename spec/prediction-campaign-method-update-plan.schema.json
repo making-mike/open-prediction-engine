@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-method-update-plan.schema.json",
+  "title": "Prediction Campaign Method Update Plan",
+  "description": "Checked non-effectful plan shape for a future explicit campaign method update.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignMethodUpdatePlanId",
+    "generatedAt",
+    "planCase",
+    "planStatus",
+    "domain",
+    "bindings",
+    "approvalArtifact",
+    "futureEffectfulCommand",
+    "rollbackRecord",
+    "preflightChecks",
+    "decision",
+    "commandSurface",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignMethodUpdatePlanId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "planCase": {
+      "type": "string",
+      "enum": ["gate_blocked", "regression_risk", "approval_missing", "rollback_missing", "plan_ready"]
+    },
+    "planStatus": {
+      "type": "string",
+      "enum": [
+        "blocked_by_method_update_gate",
+        "blocked_regression_risk",
+        "blocked_missing_approval_artifact",
+        "blocked_missing_rollback_record",
+        "ready_for_explicit_effectful_command"
+      ]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "approvalArtifact": { "$ref": "#/$defs/approvalArtifact" },
+    "futureEffectfulCommand": { "$ref": "#/$defs/futureEffectfulCommand" },
+    "rollbackRecord": { "$ref": "#/$defs/rollbackRecord" },
+    "preflightChecks": { "$ref": "#/$defs/preflightChecks" },
+    "decision": { "$ref": "#/$defs/decision" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 720
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "predictionCampaignMethodUpdateGateId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId",
+        "currentMethodId",
+        "candidateMethodId"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignMethodUpdateGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "currentMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateMethodId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "approvalArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvalArtifactId",
+        "approvalStatus",
+        "requiredApprovals",
+        "receivedApprovals",
+        "approvedAt",
+        "auditTrailStatus",
+        "missingItems"
+      ],
+      "properties": {
+        "approvalArtifactId": { "$ref": "common.schema.json#/$defs/id" },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["not_ready", "missing", "approved"]
+        },
+        "requiredApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "receivedApprovals": { "$ref": "#/$defs/boundedStringList" },
+        "approvedAt": { "$ref": "#/$defs/boundedString" },
+        "auditTrailStatus": { "$ref": "#/$defs/boundedString" },
+        "missingItems": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "futureEffectfulCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandShape",
+        "dryRunPreviewCommand",
+        "targetMethodId",
+        "requiresWriteFlag",
+        "requiresApprovalArtifact",
+        "requiresRollbackRecord",
+        "implementedNow",
+        "normalChecksMayRun",
+        "writesMethodRegistry",
+        "writesCampaignState",
+        "updatesForecastProbabilities",
+        "changesForecastMethod"
+      ],
+      "properties": {
+        "commandShape": { "$ref": "#/$defs/boundedString" },
+        "dryRunPreviewCommand": { "$ref": "#/$defs/boundedString" },
+        "targetMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "requiresWriteFlag": { "type": "boolean" },
+        "requiresApprovalArtifact": { "type": "boolean" },
+        "requiresRollbackRecord": { "type": "boolean" },
+        "implementedNow": { "type": "boolean" },
+        "normalChecksMayRun": { "type": "boolean" },
+        "writesMethodRegistry": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "updatesForecastProbabilities": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" }
+      }
+    },
+    "rollbackRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollbackRecordId",
+        "rollbackStatus",
+        "rollbackCommandShape",
+        "restoresMethodId",
+        "preservesForecastHistory",
+        "requiresApprovalBeforeRollback",
+        "missingItems"
+      ],
+      "properties": {
+        "rollbackRecordId": { "$ref": "common.schema.json#/$defs/id" },
+        "rollbackStatus": {
+          "type": "string",
+          "enum": ["not_ready", "missing", "present"]
+        },
+        "rollbackCommandShape": { "$ref": "#/$defs/boundedString" },
+        "restoresMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "preservesForecastHistory": { "type": "boolean" },
+        "requiresApprovalBeforeRollback": { "type": "boolean" },
+        "missingItems": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "preflightChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodUpdateGateReady",
+        "approvalArtifactReady",
+        "rollbackRecordReady",
+        "auditTrailReady",
+        "effectfulCommandBlockedInNormalChecks",
+        "blockingReasons"
+      ],
+      "properties": {
+        "methodUpdateGateReady": { "type": "boolean" },
+        "approvalArtifactReady": { "type": "boolean" },
+        "rollbackRecordReady": { "type": "boolean" },
+        "auditTrailReady": { "type": "boolean" },
+        "effectfulCommandBlockedInNormalChecks": { "type": "boolean" },
+        "blockingReasons": { "$ref": "#/$defs/boundedStringList" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodUpdatePlanReady",
+        "effectfulUpdateAllowedNow",
+        "automaticUpdateAllowed",
+        "futureEffectfulCommandRequired",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "methodUpdatePlanReady": { "type": "boolean" },
+        "effectfulUpdateAllowedNow": { "type": "boolean" },
+        "automaticUpdateAllowed": { "type": "boolean" },
+        "futureEffectfulCommandRequired": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "executesResolvers",
+        "createsForecastArtifacts",
+        "updatesForecastProbabilities",
+        "changesForecastMethod",
+        "changesMethodWeights",
+        "writesMethodRegistry",
+        "writesPlanArtifact",
+        "startsNextCycle"
+      ],
+      "properties": {
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "updatesForecastProbabilities": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "changesMethodWeights": { "type": "boolean" },
+        "writesMethodRegistry": { "type": "boolean" },
+        "writesPlanArtifact": { "type": "boolean" },
+        "startsNextCycle": { "type": "boolean" }
+      }
+    }
+  }
+}

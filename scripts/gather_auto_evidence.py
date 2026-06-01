@@ -20,7 +20,7 @@ from source_connector_catalog import (
     connector_binding,
 )
 from validate_forecast_request import load_json
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import emit_generated, render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -309,14 +309,6 @@ def build_source_set(
     return source_set
 
 
-def write_source_set(source_set: dict[str, Any]) -> None:
-    write_generated(SOURCE_SET_PATH, source_set, label="auto-evidence source set", regen="python3 scripts/gather_auto_evidence.py --write")
-
-
-def check_source_set(source_set: dict[str, Any]) -> None:
-    check_generated(SOURCE_SET_PATH, source_set, label="auto-evidence source set", regen="python3 scripts/gather_auto_evidence.py --write")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", type=Path, default=DEFAULT_REQUEST)
@@ -341,10 +333,8 @@ def main() -> None:
     except EvidenceGatheringError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc
-    if args.write:
-        write_source_set(source_set)
-    elif args.check:
-        check_source_set(source_set)
+    if args.write or args.check:
+        emit_generated(SOURCE_SET_PATH, source_set, write=args.write, label="auto-evidence source set", regen="python3 scripts/gather_auto_evidence.py --write")
     else:
         sys.stdout.write(render_json(source_set))
 

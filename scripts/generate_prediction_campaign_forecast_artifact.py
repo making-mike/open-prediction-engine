@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -88,6 +86,21 @@ def source_ref(
     return ref
 
 
+def record_suffix(run: dict[str, Any]) -> str:
+    return run["forecastId"].split("-")[-1]
+
+
+def run_record_id(prefix: str, run: dict[str, Any]) -> str:
+    return f"{prefix}-{record_suffix(run)}"
+
+
+def run_source_id(run: dict[str, Any], index: int) -> str:
+    suffix = record_suffix(run)
+    if suffix == "1301":
+        return f"source-{1300 + index}"
+    return f"source-{suffix}{index:02d}"
+
+
 def horizon(run: dict[str, Any]) -> dict[str, Any]:
     label = f"same-day-{run['serviceWindow'].replace('_', '-')}"
     return {
@@ -108,42 +121,52 @@ def resolution_criteria(run: dict[str, Any]) -> str:
     )
 
 
-def build_prediction_campaign_forecast_artifact() -> dict[str, dict[str, Any]]:
-    creation = build_prediction_campaign_forecast_creation()
+def build_prediction_campaign_forecast_artifact(
+    run_id: str | None = None,
+    *,
+    creation: dict[str, Any] | None = None,
+) -> dict[str, dict[str, Any]]:
+    if creation is None:
+        creation = build_prediction_campaign_forecast_creation(run_id=run_id)
     run = creation["readyRun"]
     bindings = creation["bindings"]
     horizon_record = horizon(run)
     criteria = resolution_criteria(run)
+    creation_path = (
+        CREATION_PATH
+        if creation["predictionCampaignForecastCreationId"] == "predictioncampaignforecastcreation-001"
+        else None
+    )
     outcome_ref = source_ref(
-        "source-1304",
+        run_source_id(run, 4),
         "Future transit delay outcome capture",
         "public_dataset",
     )
     provenance_refs = [
         source_ref(
-            "source-1301",
+            run_source_id(run, 1),
             "Historical transit delay fixture",
             "public_dataset",
             HISTORY_SOURCE_PATH,
             run["forecastCreateAt"],
         ),
         source_ref(
-            "source-1302",
+            run_source_id(run, 2),
             "Prediction campaign manifest fixture",
             "other",
             MANIFEST_PATH,
             GENERATED_AT,
         ),
         source_ref(
-            "source-1303",
+            run_source_id(run, 3),
             "Prediction campaign forecast-creation handoff",
             "other",
-            CREATION_PATH,
+            creation_path,
             GENERATED_AT,
         ),
     ]
     model = {
-        "modelId": "model-1301",
+        "modelId": run_record_id("model", run),
         "version": "weather-transit-delay-campaign-baseline-v0",
         "trainingCutoff": run["forecastCloseAt"],
         "configurationHash": "sha256-campaign-baseline-v0",
@@ -185,7 +208,7 @@ def build_prediction_campaign_forecast_artifact() -> dict[str, dict[str, Any]]:
         "updatedAt": run["forecastCreateAt"],
     }
     evidence = {
-        "evidencePacketId": "evidence-1301",
+        "evidencePacketId": run_record_id("evidence", run),
         "forecastId": run["forecastId"],
         "questionId": run["questionId"],
         "questionStatus": "open",
@@ -238,7 +261,7 @@ def build_prediction_campaign_forecast_artifact() -> dict[str, dict[str, Any]]:
         },
     }
     history = {
-        "historyId": "history-1301",
+        "historyId": run_record_id("history", run),
         "questionId": run["questionId"],
         "entries": [
             {

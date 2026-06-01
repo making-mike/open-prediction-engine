@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -93,6 +91,25 @@ def find_ready_decision(runner: dict[str, Any]) -> dict[str, Any]:
     raise SystemExit("prediction campaign runner has no ready forecast creation decision")
 
 
+def run_suffix(run_id: str) -> str:
+    return run_id.split("-")[-1]
+
+
+def effectful_ready_decision(run: dict[str, Any]) -> dict[str, Any]:
+    suffix = run_suffix(run["runId"])
+    return {
+        "decisionId": f"predictionrunnerdecision-{suffix}",
+        "runId": run["runId"],
+        "decisionStatus": "ready_to_create_forecast",
+        "reason": "Foreground runner clock is inside the forecast creation window for this campaign run.",
+        "nextAction": "Create the forecast only with explicit local execution.",
+        "forecastArtifactsCreated": False,
+        "liveFetchRequired": False,
+        "resolverExecutionRequired": False,
+        "writesLiveState": False,
+    }
+
+
 def find_run(manifest: dict[str, Any], run_id: str) -> dict[str, Any]:
     for run in manifest["plannedRuns"]:
         if run["runId"] == run_id:
@@ -100,14 +117,29 @@ def find_run(manifest: dict[str, Any], run_id: str) -> dict[str, Any]:
     raise SystemExit(f"prediction campaign manifest has no planned run {run_id}")
 
 
-def build_prediction_campaign_forecast_creation() -> dict[str, Any]:
-    manifest = build_prediction_campaign_manifest()
-    runner = build_prediction_campaign_runner()
-    decision = find_ready_decision(runner)
-    run = find_run(manifest, decision["runId"])
+def build_prediction_campaign_forecast_creation(
+    run_id: str | None = None,
+    *,
+    manifest: dict[str, Any] | None = None,
+    runner: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if manifest is None:
+        manifest = build_prediction_campaign_manifest()
+    if runner is None:
+        runner = build_prediction_campaign_runner()
+    if run_id is None:
+        decision = find_ready_decision(runner)
+        run = find_run(manifest, decision["runId"])
+        creation_id = "predictioncampaignforecastcreation-001"
+        runner_path = "spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json"
+    else:
+        run = find_run(manifest, run_id)
+        decision = effectful_ready_decision(run)
+        creation_id = f"predictioncampaignforecastcreation-{run_suffix(run_id)}"
+        runner_path = "runtime://prediction-campaign-start-watch"
     run_root = f".ope/live/prediction-campaigns/predictioncampaign-001/{run['runId']}"
     return {
-        "predictionCampaignForecastCreationId": "predictioncampaignforecastcreation-001",
+        "predictionCampaignForecastCreationId": creation_id,
         "generatedAt": GENERATED_AT,
         "creationStatus": "ready_dry_run_creation_request",
         "domain": manifest["domain"],
@@ -121,7 +153,7 @@ def build_prediction_campaign_forecast_creation() -> dict[str, Any]:
             "runnerDecisionId": decision["decisionId"],
             "sourcePolicyId": run["sourcePolicyId"],
             "manifestPath": "spec/fixtures/generated/prediction-campaign-manifest/weather-transit-delay-campaign-manifest.generated.json",
-            "runnerPath": "spec/fixtures/generated/prediction-campaign-runner/weather-transit-delay-campaign-runner.generated.json",
+            "runnerPath": runner_path,
         },
         "readyRun": {
             "runId": run["runId"],

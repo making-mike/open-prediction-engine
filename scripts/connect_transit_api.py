@@ -199,6 +199,7 @@ def decode_fields(data: bytes) -> list[tuple[int, int, Any]]:
         key, index = read_varint(data, index)
         field_number = key >> 3
         wire_type = key & 0x07
+        value: int | bytes
         if field_number <= 0:
             raise TransitApiConnectorError("invalid protobuf field number")
         if wire_type == 0:
@@ -445,15 +446,15 @@ def active_service_ids(package: zipfile.ZipFile, service_dates: set[str]) -> dic
     except TransitApiConnectorError:
         exception_rows = []
     for row in exception_rows:
-        service_date = row.get("date")
+        exception_date = row.get("date")
         service_id = row.get("service_id")
         exception_type = row.get("exception_type")
-        if service_date not in active_by_date or not service_id:
+        if not exception_date or exception_date not in active_by_date or not service_id:
             continue
         if exception_type == "1":
-            active_by_date[service_date].add(service_id)
+            active_by_date[exception_date].add(service_id)
         elif exception_type == "2":
-            active_by_date[service_date].discard(service_id)
+            active_by_date[exception_date].discard(service_id)
     return active_by_date
 
 
@@ -532,12 +533,13 @@ def load_static_schedules(
         if start_seconds is None:
             continue
         meta = trip_meta_by_id[trip_id]
-        schedule = {
+        start_time = seconds_to_gtfs_time(start_seconds)
+        schedule: dict[str, Any] = {
             **meta,
-            "start_time": seconds_to_gtfs_time(start_seconds),
+            "start_time": start_time,
             "stops": stops,
         }
-        key = (meta["route_id"], meta["direction_id"], schedule["start_time"])
+        key = (meta["route_id"], meta["direction_id"], start_time)
         schedules_by_key.setdefault(key, []).append(schedule)
 
     return schedules_by_key, {
@@ -888,9 +890,9 @@ def build_source_adapter_output(
     late_seconds: int,
     delay_source: str,
 ) -> dict[str, Any]:
-    service_dates = sorted({str(row["service_date"]) for row in rows}) or [None]
+    service_dates = sorted({str(row["service_date"]) for row in rows}) or ["unknown"]
     stats = delay_summary(rows, late_seconds)
-    source_manifest = {
+    source_manifest: dict[str, Any] = {
         "sourceManifestId": "sourcemanifest-1301",
         "createdAt": captured_at,
         "domainSetupId": "domainsetup-003",
@@ -955,7 +957,7 @@ def build_source_adapter_output(
             }
         ],
     }
-    field_mapping = {
+    field_mapping: dict[str, Any] = {
         "fieldMappingId": "fieldmapping-1301",
         "createdAt": captured_at,
         "domainSetupId": source_manifest["domainSetupId"],
@@ -983,7 +985,7 @@ def build_source_adapter_output(
             }
         ],
     }
-    output = {
+    output: dict[str, Any] = {
         "sourceAdapterOutputId": "sourceadapteroutput-1301",
         "generatedAt": captured_at,
         "outputStatus": "intake_ready",

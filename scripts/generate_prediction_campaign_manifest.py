@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
-import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -22,6 +20,8 @@ SCHEMA = SPEC / "prediction-campaign-manifest.schema.json"
 GENERATED_AT = "2026-05-29T00:00:00Z"
 DEFAULT_CASE = "daily_100_run_transit_calibration"
 DEFAULT_PLAN_COUNT = 4
+MAX_PREVIEW_COUNT = 12
+MAX_FULL_MATERIALIZATION_COUNT = 100
 
 RUN_STATUSES = [
     "planned_forecast_pending",
@@ -58,6 +58,16 @@ def find_case(setup: dict[str, Any], case_key: str) -> dict[str, Any]:
 
 def run_id(prefix: str, sequence: int) -> str:
     return f"{prefix}-{1300 + sequence}"
+
+
+def target_count_for_case(case: dict[str, Any]) -> int:
+    schedule = case["schedulePolicy"]
+    if "targetCount" in schedule:
+        return int(schedule["targetCount"])
+    for condition in case["endConditions"]:
+        if "targetCount" in condition:
+            return int(condition["targetCount"])
+    return DEFAULT_PLAN_COUNT
 
 
 def build_planned_runs(
@@ -105,6 +115,43 @@ def build_planned_runs(
             }
         )
     return runs
+
+
+def build_materialization(
+    planned_runs: list[dict[str, Any]],
+    *,
+    target_count: int,
+    full_materialization: bool,
+) -> dict[str, Any]:
+    duplicate_keys = [run["duplicateKey"] for run in planned_runs]
+    duplicate_conflict_count = len(duplicate_keys) - len(set(duplicate_keys))
+    first_run = planned_runs[0]
+    final_run = planned_runs[-1]
+    return {
+        "materializationMode": "full_100_run_pilot" if full_materialization else "bounded_preview",
+        "targetRunCount": target_count,
+        "materializedRunCount": len(planned_runs),
+        "boundedPreview": not full_materialization,
+        "boundedPreviewMaxCount": MAX_PREVIEW_COUNT,
+        "fullMaterializationRequested": full_materialization,
+        "fullMaterializationAvailable": True,
+        "firstRunId": first_run["runId"],
+        "nextRunId": first_run["runId"],
+        "finalRunId": final_run["runId"],
+        "firstServiceDate": first_run["serviceDate"],
+        "finalServiceDate": final_run["serviceDate"],
+        "duplicateKeyCount": len(duplicate_keys),
+        "duplicateConflictCount": duplicate_conflict_count,
+        "duplicateAuditStatus": "duplicate_conflicts" if duplicate_conflict_count else "unique_duplicate_keys",
+        "createsForecastArtifacts": False,
+        "writesCampaignState": False,
+        "normalChecksWriteLiveState": False,
+        "nextAction": (
+            "Review the full 100-run pilot plan before enabling local forecast runner writes."
+            if full_materialization
+            else "Use --full-materialization with --count 100 to inspect the complete Helsinki pilot plan."
+        ),
+    }
 
 
 def status_example(status: str, meaning: str, next_action: str) -> dict[str, Any]:
@@ -176,13 +223,17 @@ def build_prediction_campaign_manifest(
     *,
     case_key: str = DEFAULT_CASE,
     plan_count: int = DEFAULT_PLAN_COUNT,
+    target_count: int | None = None,
+    full_materialization: bool = False,
     setup: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if setup is None:
         setup = build_repeating_prediction_setup()
     case = find_case(setup, case_key)
     schedule = case["schedulePolicy"]
-    planned_runs = build_planned_runs(setup, case, plan_count=plan_count)
+    target_run_count = target_count or target_count_for_case(case)
+    materialized_count = target_run_count if full_materialization else plan_count
+    planned_runs = build_planned_runs(setup, case, plan_count=materialized_count)
     first_run = planned_runs[0]
     manifest = {
         "predictionCampaignManifestId": "predictioncampaignmanifest-001",
@@ -232,13 +283,18 @@ def build_prediction_campaign_manifest(
         },
         "planningWindow": {
             "dryRunPlannerImplemented": True,
-            "nextCandidateCount": plan_count,
+            "nextCandidateCount": len(planned_runs),
             "duplicateKeyFields": ["domain", "network", "geography", "serviceDate", "serviceWindow"],
             "duplicatePolicy": "Block a candidate when the duplicate key already exists for the campaign cycle.",
             "missedWindowPolicy": "If forecastCloseAt has passed before forecast creation, mark the run missed and never backfill a forecast.",
             "manualStopPolicy": "Manual stop freezes future planning until an explicit resume creates a new cycle or run range.",
             "statusesHandled": RUN_STATUSES,
         },
+        "materialization": build_materialization(
+            planned_runs,
+            target_count=target_run_count,
+            full_materialization=full_materialization,
+        ),
         "plannedRuns": planned_runs,
         "statusExamples": build_status_examples(),
         "progress": {
@@ -255,8 +311,10 @@ def build_prediction_campaign_manifest(
         "summary": {
             "campaignManifestImplemented": True,
             "dryRunPlannerImplemented": True,
+            "fullMaterializationImplemented": True,
             "runnerImplemented": False,
             "plannedRunCount": len(planned_runs),
+            "targetRunCount": target_run_count,
             "uniqueRunIdsMinted": True,
             "duplicatePreventionEnabled": True,
             "mutatesLiveState": False,
@@ -292,6 +350,7 @@ def plan_view(manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         "campaign": manifest["campaign"],
         "planningWindow": manifest["planningWindow"],
+        "materialization": manifest["materialization"],
         "plannedRuns": manifest["plannedRuns"],
     }
 
@@ -337,6 +396,16 @@ def main() -> None:
         help="number of candidate runs to include in the dry-run plan",
     )
     parser.add_argument(
+        "--count",
+        type=int,
+        help="target run count for explicit full pilot materialization",
+    )
+    parser.add_argument(
+        "--full-materialization",
+        action="store_true",
+        help="expand the complete local pilot plan instead of the bounded preview",
+    )
+    parser.add_argument(
         "--view",
         choices=["manifest", "plan", "status", "summary", "boundary"],
         default="manifest",
@@ -344,10 +413,25 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.plan_count < 1 or args.plan_count > 12:
-        raise SystemExit("--plan-count must be between 1 and 12")
+    if args.plan_count < 1 or args.plan_count > MAX_PREVIEW_COUNT:
+        raise SystemExit(f"--plan-count must be between 1 and {MAX_PREVIEW_COUNT}")
+    target_count = args.count
+    if target_count is not None and (target_count < 1 or target_count > MAX_FULL_MATERIALIZATION_COUNT):
+        raise SystemExit(f"--count must be between 1 and {MAX_FULL_MATERIALIZATION_COUNT}")
+    if args.full_materialization:
+        full_target_count = target_count or target_count_for_case(
+            find_case(build_repeating_prediction_setup(), args.case)
+        )
+        if full_target_count > MAX_FULL_MATERIALIZATION_COUNT:
+            raise SystemExit(f"--full-materialization supports at most {MAX_FULL_MATERIALIZATION_COUNT} runs")
+        target_count = full_target_count
 
-    manifest = build_prediction_campaign_manifest(case_key=args.case, plan_count=args.plan_count)
+    manifest = build_prediction_campaign_manifest(
+        case_key=args.case,
+        plan_count=args.plan_count,
+        target_count=target_count,
+        full_materialization=args.full_materialization,
+    )
     if args.write or args.check:
         check_or_write(manifest, write=args.write)
         return

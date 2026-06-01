@@ -17,6 +17,7 @@ def run(command: list[str]) -> None:
 
 def main() -> None:
     run([sys.executable, "scripts/run_checks.py"])
+    run([sys.executable, "scripts/check_static_analysis.py"])
 
 
 if __name__ == "__main__":

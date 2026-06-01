@@ -82,6 +82,11 @@ def main() -> None:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "campaign_plan",
+        "campaign_status",
+        "campaign_health",
+        "campaign_append_readiness",
+        "campaign_calibration_status",
         "resolution_jobs",
         "resolution_scheduler_status",
         "resolution_status",
@@ -165,6 +170,19 @@ def main() -> None:
         "without executing source setup" in source_selection["usageGuidance"],
         "private source-kind selection should preserve the non-execution boundary",
     )
+    for operation, record_type in {
+        "campaign_plan": "prediction_campaign_manifest",
+        "campaign_status": "prediction_campaign_explain",
+        "campaign_health": "prediction_campaign_doctor",
+        "campaign_append_readiness": "prediction_campaign_evidence_ledger",
+        "campaign_calibration_status": "prediction_campaign_calibration_status",
+    }.items():
+        item = operations[operation]
+        require(item["sideEffectLevel"] == "read_only", f"{operation} should be read-only")
+        require(item["inputRecordType"] == record_type, f"{operation} input record type drifted")
+        require(len(item["inputFields"]) == 2, f"{operation} should expose only maxBytes and callerIntent")
+        require(item["requiresApproval"] is False, f"{operation} should be approval-free readback")
+        require("without" in item["usageGuidance"], f"{operation} should name its non-execution boundary")
     source_builder = operations["private_setup_source_builder"]
     require(source_builder["requiresApproval"] is True, "source-builder adapter should require caller-approved paths")
     require(

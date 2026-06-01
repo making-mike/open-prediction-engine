@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -29,6 +28,7 @@ QUICKSTART_ORDER = [
     "forecast_card",
     "lifecycle_bundle",
     "claim_gate",
+    "recurring_campaign",
 ]
 
 SCENARIO_PHASES = [
@@ -165,6 +165,14 @@ def build_quickstart() -> list[dict[str, Any]]:
             "The public transport gate remains below track-record and calibration thresholds.",
             20,
         ),
+        quickstart_step(
+            7,
+            "recurring_campaign",
+            "Evaluate recurring campaign readiness",
+            "python3 scripts/ope.py prediction-campaign explain",
+            "The campaign explain readback names the next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling work.",
+            30,
+        ),
     ]
     return strip_private_keys(rows)
 
@@ -258,7 +266,7 @@ def build_integration_notes() -> list[dict[str, Any]]:
             "Operation name plus IDs such as forecastId=forecast-1102 and questionId=question-1102.",
             "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
             "One transport-neutral envelope with status, exitCode, recordBinding, payload, and sanitized errors.",
-            "Agent-call is a local dispatcher, not a hosted API or production protocol service.",
+            "Agent-call is a local dispatcher, not a hosted API or production protocol service; campaign readbacks must be evaluated before hosted scheduling.",
         ),
         integration_note(
             "mcp_stdio",
@@ -280,6 +288,7 @@ def build_release_notes() -> list[dict[str, Any]]:
                 "Approved local-folder source runtime for checked CSV/JSON fixture files under path and size limits.",
                 "Transport-neutral agent-call envelopes and local MCP stdio scaffold over the same dispatcher.",
                 "Resolution, scoring, source-handoff, setup method, source-quality, usage-trace, and pilot-validation readbacks.",
+                "Repeating prediction campaign explain, adapter, MCP, and pilot task readbacks for local campaign comprehension.",
             ],
         ),
         release_section(
@@ -288,6 +297,7 @@ def build_release_notes() -> list[dict[str, Any]]:
                 "Weather-logistics source-handoff forecast, resolution, and scoring remain checked fixture-mode paths.",
                 "Public transport corpus growth, method options, track-record gates, and live evidence promotion remain below claim thresholds.",
                 "Usage traces and pilot summaries are synthetic checked examples, not real hosted telemetry.",
+                "Recurring campaign events are checked local readbacks and do not create hosted schedules or production watchers.",
             ],
         ),
         release_section(
@@ -297,6 +307,7 @@ def build_release_notes() -> list[dict[str, Any]]:
                 "No arbitrary private API/database parsing, credential storage, raw private-row retention, or hosted watcher exists.",
                 "No calibration, broad forecast-quality, or production connector claim is allowed from the current examples.",
                 "No generated language-specific runtime types are included before adoption evidence shows they reduce setup friction.",
+                "No hosted scheduling or broader private-source runtime should be promoted before recurring prediction setup is evaluated.",
             ],
         ),
     ]
@@ -309,7 +320,8 @@ def build_success_checks() -> list[dict[str, Any]]:
         success_check(3, "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102", "forecast card readback succeeds"),
         success_check(4, "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102", "lifecycle bundle readback succeeds"),
         success_check(5, "python3 scripts/check_mvp_release_surface.py", "local MVP smoke check passes"),
-        success_check(6, "python3 scripts/run_checks.py", "canonical dependency-free check suite passes"),
+        success_check(6, "python3 scripts/ope.py prediction-campaign explain --view summary", "recurring prediction campaign readback explains local status"),
+        success_check(7, "python3 scripts/run_checks.py", "canonical dependency-free check suite passes"),
     ]
 
 

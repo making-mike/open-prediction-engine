@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -13,7 +12,7 @@ from typing import Any
 from generate_agent_pilot_validation import build_agent_pilot_validation
 from generate_release_manifest import build_manifest
 from ope_schema import SPEC, validate_record
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import emit_generated, render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +32,16 @@ EVENT_ORDER = [
     "response_too_large_readback",
     "claim_gate_readback",
     "agent_pilot_validation_read",
+    "campaign_start",
+    "campaign_forecast_created",
+    "campaign_resolve_due",
+    "campaign_resolver_executed",
+    "campaign_append_ready",
+    "campaign_appended",
+    "campaign_calibration_threshold_met",
+    "campaign_paused",
+    "campaign_resumed",
+    "campaign_stopped",
 ]
 
 
@@ -256,6 +265,146 @@ def build_events() -> list[dict[str, Any]]:
             binding=record_binding(record_type="agent-pilot-validation", record_id="agentpilotvalidation-001"),
             trace_row=trace(elapsed_ms=520, exit_code=0, response_bytes=2200, response_size_class="standard"),
         ),
+        event(
+            index=11,
+            source_case="campaign_start",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign start --count 100 --calibration-target 100",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="prediction-campaign-runner",
+                record_id="predictioncampaignrunner-001",
+            ),
+            trace_row=trace(elapsed_ms=310, exit_code=0, response_bytes=3900, response_size_class="standard"),
+        ),
+        event(
+            index=12,
+            source_case="campaign_forecast_created",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign forecast-create",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="prediction-campaign-forecast-creation",
+                record_id="predictioncampaignforecastcreation-001",
+            ),
+            trace_row=trace(elapsed_ms=280, exit_code=0, response_bytes=2600, response_size_class="standard"),
+        ),
+        event(
+            index=13,
+            source_case="campaign_resolve_due",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="resolution-job-registry",
+                record_id="resolutionjobregistry-001",
+            ),
+            trace_row=trace(elapsed_ms=240, exit_code=0, response_bytes=2100, response_size_class="standard"),
+        ),
+        event(
+            index=14,
+            source_case="campaign_resolver_executed",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="prediction-campaign-resolution-attempt",
+                record_id="predictioncampaignresolutionattempt-1301",
+            ),
+            trace_row=trace(elapsed_ms=330, exit_code=0, response_bytes=2600, response_size_class="standard"),
+        ),
+        event(
+            index=15,
+            source_case="campaign_append_ready",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign append-ready",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="prediction-campaign-evidence-ledger",
+                record_id="predictioncampaignledger-001",
+            ),
+            trace_row=trace(elapsed_ms=230, exit_code=0, response_bytes=2700, response_size_class="standard"),
+        ),
+        event(
+            index=16,
+            source_case="campaign_appended",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign append --ledger-case comparable_scored",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1301",
+                question_id="question-1301",
+                record_type="prediction-campaign-evidence-ledger",
+                record_id="predictioncampaignledger-001",
+            ),
+            trace_row=trace(elapsed_ms=250, exit_code=0, response_bytes=2850, response_size_class="standard"),
+        ),
+        event(
+            index=17,
+            source_case="campaign_calibration_threshold_met",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign calibration-status --calibration-case threshold_met",
+            outcome="success",
+            binding=record_binding(record_type="prediction-campaign-calibration-status", record_id="predictioncampaigncalibrationstatus-001"),
+            trace_row=trace(elapsed_ms=260, exit_code=0, response_bytes=2400, response_size_class="standard"),
+        ),
+        event(
+            index=18,
+            source_case="campaign_paused",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign calibration-status --calibration-case post_calibration_restart --view cycle",
+            outcome="success",
+            binding=record_binding(record_type="prediction-campaign-calibration-status", record_id="predictioncampaigncalibrationstatus-001"),
+            trace_row=trace(elapsed_ms=260, exit_code=0, response_bytes=1700, response_size_class="standard"),
+        ),
+        event(
+            index=19,
+            source_case="campaign_resumed",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign resume --from-local",
+            outcome="success",
+            binding=record_binding(record_type="prediction-campaign-resume", record_id="predictioncampaignresume-001"),
+            trace_row=trace(elapsed_ms=270, exit_code=0, response_bytes=2200, response_size_class="standard"),
+        ),
+        event(
+            index=20,
+            source_case="campaign_stopped",
+            actor="agent",
+            interface="cli",
+            event_class="campaign",
+            command="python3 scripts/ope.py prediction-campaign calibration-status --calibration-case threshold_met --view policy",
+            outcome="success",
+            binding=record_binding(record_type="prediction-campaign-calibration-status", record_id="predictioncampaigncalibrationstatus-001"),
+            trace_row=trace(elapsed_ms=260, exit_code=0, response_bytes=1500, response_size_class="standard"),
+        ),
     ]
 
 
@@ -401,7 +550,7 @@ def validate_local_usage_trace(trace_model: dict[str, Any]) -> None:
     if interfaces != {"cli", "agent_call", "mcp_stdio", "checker"}:
         raise LocalUsageTraceError("local usage trace interface coverage drifted")
     classes = {item["eventClass"] for item in events}
-    required_classes = {"setup", "forecast_run", "readback", "blocked_path", "release_surface_smoke", "agent_call", "mcp_stdio", "claim_gate", "validation_pack"}
+    required_classes = {"setup", "forecast_run", "readback", "blocked_path", "release_surface_smoke", "agent_call", "mcp_stdio", "claim_gate", "validation_pack", "campaign"}
     if classes != required_classes:
         raise LocalUsageTraceError("local usage trace event class coverage drifted")
     for item in events:
@@ -453,14 +602,6 @@ def summary(trace_model: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def write_trace(trace_model: dict[str, Any]) -> None:
-    write_generated(TRACE_PATH, trace_model, label="local usage trace", regen="python3 scripts/generate_local_usage_trace.py --write")
-
-
-def check_trace(trace_model: dict[str, Any]) -> None:
-    check_generated(TRACE_PATH, trace_model, label="local usage trace", regen="python3 scripts/generate_local_usage_trace.py --write")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--event", choices=EVENT_ORDER, help="print one local usage trace event")
@@ -472,10 +613,8 @@ def main() -> None:
     except LocalUsageTraceError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc
-    if args.write:
-        write_trace(trace_model)
-    elif args.check:
-        check_trace(trace_model)
+    if args.write or args.check:
+        emit_generated(TRACE_PATH, trace_model, write=args.write, label="local usage trace", regen="python3 scripts/generate_local_usage_trace.py --write")
     elif args.event:
         event_row = next(item for item in trace_model["eventLog"] if item["recordBinding"]["sourceCase"] == args.event)
         sys.stdout.write(render_json(event_row))

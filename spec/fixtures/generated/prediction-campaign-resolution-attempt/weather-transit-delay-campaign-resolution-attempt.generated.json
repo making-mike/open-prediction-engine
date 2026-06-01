@@ -1,0 +1,166 @@
+{
+  "predictionCampaignResolutionAttemptId": "predictioncampaignresolutionattempt-1301",
+  "generatedAt": "2026-05-31T00:30:00Z",
+  "attemptCase": {
+    "caseKey": "due_open",
+    "description": "Default checked due unresolved campaign run.",
+    "simulatedReadback": false
+  },
+  "attemptStatus": "dry_run_due_ready",
+  "executionMode": "dry_run",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "predictionCampaignForecastWriteId": "predictioncampaignforecastwrite-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "runId": "predictionrun-1301",
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "resolutionId": "resolution-1301",
+    "scoringReportId": "scoring-1301",
+    "sourcePolicyId": "sourcepolicy-1201"
+  },
+  "resolverTarget": {
+    "runStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+    "forecastArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json",
+    "resolutionEligibleAt": "2026-06-11T07:15:00Z",
+    "now": "2026-06-11T07:15:00Z",
+    "due": true,
+    "runStatus": "due_resolution",
+    "questionStatus": "open",
+    "serviceDate": "2026-06-11",
+    "serviceWindow": "morning_peak"
+  },
+  "attemptGuards": [
+    {
+      "guardId": "campaignresolutionguard-001",
+      "guardStatus": "pass",
+      "requiredBeforeResolve": true,
+      "blocksResolve": false,
+      "message": "Campaign run predictionrun-1301 is bound to forecast forecast-1301."
+    },
+    {
+      "guardId": "campaignresolutionguard-002",
+      "guardStatus": "pass",
+      "requiredBeforeResolve": true,
+      "blocksResolve": false,
+      "message": "Already terminal, excluded, or duplicate campaign runs cannot be resolved or scored again."
+    },
+    {
+      "guardId": "campaignresolutionguard-003",
+      "guardStatus": "pass",
+      "requiredBeforeResolve": true,
+      "blocksResolve": false,
+      "message": "Only open campaign forecasts can enter the resolution attempt path."
+    },
+    {
+      "guardId": "campaignresolutionguard-004",
+      "guardStatus": "pass",
+      "requiredBeforeResolve": true,
+      "blocksResolve": false,
+      "message": "Resolution may start only at or after 2026-06-11T07:15:00Z."
+    },
+    {
+      "guardId": "campaignresolutionguard-005",
+      "guardStatus": "warn",
+      "requiredBeforeResolve": false,
+      "blocksResolve": false,
+      "message": "--execute-resolvers is required before any resolver attempt can move beyond dry-run readback."
+    },
+    {
+      "guardId": "campaignresolutionguard-006",
+      "guardStatus": "warn",
+      "requiredBeforeResolve": true,
+      "blocksResolve": false,
+      "message": "Campaign outcome source execution requires --outcome-csv or --missing-outcome before local writes."
+    }
+  ],
+  "attemptResult": {
+    "resultStatus": "dry_run_ready",
+    "failureCategory": "none",
+    "retryable": true,
+    "retryAfter": "with_explicit_execute_resolvers_and_checked_outcome_source",
+    "sanitizedDiagnostics": "Due campaign run is ready for an explicit resolver attempt.",
+    "resolutionArtifactsCreated": false,
+    "scoringRecordsCreated": false
+  },
+  "duplicateSafety": {
+    "terminalRunStatuses": [
+      "ambiguous",
+      "annulled",
+      "resolved"
+    ],
+    "excludedRunStatuses": [
+      "canceled",
+      "failed",
+      "manually_stopped",
+      "missed",
+      "skipped"
+    ],
+    "duplicateRunStatus": "blocked_duplicate",
+    "terminalResolutionBlocked": true,
+    "terminalScoringBlocked": true,
+    "excludedResolutionBlocked": true,
+    "duplicateResolutionBlocked": true,
+    "duplicateScoringBlocked": true,
+    "priorEvidenceOverwriteAllowed": false
+  },
+  "sourceFetchMetadata": {
+    "fetchAttempted": false,
+    "sourceProvider": "none",
+    "sourceRole": "resolution_outcome",
+    "liveNetworkUsed": false,
+    "localOutcomePath": "none",
+    "sanitizedOnly": true
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign resolve",
+    "acceptedFlags": [
+      "--run-id",
+      "--now",
+      "--attempt-case",
+      "--execute-resolvers",
+      "--write-local",
+      "--outcome-csv",
+      "--missing-outcome",
+      "--output-format",
+      "--view"
+    ],
+    "defaultMode": "checked_resolution_attempt_readback",
+    "explicitResolverFlagRequired": true,
+    "normalChecksExecuteResolver": false
+  },
+  "summary": {
+    "resolutionAttemptReadbackImplemented": true,
+    "dueRunSelected": true,
+    "resolverExecutionRequested": false,
+    "resolverExecutionImplemented": true,
+    "duplicateSafetyImplemented": true,
+    "resolutionArtifactsCreated": false,
+    "scoringRecordsCreated": false,
+    "retryable": true,
+    "recommendedNextAction": "with_explicit_execute_resolvers_and_checked_outcome_source"
+  },
+  "executionBoundary": {
+    "normalChecksUseLiveNetwork": false,
+    "requiresExplicitResolverFlag": true,
+    "readsIgnoredLiveState": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "executesResolvers": false,
+    "createsResolutionArtifacts": false,
+    "createsScoringRecords": false,
+    "appendsCorpusEvidence": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "This readback records a campaign resolver attempt decision; it does not resolve or score the forecast.",
+    "Effectful resolver execution requires explicit --execute-resolvers plus --write-local and an outcome source or missing-outcome exclusion.",
+    "Normal checks do not read ignored local campaign state, fetch live data, write campaign state, or append corpus evidence."
+  ]
+}

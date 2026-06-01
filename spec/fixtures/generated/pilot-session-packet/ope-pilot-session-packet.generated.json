@@ -7,6 +7,7 @@
     "agentPilotValidationId": "agentpilotvalidation-001",
     "pilotEvidenceLedgerId": "pilotevidenceledger-001",
     "developerAdoptionSurfaceId": "developeradoptionsurface-001",
+    "predictionCampaignExplainId": "predictioncampaignexplain-001",
     "pilotProtocolId": "agentpilotprotocol-001",
     "pilotEvidencePolicyId": "pilotevidencepolicy-001"
   },
@@ -247,6 +248,44 @@
         "claimBoundaryRequired": true
       },
       "moderatorPrompt": "Inspect the public transport baseline track-record gate. Decide whether OPE may claim calibration or broad method quality yet."
+    },
+    {
+      "taskId": "pilotsessiontask-006",
+      "scenarioKey": "repeating_prediction_campaign",
+      "title": "Explain a repeating prediction campaign",
+      "command": "python3 scripts/ope.py prediction-campaign explain",
+      "expectedOutcomeClass": "campaign_explain_readback",
+      "measures": [
+        "task_completion",
+        "claim_boundary_comprehension",
+        "trust_for_agent_decision_support",
+        "runtime_gap_classification"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "schema_integration_friction"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "consider_next_source_runtime",
+          "tighten_claim_copy"
+        ],
+        "claimBoundaryRequired": true
+      },
+      "moderatorPrompt": "Use the campaign explain readback to identify the next forecast, next resolution, evidence threshold, and claim boundary without treating the campaign as quality or calibration evidence."
     }
   ],
   "evidenceTemplate": {
@@ -328,7 +367,7 @@
     "Stop any expansion interpretation that treats pilot usability evidence as forecast-quality or calibration evidence."
   ],
   "collectionSummary": {
-    "taskCardCount": 5,
+    "taskCardCount": 6,
     "minimumRealSessions": 3,
     "targetRealSessions": 5,
     "realSessionsRecorded": 0,

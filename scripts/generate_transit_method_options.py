@@ -14,7 +14,7 @@ from generate_transit_baseline_track_record_gate import build_gate
 from generate_transit_forward_run_corpus import OUTPUT_PATH as CORPUS_PATH
 from generate_transit_forward_run_corpus import build_corpus
 from ope_schema import SPEC, validate_record
-from ope_fixtures import check_generated, render_json, write_generated
+from ope_fixtures import emit_generated, render_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -358,14 +358,6 @@ def validate_options(options: dict[str, Any]) -> None:
         raise TransitMethodOptionsError("method options read surface must be non-executing")
 
 
-def write_options(options: dict[str, Any]) -> None:
-    write_generated(OUTPUT_PATH, options, label="transit method options", regen="python3 scripts/generate_transit_method_options.py --write")
-
-
-def check_options(options: dict[str, Any]) -> None:
-    check_generated(OUTPUT_PATH, options, label="transit method options", regen="python3 scripts/generate_transit_method_options.py --write")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
@@ -373,10 +365,8 @@ def main() -> None:
     args = parser.parse_args()
     try:
         options = build_options()
-        if args.write:
-            write_options(options)
-        elif args.check:
-            check_options(options)
+        if args.write or args.check:
+            emit_generated(OUTPUT_PATH, options, write=args.write, label="transit method options", regen="python3 scripts/generate_transit_method_options.py --write")
         else:
             sys.stdout.write(render_json(options))
     except (OSError, json.JSONDecodeError, TransitMethodOptionsError) as exc:

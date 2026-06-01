@@ -1,0 +1,272 @@
+{
+  "agentEnvelopeId": "agentenvelope-055",
+  "generatedAt": "2026-06-06T12:20:00Z",
+  "adapter": {
+    "surface": "local_cli",
+    "adapterVersion": "0.1.0",
+    "transport": "stdio_process",
+    "capabilityMode": "read_only"
+  },
+  "operation": "campaign_append_readiness",
+  "adapterRequest": {
+    "operation": "campaign_append_readiness",
+    "inputRecordType": "prediction_campaign_evidence_ledger",
+    "inputRef": "predictioncampaignledger-001",
+    "questionId": null,
+    "forecastId": null,
+    "maxBytes": 65536,
+    "callerIntent": "Read campaign append readiness without appending evidence."
+  },
+  "recordBinding": {
+    "requestId": null,
+    "pipelineRunId": null,
+    "questionId": "question-1301",
+    "forecastId": "forecast-1301",
+    "evidencePlanId": null,
+    "evidenceSourceSetId": null,
+    "sourcePolicyId": "sourcepolicy-1201",
+    "resolutionRecordId": null,
+    "scoringReportId": null
+  },
+  "state": {
+    "decisionStatus": "exclusion_audit_append_ready",
+    "approvalStatus": "not_required",
+    "dataMode": "fixture",
+    "planStatus": "campaign_append_readiness",
+    "executionMode": "read_only",
+    "sourceMode": "weather-transit-delays",
+    "forecastStatus": "waiting_resolution",
+    "resolutionStatus": "missing_outcome",
+    "scoreStatus": "not_scored",
+    "qualityClaimStatus": "not_allowed"
+  },
+  "status": "ok",
+  "exitCode": 0,
+  "payload": {
+    "predictionCampaignEvidenceLedgerId": "predictioncampaignledger-001",
+    "generatedAt": "2026-05-31T02:00:00Z",
+    "ledgerStatus": "checked_exclusion_append_ready",
+    "ledgerMode": "append-ready",
+    "domain": "weather-transit-delays",
+    "bindings": {
+      "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+      "predictionCampaignResolutionAttemptId": "predictioncampaignresolutionattempt-1301",
+      "campaignId": "predictioncampaign-001",
+      "cycleId": "predictioncycle-001",
+      "runId": "predictionrun-1301",
+      "questionId": "question-1301",
+      "forecastId": "forecast-1301",
+      "resolutionId": "resolution-1301",
+      "scoringReportId": "scoring-1301",
+      "sourcePolicyId": "sourcepolicy-1201",
+      "ledgerPath": ".ope/live/prediction-campaigns/predictioncampaign-001/evidence-ledger.json"
+    },
+    "ledgerPolicy": {
+      "appendOnly": true,
+      "comparableRowsSeparated": true,
+      "excludedRowsSeparated": true,
+      "explicitWriteRequired": true,
+      "normalChecksWriteLiveState": false,
+      "minimumObservationCount": 10,
+      "minimumComparableResolvedForTrackRecord": 30,
+      "minimumComparableResolvedForCalibration": 100,
+      "excludedReasonCodes": [
+        "missed_close",
+        "missing_outcome",
+        "low_coverage",
+        "feed_unavailable",
+        "invalid_window",
+        "leakage_risk",
+        "ambiguous",
+        "annulled",
+        "non_comparable"
+      ],
+      "noPostCloseEvidenceLeakage": true
+    },
+    "appendCandidate": {
+      "candidateStatus": "exclusion_audit_append_ready",
+      "ledgerCase": "excluded_missing_outcome",
+      "runId": "predictionrun-1301",
+      "forecastId": "forecast-1301",
+      "comparableAppendReady": false,
+      "exclusionAppendReady": true,
+      "nextAction": "Append the missing-outcome exclusion row for audit, then attach a checked outcome source before comparable evidence can grow."
+    },
+    "appendChecks": [
+      {
+        "checkId": "campaignledgercheck-001",
+        "checkName": "forecast_before_close",
+        "checkStatus": "pass",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": false,
+        "message": "Forecast time is at or before the campaign forecast close time."
+      },
+      {
+        "checkId": "campaignledgercheck-002",
+        "checkName": "source_policy_binding",
+        "checkStatus": "pass",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": false,
+        "message": "Campaign run, forecast artifact, and ledger row share sourcepolicy-1201."
+      },
+      {
+        "checkId": "campaignledgercheck-003",
+        "checkName": "no_post_close_evidence_leakage",
+        "checkStatus": "pass",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": false,
+        "message": "Ledger append uses only forecast-time evidence plus a later outcome/scoring binding."
+      },
+      {
+        "checkId": "campaignledgercheck-004",
+        "checkName": "resolution_after_horizon",
+        "checkStatus": "block",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": true,
+        "message": "No checked campaign outcome source is available, so comparable append is blocked."
+      },
+      {
+        "checkId": "campaignledgercheck-005",
+        "checkName": "score_binding",
+        "checkStatus": "block",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": true,
+        "message": "No checked campaign scoring report exists for this run."
+      },
+      {
+        "checkId": "campaignledgercheck-006",
+        "checkName": "observation_coverage",
+        "checkStatus": "block",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": true,
+        "message": "Coverage cannot be assessed until a checked outcome source exists."
+      },
+      {
+        "checkId": "campaignledgercheck-007",
+        "checkName": "comparable_scope",
+        "checkStatus": "block",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": true,
+        "message": "Missing outcome rows are preserved as excluded audit evidence, not comparable evidence."
+      },
+      {
+        "checkId": "campaignledgercheck-008",
+        "checkName": "duplicate_ledger_row",
+        "checkStatus": "pass",
+        "requiredForComparableAppend": true,
+        "blocksComparableAppend": false,
+        "message": "Append uses a stable campaign/run/forecast/row-kind key and must skip already-present rows."
+      }
+    ],
+    "comparableRows": [],
+    "excludedRows": [
+      {
+        "rowId": "campaignledgerrow-002",
+        "rowKind": "excluded",
+        "rowKey": "predictioncampaign-001:predictionrun-1301:forecast-1301:scoring-1301:excluded",
+        "campaignId": "predictioncampaign-001",
+        "cycleId": "predictioncycle-001",
+        "runId": "predictionrun-1301",
+        "questionId": "question-1301",
+        "forecastId": "forecast-1301",
+        "evidencePacketId": "evidence-1301",
+        "historyId": "history-1301",
+        "serviceDate": "2026-06-11",
+        "serviceWindow": "morning_peak",
+        "sourcePolicyId": "sourcepolicy-1201",
+        "runStatus": "blocked_missing_outcome_source",
+        "runStatePath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301.json",
+        "forecastArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/forecast-1301.json",
+        "evidencePacketPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/evidence-1301.json",
+        "forecastHistoryPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/history-1301.json",
+        "resolutionRecordPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/resolution-1301.json",
+        "scoringReportPath": ".ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/scoring-1301.json",
+        "forecastedAt": "2026-06-11T00:00:00Z",
+        "forecastCloseAt": "2026-06-11T04:45:00Z",
+        "horizonStartsAt": "2026-06-11T05:00:00Z",
+        "horizonEndsAt": "2026-06-11T07:00:00Z",
+        "resolutionEligibleAt": "2026-06-11T07:15:00Z",
+        "forecastProbability": 0.25,
+        "baselineProbability": 0.25,
+        "resolutionRecordId": "none",
+        "scoringReportId": "none",
+        "outcomeLabel": "unknown",
+        "outcomeValue": null,
+        "observationCount": 0,
+        "lateCount": 0,
+        "lateRatio": 0,
+        "scoreStatus": "not_scored",
+        "primaryScore": null,
+        "baselineScore": null,
+        "exclusionReason": "missing_outcome",
+        "appendReadiness": "exclusion_audit_append_ready"
+      }
+    ],
+    "duplicateProtection": {
+      "rowKeysInspected": 1,
+      "idempotencyRule": "Stable row keys skip already-present comparable or excluded rows instead of overwriting them.",
+      "duplicateAppendBlocked": true,
+      "priorEvidenceOverwriteAllowed": false
+    },
+    "localWriteResult": {
+      "writeStatus": "not_requested",
+      "ledgerPath": ".ope/live/prediction-campaigns/predictioncampaign-001/evidence-ledger.json",
+      "appendedRowCount": 0,
+      "alreadyPresentCount": 0,
+      "writesIgnoredLiveState": false
+    },
+    "commandSurface": {
+      "command": "python3 scripts/ope.py prediction-campaign append-ready",
+      "acceptedFlags": [
+        "--run-id",
+        "--ledger-case",
+        "--from-local",
+        "--output-format",
+        "--view"
+      ],
+      "defaultMode": "dry_run_readback",
+      "capturedStdoutMode": "json",
+      "explicitWriteFlagRequired": true,
+      "normalChecksWriteLiveState": false
+    },
+    "summary": {
+      "appendReadyCommandImplemented": true,
+      "appendCommandImplemented": true,
+      "localAppendImplemented": false,
+      "idempotentAppendImplemented": true,
+      "comparableAppendReady": false,
+      "exclusionAppendReady": true,
+      "comparableRowCount": 0,
+      "excludedRowCount": 1,
+      "writesIgnoredLiveState": false,
+      "qualityClaimAllowed": false,
+      "calibrationClaimAllowed": false,
+      "recommendedNextAction": "Resolve and score the campaign run before appending comparable evidence."
+    },
+    "executionBoundary": {
+      "readsIgnoredLiveState": false,
+      "writesIgnoredLiveState": false,
+      "writesCampaignState": false,
+      "fetchesLiveData": false,
+      "executesResolvers": false,
+      "createsResolutionArtifacts": false,
+      "createsScoringRecords": false,
+      "appendsCorpusEvidence": false,
+      "overwritesPriorEvidence": false,
+      "qualityClaimAllowed": false,
+      "calibrationClaimAllowed": false
+    },
+    "warnings": [
+      "Normal checks are dry-run and do not write the ignored local evidence ledger.",
+      "Comparable evidence requires checked resolution, score, source-policy, coverage, and no-leakage checks.",
+      "Excluded rows remain audit evidence and do not count toward track-record or calibration thresholds."
+    ]
+  },
+  "error": null,
+  "warnings": [
+    "Normal checks are dry-run and do not write the ignored local evidence ledger.",
+    "Comparable evidence requires checked resolution, score, source-policy, coverage, and no-leakage checks.",
+    "Excluded rows remain audit evidence and do not count toward track-record or calibration thresholds.",
+    "The adapter envelope is read-only and does not append campaign evidence."
+  ]
+}

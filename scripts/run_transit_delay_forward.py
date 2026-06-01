@@ -349,16 +349,15 @@ def validate_summary(summary: dict[str, Any]) -> None:
 
 
 def fixture_forward_run() -> dict[str, Any]:
-    class Args:
-        network = transit_forecast.NETWORK
-        geography = transit_forecast.GEOGRAPHY
-        service_window = transit_forecast.SERVICE_WINDOW
-        service_date = transit_forecast.SERVICE_DATE
-        late_seconds = transit_forecast.LATE_SECONDS
-        event_threshold = transit_forecast.EVENT_THRESHOLD
-        min_observations = transit_forecast.MIN_OBSERVATIONS
-
-    args = Args()
+    args = argparse.Namespace(
+        network=transit_forecast.NETWORK,
+        geography=transit_forecast.GEOGRAPHY,
+        service_window=transit_forecast.SERVICE_WINDOW,
+        service_date=transit_forecast.SERVICE_DATE,
+        late_seconds=transit_forecast.LATE_SECONDS,
+        event_threshold=transit_forecast.EVENT_THRESHOLD,
+        min_observations=transit_forecast.MIN_OBSERVATIONS,
+    )
     context = {
         "generated_at": transit_forecast.GENERATED_AT,
         "forecasted_at": transit_forecast.FORECASTED_AT,

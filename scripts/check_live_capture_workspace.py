@@ -13,7 +13,6 @@ from live_capture_workspace import (
     DEFAULT_WORKSPACE,
     build_draft_source_set,
     build_live_result_set,
-    render_json,
     save_live_result_set,
     validate_live_capture_file,
 )

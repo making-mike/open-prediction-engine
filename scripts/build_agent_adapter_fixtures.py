@@ -20,6 +20,11 @@ from generate_private_setup_agent_bundles import PrivateSetupAgentBundleError, b
 from generate_private_source_adapter_capabilities import build_capabilities as build_private_source_adapter_capabilities
 from generate_private_source_adapter_intake_bridge import build_bridge as build_private_source_adapter_intake_bridge
 from generate_private_source_adapter_outcome_matrix import build_matrix as build_private_source_adapter_outcome_matrix
+from generate_prediction_campaign_calibration_status import build_prediction_campaign_calibration_status
+from generate_prediction_campaign_doctor import build_prediction_campaign_doctor
+from generate_prediction_campaign_evidence_ledger import build_prediction_campaign_evidence_ledger
+from generate_prediction_campaign_explain import build_prediction_campaign_explain
+from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_source_intake_handoff import CASE_ORDER as SOURCE_HANDOFF_CASES
 from generate_source_intake_handoff import SourceIntakeHandoffError
 from generate_source_intake_handoff import build_handoff as build_source_handoff
@@ -161,6 +166,11 @@ OUTPUT_FILES = {
     "private_setup_lifecycle_bundle_readback": "ope-agent-private-setup-lifecycle-bundle-readback-envelope.generated.json",
     "private_setup_resolution_status_readback": "ope-agent-private-setup-resolution-status-readback-envelope.generated.json",
     "private_setup_scoring_summary_readback": "ope-agent-private-setup-scoring-summary-readback-envelope.generated.json",
+    "campaign_plan": "ope-agent-campaign-plan-envelope.generated.json",
+    "campaign_status": "ope-agent-campaign-status-envelope.generated.json",
+    "campaign_health": "ope-agent-campaign-health-envelope.generated.json",
+    "campaign_append_readiness": "ope-agent-campaign-append-readiness-envelope.generated.json",
+    "campaign_calibration_status": "ope-agent-campaign-calibration-status-envelope.generated.json",
     "resolution_jobs": "ope-agent-resolution-jobs-envelope.generated.json",
     "resolution_scheduler_status": "ope-agent-resolution-scheduler-status-envelope.generated.json",
     "resolution_jobs_missing_live_workspace_error": "ope-agent-resolution-jobs-missing-live-workspace-error-envelope.generated.json",
@@ -496,6 +506,84 @@ def validate_payload_binding(item: dict[str, Any]) -> None:
         ]:
             if boundary[key] is not False:
                 raise AgentAdapterError(f"resolution scheduler status boundary should keep {key} false")
+        return
+
+    if operation == "campaign_plan":
+        manifest = payload
+        first_run = manifest["plannedRuns"][0]
+        expect_equal("campaign plan input ref", manifest["predictionCampaignManifestId"], request["inputRef"])
+        expect_equal("campaign plan forecast binding", first_run["forecastId"], binding["forecastId"])
+        expect_equal("campaign plan question binding", first_run["questionId"], binding["questionId"])
+        expect_equal("campaign plan source policy binding", first_run["sourcePolicyId"], binding["sourcePolicyId"])
+        expect_equal("campaign plan state", "campaign_plan_readback", item["state"]["planStatus"])
+        if manifest["localStatePolicy"]["normalChecksWriteLiveState"] is not False:
+            raise AgentAdapterError("campaign plan must not write local state in normal checks")
+        for run in manifest["plannedRuns"]:
+            if run["createsForecastArtifacts"] or run["fetchesLiveData"] or run["mutatesCampaignState"]:
+                raise AgentAdapterError("campaign plan rows must stay non-mutating")
+        return
+
+    if operation == "campaign_status":
+        explain = payload
+        snapshot = explain["campaignSnapshot"]
+        expect_equal("campaign status input ref", explain["predictionCampaignExplainId"], request["inputRef"])
+        expect_equal("campaign status forecast binding", explain["bindings"]["forecastId"], binding["forecastId"])
+        expect_equal("campaign status question binding", explain["bindings"]["questionId"], binding["questionId"])
+        expect_equal("campaign status source policy binding", explain["bindings"]["sourcePolicyId"], binding["sourcePolicyId"])
+        expect_equal("campaign status state", "campaign_status_readback", item["state"]["planStatus"])
+        if snapshot["qualityClaimAllowed"] or snapshot["calibrationClaimAllowed"]:
+            raise AgentAdapterError("campaign status must keep claims blocked below threshold")
+        if explain["executionBoundary"]["readOnlyReadback"] is not True:
+            raise AgentAdapterError("campaign status must stay read-only")
+        for key, value in explain["executionBoundary"].items():
+            if key == "readOnlyReadback":
+                continue
+            if value is not False:
+                raise AgentAdapterError(f"campaign status boundary should keep {key} false")
+        return
+
+    if operation == "campaign_health":
+        doctor = payload
+        expect_equal("campaign health input ref", doctor["predictionCampaignDoctorId"], request["inputRef"])
+        expect_equal("campaign health forecast binding", doctor["bindings"]["forecastId"], binding["forecastId"])
+        expect_equal("campaign health question binding", doctor["bindings"]["questionId"], binding["questionId"])
+        expect_equal("campaign health source policy binding", doctor["bindings"]["sourcePolicyId"], binding["sourcePolicyId"])
+        expect_equal("campaign health state", "campaign_health_readback", item["state"]["planStatus"])
+        if doctor["health"]["qualityClaimAllowed"]:
+            raise AgentAdapterError("campaign health must keep quality claims blocked")
+        if doctor["executionBoundary"]["executesResolvers"] is not False:
+            raise AgentAdapterError("campaign health must not execute resolvers")
+        if doctor["executionBoundary"]["writesCampaignState"] is not False:
+            raise AgentAdapterError("campaign health must not write campaign state")
+        return
+
+    if operation == "campaign_append_readiness":
+        ledger = payload
+        candidate = ledger["appendCandidate"]
+        expect_equal("campaign append input ref", ledger["predictionCampaignEvidenceLedgerId"], request["inputRef"])
+        expect_equal("campaign append forecast binding", ledger["bindings"]["forecastId"], binding["forecastId"])
+        expect_equal("campaign append question binding", ledger["bindings"]["questionId"], binding["questionId"])
+        expect_equal("campaign append source policy binding", ledger["bindings"]["sourcePolicyId"], binding["sourcePolicyId"])
+        expect_equal("campaign append state", "campaign_append_readiness", item["state"]["planStatus"])
+        if candidate["comparableAppendReady"]:
+            raise AgentAdapterError("default campaign append readback should not be comparable-ready")
+        if ledger["executionBoundary"]["writesIgnoredLiveState"] is not False:
+            raise AgentAdapterError("campaign append-readiness must not write local state")
+        if ledger["executionBoundary"]["appendsCorpusEvidence"] is not False:
+            raise AgentAdapterError("campaign append-readiness must not append corpus evidence")
+        return
+
+    if operation == "campaign_calibration_status":
+        calibration = payload
+        expect_equal("campaign calibration input ref", calibration["predictionCampaignCalibrationStatusId"], request["inputRef"])
+        expect_equal("campaign calibration source policy binding", calibration["bindings"]["sourcePolicyId"], binding["sourcePolicyId"])
+        expect_equal("campaign calibration state", "campaign_calibration_status", item["state"]["planStatus"])
+        if calibration["summary"]["qualityClaimAllowed"] or calibration["summary"]["calibrationClaimAllowed"]:
+            raise AgentAdapterError("default campaign calibration status must keep claims blocked")
+        if calibration["executionBoundary"]["updatesForecastProbabilities"] is not False:
+            raise AgentAdapterError("campaign calibration status must not update probabilities")
+        if calibration["executionBoundary"]["changesForecastMethod"] is not False:
+            raise AgentAdapterError("campaign calibration status must not change methods")
         return
 
     if operation == "private_setup_bundle":
@@ -991,6 +1079,232 @@ def state_from_card(card: dict[str, Any]) -> dict[str, str | None]:
         resolutionStatus=card["resolution"]["status"],
         scoreStatus=card["score"]["scoreStatus"] if card["score"] else None,
         qualityClaimStatus=card["qualityClaim"]["status"],
+    )
+
+
+def campaign_binding(bindings: dict[str, Any]) -> dict[str, str | None]:
+    return nullable_binding(
+        questionId=bindings.get("questionId"),
+        forecastId=bindings.get("forecastId"),
+        sourcePolicyId=bindings.get("sourcePolicyId"),
+    )
+
+
+def campaign_plan_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    manifest = build_prediction_campaign_manifest()
+    first_run = manifest["plannedRuns"][0]
+    binding = nullable_binding(
+        questionId=first_run["questionId"],
+        forecastId=first_run["forecastId"],
+        sourcePolicyId=first_run["sourcePolicyId"],
+    )
+    state = nullable_state(
+        decisionStatus=manifest["manifestStatus"],
+        approvalStatus="not_required",
+        dataMode="fixture",
+        planStatus="campaign_plan_readback",
+        executionMode="read_only",
+        sourceMode=manifest["domain"],
+        forecastStatus=first_run["runStatus"],
+        resolutionStatus="not_started",
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *manifest["warnings"],
+        "The adapter envelope is read-only and does not start a campaign runner.",
+    ]
+    return manifest, binding, state, warnings
+
+
+def campaign_status_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    explain = build_prediction_campaign_explain()
+    snapshot = explain["campaignSnapshot"]
+    binding = campaign_binding(explain["bindings"])
+    state = nullable_state(
+        decisionStatus=explain["explainStatus"],
+        approvalStatus="not_required",
+        dataMode="fixture",
+        planStatus="campaign_status_readback",
+        executionMode="read_only",
+        sourceMode=explain["domain"],
+        forecastStatus="planned_forecast_pending",
+        resolutionStatus=snapshot["currentCampaignHealth"],
+        scoreStatus="not_scored",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *explain["warnings"],
+        "The adapter envelope is read-only and does not create campaign forecasts.",
+    ]
+    return explain, binding, state, warnings
+
+
+def campaign_health_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    doctor = build_prediction_campaign_doctor()
+    binding = campaign_binding(doctor["bindings"])
+    state = nullable_state(
+        decisionStatus=doctor["doctorStatus"],
+        approvalStatus="not_required",
+        dataMode="fixture",
+        planStatus="campaign_health_readback",
+        executionMode="read_only",
+        sourceMode=doctor["domain"],
+        forecastStatus="waiting_resolution",
+        resolutionStatus=doctor["health"]["campaignHealth"],
+        scoreStatus="not_scored",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *doctor["warnings"],
+        "The adapter envelope is read-only and cannot execute recovery or resolver commands.",
+    ]
+    return doctor, binding, state, warnings
+
+
+def campaign_append_readiness_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    ledger = build_prediction_campaign_evidence_ledger()
+    binding = campaign_binding(ledger["bindings"])
+    candidate = ledger["appendCandidate"]
+    state = nullable_state(
+        decisionStatus=candidate["candidateStatus"],
+        approvalStatus="not_required",
+        dataMode="fixture",
+        planStatus="campaign_append_readiness",
+        executionMode="read_only",
+        sourceMode=ledger["domain"],
+        forecastStatus="waiting_resolution",
+        resolutionStatus="missing_outcome",
+        scoreStatus="not_scored",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *ledger["warnings"],
+        "The adapter envelope is read-only and does not append campaign evidence.",
+    ]
+    return ledger, binding, state, warnings
+
+
+def campaign_calibration_status_adapter_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    calibration = build_prediction_campaign_calibration_status()
+    binding = nullable_binding(sourcePolicyId=calibration["bindings"]["sourcePolicyId"])
+    state = nullable_state(
+        decisionStatus=calibration["calibrationStatus"],
+        approvalStatus="not_required",
+        dataMode="fixture",
+        planStatus="campaign_calibration_status",
+        executionMode="read_only",
+        sourceMode=calibration["domain"],
+        forecastStatus="not_created",
+        resolutionStatus=calibration["thresholdReadback"]["trackRecordStatus"],
+        scoreStatus="scored",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *calibration["warnings"],
+        "The adapter envelope is read-only and does not tune, retrain, or update probabilities.",
+    ]
+    return calibration, binding, state, warnings
+
+
+def build_campaign_readback_envelope(
+    *,
+    envelope_id: str,
+    operation: str,
+    input_record_type: str,
+    input_ref: str,
+    payload: dict[str, Any],
+    binding: dict[str, str | None],
+    state: dict[str, str | None],
+    warnings: list[str],
+    caller_intent: str,
+) -> dict[str, Any]:
+    return envelope(
+        envelope_id,
+        operation,
+        "read_only",
+        input_record_type,
+        input_ref,
+        payload,
+        caller_intent=caller_intent,
+        record_binding=binding,
+        state=state,
+        warnings=warnings,
+    )
+
+
+def build_campaign_plan_envelope() -> dict[str, Any]:
+    payload, binding, state, warnings = campaign_plan_adapter_payload()
+    return build_campaign_readback_envelope(
+        envelope_id="agentenvelope-052",
+        operation="campaign_plan",
+        input_record_type="prediction_campaign_manifest",
+        input_ref=payload["predictionCampaignManifestId"],
+        payload=payload,
+        binding=binding,
+        state=state,
+        warnings=warnings,
+        caller_intent="Read the checked campaign plan without starting a runner.",
+    )
+
+
+def build_campaign_status_envelope() -> dict[str, Any]:
+    payload, binding, state, warnings = campaign_status_adapter_payload()
+    return build_campaign_readback_envelope(
+        envelope_id="agentenvelope-053",
+        operation="campaign_status",
+        input_record_type="prediction_campaign_explain",
+        input_ref=payload["predictionCampaignExplainId"],
+        payload=payload,
+        binding=binding,
+        state=state,
+        warnings=warnings,
+        caller_intent="Explain campaign status, next forecast, next resolution, and claim boundaries.",
+    )
+
+
+def build_campaign_health_envelope() -> dict[str, Any]:
+    payload, binding, state, warnings = campaign_health_adapter_payload()
+    return build_campaign_readback_envelope(
+        envelope_id="agentenvelope-054",
+        operation="campaign_health",
+        input_record_type="prediction_campaign_doctor",
+        input_ref=payload["predictionCampaignDoctorId"],
+        payload=payload,
+        binding=binding,
+        state=state,
+        warnings=warnings,
+        caller_intent="Read campaign health and queue guidance without executing recovery actions.",
+    )
+
+
+def build_campaign_append_readiness_envelope() -> dict[str, Any]:
+    payload, binding, state, warnings = campaign_append_readiness_adapter_payload()
+    return build_campaign_readback_envelope(
+        envelope_id="agentenvelope-055",
+        operation="campaign_append_readiness",
+        input_record_type="prediction_campaign_evidence_ledger",
+        input_ref=payload["predictionCampaignEvidenceLedgerId"],
+        payload=payload,
+        binding=binding,
+        state=state,
+        warnings=warnings,
+        caller_intent="Read campaign append readiness without appending evidence.",
+    )
+
+
+def build_campaign_calibration_status_envelope() -> dict[str, Any]:
+    payload, binding, state, warnings = campaign_calibration_status_adapter_payload()
+    return build_campaign_readback_envelope(
+        envelope_id="agentenvelope-056",
+        operation="campaign_calibration_status",
+        input_record_type="prediction_campaign_calibration_status",
+        input_ref=payload["predictionCampaignCalibrationStatusId"],
+        payload=payload,
+        binding=binding,
+        state=state,
+        warnings=warnings,
+        caller_intent="Read campaign calibration status without tuning probabilities or methods.",
     )
 
 
@@ -2463,6 +2777,11 @@ def build_envelopes() -> dict[str, dict[str, Any]]:
         OUTPUT_FILES["lifecycle_bundle"]: build_lifecycle_bundle_envelope(card_response, bundle_response),
         OUTPUT_FILES["resolution_status"]: build_resolution_status_envelope(card_response, bundle_response),
         OUTPUT_FILES["scoring_summary"]: build_scoring_summary_envelope(card_response, bundle_response),
+        OUTPUT_FILES["campaign_plan"]: build_campaign_plan_envelope(),
+        OUTPUT_FILES["campaign_status"]: build_campaign_status_envelope(),
+        OUTPUT_FILES["campaign_health"]: build_campaign_health_envelope(),
+        OUTPUT_FILES["campaign_append_readiness"]: build_campaign_append_readiness_envelope(),
+        OUTPUT_FILES["campaign_calibration_status"]: build_campaign_calibration_status_envelope(),
         OUTPUT_FILES["resolution_jobs"]: build_resolution_jobs_envelope(),
         OUTPUT_FILES["resolution_scheduler_status"]: build_resolution_scheduler_status_envelope(),
         OUTPUT_FILES["private_setup_bundle"]: build_private_setup_bundle_envelope(),

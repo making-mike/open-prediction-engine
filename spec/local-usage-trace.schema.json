@@ -47,8 +47,8 @@
     },
     "eventLog": {
       "type": "array",
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 20,
+      "maxItems": 20,
       "items": { "$ref": "#/$defs/usageEvent" }
     },
     "traceSummary": {
@@ -111,7 +111,8 @@
         "agent_call",
         "mcp_stdio",
         "claim_gate",
-        "validation_pack"
+        "validation_pack",
+        "campaign"
       ]
     },
     "outcome": {

@@ -5,6 +5,53 @@ description = "Contract-first forecasting engine fixtures, schemas, and bootstra
 requires-python = ">=3.12"
 dependencies = []
 
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.mypy]
+python_version = "3.12"
+files = [
+  "scripts/check_ci_workflow.py",
+  "scripts/check_prediction_campaign_forecast_write.py",
+  "scripts/check_prediction_campaign_calibration_status.py",
+  "scripts/check_prediction_campaign_doctor.py",
+  "scripts/check_prediction_campaign_evidence_ledger.py",
+  "scripts/check_prediction_campaign_explain.py",
+  "scripts/check_prediction_campaign_method_update_gate.py",
+  "scripts/check_prediction_campaign_method_update_action.py",
+  "scripts/check_prediction_campaign_method_update_plan.py",
+  "scripts/check_prediction_campaign_resolution_attempt.py",
+  "scripts/check_helsinki_traffic_pilot_runbook.py",
+  "scripts/check_helsinki_traffic_pilot_readiness.py",
+  "scripts/check_static_analysis.py",
+  "scripts/generate_helsinki_traffic_pilot_readiness.py",
+  "scripts/generate_helsinki_traffic_pilot_runbook.py",
+  "scripts/generate_prediction_campaign_calibration_status.py",
+  "scripts/generate_prediction_campaign_doctor.py",
+  "scripts/generate_prediction_campaign_evidence_ledger.py",
+  "scripts/generate_prediction_campaign_explain.py",
+  "scripts/generate_prediction_campaign_forecast_write.py",
+  "scripts/generate_prediction_campaign_method_update_gate.py",
+  "scripts/generate_prediction_campaign_method_update_action.py",
+  "scripts/generate_prediction_campaign_method_update_plan.py",
+  "scripts/generate_prediction_campaign_resolution_attempt.py",
+  "scripts/ope.py",
+  "scripts/ope_fixtures.py",
+  "scripts/ope_schema.py",
+  "scripts/prediction_campaign_forecast_write_runtime.py",
+  "scripts/prediction_campaign_resolution_runtime.py",
+  "scripts/release_check.py",
+  "scripts/run_checks.py",
+  "scripts/run_transit_delay_forecast.py",
+]
+check_untyped_defs = true
+warn_unused_ignores = true
+no_implicit_optional = true
+
 [tool.ope]
 runtime = "python3"
 package-manager = "none"
