@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -375,13 +376,25 @@ def check_workflow(workflow: dict[str, Any]) -> None:
     check_generated(WORKFLOW_PATH, workflow, label="private setup workflow", regen="python3 scripts/generate_private_setup_workflow.py --write")
 
 
+def load_generated_workflow() -> dict[str, Any] | None:
+    if not WORKFLOW_PATH.exists():
+        return None
+    workflow = json.loads(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    validate_workflow(workflow)
+    return workflow
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private setup workflow drift")
     parser.add_argument("--write", action="store_true", help="write generated private setup workflow")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        workflow = build_workflow()
+        if args.write or args.check or args.rebuild:
+            workflow = build_workflow()
+        else:
+            workflow = load_generated_workflow() or build_workflow()
     except PrivateSetupWorkflowError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

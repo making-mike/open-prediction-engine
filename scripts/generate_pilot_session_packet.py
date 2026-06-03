@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -373,6 +374,14 @@ def check_packet(packet: dict[str, Any]) -> None:
     check_generated(OUTPUT_PATH, packet, label="pilot session packet", regen="python3 scripts/generate_pilot_session_packet.py --write")
 
 
+def load_generated_packet() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    packet = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_packet(packet)
+    return packet
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -394,9 +403,13 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="check generated pilot session packet drift")
     parser.add_argument("--write", action="store_true", help="refresh generated pilot session packet")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        packet = build_pilot_session_packet()
+        if args.write or args.check or args.rebuild:
+            packet = build_pilot_session_packet()
+        else:
+            packet = load_generated_packet() or build_pilot_session_packet()
     except PilotSessionPacketError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_source_adapter_capabilities import build_capabilities
-from generate_private_setup_workflow import build_workflow
+from generate_private_source_adapter_capabilities import build_capabilities, load_generated_capabilities
+from generate_private_setup_workflow import build_workflow, load_generated_workflow
 from ope_schema import SPEC, validate_record
 from ope_fixtures import check_generated, render_json, write_generated
 
@@ -487,13 +488,27 @@ def check_matrix(matrix: dict[str, Any]) -> None:
     check_generated(MATRIX_PATH, matrix, label="private source adapter outcome matrix", regen="python3 scripts/generate_private_source_adapter_outcome_matrix.py --write")
 
 
+def load_generated_matrix() -> dict[str, Any] | None:
+    if not MATRIX_PATH.exists():
+        return None
+    matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    capability = load_generated_capabilities() or build_capabilities()
+    workflow = load_generated_workflow() or build_workflow()
+    validate_matrix(matrix, capability, workflow)
+    return matrix
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private source adapter outcome matrix drift")
     parser.add_argument("--write", action="store_true", help="write generated private source adapter outcome matrix")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        matrix = build_matrix()
+        if args.write or args.check or args.rebuild:
+            matrix = build_matrix()
+        else:
+            matrix = load_generated_matrix() or build_matrix()
     except PrivateSourceAdapterOutcomeMatrixError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

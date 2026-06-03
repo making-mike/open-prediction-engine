@@ -20,8 +20,10 @@ LEASED_OPERATIONS = {
     "resolution.record",
     "score.create",
     "evidence.append",
+    "pre_calibration.bind",
     "method.apply",
     "method.rollback",
+    "state.import_json",
 }
 
 DELETE_REPLACEMENT_OPERATIONS = {
@@ -282,6 +284,10 @@ def content_hash(data: Any) -> str:
     return hashlib.sha256(stable_json(data).encode("utf-8")).hexdigest()
 
 
+def rendered_content_hash(data: Any) -> str:
+    return hashlib.sha256(render_json(data).encode("utf-8")).hexdigest()
+
+
 def request_hash(request: dict[str, Any]) -> str:
     excluded = {"operationReceiptId", "scenarioName", "scenarioId"}
     canonical = {key: value for key, value in request.items() if key not in excluded}
@@ -324,6 +330,18 @@ def planned_writes(request: dict[str, Any]) -> list[dict[str, str]]:
             receipt_write,
             {
                 "tableName": "ope_records",
+                "recordType": "forecast_question",
+                "recordId": request.get("questionRecordId", "question-2101"),
+                "writeMode": "insert_once",
+            },
+            {
+                "tableName": "ope_records",
+                "recordType": "evidence_packet",
+                "recordId": request.get("evidencePacketId", "evidence-2101"),
+                "writeMode": "insert_once",
+            },
+            {
+                "tableName": "ope_records",
                 "recordType": "forecast_artifact",
                 "recordId": request["targetRecordId"],
                 "writeMode": "insert_once",
@@ -360,9 +378,19 @@ def planned_writes(request: dict[str, Any]) -> list[dict[str, str]]:
             receipt_write,
             {
                 "tableName": "evidence_ledger_rows",
-                "recordType": "evidence_packet",
+                "recordType": "evidence_ledger_row",
                 "recordId": request["targetRecordId"],
                 "writeMode": "append_only",
+            },
+        ]
+    if operation_name == "pre_calibration.bind":
+        return [
+            receipt_write,
+            {
+                "tableName": "operation_audit_records",
+                "recordType": "pre_calibration_binding",
+                "recordId": request.get("auditRecordId", "precalibrationbinding-2101"),
+                "writeMode": "prospective_binding",
             },
         ]
     if operation_name in {"method.apply", "method.rollback"}:
@@ -375,6 +403,11 @@ def planned_writes(request: dict[str, Any]) -> list[dict[str, str]]:
                 "writeMode": "prospective_binding",
             },
         ]
+    if operation_name == "state.import_json":
+        migration_writes = request.get("migrationWrites")
+        if not isinstance(migration_writes, list) or not migration_writes:
+            raise LifecycleOperationRuntimeError("state.import_json requires migrationWrites")
+        return [receipt_write, *migration_writes]
     if operation_name == "record.archive":
         return [
             receipt_write,
@@ -739,7 +772,7 @@ def insert_planned_records(
         if write["tableName"] == "operation_receipts":
             continue
         payload = record_payload(request, write, receipt_id=receipt_id, now=now)
-        payload_hash = content_hash(payload)
+        payload_hash = rendered_content_hash(payload)
         if write["tableName"] == "ope_records":
             conn.execute(
                 """
@@ -759,7 +792,7 @@ def insert_planned_records(
                 (
                     write["recordId"],
                     write["recordType"],
-                    request.get("schemaFile", "spec/lifecycle-operation.schema.json"),
+                    schema_file_for_record_type(write["recordType"]),
                     render_json(payload),
                     payload_hash,
                     request["sourceRecordHash"],
@@ -838,11 +871,28 @@ def insert_planned_records(
                     now,
                 ),
             )
+        elif write["tableName"] == "read_model_rows":
+            put_read_model(
+                conn,
+                write["recordType"],
+                write["recordId"],
+                payload,
+                now=now,
+            )
         else:
             raise LifecycleOperationRuntimeError(f"unsupported write table: {write['tableName']}")
 
 
 def record_payload(request: dict[str, Any], write: dict[str, str], *, receipt_id: str, now: str) -> dict[str, Any]:
+    record_payloads = request.get("recordPayloads", {})
+    if write["recordId"] in record_payloads:
+        payload = record_payloads[write["recordId"]]
+        if isinstance(payload, dict):
+            return payload
+    if write["recordType"] in record_payloads:
+        payload = record_payloads[write["recordType"]]
+        if isinstance(payload, dict):
+            return payload
     return {
         "recordId": write["recordId"],
         "recordType": write["recordType"],
@@ -857,6 +907,28 @@ def record_payload(request: dict[str, Any], write: dict[str, str], *, receipt_id
         "payload": request.get("payload", {}),
         "claimBoundary": claim_boundary(),
     }
+
+
+def schema_file_for_record_type(record_type: str) -> str:
+    return {
+        "forecast_question": "spec/forecast-question.schema.json",
+        "evidence_packet": "spec/evidence-packet.schema.json",
+        "forecast_artifact": "spec/forecast-artifact.schema.json",
+        "forecast_history": "spec/forecast-history.schema.json",
+        "resolution_record": "spec/resolution-record.schema.json",
+        "scoring_report": "spec/scoring-report.schema.json",
+        "calibration_summary": "spec/calibration-summary.schema.json",
+        "pre_calibration_binding": "spec/prediction-campaign-pre-calibration.schema.json",
+        "method_update_audit": "spec/prediction-campaign-method-update-action.schema.json",
+        "evidence_ledger_row": "spec/prediction-campaign-evidence-ledger.schema.json",
+        "run_state_projection": "spec/lifecycle-operation.schema.json",
+        "campaign_state_projection": "spec/lifecycle-operation.schema.json",
+        "method_binding_state": "spec/lifecycle-operation.schema.json",
+        "json_state_migration_receipt": "spec/lifecycle-operation.schema.json",
+        "operation_receipt": "spec/lifecycle-operation.schema.json",
+        "archive_tombstone": "spec/lifecycle-operation.schema.json",
+        "redaction_receipt": "spec/lifecycle-operation.schema.json",
+    }.get(record_type, "spec/lifecycle-operation.schema.json")
 
 
 def update_read_models(
@@ -920,7 +992,7 @@ def update_read_models(
             },
             now=now,
         )
-    if request["operationName"] in {"method.apply", "method.rollback"}:
+    if request["operationName"] in {"pre_calibration.bind", "method.apply", "method.rollback"}:
         put_read_model(
             conn,
             "calibration_status",
@@ -929,6 +1001,7 @@ def update_read_models(
                 "campaignId": campaign_id,
                 "methodOperation": request["operationName"],
                 "prospectiveOnly": True,
+                "preCalibrationBinding": request["operationName"] == "pre_calibration.bind",
                 "historicalForecastRewriteCount": 0,
                 "operationReceiptId": receipt_id,
             },
@@ -942,6 +1015,7 @@ def update_read_models(
                 "campaignId": campaign_id,
                 "methodOperation": request["operationName"],
                 "qualityClaimAllowed": False,
+                "preCalibrationBinding": request["operationName"] == "pre_calibration.bind",
                 "sampleSizeChangedByMethodRollback": False,
             },
             now=now,
@@ -980,6 +1054,73 @@ def update_read_models(
                 "forecastId": request["forecastId"],
                 "resolutionStatus": operation_status,
                 "operationReceiptId": receipt_id,
+            },
+            now=now,
+        )
+    if request["operationName"] == "score.create" and operation_status == "committed":
+        put_read_model(
+            conn,
+            "append_readiness",
+            request["targetRecordId"],
+            {
+                "campaignId": campaign_id,
+                "runId": request["runId"],
+                "forecastId": request["forecastId"],
+                "scoringReportId": request["targetRecordId"],
+                "appendDecision": "review_scored_or_excluded_row_before_append",
+                "operationReceiptId": receipt_id,
+            },
+            now=now,
+        )
+    if request["operationName"] == "evidence.append" and operation_status == "committed":
+        put_read_model(
+            conn,
+            "append_readiness",
+            request["targetRecordId"],
+            {
+                "campaignId": campaign_id,
+                "runId": request["runId"],
+                "forecastId": request["forecastId"],
+                "ledgerRowId": request["targetRecordId"],
+                "appendDecision": "already_appended_or_duplicate_check_before_retry",
+                "operationReceiptId": receipt_id,
+            },
+            now=now,
+        )
+        put_read_model(
+            conn,
+            "calibration_status",
+            campaign_id,
+            {
+                "campaignId": campaign_id,
+                "lastLedgerOperationReceiptId": receipt_id,
+                "sampleSizeChangedByAppend": True,
+                "qualityClaimAllowed": False,
+            },
+            now=now,
+        )
+        put_read_model(
+            conn,
+            "track_record_progress",
+            campaign_id,
+            {
+                "campaignId": campaign_id,
+                "lastLedgerOperationReceiptId": receipt_id,
+                "trackRecordProgressChangedByAppend": True,
+                "qualityClaimAllowed": False,
+            },
+            now=now,
+        )
+    if request["operationName"] == "state.import_json":
+        put_read_model(
+            conn,
+            "recovery_actions",
+            receipt_id,
+            {
+                "operationReceiptId": receipt_id,
+                "operationName": request["operationName"],
+                "nextSafeAction": "continue_with_sqlite_read_models_after_hash_preserving_import",
+                "claimBoundary": claim_boundary(),
             },
             now=now,
         )
@@ -1060,7 +1201,7 @@ def execution_result(
         - before["operation_audit_records"]
         - before["evidence_ledger_rows"]
     )
-    return {
+    result = {
         "operationName": request["operationName"],
         "operationReceiptId": receipt_id,
         "operationStatus": operation_status,
@@ -1078,8 +1219,38 @@ def execution_result(
             "rawCrudExposed": False,
             "historyRewriteCount": 0,
         },
+        "payloadHashBindings": payload_hash_bindings(request, preflight, receipt_id=receipt_id),
         "message": message,
     }
+    if "migrationImportSummary" in request:
+        result["migrationImportSummary"] = request["migrationImportSummary"]
+    return result
+
+
+def payload_hash_bindings(
+    request: dict[str, Any],
+    preflight: dict[str, Any],
+    *,
+    receipt_id: str,
+) -> list[dict[str, Any]]:
+    expected_hashes = request.get("recordContentHashes", {})
+    bindings = []
+    for write in preflight["plannedWrites"]:
+        if write["tableName"] == "operation_receipts":
+            continue
+        payload = record_payload(request, write, receipt_id=receipt_id, now=DEFAULT_NOW)
+        sqlite_hash = rendered_content_hash(payload)
+        source_hash = expected_hashes.get(write["recordId"]) or expected_hashes.get(write["recordType"]) or sqlite_hash
+        bindings.append(
+            {
+                "recordType": write["recordType"],
+                "recordId": write["recordId"],
+                "sourceContentHash": source_hash,
+                "sqliteContentHash": sqlite_hash,
+                "matchesSourceHash": source_hash == sqlite_hash,
+            }
+        )
+    return bindings
 
 
 def base_request(
@@ -1106,7 +1277,6 @@ def base_request(
         "idempotencyKey": idempotency_key,
         "sourceRecordHash": source_hash,
         "targetRecordId": target_record_id,
-        "schemaFile": "spec/lifecycle-operation.schema.json",
         "leaseSeconds": 120,
         "payload": {
             "domain": "transit-delay",
@@ -1124,6 +1294,18 @@ def base_request(
     return request
 
 
+def source_hash_for_hashes(*hashes: str) -> str:
+    return "sha256-" + content_hash(list(hashes))
+
+
+def attach_record_payloads(request: dict[str, Any], records: list[tuple[str, str, dict[str, Any]]]) -> dict[str, Any]:
+    request["recordPayloads"] = {record_id: payload for _, record_id, payload in records}
+    request["recordContentHashes"] = {record_id: rendered_content_hash(payload) for _, record_id, payload in records}
+    request["payload"]["sourceRecordIds"] = [record_id for _, record_id, _ in records]
+    request["payload"]["sourceContentHashes"] = [request["recordContentHashes"][record_id] for _, record_id, _ in records]
+    return request
+
+
 def scenario_summary(
     scenario_id: str,
     scenario_name: str,
@@ -1134,7 +1316,7 @@ def scenario_summary(
 ) -> dict[str, Any]:
     preflight = result["preflight"]
     writes = result["sqliteWrites"]
-    return {
+    summary = {
         "scenarioId": scenario_id,
         "scenarioName": scenario_name,
         "operationName": result["operationName"],
@@ -1154,6 +1336,8 @@ def scenario_summary(
         "historyRewriteCount": writes["historyRewriteCount"],
         "rawCrudExposed": writes["rawCrudExposed"],
         "forecastArtifactMutable": False,
+        "payloadHashBindings": result["payloadHashBindings"],
+        "migrationImportSummary": result.get("migrationImportSummary"),
         "readModelEffects": read_model_effects_for_result(result),
         "recoveryPath": preflight["recoveryPath"],
         "preflight": {
@@ -1165,6 +1349,7 @@ def scenario_summary(
         },
         "message": result["message"],
     }
+    return summary
 
 
 def result_request_idempotency_key(result: dict[str, Any]) -> str:
@@ -1179,13 +1364,425 @@ def read_model_effects_for_result(result: dict[str, Any]) -> list[str]:
         effects.extend(["next_due_forecast", "unresolved_forecasts"])
     if operation_name in {"record.archive", "record.redact", "question.cancel", "question.annul"}:
         effects.append("append_readiness")
-    if operation_name in {"method.apply", "method.rollback"}:
+    if operation_name in {"pre_calibration.bind", "method.apply", "method.rollback"}:
         effects.extend(["calibration_status", "track_record_progress"])
+    if operation_name == "state.import_json":
+        effects.extend(["next_due_forecast", "append_readiness", "calibration_status", "track_record_progress", "recovery_actions"])
     if status != "committed" and status != "idempotent_replay":
         effects.extend(["failed_operations", "recovery_actions"])
     if operation_name == "resolution.record":
         effects.append("due_resolution_jobs")
+    if operation_name == "score.create" and status == "committed":
+        effects.append("append_readiness")
+    if operation_name == "evidence.append" and status == "committed":
+        effects.extend(["append_readiness", "calibration_status", "track_record_progress"])
     return list(dict.fromkeys(effects))
+
+
+def campaign_forecast_create_request() -> dict[str, Any]:
+    from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+
+    plan = build_prediction_campaign_forecast_write(embed_source_records=True)
+    bindings = plan["bindings"]
+    target = plan["targetState"]
+    records = [
+        (artifact["recordType"], artifact["recordId"], artifact["sourceRecord"])
+        for artifact in plan["sourceArtifacts"]
+        if isinstance(artifact.get("sourceRecord"), dict)
+    ]
+    request = base_request(
+        operation_name="forecast.create",
+        receipt_id="operationreceipt-3001",
+        target_record_id=bindings["forecastId"],
+        run_id=bindings["runId"],
+        forecast_id=bindings["forecastId"],
+        idempotency_key=target["idempotencyKey"],
+        source_hash=source_hash_for_hashes(*(rendered_content_hash(payload) for _, _, payload in records)),
+    )
+    request["questionRecordId"] = bindings["questionId"]
+    request["evidencePacketId"] = bindings["evidencePacketId"]
+    request["historyRecordId"] = bindings["historyId"]
+    request["payload"] = {
+        "predictionCampaignForecastWriteId": plan["predictionCampaignForecastWriteId"],
+        "campaignId": bindings["campaignId"],
+        "runId": bindings["runId"],
+        "forecastId": bindings["forecastId"],
+        "targetState": target,
+        "historicalForecastRewriteAllowed": False,
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, records)
+
+
+def campaign_resolution_and_score_records() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
+    from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+    from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
+    from prediction_campaign_resolution_runtime import (
+        build_resolution_and_scoring,
+        outcome_from_source,
+        run_for_id,
+    )
+
+    manifest = build_prediction_campaign_manifest()
+    run = run_for_id(manifest, "predictionrun-1301")
+    plan = build_prediction_campaign_forecast_write(embed_source_records=True)
+    source_records = {artifact["recordType"]: artifact["sourceRecord"] for artifact in plan["sourceArtifacts"]}
+    outcome_summary = outcome_from_source(run=run, outcome_csv=None, missing_outcome=True)
+    resolution, scoring = build_resolution_and_scoring(
+        run=run,
+        question=source_records["forecast_question"],
+        artifact=source_records["forecast_artifact"],
+        history=source_records["forecast_history"],
+        outcome_summary=outcome_summary,
+        outcome_csv=None,
+        resolved_at=run["resolutionEligibleAt"],
+    )
+    return manifest, run, resolution, scoring
+
+
+def campaign_resolution_record_request() -> dict[str, Any]:
+    manifest, run, resolution, _ = campaign_resolution_and_score_records()
+    request = base_request(
+        operation_name="resolution.record",
+        receipt_id="operationreceipt-3101",
+        target_record_id=run["resolutionId"],
+        run_id=run["runId"],
+        forecast_id=run["forecastId"],
+        idempotency_key=f"{manifest['campaign']['campaignId']}:{run['runId']}:{run['resolutionId']}",
+        source_hash=source_hash_for_hashes(rendered_content_hash(resolution)),
+    )
+    request["payload"] = {
+        "campaignId": manifest["campaign"]["campaignId"],
+        "runId": run["runId"],
+        "forecastId": run["forecastId"],
+        "resolutionId": run["resolutionId"],
+        "resolutionStatus": resolution["status"],
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, [("resolution_record", run["resolutionId"], resolution)])
+
+
+def campaign_score_create_request() -> dict[str, Any]:
+    manifest, run, _, scoring = campaign_resolution_and_score_records()
+    request = base_request(
+        operation_name="score.create",
+        receipt_id="operationreceipt-3201",
+        target_record_id=run["scoringReportId"],
+        run_id=run["runId"],
+        forecast_id=run["forecastId"],
+        idempotency_key=f"{manifest['campaign']['campaignId']}:{run['runId']}:{run['scoringReportId']}",
+        source_hash=source_hash_for_hashes(rendered_content_hash(scoring)),
+    )
+    request["payload"] = {
+        "campaignId": manifest["campaign"]["campaignId"],
+        "runId": run["runId"],
+        "forecastId": run["forecastId"],
+        "scoringReportId": run["scoringReportId"],
+        "scoreStatus": scoring["scoreStatus"],
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, [("scoring_report", run["scoringReportId"], scoring)])
+
+
+def campaign_evidence_append_request() -> dict[str, Any]:
+    from generate_prediction_campaign_evidence_ledger import build_prediction_campaign_evidence_ledger
+
+    ledger = build_prediction_campaign_evidence_ledger(mode="append", ledger_case="comparable_scored")
+    row = ledger["comparableRows"][0]
+    request = base_request(
+        operation_name="evidence.append",
+        receipt_id="operationreceipt-3301",
+        target_record_id=row["rowId"],
+        run_id=row["runId"],
+        forecast_id=row["forecastId"],
+        idempotency_key=row["rowKey"],
+        source_hash=source_hash_for_hashes(rendered_content_hash(row)),
+    )
+    request["payload"] = {
+        "predictionCampaignEvidenceLedgerId": ledger["predictionCampaignEvidenceLedgerId"],
+        "campaignId": row["campaignId"],
+        "runId": row["runId"],
+        "forecastId": row["forecastId"],
+        "rowKind": row["rowKind"],
+        "appendOnly": True,
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, [("evidence_ledger_row", row["rowId"], row)])
+
+
+def campaign_method_operation_request(operation: str) -> dict[str, Any]:
+    from generate_prediction_campaign_method_update_action import build_prediction_campaign_method_update_action
+
+    action = build_prediction_campaign_method_update_action(operation=operation, method_update_plan_case="plan_ready")
+    bindings = action["bindings"]
+    record_id = "methodaudit-3401" if operation == "apply" else "methodaudit-3501"
+    payload = {
+        "artifactType": "prediction_campaign_method_update_action",
+        "operation": operation,
+        "predictionCampaignMethodUpdateActionId": action["predictionCampaignMethodUpdateActionId"],
+        "bindings": bindings,
+        "approvalArtifact": action["approvalArtifact"],
+        "rollbackRecord": action["rollbackRecord"],
+        "methodBinding": action["methodBinding"],
+        "effectiveScope": "future_campaign_forecasts_only",
+        "priorForecastHistoryRewriteAllowed": False,
+        "priorForecastProbabilityRewriteAllowed": False,
+        "qualityClaimAllowed": False,
+    }
+    operation_name = "method.apply" if operation == "apply" else "method.rollback"
+    request = base_request(
+        operation_name=operation_name,
+        receipt_id="operationreceipt-3401" if operation == "apply" else "operationreceipt-3501",
+        target_record_id=action["methodBinding"]["methodBindingPath"].rsplit("/", 1)[-1].replace(".json", ""),
+        run_id="predictionrun-method-update",
+        forecast_id="forecast-method-update",
+        idempotency_key=f"{bindings['campaignId']}:{operation}:method-binding",
+        source_hash=source_hash_for_hashes(rendered_content_hash(payload)),
+        audit_record_id=record_id,
+    )
+    request["leaseResourceId"] = f"{bindings['campaignId']}:method-binding"
+    request["payload"] = {
+        "predictionCampaignMethodUpdateActionId": action["predictionCampaignMethodUpdateActionId"],
+        "operation": operation,
+        "campaignId": bindings["campaignId"],
+        "targetMethodId": action["methodBinding"]["targetMethodId"],
+        "prospectiveOnly": True,
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, [("method_update_audit", record_id, payload)])
+
+
+def json_state_import_request() -> dict[str, Any]:
+    from generate_prediction_campaign_evidence_ledger import build_prediction_campaign_evidence_ledger
+    from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+
+    plan = build_prediction_campaign_forecast_write(embed_source_records=True)
+    bindings = plan["bindings"]
+    target = plan["targetState"]
+    source_records = {artifact["recordType"]: artifact["sourceRecord"] for artifact in plan["sourceArtifacts"]}
+    artifact = source_records["forecast_artifact"]
+    history = source_records["forecast_history"]
+    ledger = build_prediction_campaign_evidence_ledger(mode="append", ledger_case="comparable_scored")
+    ledger_row = ledger["comparableRows"][0]
+    run_state = {
+        "stateType": "prediction_campaign_run_state",
+        "stateVersion": 1,
+        "campaignId": bindings["campaignId"],
+        "cycleId": bindings["cycleId"],
+        "runId": bindings["runId"],
+        "forecastId": bindings["forecastId"],
+        "idempotencyKey": target["idempotencyKey"],
+        "runStatus": "waiting_resolution",
+        "artifactPaths": {
+            "forecastArtifactPath": target["forecastArtifactPath"],
+            "forecastHistoryPath": target["forecastHistoryPath"],
+        },
+        "importedFrom": target["runStatePath"],
+    }
+    campaign_state = {
+        "stateType": "prediction_campaign_state",
+        "stateVersion": 1,
+        "campaignId": bindings["campaignId"],
+        "cycleId": bindings["cycleId"],
+        "createdRunIdempotencyKeys": [target["idempotencyKey"]],
+        "forecastArtifactsCreated": 1,
+        "resolvedComparableOutcomes": 0,
+        "importedFrom": target["campaignStatePath"],
+    }
+    method_binding = {
+        "stateType": "prediction_campaign_method_binding",
+        "stateVersion": 1,
+        "campaignId": bindings["campaignId"],
+        "cycleId": bindings["cycleId"],
+        "activeMethodId": "transitmethod-100",
+        "effectiveScope": "future_campaign_forecasts_only",
+        "prospectiveOnly": True,
+        "priorForecastHistoryRewriteAllowed": False,
+        "priorForecastProbabilityRewriteAllowed": False,
+        "importedFrom": f".ope/live/prediction-campaigns/{bindings['campaignId']}/method-binding.json",
+    }
+    migration_receipt = {
+        "receiptType": "json_state_migration_receipt",
+        "sourceRoot": ".ope/live/prediction-campaigns",
+        "campaignId": bindings["campaignId"],
+        "operationName": "state.import_json",
+        "preservesForecastProbabilities": True,
+        "preservesSourceProvenance": True,
+        "rewritesHistoricalForecasts": False,
+        "importedStateClasses": [
+            "forecast_lifecycle_records",
+            "run_state",
+            "campaign_state",
+            "evidence_ledger",
+            "method_binding",
+        ],
+    }
+    records = [
+        ("forecast_artifact", bindings["forecastId"], artifact),
+        ("forecast_history", bindings["historyId"], history),
+        ("evidence_ledger_row", ledger_row["rowId"], ledger_row),
+        ("run_state_projection", "runstateprojection-1301", run_state),
+        ("campaign_state_projection", "campaignstateprojection-001", campaign_state),
+        ("method_binding_state", "methodbindingstate-001", method_binding),
+        ("json_state_migration_receipt", "jsonmigration-001", migration_receipt),
+    ]
+    request = base_request(
+        operation_name="state.import_json",
+        receipt_id="operationreceipt-3701",
+        target_record_id="jsonmigration-001",
+        run_id=bindings["runId"],
+        forecast_id=bindings["forecastId"],
+        idempotency_key=f"{bindings['campaignId']}:import-json-state:001",
+        source_hash=source_hash_for_hashes(*(rendered_content_hash(payload) for _, _, payload in records)),
+    )
+    request["leaseResourceId"] = f"{bindings['campaignId']}:json-state-import"
+    request["migrationWrites"] = [
+        {"tableName": "ope_records", "recordType": "forecast_artifact", "recordId": bindings["forecastId"], "writeMode": "insert_once"},
+        {"tableName": "forecast_history_events", "recordType": "forecast_history", "recordId": bindings["historyId"], "writeMode": "append_only"},
+        {"tableName": "evidence_ledger_rows", "recordType": "evidence_ledger_row", "recordId": ledger_row["rowId"], "writeMode": "append_only"},
+        {"tableName": "read_model_rows", "recordType": "run_state_projection", "recordId": "runstateprojection-1301", "writeMode": "projection_upsert"},
+        {"tableName": "read_model_rows", "recordType": "campaign_state_projection", "recordId": "campaignstateprojection-001", "writeMode": "projection_upsert"},
+        {"tableName": "operation_audit_records", "recordType": "method_binding_state", "recordId": "methodbindingstate-001", "writeMode": "prospective_binding"},
+        {"tableName": "operation_audit_records", "recordType": "json_state_migration_receipt", "recordId": "jsonmigration-001", "writeMode": "append_only"},
+    ]
+    request["migrationImportSummary"] = {
+        "sourceRoot": ".ope/live/prediction-campaigns",
+        "stateClassCount": 5,
+        "sourceFileCount": len(records),
+        "contentHashesPreserved": True,
+        "forecastProbabilitiesPreserved": True,
+        "sourceProvenancePreserved": True,
+        "historicalForecastRewriteCount": 0,
+        "methodBindingsPreserved": True,
+        "migrationReceiptRequired": True,
+        "automaticMigrationAllowed": False,
+    }
+    request["payload"] = {
+        "campaignId": bindings["campaignId"],
+        "sourceRoot": ".ope/live/prediction-campaigns",
+        "migrationReceiptRequired": True,
+        "contentHashCheckRequired": True,
+        "historicalForecastRewriteAllowed": False,
+        "qualityClaimAllowed": False,
+    }
+    return attach_record_payloads(request, records)
+
+
+def database_idempotency_replay_check(
+    *,
+    check_id: str,
+    record_class: str,
+    command_path: str,
+    scenario_name: str,
+    request: dict[str, Any],
+    file_mode_repeat_status: str,
+) -> dict[str, Any]:
+    conn = open_sqlite()
+    first_result = execute_operation(conn, request)
+    replay_result = execute_operation(conn, dict(request))
+    replay_writes = replay_result["sqliteWrites"]
+    duplicate_records = (
+        replay_writes["immutableRecordsInserted"]
+        + replay_writes["auditRecordsInserted"]
+    )
+    return {
+        "compatibilityCheckId": check_id,
+        "recordClass": record_class,
+        "commandPath": command_path,
+        "scenarioName": scenario_name,
+        "lifecycleOperation": request["operationName"],
+        "fileModeRepeatStatus": file_mode_repeat_status,
+        "fileModeDuplicatePrevented": True,
+        "databaseFirstExecutionStatus": first_result["operationStatus"],
+        "databaseReplayExecutionStatus": replay_result["operationStatus"],
+        "databaseReplayIdempotencyStatus": replay_result["preflight"]["idempotencyStatus"],
+        "databaseReplayOperationReceiptsWritten": replay_writes["operationReceiptsWritten"],
+        "databaseDuplicateRecordsCreated": duplicate_records,
+        "contentHashComparisonRequired": True,
+        "historyRewriteCount": replay_writes["historyRewriteCount"],
+        "physicalDeletes": replay_writes["physicalDeletes"],
+        "rawCrudExposed": replay_writes["rawCrudExposed"],
+        "compatible": (
+            first_result["operationStatus"] == "committed"
+            and replay_result["operationStatus"] == "idempotent_replay"
+            and replay_result["preflight"]["idempotencyStatus"] == "return_existing_receipt"
+            and replay_writes["operationReceiptsWritten"] == 0
+            and duplicate_records == 0
+            and replay_writes["historyRewriteCount"] == 0
+            and replay_writes["physicalDeletes"] == 0
+            and replay_writes["rawCrudExposed"] is False
+        ),
+    }
+
+
+def file_database_compatibility_checks() -> list[dict[str, Any]]:
+    return [
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-001",
+            record_class="forecast_lifecycle_records",
+            command_path="prediction-campaign forecast-write --write-local",
+            scenario_name="campaign-forecast-create",
+            request=campaign_forecast_create_request(),
+            file_mode_repeat_status="local_write_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-002",
+            record_class="resolution_records",
+            command_path="prediction-campaign resolve --execute-resolvers --write-local",
+            scenario_name="campaign-resolution-record",
+            request=campaign_resolution_record_request(),
+            file_mode_repeat_status="local_resolution_scored_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-003",
+            record_class="scoring_reports",
+            command_path="prediction-campaign resolve --execute-resolvers --write-local",
+            scenario_name="campaign-score-create",
+            request=campaign_score_create_request(),
+            file_mode_repeat_status="local_resolution_scored_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-004",
+            record_class="evidence_ledger_rows",
+            command_path="prediction-campaign append --write-local",
+            scenario_name="campaign-evidence-append",
+            request=campaign_evidence_append_request(),
+            file_mode_repeat_status="local_append_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-005",
+            record_class="pre_calibration_method_binding",
+            command_path="prediction-campaign pre-calibration --write-local",
+            scenario_name="pre-calibration-bind",
+            request=base_request(
+                operation_name="pre_calibration.bind",
+                receipt_id="operationreceipt-3901",
+                target_record_id="methodbinding-3901",
+                run_id="predictionrun-3901",
+                forecast_id="forecast-3901",
+                idempotency_key="predictioncampaign-2101:pre-calibration:methodbinding-3901",
+                source_hash="sha256-history-3901",
+                audit_record_id="precalibrationbinding-3901",
+            ),
+            file_mode_repeat_status="local_pre_calibration_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-006",
+            record_class="method_apply_binding",
+            command_path="prediction-campaign apply-method-update --write-local",
+            scenario_name="campaign-method-apply",
+            request=campaign_method_operation_request("apply"),
+            file_mode_repeat_status="local_apply_already_present",
+        ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-007",
+            record_class="method_rollback_binding",
+            command_path="prediction-campaign rollback-method-update --write-local",
+            scenario_name="campaign-method-rollback",
+            request=campaign_method_operation_request("rollback"),
+            file_mode_repeat_status="local_rollback_already_present",
+        ),
+    ]
 
 
 def run_runtime_scenarios() -> list[dict[str, Any]]:
@@ -1291,17 +1888,69 @@ def run_runtime_scenarios() -> list[dict[str, Any]]:
     scenarios.append(scenario_summary("lifecyclescenario-006", "method-rollback", rollback_result))
 
     conn = open_sqlite()
+    pre_calibration_request = base_request(
+        operation_name="pre_calibration.bind",
+        receipt_id="operationreceipt-2701",
+        target_record_id="methodbinding-2701",
+        run_id="predictionrun-2701",
+        forecast_id="forecast-2701",
+        idempotency_key="predictioncampaign-2101:pre-calibration:methodbinding-2701",
+        source_hash="sha256-history-2701",
+        audit_record_id="precalibrationbinding-2701",
+    )
+    pre_calibration_request["leaseResourceId"] = "predictioncampaign-2101:method-binding"
+    pre_calibration_request["payload"] = {
+        "domain": "transit-delay",
+        "syntheticRuntimeFixture": True,
+        "historySourceContentHash": "sha256-history-2701",
+        "calibratedProbability": 0.25,
+        "historicalForecastRewriteAllowed": False,
+        "prospectiveOnly": True,
+        "qualityClaimAllowed": False,
+    }
+    pre_calibration_result = execute_operation(conn, pre_calibration_request)
+    scenarios.append(scenario_summary("lifecyclescenario-007", "pre-calibration-bind", pre_calibration_result))
+
+    conn = open_sqlite()
+    campaign_forecast_result = execute_operation(conn, campaign_forecast_create_request())
+    scenarios.append(scenario_summary("lifecyclescenario-008", "campaign-forecast-create", campaign_forecast_result))
+
+    conn = open_sqlite()
+    campaign_resolution_result = execute_operation(conn, campaign_resolution_record_request())
+    scenarios.append(scenario_summary("lifecyclescenario-009", "campaign-resolution-record", campaign_resolution_result))
+
+    conn = open_sqlite()
+    campaign_score_result = execute_operation(conn, campaign_score_create_request())
+    scenarios.append(scenario_summary("lifecyclescenario-010", "campaign-score-create", campaign_score_result))
+
+    conn = open_sqlite()
+    campaign_append_result = execute_operation(conn, campaign_evidence_append_request())
+    scenarios.append(scenario_summary("lifecyclescenario-011", "campaign-evidence-append", campaign_append_result))
+
+    conn = open_sqlite()
+    campaign_apply_result = execute_operation(conn, campaign_method_operation_request("apply"))
+    scenarios.append(scenario_summary("lifecyclescenario-012", "campaign-method-apply", campaign_apply_result))
+
+    conn = open_sqlite()
+    campaign_rollback_result = execute_operation(conn, campaign_method_operation_request("rollback"))
+    scenarios.append(scenario_summary("lifecyclescenario-013", "campaign-method-rollback", campaign_rollback_result))
+
+    conn = open_sqlite()
+    json_import_result = execute_operation(conn, json_state_import_request())
+    scenarios.append(scenario_summary("lifecyclescenario-014", "json-state-import", json_import_result))
+
+    conn = open_sqlite()
     recovery_request = base_request(
         operation_name="score.create",
-        receipt_id="operationreceipt-2601",
-        target_record_id="scoringreport-2601",
-        run_id="predictionrun-2601",
-        forecast_id="forecast-2601",
-        idempotency_key="predictioncampaign-2101:score:forecast-2601",
+        receipt_id="operationreceipt-3801",
+        target_record_id="scoringreport-3801",
+        run_id="predictionrun-3801",
+        forecast_id="forecast-3801",
+        idempotency_key="predictioncampaign-2101:score:forecast-3801",
         force_preflight_block="Resolution record is missing, so scoring cannot commit yet.",
         recovery_path="record_resolution_then_retry_score_create_with_same_idempotency_key",
     )
     recovery_result = execute_operation(conn, recovery_request)
-    scenarios.append(scenario_summary("lifecyclescenario-007", "recovery", recovery_result))
+    scenarios.append(scenario_summary("lifecyclescenario-015", "recovery", recovery_result))
 
     return scenarios

@@ -94,6 +94,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     live_readiness_command = [sys.executable, "scripts/generate_live_connector_readiness.py"]
     transit_api_connector_command = [sys.executable, "scripts/connect_transit_api.py"]
     domain_setups_command = [sys.executable, "scripts/generate_domain_setups.py"]
+    domain_configs_command = [sys.executable, "scripts/generate_domain_configs.py"]
+    source_bindings_command = [sys.executable, "scripts/generate_source_bindings.py"]
     transit_delay_forecast_command = [sys.executable, "scripts/run_transit_delay_forecast.py"]
     transit_delay_forward_command = [sys.executable, "scripts/run_transit_delay_forward.py"]
     transit_forward_resolver_command = [sys.executable, "scripts/resolve_due_transit_forward_runs.py"]
@@ -101,6 +103,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     resolution_scheduler_command = [sys.executable, "scripts/run_resolution_scheduler.py"]
     resolution_runtime_reliability_command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
     lifecycle_operation_store_command = [sys.executable, "scripts/generate_lifecycle_operation_store.py"]
+    internal_api_command = [sys.executable, "scripts/generate_internal_api.py"]
+    prediction_workspace_registry_command = [sys.executable, "scripts/generate_prediction_workspace_registry.py"]
     transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
     transit_corpus_growth_command = [sys.executable, "scripts/generate_transit_corpus_growth_loop.py"]
     transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
@@ -171,6 +175,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         sys.executable,
         "scripts/generate_prediction_campaign_calibration_status.py",
     ]
+    prediction_campaign_pre_calibration_command = [
+        sys.executable,
+        "scripts/generate_prediction_campaign_pre_calibration.py",
+    ]
     prediction_campaign_method_update_gate_command = [
         sys.executable,
         "scripts/generate_prediction_campaign_method_update_gate.py",
@@ -210,6 +218,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         live_readiness_command.append("--write")
         transit_api_connector_command.append("--write")
         domain_setups_command.append("--write")
+        domain_configs_command.append("--write")
+        source_bindings_command.append("--write")
         transit_delay_forecast_command.append("--write")
         transit_delay_forward_command.append("--write")
         transit_forward_resolver_command.append("--write")
@@ -217,6 +227,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_scheduler_command.append("--write")
         resolution_runtime_reliability_command.append("--write")
         lifecycle_operation_store_command.append("--write")
+        internal_api_command.append("--write")
+        prediction_workspace_registry_command.append("--write")
         transit_forward_run_corpus_command.append("--write")
         transit_corpus_growth_command.append("--write")
         transit_track_record_gate_command.append("--write")
@@ -269,6 +281,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_resume_command.append("--write")
         prediction_campaign_evidence_ledger_command.append("--write")
         prediction_campaign_calibration_status_command.append("--write")
+        prediction_campaign_pre_calibration_command.append("--write")
         prediction_campaign_method_update_gate_command.append("--write")
         prediction_campaign_method_update_plan_command.append("--write")
         prediction_campaign_method_update_action_command.append("--write")
@@ -296,6 +309,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         live_readiness_command.append("--check")
         transit_api_connector_command.append("--check")
         domain_setups_command.append("--check")
+        domain_configs_command.append("--check")
+        source_bindings_command.append("--check")
         transit_delay_forecast_command.append("--check")
         transit_delay_forward_command.append("--check")
         transit_forward_resolver_command.append("--check")
@@ -303,6 +318,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_scheduler_command.append("--check")
         resolution_runtime_reliability_command.append("--check")
         lifecycle_operation_store_command.append("--check")
+        internal_api_command.append("--check")
+        prediction_workspace_registry_command.append("--check")
         transit_forward_run_corpus_command.append("--check")
         transit_corpus_growth_command.append("--check")
         transit_track_record_gate_command.append("--check")
@@ -351,6 +368,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_resume_command.append("--check")
         prediction_campaign_evidence_ledger_command.append("--check")
         prediction_campaign_calibration_status_command.append("--check")
+        prediction_campaign_pre_calibration_command.append("--check")
         prediction_campaign_method_update_gate_command.append("--check")
         prediction_campaign_method_update_plan_command.append("--check")
         prediction_campaign_method_update_action_command.append("--check")
@@ -377,6 +395,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         live_readiness_command,
         transit_api_connector_command,
         domain_setups_command,
+        domain_configs_command,
+        source_bindings_command,
         transit_delay_forecast_command,
         transit_delay_forward_command,
         transit_forward_resolver_command,
@@ -384,6 +404,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_scheduler_command,
         resolution_runtime_reliability_command,
         lifecycle_operation_store_command,
+        internal_api_command,
+        prediction_workspace_registry_command,
         transit_forward_run_corpus_command,
         transit_corpus_growth_command,
         transit_track_record_gate_command,
@@ -435,6 +457,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         prediction_campaign_resume_command,
         prediction_campaign_evidence_ledger_command,
         prediction_campaign_calibration_status_command,
+        prediction_campaign_pre_calibration_command,
         prediction_campaign_method_update_gate_command,
         prediction_campaign_method_update_plan_command,
         prediction_campaign_method_update_action_command,
@@ -625,6 +648,28 @@ def cmd_domain_setups(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_domain_setups.py"]
     if args.setup:
         command.extend(["--setup", args.setup])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_domain_configs(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_domain_configs.py"]
+    if args.domain:
+        command.extend(["--domain", args.domain])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_source_bindings(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_source_bindings.py"]
+    if args.case:
+        command.extend(["--case", args.case])
     if args.check:
         command.append("--check")
     if args.write:
@@ -854,6 +899,38 @@ def cmd_lifecycle_operation_store(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_lifecycle_operation_store.py"]
     if args.scenario:
         command.extend(["--scenario", args.scenario])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_internal_api(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_internal_api.py"]
+    if args.operation:
+        command.extend(["--operation", args.operation])
+    if args.call:
+        command.append("--call")
+    if args.caller_id:
+        command.extend(["--caller-id", args.caller_id])
+    if args.prediction_id:
+        command.extend(["--prediction-id", args.prediction_id])
+    if args.idempotency_key:
+        command.extend(["--idempotency-key", args.idempotency_key])
+    if args.max_bytes is not None:
+        command.extend(["--max-bytes", str(args.max_bytes)])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_prediction_workspace_registry(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_prediction_workspace_registry.py"]
+    if args.prediction_id:
+        command.extend(["--prediction-id", args.prediction_id])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1380,6 +1457,7 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
             "campaign-creation",
             "forecast-schedule",
             "decisions",
+            "pre-calibration",
             "missed-run-policy",
             "summary",
             "boundary",
@@ -1394,6 +1472,7 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
                 "write",
                 "live_weather",
                 "execute_resolvers",
+                "pre_calibrate",
                 "full_materialization",
                 "watch",
                 "write_local",
@@ -1411,12 +1490,35 @@ def cmd_prediction_campaign(args: argparse.Namespace) -> None:
                 "post_calibration_delay",
                 "setup_json",
                 "manifest_json",
+                "history_source",
                 "max_ticks",
                 "poll_seconds",
                 "now",
                 "output_format",
                 "view",
             ),
+        )
+        run(command)
+        return
+    if args.action == "pre-calibration":
+        pre_calibration_views = {
+            "pre-calibration",
+            "source",
+            "method",
+            "binding",
+            "checks",
+            "write",
+            "result",
+            "summary",
+            "boundary",
+        }
+        if args.view and args.view not in pre_calibration_views:
+            raise SystemExit(f"--view {args.view} is not available for prediction-campaign pre-calibration")
+        command = script_command(
+            "scripts/generate_prediction_campaign_pre_calibration.py",
+            args,
+            flags=("check", "write", "write_local"),
+            values=("history_source", "output_format", "view"),
         )
         run(command)
         return
@@ -1690,6 +1792,12 @@ def cmd_agent_call(args: argparse.Namespace) -> None:
         command.extend(["--method-gate-case", args.method_gate_case])
     if args.forecast_execution_case:
         command.extend(["--forecast-execution-case", args.forecast_execution_case])
+    if args.internal_operation:
+        command.extend(["--internal-operation", args.internal_operation])
+    if args.prediction_id:
+        command.extend(["--prediction-id", args.prediction_id])
+    if args.idempotency_key:
+        command.extend(["--idempotency-key", args.idempotency_key])
     raise SystemExit(run_forwarding_output(command, check=False))
 
 
@@ -1922,6 +2030,32 @@ def build_parser() -> argparse.ArgumentParser:
     domain_setups.add_argument("--write", action="store_true", help="refresh generated domain setup records")
     domain_setups.set_defaults(func=cmd_domain_setups)
 
+    domain_configs = subparsers.add_parser(
+        "domain-configs",
+        help="check, refresh, or print reusable domain configuration records",
+    )
+    domain_configs.add_argument(
+        "--domain",
+        choices=["weather-transit-delays", "seaport-berth-availability"],
+        help="print one domain config record",
+    )
+    domain_configs.add_argument("--check", action="store_true", help="check generated domain config drift")
+    domain_configs.add_argument("--write", action="store_true", help="refresh generated domain config records")
+    domain_configs.set_defaults(func=cmd_domain_configs)
+
+    source_bindings = subparsers.add_parser(
+        "source-bindings",
+        help="check, refresh, or print domain source binding setup records",
+    )
+    source_bindings.add_argument(
+        "--case",
+        choices=["accepted", "blocked", "partial", "rejected"],
+        help="print one source binding setup case",
+    )
+    source_bindings.add_argument("--check", action="store_true", help="check generated source binding drift")
+    source_bindings.add_argument("--write", action="store_true", help="refresh generated source binding records")
+    source_bindings.set_defaults(func=cmd_source_bindings)
+
     transit_delay_forecast = subparsers.add_parser(
         "transit-delay-forecast",
         help="run a local weather-transit-delay forecast from approved CSV/JSON files",
@@ -2077,6 +2211,14 @@ def build_parser() -> argparse.ArgumentParser:
             "archive",
             "redaction",
             "method-rollback",
+            "pre-calibration-bind",
+            "campaign-forecast-create",
+            "campaign-resolution-record",
+            "campaign-score-create",
+            "campaign-evidence-append",
+            "campaign-method-apply",
+            "campaign-method-rollback",
+            "json-state-import",
             "recovery",
         ],
         help="print one checked SQLite runtime preflight/readback scenario",
@@ -2092,6 +2234,70 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated lifecycle operation store fixture",
     )
     lifecycle_operation_store.set_defaults(func=cmd_lifecycle_operation_store)
+
+    internal_api = subparsers.add_parser(
+        "internal-api",
+        help="print checked embedded internal API operation surface",
+    )
+    internal_api.add_argument(
+        "--operation",
+        choices=[
+            "create_prediction",
+            "update_prediction",
+            "start_prediction",
+            "pause_prediction",
+            "resume_prediction",
+            "run_tick",
+            "resolve_due",
+            "append_evidence",
+            "read_status",
+            "read_forecast_card",
+            "read_lifecycle_bundle",
+            "archive_record",
+            "redact_record",
+        ],
+        help="print one stable internal API operation",
+    )
+    internal_api.add_argument(
+        "--call",
+        action="store_true",
+        help="call one internal API operation in non-mutating dry-run mode",
+    )
+    internal_api.add_argument("--caller-id", help="caller id for --call")
+    internal_api.add_argument("--prediction-id", help="prediction id for --call")
+    internal_api.add_argument("--idempotency-key", help="idempotency key for effectful --call operations")
+    internal_api.add_argument("--max-bytes", type=int, help="maximum response bytes for --call")
+    internal_api.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated internal API drift",
+    )
+    internal_api.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated internal API fixture",
+    )
+    internal_api.set_defaults(func=cmd_internal_api)
+
+    prediction_workspace_registry = subparsers.add_parser(
+        "prediction-workspace-registry",
+        help="print checked multi-prediction workspace registry readback",
+    )
+    prediction_workspace_registry.add_argument(
+        "--prediction-id",
+        help="print one prediction registry entry",
+    )
+    prediction_workspace_registry.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated prediction workspace registry drift",
+    )
+    prediction_workspace_registry.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated prediction workspace registry fixture",
+    )
+    prediction_workspace_registry.set_defaults(func=cmd_prediction_workspace_registry)
 
     transit_forward_run_corpus = subparsers.add_parser(
         "transit-forward-run-corpus",
@@ -2974,6 +3180,7 @@ def build_parser() -> argparse.ArgumentParser:
             "append-ready",
             "append",
             "calibration-status",
+            "pre-calibration",
             "method-update-gate",
             "method-update-plan",
             "apply-method-update",
@@ -3017,6 +3224,7 @@ def build_parser() -> argparse.ArgumentParser:
     prediction_campaign.add_argument("--post-calibration-delay", help="dry-run runner post-calibration delay")
     prediction_campaign.add_argument("--setup-json", help="dry-run runner setup JSON input path")
     prediction_campaign.add_argument("--manifest-json", help="dry-run runner manifest JSON input path")
+    prediction_campaign.add_argument("--history-source", help="approved historical delay CSV/JSON source for pre-calibration")
     prediction_campaign.add_argument("--campaign", help="explicit campaign id for local campaign readbacks")
     prediction_campaign.add_argument("--run-id", help="dry-run forecast creation run ID")
     prediction_campaign.add_argument(
@@ -3033,6 +3241,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--execute-resolvers",
         action="store_true",
         help="dry-run flag for future explicit resolver execution",
+    )
+    prediction_campaign.add_argument(
+        "--pre-calibrate",
+        action="store_true",
+        help="optional historical-only pre-calibration before an explicit local launch write",
     )
     prediction_campaign.add_argument("--outcome-csv", help="approved local transit outcome CSV/JSON for campaign resolution")
     prediction_campaign.add_argument(
@@ -3120,7 +3333,11 @@ def build_parser() -> argparse.ArgumentParser:
             "campaign-creation",
             "forecast-schedule",
             "decisions",
+            "pre-calibration",
             "missed-run-policy",
+            "source",
+            "method",
+            "binding",
             "attempt",
             "target",
             "guards",
@@ -3138,6 +3355,8 @@ def build_parser() -> argparse.ArgumentParser:
             "policy",
             "candidate",
             "rows",
+            "write",
+            "result",
             "gate",
             "evidence",
             "proposal",
@@ -3273,6 +3492,7 @@ def build_parser() -> argparse.ArgumentParser:
             "campaign_health",
             "campaign_append_readiness",
             "campaign_calibration_status",
+            "internal_api",
             "resolution_jobs",
             "resolution_scheduler_status",
             "resolution_status",
@@ -3345,6 +3565,27 @@ def build_parser() -> argparse.ArgumentParser:
         ],
         help="checked source-handoff forecast-execution fixture case for private setup forecast adapter",
     )
+    agent_call.add_argument(
+        "--internal-operation",
+        choices=[
+            "create_prediction",
+            "update_prediction",
+            "start_prediction",
+            "pause_prediction",
+            "resume_prediction",
+            "run_tick",
+            "resolve_due",
+            "append_evidence",
+            "read_status",
+            "read_forecast_card",
+            "read_lifecycle_bundle",
+            "archive_record",
+            "redact_record",
+        ],
+        help="stable embedded internal API operation for internal_api agent-call wrapper",
+    )
+    agent_call.add_argument("--prediction-id", help="prediction id for internal_api agent-call wrapper")
+    agent_call.add_argument("--idempotency-key", help="idempotency key for effectful internal_api operations")
     agent_call.add_argument("--max-bytes", type=int, default=65536)
     agent_call.add_argument("--caller-intent", default="Call one local OPE agent adapter operation.")
     agent_call.set_defaults(func=cmd_agent_call)

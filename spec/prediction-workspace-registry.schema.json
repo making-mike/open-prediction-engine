@@ -1,0 +1,583 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-workspace-registry.schema.json",
+  "title": "Prediction Workspace Registry",
+  "description": "Stable multi-prediction workspace registry for OPE prediction definitions and campaign instances.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionWorkspaceRegistryId",
+    "generatedAt",
+    "registryStatus",
+    "workspaceId",
+    "predictions",
+    "readModels",
+    "configurationLifecycleOperations",
+    "perPredictionConcurrencyControls",
+    "workspaceResourceControls",
+    "isolationChecks",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionWorkspaceRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "registryStatus": { "type": "string", "enum": ["stable_registry_defined"] },
+    "workspaceId": { "$ref": "common.schema.json#/$defs/id" },
+    "predictions": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/predictionRegistryEntry" }
+    },
+    "readModels": { "$ref": "#/$defs/readModels" },
+    "configurationLifecycleOperations": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/configurationLifecycleOperation" }
+    },
+    "perPredictionConcurrencyControls": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/perPredictionConcurrencyControl" }
+    },
+    "workspaceResourceControls": { "$ref": "#/$defs/workspaceResourceControls" },
+    "isolationChecks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/isolationCheck" }
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 220 }
+    }
+  },
+  "$defs": {
+    "predictionRegistryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionId",
+        "campaignId",
+        "domainId",
+        "sourceBindingId",
+        "scheduleId",
+        "status",
+        "owner",
+        "callerMetadata",
+        "lifecycleOperationSummary",
+        "readModelRefs",
+        "rawFileLayoutExposed",
+        "rawSqlExposed"
+      ],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "domainId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceBindingId": { "$ref": "common.schema.json#/$defs/id" },
+        "scheduleId": { "$ref": "common.schema.json#/$defs/id" },
+        "status": { "type": "string", "enum": ["draft", "active", "paused", "archived"] },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ownerId", "ownerType", "contactRef"],
+          "properties": {
+            "ownerId": { "$ref": "common.schema.json#/$defs/id" },
+            "ownerType": { "type": "string", "enum": ["agent", "team", "service"] },
+            "contactRef": { "type": "string", "minLength": 3, "maxLength": 120 }
+          }
+        },
+        "callerMetadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["createdBy", "lastUpdatedBy", "callerIntent"],
+          "properties": {
+            "createdBy": { "$ref": "common.schema.json#/$defs/id" },
+            "lastUpdatedBy": { "$ref": "common.schema.json#/$defs/id" },
+            "callerIntent": { "type": "string", "minLength": 8, "maxLength": 180 }
+          }
+        },
+        "lifecycleOperationSummary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operationCount", "lastOperationName", "lastOperationReceiptId", "lastOperationStatus"],
+          "properties": {
+            "operationCount": { "type": "integer", "minimum": 1, "maximum": 1000 },
+            "lastOperationName": {
+              "type": "string",
+              "enum": ["create_prediction", "start_prediction", "pause_prediction", "resume_prediction", "archive_record"]
+            },
+            "lastOperationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+            "lastOperationStatus": { "type": "string", "enum": ["committed", "paused", "archived", "dry_run_ready"] }
+          }
+        },
+        "readModelRefs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "all_predictions",
+              "active_predictions",
+              "due_forecasts",
+              "due_resolutions",
+              "blocked_operations",
+              "failed_operations",
+              "source_health_blockers",
+              "calibration_progress",
+              "track_record_progress"
+            ]
+          }
+        },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" }
+      }
+    },
+    "readModels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allPredictions",
+        "activePredictions",
+        "dueForecasts",
+        "dueResolutions",
+        "blockedOperations",
+        "failedOperations",
+        "sourceHealthBlockers",
+        "calibrationProgress",
+        "trackRecordProgress"
+      ],
+      "properties": {
+        "allPredictions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/predictionStatusRow" }
+        },
+        "activePredictions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/activePredictionRow" }
+        },
+        "dueForecasts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/dueForecastRow" }
+        },
+        "dueResolutions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/dueResolutionRow" }
+        },
+        "blockedOperations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/operationStatusRow" }
+        },
+        "failedOperations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/operationStatusRow" }
+        },
+        "sourceHealthBlockers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/sourceHealthBlockerRow" }
+        },
+        "calibrationProgress": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/calibrationProgressRow" }
+        },
+        "trackRecordProgress": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/trackRecordProgressRow" }
+        }
+      }
+    },
+    "predictionStatusRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "campaignId", "domainId", "status", "lastOperationStatus"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "domainId": { "$ref": "common.schema.json#/$defs/id" },
+        "status": { "type": "string", "enum": ["draft", "active", "paused", "archived"] },
+        "lastOperationStatus": { "type": "string", "minLength": 3, "maxLength": 80 }
+      }
+    },
+    "activePredictionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "campaignId", "nextAction", "nextDueAt", "budgetStatus"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "nextAction": { "type": "string", "enum": ["run_tick", "resolve_due", "append_evidence", "wait"] },
+        "nextDueAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "budgetStatus": { "type": "string", "enum": ["within_budget", "near_limit", "blocked"] }
+      }
+    },
+    "dueForecastRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "campaignId", "runId", "forecastId", "dueAt", "dueStatus"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "dueAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "dueStatus": { "type": "string", "enum": ["due_ready", "next_due_known", "blocked"] }
+      }
+    },
+    "dueResolutionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "campaignId", "runId", "resolutionJobId", "dueAt", "dueStatus"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "runId": { "$ref": "common.schema.json#/$defs/id" },
+        "resolutionJobId": { "$ref": "common.schema.json#/$defs/id" },
+        "dueAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "dueStatus": { "type": "string", "enum": ["due_ready", "not_due", "blocked"] }
+      }
+    },
+    "operationStatusRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionId",
+        "operationName",
+        "operationReceiptId",
+        "operationStatus",
+        "reasonCode",
+        "retryable"
+      ],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationName": {
+          "type": "string",
+          "enum": ["create_prediction", "update_prediction", "start_prediction", "pause_prediction", "resume_prediction", "resolve_due", "append_evidence"]
+        },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationStatus": { "type": "string", "enum": ["blocked", "failed"] },
+        "reasonCode": { "type": "string", "minLength": 3, "maxLength": 96 },
+        "retryable": { "type": "boolean" }
+      }
+    },
+    "sourceHealthBlockerRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "sourceBindingId", "healthStatus", "reasonCode", "nextAction"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceBindingId": { "$ref": "common.schema.json#/$defs/id" },
+        "healthStatus": { "type": "string", "enum": ["blocked_unconfirmed_mapping", "blocked_source_unavailable", "healthy"] },
+        "reasonCode": { "type": "string", "minLength": 3, "maxLength": 96 },
+        "nextAction": { "type": "string", "minLength": 3, "maxLength": 120 }
+      }
+    },
+    "calibrationProgressRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "comparableCount", "threshold", "calibrationStatus", "claimAllowed"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "comparableCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "threshold": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "calibrationStatus": { "type": "string", "enum": ["below_threshold", "threshold_met", "blocked"] },
+        "claimAllowed": { "type": "boolean" }
+      }
+    },
+    "trackRecordProgressRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionId", "scoredCount", "excludedCount", "trackRecordStatus", "baselineComparisonReady"],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "scoredCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "excludedCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "trackRecordStatus": { "type": "string", "enum": ["below_threshold", "collecting", "blocked"] },
+        "baselineComparisonReady": { "type": "boolean" }
+      }
+    },
+    "configurationLifecycleOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationName",
+        "apiOperation",
+        "operationReceiptId",
+        "idempotencyRequired",
+        "leaseRequired",
+        "auditHistoryPreserved",
+        "rawConfigMutationAllowed",
+        "physicalDeleteAllowed",
+        "auditRecordKind",
+        "readModelsUpdated"
+      ],
+      "properties": {
+        "operationName": {
+          "type": "string",
+          "enum": [
+            "prediction.config_create",
+            "prediction.config_update",
+            "prediction.config_archive",
+            "prediction.config_redact"
+          ]
+        },
+        "apiOperation": {
+          "type": "string",
+          "enum": ["create_prediction", "update_prediction", "archive_record", "redact_record"]
+        },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyRequired": { "type": "boolean" },
+        "leaseRequired": { "type": "boolean" },
+        "auditHistoryPreserved": { "type": "boolean" },
+        "rawConfigMutationAllowed": { "type": "boolean" },
+        "physicalDeleteAllowed": { "type": "boolean" },
+        "auditRecordKind": {
+          "type": "string",
+          "enum": ["create_record", "update_revision", "archive_tombstone", "redaction_receipt"]
+        },
+        "readModelsUpdated": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 9,
+          "items": {
+            "type": "string",
+            "enum": [
+              "all_predictions",
+              "active_predictions",
+              "due_forecasts",
+              "due_resolutions",
+              "blocked_operations",
+              "failed_operations",
+              "source_health_blockers",
+              "calibration_progress",
+              "track_record_progress"
+            ]
+          }
+        }
+      }
+    },
+    "perPredictionConcurrencyControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionId",
+        "idempotencyNamespaceId",
+        "leaseId",
+        "leaseScope",
+        "leaseStatus",
+        "heldBy",
+        "expiresAt",
+        "crossPredictionConcurrencyAllowed",
+        "samePredictionConcurrentMutationBlocked",
+        "staleLeaseRecoveryAction"
+      ],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyNamespaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "leaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "leaseScope": {
+          "type": "string",
+          "enum": ["prediction_config", "prediction_execution", "prediction_resolution"]
+        },
+        "leaseStatus": { "type": "string", "enum": ["available", "held", "blocked"] },
+        "heldBy": { "$ref": "common.schema.json#/$defs/id" },
+        "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "crossPredictionConcurrencyAllowed": { "type": "boolean" },
+        "samePredictionConcurrentMutationBlocked": { "type": "boolean" },
+        "staleLeaseRecoveryAction": { "type": "string", "minLength": 8, "maxLength": 160 }
+      }
+    },
+    "workspaceResourceControls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximumActivePredictions",
+        "currentActivePredictionCount",
+        "maximumQueuedOperations",
+        "currentQueuedOperationCount",
+        "maximumReadbackBytes",
+        "currentReadbackBytes",
+        "perPredictionExecutionBudgets",
+        "resourceStatus"
+      ],
+      "properties": {
+        "maximumActivePredictions": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "currentActivePredictionCount": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "maximumQueuedOperations": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "currentQueuedOperationCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "maximumReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 10485760 },
+        "currentReadbackBytes": { "type": "integer", "minimum": 0, "maximum": 10485760 },
+        "perPredictionExecutionBudgets": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/perPredictionExecutionBudget" }
+        },
+        "resourceStatus": { "type": "string", "enum": ["within_limits", "near_limits", "blocked"] }
+      }
+    },
+    "perPredictionExecutionBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionId",
+        "maxTicksPerRun",
+        "maxResolverAttempts",
+        "maxRuntimeSeconds",
+        "maxReadbackBytes",
+        "budgetStatus"
+      ],
+      "properties": {
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "maxTicksPerRun": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "maxResolverAttempts": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "maxRuntimeSeconds": { "type": "integer", "minimum": 1, "maximum": 86400 },
+        "maxReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 10485760 },
+        "budgetStatus": { "type": "string", "enum": ["within_budget", "near_limit", "blocked"] }
+      }
+    },
+    "isolationCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "isolationCheckId",
+        "checkName",
+        "sourcePredictionId",
+        "targetPredictionId",
+        "attemptedWriteKind",
+        "crossPredictionWriteAllowed",
+        "samePredictionWriteAllowed",
+        "auditRecordRequired",
+        "sanitizedDiagnosticCode"
+      ],
+      "properties": {
+        "isolationCheckId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkName": {
+          "type": "string",
+          "enum": [
+            "record_write_scope",
+            "source_binding_scope",
+            "method_binding_scope",
+            "read_model_scope"
+          ]
+        },
+        "sourcePredictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetPredictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "attemptedWriteKind": {
+          "type": "string",
+          "enum": ["forecast_record", "source_binding", "method_binding", "read_model"]
+        },
+        "crossPredictionWriteAllowed": { "type": "boolean" },
+        "samePredictionWriteAllowed": { "type": "boolean" },
+        "auditRecordRequired": { "type": "boolean" },
+        "sanitizedDiagnosticCode": { "type": "string", "minLength": 3, "maxLength": 96 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCount",
+        "activePredictionCount",
+        "stablePredictionIds",
+        "campaignIdsBound",
+        "domainIdsBound",
+        "sourceBindingIdsBound",
+        "scheduleIdsBound",
+        "ownerMetadataPresent",
+        "lifecycleSummariesPresent",
+        "readModelsPresent",
+        "dueForecastReadbackPresent",
+        "blockedAndFailedReadbacksPresent",
+        "calibrationAndTrackRecordReadbacksPresent",
+        "configurationLifecycleOperationsPresent",
+        "configurationOperationsAuditBacked",
+        "configurationDeleteReplacedByArchive",
+        "perPredictionIdempotencyPresent",
+        "perPredictionLeasesPresent",
+        "crossPredictionConcurrencyAllowed",
+        "samePredictionRaceBlocked",
+        "resourceControlsPresent",
+        "activePredictionLimitEnforced",
+        "queuedOperationLimitEnforced",
+        "readbackSizeLimitEnforced",
+        "perPredictionExecutionBudgetsPresent",
+        "isolationChecksPresent",
+        "recordIsolationEnforced",
+        "sourceBindingIsolationEnforced",
+        "methodBindingIsolationEnforced",
+        "readModelIsolationEnforced"
+      ],
+      "properties": {
+        "predictionCount": { "type": "integer", "minimum": 2 },
+        "activePredictionCount": { "type": "integer", "minimum": 1 },
+        "stablePredictionIds": { "type": "boolean" },
+        "campaignIdsBound": { "type": "boolean" },
+        "domainIdsBound": { "type": "boolean" },
+        "sourceBindingIdsBound": { "type": "boolean" },
+        "scheduleIdsBound": { "type": "boolean" },
+        "ownerMetadataPresent": { "type": "boolean" },
+        "lifecycleSummariesPresent": { "type": "boolean" },
+        "readModelsPresent": { "type": "boolean" },
+        "dueForecastReadbackPresent": { "type": "boolean" },
+        "blockedAndFailedReadbacksPresent": { "type": "boolean" },
+        "calibrationAndTrackRecordReadbacksPresent": { "type": "boolean" },
+        "configurationLifecycleOperationsPresent": { "type": "boolean" },
+        "configurationOperationsAuditBacked": { "type": "boolean" },
+        "configurationDeleteReplacedByArchive": { "type": "boolean" },
+        "perPredictionIdempotencyPresent": { "type": "boolean" },
+        "perPredictionLeasesPresent": { "type": "boolean" },
+        "crossPredictionConcurrencyAllowed": { "type": "boolean" },
+        "samePredictionRaceBlocked": { "type": "boolean" },
+        "resourceControlsPresent": { "type": "boolean" },
+        "activePredictionLimitEnforced": { "type": "boolean" },
+        "queuedOperationLimitEnforced": { "type": "boolean" },
+        "readbackSizeLimitEnforced": { "type": "boolean" },
+        "perPredictionExecutionBudgetsPresent": { "type": "boolean" },
+        "isolationChecksPresent": { "type": "boolean" },
+        "recordIsolationEnforced": { "type": "boolean" },
+        "sourceBindingIsolationEnforced": { "type": "boolean" },
+        "methodBindingIsolationEnforced": { "type": "boolean" },
+        "readModelIsolationEnforced": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackOnly", "writesRegistryState", "rawSqlExposed", "rawFileLayoutExposed", "startsPredictions"],
+      "properties": {
+        "readbackOnly": { "type": "boolean" },
+        "writesRegistryState": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "startsPredictions": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
 from generate_helsinki_traffic_pilot_runbook import build_helsinki_traffic_pilot_runbook
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
+from generate_prediction_campaign_pre_calibration import build_prediction_campaign_pre_calibration
 from generate_prediction_campaign_runner import build_prediction_campaign_runner, default_args
 from ope_fixtures import compact_json, render_json, validate_and_emit
 from ope_schema import SPEC, validate_record
@@ -84,7 +86,12 @@ def mini_runner() -> dict[str, Any]:
     return build_prediction_campaign_runner(args)
 
 
-def build_checks(runbook: dict[str, Any], full_manifest: dict[str, Any], mini: dict[str, Any]) -> list[dict[str, Any]]:
+def build_checks(
+    runbook: dict[str, Any],
+    full_manifest: dict[str, Any],
+    mini: dict[str, Any],
+    pre_calibration: dict[str, Any],
+) -> list[dict[str, Any]]:
     duplicate_conflicts = int(full_manifest["materialization"]["duplicateConflictCount"])
     smoke_rows = mini["forecastSchedule"]["scheduleRows"]
     return [
@@ -130,6 +137,14 @@ def build_checks(runbook: dict[str, Any], full_manifest: dict[str, Any], mini: d
         ),
         readiness_check(
             6,
+            key="optional_pre_calibration_ready",
+            status="pass" if pre_calibration["preCalibrationStatus"] == "ready" else "manual_required",
+            blocks_launch=False,
+            message="The optional historical-only pre-calibration path is ready when the operator requests it.",
+            evidence_command="python3 scripts/ope.py prediction-campaign pre-calibration",
+        ),
+        readiness_check(
+            7,
             key="operator_source_confirmation",
             status="manual_required",
             blocks_launch=False,
@@ -204,13 +219,20 @@ def build_launch_commands() -> list[dict[str, Any]]:
         ),
         launch_command(
             4,
-            key="launch_first_write",
-            command="python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
-            expected="Create exactly one next-due local campaign forecast before forecastCloseAt.",
-            mutates_state=True,
+            key="optional_pre_calibration",
+            command="python3 scripts/ope.py prediction-campaign pre-calibration",
+            expected="Inspect the historical-only baseline pre-calibration binding before requesting it at launch.",
+            mutates_state=False,
         ),
         launch_command(
             5,
+            key="launch_first_write",
+            command="python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
+            expected="Create exactly one next-due local campaign forecast before forecastCloseAt, writing pre-calibration first when requested.",
+            mutates_state=True,
+        ),
+        launch_command(
+            6,
             key="operator_status",
             command="python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
             expected="Inspect next forecast, next resolution, append readiness, ledger counts, and calibration progress.",
@@ -254,12 +276,13 @@ def build_helsinki_traffic_pilot_readiness() -> dict[str, Any]:
     full_manifest = build_prediction_campaign_manifest(target_count=100, full_materialization=True)
     runner = build_prediction_campaign_runner()
     mini = mini_runner()
+    pre_calibration = build_prediction_campaign_pre_calibration()
     summary = runbook["summary"]
-    checks = build_checks(runbook, full_manifest, mini)
+    checks = build_checks(runbook, full_manifest, mini, pre_calibration)
     manual = build_manual_prerequisites()
     launch_command_value = (
         "python3 scripts/ope.py prediction-campaign start --count 100 "
-        "--full-materialization --write-local --output-format jsonl"
+        "--full-materialization --pre-calibrate --write-local --output-format jsonl"
     )
     return {
         "helsinkiTrafficPilotReadinessId": "helsinkireadiness-001",
@@ -270,6 +293,7 @@ def build_helsinki_traffic_pilot_readiness() -> dict[str, Any]:
             "helsinkiTrafficDisturbancePilotRunbookId": runbook["helsinkiTrafficDisturbancePilotRunbookId"],
             "predictionCampaignManifestId": manifest["predictionCampaignManifestId"],
             "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
+            "predictionCampaignPreCalibrationId": pre_calibration["predictionCampaignPreCalibrationId"],
             "campaignId": manifest["campaign"]["campaignId"],
             "cycleId": manifest["campaign"]["cycleId"],
             "sourcePolicyId": manifest["bindings"]["sourcePolicyId"],
@@ -281,6 +305,9 @@ def build_helsinki_traffic_pilot_readiness() -> dict[str, Any]:
             "duplicateConflictCount": full_manifest["materialization"]["duplicateConflictCount"],
             "bestAvailableMethodId": summary["bestAvailableMethodId"],
             "bestAvailableMethodName": runbook["pilotScope"]["bestAvailableMethodName"],
+            "optionalPreCalibrationStatus": pre_calibration["preCalibrationStatus"],
+            "optionalPreCalibrationProbability": pre_calibration["calibrationMethod"]["calibratedProbability"],
+            "preCalibrationCommand": "python3 scripts/ope.py prediction-campaign pre-calibration",
             "localWorkspace": ".ope/live/prediction-campaigns/predictioncampaign-001",
             "launchCommand": launch_command_value,
             "nextRecommendedCommand": "python3 scripts/ope.py prediction-campaign pilot-readiness --view commands",
@@ -314,6 +341,7 @@ def build_helsinki_traffic_pilot_readiness() -> dict[str, Any]:
             "manualPrerequisitesRequired": True,
             "launchCommandReady": True,
             "miniSmokeFirst": True,
+            "optionalPreCalibrationAvailable": pre_calibration["preCalibrationStatus"] == "ready",
             "bestAvailableMethodId": summary["bestAvailableMethodId"],
             "qualityClaimAllowed": False,
             "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
@@ -326,12 +354,14 @@ def build_helsinki_traffic_pilot_readiness() -> dict[str, Any]:
             "createsForecastArtifacts": False,
             "executesResolvers": False,
             "appendsLedgerRows": False,
+            "writesPreCalibrationState": False,
             "changesForecastMethod": False,
             "qualityClaimAllowed": False,
         },
         "warnings": [
             "This readiness readback does not start the pilot; effectful launch still requires --write-local.",
             "Manual source, clock, terminal, outcome-path, and workspace-capacity confirmations remain outside normal checks.",
+            "Optional pre-calibration is historical-only and writes local binding state only when requested with --pre-calibrate and --write-local.",
             "The pilot starts on transitmethod-100; method updates remain prospective and approval-gated.",
         ],
     }
@@ -372,6 +402,22 @@ def check_or_write(data: dict[str, Any], *, write: bool) -> None:
     )
 
 
+def validate_readiness(record: dict[str, Any]) -> None:
+    errors = validate_record(record, SCHEMA)
+    if errors:
+        for error in errors:
+            print(error)
+        raise SystemExit(1)
+
+
+def load_generated_readiness() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    record = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_readiness(record)
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="refresh generated Helsinki pilot readiness")
@@ -390,15 +436,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    record = build_helsinki_traffic_pilot_readiness()
+    if args.write or args.check:
+        record = build_helsinki_traffic_pilot_readiness()
+    else:
+        record = load_generated_readiness() or build_helsinki_traffic_pilot_readiness()
     if args.write or args.check:
         check_or_write(record, write=args.write)
         return
-    errors = validate_record(record, SCHEMA)
-    if errors:
-        for error in errors:
-            print(error)
-        raise SystemExit(1)
+    validate_readiness(record)
     print_view(record, args.view, args.output_format)
 
 

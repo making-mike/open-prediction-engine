@@ -40,6 +40,8 @@ INPUT_FLAG_FIELDS = [
     "post_calibration_delay",
     "live_weather",
     "execute_resolvers",
+    "pre_calibrate",
+    "history_source",
 ]
 
 
@@ -59,6 +61,8 @@ def default_args() -> argparse.Namespace:
         manifest_json=None,
         live_weather=False,
         execute_resolvers=False,
+        pre_calibrate=False,
+        history_source=None,
         full_materialization=False,
         write_local=False,
         watch=False,
@@ -351,10 +355,55 @@ def build_campaign_creation_request(
         "candidatePlanCount": str(manifest["progress"]["plannedRunCount"]),
         "liveWeatherRequested": args.live_weather,
         "resolverExecutionRequested": args.execute_resolvers,
+        "preCalibrationRequested": args.pre_calibrate,
+        "historySourcePath": args.history_source or "spec/fixtures/local-source-files/transit-delay-history.csv",
         "acceptedForDryRun": True,
         "createsCampaignManifest": False,
         "writesCampaignState": False,
         "nextAction": "Review the normalized campaign request; use --write-local only when creating the ready forecast in ignored local state.",
+    }
+
+
+def pre_calibration_summary(args: argparse.Namespace) -> dict[str, Any]:
+    if not args.pre_calibrate:
+        return {
+            "requestStatus": "not_requested",
+            "preCalibrationStatus": "not_requested",
+            "predictionCampaignPreCalibrationId": "none",
+            "historySourcePath": "none",
+            "resolvedOutcomeRowCount": 0,
+            "calibratedProbability": 0.25,
+            "activeMethodId": BASELINE_METHOD_ID,
+            "preCalibrationArtifactPath": "none",
+            "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+            "forecastProbabilitySource": "default_checked_baseline",
+            "localWriteRequiredBeforeUse": False,
+            "writesDuringDryRun": False,
+            "qualityClaimAllowed": False,
+            "nextAction": "Add --pre-calibrate to compute a historical-only baseline binding before launch.",
+        }
+
+    from generate_prediction_campaign_pre_calibration import build_prediction_campaign_pre_calibration
+
+    record = build_prediction_campaign_pre_calibration(history_source=args.history_source)
+    return {
+        "requestStatus": "requested",
+        "preCalibrationStatus": record["preCalibrationStatus"],
+        "predictionCampaignPreCalibrationId": record["predictionCampaignPreCalibrationId"],
+        "historySourcePath": record["historySource"]["sourcePath"],
+        "resolvedOutcomeRowCount": record["historySource"]["resolvedOutcomeRowCount"],
+        "calibratedProbability": record["calibrationMethod"]["calibratedProbability"],
+        "activeMethodId": record["engineBinding"]["activeMethodId"],
+        "preCalibrationArtifactPath": record["engineBinding"]["preCalibrationArtifactPath"],
+        "methodBindingPath": record["engineBinding"]["methodBindingPath"],
+        "forecastProbabilitySource": "historical_pre_calibration",
+        "localWriteRequiredBeforeUse": True,
+        "writesDuringDryRun": False,
+        "qualityClaimAllowed": False,
+        "nextAction": (
+            "Review prediction-campaign pre-calibration, then use --pre-calibrate with --write-local "
+            "so the launch tick writes the binding before the forecast."
+        ),
     }
 
 
@@ -436,6 +485,8 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
                 "--manifest-json",
                 "--live-weather",
                 "--execute-resolvers",
+                "--pre-calibrate",
+                "--history-source",
                 "--full-materialization",
                 "--watch",
                 "--max-ticks",
@@ -451,6 +502,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         "campaignCreationRequest": creation_request,
         "forecastSchedule": build_forecast_schedule(manifest, decisions, runner_clock=args.now),
         "methodSelectionBinding": method_selection_binding(manifest),
+        "preCalibration": pre_calibration_summary(args),
         "supportedRecurrenceModes": [
             recurrence_mode("fixed_count", "--count"),
             recurrence_mode("until_date", "--until"),
@@ -485,6 +537,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
             "resolverExecutionImplemented": False,
             "writesLiveState": False,
             "normalChecksUseLiveNetwork": False,
+            "preCalibrationImplemented": True,
             "qualityClaimAllowed": False,
             "recommendedNextMilestone": "Milestone 105 campaign outcome resolver execution",
         },
@@ -494,6 +547,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
             "executesForecastRunner": False,
             "sleepsOrPolls": False,
             "writesIgnoredLiveState": False,
+            "writesPreCalibrationState": False,
             "fetchesLiveData": False,
             "executesResolvers": False,
             "appendsCorpusEvidence": False,
@@ -504,6 +558,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         },
         "warnings": [
             "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+            "Optional --pre-calibrate uses historical data only and writes a prospective baseline binding only when --write-local is explicit.",
             "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
             "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
             "No calibration or quality claim is allowed from dry-run runner decisions.",
@@ -511,7 +566,12 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
     }
 
 
-def build_local_start_result(runner: dict[str, Any], write_result: dict[str, Any]) -> dict[str, Any]:
+def build_local_start_result(
+    runner: dict[str, Any],
+    write_result: dict[str, Any],
+    *,
+    pre_calibration_result: dict[str, Any] | str = "none",
+) -> dict[str, Any]:
     return {
         "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
         "generatedAt": write_result["generatedAt"],
@@ -523,6 +583,7 @@ def build_local_start_result(runner: dict[str, Any], write_result: dict[str, Any
         "forecastId": write_result["bindings"]["forecastId"],
         "writeStatus": write_result["writeStatus"],
         "idempotencyKey": write_result["idempotencyKey"],
+        "preCalibrationResult": pre_calibration_result,
         "artifactWrites": write_result["artifactWrites"],
         "stateWrites": write_result["stateWrites"],
         "summary": {
@@ -530,6 +591,12 @@ def build_local_start_result(runner: dict[str, Any], write_result: dict[str, Any
             "foregroundExecutionImplemented": True,
             "forecastCreationImplemented": True,
             "forecastArtifactsCreated": write_result["summary"]["forecastArtifactsCreated"],
+            "preCalibrationRequested": runner["preCalibration"]["requestStatus"] == "requested",
+            "preCalibrationWriteStatus": (
+                pre_calibration_result["writeStatus"]
+                if isinstance(pre_calibration_result, dict)
+                else "not_requested"
+            ),
             "newFileWriteCount": write_result["summary"]["newFileWriteCount"],
             "alreadyPresentCount": write_result["summary"]["alreadyPresentCount"],
             "resolverExecutionImplemented": False,
@@ -540,6 +607,7 @@ def build_local_start_result(runner: dict[str, Any], write_result: dict[str, Any
         "executionBoundary": {
             "writesIgnoredLiveState": True,
             "writesCampaignState": True,
+            "writesPreCalibrationState": isinstance(pre_calibration_result, dict),
             "fetchesLiveData": False,
             "executesResolvers": False,
             "appendsCorpusEvidence": False,
@@ -574,6 +642,31 @@ def local_run_state_exists(runner: dict[str, Any], run_id: str) -> bool:
     return local_run_state_path(runner, run_id).exists()
 
 
+def pre_calibration_record_for_args(args: argparse.Namespace) -> dict[str, Any] | None:
+    if not args.pre_calibrate:
+        return None
+    from generate_prediction_campaign_pre_calibration import build_prediction_campaign_pre_calibration
+
+    return build_prediction_campaign_pre_calibration(history_source=args.history_source)
+
+
+def execute_pre_calibration_for_args(args: argparse.Namespace) -> tuple[dict[str, Any] | None, dict[str, Any] | str]:
+    record = pre_calibration_record_for_args(args)
+    if record is None:
+        return None, "none"
+    from generate_prediction_campaign_pre_calibration import (
+        execute_local_pre_calibration,
+        build_prediction_campaign_pre_calibration,
+    )
+
+    result = execute_local_pre_calibration(record)
+    written_record = build_prediction_campaign_pre_calibration(
+        history_source=args.history_source,
+        write_result=result,
+    )
+    return written_record, result
+
+
 def build_resolution_attempts_for_tick(
     runner: dict[str, Any],
     manifest: dict[str, Any],
@@ -604,12 +697,15 @@ def build_resolution_attempts_for_tick(
 def build_foreground_tick(
     runner: dict[str, Any],
     manifest: dict[str, Any],
+    args: argparse.Namespace,
     *,
     tick_number: int,
     execute_local_write: bool,
     execute_resolvers: bool,
 ) -> dict[str, Any]:
     write_result = None
+    pre_calibration_record = None
+    pre_calibration_write_result: dict[str, Any] | str = "none"
     selected_run_id = None
     actions = []
     resolution_attempts = build_resolution_attempts_for_tick(
@@ -630,11 +726,18 @@ def build_foreground_tick(
                 writes_campaign_state = False
             elif execute_local_write:
                 from prediction_campaign_forecast_write_runtime import execute_local_forecast_write
+                from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+
+                pre_calibration_record, pre_calibration_write_result = execute_pre_calibration_for_args(args)
 
                 write_result = execute_local_forecast_write(
                     run_id=row["runId"],
                     manifest=manifest,
                     runner=runner,
+                    plan_builder=lambda **kwargs: build_prediction_campaign_forecast_write(
+                        **kwargs,
+                        pre_calibration=pre_calibration_record,
+                    ),
                 )
                 selected_run_id = row["runId"]
                 action_status = write_result["writeStatus"]
@@ -665,6 +768,16 @@ def build_foreground_tick(
                 "actionStatus": action_status,
                 "forecastCreated": forecast_created,
                 "writesCampaignState": writes_campaign_state,
+                "preCalibrationRequested": args.pre_calibrate,
+                "preCalibrationStatus": (
+                    "not_requested"
+                    if not args.pre_calibrate
+                    else (
+                        pre_calibration_write_result["writeStatus"]
+                        if isinstance(pre_calibration_write_result, dict)
+                        else "dry_run_ready"
+                    )
+                ),
             }
         )
 
@@ -679,6 +792,7 @@ def build_foreground_tick(
         "runnerClock": runner["forecastSchedule"]["runnerClock"],
         "readyRunId": selected_run_id or runner["forecastSchedule"]["readyRunId"],
         "actions": actions,
+        "preCalibrationResult": pre_calibration_write_result,
         "writeResult": write_result or "none",
         "resolutionAttempts": resolution_attempts,
         "nextPollSeconds": 0,
@@ -695,6 +809,15 @@ def build_foreground_result(
 ) -> dict[str, Any]:
     created_count = sum(1 for tick in ticks for action in tick["actions"] if action["forecastCreated"])
     resolution_attempt_count = sum(len(tick["resolutionAttempts"]) for tick in ticks)
+    pre_calibration_write_count = len(
+        [
+            tick
+            for tick in ticks
+            if isinstance(tick.get("preCalibrationResult"), dict)
+            and tick["preCalibrationResult"]["writeStatus"]
+            in {"local_pre_calibration_completed", "local_pre_calibration_already_present"}
+        ]
+    )
     return {
         "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
         "generatedAt": ticks[-1]["startedAt"],
@@ -719,6 +842,8 @@ def build_foreground_result(
             "futureWindowPollingImplemented": False,
             "forecastArtifactsCreated": created_count,
             "writesCampaignState": execute_local_write and created_count > 0,
+            "preCalibrationRequested": runner["preCalibration"]["requestStatus"] == "requested",
+            "preCalibrationWriteCount": pre_calibration_write_count,
             "resolutionAttemptCount": resolution_attempt_count,
             "resolverExecutionRequested": execute_resolvers,
             "resolverExecutionImplemented": False,
@@ -734,6 +859,7 @@ def build_foreground_result(
         "executionBoundary": {
             "writesIgnoredLiveState": execute_local_write and created_count > 0,
             "writesCampaignState": execute_local_write and created_count > 0,
+            "writesPreCalibrationState": pre_calibration_write_count > 0,
             "fetchesLiveData": False,
             "executesResolvers": False,
             "appendsCorpusEvidence": False,
@@ -760,6 +886,7 @@ def run_foreground_ticks(runner: dict[str, Any], args: argparse.Namespace) -> di
         tick = build_foreground_tick(
             runner,
             manifest,
+            args,
             tick_number=tick_number,
             execute_local_write=args.write_local and tick_number == 1,
             execute_resolvers=args.execute_resolvers,
@@ -802,6 +929,7 @@ def print_view(runner: dict[str, Any], view: str) -> None:
         "campaign-creation": runner["campaignCreationRequest"],
         "forecast-schedule": runner["forecastSchedule"],
         "decisions": runner["runnerDecisions"],
+        "pre-calibration": runner["preCalibration"],
         "missed-run-policy": runner["missedRunPolicy"],
         "summary": runner["summary"],
         "boundary": runner["executionBoundary"],
@@ -842,6 +970,12 @@ def main() -> None:
     parser.add_argument("--live-weather", action="store_true", help="record an explicit future live-weather request")
     parser.add_argument("--execute-resolvers", action="store_true", help="record an explicit future resolver request")
     parser.add_argument(
+        "--pre-calibrate",
+        action="store_true",
+        help="compute optional historical-only pre-calibration before an explicit local launch write",
+    )
+    parser.add_argument("--history-source", help="approved historical delay CSV/JSON source for --pre-calibrate")
+    parser.add_argument(
         "--full-materialization",
         action="store_true",
         help="expand the complete local pilot plan before foreground scheduling",
@@ -863,7 +997,16 @@ def main() -> None:
     )
     parser.add_argument(
         "--view",
-        choices=["runner", "campaign-creation", "forecast-schedule", "decisions", "missed-run-policy", "summary", "boundary"],
+        choices=[
+            "runner",
+            "campaign-creation",
+            "forecast-schedule",
+            "decisions",
+            "pre-calibration",
+            "missed-run-policy",
+            "summary",
+            "boundary",
+        ],
         default="runner",
         help="print one prediction campaign runner view",
     )
@@ -890,17 +1033,31 @@ def main() -> None:
             PredictionCampaignForecastWriteError,
             execute_local_forecast_write,
         )
+        from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+        from generate_prediction_campaign_pre_calibration import PredictionCampaignPreCalibrationError
 
         try:
             manifest, _creation_request = build_runner_inputs(args)
+            pre_calibration_record, pre_calibration_result = execute_pre_calibration_for_args(args)
             write_result = execute_local_forecast_write(
                 run_id=ready_run_id_for_write(runner),
                 manifest=manifest,
                 runner=runner,
+                plan_builder=lambda **kwargs: build_prediction_campaign_forecast_write(
+                    **kwargs,
+                    pre_calibration=pre_calibration_record,
+                ),
             )
-        except PredictionCampaignForecastWriteError as exc:
+        except (PredictionCampaignForecastWriteError, PredictionCampaignPreCalibrationError) as exc:
             raise SystemExit(str(exc)) from exc
-        print_start_result(build_local_start_result(runner, write_result), args.output_format)
+        print_start_result(
+            build_local_start_result(
+                runner,
+                write_result,
+                pre_calibration_result=pre_calibration_result,
+            ),
+            args.output_format,
+        )
         return
     errors = validate_record(runner, SCHEMA)
     if errors:

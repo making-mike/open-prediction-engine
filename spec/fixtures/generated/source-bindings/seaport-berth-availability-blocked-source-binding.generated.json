@@ -1,0 +1,237 @@
+{
+  "sourceBindingId": "sourcebinding-115004",
+  "generatedAt": "2026-06-03T03:45:00Z",
+  "bindingCase": "blocked",
+  "bindingStatus": "blocked_safety_violation",
+  "domainConfigId": "domainconfig-002",
+  "domainKey": "seaport-berth-availability",
+  "predictionId": "prediction-004",
+  "sourceBindingMode": "adapter_output",
+  "credentialPolicy": {
+    "credentialValuesStored": false,
+    "credentialReferencesAllowed": true,
+    "credentialReferenceRequired": true,
+    "secretScanningRequired": true,
+    "rawCredentialValueDetected": true
+  },
+  "sourceRoleBindings": [
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115010",
+      "roleKey": "vessel_schedule",
+      "sourceKind": "api",
+      "sourceRef": "redacted-api-request-with-raw-token-detected",
+      "adapterRef": "adapter-seaport-api-unapproved-001",
+      "credentialRef": "redacted-credential-value-detected",
+      "approvalStatus": "blocked",
+      "bindingStatus": "blocked",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": false,
+      "queryBoundary": "unapproved_private_api_request",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": true
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115011",
+      "roleKey": "historical_berth_baseline",
+      "sourceKind": "database",
+      "sourceRef": "redacted-raw-sql-query-detected",
+      "adapterRef": "adapter-seaport-database-unapproved-001",
+      "credentialRef": "redacted-credential-value-detected",
+      "approvalStatus": "blocked",
+      "bindingStatus": "blocked",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": false,
+      "queryBoundary": "raw_sql_query_detected_and_rejected",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": true,
+      "privateParsingByOpe": true
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115012",
+      "roleKey": "berth_availability_outcome",
+      "sourceKind": "database",
+      "sourceRef": "post-outcome-rows-present-in-forecast-evidence",
+      "adapterRef": "adapter-seaport-outcome-unapproved-001",
+      "credentialRef": "redacted-credential-value-detected",
+      "approvalStatus": "blocked",
+      "bindingStatus": "blocked",
+      "forecastTimeAllowed": false,
+      "sanitizedManifestProvided": false,
+      "queryBoundary": "post_outcome_data_present_before_forecast_close",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": true,
+      "privateParsingByOpe": true
+    }
+  ],
+  "preForecastChecks": [
+    {
+      "checkId": "sourcebindingcheck-115019",
+      "checkName": "mapping_confidence",
+      "checkStatus": "block",
+      "score": 0.1,
+      "minimumScore": 0.8,
+      "blocksForecast": true,
+      "message": "Blocked source cannot be safely mapped while raw private inputs are present."
+    },
+    {
+      "checkId": "sourcebindingcheck-115020",
+      "checkName": "source_quality",
+      "checkStatus": "block",
+      "score": 0.1,
+      "minimumScore": 0.75,
+      "blocksForecast": true,
+      "message": "Source quality cannot be assessed from unsafe raw private data."
+    },
+    {
+      "checkId": "sourcebindingcheck-115021",
+      "checkName": "leakage",
+      "checkStatus": "block",
+      "score": 0.0,
+      "minimumScore": 1.0,
+      "blocksForecast": true,
+      "message": "Post-outcome rows were detected in forecast-time context."
+    },
+    {
+      "checkId": "sourcebindingcheck-115022",
+      "checkName": "freshness",
+      "checkStatus": "block",
+      "score": 0.0,
+      "minimumScore": 0.7,
+      "blocksForecast": true,
+      "message": "Freshness cannot be trusted for unapproved raw requests."
+    },
+    {
+      "checkId": "sourcebindingcheck-115023",
+      "checkName": "privacy",
+      "checkStatus": "block",
+      "score": 0.0,
+      "minimumScore": 1.0,
+      "blocksForecast": true,
+      "message": "Raw credential-like content was detected and redacted before storage."
+    },
+    {
+      "checkId": "sourcebindingcheck-115024",
+      "checkName": "outcome_availability",
+      "checkStatus": "block",
+      "score": 0.0,
+      "minimumScore": 0.7,
+      "blocksForecast": true,
+      "message": "Outcome source is unsafe and cannot be used for resolution."
+    }
+  ],
+  "setupOperations": [
+    {
+      "operationId": "setupoperation-115001",
+      "operationName": "source_binding.draft",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "create_prediction",
+      "lifecycleOperation": "prediction.config_create",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115002",
+      "operationName": "source_binding.validate",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115003",
+      "operationName": "source_binding.confirm",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115004",
+      "operationName": "source_binding.update",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115005",
+      "operationName": "source_binding.archive",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "archive_record",
+      "lifecycleOperation": "prediction.config_archive",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115006",
+      "operationName": "source_binding.redact",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case blocked",
+      "internalApiOperation": "redact_record",
+      "lifecycleOperation": "prediction.config_redact",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    }
+  ],
+  "configurationInputBoundary": {
+    "sanitizedManifestRequired": true,
+    "sanitizedMappingRequired": true,
+    "sanitizedProvenanceRequired": true,
+    "queryBoundaryRequired": true,
+    "arbitraryPrivateApiParsingByOpe": false,
+    "arbitraryDatabaseParsingByOpe": false,
+    "callerApprovalRequired": true
+  },
+  "executionBoundary": {
+    "createsForecasts": false,
+    "writesSourceData": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "executesApiCalls": false,
+    "executesDatabaseQueries": false,
+    "rawSqlAllowed": false
+  },
+  "nextAction": "stop_unsafe_source_binding",
+  "summary": {
+    "sourceBindingRecordsDefined": true,
+    "approvedSourceKindsCovered": false,
+    "setupOperationsDefined": true,
+    "safetyChecksComplete": false,
+    "allRequiredRolesBound": false,
+    "forecastGenerationAllowed": false,
+    "credentialsExcluded": true,
+    "privateParsingBehindAdapters": true,
+    "normalChecksNonMutating": true
+  },
+  "warnings": [
+    "Blocked binding stores only redaction markers, never raw credential values.",
+    "Private API and database parsing must stay behind caller-approved adapters that emit sanitized manifests."
+  ]
+}

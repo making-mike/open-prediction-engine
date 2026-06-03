@@ -81,6 +81,8 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py prediction-campaign start",
                 "python3 scripts/ope.py prediction-campaign start --view campaign-creation",
                 "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+                "python3 scripts/ope.py prediction-campaign pre-calibration",
+                "python3 scripts/ope.py prediction-campaign start --pre-calibrate --view pre-calibration",
                 "python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl",
                 "python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl",
                 "python3 scripts/ope.py prediction-campaign forecast-create",
@@ -211,6 +213,16 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "checkId": "mvp-smoke-prediction-campaign-forecast-schedule",
                 "command": "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
                 "expected": "prediction campaign start maps ready, waiting, missed, and duplicate forecast schedule actions without writing campaign state.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-pre-calibration",
+                "command": "python3 scripts/ope.py prediction-campaign pre-calibration",
+                "expected": "prediction campaign pre-calibration computes an optional historical-only baseline binding without live fetches, method changes, or local writes.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-campaign-start-pre-calibration",
+                "command": "python3 scripts/ope.py prediction-campaign start --pre-calibrate --view pre-calibration",
+                "expected": "prediction campaign start exposes requested pre-calibration before any explicit launch write.",
             },
             {
                 "checkId": "mvp-smoke-prediction-campaign-foreground-tick",

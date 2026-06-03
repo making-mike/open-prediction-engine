@@ -284,6 +284,15 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
     forecast_execution_case = arguments.get("forecastExecutionCase", "unconfirmed_builder_draft")
     if not isinstance(forecast_execution_case, str):
         raise McpProtocolError(JSONRPC_INVALID_PARAMS, "forecastExecutionCase must be a string.")
+    internal_operation = arguments.get("internalOperation", "read_status")
+    if not isinstance(internal_operation, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "internalOperation must be a string.")
+    prediction_id = arguments.get("predictionId", "predictioncampaign-001")
+    if not isinstance(prediction_id, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "predictionId must be a string.")
+    idempotency_key = arguments.get("idempotencyKey")
+    if idempotency_key is not None and not isinstance(idempotency_key, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "idempotencyKey must be a string.")
 
     source_builder_inputs = arguments.get("sourceBuilderInputs", [])
     mapping_hints = arguments.get("mappingHints", [])
@@ -306,6 +315,9 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
         source_handoff_case=source_handoff_case,
         method_gate_case=method_gate_case,
         forecast_execution_case=forecast_execution_case,
+        internal_operation=internal_operation,
+        prediction_id=prediction_id,
+        idempotency_key=idempotency_key,
         max_bytes=max_bytes,
         caller_intent=caller_intent,
     )

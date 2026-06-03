@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/source-binding.schema.json",
+  "title": "Source Binding",
+  "description": "Concrete OPE source binding setup record for a configured prediction domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceBindingId",
+    "generatedAt",
+    "bindingCase",
+    "bindingStatus",
+    "domainConfigId",
+    "domainKey",
+    "predictionId",
+    "sourceBindingMode",
+    "credentialPolicy",
+    "sourceRoleBindings",
+    "preForecastChecks",
+    "setupOperations",
+    "configurationInputBoundary",
+    "executionBoundary",
+    "nextAction",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "sourceBindingId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "bindingCase": {
+      "type": "string",
+      "enum": ["accepted", "partial", "rejected", "blocked"]
+    },
+    "bindingStatus": {
+      "type": "string",
+      "enum": [
+        "accepted_ready",
+        "partial_needs_confirmation",
+        "rejected_replace_source",
+        "blocked_safety_violation"
+      ]
+    },
+    "domainConfigId": { "$ref": "common.schema.json#/$defs/id" },
+    "domainKey": { "$ref": "common.schema.json#/$defs/domain" },
+    "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+    "sourceBindingMode": {
+      "type": "string",
+      "enum": ["sanitized_manifest", "adapter_output", "database_adapter_manifest"]
+    },
+    "credentialPolicy": { "$ref": "#/$defs/credentialPolicy" },
+    "sourceRoleBindings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/sourceRoleBinding" }
+    },
+    "preForecastChecks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/preForecastCheck" }
+    },
+    "setupOperations": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/setupOperation" }
+    },
+    "configurationInputBoundary": { "$ref": "#/$defs/configurationInputBoundary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "nextAction": {
+      "type": "string",
+      "enum": [
+        "forecast_generation_allowed",
+        "collect_missing_source_binding",
+        "replace_source_binding",
+        "stop_unsafe_source_binding"
+      ]
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 10,
+      "items": { "type": "string", "minLength": 8, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "snakeKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "credentialPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credentialValuesStored",
+        "credentialReferencesAllowed",
+        "credentialReferenceRequired",
+        "secretScanningRequired",
+        "rawCredentialValueDetected"
+      ],
+      "properties": {
+        "credentialValuesStored": { "type": "boolean" },
+        "credentialReferencesAllowed": { "type": "boolean" },
+        "credentialReferenceRequired": { "type": "boolean" },
+        "secretScanningRequired": { "type": "boolean" },
+        "rawCredentialValueDetected": { "type": "boolean" }
+      }
+    },
+    "sourceRoleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRoleBindingId",
+        "roleKey",
+        "sourceKind",
+        "sourceRef",
+        "adapterRef",
+        "credentialRef",
+        "approvalStatus",
+        "bindingStatus",
+        "forecastTimeAllowed",
+        "sanitizedManifestProvided",
+        "queryBoundary",
+        "credentialValuesStored",
+        "rawSqlAllowed",
+        "privateParsingByOpe"
+      ],
+      "properties": {
+        "sourceRoleBindingId": { "$ref": "common.schema.json#/$defs/id" },
+        "roleKey": { "$ref": "#/$defs/snakeKey" },
+        "sourceKind": {
+          "type": "string",
+          "enum": ["fixture", "local_file", "source_adapter_output", "api", "database"]
+        },
+        "sourceRef": { "type": "string", "minLength": 3, "maxLength": 220 },
+        "adapterRef": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "credentialRef": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["approved", "needs_confirmation", "rejected", "blocked"]
+        },
+        "bindingStatus": {
+          "type": "string",
+          "enum": ["confirmed", "draft", "missing", "rejected", "blocked"]
+        },
+        "forecastTimeAllowed": { "type": "boolean" },
+        "sanitizedManifestProvided": { "type": "boolean" },
+        "queryBoundary": { "type": "string", "minLength": 4, "maxLength": 160 },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawSqlAllowed": { "type": "boolean" },
+        "privateParsingByOpe": { "type": "boolean" }
+      }
+    },
+    "preForecastCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "checkName",
+        "checkStatus",
+        "score",
+        "minimumScore",
+        "blocksForecast",
+        "message"
+      ],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkName": {
+          "type": "string",
+          "enum": [
+            "mapping_confidence",
+            "source_quality",
+            "leakage",
+            "freshness",
+            "privacy",
+            "outcome_availability"
+          ]
+        },
+        "checkStatus": { "type": "string", "enum": ["pass", "warn", "fail", "block"] },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "blocksForecast": { "type": "boolean" },
+        "message": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "setupOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "operationName",
+        "operationStatus",
+        "cliCommand",
+        "internalApiOperation",
+        "lifecycleOperation",
+        "requiresReceipt",
+        "requiresIdempotencyKey",
+        "requiresLease",
+        "writesRawConfig",
+        "physicalDeleteAllowed"
+      ],
+      "properties": {
+        "operationId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationName": {
+          "type": "string",
+          "enum": [
+            "source_binding.draft",
+            "source_binding.validate",
+            "source_binding.confirm",
+            "source_binding.update",
+            "source_binding.archive",
+            "source_binding.redact"
+          ]
+        },
+        "operationStatus": { "type": "string", "enum": ["available", "blocked_until_safe"] },
+        "cliCommand": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "internalApiOperation": {
+          "type": "string",
+          "enum": ["create_prediction", "update_prediction", "archive_record", "redact_record"]
+        },
+        "lifecycleOperation": {
+          "type": "string",
+          "enum": [
+            "prediction.config_create",
+            "prediction.config_update",
+            "prediction.config_archive",
+            "prediction.config_redact"
+          ]
+        },
+        "requiresReceipt": { "type": "boolean" },
+        "requiresIdempotencyKey": { "type": "boolean" },
+        "requiresLease": { "type": "boolean" },
+        "writesRawConfig": { "type": "boolean" },
+        "physicalDeleteAllowed": { "type": "boolean" }
+      }
+    },
+    "configurationInputBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sanitizedManifestRequired",
+        "sanitizedMappingRequired",
+        "sanitizedProvenanceRequired",
+        "queryBoundaryRequired",
+        "arbitraryPrivateApiParsingByOpe",
+        "arbitraryDatabaseParsingByOpe",
+        "callerApprovalRequired"
+      ],
+      "properties": {
+        "sanitizedManifestRequired": { "type": "boolean" },
+        "sanitizedMappingRequired": { "type": "boolean" },
+        "sanitizedProvenanceRequired": { "type": "boolean" },
+        "queryBoundaryRequired": { "type": "boolean" },
+        "arbitraryPrivateApiParsingByOpe": { "type": "boolean" },
+        "arbitraryDatabaseParsingByOpe": { "type": "boolean" },
+        "callerApprovalRequired": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createsForecasts",
+        "writesSourceData",
+        "readsPrivateData",
+        "storesCredentialValues",
+        "executesApiCalls",
+        "executesDatabaseQueries",
+        "rawSqlAllowed"
+      ],
+      "properties": {
+        "createsForecasts": { "type": "boolean" },
+        "writesSourceData": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "executesApiCalls": { "type": "boolean" },
+        "executesDatabaseQueries": { "type": "boolean" },
+        "rawSqlAllowed": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceBindingRecordsDefined",
+        "approvedSourceKindsCovered",
+        "setupOperationsDefined",
+        "safetyChecksComplete",
+        "allRequiredRolesBound",
+        "forecastGenerationAllowed",
+        "credentialsExcluded",
+        "privateParsingBehindAdapters",
+        "normalChecksNonMutating"
+      ],
+      "properties": {
+        "sourceBindingRecordsDefined": { "type": "boolean" },
+        "approvedSourceKindsCovered": { "type": "boolean" },
+        "setupOperationsDefined": { "type": "boolean" },
+        "safetyChecksComplete": { "type": "boolean" },
+        "allRequiredRolesBound": { "type": "boolean" },
+        "forecastGenerationAllowed": { "type": "boolean" },
+        "credentialsExcluded": { "type": "boolean" },
+        "privateParsingBehindAdapters": { "type": "boolean" },
+        "normalChecksNonMutating": { "type": "boolean" }
+      }
+    }
+  }
+}

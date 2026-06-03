@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -16,7 +17,7 @@ from agent_adapter_dispatcher import (
     output_envelope,
 )
 from generate_agent_adapter_protocol_map import build_protocol_map
-from generate_private_source_kind_selection_examples import SOURCE_KIND_ORDER, build_examples
+from generate_private_source_kind_selection_examples import SOURCE_KIND_ORDER, build_examples, load_generated_examples
 from ope_schema import SPEC, validate_record
 from plan_auto_evidence import DEFAULT_REQUEST
 from read_ope_record import DEFAULT_MAX_BYTES
@@ -271,12 +272,23 @@ def check_matrix(matrix: dict[str, Any]) -> None:
     check_generated(MATRIX_PATH, matrix, label="private source-kind query matrix", regen="python3 scripts/generate_private_source_kind_query_matrix.py --write")
 
 
+def load_generated_matrix() -> dict[str, Any] | None:
+    if not MATRIX_PATH.exists():
+        return None
+    matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    examples_record = load_generated_examples() or build_examples()
+    examples_by_source = {item["sourceKind"]: item for item in examples_record["selectionExamples"]}
+    validate_matrix(matrix, examples_by_source)
+    return matrix
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private source-kind query matrix")
     parser.add_argument("--write", action="store_true", help="write generated private source-kind query matrix")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
-    matrix = build_matrix()
+    matrix = build_matrix() if args.write or args.check or args.rebuild else (load_generated_matrix() or build_matrix())
     if args.write:
         write_matrix(matrix)
     elif args.check:

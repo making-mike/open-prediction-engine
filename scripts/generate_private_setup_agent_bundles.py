@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -358,23 +359,58 @@ def check_bundles(bundles: list[dict[str, Any]]) -> None:
     print(f"checked {len(bundles)} private setup agent bundles")
 
 
+def load_generated_bundle(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    bundle = json.loads(path.read_text(encoding="utf-8"))
+    validate_bundle(bundle)
+    return bundle
+
+
+def load_generated_bundles() -> list[dict[str, Any]] | None:
+    paths = sorted(GENERATED.glob("ope-private-setup-agent-bundle-*.generated.json"))
+    if not paths:
+        return None
+    bundles = [load_generated_bundle(path) for path in paths]
+    if any(bundle is None for bundle in bundles):
+        return None
+    return [bundle for bundle in bundles if bundle is not None]
+
+
+def load_bundle_by_request_id(request_id: str) -> dict[str, Any] | None:
+    for bundle in load_generated_bundles() or []:
+        if bundle["requestSummary"]["privateSetupRequestId"] == request_id:
+            return bundle
+    return None
+
+
+def load_bundle_by_case(case: str) -> dict[str, Any] | None:
+    return load_generated_bundle(bundle_path(case.replace("_", "-")))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request-id", help="print one bundle by private setup request id")
     parser.add_argument("--case", choices=BAD_REQUEST_CASES, help="print one bad-request example bundle")
     parser.add_argument("--check", action="store_true", help="check generated private setup bundle drift")
     parser.add_argument("--write", action="store_true", help="write generated private setup bundles")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading checked fixtures")
     args = parser.parse_args()
     try:
         if args.request_id and args.case:
             raise PrivateSetupAgentBundleError("provide either --request-id or --case, not both")
         if args.request_id:
-            sys.stdout.write(render_json(bundle_by_request_id(args.request_id)))
+            bundle = None if args.rebuild else load_bundle_by_request_id(args.request_id)
+            sys.stdout.write(render_json(bundle or bundle_by_request_id(args.request_id)))
             return
         if args.case:
-            sys.stdout.write(render_json(bundle_by_case(args.case)))
+            bundle = None if args.rebuild else load_bundle_by_case(args.case)
+            sys.stdout.write(render_json(bundle or bundle_by_case(args.case)))
             return
-        bundles = build_bundles()
+        if args.write or args.check or args.rebuild:
+            bundles = build_bundles()
+        else:
+            bundles = load_generated_bundles() or build_bundles()
     except PrivateSetupAgentBundleError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

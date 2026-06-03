@@ -76,6 +76,7 @@
         "predictionCampaignManifestId",
         "predictionCampaignRunnerId",
         "predictionCampaignDoctorId",
+        "predictionCampaignPreCalibrationId",
         "predictionCampaignEvidenceLedgerId",
         "predictionCampaignCalibrationStatusId",
         "predictionCampaignMethodUpdatePlanId",
@@ -87,6 +88,7 @@
         "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignDoctorId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignPreCalibrationId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignCalibrationStatusId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignMethodUpdatePlanId": { "$ref": "common.schema.json#/$defs/id" },
@@ -111,6 +113,8 @@
         "bestAvailableMethodName",
         "nonBaselineMethodGate",
         "fullMaterializationCommand",
+        "optionalPreCalibrationCommand",
+        "launchWithPreCalibrationCommand",
         "miniSmokeCommand",
         "normalChecksUseLiveNetwork",
         "normalChecksWriteLocalState"
@@ -128,6 +132,8 @@
         "bestAvailableMethodName": { "$ref": "#/$defs/boundedString" },
         "nonBaselineMethodGate": { "$ref": "#/$defs/boundedString" },
         "fullMaterializationCommand": { "$ref": "#/$defs/boundedString" },
+        "optionalPreCalibrationCommand": { "$ref": "#/$defs/boundedString" },
+        "launchWithPreCalibrationCommand": { "$ref": "#/$defs/boundedString" },
         "miniSmokeCommand": { "$ref": "#/$defs/boundedString" },
         "normalChecksUseLiveNetwork": { "type": "boolean" },
         "normalChecksWriteLocalState": { "type": "boolean" }
@@ -330,6 +336,8 @@
         "successCriteriaCount",
         "abortCriteriaCount",
         "bestAvailableMethodId",
+        "optionalPreCalibrationAvailable",
+        "optionalPreCalibrationStatus",
         "qualityClaimAllowed",
         "calibrationClaimAllowed",
         "recommendedNextCommand"
@@ -341,6 +349,8 @@
         "successCriteriaCount": { "type": "integer", "minimum": 0 },
         "abortCriteriaCount": { "type": "integer", "minimum": 0 },
         "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "optionalPreCalibrationAvailable": { "type": "boolean" },
+        "optionalPreCalibrationStatus": { "$ref": "#/$defs/boundedString" },
         "qualityClaimAllowed": { "type": "boolean" },
         "calibrationClaimAllowed": { "type": "boolean" },
         "recommendedNextCommand": { "$ref": "#/$defs/boundedString" }
@@ -356,6 +366,7 @@
         "startsLongRunningRunner",
         "executesResolvers",
         "appendsLedgerRows",
+        "writesPreCalibrationState",
         "changesForecastMethod",
         "hostedRuntimeAllowed",
         "qualityClaimAllowed"
@@ -367,6 +378,7 @@
         "startsLongRunningRunner": { "type": "boolean" },
         "executesResolvers": { "type": "boolean" },
         "appendsLedgerRows": { "type": "boolean" },
+        "writesPreCalibrationState": { "type": "boolean" },
         "changesForecastMethod": { "type": "boolean" },
         "hostedRuntimeAllowed": { "type": "boolean" },
         "qualityClaimAllowed": { "type": "boolean" }

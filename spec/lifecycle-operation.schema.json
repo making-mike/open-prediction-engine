@@ -19,6 +19,9 @@
     "readModels",
     "mutationSemantics",
     "migrationPlan",
+    "jsonCompatibilityAdapter",
+    "writeLocalOperationCoverage",
+    "fileDatabaseCompatibilityChecks",
     "agentPreflightSurface",
     "runtimeScenarios",
     "executionBoundary",
@@ -70,11 +73,24 @@
     },
     "mutationSemantics": { "$ref": "#/$defs/mutationSemantics" },
     "migrationPlan": { "$ref": "#/$defs/migrationPlan" },
+    "jsonCompatibilityAdapter": { "$ref": "#/$defs/jsonCompatibilityAdapter" },
+    "writeLocalOperationCoverage": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/writeLocalOperationCoverage" }
+    },
+    "fileDatabaseCompatibilityChecks": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/fileDatabaseCompatibilityCheck" }
+    },
     "agentPreflightSurface": { "$ref": "#/$defs/agentPreflightSurface" },
     "runtimeScenarios": {
       "type": "array",
-      "minItems": 7,
-      "maxItems": 7,
+      "minItems": 15,
+      "maxItems": 15,
       "items": { "$ref": "#/$defs/runtimeScenario" }
     },
     "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
@@ -214,19 +230,21 @@
             "resolution.record",
             "score.create",
             "evidence.append",
+            "pre_calibration.bind",
             "method.apply",
             "method.rollback",
+            "state.import_json",
             "record.archive",
             "record.redact"
           ]
         },
         "operationClass": {
           "type": "string",
-          "enum": ["create", "append_update", "terminal_state", "method_state", "delete_replacement"]
+          "enum": ["create", "append_update", "terminal_state", "method_state", "migration", "delete_replacement"]
         },
         "lifecyclePhase": {
           "type": "string",
-          "enum": ["planning", "forecasting", "recalculation", "governance", "resolution", "scoring", "evidence", "method_update", "retention"]
+          "enum": ["planning", "forecasting", "recalculation", "governance", "resolution", "scoring", "evidence", "method_update", "migration", "retention"]
         },
         "requiresPreflight": { "type": "boolean" },
         "requiresIdempotencyKey": { "type": "boolean" },
@@ -271,7 +289,10 @@
             "resolution_record",
             "scoring_report",
             "calibration_summary",
+            "pre_calibration_binding",
             "method_update_audit",
+            "evidence_ledger_row",
+            "json_state_migration_receipt",
             "operation_receipt",
             "archive_tombstone",
             "redaction_receipt"
@@ -349,10 +370,10 @@
         "leaseRequiredFor": {
           "type": "array",
           "minItems": 5,
-          "maxItems": 8,
+          "maxItems": 9,
           "items": {
             "type": "string",
-            "enum": ["campaign.create_run", "forecast.create", "resolution.record", "score.create", "evidence.append", "method.apply", "method.rollback"]
+            "enum": ["campaign.create_run", "forecast.create", "resolution.record", "score.create", "evidence.append", "pre_calibration.bind", "method.apply", "method.rollback", "state.import_json"]
           }
         },
         "leaseOwnerField": { "type": "string", "enum": ["agentOrWorkerId"] },
@@ -469,6 +490,108 @@
         "normalChecksRequireDatabase": { "type": "boolean" }
       }
     },
+    "jsonCompatibilityAdapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterName",
+        "adapterStatus",
+        "sourceRoot",
+        "readCompatibilityAllowed",
+        "writeCompatibilityAllowed",
+        "normalChecksWriteLiveState",
+        "automaticMigrationAllowed",
+        "explicitMigrationOperationRequired",
+        "migrationReceiptRequired",
+        "contentHashCheckRequired",
+        "sourceRecordHashRequired",
+        "preservesForecastProbabilities",
+        "preservesSourceProvenance",
+        "rewritesHistoricalForecasts",
+        "rawCrudExposed",
+        "stateClasses",
+        "knownLimitations"
+      ],
+      "properties": {
+        "adapterName": {
+          "type": "string",
+          "enum": ["ignored_json_live_state"]
+        },
+        "adapterStatus": {
+          "type": "string",
+          "enum": ["current_compatibility_adapter"]
+        },
+        "sourceRoot": {
+          "type": "string",
+          "enum": [".ope/live/prediction-campaigns"]
+        },
+        "readCompatibilityAllowed": { "type": "boolean" },
+        "writeCompatibilityAllowed": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "automaticMigrationAllowed": { "type": "boolean" },
+        "explicitMigrationOperationRequired": { "type": "boolean" },
+        "migrationReceiptRequired": { "type": "boolean" },
+        "contentHashCheckRequired": { "type": "boolean" },
+        "sourceRecordHashRequired": { "type": "boolean" },
+        "preservesForecastProbabilities": { "type": "boolean" },
+        "preservesSourceProvenance": { "type": "boolean" },
+        "rewritesHistoricalForecasts": { "type": "boolean" },
+        "rawCrudExposed": { "type": "boolean" },
+        "stateClasses": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/jsonCompatibilityStateClass" }
+        },
+        "knownLimitations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 180
+          }
+        }
+      }
+    },
+    "jsonCompatibilityStateClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stateClass",
+        "sourcePathPattern",
+        "migrationTargetTable",
+        "contentHashPreserved",
+        "migrationReceiptRequired",
+        "rawCrudExposed"
+      ],
+      "properties": {
+        "stateClass": {
+          "type": "string",
+          "enum": [
+            "forecast_lifecycle_records",
+            "campaign_state",
+            "run_state",
+            "evidence_ledger",
+            "method_binding",
+            "operation_audit"
+          ]
+        },
+        "sourcePathPattern": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 140
+        },
+        "migrationTargetTable": {
+          "type": "string",
+          "enum": ["ope_records", "forecast_history_events", "operation_audit_records", "evidence_ledger_rows", "read_model_rows"]
+        },
+        "contentHashPreserved": { "type": "boolean" },
+        "migrationReceiptRequired": { "type": "boolean" },
+        "rawCrudExposed": { "type": "boolean" }
+      }
+    },
     "agentPreflightSurface": {
       "type": "object",
       "additionalProperties": false,
@@ -491,6 +614,106 @@
         "operationReceiptReturned": { "type": "boolean" },
         "safeRetryAdviceReturned": { "type": "boolean" },
         "claimBoundaryReturned": { "type": "boolean" }
+      }
+    },
+    "writeLocalOperationCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coverageId",
+        "commandPath",
+        "lifecycleOperations",
+        "scenarioNames",
+        "requiredOperationReceiptCount",
+        "requiredReadModels",
+        "allReceiptsChecked",
+        "allReadModelsChecked",
+        "idempotencyRequired",
+        "leaseRequired",
+        "rawCrudExposed",
+        "normalChecksWriteLiveState",
+        "compatibilityJsonWriteAllowed",
+        "notes"
+      ],
+      "properties": {
+        "coverageId": { "$ref": "common.schema.json#/$defs/id" },
+        "commandPath": {
+          "type": "string",
+          "enum": [
+            "prediction-campaign start --write-local",
+            "prediction-campaign start --pre-calibrate --write-local",
+            "prediction-campaign forecast-write --write-local",
+            "prediction-campaign resolve --execute-resolvers --write-local",
+            "prediction-campaign append --write-local",
+            "prediction-campaign pre-calibration --write-local",
+            "prediction-campaign apply-method-update --write-local",
+            "prediction-campaign rollback-method-update --write-local"
+          ]
+        },
+        "lifecycleOperations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "enum": [
+              "forecast.create",
+              "resolution.record",
+              "score.create",
+              "evidence.append",
+              "pre_calibration.bind",
+              "method.apply",
+              "method.rollback"
+            ]
+          }
+        },
+        "scenarioNames": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "enum": [
+              "pre-calibration-bind",
+              "campaign-forecast-create",
+              "campaign-resolution-record",
+              "campaign-score-create",
+              "campaign-evidence-append",
+              "campaign-method-apply",
+              "campaign-method-rollback"
+            ]
+          }
+        },
+        "requiredOperationReceiptCount": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "requiredReadModels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "enum": [
+              "campaign_status",
+              "next_due_forecast",
+              "due_resolution_jobs",
+              "unresolved_forecasts",
+              "append_readiness",
+              "calibration_status",
+              "track_record_progress"
+            ]
+          }
+        },
+        "allReceiptsChecked": { "type": "boolean" },
+        "allReadModelsChecked": { "type": "boolean" },
+        "idempotencyRequired": { "type": "boolean" },
+        "leaseRequired": { "type": "boolean" },
+        "rawCrudExposed": { "type": "boolean" },
+        "normalChecksWriteLiveState": { "type": "boolean" },
+        "compatibilityJsonWriteAllowed": { "type": "boolean" },
+        "notes": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 220
+        }
       }
     },
     "runtimeScenario": {
@@ -516,6 +739,8 @@
         "historyRewriteCount",
         "rawCrudExposed",
         "forecastArtifactMutable",
+        "payloadHashBindings",
+        "migrationImportSummary",
         "readModelEffects",
         "recoveryPath",
         "preflight",
@@ -525,7 +750,23 @@
         "scenarioId": { "$ref": "common.schema.json#/$defs/id" },
         "scenarioName": {
           "type": "string",
-          "enum": ["create", "retry-idempotent", "lease-conflict", "archive", "redaction", "method-rollback", "recovery"]
+          "enum": [
+            "create",
+            "retry-idempotent",
+            "lease-conflict",
+            "archive",
+            "redaction",
+            "method-rollback",
+            "pre-calibration-bind",
+            "campaign-forecast-create",
+            "campaign-resolution-record",
+            "campaign-score-create",
+            "campaign-evidence-append",
+            "campaign-method-apply",
+            "campaign-method-rollback",
+            "json-state-import",
+            "recovery"
+          ]
         },
         "operationName": {
           "type": "string",
@@ -538,8 +779,10 @@
             "resolution.record",
             "score.create",
             "evidence.append",
+            "pre_calibration.bind",
             "method.apply",
             "method.rollback",
+            "state.import_json",
             "record.archive",
             "record.redact"
           ]
@@ -584,6 +827,18 @@
         "historyRewriteCount": { "type": "integer", "minimum": 0, "maximum": 0 },
         "rawCrudExposed": { "type": "boolean" },
         "forecastArtifactMutable": { "type": "boolean" },
+        "payloadHashBindings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/payloadHashBinding" }
+        },
+        "migrationImportSummary": {
+          "anyOf": [
+            { "$ref": "#/$defs/migrationImportSummary" },
+            { "type": "null" }
+          ]
+        },
         "readModelEffects": {
           "type": "array",
           "minItems": 1,
@@ -614,6 +869,101 @@
           "minLength": 8,
           "maxLength": 180
         }
+      }
+    },
+    "fileDatabaseCompatibilityCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatibilityCheckId",
+        "recordClass",
+        "commandPath",
+        "scenarioName",
+        "lifecycleOperation",
+        "fileModeRepeatStatus",
+        "fileModeDuplicatePrevented",
+        "databaseFirstExecutionStatus",
+        "databaseReplayExecutionStatus",
+        "databaseReplayIdempotencyStatus",
+        "databaseReplayOperationReceiptsWritten",
+        "databaseDuplicateRecordsCreated",
+        "contentHashComparisonRequired",
+        "historyRewriteCount",
+        "physicalDeletes",
+        "rawCrudExposed",
+        "compatible"
+      ],
+      "properties": {
+        "compatibilityCheckId": { "$ref": "common.schema.json#/$defs/id" },
+        "recordClass": {
+          "type": "string",
+          "enum": [
+            "forecast_lifecycle_records",
+            "resolution_records",
+            "scoring_reports",
+            "evidence_ledger_rows",
+            "pre_calibration_method_binding",
+            "method_apply_binding",
+            "method_rollback_binding"
+          ]
+        },
+        "commandPath": {
+          "type": "string",
+          "enum": [
+            "prediction-campaign forecast-write --write-local",
+            "prediction-campaign resolve --execute-resolvers --write-local",
+            "prediction-campaign append --write-local",
+            "prediction-campaign pre-calibration --write-local",
+            "prediction-campaign apply-method-update --write-local",
+            "prediction-campaign rollback-method-update --write-local"
+          ]
+        },
+        "scenarioName": {
+          "type": "string",
+          "enum": [
+            "pre-calibration-bind",
+            "campaign-forecast-create",
+            "campaign-resolution-record",
+            "campaign-score-create",
+            "campaign-evidence-append",
+            "campaign-method-apply",
+            "campaign-method-rollback"
+          ]
+        },
+        "lifecycleOperation": {
+          "type": "string",
+          "enum": [
+            "forecast.create",
+            "resolution.record",
+            "score.create",
+            "evidence.append",
+            "pre_calibration.bind",
+            "method.apply",
+            "method.rollback"
+          ]
+        },
+        "fileModeRepeatStatus": {
+          "type": "string",
+          "enum": [
+            "local_write_already_present",
+            "local_resolution_scored_already_present",
+            "local_append_already_present",
+            "local_pre_calibration_already_present",
+            "local_apply_already_present",
+            "local_rollback_already_present"
+          ]
+        },
+        "fileModeDuplicatePrevented": { "type": "boolean" },
+        "databaseFirstExecutionStatus": { "type": "string", "enum": ["committed"] },
+        "databaseReplayExecutionStatus": { "type": "string", "enum": ["idempotent_replay"] },
+        "databaseReplayIdempotencyStatus": { "type": "string", "enum": ["return_existing_receipt"] },
+        "databaseReplayOperationReceiptsWritten": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "databaseDuplicateRecordsCreated": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "contentHashComparisonRequired": { "type": "boolean" },
+        "historyRewriteCount": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "physicalDeletes": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "rawCrudExposed": { "type": "boolean" },
+        "compatible": { "type": "boolean" }
       }
     },
     "runtimePreflight": {
@@ -649,17 +999,24 @@
       "properties": {
         "tableName": {
           "type": "string",
-          "enum": ["operation_receipts", "ope_records", "forecast_history_events", "operation_audit_records", "evidence_ledger_rows"]
+          "enum": ["operation_receipts", "ope_records", "forecast_history_events", "operation_audit_records", "evidence_ledger_rows", "read_model_rows"]
         },
         "recordType": {
           "type": "string",
           "enum": [
             "forecast_artifact",
+            "forecast_question",
             "forecast_history",
+            "evidence_packet",
             "resolution_record",
             "scoring_report",
-            "evidence_packet",
+            "evidence_ledger_row",
+            "pre_calibration_binding",
             "method_update_audit",
+            "method_binding_state",
+            "json_state_migration_receipt",
+            "run_state_projection",
+            "campaign_state_projection",
             "operation_receipt",
             "archive_tombstone",
             "redaction_receipt"
@@ -668,8 +1025,76 @@
         "recordId": { "$ref": "common.schema.json#/$defs/id" },
         "writeMode": {
           "type": "string",
-          "enum": ["append_only", "insert_once", "prospective_binding", "tombstone_append", "redaction_append"]
+          "enum": ["append_only", "insert_once", "prospective_binding", "projection_upsert", "tombstone_append", "redaction_append"]
         }
+      }
+    },
+    "migrationImportSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRoot",
+        "stateClassCount",
+        "sourceFileCount",
+        "contentHashesPreserved",
+        "forecastProbabilitiesPreserved",
+        "sourceProvenancePreserved",
+        "historicalForecastRewriteCount",
+        "methodBindingsPreserved",
+        "migrationReceiptRequired",
+        "automaticMigrationAllowed"
+      ],
+      "properties": {
+        "sourceRoot": { "type": "string", "enum": [".ope/live/prediction-campaigns"] },
+        "stateClassCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "sourceFileCount": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "contentHashesPreserved": { "type": "boolean" },
+        "forecastProbabilitiesPreserved": { "type": "boolean" },
+        "sourceProvenancePreserved": { "type": "boolean" },
+        "historicalForecastRewriteCount": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "methodBindingsPreserved": { "type": "boolean" },
+        "migrationReceiptRequired": { "type": "boolean" },
+        "automaticMigrationAllowed": { "type": "boolean" }
+      }
+    },
+    "payloadHashBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "recordId", "sourceContentHash", "sqliteContentHash", "matchesSourceHash"],
+      "properties": {
+        "recordType": {
+          "type": "string",
+          "enum": [
+            "forecast_question",
+            "evidence_packet",
+            "forecast_artifact",
+            "forecast_history",
+            "resolution_record",
+            "scoring_report",
+            "evidence_ledger_row",
+            "pre_calibration_binding",
+            "method_update_audit",
+            "method_binding_state",
+            "json_state_migration_receipt",
+            "run_state_projection",
+            "campaign_state_projection",
+            "operation_receipt",
+            "archive_tombstone",
+            "redaction_receipt"
+          ]
+        },
+        "recordId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceContentHash": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 96
+        },
+        "sqliteContentHash": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 96
+        },
+        "matchesSourceHash": { "type": "boolean" }
       }
     },
     "runtimeBlockingGuard": {
@@ -761,6 +1186,11 @@
         "immutableRecordClassCount",
         "sqliteTableCount",
         "runtimeScenarioCount",
+        "writeLocalOperationCoverageCount",
+        "allWriteLocalPathsReceiptBacked",
+        "allWriteLocalPathsReadModelBacked",
+        "fileDatabaseCompatibilityCheckCount",
+        "fileDatabaseCompatibilityChecked",
         "deleteReplacedByLifecycleOperations",
         "agentImplementationReady",
         "sqliteRuntimeChecked",
@@ -776,6 +1206,11 @@
         "immutableRecordClassCount": { "type": "integer", "minimum": 8 },
         "sqliteTableCount": { "type": "integer", "minimum": 8 },
         "runtimeScenarioCount": { "type": "integer", "minimum": 7 },
+        "writeLocalOperationCoverageCount": { "type": "integer", "minimum": 8 },
+        "allWriteLocalPathsReceiptBacked": { "type": "boolean" },
+        "allWriteLocalPathsReadModelBacked": { "type": "boolean" },
+        "fileDatabaseCompatibilityCheckCount": { "type": "integer", "minimum": 7 },
+        "fileDatabaseCompatibilityChecked": { "type": "boolean" },
         "deleteReplacedByLifecycleOperations": { "type": "boolean" },
         "agentImplementationReady": { "type": "boolean" },
         "sqliteRuntimeChecked": { "type": "boolean" },

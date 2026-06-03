@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_setup_workflow import build_workflow
+from generate_private_setup_workflow import build_workflow, load_generated_workflow
 from ope_schema import SPEC, validate_record
 from ope_fixtures import render_json
 
@@ -429,13 +430,26 @@ def check_capabilities(capability: dict[str, Any]) -> None:
     print("checked private source adapter capabilities")
 
 
+def load_generated_capabilities() -> dict[str, Any] | None:
+    if not CAPABILITY_PATH.exists():
+        return None
+    capability = json.loads(CAPABILITY_PATH.read_text(encoding="utf-8"))
+    workflow = load_generated_workflow() or build_workflow()
+    validate_capabilities(capability, workflow)
+    return capability
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private source adapter capability drift")
     parser.add_argument("--write", action="store_true", help="write generated private source adapter capability records")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        capability = build_capabilities()
+        if args.write or args.check or args.rebuild:
+            capability = build_capabilities()
+        else:
+            capability = load_generated_capabilities() or build_capabilities()
     except PrivateSourceAdapterCapabilityError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

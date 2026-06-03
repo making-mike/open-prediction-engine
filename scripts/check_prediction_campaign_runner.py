@@ -18,6 +18,7 @@ def main() -> None:
     creation = runner["campaignCreationRequest"]
     forecast_schedule = runner["forecastSchedule"]
     method_binding = runner["methodSelectionBinding"]
+    pre_calibration = runner["preCalibration"]
     decisions = runner["runnerDecisions"]
     missed_policy = runner["missedRunPolicy"]
     progress = runner["progress"]
@@ -43,6 +44,8 @@ def main() -> None:
         "--post-calibration-action",
         "--live-weather",
         "--execute-resolvers",
+        "--pre-calibrate",
+        "--history-source",
         "--full-materialization",
         "--watch",
         "--max-ticks",
@@ -66,6 +69,11 @@ def main() -> None:
     require(creation["serviceWindow"] == "morning_peak", "campaign creation service window drifted")
     require(creation["interval"] == "P1D", "campaign creation interval drifted")
     require(creation["targetCount"] == "100", "campaign creation target count drifted")
+    require(creation["preCalibrationRequested"] is False, "default pre-calibration request drifted")
+    require(
+        creation["historySourcePath"] == "spec/fixtures/local-source-files/transit-delay-history.csv",
+        "default history source path drifted",
+    )
     require(creation["acceptedForDryRun"] is True, "campaign creation input should be accepted for dry-run")
     require(creation["createsCampaignManifest"] is False, "dry-run campaign input must not create a manifest")
     require(creation["writesCampaignState"] is False, "dry-run campaign input must not write state")
@@ -105,6 +113,14 @@ def main() -> None:
         method_binding["priorForecastHistoryRewriteAllowed"] is False,
         "method binding must not rewrite history",
     )
+
+    require(pre_calibration["requestStatus"] == "not_requested", "default pre-calibration should be off")
+    require(pre_calibration["preCalibrationStatus"] == "not_requested", "default pre-calibration status drifted")
+    require(pre_calibration["calibratedProbability"] == 0.25, "default pre-calibration probability drifted")
+    require(pre_calibration["activeMethodId"] == "transitmethod-100", "pre-calibration method binding drifted")
+    require(pre_calibration["localWriteRequiredBeforeUse"] is False, "default pre-calibration should not require write")
+    require(pre_calibration["writesDuringDryRun"] is False, "pre-calibration dry-run must not write")
+    require(pre_calibration["qualityClaimAllowed"] is False, "pre-calibration must not allow quality claims")
 
     require(missed_policy["policyName"] == "skip_if_forecast_close_passed", "missed-run policy name drifted")
     require(missed_policy["defaultAction"] == "mark_missed_without_forecast", "missed-run default action drifted")
@@ -147,6 +163,7 @@ def main() -> None:
     require(summary["resolverExecutionImplemented"] is False, "resolver execution must remain unimplemented")
     require(summary["writesLiveState"] is False, "runner summary must not write state")
     require(summary["normalChecksUseLiveNetwork"] is False, "normal checks must stay offline")
+    require(summary["preCalibrationImplemented"] is True, "runner should expose pre-calibration")
     require(summary["qualityClaimAllowed"] is False, "quality claims must remain blocked")
 
     require(boundary["readOnlyDryRun"] is True, "boundary should remain read-only dry run")
@@ -167,6 +184,18 @@ def main() -> None:
         mini_statuses == {"ready_to_create_forecast", "wait_until_create_time", "skip_missed_close"},
         "mini runner decision coverage drifted",
     )
+
+    pre_args = default_args()
+    pre_args.pre_calibrate = True
+    pre_runner = build_prediction_campaign_runner(pre_args)
+    pre = pre_runner["preCalibration"]
+    require(pre_runner["campaignCreationRequest"]["preCalibrationRequested"] is True, "pre-calibration flag should be bound")
+    require(pre["requestStatus"] == "requested", "pre-calibration request status drifted")
+    require(pre["preCalibrationStatus"] == "ready", "pre-calibration should be ready for default history")
+    require(pre["resolvedOutcomeRowCount"] == 30, "pre-calibration row count drifted")
+    require(pre["calibratedProbability"] == 0.25, "pre-calibration probability drifted")
+    require(pre["forecastProbabilitySource"] == "historical_pre_calibration", "pre-calibration source drifted")
+    require(pre["localWriteRequiredBeforeUse"] is True, "requested pre-calibration should require local write before use")
 
     full_args = default_args()
     full_args.full_materialization = True

@@ -166,7 +166,10 @@ Current checked transit surfaces are grouped here so new work can be added as a 
 - Campaign manifest and runner: `prediction-campaign plan`, `status`, and `start` expose unique dry-run campaign/cycle/run/question/forecast/resolution/scoring IDs, duplicate keys, bounded default previews, explicit 100-run Helsinki pilot materialization with `--full-materialization`, normalized flag/setup-JSON campaign input, forecast schedule rows, bounded foreground ticks, runner-clock `--now`, missed-run policy, JSONL output expectations, and guarded `--write-local` creation for the next due run.
 - Campaign forecast lifecycle: `prediction-campaign forecast-create`, `forecast-artifact`, and `forecast-write` bind the ready runner decision to planned IDs, materialize unresolved `forecast-1301` as a baseline-only checked fixture, and copy lifecycle records plus minimal campaign/run state idempotently only when `--write-local` is explicit.
 - Campaign recovery and evidence: `prediction-campaign resolve`, `doctor`, `resume`, `append-ready`, `append`, `calibration-status`, `method-update-gate`, `method-update-plan`, `apply-method-update`, `rollback-method-update`, `explain`, `pilot-runbook`, and `pilot-readiness` expose due-resolution attempts, guarded local resolution/scoring writes from outcome-only transit rows, missing-outcome exclusions, health queues, interrupted-state recovery, append-readiness, provenance-rich local ledger rows, local-ledger calibration readbacks with reliability buckets and caveats, method-update readiness, approval/rollback plan shape, explicit local method-binding apply/rollback, pilot-task guidance, a 3-run smoke path, operator status, launch readiness, success/abort criteria, sanitized error envelopes, and claim boundaries without changing methods or calibration claims during normal checks.
-- Lifecycle operation storage: `lifecycle-operation-store` checks the local SQLite operation store for multi-agent execution, including Postgres-compatible schema notes, operation receipts, idempotency keys, leases, read models, immutable forecast records, archive/redaction replacements for generic delete, and scenario readbacks for create, retry, lease-conflict, archive, redaction, method rollback, and recovery.
+- Lifecycle operation storage: `lifecycle-operation-store` checks the local SQLite operation store for multi-agent execution, including Postgres-compatible schema notes, operation receipts, idempotency keys, leases, read models, immutable forecast records, the explicit ignored `.ope/live` JSON compatibility adapter, archive/redaction replacements for generic delete, write-local command coverage, file/database duplicate-prevention checks, and scenario readbacks for create, retry, lease-conflict, campaign operation bridges, pre-calibration binding, JSON state import, and recovery.
+- Embedded internal API: `internal-api` defines the stable host/agent operation surface for create, update, start, pause, resume, tick, resolve, append, read, archive, and redact calls without exposing raw files, raw SQL, hidden schedulers, or transport-specific behavior. Its in-process runtime, CLI `--call`, and `agent-call --operation internal_api` wrappers share one internal function; HTTP, queue, and hosted service remain future transports over that same function.
+- Workspace registry: `prediction-workspace-registry` exposes stable prediction, campaign, domain, source-binding, and schedule IDs for multiple predictions, with owner/caller metadata, lifecycle operation summaries, workspace read models for active, due, blocked, failed, source-health, calibration, and track-record status, audit-backed create/update/archive/redact configuration operation definitions, per-prediction idempotency namespaces and leases, workspace resource limits and execution budgets, and cross-prediction isolation checks.
+- Domain/source setup: `domain-configs` defines reusable domain shape records, while `source-bindings` checks accepted, partial, rejected, and blocked source setup cases across local files, source-adapter outputs, APIs, and database adapter manifests. Source binding readbacks include mapping-confidence, source-quality, leakage, freshness, privacy, and outcome-availability checks, setup operations for draft/validate/confirm/update/archive/redact, internal API operation mappings, credential-reference-only policy, and non-mutating private API/database adapter boundaries.
 
 Normal checks stay offline and non-mutating. Effectful local writes require explicit flags, live connector calls remain opt-in, campaign resolver execution is separated from forecast writing and ledger append, and quality/calibration claims remain blocked until enough comparable outcomes exist.
 
@@ -222,6 +225,18 @@ python3 scripts/ope.py prediction-campaign pilot-readiness --view commands
 python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py lifecycle-operation-store
 python3 scripts/ope.py lifecycle-operation-store --scenario method-rollback
+python3 scripts/ope.py lifecycle-operation-store --scenario pre-calibration-bind
+python3 scripts/ope.py lifecycle-operation-store --scenario json-state-import
+python3 scripts/ope.py internal-api
+python3 scripts/ope.py internal-api --operation start_prediction
+python3 scripts/ope.py internal-api --operation start_prediction --call
+python3 scripts/ope.py agent-call --operation internal_api --internal-operation start_prediction
+python3 scripts/ope.py prediction-workspace-registry
+python3 scripts/ope.py prediction-workspace-registry --prediction-id prediction-001
+python3 scripts/ope.py domain-configs
+python3 scripts/ope.py source-bindings
+python3 scripts/ope.py source-bindings --case accepted
+python3 scripts/ope.py source-bindings --case blocked
 python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001
 python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001 --from-local-ledger
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001

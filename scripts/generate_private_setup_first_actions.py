@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
 from generate_private_setup_requests import build_request_set, render_json
-from private_setup_action_dispatcher import action_from_request_row
+from private_setup_action_dispatcher import action_from_request_row, validate_action
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,12 +52,26 @@ def check_actions(actions: list[dict[str, Any]]) -> None:
     print(f"checked {len(actions)} private setup first actions")
 
 
+def load_generated_actions() -> list[dict[str, Any]] | None:
+    paths = sorted(GENERATED.glob("ope-private-setup-first-action-*.generated.json"))
+    paths = [path for path in paths if path.name != "ope-private-setup-first-action-runbook.generated.json"]
+    if not paths:
+        return None
+    actions = []
+    for path in paths:
+        action = json.loads(path.read_text(encoding="utf-8"))
+        validate_action(action)
+        actions.append(action)
+    return sorted(actions, key=lambda item: item["privateSetupFirstActionId"])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private setup first-action drift")
     parser.add_argument("--write", action="store_true", help="write generated private setup first actions")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading checked fixtures")
     args = parser.parse_args()
-    actions = build_actions()
+    actions = build_actions() if args.write or args.check or args.rebuild else (load_generated_actions() or build_actions())
     if args.write:
         write_actions(actions)
     elif args.check:

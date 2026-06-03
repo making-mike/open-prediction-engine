@@ -19,6 +19,11 @@ The project should advance in this order:
 9. Add policy-bound auto-evidence gathering for `data: auto`.
 10. Add local repeating prediction setup so agents can start, resume, resolve, score, and measure forecast campaigns from a terminal.
 11. Add stronger forecasting methods only after baseline, benchmark, track-record, and calibration controls exist.
+12. Turn the lifecycle operation store into a database-native local runtime for the existing campaign write paths.
+13. Add an embedded internal OPE API so host software can manage many predictions without exposing raw files or raw SQL.
+14. Add domain and source configuration contracts so agents can set up new prediction domains from approved files, APIs, or databases.
+15. Add background worker coordination only after idempotency, leases, recovery read models, and resource limits are enforced.
+16. Keep hosted service, broader private-source parsing, and stronger methods behind explicit readiness gates.
 
 The roadmap is intentionally contract-first, agent-native, and domain-agnostic. OPE should not start as a generic LLM forecast endpoint or an unbounded web crawler. Weather-logistics is the reference wedge used to prove the standard, not the product's long-term boundary.
 
@@ -145,6 +150,10 @@ Done:
 - Campaign method-update apply and rollback now exist as guarded explicit local commands that require plan-ready evidence and approvals before writing ignored method-binding/audit state.
 - The Helsinki 100-run pilot operations runbook now defines setup review, 3-run smoke, foreground runner operation, daily checks, resolution, append, calibration readback, recovery, success criteria, and abort criteria through `python3 scripts/ope.py prediction-campaign pilot-runbook`.
 - The Helsinki pilot launch-readiness gate now joins the runbook, mini-smoke path, full 100-run materialization, baseline method boundary, manual prerequisites, launch commands, and blocked actions through `python3 scripts/ope.py prediction-campaign pilot-readiness`.
+- The lifecycle operation store now defines and checks a local SQLite runtime boundary for immutable records, operation receipts, idempotency keys, leases, operation audit records, read models, ignored `.ope/live` JSON migration rules, write-local command coverage, and file/database duplicate-prevention compatibility.
+- The embedded internal API now has a checked stable operation surface through `python3 scripts/ope.py internal-api`, plus shared in-process, CLI dry-run, and agent-call wrappers over one `call_internal_api()` function; effectful calls return receipt/readback fields, request/response envelopes stay compact, and HTTP, queue, and hosted service are explicit future transports over the same semantics.
+- The multi-prediction workspace registry now has a checked readback through `python3 scripts/ope.py prediction-workspace-registry`, binding stable prediction, campaign, domain, source-binding, and schedule IDs with owner/caller metadata, lifecycle operation summaries, workspace read models for active, due, blocked, failed, source-health, calibration, and track-record status, audit-backed configuration lifecycle operation definitions for create, update, archive, and redact, per-prediction idempotency namespaces and leases, workspace resource controls, and cross-prediction isolation checks.
+- Domain/source setup now has checked `domain-configs` and `source-bindings` readbacks: reusable weather-transit and seaport domain configs, accepted/partial/rejected/blocked source-binding cases, approved local-file/source-adapter/API/database coverage, mapping-confidence/source-quality/leakage/freshness/privacy/outcome-availability pre-forecast checks, setup operation lifecycle mappings, credential-reference-only policy, and adapter boundaries that keep private API/database parsing outside OPE records.
 
 Not started:
 
@@ -160,21 +169,22 @@ Not started:
 - Production hosted, HTTP, or queue agent adapter runtime.
 - Hosted service runtime and network API.
 - Production forecast use of live connector results.
-- Database-backed lifecycle operation store beyond ignored local JSON state, including durable idempotency, leases, operation audit logs, and read models for multi-agent execution.
+- Effectful workspace queues beyond the checked stable-ID, read-model, configuration-lifecycle, idempotency, lease, resource-control, and isolation registry readback.
+- Domain/source configuration package that lets agents set up new domains from approved local files, source-adapter outputs, APIs, or databases while preserving source policy, leakage, privacy, and mapping-confidence boundaries.
+- Background local worker loop that runs OPE in-process or as a small sidecar without interfering with the host application, with bounded resource use, cancellation, backoff, and health checks.
+- Lightweight runtime hardening for dependency budget, minimal persistent state, secret redaction, path/database allow-listing, encrypted or isolated credential references, response-size limits, and agent-readable code organization.
 - Generated language-specific runtime types remain deferred until pilot/adoption evidence shows they reduce setup friction.
 
 In progress:
 
-- None. Milestone 110 completed the read-only Helsinki pilot launch-readiness gate.
+- Starting post-114 domain/source configuration package work.
 
 Next:
 
-1. Run `python3 scripts/ope.py prediction-campaign pilot-readiness --view commands`, confirm the manual prerequisites, run the 3-run smoke path, then start the supervised 100-run Helsinki pilot only through the explicit `--write-local` launch command.
-2. Keep `transitmethod-100` historical-frequency baseline as the default method until at least 30 comparable resolved outcomes exist for non-baseline selection evidence and 100 comparable resolved outcomes exist for calibration.
-3. During the pilot, use the checked resolve, append, track-record, calibration-status, doctor, and explain readbacks to preserve forecast-before-outcome guarantees and separate implementation evidence from quality claims.
-4. Consider `apply-method-update` only after real campaign evidence, approvals, benchmark evidence, source-policy review, and rollback records make the method-update gate and plan eligible.
-5. Design the database-backed lifecycle operation store before broad hosted runtime work: keep forecast records immutable, expose create/update/delete as domain lifecycle operations, and use SQLite/Postgres-style storage only to provide durability, idempotency, leases, and read models.
-6. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
+1. Add domain configuration records for question templates, horizons, resolution criteria, baseline method, accepted source roles, exclusion rules, sample thresholds, and claim boundaries.
+2. Add domain/source configuration contracts for approved local files, source-adapter outputs, APIs, and databases, with mapping confidence, leakage checks, privacy boundaries, and source-policy binding.
+3. Add a lightweight background worker mode only after database idempotency, leases, bounded resource use, cancellation, and recovery read models are checked.
+4. Keep `transitmethod-100` historical-frequency baseline as the default method until comparable evidence, approvals, benchmark evidence, and method-update plans allow stronger methods.
 
 MVP path:
 
@@ -182,7 +192,8 @@ MVP path:
 - Milestones 81-90 should validate that product with real agent/developer use, add local measurement, grow evidence toward claim thresholds, and improve adoption before expanding into hosted or broad private-source runtimes.
 - Milestones 91-102 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, calibration readbacks, a non-effectful method-update gate, a non-effectful update plan, and release-time static coverage for the campaign readbacks without hosted scheduling.
 - Milestones 103-110 turn the Helsinki campaign from checked readbacks into a local pilot that can materialize 100 planned baseline predictions, collect them, resolve and score them, append evidence, report calibration readiness, and pass a launch-readiness gate before any hosted scheduler or default non-baseline method exists.
-- Milestone 111 should define the storage/runtime architecture for real multi-agent execution: a lifecycle operation log, immutable record store, idempotency table, leases, read models, and tombstone/archive rules, starting with local SQLite and leaving Postgres/hosted service implementation behind explicit readiness gates.
+- Milestone 111 defined the storage/runtime architecture for real multi-agent execution: a lifecycle operation log, immutable record store, idempotency table, leases, read models, and tombstone/archive rules, starting with local SQLite and leaving Postgres/hosted service implementation behind explicit readiness gates.
+- Milestones 112-118 should move from checked database architecture to an embedded, database-native, multi-prediction OPE runtime: first migrate current campaign operations into lifecycle operations, then add a stable internal API, multi-prediction registry, domain/source configuration package, background worker loop, and lightweight security hardening.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -3550,14 +3561,217 @@ Expected outputs:
 - `spec/lifecycle-operation.schema.json`
 - `spec/storage-adapter.md`
 - SQLite schema notes and Postgres compatibility notes.
-- Checked fixtures for create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, and recovery scenarios.
+- Checked fixtures for create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, pre-calibration-bind, campaign operation bridge, JSON state import, and recovery scenarios.
 - CLI/readback surface for inspecting lifecycle operations without requiring a hosted runtime.
+
+## Milestone 112: Database-Native Campaign Operation Bridge
+
+Status: Complete.
+
+Goal: migrate the current effectful local campaign paths from file-first writes into lifecycle operations backed by the local SQLite operation store, while preserving `.ope/live` compatibility during migration.
+
+Tasks:
+
+- [x] Add a database-native pre-calibration binding operation, such as `method.pre_calibrate` or `pre_calibration.bind`, with preflight checks, idempotency, a campaign method-binding lease, source-history hash binding, and prospective-only write semantics.
+- [x] Add database-backed operation execution for `forecast.create`, `resolution.record`, `score.create`, `evidence.append`, `method.apply`, and `method.rollback` using the same record payloads and content hashes as the current ignored JSON runtime.
+- [x] Keep `.ope/live` JSON as a compatibility adapter until migration is explicit, content-hash checked, and receipt-backed.
+- [x] Add migration receipts that import existing ignored JSON state into SQLite without rewriting forecast probabilities, histories, source provenance, or method bindings.
+- [x] Add operation receipts and read-model updates for every write path agents currently trigger with `--write-local`.
+- [x] Add compatibility checks that prove repeated file-mode and database-mode calls do not duplicate forecasts, resolutions, scores, ledger rows, or method bindings.
+
+Exit criteria:
+
+- Current campaign write commands can run through the local SQLite operation store behind an adapter.
+- Pre-calibration is database-native and can be consumed by forecast creation without agents managing raw method-binding files.
+- File compatibility remains available but is no longer the only effectful runtime.
+
+Expected outputs:
+
+- Database-backed campaign operation adapter.
+- `pre_calibration.bind` or equivalent lifecycle operation schema/readback.
+- Migration command or readback for ignored `.ope/live` campaign state.
+- Regression checks for idempotent retries, lease conflicts, and file/database compatibility.
+
+## Milestone 113: Embedded Internal API Surface
+
+Status: Complete.
+
+Goal: expose OPE as an internal API that host applications and agents can use like a small embedded service, without requiring raw file manipulation, raw SQL, or direct scheduler control.
+
+Tasks:
+
+- [x] Define a stable internal command/API surface for `create_prediction`, `update_prediction`, `start_prediction`, `pause_prediction`, `resume_prediction`, `run_tick`, `resolve_due`, `append_evidence`, `read_status`, `read_forecast_card`, `read_lifecycle_bundle`, `archive_record`, and `redact_record`.
+- [x] Support at least in-process Python calls and CLI/agent-call wrappers over the same operation functions.
+- [x] Keep HTTP, queue, and hosted service adapters transport layers over the same internal API, not separate behavior.
+- [x] Return operation receipts, idempotency status, blocking guards, next actions, and sanitized diagnostics for every effectful call.
+- [x] Add request/response envelopes that are compact enough for agents and explicit enough for host software.
+- [x] Document non-interference boundaries: no surprise network calls, no unbounded loops, no hidden scheduler installation, and no automatic method upgrades.
+
+Exit criteria:
+
+- A host application can call OPE as an internal library or local command surface without knowing the file layout.
+- Agents can implement OPE integration through a small set of stable operations and readbacks.
+- All transports share one semantics layer.
+
+Expected outputs:
+
+- `spec/internal-api.md`
+- Internal API schema or typed request records.
+- `python3 scripts/ope.py internal-api`
+- In-process adapter and CLI compatibility checks.
+- Agent-facing examples for creating and managing one prediction through the API.
+
+## Milestone 114: Multi-Prediction Workspace Registry
+
+Status: Complete.
+
+Goal: allow agents to set up and manage any number of predictions, campaigns, domains, schedules, and source bindings in one isolated OPE workspace.
+
+Tasks:
+
+- [x] Add a prediction registry with stable prediction IDs, campaign IDs, domain IDs, source-binding IDs, schedule IDs, status, owner/caller metadata, and lifecycle operation summaries.
+- [x] Add read models for all predictions, active predictions, due forecasts, due resolutions, blocked operations, failed operations, source-health blockers, and calibration/track-record progress.
+- [x] Add lifecycle operations for prediction configuration create/update/archive/redact that preserve audit history instead of mutating raw config silently.
+- [x] Add per-prediction idempotency keys and leases so concurrent agents can manage different predictions without racing.
+- [x] Add workspace-level resource controls, including maximum active predictions, maximum queued operations, maximum readback size, and per-prediction execution budgets.
+- [x] Add isolation checks so one prediction cannot write another prediction's records, source bindings, method binding, or read models.
+
+Exit criteria:
+
+- One OPE workspace can contain multiple independent predictions and campaigns.
+- Agents can list, inspect, start, pause, resume, and archive predictions without reading raw database tables or files.
+- Concurrent agents can operate on separate predictions safely.
+
+Expected outputs:
+
+- Prediction registry schema and checked fixtures.
+- Workspace status and queue readbacks.
+- Multi-prediction smoke checks with at least two domains or two campaigns.
+- Isolation and idempotency regression checks.
+
+## Milestone 115: Domain And Source Configuration Package
+
+Status: Complete.
+
+Goal: make OPE configurable for new domains and data sources while keeping setup safe, understandable, and policy-bound.
+
+Tasks:
+
+- [x] Define domain configuration records for question templates, horizons, resolution criteria, baseline method, accepted source roles, exclusion rules, sample thresholds, and claim boundaries.
+- [x] Define source binding records for approved local files, source-adapter outputs, APIs, and databases without storing credentials in OPE records.
+- [x] Add mapping-confidence, source-quality, leakage, freshness, privacy, and outcome-availability checks before any forecast generation.
+- [x] Add setup operations for draft, validate, confirm, update, archive, and redact domain/source configurations.
+- [x] Add small examples for at least weather-transit-delay plus one non-transit private operational domain.
+- [x] Keep arbitrary private API/database parsing behind adapters and caller approval; OPE receives sanitized manifests, mappings, provenance, and query boundaries.
+
+Exit criteria:
+
+- Agents can configure a new prediction domain without editing generator code.
+- Unsafe or low-confidence source bindings are blocked before forecast artifacts are created.
+- Domain configs are understandable records, not hidden plugin behavior.
+
+Expected outputs:
+
+- `spec/domain-config.schema.json`
+- `spec/source-binding.schema.json`
+- Domain/source setup CLI and internal API commands.
+- Checked setup fixtures for accepted, partial, rejected, and blocked configurations.
+
+## Milestone 116: Background Worker And Sidecar Runtime
+
+Status: Planned.
+
+Goal: run OPE in the background as an embedded worker or small local sidecar so host software can keep operating while predictions are scheduled, resolved, and monitored.
+
+Tasks:
+
+- [ ] Add a bounded worker loop that polls database read models for due forecast, resolution, append, recovery, and maintenance operations.
+- [ ] Use leases, idempotency keys, cancellation flags, and retry/backoff policies for every worker-executed operation.
+- [ ] Add health, pause, resume, drain, shutdown, and one-tick commands.
+- [ ] Keep foreground `run_tick` behavior equivalent to worker behavior for deterministic checks.
+- [ ] Add resource limits for CPU time, wall-clock time, queue size, operation count, output size, and source fetch policy.
+- [ ] Keep OS scheduler installation, hosted workers, and network listeners optional adapters, not default behavior.
+
+Exit criteria:
+
+- OPE can run one bounded background loop without blocking or interfering with host application workflows.
+- A host can stop, pause, resume, or inspect the worker safely.
+- Worker execution cannot bypass operation preflight, leases, idempotency, or claim boundaries.
+
+Expected outputs:
+
+- Local worker runtime module.
+- Worker status and recovery readbacks.
+- One-tick and bounded-loop checks.
+- Sidecar boundary documentation.
+
+## Milestone 117: Lightweight Security And Runtime Hardening
+
+Status: Planned.
+
+Goal: keep OPE small, secure, and understandable for agents and developers before expanding sources, transports, or hosted runtime.
+
+Tasks:
+
+- [ ] Define a dependency budget and keep the core runtime on the Python standard library where practical.
+- [ ] Separate core lifecycle logic, storage adapters, source adapters, method adapters, and transport adapters into small modules with clear boundaries.
+- [ ] Add path allow-listing, symlink escape checks, database path checks, response-size limits, input-size limits, and sanitized diagnostics to every new runtime surface.
+- [ ] Keep credentials out of OPE records; store only credential references, source policy IDs, and sanitized provenance.
+- [ ] Add threat-model notes for malicious source data, prompt/source injection, path traversal, idempotency replay, lease abuse, oversized responses, and accidental private-data exposure.
+- [ ] Add static and runtime checks that agents can read and run locally without hidden services.
+
+Exit criteria:
+
+- The embedded runtime remains lightweight enough to vendor or run locally in host software.
+- Security boundaries are explicit in code, specs, and checks.
+- Agents can understand the core implementation without needing a large framework or generated service stack.
+
+Expected outputs:
+
+- `spec/runtime-security.md`
+- Dependency and module-boundary checklist.
+- Runtime hardening checks for the embedded API, database adapter, worker, and domain/source setup.
+- Updated contributor and agent implementation guidance.
+
+## Milestone 118: Agent Implementation Kit And Conformance
+
+Status: Planned.
+
+Goal: make it easy for independent agents to implement OPE flows in their own software while preserving the same lifecycle, database, and safety semantics.
+
+Tasks:
+
+- [ ] Add a compact implementation guide that explains the minimal OPE integration path: configure domain/source, create prediction, start, run tick or worker, read status, resolve, append, score, and inspect calibration.
+- [ ] Add conformance fixtures for embedded API calls, operation receipts, source configuration, multi-prediction registry, worker ticks, and blocked-path examples.
+- [ ] Add adapter examples for in-process use, CLI use, local MCP use, and future HTTP/queue transports over the same internal API.
+- [ ] Add "do not implement" guidance for raw CRUD writes, unbounded background loops, silent deletion, hidden live fetches, credential storage in records, and automatic method upgrades.
+- [ ] Add small starter templates that keep OPE encapsulated from the host application's main business logic.
+- [ ] Keep generated language-specific SDKs deferred until conformance evidence shows agents need them.
+
+Exit criteria:
+
+- An agent can add OPE to a host application as an encapsulated internal service without re-learning the full repository.
+- Conformance checks catch lifecycle, storage, safety, and claim-boundary drift.
+- OPE remains a standard plus runtime surface, not a one-off application script.
+
+Expected outputs:
+
+- `spec/agent-implementation-kit.md`
+- Conformance fixture pack.
+- Minimal embedded-runtime examples.
+- Updated MCP/agent-call/internal API mapping.
 
 ## Open Decisions
 
 - When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
 - When should OPE add a persistent user-selected SQLite database path beyond the checked ephemeral SQLite runtime scenarios?
 - Which lifecycle operations need strict leases versus idempotency-only guards?
+- Should pre-calibration be represented as `method.pre_calibrate`, `pre_calibration.bind`, or a subtype of `method.apply`?
+- What is the smallest internal API shape that can manage many predictions without becoming a hosted service too early?
+- Should the first embedded runtime expose only in-process and CLI adapters, or should local HTTP be added once the internal API is stable?
+- How should the multi-prediction workspace isolate resources, source bindings, and operation queues across host application tenants or users?
+- Which domain/source configuration fields are required for every domain, and which remain domain-specific extensions?
+- What credential-reference mechanism is acceptable for private APIs and databases without storing secrets in OPE records?
 - What retention/redaction policy should distinguish audit-preserving tombstones from rare physical deletion?
 - What is the smallest domain setup contract that remains useful across private operational domains?
 - Which source-manifest and mapping format should agents use for local files, APIs, and databases?

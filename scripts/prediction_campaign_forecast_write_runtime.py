@@ -176,7 +176,7 @@ def build_run_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
 def build_campaign_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
     bindings = plan["bindings"]
     target = plan["targetState"]
-    return {
+    state = {
         "stateType": "prediction_campaign_state",
         "stateVersion": 1,
         "writtenAt": written_at,
@@ -197,6 +197,18 @@ def build_campaign_state(plan: dict[str, Any], written_at: str) -> dict[str, Any
             "qualityClaimAllowed": False,
         },
     }
+    pre_calibration = plan.get("preCalibrationBinding")
+    if isinstance(pre_calibration, dict):
+        state.update(
+            {
+                "activeMethodId": pre_calibration["activeMethodId"],
+                "calibratedProbability": pre_calibration["calibratedProbability"],
+                "preCalibrationPath": pre_calibration["preCalibrationArtifactPath"],
+                "methodBindingPath": pre_calibration["methodBindingPath"],
+                "forecastProbabilitySource": pre_calibration["forecastProbabilitySource"],
+            }
+        )
+    return state
 
 
 def preflight_state_target(path_value: str, idempotency_key: str, *, allow_campaign_append: bool = False) -> None:
@@ -230,6 +242,15 @@ def write_state_if_safe(path_value: str, state: dict[str, Any], idempotency_key:
                 )
                 merged["forecastArtifactsCreated"] = len(merged["createdRunIdempotencyKeys"])
                 merged["nextAction"] = state["nextAction"]
+                for key in [
+                    "activeMethodId",
+                    "calibratedProbability",
+                    "preCalibrationPath",
+                    "methodBindingPath",
+                    "forecastProbabilitySource",
+                ]:
+                    if key in state:
+                        merged[key] = state[key]
                 target_path.write_text(render_json(merged), encoding="utf-8")
                 return {
                     "stateType": state["stateType"],

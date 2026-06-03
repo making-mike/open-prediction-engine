@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -460,6 +461,14 @@ def check_ledger(ledger: dict[str, Any]) -> None:
     check_generated(OUTPUT_PATH, ledger, label="pilot evidence ledger", regen="python3 scripts/generate_pilot_evidence_ledger.py --write")
 
 
+def load_generated_ledger() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    ledger = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_ledger(ledger)
+    return ledger
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one pilot evidence case")
@@ -470,9 +479,13 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="check generated pilot evidence ledger drift")
     parser.add_argument("--write", action="store_true", help="refresh generated pilot evidence ledger")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        ledger = build_pilot_evidence_ledger()
+        if args.write or args.check or args.rebuild:
+            ledger = build_pilot_evidence_ledger()
+        else:
+            ledger = load_generated_ledger() or build_pilot_evidence_ledger()
     except PilotEvidenceLedgerError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

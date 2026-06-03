@@ -2831,6 +2831,194 @@
       ]
     },
     {
+      "operation": "internal_api",
+      "inputRecordType": "internal_api_request",
+      "sideEffectLevel": "dry_run_generation",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "internalOperation",
+          "required": true,
+          "type": "string",
+          "source": "agent-call --internal-operation",
+          "notes": "Stable embedded internal API operation name to call in dry-run mode."
+        },
+        {
+          "name": "predictionId",
+          "required": false,
+          "type": "id",
+          "source": "agent-call --prediction-id",
+          "notes": "Prediction or campaign ID used by the internal API wrapper."
+        },
+        {
+          "name": "idempotencyKey",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --idempotency-key",
+          "notes": "Caller-provided retry key for effectful internal API operations."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation internal_api --forecast-id forecast-602 --question-id question-601",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_internal_api",
+        "argumentFields": [
+          {
+            "name": "internalOperation",
+            "required": true,
+            "type": "string",
+            "source": "agent-call --internal-operation",
+            "notes": "Stable embedded internal API operation name to call in dry-run mode."
+          },
+          {
+            "name": "predictionId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --prediction-id",
+            "notes": "Prediction or campaign ID used by the internal API wrapper."
+          },
+          {
+            "name": "idempotencyKey",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --idempotency-key",
+            "notes": "Caller-provided retry key for effectful internal API operations."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/internal-api",
+        "argumentFields": [
+          {
+            "name": "internalOperation",
+            "required": true,
+            "type": "string",
+            "source": "agent-call --internal-operation",
+            "notes": "Stable embedded internal API operation name to call in dry-run mode."
+          },
+          {
+            "name": "predictionId",
+            "required": false,
+            "type": "id",
+            "source": "agent-call --prediction-id",
+            "notes": "Prediction or campaign ID used by the internal API wrapper."
+          },
+          {
+            "name": "idempotencyKey",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --idempotency-key",
+            "notes": "Caller-provided retry key for effectful internal API operations."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.internal_api.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access.",
+        "credentialBoundary": "Credentials are not required for the current local operation and must not be accepted in prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent needs to call the embedded internal API wrapper in non-mutating dry-run mode.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
       "operation": "resolution_jobs",
       "inputRecordType": "resolution_job_registry",
       "sideEffectLevel": "read_only",

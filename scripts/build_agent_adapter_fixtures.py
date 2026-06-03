@@ -2933,6 +2933,20 @@ def check_envelopes(envelopes: dict[str, dict[str, Any]]) -> None:
     print(f"checked {len(envelopes)} agent adapter envelopes")
 
 
+def load_generated_envelopes() -> dict[str, dict[str, Any]] | None:
+    if not all((GENERATED / filename).exists() for filename in OUTPUT_FILES.values()):
+        return None
+    envelopes: dict[str, dict[str, Any]] = {}
+    for filename in OUTPUT_FILES.values():
+        item = json.loads((GENERATED / filename).read_text(encoding="utf-8"))
+        errors = validate_record(item, SCHEMA)
+        if errors:
+            raise AgentAdapterError(f"{filename} schema validation failed: {errors[0]}")
+        validate_envelope_semantics(item)
+        envelopes[filename] = item
+    return envelopes
+
+
 def envelope_collection(envelopes: dict[str, dict[str, Any]]) -> dict[str, Any]:
     return {
         "agentEnvelopeSetId": "agentenvelopeset-001",
@@ -2946,9 +2960,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated agent-envelope drift")
     parser.add_argument("--write", action="store_true", help="write generated agent-envelope fixtures")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading checked fixtures")
     args = parser.parse_args()
     try:
-        envelopes = build_envelopes()
+        if args.write or args.check or args.rebuild:
+            envelopes = build_envelopes()
+        else:
+            envelopes = load_generated_envelopes() or build_envelopes()
     except (AgentAdapterError, PublicError) as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

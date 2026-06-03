@@ -60,6 +60,7 @@
     "runner decision predictionrunnerdecision-001",
     "source policy sourcepolicy-1201",
     "baseline-only default selected below transit comparable-outcome threshold",
+    "no optional pre-calibration binding requested",
     "forecast closes at 2026-06-11T04:45:00Z before horizon start 2026-06-11T05:00:00Z",
     "normal checks do not write .ope/live campaign state",
     "resolution and scoring remain pending until post-window evidence is explicitly resolved"

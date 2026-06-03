@@ -79,6 +79,7 @@
         "helsinkiTrafficDisturbancePilotRunbookId",
         "predictionCampaignManifestId",
         "predictionCampaignRunnerId",
+        "predictionCampaignPreCalibrationId",
         "campaignId",
         "cycleId",
         "sourcePolicyId"
@@ -87,6 +88,7 @@
         "helsinkiTrafficDisturbancePilotRunbookId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
         "predictionCampaignRunnerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionCampaignPreCalibrationId": { "$ref": "common.schema.json#/$defs/id" },
         "campaignId": { "$ref": "common.schema.json#/$defs/id" },
         "cycleId": { "$ref": "common.schema.json#/$defs/id" },
         "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" }
@@ -102,6 +104,9 @@
         "duplicateConflictCount",
         "bestAvailableMethodId",
         "bestAvailableMethodName",
+        "optionalPreCalibrationStatus",
+        "optionalPreCalibrationProbability",
+        "preCalibrationCommand",
         "localWorkspace",
         "launchCommand",
         "nextRecommendedCommand",
@@ -117,6 +122,9 @@
         "duplicateConflictCount": { "type": "integer", "minimum": 0 },
         "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
         "bestAvailableMethodName": { "$ref": "#/$defs/boundedString" },
+        "optionalPreCalibrationStatus": { "$ref": "#/$defs/boundedString" },
+        "optionalPreCalibrationProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "preCalibrationCommand": { "$ref": "#/$defs/boundedString" },
         "localWorkspace": { "$ref": "#/$defs/boundedString" },
         "launchCommand": { "$ref": "#/$defs/boundedString" },
         "nextRecommendedCommand": { "$ref": "#/$defs/boundedString" },
@@ -206,6 +214,7 @@
         "manualPrerequisitesRequired",
         "launchCommandReady",
         "miniSmokeFirst",
+        "optionalPreCalibrationAvailable",
         "bestAvailableMethodId",
         "qualityClaimAllowed",
         "recommendedNextCommand"
@@ -216,6 +225,7 @@
         "manualPrerequisitesRequired": { "type": "boolean" },
         "launchCommandReady": { "type": "boolean" },
         "miniSmokeFirst": { "type": "boolean" },
+        "optionalPreCalibrationAvailable": { "type": "boolean" },
         "bestAvailableMethodId": { "$ref": "common.schema.json#/$defs/id" },
         "qualityClaimAllowed": { "type": "boolean" },
         "recommendedNextCommand": { "$ref": "#/$defs/boundedString" }
@@ -232,6 +242,7 @@
         "createsForecastArtifacts",
         "executesResolvers",
         "appendsLedgerRows",
+        "writesPreCalibrationState",
         "changesForecastMethod",
         "qualityClaimAllowed"
       ],
@@ -243,6 +254,7 @@
         "createsForecastArtifacts": { "type": "boolean" },
         "executesResolvers": { "type": "boolean" },
         "appendsLedgerRows": { "type": "boolean" },
+        "writesPreCalibrationState": { "type": "boolean" },
         "changesForecastMethod": { "type": "boolean" },
         "qualityClaimAllowed": { "type": "boolean" }
       }

@@ -1,0 +1,402 @@
+{
+  "predictionWorkspaceRegistryId": "workspace-registry-001",
+  "generatedAt": "2026-06-03T02:20:00Z",
+  "registryStatus": "stable_registry_defined",
+  "workspaceId": "opeworkspace-001",
+  "predictions": [
+    {
+      "predictionId": "prediction-001",
+      "campaignId": "predictioncampaign-001",
+      "domainId": "domainweathertransitdelays-001",
+      "sourceBindingId": "sourcebinding-001",
+      "scheduleId": "schedule-001",
+      "status": "active",
+      "owner": {
+        "ownerId": "operatorlocal-001",
+        "ownerType": "team",
+        "contactRef": "local-operator-record"
+      },
+      "callerMetadata": {
+        "createdBy": "agentalpha-001",
+        "lastUpdatedBy": "agentalpha-001",
+        "callerIntent": "Run the weather-transit-delay campaign with baseline method execution until calibration thresholds and approvals pass."
+      },
+      "lifecycleOperationSummary": {
+        "operationCount": 8,
+        "lastOperationName": "start_prediction",
+        "lastOperationReceiptId": "operationreceipt-001",
+        "lastOperationStatus": "committed"
+      },
+      "readModelRefs": [
+        "all_predictions",
+        "active_predictions",
+        "due_forecasts",
+        "due_resolutions",
+        "calibration_progress",
+        "track_record_progress"
+      ],
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false
+    },
+    {
+      "predictionId": "prediction-002",
+      "campaignId": "predictioncampaign-002",
+      "domainId": "domainseaportberthavailability-001",
+      "sourceBindingId": "sourcebinding-002",
+      "scheduleId": "schedule-002",
+      "status": "paused",
+      "owner": {
+        "ownerId": "serviceops-001",
+        "ownerType": "service",
+        "contactRef": "ops-service-record"
+      },
+      "callerMetadata": {
+        "createdBy": "agentbeta-001",
+        "lastUpdatedBy": "agentbeta-001",
+        "callerIntent": "Hold a private berth-availability setup until source bindings are confirmed and leakage checks pass."
+      },
+      "lifecycleOperationSummary": {
+        "operationCount": 3,
+        "lastOperationName": "pause_prediction",
+        "lastOperationReceiptId": "operationreceipt-002",
+        "lastOperationStatus": "paused"
+      },
+      "readModelRefs": [
+        "all_predictions",
+        "blocked_operations",
+        "source_health_blockers",
+        "calibration_progress"
+      ],
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false
+    }
+  ],
+  "readModels": {
+    "allPredictions": [
+      {
+        "predictionId": "prediction-001",
+        "campaignId": "predictioncampaign-001",
+        "domainId": "domainweathertransitdelays-001",
+        "status": "active",
+        "lastOperationStatus": "committed"
+      },
+      {
+        "predictionId": "prediction-002",
+        "campaignId": "predictioncampaign-002",
+        "domainId": "domainseaportberthavailability-001",
+        "status": "paused",
+        "lastOperationStatus": "paused"
+      }
+    ],
+    "activePredictions": [
+      {
+        "predictionId": "prediction-001",
+        "campaignId": "predictioncampaign-001",
+        "nextAction": "run_tick",
+        "nextDueAt": "2026-06-11T06:30:00Z",
+        "budgetStatus": "within_budget"
+      }
+    ],
+    "dueForecasts": [
+      {
+        "predictionId": "prediction-001",
+        "campaignId": "predictioncampaign-001",
+        "runId": "predictionrun-1301",
+        "forecastId": "forecast-1301",
+        "dueAt": "2026-06-11T06:30:00Z",
+        "dueStatus": "due_ready"
+      }
+    ],
+    "dueResolutions": [
+      {
+        "predictionId": "prediction-001",
+        "campaignId": "predictioncampaign-001",
+        "runId": "predictionrun-1301",
+        "resolutionJobId": "resolutionjob-1301",
+        "dueAt": "2026-06-11T07:15:00Z",
+        "dueStatus": "due_ready"
+      }
+    ],
+    "blockedOperations": [
+      {
+        "predictionId": "prediction-002",
+        "operationName": "resume_prediction",
+        "operationReceiptId": "operationreceipt-003",
+        "operationStatus": "blocked",
+        "reasonCode": "source_binding_unconfirmed",
+        "retryable": true
+      }
+    ],
+    "failedOperations": [
+      {
+        "predictionId": "prediction-002",
+        "operationName": "start_prediction",
+        "operationReceiptId": "operationreceipt-004",
+        "operationStatus": "failed",
+        "reasonCode": "mapping_confidence_below_threshold",
+        "retryable": true
+      }
+    ],
+    "sourceHealthBlockers": [
+      {
+        "predictionId": "prediction-002",
+        "sourceBindingId": "sourcebinding-002",
+        "healthStatus": "blocked_unconfirmed_mapping",
+        "reasonCode": "mapping_confirmation_required",
+        "nextAction": "confirm source mapping before resume"
+      }
+    ],
+    "calibrationProgress": [
+      {
+        "predictionId": "prediction-001",
+        "comparableCount": 1,
+        "threshold": 100,
+        "calibrationStatus": "below_threshold",
+        "claimAllowed": false
+      },
+      {
+        "predictionId": "prediction-002",
+        "comparableCount": 0,
+        "threshold": 100,
+        "calibrationStatus": "blocked",
+        "claimAllowed": false
+      }
+    ],
+    "trackRecordProgress": [
+      {
+        "predictionId": "prediction-001",
+        "scoredCount": 1,
+        "excludedCount": 6,
+        "trackRecordStatus": "below_threshold",
+        "baselineComparisonReady": true
+      },
+      {
+        "predictionId": "prediction-002",
+        "scoredCount": 0,
+        "excludedCount": 0,
+        "trackRecordStatus": "blocked",
+        "baselineComparisonReady": false
+      }
+    ]
+  },
+  "configurationLifecycleOperations": [
+    {
+      "operationName": "prediction.config_create",
+      "apiOperation": "create_prediction",
+      "operationReceiptId": "operationreceipt-005",
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "auditHistoryPreserved": true,
+      "rawConfigMutationAllowed": false,
+      "physicalDeleteAllowed": false,
+      "auditRecordKind": "create_record",
+      "readModelsUpdated": [
+        "all_predictions",
+        "active_predictions",
+        "due_forecasts",
+        "calibration_progress",
+        "track_record_progress"
+      ]
+    },
+    {
+      "operationName": "prediction.config_update",
+      "apiOperation": "update_prediction",
+      "operationReceiptId": "operationreceipt-006",
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "auditHistoryPreserved": true,
+      "rawConfigMutationAllowed": false,
+      "physicalDeleteAllowed": false,
+      "auditRecordKind": "update_revision",
+      "readModelsUpdated": [
+        "all_predictions",
+        "active_predictions",
+        "blocked_operations",
+        "failed_operations",
+        "source_health_blockers",
+        "calibration_progress",
+        "track_record_progress"
+      ]
+    },
+    {
+      "operationName": "prediction.config_archive",
+      "apiOperation": "archive_record",
+      "operationReceiptId": "operationreceipt-007",
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "auditHistoryPreserved": true,
+      "rawConfigMutationAllowed": false,
+      "physicalDeleteAllowed": false,
+      "auditRecordKind": "archive_tombstone",
+      "readModelsUpdated": [
+        "all_predictions",
+        "active_predictions",
+        "due_forecasts",
+        "due_resolutions",
+        "blocked_operations",
+        "failed_operations"
+      ]
+    },
+    {
+      "operationName": "prediction.config_redact",
+      "apiOperation": "redact_record",
+      "operationReceiptId": "operationreceipt-008",
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "auditHistoryPreserved": true,
+      "rawConfigMutationAllowed": false,
+      "physicalDeleteAllowed": false,
+      "auditRecordKind": "redaction_receipt",
+      "readModelsUpdated": [
+        "all_predictions",
+        "blocked_operations",
+        "failed_operations",
+        "source_health_blockers"
+      ]
+    }
+  ],
+  "perPredictionConcurrencyControls": [
+    {
+      "predictionId": "prediction-001",
+      "idempotencyNamespaceId": "idempotencynamespace-001",
+      "leaseId": "predictionlease-001",
+      "leaseScope": "prediction_execution",
+      "leaseStatus": "available",
+      "heldBy": "agentalpha-001",
+      "expiresAt": "2026-06-11T06:35:00Z",
+      "crossPredictionConcurrencyAllowed": true,
+      "samePredictionConcurrentMutationBlocked": true,
+      "staleLeaseRecoveryAction": "release expired execution lease before retrying the same prediction"
+    },
+    {
+      "predictionId": "prediction-002",
+      "idempotencyNamespaceId": "idempotencynamespace-002",
+      "leaseId": "predictionlease-002",
+      "leaseScope": "prediction_config",
+      "leaseStatus": "blocked",
+      "heldBy": "agentbeta-001",
+      "expiresAt": "2026-06-11T06:40:00Z",
+      "crossPredictionConcurrencyAllowed": true,
+      "samePredictionConcurrentMutationBlocked": true,
+      "staleLeaseRecoveryAction": "ask the holder to finish source confirmation or expire the config lease"
+    }
+  ],
+  "workspaceResourceControls": {
+    "maximumActivePredictions": 8,
+    "currentActivePredictionCount": 1,
+    "maximumQueuedOperations": 32,
+    "currentQueuedOperationCount": 4,
+    "maximumReadbackBytes": 65536,
+    "currentReadbackBytes": 12288,
+    "perPredictionExecutionBudgets": [
+      {
+        "predictionId": "prediction-001",
+        "maxTicksPerRun": 1,
+        "maxResolverAttempts": 2,
+        "maxRuntimeSeconds": 30,
+        "maxReadbackBytes": 32768,
+        "budgetStatus": "within_budget"
+      },
+      {
+        "predictionId": "prediction-002",
+        "maxTicksPerRun": 1,
+        "maxResolverAttempts": 1,
+        "maxRuntimeSeconds": 15,
+        "maxReadbackBytes": 16384,
+        "budgetStatus": "blocked"
+      }
+    ],
+    "resourceStatus": "within_limits"
+  },
+  "isolationChecks": [
+    {
+      "isolationCheckId": "isolationcheck-001",
+      "checkName": "record_write_scope",
+      "attemptedWriteKind": "forecast_record",
+      "sanitizedDiagnosticCode": "cross_prediction_record_write_blocked",
+      "sourcePredictionId": "prediction-001",
+      "targetPredictionId": "prediction-002",
+      "crossPredictionWriteAllowed": false,
+      "samePredictionWriteAllowed": true,
+      "auditRecordRequired": true
+    },
+    {
+      "isolationCheckId": "isolationcheck-002",
+      "checkName": "source_binding_scope",
+      "attemptedWriteKind": "source_binding",
+      "sanitizedDiagnosticCode": "cross_prediction_source_binding_write_blocked",
+      "sourcePredictionId": "prediction-001",
+      "targetPredictionId": "prediction-002",
+      "crossPredictionWriteAllowed": false,
+      "samePredictionWriteAllowed": true,
+      "auditRecordRequired": true
+    },
+    {
+      "isolationCheckId": "isolationcheck-003",
+      "checkName": "method_binding_scope",
+      "attemptedWriteKind": "method_binding",
+      "sanitizedDiagnosticCode": "cross_prediction_method_binding_write_blocked",
+      "sourcePredictionId": "prediction-001",
+      "targetPredictionId": "prediction-002",
+      "crossPredictionWriteAllowed": false,
+      "samePredictionWriteAllowed": true,
+      "auditRecordRequired": true
+    },
+    {
+      "isolationCheckId": "isolationcheck-004",
+      "checkName": "read_model_scope",
+      "attemptedWriteKind": "read_model",
+      "sanitizedDiagnosticCode": "cross_prediction_read_model_write_blocked",
+      "sourcePredictionId": "prediction-001",
+      "targetPredictionId": "prediction-002",
+      "crossPredictionWriteAllowed": false,
+      "samePredictionWriteAllowed": true,
+      "auditRecordRequired": true
+    }
+  ],
+  "summary": {
+    "predictionCount": 2,
+    "activePredictionCount": 1,
+    "stablePredictionIds": true,
+    "campaignIdsBound": true,
+    "domainIdsBound": true,
+    "sourceBindingIdsBound": true,
+    "scheduleIdsBound": true,
+    "ownerMetadataPresent": true,
+    "lifecycleSummariesPresent": true,
+    "readModelsPresent": true,
+    "dueForecastReadbackPresent": true,
+    "blockedAndFailedReadbacksPresent": true,
+    "calibrationAndTrackRecordReadbacksPresent": true,
+    "configurationLifecycleOperationsPresent": true,
+    "configurationOperationsAuditBacked": true,
+    "configurationDeleteReplacedByArchive": true,
+    "perPredictionIdempotencyPresent": true,
+    "perPredictionLeasesPresent": true,
+    "crossPredictionConcurrencyAllowed": true,
+    "samePredictionRaceBlocked": true,
+    "resourceControlsPresent": true,
+    "activePredictionLimitEnforced": true,
+    "queuedOperationLimitEnforced": true,
+    "readbackSizeLimitEnforced": true,
+    "perPredictionExecutionBudgetsPresent": true,
+    "isolationChecksPresent": true,
+    "recordIsolationEnforced": true,
+    "sourceBindingIsolationEnforced": true,
+    "methodBindingIsolationEnforced": true,
+    "readModelIsolationEnforced": true
+  },
+  "executionBoundary": {
+    "readbackOnly": true,
+    "writesRegistryState": false,
+    "rawSqlExposed": false,
+    "rawFileLayoutExposed": false,
+    "startsPredictions": false
+  },
+  "warnings": [
+    "This registry is a checked readback contract and does not start, pause, or mutate predictions.",
+    "Agents should use stable prediction IDs and internal API calls instead of raw files or raw SQL.",
+    "Domain and source configuration records remain separate milestone work before new domains execute.",
+    "Concurrent write safety still depends on lifecycle operation receipts, idempotency keys, and leases."
+  ]
+}

@@ -300,6 +300,25 @@
       }
     },
     {
+      "operationName": "pre_calibration.bind",
+      "operationClass": "method_state",
+      "lifecyclePhase": "method_update",
+      "requiresPreflight": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesImmutableRecords": true,
+      "updatesReadModels": true,
+      "deleteReplacement": "not_delete",
+      "allowedWriteMode": "prospective_binding",
+      "retrySafety": "lease_and_idempotent_required",
+      "claimBoundary": {
+        "createsQualityClaim": false,
+        "allowsPostOutcomeRewrite": false,
+        "allowsSilentDelete": false,
+        "allowsRawCrud": false
+      }
+    },
+    {
       "operationName": "method.apply",
       "operationClass": "method_state",
       "lifecyclePhase": "method_update",
@@ -329,6 +348,25 @@
       "updatesReadModels": true,
       "deleteReplacement": "not_delete",
       "allowedWriteMode": "prospective_binding",
+      "retrySafety": "lease_and_idempotent_required",
+      "claimBoundary": {
+        "createsQualityClaim": false,
+        "allowsPostOutcomeRewrite": false,
+        "allowsSilentDelete": false,
+        "allowsRawCrud": false
+      }
+    },
+    {
+      "operationName": "state.import_json",
+      "operationClass": "migration",
+      "lifecyclePhase": "migration",
+      "requiresPreflight": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesImmutableRecords": true,
+      "updatesReadModels": true,
+      "deleteReplacement": "not_delete",
+      "allowedWriteMode": "insert_once",
       "retrySafety": "lease_and_idempotent_required",
       "claimBoundary": {
         "createsQualityClaim": false,
@@ -441,8 +479,35 @@
       "provenanceRequired": true
     },
     {
+      "recordType": "pre_calibration_binding",
+      "schemaFile": "spec/prediction-campaign-pre-calibration.schema.json",
+      "storageTable": "operation_audit_records",
+      "mutableAfterWrite": false,
+      "writeMode": "append_only",
+      "hashRequired": true,
+      "provenanceRequired": true
+    },
+    {
       "recordType": "method_update_audit",
       "schemaFile": "spec/prediction-campaign-method-update-action.schema.json",
+      "storageTable": "operation_audit_records",
+      "mutableAfterWrite": false,
+      "writeMode": "append_only",
+      "hashRequired": true,
+      "provenanceRequired": true
+    },
+    {
+      "recordType": "evidence_ledger_row",
+      "schemaFile": "spec/prediction-campaign-evidence-ledger.schema.json",
+      "storageTable": "evidence_ledger_rows",
+      "mutableAfterWrite": false,
+      "writeMode": "append_only",
+      "hashRequired": true,
+      "provenanceRequired": true
+    },
+    {
+      "recordType": "json_state_migration_receipt",
+      "schemaFile": "spec/lifecycle-operation.schema.json",
       "storageTable": "operation_audit_records",
       "mutableAfterWrite": false,
       "writeMode": "append_only",
@@ -502,8 +567,10 @@
       "resolution.record",
       "score.create",
       "evidence.append",
+      "pre_calibration.bind",
       "method.apply",
-      "method.rollback"
+      "method.rollback",
+      "state.import_json"
     ],
     "leaseOwnerField": "agentOrWorkerId",
     "expiresAtRequired": true,
@@ -637,6 +704,414 @@
     "migrationReceiptRequired": true,
     "normalChecksRequireDatabase": false
   },
+  "jsonCompatibilityAdapter": {
+    "adapterName": "ignored_json_live_state",
+    "adapterStatus": "current_compatibility_adapter",
+    "sourceRoot": ".ope/live/prediction-campaigns",
+    "readCompatibilityAllowed": true,
+    "writeCompatibilityAllowed": true,
+    "normalChecksWriteLiveState": false,
+    "automaticMigrationAllowed": false,
+    "explicitMigrationOperationRequired": true,
+    "migrationReceiptRequired": true,
+    "contentHashCheckRequired": true,
+    "sourceRecordHashRequired": true,
+    "preservesForecastProbabilities": true,
+    "preservesSourceProvenance": true,
+    "rewritesHistoricalForecasts": false,
+    "rawCrudExposed": false,
+    "stateClasses": [
+      {
+        "stateClass": "forecast_lifecycle_records",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/{run}/{record}.json",
+        "migrationTargetTable": "ope_records",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      },
+      {
+        "stateClass": "run_state",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/{run}.json",
+        "migrationTargetTable": "read_model_rows",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      },
+      {
+        "stateClass": "campaign_state",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/state.json",
+        "migrationTargetTable": "read_model_rows",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      },
+      {
+        "stateClass": "evidence_ledger",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/evidence-ledger.json",
+        "migrationTargetTable": "evidence_ledger_rows",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      },
+      {
+        "stateClass": "method_binding",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/method-binding.json",
+        "migrationTargetTable": "operation_audit_records",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      },
+      {
+        "stateClass": "operation_audit",
+        "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/method-updates/{artifact}.json",
+        "migrationTargetTable": "operation_audit_records",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
+      }
+    ],
+    "knownLimitations": [
+      "Ignored JSON compatibility is weak for concurrent agents until imported through lifecycle receipts.",
+      "Compatibility writes remain explicit local actions and are never performed by normal checks.",
+      "Migration must preserve source content hashes before SQLite becomes authoritative for existing state."
+    ]
+  },
+  "writeLocalOperationCoverage": [
+    {
+      "coverageId": "writelocalcoverage-001",
+      "commandPath": "prediction-campaign start --write-local",
+      "lifecycleOperations": [
+        "forecast.create"
+      ],
+      "scenarioNames": [
+        "campaign-forecast-create"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-002",
+      "commandPath": "prediction-campaign start --pre-calibrate --write-local",
+      "lifecycleOperations": [
+        "pre_calibration.bind",
+        "forecast.create"
+      ],
+      "scenarioNames": [
+        "pre-calibration-bind",
+        "campaign-forecast-create"
+      ],
+      "requiredOperationReceiptCount": 2,
+      "requiredReadModels": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-003",
+      "commandPath": "prediction-campaign forecast-write --write-local",
+      "lifecycleOperations": [
+        "forecast.create"
+      ],
+      "scenarioNames": [
+        "campaign-forecast-create"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-004",
+      "commandPath": "prediction-campaign resolve --execute-resolvers --write-local",
+      "lifecycleOperations": [
+        "resolution.record",
+        "score.create"
+      ],
+      "scenarioNames": [
+        "campaign-resolution-record",
+        "campaign-score-create"
+      ],
+      "requiredOperationReceiptCount": 2,
+      "requiredReadModels": [
+        "campaign_status",
+        "due_resolution_jobs",
+        "append_readiness"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-005",
+      "commandPath": "prediction-campaign append --write-local",
+      "lifecycleOperations": [
+        "evidence.append"
+      ],
+      "scenarioNames": [
+        "campaign-evidence-append"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "append_readiness",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-006",
+      "commandPath": "prediction-campaign pre-calibration --write-local",
+      "lifecycleOperations": [
+        "pre_calibration.bind"
+      ],
+      "scenarioNames": [
+        "pre-calibration-bind"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-007",
+      "commandPath": "prediction-campaign apply-method-update --write-local",
+      "lifecycleOperations": [
+        "method.apply"
+      ],
+      "scenarioNames": [
+        "campaign-method-apply"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-008",
+      "commandPath": "prediction-campaign rollback-method-update --write-local",
+      "lifecycleOperations": [
+        "method.rollback"
+      ],
+      "scenarioNames": [
+        "campaign-method-rollback"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    }
+  ],
+  "fileDatabaseCompatibilityChecks": [
+    {
+      "compatibilityCheckId": "compatibilitycheck-001",
+      "recordClass": "forecast_lifecycle_records",
+      "commandPath": "prediction-campaign forecast-write --write-local",
+      "scenarioName": "campaign-forecast-create",
+      "lifecycleOperation": "forecast.create",
+      "fileModeRepeatStatus": "local_write_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-002",
+      "recordClass": "resolution_records",
+      "commandPath": "prediction-campaign resolve --execute-resolvers --write-local",
+      "scenarioName": "campaign-resolution-record",
+      "lifecycleOperation": "resolution.record",
+      "fileModeRepeatStatus": "local_resolution_scored_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-003",
+      "recordClass": "scoring_reports",
+      "commandPath": "prediction-campaign resolve --execute-resolvers --write-local",
+      "scenarioName": "campaign-score-create",
+      "lifecycleOperation": "score.create",
+      "fileModeRepeatStatus": "local_resolution_scored_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-004",
+      "recordClass": "evidence_ledger_rows",
+      "commandPath": "prediction-campaign append --write-local",
+      "scenarioName": "campaign-evidence-append",
+      "lifecycleOperation": "evidence.append",
+      "fileModeRepeatStatus": "local_append_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-005",
+      "recordClass": "pre_calibration_method_binding",
+      "commandPath": "prediction-campaign pre-calibration --write-local",
+      "scenarioName": "pre-calibration-bind",
+      "lifecycleOperation": "pre_calibration.bind",
+      "fileModeRepeatStatus": "local_pre_calibration_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-006",
+      "recordClass": "method_apply_binding",
+      "commandPath": "prediction-campaign apply-method-update --write-local",
+      "scenarioName": "campaign-method-apply",
+      "lifecycleOperation": "method.apply",
+      "fileModeRepeatStatus": "local_apply_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-007",
+      "recordClass": "method_rollback_binding",
+      "commandPath": "prediction-campaign rollback-method-update --write-local",
+      "scenarioName": "campaign-method-rollback",
+      "lifecycleOperation": "method.rollback",
+      "fileModeRepeatStatus": "local_rollback_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    }
+  ],
   "agentPreflightSurface": {
     "preflightRequired": true,
     "plannedWritesListed": true,
@@ -659,15 +1134,46 @@
       "idempotencyStatus": "new_key_available",
       "leaseStatus": "available",
       "operationReceiptId": "operationreceipt-2101",
-      "plannedWriteCount": 3,
+      "plannedWriteCount": 5,
       "operationReceiptsWritten": 1,
-      "immutableRecordsInserted": 2,
+      "immutableRecordsInserted": 4,
       "auditRecordsInserted": 0,
       "duplicateRecordsCreated": 0,
       "physicalDeletes": 0,
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "forecast_question",
+          "recordId": "question-2101",
+          "sourceContentHash": "2fe00cf00aa2fd6c27812c555b4d0d08267c770c9312f5ae6e11c8812d703ae0",
+          "sqliteContentHash": "2fe00cf00aa2fd6c27812c555b4d0d08267c770c9312f5ae6e11c8812d703ae0",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "evidence_packet",
+          "recordId": "evidence-2101",
+          "sourceContentHash": "57294dd77ea051d01a5d124929fa24945b90d0143d2f934e2c702b845980fc31",
+          "sqliteContentHash": "57294dd77ea051d01a5d124929fa24945b90d0143d2f934e2c702b845980fc31",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_artifact",
+          "recordId": "forecast-2101",
+          "sourceContentHash": "376fe2afbf36ebc2b42391df56c46bcc26c075d87a5dc44ab7c1ad1a220845c4",
+          "sqliteContentHash": "376fe2afbf36ebc2b42391df56c46bcc26c075d87a5dc44ab7c1ad1a220845c4",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_history",
+          "recordId": "forecasthistory-2101",
+          "sourceContentHash": "ab1ad9412aebeb5ac064fe49eae0725c3bd144864c23b3485d77dac70d46515d",
+          "sqliteContentHash": "ab1ad9412aebeb5ac064fe49eae0725c3bd144864c23b3485d77dac70d46515d",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "next_due_forecast",
@@ -681,6 +1187,18 @@
             "recordType": "operation_receipt",
             "recordId": "operationreceipt-2101",
             "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_question",
+            "recordId": "question-2101",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "evidence_packet",
+            "recordId": "evidence-2101",
+            "writeMode": "insert_once"
           },
           {
             "tableName": "ope_records",
@@ -748,7 +1266,7 @@
       "idempotencyStatus": "return_existing_receipt",
       "leaseStatus": "not_required",
       "operationReceiptId": "operationreceipt-2101",
-      "plannedWriteCount": 3,
+      "plannedWriteCount": 5,
       "operationReceiptsWritten": 0,
       "immutableRecordsInserted": 0,
       "auditRecordsInserted": 0,
@@ -757,6 +1275,37 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "forecast_question",
+          "recordId": "question-2101",
+          "sourceContentHash": "2fe00cf00aa2fd6c27812c555b4d0d08267c770c9312f5ae6e11c8812d703ae0",
+          "sqliteContentHash": "2fe00cf00aa2fd6c27812c555b4d0d08267c770c9312f5ae6e11c8812d703ae0",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "evidence_packet",
+          "recordId": "evidence-2101",
+          "sourceContentHash": "57294dd77ea051d01a5d124929fa24945b90d0143d2f934e2c702b845980fc31",
+          "sqliteContentHash": "57294dd77ea051d01a5d124929fa24945b90d0143d2f934e2c702b845980fc31",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_artifact",
+          "recordId": "forecast-2101",
+          "sourceContentHash": "376fe2afbf36ebc2b42391df56c46bcc26c075d87a5dc44ab7c1ad1a220845c4",
+          "sqliteContentHash": "376fe2afbf36ebc2b42391df56c46bcc26c075d87a5dc44ab7c1ad1a220845c4",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_history",
+          "recordId": "forecasthistory-2101",
+          "sourceContentHash": "ab1ad9412aebeb5ac064fe49eae0725c3bd144864c23b3485d77dac70d46515d",
+          "sqliteContentHash": "ab1ad9412aebeb5ac064fe49eae0725c3bd144864c23b3485d77dac70d46515d",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status"
       ],
@@ -768,6 +1317,18 @@
             "recordType": "operation_receipt",
             "recordId": "operationreceipt-2102",
             "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_question",
+            "recordId": "question-2101",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "evidence_packet",
+            "recordId": "evidence-2101",
+            "writeMode": "insert_once"
           },
           {
             "tableName": "ope_records",
@@ -835,7 +1396,7 @@
       "idempotencyStatus": "new_key_available",
       "leaseStatus": "blocked_lease_conflict",
       "operationReceiptId": "operationreceipt-2202",
-      "plannedWriteCount": 3,
+      "plannedWriteCount": 5,
       "operationReceiptsWritten": 1,
       "immutableRecordsInserted": 0,
       "auditRecordsInserted": 0,
@@ -844,6 +1405,37 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "forecast_question",
+          "recordId": "question-2101",
+          "sourceContentHash": "4e3cc86411c89a5ebee61b83d61359c670d2bc6511ec8116d0aee0c9de6c0e25",
+          "sqliteContentHash": "4e3cc86411c89a5ebee61b83d61359c670d2bc6511ec8116d0aee0c9de6c0e25",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "evidence_packet",
+          "recordId": "evidence-2101",
+          "sourceContentHash": "2a420eba1cc206bc3cca3a826e53215dcb3c142c52ed6b0c91c38c670ae3c1bc",
+          "sqliteContentHash": "2a420eba1cc206bc3cca3a826e53215dcb3c142c52ed6b0c91c38c670ae3c1bc",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_artifact",
+          "recordId": "forecast-2201",
+          "sourceContentHash": "a83a5ab67b926cf5360fd39a971102c9fb7fd34dd896d9afb0393cc6a5d0b7b5",
+          "sqliteContentHash": "a83a5ab67b926cf5360fd39a971102c9fb7fd34dd896d9afb0393cc6a5d0b7b5",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_history",
+          "recordId": "forecasthistory-2101",
+          "sourceContentHash": "3f9d4e7f3f997b4c38b3ed500d77594598c633e36af1b25805665de4f4248594",
+          "sqliteContentHash": "3f9d4e7f3f997b4c38b3ed500d77594598c633e36af1b25805665de4f4248594",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "failed_operations",
@@ -857,6 +1449,18 @@
             "recordType": "operation_receipt",
             "recordId": "operationreceipt-2202",
             "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_question",
+            "recordId": "question-2101",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "evidence_packet",
+            "recordId": "evidence-2101",
+            "writeMode": "insert_once"
           },
           {
             "tableName": "ope_records",
@@ -933,6 +1537,16 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "archive_tombstone",
+          "recordId": "archive-2301",
+          "sourceContentHash": "99dd69aa7b99e8ee622494d6e2df4e051b50422eab524f69a7988ec5c59ed8b3",
+          "sqliteContentHash": "99dd69aa7b99e8ee622494d6e2df4e051b50422eab524f69a7988ec5c59ed8b3",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "append_readiness"
@@ -1009,6 +1623,16 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "redaction_receipt",
+          "recordId": "redaction-2401",
+          "sourceContentHash": "e6807143be780c21e06473c8fffb348d896a9b4ecc7b5851c580477bbb3de1ed",
+          "sqliteContentHash": "e6807143be780c21e06473c8fffb348d896a9b4ecc7b5851c580477bbb3de1ed",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "append_readiness"
@@ -1085,6 +1709,16 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "method_update_audit",
+          "recordId": "methodaudit-2501",
+          "sourceContentHash": "51a7dbbda716e6325f0b89e1b74d8d7fd0866e0e848466228ac98a925c078893",
+          "sqliteContentHash": "51a7dbbda716e6325f0b89e1b74d8d7fd0866e0e848466228ac98a925c078893",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "calibration_status",
@@ -1150,6 +1784,880 @@
     },
     {
       "scenarioId": "lifecyclescenario-007",
+      "scenarioName": "pre-calibration-bind",
+      "operationName": "pre_calibration.bind",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-2701",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 1,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "pre_calibration_binding",
+          "recordId": "precalibrationbinding-2701",
+          "sourceContentHash": "48d0790533327aae87fe705f00b63b1b3d1f0da318f48a2a44a95e7affe1d433",
+          "sqliteContentHash": "48d0790533327aae87fe705f00b63b1b3d1f0da318f48a2a44a95e7affe1d433",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-2701",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "operation_audit_records",
+            "recordType": "pre_calibration_binding",
+            "recordId": "precalibrationbinding-2701",
+            "writeMode": "prospective_binding"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-2101:pre-calibration:methodbinding-2701",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "pre_calibration.bind:predictioncampaign-2101:method-binding",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-008",
+      "scenarioName": "campaign-forecast-create",
+      "operationName": "forecast.create",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3001",
+      "plannedWriteCount": 5,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 4,
+      "auditRecordsInserted": 0,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "forecast_question",
+          "recordId": "question-1301",
+          "sourceContentHash": "063655f1faa260a82d8b1f091df150e378f55a8f029226e4575e2f9bc25bf518",
+          "sqliteContentHash": "063655f1faa260a82d8b1f091df150e378f55a8f029226e4575e2f9bc25bf518",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "evidence_packet",
+          "recordId": "evidence-1301",
+          "sourceContentHash": "1e8d676973fee232d6a4185a8c1222140206d721b12866d78e57f57309cb7d1c",
+          "sqliteContentHash": "1e8d676973fee232d6a4185a8c1222140206d721b12866d78e57f57309cb7d1c",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_artifact",
+          "recordId": "forecast-1301",
+          "sourceContentHash": "b85e59f7d7cfe6007778ed9e1d7d79d3c9f114ecc8c8db7cb63ffd6c812894b2",
+          "sqliteContentHash": "b85e59f7d7cfe6007778ed9e1d7d79d3c9f114ecc8c8db7cb63ffd6c812894b2",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_history",
+          "recordId": "history-1301",
+          "sourceContentHash": "45cff64a66b02e26adadf5bbac9c9400f42c351b70fd31d0fbddc2f25d94ad55",
+          "sqliteContentHash": "45cff64a66b02e26adadf5bbac9c9400f42c351b70fd31d0fbddc2f25d94ad55",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3001",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_question",
+            "recordId": "question-1301",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "evidence_packet",
+            "recordId": "evidence-1301",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_artifact",
+            "recordId": "forecast-1301",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "forecast_history_events",
+            "recordType": "forecast_history",
+            "recordId": "history-1301",
+            "writeMode": "append_only"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:predictionrun-1301:forecast-1301",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "forecast.create:predictionrun-1301",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-009",
+      "scenarioName": "campaign-resolution-record",
+      "operationName": "resolution.record",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3101",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 0,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "resolution_record",
+          "recordId": "resolution-1301",
+          "sourceContentHash": "6d9e05d235304a13ad4e90b4b00414f5ba2d382b9a60de2b3bc6ba4757fb40b1",
+          "sqliteContentHash": "6d9e05d235304a13ad4e90b4b00414f5ba2d382b9a60de2b3bc6ba4757fb40b1",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "due_resolution_jobs"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3101",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "resolution_record",
+            "recordId": "resolution-1301",
+            "writeMode": "insert_once"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:predictionrun-1301:resolution-1301",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "resolution.record:predictionrun-1301",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-010",
+      "scenarioName": "campaign-score-create",
+      "operationName": "score.create",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3201",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 0,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "scoring_report",
+          "recordId": "scoring-1301",
+          "sourceContentHash": "7dcd68466ef2f36a8b2d77782e12d94d5da423e91d3fee5491114bc9e1f3eb11",
+          "sqliteContentHash": "7dcd68466ef2f36a8b2d77782e12d94d5da423e91d3fee5491114bc9e1f3eb11",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "append_readiness"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3201",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "scoring_report",
+            "recordId": "scoring-1301",
+            "writeMode": "insert_once"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:predictionrun-1301:scoring-1301",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "score.create:predictionrun-1301",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-011",
+      "scenarioName": "campaign-evidence-append",
+      "operationName": "evidence.append",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3301",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 0,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "evidence_ledger_row",
+          "recordId": "campaignledgerrow-001",
+          "sourceContentHash": "d973b6ee21b101fbf04d7e73f4f2d7a9bf543257744f589201f87899c11d5c6e",
+          "sqliteContentHash": "d973b6ee21b101fbf04d7e73f4f2d7a9bf543257744f589201f87899c11d5c6e",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "append_readiness",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3301",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "evidence_ledger_rows",
+            "recordType": "evidence_ledger_row",
+            "recordId": "campaignledgerrow-001",
+            "writeMode": "append_only"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:predictionrun-1301:forecast-1301:scoring-1301:comparable",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "evidence.append:predictionrun-1301",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-012",
+      "scenarioName": "campaign-method-apply",
+      "operationName": "method.apply",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3401",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 1,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "method_update_audit",
+          "recordId": "methodaudit-3401",
+          "sourceContentHash": "2efb9aa2772580c6f3b2fb69f6409e76bead1061ca2336a72bdcd74ca4b17cee",
+          "sqliteContentHash": "2efb9aa2772580c6f3b2fb69f6409e76bead1061ca2336a72bdcd74ca4b17cee",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3401",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "operation_audit_records",
+            "recordType": "method_update_audit",
+            "recordId": "methodaudit-3401",
+            "writeMode": "prospective_binding"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:apply:method-binding",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "method.apply:predictioncampaign-001:method-binding",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-013",
+      "scenarioName": "campaign-method-rollback",
+      "operationName": "method.rollback",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3501",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 1,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "method_update_audit",
+          "recordId": "methodaudit-3501",
+          "sourceContentHash": "ef7b4618a0fe0c8ed6547aee6a65bd9bcbdfa57929859e12aaea2980cb664302",
+          "sqliteContentHash": "ef7b4618a0fe0c8ed6547aee6a65bd9bcbdfa57929859e12aaea2980cb664302",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3501",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "operation_audit_records",
+            "recordType": "method_update_audit",
+            "recordId": "methodaudit-3501",
+            "writeMode": "prospective_binding"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:rollback:method-binding",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "method.rollback:predictioncampaign-001:method-binding",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-014",
+      "scenarioName": "json-state-import",
+      "operationName": "state.import_json",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3701",
+      "plannedWriteCount": 8,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 5,
+      "auditRecordsInserted": 2,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "forecast_artifact",
+          "recordId": "forecast-1301",
+          "sourceContentHash": "b85e59f7d7cfe6007778ed9e1d7d79d3c9f114ecc8c8db7cb63ffd6c812894b2",
+          "sqliteContentHash": "b85e59f7d7cfe6007778ed9e1d7d79d3c9f114ecc8c8db7cb63ffd6c812894b2",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "forecast_history",
+          "recordId": "history-1301",
+          "sourceContentHash": "45cff64a66b02e26adadf5bbac9c9400f42c351b70fd31d0fbddc2f25d94ad55",
+          "sqliteContentHash": "45cff64a66b02e26adadf5bbac9c9400f42c351b70fd31d0fbddc2f25d94ad55",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "evidence_ledger_row",
+          "recordId": "campaignledgerrow-001",
+          "sourceContentHash": "d973b6ee21b101fbf04d7e73f4f2d7a9bf543257744f589201f87899c11d5c6e",
+          "sqliteContentHash": "d973b6ee21b101fbf04d7e73f4f2d7a9bf543257744f589201f87899c11d5c6e",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "run_state_projection",
+          "recordId": "runstateprojection-1301",
+          "sourceContentHash": "e7428b6f29c57942d80845f49c2dab1c98494672ad25fbaef3a52c0e7e616b5c",
+          "sqliteContentHash": "e7428b6f29c57942d80845f49c2dab1c98494672ad25fbaef3a52c0e7e616b5c",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "campaign_state_projection",
+          "recordId": "campaignstateprojection-001",
+          "sourceContentHash": "0f1a5e8ccbdd610a845b4c9f900baeb05d85fc7b35c0602ad7d74956f8359764",
+          "sqliteContentHash": "0f1a5e8ccbdd610a845b4c9f900baeb05d85fc7b35c0602ad7d74956f8359764",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "method_binding_state",
+          "recordId": "methodbindingstate-001",
+          "sourceContentHash": "e41b99858d76317dec8f7847396af804465d7fdd3f859f532e9d80722138923c",
+          "sqliteContentHash": "e41b99858d76317dec8f7847396af804465d7fdd3f859f532e9d80722138923c",
+          "matchesSourceHash": true
+        },
+        {
+          "recordType": "json_state_migration_receipt",
+          "recordId": "jsonmigration-001",
+          "sourceContentHash": "fb5094b77bf307277d2f5fd3df8e96ed1343b0dae63310fa5e851439272b0191",
+          "sqliteContentHash": "fb5094b77bf307277d2f5fd3df8e96ed1343b0dae63310fa5e851439272b0191",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": {
+        "sourceRoot": ".ope/live/prediction-campaigns",
+        "stateClassCount": 5,
+        "sourceFileCount": 7,
+        "contentHashesPreserved": true,
+        "forecastProbabilitiesPreserved": true,
+        "sourceProvenancePreserved": true,
+        "historicalForecastRewriteCount": 0,
+        "methodBindingsPreserved": true,
+        "migrationReceiptRequired": true,
+        "automaticMigrationAllowed": false
+      },
+      "readModelEffects": [
+        "campaign_status",
+        "next_due_forecast",
+        "append_readiness",
+        "calibration_status",
+        "track_record_progress",
+        "recovery_actions"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3701",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "ope_records",
+            "recordType": "forecast_artifact",
+            "recordId": "forecast-1301",
+            "writeMode": "insert_once"
+          },
+          {
+            "tableName": "forecast_history_events",
+            "recordType": "forecast_history",
+            "recordId": "history-1301",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "evidence_ledger_rows",
+            "recordType": "evidence_ledger_row",
+            "recordId": "campaignledgerrow-001",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "read_model_rows",
+            "recordType": "run_state_projection",
+            "recordId": "runstateprojection-1301",
+            "writeMode": "projection_upsert"
+          },
+          {
+            "tableName": "read_model_rows",
+            "recordType": "campaign_state_projection",
+            "recordId": "campaignstateprojection-001",
+            "writeMode": "projection_upsert"
+          },
+          {
+            "tableName": "operation_audit_records",
+            "recordType": "method_binding_state",
+            "recordId": "methodbindingstate-001",
+            "writeMode": "prospective_binding"
+          },
+          {
+            "tableName": "operation_audit_records",
+            "recordType": "json_state_migration_receipt",
+            "recordId": "jsonmigration-001",
+            "writeMode": "append_only"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "predictioncampaign-001:import-json-state:001",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "state.import_json:predictioncampaign-001:json-state-import",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-015",
       "scenarioName": "recovery",
       "operationName": "score.create",
       "sqliteRuntimeExercised": true,
@@ -1158,7 +2666,7 @@
       "executionStatus": "failed_preflight_guard",
       "idempotencyStatus": "new_key_available",
       "leaseStatus": "available",
-      "operationReceiptId": "operationreceipt-2601",
+      "operationReceiptId": "operationreceipt-3801",
       "plannedWriteCount": 2,
       "operationReceiptsWritten": 1,
       "immutableRecordsInserted": 0,
@@ -1168,6 +2676,16 @@
       "historyRewriteCount": 0,
       "rawCrudExposed": false,
       "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "scoring_report",
+          "recordId": "scoringreport-3801",
+          "sourceContentHash": "05cae8c62e0925fb122c1988b899c11d490596f60329faf0ed96ebb81eb16c3a",
+          "sqliteContentHash": "05cae8c62e0925fb122c1988b899c11d490596f60329faf0ed96ebb81eb16c3a",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
       "readModelEffects": [
         "campaign_status",
         "failed_operations",
@@ -1179,13 +2697,13 @@
           {
             "tableName": "operation_receipts",
             "recordType": "operation_receipt",
-            "recordId": "operationreceipt-2601",
+            "recordId": "operationreceipt-3801",
             "writeMode": "append_only"
           },
           {
             "tableName": "ope_records",
             "recordType": "scoring_report",
-            "recordId": "scoringreport-2601",
+            "recordId": "scoringreport-3801",
             "writeMode": "insert_once"
           }
         ],
@@ -1221,10 +2739,10 @@
             "message": "Resolution record is missing, so scoring cannot commit yet."
           }
         ],
-        "idempotencyKey": "predictioncampaign-2101:score:forecast-2601",
+        "idempotencyKey": "predictioncampaign-2101:score:forecast-3801",
         "leasePlan": {
           "requiresLease": true,
-          "leaseKey": "score.create:predictionrun-2601",
+          "leaseKey": "score.create:predictionrun-3801",
           "ownerId": "agent-alpha",
           "expiresAt": "2026-06-03T00:32:00Z"
         },
@@ -1260,11 +2778,16 @@
     "databaseBackendImplemented": true,
     "firstBackend": "local_sqlite",
     "productionDesignBackend": "postgres_design",
-    "operationCount": 12,
+    "operationCount": 14,
     "readModelCount": 9,
-    "immutableRecordClassCount": 11,
+    "immutableRecordClassCount": 14,
     "sqliteTableCount": 8,
-    "runtimeScenarioCount": 7,
+    "runtimeScenarioCount": 15,
+    "writeLocalOperationCoverageCount": 8,
+    "allWriteLocalPathsReceiptBacked": true,
+    "allWriteLocalPathsReadModelBacked": true,
+    "fileDatabaseCompatibilityCheckCount": 7,
+    "fileDatabaseCompatibilityChecked": true,
     "deleteReplacedByLifecycleOperations": true,
     "agentImplementationReady": true,
     "sqliteRuntimeChecked": true,

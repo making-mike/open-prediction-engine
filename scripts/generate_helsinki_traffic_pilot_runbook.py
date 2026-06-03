@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ from generate_prediction_campaign_doctor import build_prediction_campaign_doctor
 from generate_prediction_campaign_evidence_ledger import build_prediction_campaign_evidence_ledger
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
 from generate_prediction_campaign_method_update_plan import build_prediction_campaign_method_update_plan
+from generate_prediction_campaign_pre_calibration import build_prediction_campaign_pre_calibration
 from generate_prediction_campaign_runner import build_prediction_campaign_runner, default_args
 from ope_fixtures import compact_json, render_json, validate_and_emit
 from ope_schema import SPEC, validate_record
@@ -348,17 +350,27 @@ def build_runbook_steps() -> list[dict[str, Any]]:
         ),
         runbook_step(
             5,
-            key="create_next_forecast",
-            phase="forecast",
-            command="python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
-            operator_check="Run only inside the forecast creation window and keep stdout/logs.",
-            success_signal="One ready forecast is created idempotently in .ope/live for the next due run.",
-            recovery_action="If close time has passed, record missed and advance; never backfill.",
-            claim_boundary="Forecast creation still uses the baseline method until method-update gates permit otherwise.",
-            mutates_state=True,
+            key="review_pre_calibration",
+            phase="setup",
+            command="python3 scripts/ope.py prediction-campaign pre-calibration",
+            operator_check="Confirm historical-only pre-calibration is ready, scoped before the first pilot service date, and bound to transitmethod-100.",
+            success_signal="preCalibrationStatus is ready and calibratedProbability is visible before any forecast write.",
+            recovery_action="If pre-calibration is blocked, either fix the historical source or launch without --pre-calibrate.",
+            claim_boundary="Pre-calibration sets only a prospective baseline probability and does not create a quality claim.",
         ),
         runbook_step(
             6,
+            key="create_next_forecast",
+            phase="forecast",
+            command="python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
+            operator_check="Run only inside the forecast creation window and keep stdout/logs.",
+            success_signal="One ready forecast is created idempotently in .ope/live for the next due run.",
+            recovery_action="If close time has passed, record missed and advance; never backfill.",
+            claim_boundary="Forecast creation still uses the baseline method, with optional historical pre-calibration, until method-update gates permit otherwise.",
+            mutates_state=True,
+        ),
+        runbook_step(
+            7,
             key="daily_operator_status",
             phase="monitor",
             command="python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
@@ -368,7 +380,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             claim_boundary="Status readbacks do not mutate campaign state or imply model quality.",
         ),
         runbook_step(
-            7,
+            8,
             key="resolve_due_run",
             phase="resolve",
             command=(
@@ -382,7 +394,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             mutates_state=True,
         ),
         runbook_step(
-            8,
+            9,
             key="append_scored_row",
             phase="append",
             command="python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local",
@@ -393,7 +405,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             mutates_state=True,
         ),
         runbook_step(
-            9,
+            10,
             key="review_calibration_threshold",
             phase="calibrate",
             command="python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot",
@@ -403,7 +415,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             claim_boundary="Calibration readback is measurement-only and does not update probabilities.",
         ),
         runbook_step(
-            10,
+            11,
             key="review_method_update_after_threshold",
             phase="calibrate",
             command="python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command",
@@ -413,7 +425,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             claim_boundary="The best available method is baseline until an explicit local apply command is approved.",
         ),
         runbook_step(
-            11,
+            12,
             key="recover_or_resume",
             phase="recover",
             command="python3 scripts/ope.py prediction-campaign resume --from-local",
@@ -423,7 +435,7 @@ def build_runbook_steps() -> list[dict[str, Any]]:
             claim_boundary="Recovery must preserve prior forecasts and append-only evidence.",
         ),
         runbook_step(
-            12,
+            13,
             key="stop_or_abort",
             phase="stop",
             command="python3 scripts/ope.py prediction-campaign pilot-runbook --view abort",
@@ -540,6 +552,7 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
     full_manifest = build_prediction_campaign_manifest(target_count=TARGET_RUN_COUNT, full_materialization=True)
     runner = build_prediction_campaign_runner()
     mini_runner = build_prediction_campaign_runner(mini_runner_args())
+    pre_calibration = build_prediction_campaign_pre_calibration()
     doctor = build_prediction_campaign_doctor()
     ledger = build_prediction_campaign_evidence_ledger()
     calibration = build_prediction_campaign_calibration_status()
@@ -557,6 +570,7 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
             "predictionCampaignManifestId": manifest["predictionCampaignManifestId"],
             "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
             "predictionCampaignDoctorId": doctor["predictionCampaignDoctorId"],
+            "predictionCampaignPreCalibrationId": pre_calibration["predictionCampaignPreCalibrationId"],
             "predictionCampaignEvidenceLedgerId": ledger["predictionCampaignEvidenceLedgerId"],
             "predictionCampaignCalibrationStatusId": calibration["predictionCampaignCalibrationStatusId"],
             "predictionCampaignMethodUpdatePlanId": method_plan["predictionCampaignMethodUpdatePlanId"],
@@ -577,6 +591,8 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
             "bestAvailableMethodName": "baseline historical transit-delay frequency",
             "nonBaselineMethodGate": "Use transitmethod-101 only after the method-update gate, plan, approvals, benchmark evidence, and rollback record are ready.",
             "fullMaterializationCommand": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization",
+            "optionalPreCalibrationCommand": "python3 scripts/ope.py prediction-campaign pre-calibration",
+            "launchWithPreCalibrationCommand": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
             "miniSmokeCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
             "normalChecksUseLiveNetwork": False,
             "normalChecksWriteLocalState": False,
@@ -615,6 +631,8 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
             "successCriteriaCount": len(success),
             "abortCriteriaCount": len(abort),
             "bestAvailableMethodId": "transitmethod-100",
+            "optionalPreCalibrationAvailable": pre_calibration["preCalibrationStatus"] == "ready",
+            "optionalPreCalibrationStatus": pre_calibration["preCalibrationStatus"],
             "qualityClaimAllowed": False,
             "calibrationClaimAllowed": False,
             "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke",
@@ -626,6 +644,7 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
             "startsLongRunningRunner": False,
             "executesResolvers": False,
             "appendsLedgerRows": False,
+            "writesPreCalibrationState": False,
             "changesForecastMethod": False,
             "hostedRuntimeAllowed": False,
             "qualityClaimAllowed": False,
@@ -633,6 +652,7 @@ def build_helsinki_traffic_pilot_runbook() -> dict[str, Any]:
         "warnings": [
             "This runbook is a checked local operations readback; it does not start the real pilot by itself.",
             "The three-run smoke path must pass before the 100-run pilot is started with explicit local writes.",
+            "Optional pre-calibration must use historical-only data and stays on the baseline method.",
             "The best available method remains transitmethod-100 until evidence and approvals explicitly permit a prospective method update.",
             "Calibration after 100 comparable outcomes is measurement-only and does not rewrite historical forecasts or probabilities.",
         ],
@@ -676,6 +696,22 @@ def check_or_write(data: dict[str, Any], *, write: bool) -> None:
     )
 
 
+def validate_runbook(record: dict[str, Any]) -> None:
+    errors = validate_record(record, SCHEMA)
+    if errors:
+        for error in errors:
+            print(error)
+        raise SystemExit(1)
+
+
+def load_generated_runbook() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    record = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_runbook(record)
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="refresh generated Helsinki pilot runbook")
@@ -694,15 +730,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    record = build_helsinki_traffic_pilot_runbook()
+    if args.write or args.check:
+        record = build_helsinki_traffic_pilot_runbook()
+    else:
+        record = load_generated_runbook() or build_helsinki_traffic_pilot_runbook()
     if args.write or args.check:
         check_or_write(record, write=args.write)
         return
-    errors = validate_record(record, SCHEMA)
-    if errors:
-        for error in errors:
-            print(error)
-        raise SystemExit(1)
+    validate_runbook(record)
     print_view(record, args.view, args.output_format)
 
 

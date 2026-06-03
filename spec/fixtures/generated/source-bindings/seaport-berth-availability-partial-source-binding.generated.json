@@ -1,0 +1,237 @@
+{
+  "sourceBindingId": "sourcebinding-115002",
+  "generatedAt": "2026-06-03T03:45:00Z",
+  "bindingCase": "partial",
+  "bindingStatus": "partial_needs_confirmation",
+  "domainConfigId": "domainconfig-002",
+  "domainKey": "seaport-berth-availability",
+  "predictionId": "prediction-002",
+  "sourceBindingMode": "database_adapter_manifest",
+  "credentialPolicy": {
+    "credentialValuesStored": false,
+    "credentialReferencesAllowed": true,
+    "credentialReferenceRequired": true,
+    "secretScanningRequired": true,
+    "rawCredentialValueDetected": false
+  },
+  "sourceRoleBindings": [
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115004",
+      "roleKey": "vessel_schedule",
+      "sourceKind": "database",
+      "sourceRef": "manifest-seaport-vessel-schedule-001",
+      "adapterRef": "adapter-seaport-database-sanitized-001",
+      "credentialRef": "credentialref-seaport-readonly-001",
+      "approvalStatus": "approved",
+      "bindingStatus": "confirmed",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": true,
+      "queryBoundary": "approved_readonly_query_manifest_without_raw_sql",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115005",
+      "roleKey": "historical_berth_baseline",
+      "sourceKind": "source_adapter_output",
+      "sourceRef": "adapter-output-seaport-berth-history-draft-001",
+      "adapterRef": "adapter-seaport-history-sanitized-001",
+      "credentialRef": "credentialref-seaport-readonly-001",
+      "approvalStatus": "needs_confirmation",
+      "bindingStatus": "draft",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": true,
+      "queryBoundary": "candidate_history_window_requires_owner_confirmation",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115006",
+      "roleKey": "berth_availability_outcome",
+      "sourceKind": "database",
+      "sourceRef": "missing-resolution-outcome-manifest",
+      "adapterRef": "adapter-seaport-outcome-sanitized-001",
+      "credentialRef": "credentialref-seaport-readonly-001",
+      "approvalStatus": "needs_confirmation",
+      "bindingStatus": "missing",
+      "forecastTimeAllowed": false,
+      "sanitizedManifestProvided": false,
+      "queryBoundary": "post_horizon_outcome_query_boundary_not_confirmed",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    }
+  ],
+  "preForecastChecks": [
+    {
+      "checkId": "sourcebindingcheck-115007",
+      "checkName": "mapping_confidence",
+      "checkStatus": "warn",
+      "score": 0.78,
+      "minimumScore": 0.8,
+      "blocksForecast": true,
+      "message": "Baseline mapping is close but still needs owner confirmation."
+    },
+    {
+      "checkId": "sourcebindingcheck-115008",
+      "checkName": "source_quality",
+      "checkStatus": "warn",
+      "score": 0.73,
+      "minimumScore": 0.75,
+      "blocksForecast": true,
+      "message": "Historical berth coverage is not yet strong enough for forecast execution."
+    },
+    {
+      "checkId": "sourcebindingcheck-115009",
+      "checkName": "leakage",
+      "checkStatus": "pass",
+      "score": 1.0,
+      "minimumScore": 1.0,
+      "blocksForecast": false,
+      "message": "Outcome binding is not forecast-time evidence."
+    },
+    {
+      "checkId": "sourcebindingcheck-115010",
+      "checkName": "freshness",
+      "checkStatus": "pass",
+      "score": 0.85,
+      "minimumScore": 0.7,
+      "blocksForecast": false,
+      "message": "Vessel schedule freshness is within the configured retrieval window."
+    },
+    {
+      "checkId": "sourcebindingcheck-115011",
+      "checkName": "privacy",
+      "checkStatus": "pass",
+      "score": 1.0,
+      "minimumScore": 1.0,
+      "blocksForecast": false,
+      "message": "Only credential references and sanitized manifests are present."
+    },
+    {
+      "checkId": "sourcebindingcheck-115012",
+      "checkName": "outcome_availability",
+      "checkStatus": "fail",
+      "score": 0.2,
+      "minimumScore": 0.7,
+      "blocksForecast": true,
+      "message": "Resolution outcome binding is missing and must be confirmed first."
+    }
+  ],
+  "setupOperations": [
+    {
+      "operationId": "setupoperation-115001",
+      "operationName": "source_binding.draft",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "create_prediction",
+      "lifecycleOperation": "prediction.config_create",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115002",
+      "operationName": "source_binding.validate",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115003",
+      "operationName": "source_binding.confirm",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115004",
+      "operationName": "source_binding.update",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115005",
+      "operationName": "source_binding.archive",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "archive_record",
+      "lifecycleOperation": "prediction.config_archive",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115006",
+      "operationName": "source_binding.redact",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case partial",
+      "internalApiOperation": "redact_record",
+      "lifecycleOperation": "prediction.config_redact",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    }
+  ],
+  "configurationInputBoundary": {
+    "sanitizedManifestRequired": true,
+    "sanitizedMappingRequired": true,
+    "sanitizedProvenanceRequired": true,
+    "queryBoundaryRequired": true,
+    "arbitraryPrivateApiParsingByOpe": false,
+    "arbitraryDatabaseParsingByOpe": false,
+    "callerApprovalRequired": true
+  },
+  "executionBoundary": {
+    "createsForecasts": false,
+    "writesSourceData": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "executesApiCalls": false,
+    "executesDatabaseQueries": false,
+    "rawSqlAllowed": false
+  },
+  "nextAction": "collect_missing_source_binding",
+  "summary": {
+    "sourceBindingRecordsDefined": true,
+    "approvedSourceKindsCovered": true,
+    "setupOperationsDefined": true,
+    "safetyChecksComplete": false,
+    "allRequiredRolesBound": false,
+    "forecastGenerationAllowed": false,
+    "credentialsExcluded": true,
+    "privateParsingBehindAdapters": true,
+    "normalChecksNonMutating": true
+  },
+  "warnings": [
+    "Partial binding blocks forecast generation until missing source roles and mappings are confirmed.",
+    "The database source is represented by an adapter manifest and credential reference, not raw SQL or credential values."
+  ]
+}

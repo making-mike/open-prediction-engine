@@ -15,6 +15,7 @@
     "campaignCreationRequest",
     "forecastSchedule",
     "methodSelectionBinding",
+    "preCalibration",
     "supportedRecurrenceModes",
     "runnerDecisions",
     "missedRunPolicy",
@@ -37,6 +38,7 @@
     "campaignCreationRequest": { "$ref": "#/$defs/campaignCreationRequest" },
     "forecastSchedule": { "$ref": "#/$defs/forecastSchedule" },
     "methodSelectionBinding": { "$ref": "#/$defs/methodSelectionBinding" },
+    "preCalibration": { "$ref": "#/$defs/preCalibration" },
     "supportedRecurrenceModes": {
       "type": "array",
       "minItems": 5,
@@ -140,6 +142,8 @@
         "candidatePlanCount",
         "liveWeatherRequested",
         "resolverExecutionRequested",
+        "preCalibrationRequested",
+        "historySourcePath",
         "acceptedForDryRun",
         "createsCampaignManifest",
         "writesCampaignState",
@@ -164,6 +168,8 @@
         "candidatePlanCount": { "$ref": "#/$defs/boundedString" },
         "liveWeatherRequested": { "type": "boolean" },
         "resolverExecutionRequested": { "type": "boolean" },
+        "preCalibrationRequested": { "type": "boolean" },
+        "historySourcePath": { "$ref": "#/$defs/boundedString" },
         "acceptedForDryRun": { "type": "boolean" },
         "createsCampaignManifest": { "type": "boolean" },
         "writesCampaignState": { "type": "boolean" },
@@ -271,6 +277,56 @@
         "forecastCloseAt": { "$ref": "common.schema.json#/$defs/timestamp" },
         "createsForecastArtifacts": { "type": "boolean" },
         "writesCampaignState": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "preCalibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestStatus",
+        "preCalibrationStatus",
+        "predictionCampaignPreCalibrationId",
+        "historySourcePath",
+        "resolvedOutcomeRowCount",
+        "calibratedProbability",
+        "activeMethodId",
+        "preCalibrationArtifactPath",
+        "methodBindingPath",
+        "forecastProbabilitySource",
+        "localWriteRequiredBeforeUse",
+        "writesDuringDryRun",
+        "qualityClaimAllowed",
+        "nextAction"
+      ],
+      "properties": {
+        "requestStatus": {
+          "type": "string",
+          "enum": ["not_requested", "requested"]
+        },
+        "preCalibrationStatus": {
+          "type": "string",
+          "enum": [
+            "not_requested",
+            "ready",
+            "blocked_insufficient_historical_rows",
+            "blocked_future_or_pilot_window_rows",
+            "blocked_unresolved_historical_outcomes",
+            "local_pre_calibration_completed",
+            "local_pre_calibration_already_present"
+          ]
+        },
+        "predictionCampaignPreCalibrationId": { "$ref": "#/$defs/boundedString" },
+        "historySourcePath": { "$ref": "#/$defs/boundedString" },
+        "resolvedOutcomeRowCount": { "type": "integer", "minimum": 0 },
+        "calibratedProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "activeMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "preCalibrationArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "methodBindingPath": { "$ref": "#/$defs/boundedString" },
+        "forecastProbabilitySource": { "$ref": "#/$defs/boundedString" },
+        "localWriteRequiredBeforeUse": { "type": "boolean" },
+        "writesDuringDryRun": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
         "nextAction": { "$ref": "#/$defs/boundedString" }
       }
     },
@@ -401,6 +457,7 @@
         "resolverExecutionImplemented",
         "writesLiveState",
         "normalChecksUseLiveNetwork",
+        "preCalibrationImplemented",
         "qualityClaimAllowed",
         "recommendedNextMilestone"
       ],
@@ -411,6 +468,7 @@
         "resolverExecutionImplemented": { "type": "boolean" },
         "writesLiveState": { "type": "boolean" },
         "normalChecksUseLiveNetwork": { "type": "boolean" },
+        "preCalibrationImplemented": { "type": "boolean" },
         "qualityClaimAllowed": { "type": "boolean" },
         "recommendedNextMilestone": { "$ref": "#/$defs/boundedString" }
       }
@@ -424,6 +482,7 @@
         "executesForecastRunner",
         "sleepsOrPolls",
         "writesIgnoredLiveState",
+        "writesPreCalibrationState",
         "fetchesLiveData",
         "executesResolvers",
         "appendsCorpusEvidence",
@@ -438,6 +497,7 @@
         "executesForecastRunner": { "type": "boolean" },
         "sleepsOrPolls": { "type": "boolean" },
         "writesIgnoredLiveState": { "type": "boolean" },
+        "writesPreCalibrationState": { "type": "boolean" },
         "fetchesLiveData": { "type": "boolean" },
         "executesResolvers": { "type": "boolean" },
         "appendsCorpusEvidence": { "type": "boolean" },

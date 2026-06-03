@@ -87,12 +87,30 @@ def main() -> None:
         "campaign_health",
         "campaign_append_readiness",
         "campaign_calibration_status",
+        "internal_api",
         "resolution_jobs",
         "resolution_scheduler_status",
         "resolution_status",
         "scoring_summary",
     ]:
         require(operations[operation]["requiresApproval"] is False, f"{operation} should be read/status-only")
+    internal_api = operations["internal_api"]
+    require(
+        internal_api["sideEffectLevel"] == "dry_run_generation",
+        "internal API wrapper should be a dry-run generation adapter",
+    )
+    require(
+        internal_api["inputRecordType"] == "internal_api_request",
+        "internal API wrapper should bind internal API request records",
+    )
+    internal_fields = {item["name"]: item for item in internal_api["inputFields"]}
+    require("internalOperation" in internal_fields, "internal API wrapper should expose internalOperation")
+    require("predictionId" in internal_fields, "internal API wrapper should expose predictionId")
+    require("idempotencyKey" in internal_fields, "internal API wrapper should expose idempotencyKey")
+    require(
+        "non-mutating dry-run mode" in internal_api["usageGuidance"],
+        "internal API wrapper guidance should preserve dry-run semantics",
+    )
     adapter_runbook = operations["private_setup_adapter_runbook"]
     require(
         adapter_runbook["sideEffectLevel"] == "read_only",

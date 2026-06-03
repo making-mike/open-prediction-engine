@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import json
+import os
+import shlex
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from check_live_capture_workspace import fixture_integration_result
@@ -15,26 +18,50 @@ from live_capture_workspace import build_live_result_set, save_live_result_set
 
 
 ROOT = Path(__file__).resolve().parents[1]
+FULL_DRIFT_CHECKS = os.environ.get("OPE_CLI_FULL_DRIFT_CHECKS") == "1"
 
 
-def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, "scripts/ope.py", *args],
-        cwd=ROOT,
-        check=True,
-        text=True,
-        capture_output=True,
-    )
-
-
-def run_cli_unchecked(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, "scripts/ope.py", *args],
+def run_ope_command(*args: str, check: bool) -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, "scripts/ope.py", *args]
+    rendered = shlex.join(command)
+    started = time.perf_counter()
+    print(f"[check_cli] start {rendered}", file=sys.stderr, flush=True)
+    result = subprocess.run(
+        command,
         cwd=ROOT,
         check=False,
         text=True,
         capture_output=True,
     )
+    print(
+        f"[check_cli] done exit={result.returncode} elapsed={time.perf_counter() - started:.2f}s {rendered}",
+        file=sys.stderr,
+        flush=True,
+    )
+    if check:
+        result.check_returncode()
+    return result
+
+
+def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
+    return run_ope_command(*args, check=True)
+
+
+def run_cli_unchecked(*args: str) -> subprocess.CompletedProcess[str]:
+    return run_ope_command(*args, check=False)
+
+
+def run_optional_drift_check(*args: str, expected_stdout: str, label: str) -> None:
+    if not FULL_DRIFT_CHECKS:
+        print(
+            f"[check_cli] skip duplicate drift check for {label}; set OPE_CLI_FULL_DRIFT_CHECKS=1 to run it",
+            file=sys.stderr,
+            flush=True,
+        )
+        return
+    result = run_cli(*args)
+    if expected_stdout not in result.stdout:
+        raise AssertionError(f"CLI {label} check output drifted")
 
 
 def agent_call_setup_readback(operation: str) -> dict[str, object]:
@@ -54,12 +81,20 @@ def main() -> None:
     generate_fixtures_list = run_cli("generate-fixtures", "--list")
     if "scripts/generate_prediction_campaign_explain.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the campaign explain generator")
+    if "scripts/generate_prediction_campaign_pre_calibration.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the campaign pre-calibration generator")
     if "scripts/generate_helsinki_traffic_pilot_runbook.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the Helsinki pilot runbook generator")
     if "scripts/generate_helsinki_traffic_pilot_readiness.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the Helsinki pilot readiness generator")
     if "scripts/generate_lifecycle_operation_store.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the lifecycle operation store generator")
+    if "scripts/generate_internal_api.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the internal API generator")
+    if "scripts/generate_prediction_workspace_registry.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the prediction workspace registry generator")
+    if "scripts/generate_source_bindings.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the source binding generator")
     if "fixture commands" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures list output drifted")
     run_cli("resolve-live")
@@ -69,12 +104,19 @@ def main() -> None:
     run_cli("live-readiness", "--check")
     run_cli("transit-api-connector", "--check")
     run_cli("domain-setups", "--check")
+    run_cli("domain-configs", "--check")
+    run_cli("source-bindings", "--check")
     run_cli("transit-delay-forward-run", "--check")
     run_cli("resolve-due-forward-runs", "--check")
     run_cli("resolution-jobs", "--check")
     run_cli("resolution-scheduler", "--check")
     run_cli("resolution-runtime-reliability", "--check")
-    run_cli("lifecycle-operation-store", "--check")
+    run_optional_drift_check(
+        "lifecycle-operation-store",
+        "--check",
+        expected_stdout="checked lifecycle operation store",
+        label="lifecycle-operation-store",
+    )
     run_cli("transit-forward-run-corpus", "--check")
     transit_corpus_growth = run_cli("transit-corpus-growth")
     transit_corpus_growth_payload = json.loads(transit_corpus_growth.stdout)
@@ -135,7 +177,12 @@ def main() -> None:
     if "checked source quality mapping confidence" not in source_quality_check.stdout:
         raise AssertionError("CLI source-quality check output drifted")
     run_cli("source-handoff", "--check")
-    run_cli("source-handoff-method", "--check")
+    run_optional_drift_check(
+        "source-handoff-method",
+        "--check",
+        expected_stdout="checked source handoff method gates",
+        label="source-handoff-method",
+    )
     run_cli("auto-forecast")
     run_cli("resolve-auto-evidence")
     run_cli("historical-forecast")
@@ -144,7 +191,12 @@ def main() -> None:
     run_cli("setup-benchmark", "--check")
     run_cli("setup-method", "--check")
     run_cli("setup-forecast", "--check")
-    run_cli("source-handoff-forecast", "--check")
+    run_optional_drift_check(
+        "source-handoff-forecast",
+        "--check",
+        expected_stdout="checked 12 source-handoff setup forecast outputs",
+        label="source-handoff-forecast",
+    )
     local_source_runtime = run_cli("local-source-runtime")
     local_source_runtime_payload = json.loads(local_source_runtime.stdout)
     if local_source_runtime_payload["summary"]["forecastCardReadyCount"] != 1:
@@ -160,19 +212,67 @@ def main() -> None:
         raise AssertionError("CLI local-source-runtime should ask for missing approval")
     if runtime_cases["unsafe_path"]["runtimeStatus"] != "blocked_unsafe_path":
         raise AssertionError("CLI local-source-runtime should block unsafe paths")
-    local_source_runtime_check = run_cli("local-source-runtime", "--check")
-    if "checked local source runtime" not in local_source_runtime_check.stdout:
-        raise AssertionError("CLI local-source-runtime check output drifted")
+    run_optional_drift_check(
+        "local-source-runtime",
+        "--check",
+        expected_stdout="checked local source runtime",
+        label="local-source-runtime",
+    )
     run_cli("resolve-source-handoff")
-    run_cli("source-handoff-runbook", "--check")
-    run_cli("private-setup-workflow", "--check")
-    run_cli("private-source-adapters", "--check")
-    run_cli("private-source-adapter-outcomes", "--check")
-    run_cli("private-source-adapter-bridge", "--check")
-    run_cli("private-setup-requests", "--check")
-    run_cli("private-setup-actions", "--check")
-    run_cli("private-setup-action-runbook", "--check")
-    run_cli("private-setup-bundles", "--check")
+    run_optional_drift_check(
+        "source-handoff-runbook",
+        "--check",
+        expected_stdout="checked source handoff setup runbook",
+        label="source-handoff-runbook",
+    )
+    run_optional_drift_check(
+        "private-setup-workflow",
+        "--check",
+        expected_stdout="checked private setup workflow",
+        label="private-setup-workflow",
+    )
+    run_optional_drift_check(
+        "private-source-adapters",
+        "--check",
+        expected_stdout="checked private source adapter capabilities",
+        label="private-source-adapters",
+    )
+    run_optional_drift_check(
+        "private-source-adapter-outcomes",
+        "--check",
+        expected_stdout="checked private source adapter outcome matrix",
+        label="private-source-adapter-outcomes",
+    )
+    run_optional_drift_check(
+        "private-source-adapter-bridge",
+        "--check",
+        expected_stdout="checked private source adapter intake bridge",
+        label="private-source-adapter-bridge",
+    )
+    run_optional_drift_check(
+        "private-setup-requests",
+        "--check",
+        expected_stdout="checked private setup requests",
+        label="private-setup-requests",
+    )
+    run_optional_drift_check(
+        "private-setup-actions",
+        "--check",
+        expected_stdout="checked private setup first actions",
+        label="private-setup-actions",
+    )
+    run_optional_drift_check(
+        "private-setup-action-runbook",
+        "--check",
+        expected_stdout="checked private setup first-action runbook",
+        label="private-setup-action-runbook",
+    )
+    run_optional_drift_check(
+        "private-setup-bundles",
+        "--check",
+        expected_stdout="checked private setup agent bundles",
+        label="private-setup-bundles",
+    )
     private_setup_orchestrator = run_cli("private-setup-orchestrator")
     private_setup_orchestrator_payload = json.loads(private_setup_orchestrator.stdout)
     if private_setup_orchestrator_payload["runCount"] != 8:
@@ -186,9 +286,12 @@ def main() -> None:
         raise AssertionError("CLI private-setup-orchestrator should route accepted adapter output to forecast execution")
     if orchestrator_cases["unsafe_source"]["nextAction"] != "stop_unsafe_connector":
         raise AssertionError("CLI private-setup-orchestrator should stop unsafe source output")
-    private_setup_orchestrator_check = run_cli("private-setup-orchestrator", "--check")
-    if "checked private setup orchestrator" not in private_setup_orchestrator_check.stdout:
-        raise AssertionError("CLI private-setup-orchestrator check output drifted")
+    run_optional_drift_check(
+        "private-setup-orchestrator",
+        "--check",
+        expected_stdout="checked private setup orchestrator",
+        label="private-setup-orchestrator",
+    )
     agent_pilot_validation = run_cli("agent-pilot-validation")
     agent_pilot_validation_payload = json.loads(agent_pilot_validation.stdout)
     if agent_pilot_validation_payload["taskCount"] != 5:
@@ -202,9 +305,12 @@ def main() -> None:
         raise AssertionError("CLI agent-pilot-validation accepted-adapter scenario drifted")
     if pilot_scenarios["unsafe_source_block"]["expectedOutcomeClass"] != "blocked_unsafe":
         raise AssertionError("CLI agent-pilot-validation unsafe-source scenario drifted")
-    agent_pilot_validation_check = run_cli("agent-pilot-validation", "--check")
-    if "checked agent pilot validation pack" not in agent_pilot_validation_check.stdout:
-        raise AssertionError("CLI agent-pilot-validation check output drifted")
+    run_optional_drift_check(
+        "agent-pilot-validation",
+        "--check",
+        expected_stdout="checked agent pilot validation pack",
+        label="agent-pilot-validation",
+    )
     pilot_evidence = run_cli("pilot-evidence")
     pilot_evidence_payload = json.loads(pilot_evidence.stdout)
     if pilot_evidence_payload["summary"]["acceptedRealSessionCount"] != 0:
@@ -224,9 +330,12 @@ def main() -> None:
     pilot_evidence_summary_payload = json.loads(pilot_evidence_summary.stdout)
     if pilot_evidence_summary_payload["expansionEvidenceReady"] is not False:
         raise AssertionError("CLI pilot-evidence summary should not unblock expansion")
-    pilot_evidence_check = run_cli("pilot-evidence", "--check")
-    if "checked pilot evidence ledger" not in pilot_evidence_check.stdout:
-        raise AssertionError("CLI pilot-evidence check output drifted")
+    run_optional_drift_check(
+        "pilot-evidence",
+        "--check",
+        expected_stdout="checked pilot evidence ledger",
+        label="pilot-evidence",
+    )
     pilot_session_packet = run_cli("pilot-session-packet")
     pilot_session_packet_payload = json.loads(pilot_session_packet.stdout)
     if pilot_session_packet_payload["collectionSummary"]["taskCardCount"] != 6:
@@ -246,9 +355,12 @@ def main() -> None:
     pilot_session_template_payload = json.loads(pilot_session_template.stdout)
     if not pilot_session_template_payload["ledgerSubmissionShape"]["canSubmitToPilotEvidence"]:
         raise AssertionError("CLI pilot-session-packet template should be ledger-submission shaped")
-    pilot_session_check = run_cli("pilot-session-packet", "--check")
-    if "checked pilot session packet" not in pilot_session_check.stdout:
-        raise AssertionError("CLI pilot-session-packet check output drifted")
+    run_optional_drift_check(
+        "pilot-session-packet",
+        "--check",
+        expected_stdout="checked pilot session packet",
+        label="pilot-session-packet",
+    )
     pilot_summary_intake = run_cli("pilot-summary-intake")
     pilot_summary_intake_payload = json.loads(pilot_summary_intake.stdout)
     if pilot_summary_intake_payload["summary"]["acceptedLedgerReadyCount"] != 2:
@@ -270,9 +382,12 @@ def main() -> None:
     pilot_summary_rules_payload = json.loads(pilot_summary_rules.stdout)
     if pilot_summary_rules_payload[0]["decision"] != "Accept for ledger review.":
         raise AssertionError("CLI pilot-summary-intake rules order drifted")
-    pilot_summary_check = run_cli("pilot-summary-intake", "--check")
-    if "checked pilot summary intake" not in pilot_summary_check.stdout:
-        raise AssertionError("CLI pilot-summary-intake check output drifted")
+    run_optional_drift_check(
+        "pilot-summary-intake",
+        "--check",
+        expected_stdout="checked pilot summary intake",
+        label="pilot-summary-intake",
+    )
     local_usage_trace = run_cli("local-usage-trace")
     local_usage_trace_payload = json.loads(local_usage_trace.stdout)
     if local_usage_trace_payload["totalEvents"] != 20:
@@ -290,9 +405,12 @@ def main() -> None:
         raise AssertionError("CLI local-usage-trace should expose sanitized oversized readback")
     if usage_events["campaign_calibration_threshold_met"]["eventClass"] != "campaign":
         raise AssertionError("CLI local-usage-trace should expose campaign lifecycle events")
-    local_usage_trace_check = run_cli("local-usage-trace", "--check")
-    if "checked local usage trace" not in local_usage_trace_check.stdout:
-        raise AssertionError("CLI local-usage-trace check output drifted")
+    run_optional_drift_check(
+        "local-usage-trace",
+        "--check",
+        expected_stdout="checked local usage trace",
+        label="local-usage-trace",
+    )
     developer_adoption = run_cli("developer-adoption")
     developer_adoption_payload = json.loads(developer_adoption.stdout)
     if developer_adoption_payload["summary"]["quickstartStepCount"] != 7:
@@ -312,9 +430,12 @@ def main() -> None:
         raise AssertionError("CLI developer-adoption quickstart should begin with Python setup")
     if "prediction-campaign explain" not in developer_quickstart_payload[-1]["command"]:
         raise AssertionError("CLI developer-adoption quickstart should evaluate recurring campaigns")
-    developer_adoption_check = run_cli("developer-adoption", "--check")
-    if "checked developer adoption surface" not in developer_adoption_check.stdout:
-        raise AssertionError("CLI developer-adoption check output drifted")
+    run_optional_drift_check(
+        "developer-adoption",
+        "--check",
+        expected_stdout="checked developer adoption surface",
+        label="developer-adoption",
+    )
     expansion_readiness = run_cli("expansion-readiness")
     expansion_readiness_payload = json.loads(expansion_readiness.stdout)
     if expansion_readiness_payload["gateStatus"] != "blocked_pending_evidence":
@@ -349,9 +470,12 @@ def main() -> None:
     expansion_option_payload = json.loads(expansion_option_section.stdout)
     if expansion_option_payload[0]["area"] != "hosted_runtime":
         raise AssertionError("CLI expansion-readiness option section order drifted")
-    expansion_readiness_check = run_cli("expansion-readiness", "--check")
-    if "checked expansion readiness gate" not in expansion_readiness_check.stdout:
-        raise AssertionError("CLI expansion-readiness check output drifted")
+    run_optional_drift_check(
+        "expansion-readiness",
+        "--check",
+        expected_stdout="checked expansion readiness gate",
+        label="expansion-readiness",
+    )
     repeating_setup = run_cli("repeating-prediction-setup")
     repeating_setup_payload = json.loads(repeating_setup.stdout)
     if repeating_setup_payload["setupStatus"] != "contract_ready_non_executing":
@@ -427,6 +551,8 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign start default input mode drifted")
     if prediction_campaign_start_payload["campaignCreationRequest"]["targetCount"] != "100":
         raise AssertionError("CLI prediction-campaign start target count drifted")
+    if prediction_campaign_start_payload["preCalibration"]["requestStatus"] != "not_requested":
+        raise AssertionError("CLI prediction-campaign start should not pre-calibrate by default")
     if prediction_campaign_start_payload["forecastSchedule"]["readyRunId"] != "predictionrun-1301":
         raise AssertionError("CLI prediction-campaign start forecast schedule ready run drifted")
     if prediction_campaign_start_payload["missedRunPolicy"]["recordedRunStatus"] != "missed":
@@ -465,6 +591,8 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign foreground tick should not claim future-window polling")
     if prediction_campaign_foreground_payload["executionBoundary"]["writesCampaignState"] is not False:
         raise AssertionError("CLI prediction-campaign foreground dry-run must not write campaign state")
+    if prediction_campaign_foreground_payload["executionBoundary"]["writesPreCalibrationState"] is not False:
+        raise AssertionError("CLI prediction-campaign foreground dry-run must not write pre-calibration state")
     prediction_campaign_next_due = run_cli(
         "prediction-campaign",
         "start",
@@ -544,6 +672,20 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign start should record explicit live weather requests")
     if prediction_campaign_start_flags_payload["campaignCreationRequest"]["resolverExecutionRequested"] is not True:
         raise AssertionError("CLI prediction-campaign start should record explicit resolver requests")
+    prediction_campaign_start_pre_calibration = run_cli(
+        "prediction-campaign",
+        "start",
+        "--pre-calibrate",
+        "--view",
+        "pre-calibration",
+    )
+    prediction_campaign_start_pre_calibration_payload = json.loads(prediction_campaign_start_pre_calibration.stdout)
+    if prediction_campaign_start_pre_calibration_payload["requestStatus"] != "requested":
+        raise AssertionError("CLI prediction-campaign start should expose requested pre-calibration")
+    if prediction_campaign_start_pre_calibration_payload["preCalibrationStatus"] != "ready":
+        raise AssertionError("CLI prediction-campaign start pre-calibration should be ready")
+    if prediction_campaign_start_pre_calibration_payload["calibratedProbability"] != 0.25:
+        raise AssertionError("CLI prediction-campaign start pre-calibration probability drifted")
     prediction_campaign_setup_json = run_cli(
         "prediction-campaign",
         "start",
@@ -714,9 +856,13 @@ def main() -> None:
     prediction_campaign_doctor_waiting_payload = json.loads(prediction_campaign_doctor_waiting.stdout)
     if prediction_campaign_doctor_waiting_payload["waitingRunCount"] != 1:
         raise AssertionError("CLI prediction-campaign doctor waiting view drifted")
-    prediction_campaign_doctor_check = run_cli("prediction-campaign", "doctor", "--check")
-    if "checked prediction campaign doctor" not in prediction_campaign_doctor_check.stdout:
-        raise AssertionError("CLI prediction-campaign doctor check output drifted")
+    run_optional_drift_check(
+        "prediction-campaign",
+        "doctor",
+        "--check",
+        expected_stdout="checked prediction campaign doctor",
+        label="prediction-campaign doctor",
+    )
     prediction_campaign_resume = run_cli("prediction-campaign", "resume")
     prediction_campaign_resume_payload = json.loads(prediction_campaign_resume.stdout)
     if prediction_campaign_resume_payload["resumeStatus"] != "checked_resume_plan_non_mutating":
@@ -802,6 +948,26 @@ def main() -> None:
     prediction_campaign_calibration_check = run_cli("prediction-campaign", "calibration-status", "--check")
     if "checked prediction campaign calibration status" not in prediction_campaign_calibration_check.stdout:
         raise AssertionError("CLI prediction-campaign calibration status check output drifted")
+    prediction_campaign_pre_calibration = run_cli("prediction-campaign", "pre-calibration")
+    prediction_campaign_pre_calibration_payload = json.loads(prediction_campaign_pre_calibration.stdout)
+    if prediction_campaign_pre_calibration_payload["preCalibrationStatus"] != "ready":
+        raise AssertionError("CLI prediction-campaign pre-calibration status drifted")
+    if prediction_campaign_pre_calibration_payload["calibrationMethod"]["calibratedProbability"] != 0.25:
+        raise AssertionError("CLI prediction-campaign pre-calibration probability drifted")
+    if prediction_campaign_pre_calibration_payload["executionBoundary"]["writesIgnoredLiveState"] is not False:
+        raise AssertionError("CLI prediction-campaign pre-calibration must not write by default")
+    prediction_campaign_pre_calibration_method = run_cli(
+        "prediction-campaign",
+        "pre-calibration",
+        "--view",
+        "method",
+    )
+    prediction_campaign_pre_calibration_method_payload = json.loads(prediction_campaign_pre_calibration_method.stdout)
+    if prediction_campaign_pre_calibration_method_payload["positiveOutcomeCount"] != 7:
+        raise AssertionError("CLI prediction-campaign pre-calibration positive count drifted")
+    prediction_campaign_pre_calibration_check = run_cli("prediction-campaign", "pre-calibration", "--check")
+    if "checked prediction campaign pre-calibration" not in prediction_campaign_pre_calibration_check.stdout:
+        raise AssertionError("CLI prediction-campaign pre-calibration check output drifted")
     prediction_campaign_method_gate = run_cli("prediction-campaign", "method-update-gate")
     prediction_campaign_method_gate_payload = json.loads(prediction_campaign_method_gate.stdout)
     if prediction_campaign_method_gate_payload["gateStatus"] != "blocked_insufficient_calibration_evidence":
@@ -889,9 +1055,13 @@ def main() -> None:
         raise AssertionError("CLI prediction-campaign explain next forecast drifted")
     if prediction_campaign_explain_payload["summary"]["agentAdapterReadbacksImplemented"] is not True:
         raise AssertionError("CLI prediction-campaign explain should expose agent adapter readbacks")
-    prediction_campaign_explain_check = run_cli("prediction-campaign", "explain", "--check")
-    if "checked prediction campaign explain" not in prediction_campaign_explain_check.stdout:
-        raise AssertionError("CLI prediction-campaign explain check output drifted")
+    run_optional_drift_check(
+        "prediction-campaign",
+        "explain",
+        "--check",
+        expected_stdout="checked prediction campaign explain",
+        label="prediction-campaign explain",
+    )
     prediction_campaign_pilot_runbook = run_cli("prediction-campaign", "pilot-runbook")
     prediction_campaign_pilot_runbook_payload = json.loads(prediction_campaign_pilot_runbook.stdout)
     if prediction_campaign_pilot_runbook_payload["pilotScope"]["targetRunCount"] != 100:
@@ -910,9 +1080,13 @@ def main() -> None:
     prediction_campaign_pilot_smoke_payload = json.loads(prediction_campaign_pilot_smoke.stdout)
     if prediction_campaign_pilot_smoke_payload["expectedRunIds"][-1] != "predictionrun-1303":
         raise AssertionError("CLI prediction-campaign pilot smoke final run drifted")
-    prediction_campaign_pilot_runbook_check = run_cli("prediction-campaign", "pilot-runbook", "--check")
-    if "checked Helsinki traffic pilot runbook" not in prediction_campaign_pilot_runbook_check.stdout:
-        raise AssertionError("CLI prediction-campaign pilot runbook check output drifted")
+    run_optional_drift_check(
+        "prediction-campaign",
+        "pilot-runbook",
+        "--check",
+        expected_stdout="checked Helsinki traffic pilot runbook",
+        label="prediction-campaign pilot-runbook",
+    )
     prediction_campaign_pilot_readiness = run_cli("prediction-campaign", "pilot-readiness")
     prediction_campaign_pilot_readiness_payload = json.loads(prediction_campaign_pilot_readiness.stdout)
     if prediction_campaign_pilot_readiness_payload["readinessSummary"]["targetRunCount"] != 100:
@@ -928,22 +1102,63 @@ def main() -> None:
         "commands",
     )
     prediction_campaign_pilot_readiness_commands_payload = json.loads(prediction_campaign_pilot_readiness_commands.stdout)
-    if prediction_campaign_pilot_readiness_commands_payload[3]["commandKey"] != "launch_first_write":
+    if prediction_campaign_pilot_readiness_commands_payload[4]["commandKey"] != "launch_first_write":
         raise AssertionError("CLI prediction-campaign pilot readiness launch command drifted")
-    prediction_campaign_pilot_readiness_check = run_cli("prediction-campaign", "pilot-readiness", "--check")
-    if "checked Helsinki traffic pilot readiness" not in prediction_campaign_pilot_readiness_check.stdout:
-        raise AssertionError("CLI prediction-campaign pilot readiness check output drifted")
-    run_cli("private-setup-adapter-runbook", "--check")
-    run_cli("private-setup-adapter-conformance", "--check")
-    run_cli("private-setup-adapter-conformance-summary", "--check")
-    run_cli("private-source-kind-selection", "--check")
-    run_cli("private-source-kind-query-matrix", "--check")
+    if "--pre-calibrate" not in prediction_campaign_pilot_readiness_commands_payload[4]["command"]:
+        raise AssertionError("CLI prediction-campaign pilot readiness launch should include pre-calibration")
+    run_optional_drift_check(
+        "prediction-campaign",
+        "pilot-readiness",
+        "--check",
+        expected_stdout="checked Helsinki traffic pilot readiness",
+        label="prediction-campaign pilot-readiness",
+    )
+    run_optional_drift_check(
+        "private-setup-adapter-runbook",
+        "--check",
+        expected_stdout="checked private setup adapter-chain runbook",
+        label="private-setup-adapter-runbook",
+    )
+    run_optional_drift_check(
+        "private-setup-adapter-conformance",
+        "--check",
+        expected_stdout="checked private setup adapter conformance matrix",
+        label="private-setup-adapter-conformance",
+    )
+    run_optional_drift_check(
+        "private-setup-adapter-conformance-summary",
+        "--check",
+        expected_stdout="checked private setup adapter conformance summary",
+        label="private-setup-adapter-conformance-summary",
+    )
+    run_optional_drift_check(
+        "private-source-kind-selection",
+        "--check",
+        expected_stdout="checked private source-kind selection examples",
+        label="private-source-kind-selection",
+    )
+    run_optional_drift_check(
+        "private-source-kind-query-matrix",
+        "--check",
+        expected_stdout="checked private source-kind query matrix",
+        label="private-source-kind-query-matrix",
+    )
     run_cli("recalculation", "--check")
     run_cli("forecast-run", "--check")
     run_cli("forecast-run-matrix", "--check")
     run_cli("forecast-runbook", "--check")
-    run_cli("agent-envelopes", "--check")
-    run_cli("agent-protocol-map", "--check")
+    run_optional_drift_check(
+        "agent-envelopes",
+        "--check",
+        expected_stdout="checked 56 agent adapter envelopes",
+        label="agent-envelopes",
+    )
+    run_optional_drift_check(
+        "agent-protocol-map",
+        "--check",
+        expected_stdout="checked agent adapter protocol map",
+        label="agent-protocol-map",
+    )
     run_cli("pipeline")
     run_cli("resolve-pipeline")
     run_cli("manifest")
@@ -1218,6 +1433,92 @@ def main() -> None:
     if transit_setup_payload["claimPolicy"]["calibrationClaimAllowed"] is not False:
         raise AssertionError("CLI transit domain setup should block calibration claims")
 
+    domain_configs = run_cli("domain-configs")
+    domain_configs_payload = json.loads(domain_configs.stdout)
+    if domain_configs_payload["configCount"] != 2:
+        raise AssertionError("CLI domain-configs should expose two config records")
+    config_summaries = {item["domainKey"]: item for item in domain_configs_payload["domains"]}
+    if config_summaries["weather-transit-delays"]["configStatus"] != "defined_readback":
+        raise AssertionError("CLI domain-configs should expose transit config as defined")
+    if config_summaries["seaport-berth-availability"]["configStatus"] != "candidate_readback":
+        raise AssertionError("CLI domain-configs should expose seaport config as candidate")
+    if config_summaries["seaport-berth-availability"]["credentialsExcluded"] is not True:
+        raise AssertionError("CLI domain-configs should exclude credentials")
+
+    transit_config = run_cli("domain-configs", "--domain", "weather-transit-delays")
+    transit_config_payload = json.loads(transit_config.stdout)
+    if transit_config_payload["baselineMethod"]["methodId"] != "transitmethod-100":
+        raise AssertionError("CLI transit domain config baseline method drifted")
+    if transit_config_payload["claimBoundaries"]["calibrationClaimAllowed"] is not False:
+        raise AssertionError("CLI transit domain config should block calibration claims")
+    transit_config_roles = {item["roleKey"]: item for item in transit_config_payload["acceptedSourceRoles"]}
+    if transit_config_roles["transit_delay_outcome"]["forecastTimeAllowed"] is not False:
+        raise AssertionError("CLI transit outcome role must be resolution-only")
+
+    seaport_config = run_cli("domain-configs", "--domain", "seaport-berth-availability")
+    seaport_config_payload = json.loads(seaport_config.stdout)
+    seaport_config_roles = {item["roleKey"]: item for item in seaport_config_payload["acceptedSourceRoles"]}
+    if "database" not in seaport_config_roles["vessel_schedule"]["acceptedSourceKinds"]:
+        raise AssertionError("CLI seaport domain config should allow database adapters")
+    if seaport_config_payload["executionBoundary"]["readsPrivateData"] is not False:
+        raise AssertionError("CLI seaport domain config must not read private data")
+
+    source_bindings = run_cli("source-bindings")
+    source_bindings_payload = json.loads(source_bindings.stdout)
+    if source_bindings_payload["bindingCaseCount"] != 4:
+        raise AssertionError("CLI source-bindings should expose four setup cases")
+    if {"api", "database", "local_file", "source_adapter_output"} - set(source_bindings_payload["approvedSourceKinds"]):
+        raise AssertionError("CLI source-bindings should cover approved local file, adapter, API, and database sources")
+    source_binding_cases = {
+        item["bindingCase"]: item for item in source_bindings_payload["cases"]
+    }
+    if source_binding_cases["accepted"]["nextAction"] != "forecast_generation_allowed":
+        raise AssertionError("CLI source-bindings accepted case should allow lifecycle forecast generation")
+    if source_binding_cases["partial"]["nextAction"] != "collect_missing_source_binding":
+        raise AssertionError("CLI source-bindings partial case should request missing source bindings")
+    if source_binding_cases["rejected"]["nextAction"] != "replace_source_binding":
+        raise AssertionError("CLI source-bindings rejected case should request replacement")
+    if source_binding_cases["blocked"]["nextAction"] != "stop_unsafe_source_binding":
+        raise AssertionError("CLI source-bindings blocked case should stop unsafe setup")
+    if any(item["credentialValuesStored"] for item in source_binding_cases.values()):
+        raise AssertionError("CLI source-bindings must not store credential values")
+    source_binding_operations = {
+        item["operationName"]: item for item in source_bindings_payload["setupOperations"]
+    }
+    if set(source_binding_operations) != {
+        "source_binding.draft",
+        "source_binding.validate",
+        "source_binding.confirm",
+        "source_binding.update",
+        "source_binding.archive",
+        "source_binding.redact",
+    }:
+        raise AssertionError("CLI source-bindings setup operation coverage drifted")
+    if source_binding_operations["source_binding.archive"]["internalApiOperation"] != "archive_record":
+        raise AssertionError("CLI source-bindings archive should map to internal archive operation")
+    accepted_binding = run_cli("source-bindings", "--case", "accepted")
+    accepted_binding_payload = json.loads(accepted_binding.stdout)
+    if accepted_binding_payload["summary"]["forecastGenerationAllowed"] is not True:
+        raise AssertionError("CLI source-bindings accepted case should allow forecast generation")
+    if any(item["blocksForecast"] for item in accepted_binding_payload["preForecastChecks"]):
+        raise AssertionError("CLI source-bindings accepted case should not expose forecast blockers")
+    partial_binding = run_cli("source-bindings", "--case", "partial")
+    partial_binding_payload = json.loads(partial_binding.stdout)
+    if partial_binding_payload["summary"]["forecastGenerationAllowed"] is not False:
+        raise AssertionError("CLI source-bindings partial case should block forecast generation")
+    if not any(item["bindingStatus"] == "missing" for item in partial_binding_payload["sourceRoleBindings"]):
+        raise AssertionError("CLI source-bindings partial case should expose missing source role")
+    rejected_binding = run_cli("source-bindings", "--case", "rejected")
+    rejected_binding_payload = json.loads(rejected_binding.stdout)
+    if rejected_binding_payload["nextAction"] != "replace_source_binding":
+        raise AssertionError("CLI source-bindings rejected case should route to source replacement")
+    blocked_binding = run_cli("source-bindings", "--case", "blocked")
+    blocked_binding_payload = json.loads(blocked_binding.stdout)
+    if blocked_binding_payload["credentialPolicy"]["rawCredentialValueDetected"] is not True:
+        raise AssertionError("CLI source-bindings blocked case should detect raw credential-like input")
+    if not all(item["blocksForecast"] for item in blocked_binding_payload["preForecastChecks"]):
+        raise AssertionError("CLI source-bindings blocked case should block every pre-forecast check")
+
     transit_forecast = run_cli("transit-delay-forecast")
     transit_forecast_payload = json.loads(transit_forecast.stdout)
     if transit_forecast_payload["domain"] != "weather-transit-delays":
@@ -1393,7 +1694,7 @@ def main() -> None:
     lifecycle_store = run_cli("lifecycle-operation-store")
     lifecycle_store_payload = json.loads(lifecycle_store.stdout)
     lifecycle_operations = {item["operationName"]: item for item in lifecycle_store_payload["operationCatalog"]}
-    if {"forecast.create", "resolution.record", "score.create", "record.archive", "record.redact"} - set(lifecycle_operations):
+    if {"forecast.create", "resolution.record", "score.create", "pre_calibration.bind", "state.import_json", "record.archive", "record.redact"} - set(lifecycle_operations):
         raise AssertionError("CLI lifecycle-operation-store should expose core lifecycle operations")
     if lifecycle_store_payload["summary"]["firstBackend"] != "local_sqlite":
         raise AssertionError("CLI lifecycle-operation-store should plan SQLite as the first backend")
@@ -1401,8 +1702,18 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store should keep Postgres as the production design target")
     if not lifecycle_store_payload["summary"]["sqliteRuntimeChecked"]:
         raise AssertionError("CLI lifecycle-operation-store should expose a checked SQLite runtime")
-    if lifecycle_store_payload["summary"]["runtimeScenarioCount"] != 7:
-        raise AssertionError("CLI lifecycle-operation-store should expose the seven required runtime scenarios")
+    if lifecycle_store_payload["summary"]["runtimeScenarioCount"] != 15:
+        raise AssertionError("CLI lifecycle-operation-store should expose the fifteen required runtime scenarios")
+    if lifecycle_store_payload["summary"]["writeLocalOperationCoverageCount"] != 8:
+        raise AssertionError("CLI lifecycle-operation-store should cover the eight current write-local command paths")
+    if not lifecycle_store_payload["summary"]["allWriteLocalPathsReceiptBacked"]:
+        raise AssertionError("CLI lifecycle-operation-store should receipt-back all write-local command paths")
+    if not lifecycle_store_payload["summary"]["allWriteLocalPathsReadModelBacked"]:
+        raise AssertionError("CLI lifecycle-operation-store should read-model-back all write-local command paths")
+    if lifecycle_store_payload["summary"]["fileDatabaseCompatibilityCheckCount"] != 7:
+        raise AssertionError("CLI lifecycle-operation-store should expose seven file/database compatibility checks")
+    if not lifecycle_store_payload["summary"]["fileDatabaseCompatibilityChecked"]:
+        raise AssertionError("CLI lifecycle-operation-store should check file/database compatibility")
     lifecycle_boundary = lifecycle_store_payload["executionBoundary"]
     if lifecycle_boundary["readbackExecutesDatabaseWrites"] or lifecycle_boundary["rawCrudExposedToAgents"]:
         raise AssertionError("CLI lifecycle-operation-store must remain non-mutating and block raw CRUD")
@@ -1412,6 +1723,13 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store must keep forecast artifacts immutable")
     if lifecycle_store_payload["mutationSemantics"]["deleteAllowedAsPhysicalDefault"]:
         raise AssertionError("CLI lifecycle-operation-store must replace physical delete with lifecycle operations")
+    lifecycle_compat = lifecycle_store_payload["jsonCompatibilityAdapter"]
+    if lifecycle_compat["adapterStatus"] != "current_compatibility_adapter":
+        raise AssertionError("CLI lifecycle-operation-store should expose ignored JSON as the current compatibility adapter")
+    if lifecycle_compat["automaticMigrationAllowed"] or lifecycle_compat["normalChecksWriteLiveState"]:
+        raise AssertionError("CLI lifecycle-operation-store compatibility adapter must not auto-migrate or write in checks")
+    if not lifecycle_compat["migrationReceiptRequired"] or not lifecycle_compat["contentHashCheckRequired"]:
+        raise AssertionError("CLI lifecycle-operation-store compatibility adapter should require receipts and content hashes")
     lifecycle_read_models = {item["readModelName"] for item in lifecycle_store_payload["readModels"]}
     if "next_due_forecast" not in lifecycle_read_models or "recovery_actions" not in lifecycle_read_models:
         raise AssertionError("CLI lifecycle-operation-store should expose agent read models")
@@ -1420,6 +1738,39 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store retry scenario should avoid duplicate records")
     if lifecycle_scenarios["lease-conflict"]["executionStatus"] != "blocked_lease_conflict":
         raise AssertionError("CLI lifecycle-operation-store should expose a blocked lease-conflict scenario")
+    if lifecycle_scenarios["pre-calibration-bind"]["operationName"] != "pre_calibration.bind":
+        raise AssertionError("CLI lifecycle-operation-store should expose database-native pre-calibration binding")
+    if lifecycle_scenarios["pre-calibration-bind"]["preflight"]["plannedWrites"][1]["recordType"] != "pre_calibration_binding":
+        raise AssertionError("CLI lifecycle-operation-store pre-calibration binding should write its own audit record")
+    if lifecycle_scenarios["campaign-forecast-create"]["immutableRecordsInserted"] != 4:
+        raise AssertionError("CLI lifecycle-operation-store campaign forecast bridge should write four lifecycle records")
+    if not all(row["matchesSourceHash"] for row in lifecycle_scenarios["campaign-forecast-create"]["payloadHashBindings"]):
+        raise AssertionError("CLI lifecycle-operation-store campaign bridge hashes should match source payloads")
+    if lifecycle_scenarios["campaign-evidence-append"]["preflight"]["plannedWrites"][1]["recordType"] != "evidence_ledger_row":
+        raise AssertionError("CLI lifecycle-operation-store campaign append bridge should write evidence ledger rows")
+    if "append_readiness" not in lifecycle_scenarios["campaign-score-create"]["readModelEffects"]:
+        raise AssertionError("CLI lifecycle-operation-store scoring bridge should update append readiness")
+    if "calibration_status" not in lifecycle_scenarios["campaign-evidence-append"]["readModelEffects"]:
+        raise AssertionError("CLI lifecycle-operation-store append bridge should update calibration status")
+    lifecycle_write_local_commands = {
+        item["commandPath"] for item in lifecycle_store_payload["writeLocalOperationCoverage"]
+    }
+    if "prediction-campaign resolve --execute-resolvers --write-local" not in lifecycle_write_local_commands:
+        raise AssertionError("CLI lifecycle-operation-store should map resolver write-local commands to lifecycle operations")
+    if "prediction-campaign start --pre-calibrate --write-local" not in lifecycle_write_local_commands:
+        raise AssertionError("CLI lifecycle-operation-store should map pre-calibrated starts to lifecycle operations")
+    lifecycle_compatibility_classes = {
+        item["recordClass"] for item in lifecycle_store_payload["fileDatabaseCompatibilityChecks"]
+    }
+    if {"forecast_lifecycle_records", "resolution_records", "scoring_reports", "evidence_ledger_rows"} - lifecycle_compatibility_classes:
+        raise AssertionError("CLI lifecycle-operation-store should check file/database compatibility for campaign records")
+    if any(item["databaseDuplicateRecordsCreated"] for item in lifecycle_store_payload["fileDatabaseCompatibilityChecks"]):
+        raise AssertionError("CLI lifecycle-operation-store compatibility checks should prevent duplicate database records")
+    migration_summary = lifecycle_scenarios["json-state-import"]["migrationImportSummary"]
+    if migration_summary is None or not migration_summary["contentHashesPreserved"]:
+        raise AssertionError("CLI lifecycle-operation-store JSON import should preserve content hashes")
+    if not migration_summary["forecastProbabilitiesPreserved"] or migration_summary["historicalForecastRewriteCount"] != 0:
+        raise AssertionError("CLI lifecycle-operation-store JSON import should preserve probabilities and avoid history rewrites")
     if lifecycle_scenarios["archive"]["physicalDeletes"] != 0 or lifecycle_scenarios["redaction"]["physicalDeletes"] != 0:
         raise AssertionError("CLI lifecycle-operation-store should replace delete-like operations with audit records")
     lifecycle_scenario = run_cli("lifecycle-operation-store", "--scenario", "method-rollback")
@@ -1428,9 +1779,149 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store --scenario should print the requested scenario")
     if lifecycle_scenario_payload["preflight"]["plannedWrites"][1]["writeMode"] != "prospective_binding":
         raise AssertionError("CLI lifecycle-operation-store method rollback should be prospective")
-    lifecycle_store_check = run_cli("lifecycle-operation-store", "--check")
-    if "checked lifecycle operation store" not in lifecycle_store_check.stdout:
-        raise AssertionError("CLI lifecycle-operation-store --check did not check generated output")
+    run_optional_drift_check(
+        "lifecycle-operation-store",
+        "--check",
+        expected_stdout="checked lifecycle operation store",
+        label="lifecycle-operation-store",
+    )
+
+    internal_api = run_cli("internal-api")
+    internal_api_payload = json.loads(internal_api.stdout)
+    if internal_api_payload["summary"]["operationCount"] != 13:
+        raise AssertionError("CLI internal-api should expose the stable 13-operation surface")
+    if not internal_api_payload["summary"]["allEffectfulOperationsReceiptBacked"]:
+        raise AssertionError("CLI internal-api should receipt-back effectful operations")
+    if internal_api_payload["nonInterferenceBoundary"]["rawSqlExposed"]:
+        raise AssertionError("CLI internal-api must not expose raw SQL")
+    internal_api_start = run_cli("internal-api", "--operation", "start_prediction")
+    internal_api_start_payload = json.loads(internal_api_start.stdout)
+    if internal_api_start_payload["operationName"] != "start_prediction":
+        raise AssertionError("CLI internal-api --operation should print the requested operation")
+    if "forecast.create" not in internal_api_start_payload["lifecycleOperations"]:
+        raise AssertionError("CLI internal-api start_prediction should map to forecast.create")
+    internal_api_check = run_cli("internal-api", "--check")
+    if "checked internal API" not in internal_api_check.stdout:
+        raise AssertionError("CLI internal-api --check did not check generated output")
+
+    workspace_registry = run_cli("prediction-workspace-registry")
+    workspace_registry_payload = json.loads(workspace_registry.stdout)
+    if workspace_registry_payload["summary"]["predictionCount"] != 2:
+        raise AssertionError("CLI prediction-workspace-registry should expose two predictions")
+    if workspace_registry_payload["summary"]["activePredictionCount"] != 1:
+        raise AssertionError("CLI prediction-workspace-registry should expose one active prediction")
+    registry_entries = {
+        item["predictionId"]: item for item in workspace_registry_payload["predictions"]
+    }
+    if set(registry_entries) != {"prediction-001", "prediction-002"}:
+        raise AssertionError("CLI prediction-workspace-registry prediction IDs drifted")
+    if registry_entries["prediction-001"]["domainId"] != "domainweathertransitdelays-001":
+        raise AssertionError("CLI prediction-workspace-registry active domain binding drifted")
+    if registry_entries["prediction-002"]["status"] != "paused":
+        raise AssertionError("CLI prediction-workspace-registry paused status drifted")
+    registry_read_models = workspace_registry_payload["readModels"]
+    if set(registry_read_models) != {
+        "allPredictions",
+        "activePredictions",
+        "dueForecasts",
+        "dueResolutions",
+        "blockedOperations",
+        "failedOperations",
+        "sourceHealthBlockers",
+        "calibrationProgress",
+        "trackRecordProgress",
+    }:
+        raise AssertionError("CLI prediction-workspace-registry read model coverage drifted")
+    if registry_read_models["dueForecasts"][0]["forecastId"] != "forecast-1301":
+        raise AssertionError("CLI prediction-workspace-registry due forecast binding drifted")
+    if registry_read_models["dueResolutions"][0]["resolutionJobId"] != "resolutionjob-1301":
+        raise AssertionError("CLI prediction-workspace-registry due resolution binding drifted")
+    if registry_read_models["blockedOperations"][0]["operationStatus"] != "blocked":
+        raise AssertionError("CLI prediction-workspace-registry blocked operation readback drifted")
+    if registry_read_models["failedOperations"][0]["operationStatus"] != "failed":
+        raise AssertionError("CLI prediction-workspace-registry failed operation readback drifted")
+    if registry_read_models["sourceHealthBlockers"][0]["sourceBindingId"] != "sourcebinding-002":
+        raise AssertionError("CLI prediction-workspace-registry source-health blocker drifted")
+    if not workspace_registry_payload["summary"]["readModelsPresent"]:
+        raise AssertionError("CLI prediction-workspace-registry should expose workspace read models")
+    registry_config_operations = {
+        item["operationName"]: item for item in workspace_registry_payload["configurationLifecycleOperations"]
+    }
+    if set(registry_config_operations) != {
+        "prediction.config_create",
+        "prediction.config_update",
+        "prediction.config_archive",
+        "prediction.config_redact",
+    }:
+        raise AssertionError("CLI prediction-workspace-registry configuration operation coverage drifted")
+    if registry_config_operations["prediction.config_archive"]["auditRecordKind"] != "archive_tombstone":
+        raise AssertionError("CLI prediction-workspace-registry archive should use a tombstone")
+    if registry_config_operations["prediction.config_redact"]["auditRecordKind"] != "redaction_receipt":
+        raise AssertionError("CLI prediction-workspace-registry redact should use a redaction receipt")
+    if any(item["rawConfigMutationAllowed"] for item in registry_config_operations.values()):
+        raise AssertionError("CLI prediction-workspace-registry must block raw config mutation")
+    if any(item["physicalDeleteAllowed"] for item in registry_config_operations.values()):
+        raise AssertionError("CLI prediction-workspace-registry must replace physical delete")
+    if not workspace_registry_payload["summary"]["configurationOperationsAuditBacked"]:
+        raise AssertionError("CLI prediction-workspace-registry should audit-back config operations")
+    registry_concurrency_controls = {
+        item["predictionId"]: item for item in workspace_registry_payload["perPredictionConcurrencyControls"]
+    }
+    if set(registry_concurrency_controls) != {"prediction-001", "prediction-002"}:
+        raise AssertionError("CLI prediction-workspace-registry concurrency control coverage drifted")
+    if len({item["idempotencyNamespaceId"] for item in registry_concurrency_controls.values()}) != 2:
+        raise AssertionError("CLI prediction-workspace-registry idempotency namespaces should be unique")
+    if len({item["leaseId"] for item in registry_concurrency_controls.values()}) != 2:
+        raise AssertionError("CLI prediction-workspace-registry lease IDs should be unique")
+    if not all(item["crossPredictionConcurrencyAllowed"] for item in registry_concurrency_controls.values()):
+        raise AssertionError("CLI prediction-workspace-registry should allow different prediction concurrency")
+    if not all(item["samePredictionConcurrentMutationBlocked"] for item in registry_concurrency_controls.values()):
+        raise AssertionError("CLI prediction-workspace-registry should block same-prediction races")
+    registry_resource_controls = workspace_registry_payload["workspaceResourceControls"]
+    if registry_resource_controls["currentActivePredictionCount"] > registry_resource_controls["maximumActivePredictions"]:
+        raise AssertionError("CLI prediction-workspace-registry active prediction limit exceeded")
+    if registry_resource_controls["currentQueuedOperationCount"] > registry_resource_controls["maximumQueuedOperations"]:
+        raise AssertionError("CLI prediction-workspace-registry queued operation limit exceeded")
+    if registry_resource_controls["currentReadbackBytes"] > registry_resource_controls["maximumReadbackBytes"]:
+        raise AssertionError("CLI prediction-workspace-registry readback limit exceeded")
+    registry_budgets = {
+        item["predictionId"]: item for item in registry_resource_controls["perPredictionExecutionBudgets"]
+    }
+    if set(registry_budgets) != {"prediction-001", "prediction-002"}:
+        raise AssertionError("CLI prediction-workspace-registry execution budget coverage drifted")
+    if registry_budgets["prediction-001"]["budgetStatus"] != "within_budget":
+        raise AssertionError("CLI prediction-workspace-registry active budget status drifted")
+    if registry_budgets["prediction-002"]["budgetStatus"] != "blocked":
+        raise AssertionError("CLI prediction-workspace-registry paused budget status drifted")
+    if not workspace_registry_payload["summary"]["resourceControlsPresent"]:
+        raise AssertionError("CLI prediction-workspace-registry should expose resource controls")
+    registry_isolation_checks = {
+        item["checkName"]: item for item in workspace_registry_payload["isolationChecks"]
+    }
+    if set(registry_isolation_checks) != {
+        "record_write_scope",
+        "source_binding_scope",
+        "method_binding_scope",
+        "read_model_scope",
+    }:
+        raise AssertionError("CLI prediction-workspace-registry isolation coverage drifted")
+    if any(item["crossPredictionWriteAllowed"] for item in registry_isolation_checks.values()):
+        raise AssertionError("CLI prediction-workspace-registry should block cross-prediction writes")
+    if not all(item["samePredictionWriteAllowed"] for item in registry_isolation_checks.values()):
+        raise AssertionError("CLI prediction-workspace-registry should keep same-prediction writes lease-gated")
+    if not all(item["auditRecordRequired"] for item in registry_isolation_checks.values()):
+        raise AssertionError("CLI prediction-workspace-registry should audit blocked isolation checks")
+    if not workspace_registry_payload["summary"]["isolationChecksPresent"]:
+        raise AssertionError("CLI prediction-workspace-registry should expose isolation checks")
+    if workspace_registry_payload["executionBoundary"]["writesRegistryState"]:
+        raise AssertionError("CLI prediction-workspace-registry must remain readback-only")
+    workspace_registry_entry = run_cli("prediction-workspace-registry", "--prediction-id", "prediction-001")
+    workspace_registry_entry_payload = json.loads(workspace_registry_entry.stdout)
+    if workspace_registry_entry_payload["predictionId"] != "prediction-001":
+        raise AssertionError("CLI prediction-workspace-registry --prediction-id should print the requested entry")
+    workspace_registry_check = run_cli("prediction-workspace-registry", "--check")
+    if "checked prediction workspace registry" not in workspace_registry_check.stdout:
+        raise AssertionError("CLI prediction-workspace-registry --check did not check generated output")
 
     transit_corpus = run_cli("transit-forward-run-corpus")
     transit_corpus_payload = json.loads(transit_corpus.stdout)
@@ -2476,7 +2967,12 @@ def main() -> None:
 
     agent_protocol_map = run_cli("agent-protocol-map")
     agent_protocol_map_payload = json.loads(agent_protocol_map.stdout)
-    if len(agent_protocol_map_payload["operations"]) != 23:
+    protocol_operation_names = {
+        item["operation"]
+        for item in agent_protocol_map_payload["operations"]
+    }
+    expected_protocol_operations = success_operations | {"internal_api"}
+    if protocol_operation_names != expected_protocol_operations:
         raise AssertionError("CLI agent-protocol-map should expose every agent operation")
     protocol_runtime = agent_protocol_map_payload["adapterContract"]["protocolRuntimeImplemented"]
     if protocol_runtime is not True:

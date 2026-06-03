@@ -1,0 +1,147 @@
+{
+  "predictionCampaignPreCalibrationId": "predictioncampaignprecalibration-001",
+  "generatedAt": "2026-06-01T00:30:00Z",
+  "preCalibrationStatus": "ready",
+  "domain": "weather-transit-delays",
+  "bindings": {
+    "predictionCampaignManifestId": "predictioncampaignmanifest-001",
+    "campaignId": "predictioncampaign-001",
+    "cycleId": "predictioncycle-001",
+    "sourcePolicyId": "sourcepolicy-1201",
+    "methodId": "transitmethod-100",
+    "firstPilotRunId": "predictionrun-1301",
+    "firstPilotServiceDate": "2026-06-11"
+  },
+  "historySource": {
+    "sourceId": "source-prec-001",
+    "sourceType": "public_dataset",
+    "sourcePath": "spec/fixtures/local-source-files/transit-delay-history.csv",
+    "uri": "local://spec/fixtures/local-source-files/transit-delay-history.csv",
+    "contentHash": "6e7e339a0dd78925072cc0052f057f8168b34667f9331d658683ae30f3bbf4f4",
+    "rowCount": 30,
+    "scopedRowCount": 30,
+    "resolvedOutcomeRowCount": 30,
+    "minimumHistoricalRows": 30,
+    "firstHistoricalServiceDate": "2026-05-01",
+    "lastHistoricalServiceDate": "2026-05-30",
+    "leakageCheckStatus": "pass",
+    "sourceCommand": "python3 scripts/ope.py prediction-campaign pre-calibration"
+  },
+  "calibrationMethod": {
+    "methodName": "historical_frequency_laplace_pre_calibration",
+    "outputType": "binary",
+    "eventThreshold": 0.2,
+    "positiveOutcomeCount": 7,
+    "negativeOutcomeCount": 23,
+    "rawEventRate": 0.2333333333,
+    "priorPositiveCount": 1.0,
+    "priorNegativeCount": 1.0,
+    "smoothing": "laplace_add_one",
+    "calibratedProbability": 0.25,
+    "calibrationChangesMethodClass": false,
+    "automaticProbabilityUpdateAllowed": false
+  },
+  "engineBinding": {
+    "activeMethodId": "transitmethod-100",
+    "calibratedProbability": 0.25,
+    "preCalibrationArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/pre-calibration/predictioncampaignprecalibration-001.json",
+    "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+    "effectiveScope": "future_campaign_forecasts_only",
+    "forecastArtifactCanUseBeforePilot": true,
+    "normalChecksReadLocalBinding": false,
+    "prospectiveOnly": true,
+    "priorForecastHistoryRewriteAllowed": false,
+    "changesForecastMethod": false
+  },
+  "preflightChecks": [
+    {
+      "checkId": "precalibrationcheck-001",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Historical source must contain resolvable binary delay outcomes for the campaign scope."
+    },
+    {
+      "checkId": "precalibrationcheck-002",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "At least 30 scoped historical rows are required before pre-calibration."
+    },
+    {
+      "checkId": "precalibrationcheck-003",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Historical pre-calibration rows must end before the first pilot service date."
+    },
+    {
+      "checkId": "precalibrationcheck-004",
+      "checkStatus": "pass",
+      "requiredBeforeWrite": true,
+      "blocksWrite": false,
+      "message": "Pre-calibration may bind only the historical-frequency baseline method before pilot launch."
+    }
+  ],
+  "writePlan": {
+    "requiresWriteLocal": true,
+    "writeLocalRequested": false,
+    "preCalibrationArtifactPath": ".ope/live/prediction-campaigns/predictioncampaign-001/pre-calibration/predictioncampaignprecalibration-001.json",
+    "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+    "idempotent": true,
+    "normalChecksWriteLocal": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false
+  },
+  "writeResult": {
+    "writeStatus": "not_run",
+    "artifactWrites": [],
+    "stateWrites": [],
+    "newFileWriteCount": 0,
+    "alreadyPresentCount": 0,
+    "sanitizedDiagnostics": "Dry-run readback only; add --write-local to write ignored local pre-calibration state."
+  },
+  "commandSurface": {
+    "command": "python3 scripts/ope.py prediction-campaign pre-calibration",
+    "acceptedFlags": [
+      "--history-source",
+      "--write-local",
+      "--output-format",
+      "--view"
+    ],
+    "defaultMode": "historical_pre_calibration_readback",
+    "capturedStdoutMode": "json",
+    "explicitWriteFlagRequired": true,
+    "normalChecksMutateState": false
+  },
+  "summary": {
+    "preCalibrationImplemented": true,
+    "historicalOnly": true,
+    "localWriteEligible": true,
+    "calibratedProbability": 0.25,
+    "writesMethodBinding": false,
+    "changesForecastMethod": false,
+    "qualityClaimAllowed": false,
+    "recommendedNextAction": "Run the pilot launch with --pre-calibrate and --write-local after reviewing the historical-only binding."
+  },
+  "executionBoundary": {
+    "readsHistoricalSource": true,
+    "readsIgnoredLiveState": false,
+    "writesIgnoredLiveState": false,
+    "writesCampaignState": false,
+    "fetchesLiveData": false,
+    "createsForecastArtifacts": false,
+    "executesResolvers": false,
+    "appendsCorpusEvidence": false,
+    "updatesPriorForecastProbabilities": false,
+    "changesForecastMethod": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "Pre-calibration is optional and historical-only; it does not fetch live sources.",
+    "The binding stays on the baseline method and changes only the prospective baseline probability.",
+    "Pre-calibration does not create quality, track-record, or live calibration claims."
+  ]
+}

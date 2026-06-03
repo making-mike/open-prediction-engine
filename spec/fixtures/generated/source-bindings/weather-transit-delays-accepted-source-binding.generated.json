@@ -1,0 +1,237 @@
+{
+  "sourceBindingId": "sourcebinding-115001",
+  "generatedAt": "2026-06-03T03:45:00Z",
+  "bindingCase": "accepted",
+  "bindingStatus": "accepted_ready",
+  "domainConfigId": "domainconfig-001",
+  "domainKey": "weather-transit-delays",
+  "predictionId": "prediction-001",
+  "sourceBindingMode": "sanitized_manifest",
+  "credentialPolicy": {
+    "credentialValuesStored": false,
+    "credentialReferencesAllowed": true,
+    "credentialReferenceRequired": false,
+    "secretScanningRequired": true,
+    "rawCredentialValueDetected": false
+  },
+  "sourceRoleBindings": [
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115001",
+      "roleKey": "weather_forecast",
+      "sourceKind": "api",
+      "sourceRef": "source-openmeteo-forecast-manifest-001",
+      "adapterRef": "adapter-openmeteo-public-001",
+      "credentialRef": "none",
+      "approvalStatus": "approved",
+      "bindingStatus": "confirmed",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": true,
+      "queryBoundary": "bounded_public_weather_forecast_query",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115002",
+      "roleKey": "historical_delay_baseline",
+      "sourceKind": "local_file",
+      "sourceRef": "spec/fixtures/transit/historical-delay-baseline.csv",
+      "adapterRef": "adapter-local-csv-001",
+      "credentialRef": "none",
+      "approvalStatus": "approved",
+      "bindingStatus": "confirmed",
+      "forecastTimeAllowed": true,
+      "sanitizedManifestProvided": true,
+      "queryBoundary": "approved_fixture_file_under_spec_fixtures",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    },
+    {
+      "sourceRoleBindingId": "sourcerolebinding-115003",
+      "roleKey": "transit_delay_outcome",
+      "sourceKind": "source_adapter_output",
+      "sourceRef": "spec/fixtures/generated/transit-api-connector/hsl-tripupdates-source-output.generated.json",
+      "adapterRef": "adapter-hsl-transit-output-001",
+      "credentialRef": "none",
+      "approvalStatus": "approved",
+      "bindingStatus": "confirmed",
+      "forecastTimeAllowed": false,
+      "sanitizedManifestProvided": true,
+      "queryBoundary": "resolution_only_adapter_output_after_service_window",
+      "credentialValuesStored": false,
+      "rawSqlAllowed": false,
+      "privateParsingByOpe": false
+    }
+  ],
+  "preForecastChecks": [
+    {
+      "checkId": "sourcebindingcheck-115001",
+      "checkName": "mapping_confidence",
+      "checkStatus": "pass",
+      "score": 0.98,
+      "minimumScore": 0.8,
+      "blocksForecast": false,
+      "message": "All source fields map to configured transit source roles."
+    },
+    {
+      "checkId": "sourcebindingcheck-115002",
+      "checkName": "source_quality",
+      "checkStatus": "pass",
+      "score": 0.94,
+      "minimumScore": 0.75,
+      "blocksForecast": false,
+      "message": "Source freshness, coverage, and provenance meet the domain policy."
+    },
+    {
+      "checkId": "sourcebindingcheck-115003",
+      "checkName": "leakage",
+      "checkStatus": "pass",
+      "score": 1.0,
+      "minimumScore": 1.0,
+      "blocksForecast": false,
+      "message": "Resolution-only transit outcome is excluded from forecast-time evidence."
+    },
+    {
+      "checkId": "sourcebindingcheck-115004",
+      "checkName": "freshness",
+      "checkStatus": "pass",
+      "score": 0.92,
+      "minimumScore": 0.7,
+      "blocksForecast": false,
+      "message": "Forecast-time weather source is inside the configured retrieval window."
+    },
+    {
+      "checkId": "sourcebindingcheck-115005",
+      "checkName": "privacy",
+      "checkStatus": "pass",
+      "score": 1.0,
+      "minimumScore": 1.0,
+      "blocksForecast": false,
+      "message": "No credential values or private records are present in OPE records."
+    },
+    {
+      "checkId": "sourcebindingcheck-115006",
+      "checkName": "outcome_availability",
+      "checkStatus": "pass",
+      "score": 0.9,
+      "minimumScore": 0.7,
+      "blocksForecast": false,
+      "message": "A post-window outcome source is bound for later resolution only."
+    }
+  ],
+  "setupOperations": [
+    {
+      "operationId": "setupoperation-115001",
+      "operationName": "source_binding.draft",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "create_prediction",
+      "lifecycleOperation": "prediction.config_create",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115002",
+      "operationName": "source_binding.validate",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115003",
+      "operationName": "source_binding.confirm",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115004",
+      "operationName": "source_binding.update",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "update_prediction",
+      "lifecycleOperation": "prediction.config_update",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115005",
+      "operationName": "source_binding.archive",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "archive_record",
+      "lifecycleOperation": "prediction.config_archive",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    },
+    {
+      "operationId": "setupoperation-115006",
+      "operationName": "source_binding.redact",
+      "operationStatus": "available",
+      "cliCommand": "python3 scripts/ope.py source-bindings --case accepted",
+      "internalApiOperation": "redact_record",
+      "lifecycleOperation": "prediction.config_redact",
+      "requiresReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "writesRawConfig": false,
+      "physicalDeleteAllowed": false
+    }
+  ],
+  "configurationInputBoundary": {
+    "sanitizedManifestRequired": true,
+    "sanitizedMappingRequired": true,
+    "sanitizedProvenanceRequired": true,
+    "queryBoundaryRequired": true,
+    "arbitraryPrivateApiParsingByOpe": false,
+    "arbitraryDatabaseParsingByOpe": false,
+    "callerApprovalRequired": true
+  },
+  "executionBoundary": {
+    "createsForecasts": false,
+    "writesSourceData": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "executesApiCalls": false,
+    "executesDatabaseQueries": false,
+    "rawSqlAllowed": false
+  },
+  "nextAction": "forecast_generation_allowed",
+  "summary": {
+    "sourceBindingRecordsDefined": true,
+    "approvedSourceKindsCovered": true,
+    "setupOperationsDefined": true,
+    "safetyChecksComplete": true,
+    "allRequiredRolesBound": true,
+    "forecastGenerationAllowed": true,
+    "credentialsExcluded": true,
+    "privateParsingBehindAdapters": true,
+    "normalChecksNonMutating": true
+  },
+  "warnings": [
+    "Accepted binding permits forecast generation only through lifecycle preflight and operation receipts.",
+    "Outcome adapter output remains resolution-only and is not forecast-time evidence."
+  ]
+}

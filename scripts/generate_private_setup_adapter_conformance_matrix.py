@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -440,12 +441,21 @@ def check_matrix(matrix: dict[str, Any]) -> None:
     check_generated(MATRIX_PATH, matrix, label="private setup adapter conformance matrix", regen="python3 scripts/generate_private_setup_adapter_conformance_matrix.py --write")
 
 
+def load_generated_matrix() -> dict[str, Any] | None:
+    if not MATRIX_PATH.exists():
+        return None
+    matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    validate_matrix(matrix)
+    return matrix
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private setup adapter conformance matrix")
     parser.add_argument("--write", action="store_true", help="write generated private setup adapter conformance matrix")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
-    matrix = build_matrix()
+    matrix = build_matrix() if args.write or args.check or args.rebuild else (load_generated_matrix() or build_matrix())
     if args.write:
         write_matrix(matrix)
     elif args.check:

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -306,6 +307,22 @@ def check_or_write(data: dict[str, Any], *, write: bool) -> None:
     )
 
 
+def validate_doctor(doctor: dict[str, Any]) -> None:
+    errors = validate_record(doctor, SCHEMA)
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
+        raise SystemExit(1)
+
+
+def load_generated_doctor() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    doctor = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_doctor(doctor)
+    return doctor
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="refresh generated prediction campaign doctor")
@@ -327,12 +344,11 @@ def main() -> None:
 
     if (args.write or args.check) and args.now != DEFAULT_NOW:
         raise SystemExit("custom doctor inputs cannot be combined with --write or --check")
-    doctor = build_prediction_campaign_doctor(now=args.now)
-    errors = validate_record(doctor, SCHEMA)
-    if errors:
-        for error in errors:
-            print(error, file=sys.stderr)
-        raise SystemExit(1)
+    if args.write or args.check or args.now != DEFAULT_NOW:
+        doctor = build_prediction_campaign_doctor(now=args.now)
+    else:
+        doctor = load_generated_doctor() or build_prediction_campaign_doctor(now=args.now)
+    validate_doctor(doctor)
     if args.write or args.check:
         check_or_write(doctor, write=args.write)
         return

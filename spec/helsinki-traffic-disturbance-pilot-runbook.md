@@ -14,6 +14,7 @@ Best available method for the pilot is `transitmethod-100`, the transparent base
 - Target: 100 comparable resolved outcomes
 - Mini smoke target: 3 planned runs
 - Full plan command: `python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization`
+- Optional pre-calibration command: `python3 scripts/ope.py prediction-campaign pre-calibration`
 - Checked readback: `python3 scripts/ope.py prediction-campaign pilot-runbook`
 
 ## Mini Smoke Before The Real Pilot
@@ -45,13 +46,19 @@ python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke
 python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization
 ```
 
-3. Create the next due forecast only during the forecast window.
+3. Review optional historical pre-calibration before the first local write.
 
 ```bash
-python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl
+python3 scripts/ope.py prediction-campaign pre-calibration
 ```
 
-4. Check operator status daily or before each action.
+4. Create the next due forecast only during the forecast window. Include `--pre-calibrate` when the historical-only pre-calibration readback is ready and you want the pilot to use it.
+
+```bash
+python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl
+```
+
+5. Check operator status daily or before each action.
 
 ```bash
 python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status
@@ -59,25 +66,25 @@ python3 scripts/ope.py prediction-campaign doctor
 python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001
 ```
 
-5. Resolve a due run only after the horizon ends and only with eligible outcome evidence.
+6. Resolve a due run only after the horizon ends and only with eligible outcome evidence.
 
 ```bash
 python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local
 ```
 
-6. Append the scored local row.
+7. Append the scored local row.
 
 ```bash
 python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local
 ```
 
-7. Review calibration progress.
+8. Review calibration progress.
 
 ```bash
 python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot
 ```
 
-8. After 100 comparable outcomes, review method update readiness. Do not change methods unless the explicit plan-ready apply command is approved.
+9. After 100 comparable outcomes, review method update readiness. Do not change methods unless the explicit plan-ready apply command is approved.
 
 ```bash
 python3 scripts/ope.py prediction-campaign method-update-gate

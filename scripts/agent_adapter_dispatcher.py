@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,9 @@ from typing import Any
 from build_agent_adapter_fixtures import (
     SCHEMA,
     AgentAdapterError,
+    GENERATED as AGENT_ADAPTER_GENERATED,
     FORECAST_EXECUTION_CASES,
+    OUTPUT_FILES,
     binding_from_card,
     binding_from_trace,
     campaign_append_readiness_adapter_payload,
@@ -61,7 +64,14 @@ from generate_private_setup_agent_bundles import (
     PrivateSetupAgentBundleError,
     bundle_by_case,
     bundle_by_request_id,
+    load_bundle_by_case,
+    load_bundle_by_request_id,
 )
+from generate_private_source_adapter_capabilities import build_capabilities, load_generated_capabilities
+from generate_private_source_adapter_intake_bridge import build_bridge, load_generated_bridge
+from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
+from generate_internal_api import OPERATION_ORDER
+from internal_api_runtime import call_internal_api
 from read_ope_record import DEFAULT_MAX_BYTES, PublicError, read_record
 from validate_forecast_request import load_json, validate_request
 
@@ -91,6 +101,7 @@ CAPABILITY_BY_OPERATION = {
     "campaign_health": "read_only",
     "campaign_append_readiness": "read_only",
     "campaign_calibration_status": "read_only",
+    "internal_api": "dry_run_generation",
     "resolution_jobs": "read_only",
     "resolution_scheduler_status": "read_only",
     "resolution_status": "resolution_check",
@@ -116,6 +127,7 @@ INPUT_TYPE_BY_OPERATION = {
     "campaign_health": "prediction_campaign_doctor",
     "campaign_append_readiness": "prediction_campaign_evidence_ledger",
     "campaign_calibration_status": "prediction_campaign_calibration_status",
+    "internal_api": "internal_api_request",
     "resolution_jobs": "resolution_job_registry",
     "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
@@ -183,7 +195,7 @@ def input_ref_for(args: argparse.Namespace) -> str:
         summary = load_private_setup_adapter_conformance_summary()
         return summary["privateSetupAdapterConformanceSummaryId"]
     if args.operation == "private_source_adapter_guidance":
-        guidance = build_private_source_adapter_guidance_payload()
+        guidance = private_source_adapter_guidance_record()
         return guidance["bindingSummary"]["privateSourceAdapterCapabilityId"]
     if args.operation == "private_source_kind_selection":
         examples = load_private_source_kind_selection_examples()
@@ -215,6 +227,8 @@ def input_ref_for(args: argparse.Namespace) -> str:
     if args.operation == "campaign_calibration_status":
         payload, _binding, _state, _warnings = campaign_calibration_status_adapter_payload()
         return payload["predictionCampaignCalibrationStatusId"]
+    if args.operation == "internal_api":
+        return internal_api_payload(args)["internalApiCallId"]
     if args.operation == "resolution_jobs":
         registry = load_resolution_job_registry()
         return registry["resolutionJobRegistryId"]
@@ -410,6 +424,33 @@ def scoring_summary_payload(forecast_id: str, question_id: str | None) -> tuple[
     )
 
 
+def internal_api_payload(args: argparse.Namespace) -> dict[str, Any]:
+    return call_internal_api(
+        args.internal_operation,
+        caller_id="agent-call",
+        prediction_id=args.prediction_id,
+        idempotency_key=args.idempotency_key,
+        max_bytes=args.max_bytes,
+    )
+
+
+def internal_api_adapter_payload(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    payload = internal_api_payload(args)
+    return (
+        payload,
+        nullable_binding(requestId=payload["internalApiCallId"]),
+        nullable_state(
+            decisionStatus=payload["callStatus"],
+            executionMode="internal_api_dry_run",
+            qualityClaimStatus="not_allowed",
+        ),
+        [
+            "Internal API agent-call wrapper is non-mutating and uses the same in-process function as the CLI wrapper.",
+            "Effectful internal API operations must commit through lifecycle operation receipts outside this dry-run readback.",
+        ],
+    )
+
+
 def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, Any]:
     if bundle_case and bundle_case not in BAD_REQUEST_CASES:
         raise AgentCallError(
@@ -419,14 +460,83 @@ def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, 
         )
     try:
         if bundle_case:
-            return bundle_by_case(bundle_case)
-        return bundle_by_request_id(request_id)
+            return load_bundle_by_case(bundle_case) or bundle_by_case(bundle_case)
+        return load_bundle_by_request_id(request_id) or bundle_by_request_id(request_id)
     except PrivateSetupAgentBundleError as exc:
         raise AgentCallError(
             "not_found",
             "Private setup agent bundle was not found.",
             binding=nullable_binding(requestId=request_id),
         ) from exc
+
+
+def private_source_adapter_guidance_record() -> dict[str, Any]:
+    capability = load_generated_capabilities() or build_capabilities()
+    matrix = load_generated_matrix() or build_matrix()
+    bridge = load_generated_bridge() or build_bridge()
+    adapters = {item["sourceKind"]: item for item in capability["adapters"]}
+    rows = {item["sourceKind"]: item for item in matrix["outcomeRows"]}
+    bridge_rows = {item["sourceKind"]: item for item in bridge["bridgeRows"]}
+    supported_source_kinds = capability["supportedSourceKinds"]
+    summary = []
+    for source_kind in supported_source_kinds + ["unregistered_source", "unsafe_source"]:
+        row = rows[source_kind]
+        bridge_row = bridge_rows[source_kind]
+        adapter_item = adapters.get(source_kind)
+        summary.append(
+            {
+                "sourceKind": source_kind,
+                "implementationStatus": adapter_item["implementationStatus"] if adapter_item else "not_declared",
+                "availabilityStatus": adapter_item["availabilityStatus"] if adapter_item else "not_declared",
+                "outcomeClass": row["outcomeClass"],
+                "setupOutcomeClass": row["setupOutcomeClass"],
+                "requiresApproval": row["requiresApproval"],
+                "requiresCredential": row["requiresCredential"],
+                "canEnterSetup": row["canEnterSetup"],
+                "canExecuteSourceRead": row["canExecuteSourceRead"],
+                "allowedEntrypoint": bridge_row["allowedEntrypoint"],
+                "currentCommand": bridge_row["currentCommand"],
+                "retryCondition": bridge_row["retryCondition"],
+                "canCreateForecastArtifacts": row["canCreateForecastArtifacts"],
+                "canCreateScoringRecords": row["canCreateScoringRecords"],
+                "agentNextAction": row["agentNextAction"],
+            }
+        )
+    return {
+        "privateSourceAdapterGuidanceId": "privatesourceadapterguidance-001",
+        "generatedAt": "2026-06-06T12:20:00Z",
+        "scope": "domain_agnostic",
+        "runtimeStatus": "guidance_only",
+        "bindingSummary": {
+            "privateSourceAdapterCapabilityId": capability["privateSourceAdapterCapabilityId"],
+            "privateSourceAdapterOutcomeMatrixId": matrix["privateSourceAdapterOutcomeMatrixId"],
+            "privateSourceAdapterIntakeBridgeId": bridge["privateSourceAdapterIntakeBridgeId"],
+            "privateSetupWorkflowId": capability["boundPrivateSetupWorkflowId"],
+            "supportedSourceKinds": supported_source_kinds,
+        },
+        "sourceKindSummary": summary,
+        "capability": capability,
+        "outcomeMatrix": matrix,
+        "intakeBridge": bridge,
+        "executionBoundary": {
+            "guidanceDoesNotExecute": True,
+            "runsAdapterCalls": False,
+            "readsPrivateData": False,
+            "createsSourceManifests": False,
+            "createsFieldMappings": False,
+            "createsForecastArtifacts": False,
+            "createsScoringRecords": False,
+            "fetchesLiveData": False,
+            "storesCredentials": False,
+            "createsHostedRuntime": False,
+        },
+        "warnings": [
+            "Private source adapter guidance is read-only and does not execute source reads.",
+            "Private API, private database, and manual upload adapters remain planned-only until a runtime lands.",
+            "Use source-builder or source-handoff only through later checked operations after caller approval.",
+            "This guidance does not create source manifests, forecasts, resolution records, scoring records, or credentials.",
+        ],
+    }
 
 
 def private_setup_bundle_payload(
@@ -483,7 +593,7 @@ def private_setup_adapter_conformance_summary_payload() -> tuple[dict[str, Any],
 
 
 def private_source_adapter_guidance_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
-    guidance = build_private_source_adapter_guidance_payload()
+    guidance = private_source_adapter_guidance_record()
     binding = nullable_binding()
     state = state_from_private_source_adapter_guidance(guidance)
     return guidance, binding, state, guidance["warnings"]
@@ -623,7 +733,25 @@ def private_setup_method_gate_payload(
     )
 
 
+def load_generated_agent_envelope(key: str) -> dict[str, Any] | None:
+    filename = OUTPUT_FILES[key]
+    path = AGENT_ADAPTER_GENERATED / filename
+    if not path.exists():
+        return None
+    item = json.loads(path.read_text(encoding="utf-8"))
+    errors = validate_record(item, SCHEMA)
+    if errors:
+        raise AgentAdapterError(f"{filename} schema validation failed: {errors[0]}")
+    validate_envelope_semantics(item)
+    return item
+
+
 def forecast_execution_payload(args: argparse.Namespace) -> dict[str, Any]:
+    if args.private_setup_request_id == DEFAULT_PRIVATE_SETUP_REQUEST_ID:
+        key = f"private_setup_forecast_execution_{args.forecast_execution_case}"
+        item = load_generated_agent_envelope(key)
+        if item is not None:
+            return item["payload"]
     try:
         return forecast_execution_result_payload(
             private_setup_request_id=args.private_setup_request_id,
@@ -739,6 +867,9 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
         payload, binding, state, warnings = campaign_plan_adapter_payload()
         return payload["predictionCampaignManifestId"], payload, binding, state, warnings
     if args.operation == "campaign_status":
+        item = load_generated_agent_envelope("campaign_status")
+        if item is not None:
+            return item["adapterRequest"]["inputRef"], item["payload"], item["recordBinding"], item["state"], item["warnings"]
         payload, binding, state, warnings = campaign_status_adapter_payload()
         return payload["predictionCampaignExplainId"], payload, binding, state, warnings
     if args.operation == "campaign_health":
@@ -750,6 +881,9 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "campaign_calibration_status":
         payload, binding, state, warnings = campaign_calibration_status_adapter_payload()
         return payload["predictionCampaignCalibrationStatusId"], payload, binding, state, warnings
+    if args.operation == "internal_api":
+        payload, binding, state, warnings = internal_api_adapter_payload(args)
+        return payload["internalApiCallId"], payload, binding, state, warnings
     if args.operation == "resolution_jobs":
         payload, binding, state, warnings = resolution_jobs_payload()
         return payload["resolutionJobRegistryId"], payload, binding, state, warnings
@@ -855,6 +989,8 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "predictioncampaignevidenceledger-001"
     if args.operation == "campaign_calibration_status":
         return "predictioncampaigncalibrationstatus-001"
+    if args.operation == "internal_api":
+        return "internalapicall-001"
     if args.operation == "resolution_jobs":
         return "resolutionjobregistry-001"
     if args.operation == "resolution_scheduler_status":
@@ -907,6 +1043,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-handoff-case", choices=SOURCE_HANDOFF_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--method-gate-case", choices=METHOD_GATE_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--forecast-execution-case", choices=FORECAST_EXECUTION_CASES, default="unconfirmed_builder_draft")
+    parser.add_argument("--internal-operation", choices=OPERATION_ORDER, default="read_status")
+    parser.add_argument("--prediction-id", default="predictioncampaign-001")
+    parser.add_argument("--idempotency-key")
     parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
     parser.add_argument("--caller-intent", default=DEFAULT_CALLER_INTENT)
     return parser

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -556,6 +557,24 @@ def build_outputs() -> dict[str, Any]:
     return outputs
 
 
+def load_generated_outputs() -> dict[str, Any] | None:
+    if not GENERATED.exists():
+        return None
+    outputs: dict[str, Any] = {}
+    for case in CASE_ORDER:
+        prefix = output_prefix(case)
+        run_name = f"{prefix}-setup-forecast-run.generated.json"
+        if not (GENERATED / run_name).exists():
+            return None
+        case_outputs = {
+            path.name: json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted(GENERATED.glob(f"{prefix}-*.generated.json"))
+        }
+        validate_case_outputs(case, case_outputs)
+        outputs.update(case_outputs)
+    return outputs
+
+
 def write_outputs(outputs: dict[str, Any]) -> None:
     expected_names = set(outputs)
     GENERATED.mkdir(parents=True, exist_ok=True)
@@ -620,7 +639,10 @@ def main() -> None:
     parser.add_argument("--write", action="store_true", help="write generated source-handoff setup forecast outputs")
     args = parser.parse_args()
     try:
-        outputs = build_outputs()
+        if args.write or args.check:
+            outputs = build_outputs()
+        else:
+            outputs = load_generated_outputs() or build_outputs()
     except SourceHandoffForecastError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

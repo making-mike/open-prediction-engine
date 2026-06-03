@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
@@ -321,6 +322,22 @@ def check_or_write(data: dict[str, Any], *, write: bool) -> None:
     )
 
 
+def validate_explain(record: dict[str, Any]) -> None:
+    errors = validate_record(record, SCHEMA)
+    if errors:
+        for error in errors:
+            print(error)
+        raise SystemExit(1)
+
+
+def load_generated_explain() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    record = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_explain(record)
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="refresh generated campaign explain readback")
@@ -338,15 +355,14 @@ def main() -> None:
         help="print one prediction campaign explain view",
     )
     args = parser.parse_args()
-    record = build_prediction_campaign_explain()
+    if args.write or args.check:
+        record = build_prediction_campaign_explain()
+    else:
+        record = load_generated_explain() or build_prediction_campaign_explain()
     if args.write or args.check:
         check_or_write(record, write=args.write)
         return
-    errors = validate_record(record, SCHEMA)
-    if errors:
-        for error in errors:
-            print(error)
-        raise SystemExit(1)
+    validate_explain(record)
     print_view(record, args.view, args.output_format)
 
 

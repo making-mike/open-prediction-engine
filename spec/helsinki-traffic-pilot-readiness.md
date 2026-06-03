@@ -22,6 +22,7 @@ python3 scripts/ope.py prediction-campaign pilot-readiness --view commands
 - full 100-run materialization has no duplicate date/window keys
 - the baseline method remains the launch method
 - missed windows are not backfilled
+- optional historical-only pre-calibration is ready if the operator requests it
 
 Manual launch prerequisites still remain outside normal checks:
 
@@ -39,11 +40,12 @@ Use readiness as the gate, then run the smoke path before the first effectful wr
 python3 scripts/ope.py prediction-campaign pilot-readiness
 python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl
 python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization
-python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl
+python3 scripts/ope.py prediction-campaign pre-calibration
+python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl
 python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status
 ```
 
-The first effectful launch command creates only one next-due local campaign forecast. Resolution, append, calibration, and method update remain separate explicit steps.
+The first effectful launch command creates only one next-due local campaign forecast. If `--pre-calibrate` is present, it first writes the historical-only baseline binding into ignored local state and then uses that calibrated probability for the forecast artifact. Resolution, append, calibration, and method update remain separate explicit steps.
 
 ## Blocked Actions
 

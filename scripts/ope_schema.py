@@ -273,8 +273,16 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "resolution-scheduler-run.schema.json"
     if name.endswith("resolution-runtime-reliability.generated.json"):
         return spec_root / "resolution-runtime-reliability.schema.json"
+    if name.endswith("internal-api.generated.json"):
+        return spec_root / "internal-api.schema.json"
+    if name.endswith("prediction-workspace-registry.generated.json"):
+        return spec_root / "prediction-workspace-registry.schema.json"
     if name.endswith("lifecycle-operation-store.generated.json"):
         return spec_root / "lifecycle-operation.schema.json"
+    if name.endswith("-domain-config.generated.json"):
+        return spec_root / "domain-config.schema.json"
+    if name.endswith("-source-binding.generated.json"):
+        return spec_root / "source-binding.schema.json"
     if name.endswith("-domain-setup.generated.json"):
         return spec_root / "domain-setup.schema.json"
     if name.endswith("-source-manifest-build.generated.json"):
@@ -319,6 +327,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "prediction-campaign-resume.schema.json"
     if name.endswith("campaign-evidence-ledger.generated.json"):
         return spec_root / "prediction-campaign-evidence-ledger.schema.json"
+    if name.endswith("campaign-pre-calibration.generated.json"):
+        return spec_root / "prediction-campaign-pre-calibration.schema.json"
     if name.endswith("campaign-calibration-status.generated.json"):
         return spec_root / "prediction-campaign-calibration-status.schema.json"
     if name.endswith("campaign-method-update-gate.generated.json"):

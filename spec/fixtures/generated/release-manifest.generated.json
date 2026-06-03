@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 97,
+    "schemaFileCount": 102,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -36,6 +36,7 @@
       "spec/calibration-summary.schema.json",
       "spec/common.schema.json",
       "spec/developer-adoption-surface.schema.json",
+      "spec/domain-config.schema.json",
       "spec/domain-setup.schema.json",
       "spec/evidence-gathering-plan.schema.json",
       "spec/evidence-packet.schema.json",
@@ -52,6 +53,7 @@
       "spec/forecast-run-summary.schema.json",
       "spec/helsinki-traffic-disturbance-pilot-runbook.schema.json",
       "spec/helsinki-traffic-pilot-readiness.schema.json",
+      "spec/internal-api.schema.json",
       "spec/lifecycle-operation.schema.json",
       "spec/live-connector-readiness.schema.json",
       "spec/local-source-runtime.schema.json",
@@ -73,9 +75,11 @@
       "spec/prediction-campaign-method-update-action.schema.json",
       "spec/prediction-campaign-method-update-gate.schema.json",
       "spec/prediction-campaign-method-update-plan.schema.json",
+      "spec/prediction-campaign-pre-calibration.schema.json",
       "spec/prediction-campaign-resolution-attempt.schema.json",
       "spec/prediction-campaign-resume.schema.json",
       "spec/prediction-campaign-runner.schema.json",
+      "spec/prediction-workspace-registry.schema.json",
       "spec/private-setup-adapter-chain-runbook.schema.json",
       "spec/private-setup-adapter-conformance-matrix.schema.json",
       "spec/private-setup-adapter-conformance-summary.schema.json",
@@ -105,6 +109,7 @@
       "spec/setup-method-decision.schema.json",
       "spec/source-adapter-intake.schema.json",
       "spec/source-adapter-output.schema.json",
+      "spec/source-binding.schema.json",
       "spec/source-connector-registry.schema.json",
       "spec/source-connector-result-set.schema.json",
       "spec/source-handoff-method-gate.schema.json",
@@ -182,6 +187,8 @@
         "python3 scripts/ope.py prediction-campaign start",
         "python3 scripts/ope.py prediction-campaign start --view campaign-creation",
         "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
+        "python3 scripts/ope.py prediction-campaign pre-calibration",
+        "python3 scripts/ope.py prediction-campaign start --pre-calibrate --view pre-calibration",
         "python3 scripts/ope.py prediction-campaign start --watch --max-ticks 1 --output-format jsonl",
         "python3 scripts/ope.py prediction-campaign start --now 2026-06-12T00:00:00Z --watch --max-ticks 1 --output-format jsonl",
         "python3 scripts/ope.py prediction-campaign forecast-create",
@@ -318,6 +325,16 @@
         "checkId": "mvp-smoke-prediction-campaign-forecast-schedule",
         "command": "python3 scripts/ope.py prediction-campaign start --view forecast-schedule",
         "expected": "prediction campaign start maps ready, waiting, missed, and duplicate forecast schedule actions without writing campaign state."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-pre-calibration",
+        "command": "python3 scripts/ope.py prediction-campaign pre-calibration",
+        "expected": "prediction campaign pre-calibration computes an optional historical-only baseline binding without live fetches, method changes, or local writes."
+      },
+      {
+        "checkId": "mvp-smoke-prediction-campaign-start-pre-calibration",
+        "command": "python3 scripts/ope.py prediction-campaign start --pre-calibrate --view pre-calibration",
+        "expected": "prediction campaign start exposes requested pre-calibration before any explicit launch write."
       },
       {
         "checkId": "mvp-smoke-prediction-campaign-foreground-tick",

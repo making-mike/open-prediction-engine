@@ -23,12 +23,21 @@ def main() -> None:
     require(record["domain"] == "weather-transit-delays", "runbook domain drifted")
     require(record["bindings"]["campaignId"] == "predictioncampaign-001", "campaign binding drifted")
     require(record["bindings"]["sourcePolicyId"] == "sourcepolicy-1201", "source policy binding drifted")
+    require(
+        record["bindings"]["predictionCampaignPreCalibrationId"] == "predictioncampaignprecalibration-001",
+        "pre-calibration binding drifted",
+    )
 
     require(scope["geography"] == "helsinki", "pilot geography drifted")
     require(scope["network"] == "hsl-surface", "pilot network drifted")
     require(scope["targetRunCount"] == 100, "target run count drifted")
     require(scope["miniSmokeRunCount"] == 3, "mini smoke run count drifted")
     require(scope["bestAvailableMethodId"] == "transitmethod-100", "best available method drifted")
+    require(
+        scope["optionalPreCalibrationCommand"] == "python3 scripts/ope.py prediction-campaign pre-calibration",
+        "optional pre-calibration command drifted",
+    )
+    require("--pre-calibrate" in scope["launchWithPreCalibrationCommand"], "launch command must request pre-calibration")
     require(scope["normalChecksUseLiveNetwork"] is False, "normal checks must not use live network")
     require(scope["normalChecksWriteLocalState"] is False, "normal checks must not write local state")
 
@@ -76,8 +85,16 @@ def main() -> None:
     require(smoke["normalChecksMutateState"] is False, "mini smoke must not mutate state")
 
     phases = {item["phase"] for item in record["runbookSteps"]}
+    step_by_key = {item["stepKey"]: item for item in record["runbookSteps"]}
     for phase in ["setup", "smoke", "forecast", "monitor", "resolve", "append", "calibrate", "recover", "stop"]:
         require(phase in phases, f"missing runbook phase {phase}")
+    require("review_pre_calibration" in step_by_key, "missing pre-calibration review step")
+    require(
+        step_by_key["review_pre_calibration"]["command"] == "python3 scripts/ope.py prediction-campaign pre-calibration",
+        "pre-calibration review command drifted",
+    )
+    require(step_by_key["review_pre_calibration"]["mutatesState"] is False, "pre-calibration review must be read-only")
+    require("--pre-calibrate" in step_by_key["create_next_forecast"]["command"], "forecast launch must pre-calibrate")
     require(any(item["mutatesState"] for item in record["runbookSteps"]), "runbook should identify effectful steps")
     require(len(record["successCriteria"]) == 6, "success criteria count drifted")
     require(len(record["abortCriteria"]) == 6, "abort criteria count drifted")
@@ -110,6 +127,8 @@ def main() -> None:
     require(summary["miniCampaignSmokeReady"] is True, "mini smoke should be ready")
     require(summary["operatorStatusReady"] is True, "operator status should be ready")
     require(summary["bestAvailableMethodId"] == "transitmethod-100", "summary best method drifted")
+    require(summary["optionalPreCalibrationAvailable"] is True, "optional pre-calibration should be ready")
+    require(summary["optionalPreCalibrationStatus"] == "ready", "optional pre-calibration status drifted")
     require(summary["qualityClaimAllowed"] is False, "quality claim must stay blocked")
     require(summary["calibrationClaimAllowed"] is False, "calibration claim must stay blocked")
 

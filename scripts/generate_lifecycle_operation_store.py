@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from lifecycle_operation_store_runtime import run_runtime_scenarios, sqlite_schema_plan
+from lifecycle_operation_store_runtime import file_database_compatibility_checks, run_runtime_scenarios, sqlite_schema_plan
 from ope_fixtures import check_generated, render_json, write_generated
 from ope_schema import SPEC, validate_record
 
@@ -25,6 +26,14 @@ SCENARIO_NAMES = [
     "archive",
     "redaction",
     "method-rollback",
+    "pre-calibration-bind",
+    "campaign-forecast-create",
+    "campaign-resolution-record",
+    "campaign-score-create",
+    "campaign-evidence-append",
+    "campaign-method-apply",
+    "campaign-method-rollback",
+    "json-state-import",
     "recovery",
 ]
 
@@ -119,8 +128,10 @@ def operation_catalog() -> list[dict[str, Any]]:
         operation("resolution.record", "create", "resolution", lease=True, writes_records=True, write_mode="insert_once"),
         operation("score.create", "create", "scoring", lease=True, writes_records=True, write_mode="insert_once"),
         operation("evidence.append", "append_update", "evidence", lease=True, writes_records=True, write_mode="append_only"),
+        operation("pre_calibration.bind", "method_state", "method_update", lease=True, writes_records=True, write_mode="prospective_binding"),
         operation("method.apply", "method_state", "method_update", lease=True, writes_records=True, write_mode="prospective_binding"),
         operation("method.rollback", "method_state", "method_update", lease=True, writes_records=True, write_mode="prospective_binding"),
+        operation("state.import_json", "migration", "migration", lease=True, writes_records=True, write_mode="insert_once"),
         operation(
             "record.archive",
             "delete_replacement",
@@ -163,7 +174,10 @@ def immutable_record_store() -> list[dict[str, Any]]:
         record_class("resolution_record", "spec/resolution-record.schema.json", "ope_records", "insert_once"),
         record_class("scoring_report", "spec/scoring-report.schema.json", "ope_records", "insert_once"),
         record_class("calibration_summary", "spec/calibration-summary.schema.json", "ope_records", "insert_once"),
+        record_class("pre_calibration_binding", "spec/prediction-campaign-pre-calibration.schema.json", "operation_audit_records", "append_only"),
         record_class("method_update_audit", "spec/prediction-campaign-method-update-action.schema.json", "operation_audit_records", "append_only"),
+        record_class("evidence_ledger_row", "spec/prediction-campaign-evidence-ledger.schema.json", "evidence_ledger_rows", "append_only"),
+        record_class("json_state_migration_receipt", "spec/lifecycle-operation.schema.json", "operation_audit_records", "append_only"),
         record_class("operation_receipt", "spec/lifecycle-operation.schema.json", "operation_receipts", "append_only"),
         record_class("archive_tombstone", "spec/lifecycle-operation.schema.json", "operation_audit_records", "append_only"),
         record_class("redaction_receipt", "spec/lifecycle-operation.schema.json", "operation_audit_records", "append_only"),
@@ -195,12 +209,184 @@ def read_models() -> list[dict[str, Any]]:
     ]
 
 
+def json_compatibility_adapter() -> dict[str, Any]:
+    return {
+        "adapterName": "ignored_json_live_state",
+        "adapterStatus": "current_compatibility_adapter",
+        "sourceRoot": ".ope/live/prediction-campaigns",
+        "readCompatibilityAllowed": True,
+        "writeCompatibilityAllowed": True,
+        "normalChecksWriteLiveState": False,
+        "automaticMigrationAllowed": False,
+        "explicitMigrationOperationRequired": True,
+        "migrationReceiptRequired": True,
+        "contentHashCheckRequired": True,
+        "sourceRecordHashRequired": True,
+        "preservesForecastProbabilities": True,
+        "preservesSourceProvenance": True,
+        "rewritesHistoricalForecasts": False,
+        "rawCrudExposed": False,
+        "stateClasses": [
+            {
+                "stateClass": "forecast_lifecycle_records",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/{run}/{record}.json",
+                "migrationTargetTable": "ope_records",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+            {
+                "stateClass": "run_state",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/{run}.json",
+                "migrationTargetTable": "read_model_rows",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+            {
+                "stateClass": "campaign_state",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/state.json",
+                "migrationTargetTable": "read_model_rows",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+            {
+                "stateClass": "evidence_ledger",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/evidence-ledger.json",
+                "migrationTargetTable": "evidence_ledger_rows",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+            {
+                "stateClass": "method_binding",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/method-binding.json",
+                "migrationTargetTable": "operation_audit_records",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+            {
+                "stateClass": "operation_audit",
+                "sourcePathPattern": ".ope/live/prediction-campaigns/{campaign}/method-updates/{artifact}.json",
+                "migrationTargetTable": "operation_audit_records",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
+        ],
+        "knownLimitations": [
+            "Ignored JSON compatibility is weak for concurrent agents until imported through lifecycle receipts.",
+            "Compatibility writes remain explicit local actions and are never performed by normal checks.",
+            "Migration must preserve source content hashes before SQLite becomes authoritative for existing state.",
+        ],
+    }
+
+
+def write_local_coverage_entry(
+    coverage_id: str,
+    command_path: str,
+    lifecycle_operations: list[str],
+    scenario_names: list[str],
+    required_receipts: int,
+    required_read_models: list[str],
+) -> dict[str, Any]:
+    return {
+        "coverageId": coverage_id,
+        "commandPath": command_path,
+        "lifecycleOperations": lifecycle_operations,
+        "scenarioNames": scenario_names,
+        "requiredOperationReceiptCount": required_receipts,
+        "requiredReadModels": required_read_models,
+        "allReceiptsChecked": True,
+        "allReadModelsChecked": True,
+        "idempotencyRequired": True,
+        "leaseRequired": True,
+        "rawCrudExposed": False,
+        "normalChecksWriteLiveState": False,
+        "compatibilityJsonWriteAllowed": True,
+        "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use.",
+    }
+
+
+def write_local_operation_coverage() -> list[dict[str, Any]]:
+    return [
+        write_local_coverage_entry(
+            "writelocalcoverage-001",
+            "prediction-campaign start --write-local",
+            ["forecast.create"],
+            ["campaign-forecast-create"],
+            1,
+            ["campaign_status", "next_due_forecast", "unresolved_forecasts"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-002",
+            "prediction-campaign start --pre-calibrate --write-local",
+            ["pre_calibration.bind", "forecast.create"],
+            ["pre-calibration-bind", "campaign-forecast-create"],
+            2,
+            ["campaign_status", "calibration_status", "track_record_progress", "next_due_forecast", "unresolved_forecasts"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-003",
+            "prediction-campaign forecast-write --write-local",
+            ["forecast.create"],
+            ["campaign-forecast-create"],
+            1,
+            ["campaign_status", "next_due_forecast", "unresolved_forecasts"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-004",
+            "prediction-campaign resolve --execute-resolvers --write-local",
+            ["resolution.record", "score.create"],
+            ["campaign-resolution-record", "campaign-score-create"],
+            2,
+            ["campaign_status", "due_resolution_jobs", "append_readiness"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-005",
+            "prediction-campaign append --write-local",
+            ["evidence.append"],
+            ["campaign-evidence-append"],
+            1,
+            ["campaign_status", "append_readiness", "calibration_status", "track_record_progress"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-006",
+            "prediction-campaign pre-calibration --write-local",
+            ["pre_calibration.bind"],
+            ["pre-calibration-bind"],
+            1,
+            ["campaign_status", "calibration_status", "track_record_progress"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-007",
+            "prediction-campaign apply-method-update --write-local",
+            ["method.apply"],
+            ["campaign-method-apply"],
+            1,
+            ["campaign_status", "calibration_status", "track_record_progress"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-008",
+            "prediction-campaign rollback-method-update --write-local",
+            ["method.rollback"],
+            ["campaign-method-rollback"],
+            1,
+            ["campaign_status", "calibration_status", "track_record_progress"],
+        ),
+    ]
+
+
 def build_lifecycle_operation_store() -> dict[str, Any]:
     operations = operation_catalog()
     records = immutable_record_store()
     models = read_models()
     runtime_scenarios = run_runtime_scenarios()
     schema_plan = sqlite_schema_plan()
+    write_local_coverage = write_local_operation_coverage()
+    compatibility_checks = file_database_compatibility_checks()
     store = {
         "lifecycleOperationStoreId": "lifecycleoperationstore-001",
         "generatedAt": GENERATED_AT,
@@ -221,7 +407,7 @@ def build_lifecycle_operation_store() -> dict[str, Any]:
         },
         "leaseModel": {
             "tableName": "operation_leases",
-            "leaseRequiredFor": ["campaign.create_run", "forecast.create", "resolution.record", "score.create", "evidence.append", "method.apply", "method.rollback"],
+            "leaseRequiredFor": ["campaign.create_run", "forecast.create", "resolution.record", "score.create", "evidence.append", "pre_calibration.bind", "method.apply", "method.rollback", "state.import_json"],
             "leaseOwnerField": "agentOrWorkerId",
             "expiresAtRequired": True,
             "conflictStatus": "blocked_lease_conflict",
@@ -248,6 +434,9 @@ def build_lifecycle_operation_store() -> dict[str, Any]:
             "migrationReceiptRequired": True,
             "normalChecksRequireDatabase": False,
         },
+        "jsonCompatibilityAdapter": json_compatibility_adapter(),
+        "writeLocalOperationCoverage": write_local_coverage,
+        "fileDatabaseCompatibilityChecks": compatibility_checks,
         "agentPreflightSurface": {
             "preflightRequired": True,
             "plannedWritesListed": True,
@@ -286,6 +475,11 @@ def build_lifecycle_operation_store() -> dict[str, Any]:
             "immutableRecordClassCount": len(records),
             "sqliteTableCount": len(schema_plan),
             "runtimeScenarioCount": len(runtime_scenarios),
+            "writeLocalOperationCoverageCount": len(write_local_coverage),
+            "allWriteLocalPathsReceiptBacked": True,
+            "allWriteLocalPathsReadModelBacked": True,
+            "fileDatabaseCompatibilityCheckCount": len(compatibility_checks),
+            "fileDatabaseCompatibilityChecked": True,
             "deleteReplacedByLifecycleOperations": True,
             "agentImplementationReady": True,
             "sqliteRuntimeChecked": True,
@@ -335,6 +529,28 @@ def validate_lifecycle_operation_store(store: dict[str, Any]) -> None:
         raise LifecycleOperationStoreError("lifecycle operation store must block silent delete and post-outcome rewrites")
     if not store["idempotencyModel"]["requiredForAllEffectfulOperations"]:
         raise LifecycleOperationStoreError("effectful operations must require idempotency")
+    compat = store["jsonCompatibilityAdapter"]
+    if compat["adapterName"] != "ignored_json_live_state" or compat["adapterStatus"] != "current_compatibility_adapter":
+        raise LifecycleOperationStoreError("ignored JSON compatibility adapter status drifted")
+    if compat["normalChecksWriteLiveState"] or compat["automaticMigrationAllowed"] or compat["rawCrudExposed"]:
+        raise LifecycleOperationStoreError("ignored JSON compatibility must not auto-migrate, write in checks, or expose raw CRUD")
+    for flag in [
+        "explicitMigrationOperationRequired",
+        "migrationReceiptRequired",
+        "contentHashCheckRequired",
+        "sourceRecordHashRequired",
+        "preservesForecastProbabilities",
+        "preservesSourceProvenance",
+    ]:
+        if not compat[flag]:
+            raise LifecycleOperationStoreError(f"ignored JSON compatibility adapter must keep {flag} true")
+    if compat["rewritesHistoricalForecasts"]:
+        raise LifecycleOperationStoreError("ignored JSON compatibility adapter must not rewrite historical forecasts")
+    for state_class in compat["stateClasses"]:
+        if not state_class["contentHashPreserved"] or not state_class["migrationReceiptRequired"]:
+            raise LifecycleOperationStoreError("ignored JSON state classes must preserve hashes and require receipts")
+        if state_class["rawCrudExposed"]:
+            raise LifecycleOperationStoreError("ignored JSON state classes must not expose raw CRUD")
     lease_required = set(store["leaseModel"]["leaseRequiredFor"])
     for item in store["operationCatalog"]:
         if not item["requiresPreflight"] or not item["requiresIdempotencyKey"]:
@@ -361,6 +577,59 @@ def validate_lifecycle_operation_store(store: dict[str, Any]) -> None:
             raise LifecycleOperationStoreError("runtime scenarios must preserve claim boundaries")
         if not item["preflight"]["plannedWrites"] or not item["preflight"]["blockingGuards"]:
             raise LifecycleOperationStoreError("runtime scenarios must expose planned writes and blocking guards")
+    for coverage in store["writeLocalOperationCoverage"]:
+        if not coverage["allReceiptsChecked"] or not coverage["allReadModelsChecked"]:
+            raise LifecycleOperationStoreError("write-local coverage must check receipts and read-model effects")
+        if not coverage["idempotencyRequired"] or not coverage["leaseRequired"]:
+            raise LifecycleOperationStoreError("write-local coverage must require idempotency and leases")
+        if coverage["rawCrudExposed"] or coverage["normalChecksWriteLiveState"]:
+            raise LifecycleOperationStoreError("write-local coverage must not expose raw CRUD or write live state in checks")
+        receipt_count = 0
+        read_model_effects: set[str] = set()
+        operation_names = []
+        for scenario_name in coverage["scenarioNames"]:
+            scenario = scenarios[scenario_name]
+            if scenario["executionStatus"] != "committed":
+                raise LifecycleOperationStoreError(f"write-local coverage scenario is not committed: {scenario_name}")
+            receipt_count += scenario["operationReceiptsWritten"]
+            read_model_effects.update(scenario["readModelEffects"])
+            operation_names.append(scenario["operationName"])
+        if receipt_count < coverage["requiredOperationReceiptCount"]:
+            raise LifecycleOperationStoreError(f"write-local coverage missing receipts for {coverage['commandPath']}")
+        if set(operation_names) != set(coverage["lifecycleOperations"]):
+            raise LifecycleOperationStoreError(f"write-local coverage operation mapping drifted for {coverage['commandPath']}")
+        if not set(coverage["requiredReadModels"]).issubset(read_model_effects):
+            raise LifecycleOperationStoreError(f"write-local coverage missing read-model effects for {coverage['commandPath']}")
+    required_compatibility_classes = {
+        "forecast_lifecycle_records",
+        "resolution_records",
+        "scoring_reports",
+        "evidence_ledger_rows",
+        "pre_calibration_method_binding",
+        "method_apply_binding",
+        "method_rollback_binding",
+    }
+    compatibility_checks = store["fileDatabaseCompatibilityChecks"]
+    if {item["recordClass"] for item in compatibility_checks} != required_compatibility_classes:
+        raise LifecycleOperationStoreError("file/database compatibility checks should cover current write-local record classes")
+    for item in compatibility_checks:
+        scenario = scenarios[item["scenarioName"]]
+        if scenario["operationName"] != item["lifecycleOperation"]:
+            raise LifecycleOperationStoreError(f"compatibility check operation drifted for {item['recordClass']}")
+        if not item["fileModeDuplicatePrevented"] or not item["compatible"]:
+            raise LifecycleOperationStoreError(f"compatibility check is not duplicate-safe: {item['recordClass']}")
+        if item["databaseFirstExecutionStatus"] != "committed":
+            raise LifecycleOperationStoreError(f"compatibility first execution did not commit: {item['recordClass']}")
+        if item["databaseReplayExecutionStatus"] != "idempotent_replay":
+            raise LifecycleOperationStoreError(f"compatibility replay did not return idempotent replay: {item['recordClass']}")
+        if item["databaseReplayIdempotencyStatus"] != "return_existing_receipt":
+            raise LifecycleOperationStoreError(f"compatibility replay did not return existing receipt: {item['recordClass']}")
+        if item["databaseReplayOperationReceiptsWritten"] != 0 or item["databaseDuplicateRecordsCreated"] != 0:
+            raise LifecycleOperationStoreError(f"compatibility replay created duplicate database rows: {item['recordClass']}")
+        if item["historyRewriteCount"] != 0 or item["physicalDeletes"] != 0 or item["rawCrudExposed"]:
+            raise LifecycleOperationStoreError(f"compatibility replay violated mutation boundaries: {item['recordClass']}")
+        if not item["contentHashComparisonRequired"]:
+            raise LifecycleOperationStoreError(f"compatibility checks should require content-hash comparison: {item['recordClass']}")
 
 
 def write_lifecycle_operation_store(store: dict[str, Any]) -> None:
@@ -381,6 +650,14 @@ def check_lifecycle_operation_store(store: dict[str, Any]) -> None:
     )
 
 
+def load_generated_store() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    store = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_lifecycle_operation_store(store)
+    return store
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", choices=SCENARIO_NAMES, help="print one checked SQLite runtime scenario")
@@ -388,7 +665,10 @@ def main() -> None:
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
     try:
-        store = build_lifecycle_operation_store()
+        if args.write or args.check:
+            store = build_lifecycle_operation_store()
+        else:
+            store = load_generated_store() or build_lifecycle_operation_store()
         if args.scenario:
             scenario = next(item for item in store["runtimeScenarios"] if item["scenarioName"] == args.scenario)
             sys.stdout.write(render_json(scenario))

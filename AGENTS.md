@@ -67,6 +67,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/repeating-prediction-setup.md`: checked local-first repeating prediction setup contract, recurrence examples, post-calibration policies, and non-execution boundary.
 - `spec/prediction-campaign-manifest.md`: checked local dry-run campaign manifest with unique run IDs, duplicate prevention, local-state path policy, and status readbacks.
 - `spec/prediction-campaign-runner.md`: checked dry-run terminal runner readback for campaign start command semantics and non-execution boundary.
+- `spec/prediction-campaign-pre-calibration.md`: optional historical-only campaign pre-calibration boundary before pilot launch.
 - `spec/prediction-campaign-forecast-creation.md`: checked dry-run handoff from a ready campaign runner decision to planned forecast artifact IDs.
 - `spec/prediction-campaign-forecast-artifact.md`: checked unresolved campaign forecast artifact using the standard lifecycle contracts.
 - `spec/prediction-campaign-forecast-write.md`: checked non-mutating campaign forecast lifecycle write plan and local-state guard boundary.
@@ -399,6 +400,7 @@ python3 scripts/ope.py repeating-prediction-setup
 python3 scripts/ope.py prediction-campaign plan
 python3 scripts/ope.py prediction-campaign status
 python3 scripts/ope.py prediction-campaign start
+python3 scripts/ope.py prediction-campaign pre-calibration
 python3 scripts/ope.py prediction-campaign forecast-create
 python3 scripts/ope.py prediction-campaign forecast-artifact
 python3 scripts/ope.py prediction-campaign forecast-write

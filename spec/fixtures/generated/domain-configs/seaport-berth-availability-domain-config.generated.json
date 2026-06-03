@@ -1,0 +1,162 @@
+{
+  "domainConfigId": "domainconfig-002",
+  "generatedAt": "2026-06-03T03:15:00Z",
+  "configStatus": "candidate_readback",
+  "domainId": "domainseaportberthavailability-001",
+  "domainKey": "seaport-berth-availability",
+  "displayName": "Seaport Berth Availability Domain Config",
+  "version": "0.1",
+  "questionTemplates": [
+    {
+      "templateId": "questiontemplate-115002",
+      "templateKey": "berth_availability_window",
+      "templateText": "Will {port_area} have at least one qualifying berth available for {vessel_class} during {arrival_window}?",
+      "outputType": "binary",
+      "requiredParameters": [
+        "port_area",
+        "vessel_class",
+        "arrival_window"
+      ],
+      "forecastClosePolicy": "Forecast must close before the arrival window starts."
+    }
+  ],
+  "horizons": [
+    {
+      "horizonId": "horizon-115002",
+      "horizonKey": "arrival_window",
+      "label": "Declared arrival window",
+      "startsAfter": "forecast close",
+      "endsAfter": "declared arrival window end"
+    }
+  ],
+  "resolutionCriteria": {
+    "primaryOutcomeRole": "berth_availability_outcome",
+    "resolutionTiming": "post_horizon",
+    "yesCriteria": "Confirmed operations outcome shows at least one qualifying berth was available.",
+    "noCriteria": "Confirmed operations outcome shows no qualifying berth was available.",
+    "ambiguousCriteria": [
+      "Operations outcome conflicts with berth occupancy records.",
+      "The arrival window changed after forecast close."
+    ],
+    "annulledCriteria": [
+      "The vessel call was canceled before forecast close.",
+      "The configured port area or vessel class was invalid before forecast close."
+    ]
+  },
+  "baselineMethod": {
+    "methodId": "seaportmethod-100",
+    "methodKey": "historical_frequency",
+    "methodClass": "historical_frequency",
+    "minimumRows": 50,
+    "minimumPositiveOutcomes": 1,
+    "fallbackAllowed": true,
+    "defaultUntilApprovedUpdate": true
+  },
+  "acceptedSourceRoles": [
+    {
+      "roleId": "sourcerole-115004",
+      "roleKey": "vessel_schedule",
+      "timing": "forecast_time",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "api",
+        "database"
+      ],
+      "requiredFields": [
+        "vessel_id",
+        "vessel_class",
+        "arrival_window",
+        "port_area"
+      ],
+      "forecastTimeAllowed": true,
+      "credentialValuesStored": false
+    },
+    {
+      "roleId": "sourcerole-115005",
+      "roleKey": "historical_berth_baseline",
+      "timing": "baseline",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "database"
+      ],
+      "requiredFields": [
+        "port_area",
+        "arrival_window",
+        "berth_available"
+      ],
+      "forecastTimeAllowed": true,
+      "credentialValuesStored": false
+    },
+    {
+      "roleId": "sourcerole-115006",
+      "roleKey": "berth_availability_outcome",
+      "timing": "resolution",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "database"
+      ],
+      "requiredFields": [
+        "port_area",
+        "arrival_window",
+        "berth_available",
+        "observed_after"
+      ],
+      "forecastTimeAllowed": false,
+      "credentialValuesStored": false
+    }
+  ],
+  "exclusionRules": [
+    {
+      "ruleId": "exclusionrule-115003",
+      "reasonCode": "source_unconfirmed",
+      "description": "Unconfirmed private source mappings block forecast execution.",
+      "scoreTreatment": "manual_review_required"
+    },
+    {
+      "ruleId": "exclusionrule-115004",
+      "reasonCode": "non_comparable_window",
+      "description": "Arrival windows outside the configured horizon are excluded from comparable scoring.",
+      "scoreTreatment": "exclude_from_scoring"
+    }
+  ],
+  "sampleThresholds": {
+    "minimumComparableForecastsForCalibration": 100,
+    "minimumComparableForecastsForQualityClaim": 100,
+    "minimumBaselineRows": 50,
+    "minimumPositiveOutcomes": 1
+  },
+  "claimBoundaries": {
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "claimReviewRequired": true
+  },
+  "executionBoundary": {
+    "createsForecasts": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "liveFetchAllowed": false,
+    "rawSqlAllowed": false
+  },
+  "summary": {
+    "questionTemplatesDefined": true,
+    "horizonsDefined": true,
+    "resolutionCriteriaDefined": true,
+    "baselineMethodDefined": true,
+    "acceptedSourceRolesDefined": true,
+    "exclusionRulesDefined": true,
+    "sampleThresholdsDefined": true,
+    "claimBoundariesDefined": true,
+    "normalChecksNonMutating": true,
+    "credentialsExcluded": true
+  },
+  "warnings": [
+    "Candidate domain config is not runnable until source bindings and mapping checks pass.",
+    "Credential values must stay outside OPE records and be referenced only through approved adapters.",
+    "Private database and API parsing remain behind caller-approved adapters."
+  ]
+}

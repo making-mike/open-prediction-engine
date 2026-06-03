@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -192,6 +193,29 @@ def build_records() -> dict[str, tuple[dict[str, Any], dict[str, Any] | None, di
     return {case: build_case(case) for case in CASE_ORDER}
 
 
+def load_generated_records() -> dict[str, tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]] | None:
+    records: dict[str, tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]] = {}
+    for case in CASE_ORDER:
+        paths = paths_for(case)
+        if not paths["summary"].exists():
+            return None
+        summary = json.loads(paths["summary"].read_text(encoding="utf-8"))
+        validate_or_raise(summary, SUMMARY_SCHEMA, "source handoff method gate")
+
+        benchmark_gate = None
+        if paths["benchmark"].exists():
+            benchmark_gate = json.loads(paths["benchmark"].read_text(encoding="utf-8"))
+            validate_or_raise(benchmark_gate, BENCHMARK_SCHEMA, "setup benchmark gate")
+
+        decision = None
+        if paths["decision"].exists():
+            decision = json.loads(paths["decision"].read_text(encoding="utf-8"))
+            validate_or_raise(decision, DECISION_SCHEMA, "setup method decision")
+
+        records[case] = (summary, benchmark_gate, decision)
+    return records
+
+
 def write_outputs(records: dict[str, tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]]) -> None:
     GENERATED.mkdir(parents=True, exist_ok=True)
     for case, (summary, benchmark_gate, decision) in records.items():
@@ -254,7 +278,10 @@ def main() -> None:
     parser.add_argument("--write", action="store_true", help="write generated source handoff method gate records")
     args = parser.parse_args()
     try:
-        records = build_records()
+        if args.write or args.check:
+            records = build_records()
+        else:
+            records = load_generated_records() or build_records()
     except SourceHandoffMethodGateError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

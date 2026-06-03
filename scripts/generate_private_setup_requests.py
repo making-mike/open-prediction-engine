@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_source_adapter_intake_bridge import build_bridge
+from generate_private_source_adapter_intake_bridge import build_bridge, load_generated_bridge
 from ope_schema import SPEC, validate_record
 from ope_fixtures import check_generated, render_json, write_generated
 
@@ -269,13 +270,26 @@ def check_request_set(request_set: dict[str, Any]) -> None:
     check_generated(REQUESTS_PATH, request_set, label="private setup requests", regen="python3 scripts/generate_private_setup_requests.py --write")
 
 
+def load_generated_request_set() -> dict[str, Any] | None:
+    if not REQUESTS_PATH.exists():
+        return None
+    request_set = json.loads(REQUESTS_PATH.read_text(encoding="utf-8"))
+    bridge = load_generated_bridge() or build_bridge()
+    validate_request_set(request_set, bridge)
+    return request_set
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private setup request drift")
     parser.add_argument("--write", action="store_true", help="write generated private setup requests")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        request_set = build_request_set()
+        if args.write or args.check or args.rebuild:
+            request_set = build_request_set()
+        else:
+            request_set = load_generated_request_set() or build_request_set()
     except PrivateSetupRequestError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

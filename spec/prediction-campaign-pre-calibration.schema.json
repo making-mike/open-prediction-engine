@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-campaign-pre-calibration.schema.json",
+  "title": "Prediction Campaign Pre-Calibration",
+  "description": "Optional historical-only pre-calibration readback and guarded local binding for a prediction campaign before pilot launch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionCampaignPreCalibrationId",
+    "generatedAt",
+    "preCalibrationStatus",
+    "domain",
+    "bindings",
+    "historySource",
+    "calibrationMethod",
+    "engineBinding",
+    "preflightChecks",
+    "writePlan",
+    "writeResult",
+    "commandSurface",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionCampaignPreCalibrationId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "preCalibrationStatus": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "blocked_insufficient_historical_rows",
+        "blocked_future_or_pilot_window_rows",
+        "blocked_unresolved_historical_outcomes",
+        "local_pre_calibration_completed",
+        "local_pre_calibration_already_present"
+      ]
+    },
+    "domain": { "$ref": "common.schema.json#/$defs/domain" },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "historySource": { "$ref": "#/$defs/historySource" },
+    "calibrationMethod": { "$ref": "#/$defs/calibrationMethod" },
+    "engineBinding": { "$ref": "#/$defs/engineBinding" },
+    "preflightChecks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/preflightCheck" }
+    },
+    "writePlan": { "$ref": "#/$defs/writePlan" },
+    "writeResult": { "$ref": "#/$defs/writeResult" },
+    "commandSurface": { "$ref": "#/$defs/commandSurface" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionCampaignManifestId",
+        "campaignId",
+        "cycleId",
+        "sourcePolicyId",
+        "methodId",
+        "firstPilotRunId",
+        "firstPilotServiceDate"
+      ],
+      "properties": {
+        "predictionCampaignManifestId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "cycleId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodId": { "$ref": "common.schema.json#/$defs/id" },
+        "firstPilotRunId": { "$ref": "common.schema.json#/$defs/id" },
+        "firstPilotServiceDate": { "type": "string", "format": "date" }
+      }
+    },
+    "historySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "sourceType",
+        "sourcePath",
+        "uri",
+        "contentHash",
+        "rowCount",
+        "scopedRowCount",
+        "resolvedOutcomeRowCount",
+        "minimumHistoricalRows",
+        "firstHistoricalServiceDate",
+        "lastHistoricalServiceDate",
+        "leakageCheckStatus",
+        "sourceCommand"
+      ],
+      "properties": {
+        "sourceId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceType": { "$ref": "#/$defs/boundedString" },
+        "sourcePath": { "$ref": "#/$defs/boundedString" },
+        "uri": { "$ref": "#/$defs/boundedString" },
+        "contentHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        "rowCount": { "type": "integer", "minimum": 0 },
+        "scopedRowCount": { "type": "integer", "minimum": 0 },
+        "resolvedOutcomeRowCount": { "type": "integer", "minimum": 0 },
+        "minimumHistoricalRows": { "type": "integer", "minimum": 1 },
+        "firstHistoricalServiceDate": { "$ref": "#/$defs/boundedString" },
+        "lastHistoricalServiceDate": { "$ref": "#/$defs/boundedString" },
+        "leakageCheckStatus": {
+          "type": "string",
+          "enum": ["pass", "block"]
+        },
+        "sourceCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "calibrationMethod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodName",
+        "outputType",
+        "eventThreshold",
+        "positiveOutcomeCount",
+        "negativeOutcomeCount",
+        "rawEventRate",
+        "priorPositiveCount",
+        "priorNegativeCount",
+        "smoothing",
+        "calibratedProbability",
+        "calibrationChangesMethodClass",
+        "automaticProbabilityUpdateAllowed"
+      ],
+      "properties": {
+        "methodName": { "$ref": "#/$defs/boundedString" },
+        "outputType": {
+          "type": "string",
+          "enum": ["binary"]
+        },
+        "eventThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "positiveOutcomeCount": { "type": "integer", "minimum": 0 },
+        "negativeOutcomeCount": { "type": "integer", "minimum": 0 },
+        "rawEventRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "priorPositiveCount": { "type": "number", "minimum": 0 },
+        "priorNegativeCount": { "type": "number", "minimum": 0 },
+        "smoothing": { "$ref": "#/$defs/boundedString" },
+        "calibratedProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "calibrationChangesMethodClass": { "type": "boolean" },
+        "automaticProbabilityUpdateAllowed": { "type": "boolean" }
+      }
+    },
+    "engineBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeMethodId",
+        "calibratedProbability",
+        "preCalibrationArtifactPath",
+        "methodBindingPath",
+        "effectiveScope",
+        "forecastArtifactCanUseBeforePilot",
+        "normalChecksReadLocalBinding",
+        "prospectiveOnly",
+        "priorForecastHistoryRewriteAllowed",
+        "changesForecastMethod"
+      ],
+      "properties": {
+        "activeMethodId": { "$ref": "common.schema.json#/$defs/id" },
+        "calibratedProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "preCalibrationArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "methodBindingPath": { "$ref": "#/$defs/boundedString" },
+        "effectiveScope": { "$ref": "#/$defs/boundedString" },
+        "forecastArtifactCanUseBeforePilot": { "type": "boolean" },
+        "normalChecksReadLocalBinding": { "type": "boolean" },
+        "prospectiveOnly": { "type": "boolean" },
+        "priorForecastHistoryRewriteAllowed": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" }
+      }
+    },
+    "preflightCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "checkStatus", "requiredBeforeWrite", "blocksWrite", "message"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "checkStatus": {
+          "type": "string",
+          "enum": ["pass", "block"]
+        },
+        "requiredBeforeWrite": { "type": "boolean" },
+        "blocksWrite": { "type": "boolean" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "writePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiresWriteLocal",
+        "writeLocalRequested",
+        "preCalibrationArtifactPath",
+        "methodBindingPath",
+        "idempotent",
+        "normalChecksWriteLocal",
+        "storesCredentials",
+        "storesPrivateRows"
+      ],
+      "properties": {
+        "requiresWriteLocal": { "type": "boolean" },
+        "writeLocalRequested": { "type": "boolean" },
+        "preCalibrationArtifactPath": { "$ref": "#/$defs/boundedString" },
+        "methodBindingPath": { "$ref": "#/$defs/boundedString" },
+        "idempotent": { "type": "boolean" },
+        "normalChecksWriteLocal": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" }
+      }
+    },
+    "writeResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writeStatus",
+        "artifactWrites",
+        "stateWrites",
+        "newFileWriteCount",
+        "alreadyPresentCount",
+        "sanitizedDiagnostics"
+      ],
+      "properties": {
+        "writeStatus": {
+          "type": "string",
+          "enum": ["not_run", "local_pre_calibration_completed", "local_pre_calibration_already_present"]
+        },
+        "artifactWrites": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/writeRow" }
+        },
+        "stateWrites": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/writeRow" }
+        },
+        "newFileWriteCount": { "type": "integer", "minimum": 0 },
+        "alreadyPresentCount": { "type": "integer", "minimum": 0 },
+        "sanitizedDiagnostics": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "writeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "targetPath", "writeStatus", "contentHash"],
+      "properties": {
+        "recordType": { "$ref": "#/$defs/boundedString" },
+        "targetPath": { "$ref": "#/$defs/boundedString" },
+        "writeStatus": {
+          "type": "string",
+          "enum": ["written", "updated", "already_present"]
+        },
+        "contentHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        }
+      }
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "acceptedFlags",
+        "defaultMode",
+        "capturedStdoutMode",
+        "explicitWriteFlagRequired",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/boundedString" },
+        "acceptedFlags": { "$ref": "#/$defs/boundedStringList" },
+        "defaultMode": { "$ref": "#/$defs/boundedString" },
+        "capturedStdoutMode": { "$ref": "#/$defs/boundedString" },
+        "explicitWriteFlagRequired": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preCalibrationImplemented",
+        "historicalOnly",
+        "localWriteEligible",
+        "calibratedProbability",
+        "writesMethodBinding",
+        "changesForecastMethod",
+        "qualityClaimAllowed",
+        "recommendedNextAction"
+      ],
+      "properties": {
+        "preCalibrationImplemented": { "type": "boolean" },
+        "historicalOnly": { "type": "boolean" },
+        "localWriteEligible": { "type": "boolean" },
+        "calibratedProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "writesMethodBinding": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "recommendedNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readsHistoricalSource",
+        "readsIgnoredLiveState",
+        "writesIgnoredLiveState",
+        "writesCampaignState",
+        "fetchesLiveData",
+        "createsForecastArtifacts",
+        "executesResolvers",
+        "appendsCorpusEvidence",
+        "updatesPriorForecastProbabilities",
+        "changesForecastMethod",
+        "storesCredentials",
+        "storesPrivateRows",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "readsHistoricalSource": { "type": "boolean" },
+        "readsIgnoredLiveState": { "type": "boolean" },
+        "writesIgnoredLiveState": { "type": "boolean" },
+        "writesCampaignState": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "executesResolvers": { "type": "boolean" },
+        "appendsCorpusEvidence": { "type": "boolean" },
+        "updatesPriorForecastProbabilities": { "type": "boolean" },
+        "changesForecastMethod": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,459 @@
+{
+  "internalApiId": "internalapi-001",
+  "generatedAt": "2026-06-03T01:10:00Z",
+  "apiStatus": "stable_surface_defined",
+  "designScope": "embedded_internal_api",
+  "operationSurface": [
+    {
+      "operationName": "create_prediction",
+      "operationKind": "effectful",
+      "implementationStatus": "defined_surface",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "create_prediction",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation create_prediction",
+      "agentCallOperation": "create_prediction",
+      "lifecycleOperations": [
+        "prediction.config_create"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Create a prediction configuration through a receipt-backed operation, not raw file or SQL writes."
+    },
+    {
+      "operationName": "update_prediction",
+      "operationKind": "effectful",
+      "implementationStatus": "defined_surface",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "update_prediction",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation update_prediction",
+      "agentCallOperation": "update_prediction",
+      "lifecycleOperations": [
+        "prediction.config_update"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Update prediction configuration through audited lifecycle state, preserving prior configuration history."
+    },
+    {
+      "operationName": "start_prediction",
+      "operationKind": "effectful",
+      "implementationStatus": "mapped_to_existing_lifecycle_operation",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "start_prediction",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation start_prediction",
+      "agentCallOperation": "start_prediction",
+      "lifecycleOperations": [
+        "forecast.create"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Start or create the next due forecast through the forecast.create lifecycle operation."
+    },
+    {
+      "operationName": "pause_prediction",
+      "operationKind": "effectful",
+      "implementationStatus": "defined_surface",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "pause_prediction",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation pause_prediction",
+      "agentCallOperation": "pause_prediction",
+      "lifecycleOperations": [
+        "prediction.pause"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Pause future ticks without deleting existing forecasts, histories, scores, or evidence rows."
+    },
+    {
+      "operationName": "resume_prediction",
+      "operationKind": "effectful",
+      "implementationStatus": "defined_surface",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "resume_prediction",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation resume_prediction",
+      "agentCallOperation": "resume_prediction",
+      "lifecycleOperations": [
+        "prediction.resume"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Resume a paused prediction through a receipt-backed operation with bounded next actions."
+    },
+    {
+      "operationName": "run_tick",
+      "operationKind": "bounded_tick",
+      "implementationStatus": "defined_surface",
+      "sideEffectLevel": "bounded_tick",
+      "inProcessFunctionName": "run_tick",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation run_tick",
+      "agentCallOperation": "run_tick",
+      "lifecycleOperations": [
+        "prediction.tick"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "due_resolution_jobs",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Run one bounded foreground tick; background worker loops must preserve the same semantics later."
+    },
+    {
+      "operationName": "resolve_due",
+      "operationKind": "effectful",
+      "implementationStatus": "mapped_to_existing_lifecycle_operation",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "resolve_due",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation resolve_due",
+      "agentCallOperation": "resolve_due",
+      "lifecycleOperations": [
+        "resolution.record",
+        "score.create"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "due_resolution_jobs",
+        "append_readiness"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Resolve due forecasts through resolution and scoring lifecycle operations."
+    },
+    {
+      "operationName": "append_evidence",
+      "operationKind": "effectful",
+      "implementationStatus": "mapped_to_existing_lifecycle_operation",
+      "sideEffectLevel": "receipt_backed_mutation",
+      "inProcessFunctionName": "append_evidence",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation append_evidence",
+      "agentCallOperation": "append_evidence",
+      "lifecycleOperations": [
+        "evidence.append"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "append_readiness",
+        "calibration_status",
+        "track_record_progress"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Append comparable or excluded evidence rows through the append-only evidence operation."
+    },
+    {
+      "operationName": "read_status",
+      "operationKind": "read_only",
+      "implementationStatus": "mapped_to_existing_read_surface",
+      "sideEffectLevel": "read_only",
+      "inProcessFunctionName": "read_status",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation read_status",
+      "agentCallOperation": "read_status",
+      "lifecycleOperations": [],
+      "requiresOperationReceipt": false,
+      "returnsOperationReceipt": false,
+      "requiresIdempotencyKey": false,
+      "requiresLease": false,
+      "returnsReadModels": [
+        "campaign_status",
+        "next_due_forecast",
+        "due_resolution_jobs",
+        "append_readiness"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Read prediction and campaign status from read models without mutating state."
+    },
+    {
+      "operationName": "read_forecast_card",
+      "operationKind": "read_only",
+      "implementationStatus": "mapped_to_existing_read_surface",
+      "sideEffectLevel": "read_only",
+      "inProcessFunctionName": "read_forecast_card",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation read_forecast_card",
+      "agentCallOperation": "read_forecast_card",
+      "lifecycleOperations": [],
+      "requiresOperationReceipt": false,
+      "returnsOperationReceipt": false,
+      "requiresIdempotencyKey": false,
+      "requiresLease": false,
+      "returnsReadModels": [
+        "forecast_card"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Read compact forecast-card output for downstream decisions."
+    },
+    {
+      "operationName": "read_lifecycle_bundle",
+      "operationKind": "read_only",
+      "implementationStatus": "mapped_to_existing_read_surface",
+      "sideEffectLevel": "read_only",
+      "inProcessFunctionName": "read_lifecycle_bundle",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation read_lifecycle_bundle",
+      "agentCallOperation": "read_lifecycle_bundle",
+      "lifecycleOperations": [],
+      "requiresOperationReceipt": false,
+      "returnsOperationReceipt": false,
+      "requiresIdempotencyKey": false,
+      "requiresLease": false,
+      "returnsReadModels": [
+        "lifecycle_bundle"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Read lifecycle bundle output for audit context without exposing raw storage layout."
+    },
+    {
+      "operationName": "archive_record",
+      "operationKind": "retention",
+      "implementationStatus": "mapped_to_existing_lifecycle_operation",
+      "sideEffectLevel": "retention_mutation",
+      "inProcessFunctionName": "archive_record",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation archive_record",
+      "agentCallOperation": "archive_record",
+      "lifecycleOperations": [
+        "record.archive"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "append_readiness",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Archive records from active views with tombstone receipts instead of physical deletion."
+    },
+    {
+      "operationName": "redact_record",
+      "operationKind": "retention",
+      "implementationStatus": "mapped_to_existing_lifecycle_operation",
+      "sideEffectLevel": "retention_mutation",
+      "inProcessFunctionName": "redact_record",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation redact_record",
+      "agentCallOperation": "redact_record",
+      "lifecycleOperations": [
+        "record.redact"
+      ],
+      "requiresOperationReceipt": true,
+      "returnsOperationReceipt": true,
+      "requiresIdempotencyKey": true,
+      "requiresLease": true,
+      "returnsReadModels": [
+        "campaign_status",
+        "append_readiness",
+        "recovery_actions"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Redact unsafe or private fields through redaction receipts, preserving audit metadata."
+    }
+  ],
+  "adapterSurfaces": [
+    {
+      "adapterName": "in_process_python",
+      "adapterStatus": "defined_required",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Host applications should call these operation functions directly when embedding OPE."
+    },
+    {
+      "adapterName": "cli",
+      "adapterStatus": "defined_required",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "The CLI wrapper should call the same operation functions as in-process use."
+    },
+    {
+      "adapterName": "agent_call",
+      "adapterStatus": "defined_required",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Agent-call wrappers should return compact envelopes over the same semantics."
+    },
+    {
+      "adapterName": "mcp_stdio",
+      "adapterStatus": "planned_wrapper",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Local MCP remains a wrapper over internal operations, not a separate behavior layer."
+    },
+    {
+      "adapterName": "http",
+      "adapterStatus": "future_transport",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "HTTP is a future transport over the internal API, not an independent runtime."
+    },
+    {
+      "adapterName": "queue",
+      "adapterStatus": "future_transport",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Queue execution is deferred until worker semantics and resource bounds are checked."
+    },
+    {
+      "adapterName": "hosted_service",
+      "adapterStatus": "future_transport",
+      "sharesInternalSemantics": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Hosted service runtime is a future deployment adapter over the internal API, not a separate behavior layer."
+    }
+  ],
+  "requestEnvelope": {
+    "requiredFields": [
+      "operationName",
+      "callerId",
+      "predictionId",
+      "input"
+    ],
+    "optionalFields": [
+      "idempotencyKey",
+      "maxBytes",
+      "dryRun",
+      "callerIntent",
+      "sourcePolicyId",
+      "domainId"
+    ],
+    "maxBytesRequired": true,
+    "credentialValuesAllowed": false,
+    "rawSqlAllowed": false,
+    "rawPathMutationAllowed": false
+  },
+  "responseEnvelope": {
+    "requiredFields": [
+      "operationName",
+      "status",
+      "exitCode",
+      "payload",
+      "warnings"
+    ],
+    "effectfulFields": [
+      "operationReceiptId",
+      "idempotencyStatus",
+      "blockingGuards",
+      "leaseStatus",
+      "nextActions",
+      "sanitizedDiagnostics"
+    ],
+    "readOnlyFields": [
+      "readModelRefs",
+      "recordRefs",
+      "claimBoundary"
+    ],
+    "sanitizedErrorsRequired": true,
+    "responseTooLargeStatus": "response_too_large"
+  },
+  "nonInterferenceBoundary": {
+    "surpriseNetworkCallsAllowed": false,
+    "unboundedLoopsAllowed": false,
+    "hiddenSchedulerInstallationAllowed": false,
+    "automaticMethodUpgradesAllowed": false,
+    "storesCredentialValues": false,
+    "rawSqlExposed": false,
+    "rawFileLayoutExposed": false,
+    "hostedRuntimeRequired": false
+  },
+  "summary": {
+    "operationCount": 13,
+    "effectfulOperationCount": 10,
+    "readOnlyOperationCount": 3,
+    "allEffectfulOperationsReceiptBacked": true,
+    "allEffectfulOperationsIdempotent": true,
+    "allEffectfulOperationsLeaseAware": true,
+    "allEffectfulCallsReturnReceiptFields": true,
+    "inProcessSurfaceDefined": true,
+    "cliSurfaceDefined": true,
+    "agentCallSurfaceDefined": true,
+    "httpAndQueueAreFutureTransports": true,
+    "hostedServiceIsFutureAdapter": true,
+    "compactRequestResponseEnvelopesDefined": true,
+    "nonInterferenceBoundaryDefined": true
+  },
+  "warnings": [
+    "This is a stable internal API surface definition, not a hosted service runtime.",
+    "Effectful calls must return operation receipts and never expose raw SQL or raw local file paths.",
+    "Read-only calls return compact read models and record references without mutating state.",
+    "HTTP, queue, and hosted service adapters remain future transports over the same internal semantics."
+  ]
+}

@@ -284,6 +284,25 @@ def main() -> None:
     if campaign_calibration_record["executionBoundary"]["updatesForecastProbabilities"] is not False:
         raise AssertionError("campaign-calibration-status must not update probabilities")
 
+    internal_api = run_dispatcher(
+        "--operation",
+        "internal_api",
+        "--internal-operation",
+        "start_prediction",
+        "--prediction-id",
+        "predictioncampaign-001",
+    )
+    internal_api_payload = payload(internal_api)
+    if internal_api.returncode != 0:
+        raise AssertionError(f"internal-api agent call should succeed: {internal_api.stderr}")
+    internal_api_record = internal_api_payload["payload"]
+    if internal_api_record["operationName"] != "start_prediction":
+        raise AssertionError("internal-api agent call should return the requested internal operation")
+    if internal_api_record["operationReceiptId"] is None:
+        raise AssertionError("internal-api effectful dry-run should describe the receipt it will return")
+    if internal_api_record["executionBoundary"]["writesState"] is not False:
+        raise AssertionError("internal-api agent call must be non-mutating")
+
     source_guidance = run_dispatcher(
         "--operation",
         "private_source_adapter_guidance",

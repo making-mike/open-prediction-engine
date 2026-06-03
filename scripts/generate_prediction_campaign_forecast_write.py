@@ -87,13 +87,18 @@ def build_prediction_campaign_forecast_write(
     embed_source_records: bool = False,
     manifest: dict[str, Any] | None = None,
     runner: dict[str, Any] | None = None,
+    pre_calibration: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if manifest is None:
         manifest = build_prediction_campaign_manifest()
     if runner is None:
         runner = build_prediction_campaign_runner()
     creation = build_prediction_campaign_forecast_creation(run_id=run_id, manifest=manifest, runner=runner)
-    records = build_prediction_campaign_forecast_artifact(run_id=run_id, creation=creation)
+    records = build_prediction_campaign_forecast_artifact(
+        run_id=run_id,
+        creation=creation,
+        pre_calibration=pre_calibration,
+    )
     run = creation["readyRun"]
     bindings = creation["bindings"]
     campaign = manifest["campaign"]
@@ -155,6 +160,21 @@ def build_prediction_campaign_forecast_write(
             embed_source_record=embed_source_records,
         ),
     ]
+    pre_calibration_binding = None
+    if pre_calibration is not None:
+        pre_calibration_binding = {
+            "predictionCampaignPreCalibrationId": pre_calibration["predictionCampaignPreCalibrationId"],
+            "preCalibrationStatus": pre_calibration["preCalibrationStatus"],
+            "activeMethodId": pre_calibration["engineBinding"]["activeMethodId"],
+            "calibratedProbability": pre_calibration["engineBinding"]["calibratedProbability"],
+            "preCalibrationArtifactPath": pre_calibration["engineBinding"]["preCalibrationArtifactPath"],
+            "methodBindingPath": pre_calibration["engineBinding"]["methodBindingPath"],
+            "historySourcePath": pre_calibration["historySource"]["sourcePath"],
+            "historySourceContentHash": pre_calibration["historySource"]["contentHash"],
+            "forecastProbabilitySource": "historical_pre_calibration",
+            "prospectiveOnly": True,
+            "priorForecastHistoryRewriteAllowed": False,
+        }
     guards = [
         write_guard(
             1,
@@ -213,7 +233,7 @@ def build_prediction_campaign_forecast_write(
             message="The write plan does not fetch live data, execute resolvers, create scores, or append corpus evidence.",
         ),
     ]
-    return {
+    plan = {
         "predictionCampaignForecastWriteId": "predictioncampaignforecastwrite-001" if checked_fixture_run else f"predictioncampaignforecastwrite-{write_suffix}",
         "generatedAt": GENERATED_AT,
         "writeStatus": "ready_for_explicit_local_write",
@@ -289,6 +309,9 @@ def build_prediction_campaign_forecast_write(
             "Normal checks validate checked fixtures without live network access or ignored state mutation.",
         ],
     }
+    if pre_calibration_binding is not None:
+        plan["preCalibrationBinding"] = pre_calibration_binding
+    return plan
 
 
 def print_write_result(result: dict[str, Any], output_format: str | None) -> None:

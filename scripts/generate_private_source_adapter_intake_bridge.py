@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_source_adapter_outcome_matrix import build_matrix
+from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
 from ope_schema import SPEC, validate_record
 from ope_fixtures import check_generated, render_json, write_generated
 
@@ -355,13 +356,26 @@ def check_bridge(bridge: dict[str, Any]) -> None:
     check_generated(BRIDGE_PATH, bridge, label="private source adapter intake bridge", regen="python3 scripts/generate_private_source_adapter_intake_bridge.py --write")
 
 
+def load_generated_bridge() -> dict[str, Any] | None:
+    if not BRIDGE_PATH.exists():
+        return None
+    bridge = json.loads(BRIDGE_PATH.read_text(encoding="utf-8"))
+    matrix = load_generated_matrix() or build_matrix()
+    validate_bridge(bridge, matrix)
+    return bridge
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private source adapter intake bridge drift")
     parser.add_argument("--write", action="store_true", help="write generated private source adapter intake bridge")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        bridge = build_bridge()
+        if args.write or args.check or args.rebuild:
+            bridge = build_bridge()
+        else:
+            bridge = load_generated_bridge() or build_bridge()
     except PrivateSourceAdapterIntakeBridgeError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

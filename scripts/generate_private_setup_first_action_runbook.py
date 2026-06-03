@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_setup_first_actions import action_path, build_actions
+from generate_private_setup_first_actions import action_path, build_actions, load_generated_actions
 from generate_private_setup_requests import render_json
 from ope_fixtures import check_generated, write_generated
 from ope_schema import SPEC, validate_record
@@ -244,11 +245,11 @@ def build_runbook() -> dict[str, Any]:
     return runbook
 
 
-def validate_runbook(runbook: dict[str, Any]) -> None:
+def validate_runbook(runbook: dict[str, Any], actions: list[dict[str, Any]] | None = None) -> None:
     errors = validate_record(runbook, SCHEMA)
     if errors:
         raise PrivateSetupActionRunbookError(f"private setup first-action runbook schema validation failed: {errors[0]}")
-    actions = {action["privateSetupFirstActionId"]: action for action in build_actions()}
+    actions = {action["privateSetupFirstActionId"]: action for action in (actions or build_actions())}
     rows = runbook["casePlaybooks"]
     if len(rows) != len(actions):
         raise PrivateSetupActionRunbookError("runbook should cover every generated first-action fixture")
@@ -292,13 +293,25 @@ def check_runbook(runbook: dict[str, Any]) -> None:
     check_generated(RUNBOOK_PATH, runbook, label="private setup first-action runbook", regen="python3 scripts/generate_private_setup_first_action_runbook.py --write")
 
 
+def load_generated_runbook() -> dict[str, Any] | None:
+    if not RUNBOOK_PATH.exists():
+        return None
+    runbook = json.loads(RUNBOOK_PATH.read_text(encoding="utf-8"))
+    validate_runbook(runbook, load_generated_actions())
+    return runbook
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private setup first-action runbook drift")
     parser.add_argument("--write", action="store_true", help="write generated private setup first-action runbook")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        runbook = build_runbook()
+        if args.write or args.check or args.rebuild:
+            runbook = build_runbook()
+        else:
+            runbook = load_generated_runbook() or build_runbook()
     except PrivateSetupActionRunbookError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

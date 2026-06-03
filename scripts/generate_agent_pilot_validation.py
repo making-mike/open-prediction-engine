@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -591,14 +592,26 @@ def check_pack(pack: dict[str, Any]) -> None:
     check_generated(PILOT_PATH, pack, label="agent pilot validation pack", regen="python3 scripts/generate_agent_pilot_validation.py --write")
 
 
+def load_generated_pack() -> dict[str, Any] | None:
+    if not PILOT_PATH.exists():
+        return None
+    pack = json.loads(PILOT_PATH.read_text(encoding="utf-8"))
+    validate_agent_pilot_validation(pack)
+    return pack
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one pilot task scenario")
     parser.add_argument("--check", action="store_true", help="check generated pilot validation pack drift")
     parser.add_argument("--write", action="store_true", help="write generated pilot validation pack")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        pack = build_agent_pilot_validation()
+        if args.write or args.check or args.rebuild:
+            pack = build_agent_pilot_validation()
+        else:
+            pack = load_generated_pack() or build_agent_pilot_validation()
     except AgentPilotValidationError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -554,6 +555,14 @@ def check_runtime(runtime: dict[str, Any]) -> None:
     check_generated(OUTPUT_PATH, runtime, label="local source runtime", regen="python3 scripts/generate_local_source_runtime.py --write")
 
 
+def load_generated_runtime() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    runtime = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_runtime(runtime)
+    return runtime
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one local source runtime case")
@@ -561,7 +570,10 @@ def main() -> None:
     parser.add_argument("--write", action="store_true", help="write generated local source runtime")
     args = parser.parse_args()
     try:
-        runtime = build_runtime()
+        if args.write or args.check:
+            runtime = build_runtime()
+        else:
+            runtime = load_generated_runtime() or build_runtime()
     except LocalSourceRuntimeError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

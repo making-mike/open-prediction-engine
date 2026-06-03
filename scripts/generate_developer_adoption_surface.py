@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -478,6 +479,14 @@ def check_surface(surface: dict[str, Any]) -> None:
     check_generated(OUTPUT_PATH, surface, label="developer adoption surface", regen="python3 scripts/generate_developer_adoption_surface.py --write")
 
 
+def load_generated_surface() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    surface = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_surface(surface)
+    return surface
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -487,9 +496,13 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="check generated developer adoption surface drift")
     parser.add_argument("--write", action="store_true", help="refresh generated developer adoption surface")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        surface = build_developer_adoption_surface()
+        if args.write or args.check or args.rebuild:
+            surface = build_developer_adoption_surface()
+        else:
+            surface = load_generated_surface() or build_developer_adoption_surface()
     except DeveloperAdoptionSurfaceError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

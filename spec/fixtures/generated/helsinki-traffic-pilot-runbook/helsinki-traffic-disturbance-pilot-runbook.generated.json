@@ -7,6 +7,7 @@
     "predictionCampaignManifestId": "predictioncampaignmanifest-001",
     "predictionCampaignRunnerId": "predictioncampaignrunner-001",
     "predictionCampaignDoctorId": "predictioncampaigndoctor-001",
+    "predictionCampaignPreCalibrationId": "predictioncampaignprecalibration-001",
     "predictionCampaignEvidenceLedgerId": "predictioncampaignledger-001",
     "predictionCampaignCalibrationStatusId": "predictioncampaigncalibrationstatus-001",
     "predictionCampaignMethodUpdatePlanId": "predictioncampaignmethodupdateplan-001",
@@ -27,6 +28,8 @@
     "bestAvailableMethodName": "baseline historical transit-delay frequency",
     "nonBaselineMethodGate": "Use transitmethod-101 only after the method-update gate, plan, approvals, benchmark evidence, and rollback record are ready.",
     "fullMaterializationCommand": "python3 scripts/ope.py prediction-campaign plan --count 100 --full-materialization",
+    "optionalPreCalibrationCommand": "python3 scripts/ope.py prediction-campaign pre-calibration",
+    "launchWithPreCalibrationCommand": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
     "miniSmokeCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
     "normalChecksUseLiveNetwork": false,
     "normalChecksWriteLocalState": false
@@ -167,19 +170,32 @@
     {
       "stepId": "helsinkipilotstep-005",
       "stepNumber": 5,
+      "stepKey": "review_pre_calibration",
+      "phase": "setup",
+      "command": "python3 scripts/ope.py prediction-campaign pre-calibration",
+      "operatorCheck": "Confirm historical-only pre-calibration is ready, scoped before the first pilot service date, and bound to transitmethod-100.",
+      "successSignal": "preCalibrationStatus is ready and calibratedProbability is visible before any forecast write.",
+      "recoveryAction": "If pre-calibration is blocked, either fix the historical source or launch without --pre-calibrate.",
+      "mutatesState": false,
+      "requiresLiveOptIn": false,
+      "claimBoundary": "Pre-calibration sets only a prospective baseline probability and does not create a quality claim."
+    },
+    {
+      "stepId": "helsinkipilotstep-006",
+      "stepNumber": 6,
       "stepKey": "create_next_forecast",
       "phase": "forecast",
-      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
+      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
       "operatorCheck": "Run only inside the forecast creation window and keep stdout/logs.",
       "successSignal": "One ready forecast is created idempotently in .ope/live for the next due run.",
       "recoveryAction": "If close time has passed, record missed and advance; never backfill.",
       "mutatesState": true,
       "requiresLiveOptIn": false,
-      "claimBoundary": "Forecast creation still uses the baseline method until method-update gates permit otherwise."
+      "claimBoundary": "Forecast creation still uses the baseline method, with optional historical pre-calibration, until method-update gates permit otherwise."
     },
     {
-      "stepId": "helsinkipilotstep-006",
-      "stepNumber": 6,
+      "stepId": "helsinkipilotstep-007",
+      "stepNumber": 7,
       "stepKey": "daily_operator_status",
       "phase": "monitor",
       "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
@@ -191,8 +207,8 @@
       "claimBoundary": "Status readbacks do not mutate campaign state or imply model quality."
     },
     {
-      "stepId": "helsinkipilotstep-007",
-      "stepNumber": 7,
+      "stepId": "helsinkipilotstep-008",
+      "stepNumber": 8,
       "stepKey": "resolve_due_run",
       "phase": "resolve",
       "command": "python3 scripts/ope.py prediction-campaign resolve --run-id predictionrun-1301 --execute-resolvers --outcome-csv .ope/live/prediction-campaigns/predictioncampaign-001/predictionrun-1301/outcome.csv --write-local",
@@ -204,8 +220,8 @@
       "claimBoundary": "Outcome rows must be resolution-only and must not change the original forecast."
     },
     {
-      "stepId": "helsinkipilotstep-008",
-      "stepNumber": 8,
+      "stepId": "helsinkipilotstep-009",
+      "stepNumber": 9,
       "stepKey": "append_scored_row",
       "phase": "append",
       "command": "python3 scripts/ope.py prediction-campaign append --from-local --run-id predictionrun-1301 --write-local",
@@ -217,8 +233,8 @@
       "claimBoundary": "Ledger append grows evidence but does not itself allow a calibration claim."
     },
     {
-      "stepId": "helsinkipilotstep-009",
-      "stepNumber": 9,
+      "stepId": "helsinkipilotstep-010",
+      "stepNumber": 10,
       "stepKey": "review_calibration_threshold",
       "phase": "calibrate",
       "command": "python3 scripts/ope.py prediction-campaign calibration-status --campaign predictioncampaign-001 --from-local-ledger --view pilot",
@@ -230,8 +246,8 @@
       "claimBoundary": "Calibration readback is measurement-only and does not update probabilities."
     },
     {
-      "stepId": "helsinkipilotstep-010",
-      "stepNumber": 10,
+      "stepId": "helsinkipilotstep-011",
+      "stepNumber": 11,
       "stepKey": "review_method_update_after_threshold",
       "phase": "calibrate",
       "command": "python3 scripts/ope.py prediction-campaign method-update-plan --method-update-plan-case plan_ready --view command",
@@ -243,8 +259,8 @@
       "claimBoundary": "The best available method is baseline until an explicit local apply command is approved."
     },
     {
-      "stepId": "helsinkipilotstep-011",
-      "stepNumber": 11,
+      "stepId": "helsinkipilotstep-012",
+      "stepNumber": 12,
       "stepKey": "recover_or_resume",
       "phase": "recover",
       "command": "python3 scripts/ope.py prediction-campaign resume --from-local",
@@ -256,8 +272,8 @@
       "claimBoundary": "Recovery must preserve prior forecasts and append-only evidence."
     },
     {
-      "stepId": "helsinkipilotstep-012",
-      "stepNumber": 12,
+      "stepId": "helsinkipilotstep-013",
+      "stepNumber": 13,
       "stepKey": "stop_or_abort",
       "phase": "stop",
       "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view abort",
@@ -484,6 +500,8 @@
     "successCriteriaCount": 6,
     "abortCriteriaCount": 6,
     "bestAvailableMethodId": "transitmethod-100",
+    "optionalPreCalibrationAvailable": true,
+    "optionalPreCalibrationStatus": "ready",
     "qualityClaimAllowed": false,
     "calibrationClaimAllowed": false,
     "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign pilot-runbook --view smoke"
@@ -495,6 +513,7 @@
     "startsLongRunningRunner": false,
     "executesResolvers": false,
     "appendsLedgerRows": false,
+    "writesPreCalibrationState": false,
     "changesForecastMethod": false,
     "hostedRuntimeAllowed": false,
     "qualityClaimAllowed": false
@@ -502,6 +521,7 @@
   "warnings": [
     "This runbook is a checked local operations readback; it does not start the real pilot by itself.",
     "The three-run smoke path must pass before the 100-run pilot is started with explicit local writes.",
+    "Optional pre-calibration must use historical-only data and stays on the baseline method.",
     "The best available method remains transitmethod-100 until evidence and approvals explicitly permit a prospective method update.",
     "Calibration after 100 comparable outcomes is measurement-only and does not rewrite historical forecasts or probabilities."
   ]

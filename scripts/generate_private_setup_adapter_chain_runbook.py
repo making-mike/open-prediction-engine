@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -561,13 +562,25 @@ def check_runbook(runbook: dict[str, Any]) -> None:
     check_generated(RUNBOOK_PATH, runbook, label="private setup adapter-chain runbook", regen="python3 scripts/generate_private_setup_adapter_chain_runbook.py --write")
 
 
+def load_generated_runbook() -> dict[str, Any] | None:
+    if not RUNBOOK_PATH.exists():
+        return None
+    runbook = json.loads(RUNBOOK_PATH.read_text(encoding="utf-8"))
+    validate_runbook(runbook)
+    return runbook
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated runbook drift")
     parser.add_argument("--write", action="store_true", help="write generated runbook")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        runbook = build_runbook()
+        if args.write or args.check or args.rebuild:
+            runbook = build_runbook()
+        else:
+            runbook = load_generated_runbook() or build_runbook()
     except PrivateSetupAdapterChainRunbookError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

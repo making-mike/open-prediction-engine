@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -399,6 +400,52 @@ def validate_examples(
             raise PrivateSourceKindSelectionExamplesError(f"{key} must remain false")
 
 
+def validate_generated_examples(record: dict[str, Any]) -> None:
+    errors = validate_record(record, SCHEMA)
+    if errors:
+        raise PrivateSourceKindSelectionExamplesError(
+            f"private source-kind selection examples schema validation failed: {errors[0]}"
+        )
+    examples = {item["sourceKind"]: item for item in record["selectionExamples"]}
+    if list(examples) != SOURCE_KIND_ORDER:
+        raise PrivateSourceKindSelectionExamplesError("selection examples should preserve source-kind order")
+    for source_kind, example in examples.items():
+        recommendation_item = example["recommendation"]
+        if recommendation_item["forecastArtifactsAllowed"] or recommendation_item["scoringAllowed"]:
+            raise PrivateSourceKindSelectionExamplesError(f"{source_kind} examples must not allow forecast or scoring")
+        if not recommendation_item["stopBeforeForecast"]:
+            raise PrivateSourceKindSelectionExamplesError(f"{source_kind} should stop before forecast execution")
+    if examples["local_file"]["recommendation"]["immediateAction"] != "call_source_builder_adapter":
+        raise PrivateSourceKindSelectionExamplesError("local file should select source-builder adapter")
+    if examples["manual_mapping"]["recommendation"]["requiresCallerConfirmation"] is not True:
+        raise PrivateSourceKindSelectionExamplesError("manual mapping should require confirmation")
+    if examples["auto_evidence_connector"]["adapterChainBinding"]["applicability"] != "outside_current_adapter_chain":
+        raise PrivateSourceKindSelectionExamplesError("auto evidence should remain outside the local-file adapter chain")
+    for source_kind in ["manual_upload", "private_api", "private_database"]:
+        if examples[source_kind]["adapterChainBinding"]["adapterCommandAfterPrerequisites"] != NO_COMMAND:
+            raise PrivateSourceKindSelectionExamplesError(f"{source_kind} should expose no adapter command")
+    if examples["unregistered_source"]["recommendation"]["immediateAction"] != "replace_source":
+        raise PrivateSourceKindSelectionExamplesError("unregistered source should require replacement")
+    if examples["unsafe_source"]["recommendation"]["immediateAction"] != "reject_source":
+        raise PrivateSourceKindSelectionExamplesError("unsafe source should be rejected")
+
+    boundary = record["executionBoundary"]
+    if boundary["examplesDoNotExecute"] is not True or boundary["runsCommands"] is not False:
+        raise PrivateSourceKindSelectionExamplesError("selection examples must remain non-executing")
+    for key in [
+        "readsPrivateData",
+        "createsSourceManifests",
+        "createsFieldMappings",
+        "createsForecastArtifacts",
+        "createsScoringRecords",
+        "fetchesLiveData",
+        "storesCredentials",
+        "createsHostedRuntime",
+    ]:
+        if boundary[key] is not False:
+            raise PrivateSourceKindSelectionExamplesError(f"{key} must remain false")
+
+
 def write_examples(record: dict[str, Any]) -> None:
     write_generated(EXAMPLES_PATH, record, label="private source-kind selection examples", regen="python3 scripts/generate_private_source_kind_selection_examples.py --write")
 
@@ -407,12 +454,21 @@ def check_examples(record: dict[str, Any]) -> None:
     check_generated(EXAMPLES_PATH, record, label="private source-kind selection examples", regen="python3 scripts/generate_private_source_kind_selection_examples.py --write")
 
 
+def load_generated_examples() -> dict[str, Any] | None:
+    if not EXAMPLES_PATH.exists():
+        return None
+    record = json.loads(EXAMPLES_PATH.read_text(encoding="utf-8"))
+    validate_generated_examples(record)
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated private source-kind selection examples")
     parser.add_argument("--write", action="store_true", help="write generated private source-kind selection examples")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
-    record = build_examples()
+    record = build_examples() if args.write or args.check or args.rebuild else (load_generated_examples() or build_examples())
     if args.write:
         write_examples(record)
     elif args.check:

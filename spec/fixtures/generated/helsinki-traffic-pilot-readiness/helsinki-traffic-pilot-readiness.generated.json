@@ -7,6 +7,7 @@
     "helsinkiTrafficDisturbancePilotRunbookId": "helsinkipilotrunbook-001",
     "predictionCampaignManifestId": "predictioncampaignmanifest-001",
     "predictionCampaignRunnerId": "predictioncampaignrunner-001",
+    "predictionCampaignPreCalibrationId": "predictioncampaignprecalibration-001",
     "campaignId": "predictioncampaign-001",
     "cycleId": "predictioncycle-001",
     "sourcePolicyId": "sourcepolicy-1201"
@@ -18,8 +19,11 @@
     "duplicateConflictCount": 0,
     "bestAvailableMethodId": "transitmethod-100",
     "bestAvailableMethodName": "baseline historical transit-delay frequency",
+    "optionalPreCalibrationStatus": "ready",
+    "optionalPreCalibrationProbability": 0.25,
+    "preCalibrationCommand": "python3 scripts/ope.py prediction-campaign pre-calibration",
     "localWorkspace": ".ope/live/prediction-campaigns/predictioncampaign-001",
-    "launchCommand": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
+    "launchCommand": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
     "nextRecommendedCommand": "python3 scripts/ope.py prediction-campaign pilot-readiness --view commands",
     "explicitWriteRequired": true,
     "manualLivePrerequisitesRequired": true,
@@ -69,6 +73,14 @@
     },
     {
       "checkId": "helsinkireadinesscheck-006",
+      "checkKey": "optional_pre_calibration_ready",
+      "checkStatus": "pass",
+      "blocksLaunch": false,
+      "message": "The optional historical-only pre-calibration path is ready when the operator requests it.",
+      "evidenceCommand": "python3 scripts/ope.py prediction-campaign pre-calibration"
+    },
+    {
+      "checkId": "helsinkireadinesscheck-007",
       "checkKey": "operator_source_confirmation",
       "checkStatus": "manual_required",
       "blocksLaunch": false,
@@ -140,14 +152,22 @@
     },
     {
       "commandId": "helsinkireadinesscommand-004",
+      "commandKey": "optional_pre_calibration",
+      "command": "python3 scripts/ope.py prediction-campaign pre-calibration",
+      "expected": "Inspect the historical-only baseline pre-calibration binding before requesting it at launch.",
+      "mutatesState": false,
+      "requiresOperatorSupervision": false
+    },
+    {
+      "commandId": "helsinkireadinesscommand-005",
       "commandKey": "launch_first_write",
-      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --write-local --output-format jsonl",
-      "expected": "Create exactly one next-due local campaign forecast before forecastCloseAt.",
+      "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
+      "expected": "Create exactly one next-due local campaign forecast before forecastCloseAt, writing pre-calibration first when requested.",
       "mutatesState": true,
       "requiresOperatorSupervision": true
     },
     {
-      "commandId": "helsinkireadinesscommand-005",
+      "commandId": "helsinkireadinesscommand-006",
       "commandKey": "operator_status",
       "command": "python3 scripts/ope.py prediction-campaign pilot-runbook --view operator-status",
       "expected": "Inspect next forecast, next resolution, append readiness, ledger counts, and calibration progress.",
@@ -202,6 +222,7 @@
     "manualPrerequisitesRequired": true,
     "launchCommandReady": true,
     "miniSmokeFirst": true,
+    "optionalPreCalibrationAvailable": true,
     "bestAvailableMethodId": "transitmethod-100",
     "qualityClaimAllowed": false,
     "recommendedNextCommand": "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl"
@@ -214,12 +235,14 @@
     "createsForecastArtifacts": false,
     "executesResolvers": false,
     "appendsLedgerRows": false,
+    "writesPreCalibrationState": false,
     "changesForecastMethod": false,
     "qualityClaimAllowed": false
   },
   "warnings": [
     "This readiness readback does not start the pilot; effectful launch still requires --write-local.",
     "Manual source, clock, terminal, outcome-path, and workspace-capacity confirmations remain outside normal checks.",
+    "Optional pre-calibration is historical-only and writes local binding state only when requested with --pre-calibrate and --write-local.",
     "The pilot starts on transitmethod-100; method updates remain prospective and approval-gated."
   ]
 }

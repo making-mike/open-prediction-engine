@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/domain-config.schema.json",
+  "title": "Domain Config",
+  "description": "Reusable OPE domain configuration record for agent-managed prediction domains.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domainConfigId",
+    "generatedAt",
+    "configStatus",
+    "domainId",
+    "domainKey",
+    "displayName",
+    "version",
+    "questionTemplates",
+    "horizons",
+    "resolutionCriteria",
+    "baselineMethod",
+    "acceptedSourceRoles",
+    "exclusionRules",
+    "sampleThresholds",
+    "claimBoundaries",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "domainConfigId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "configStatus": { "type": "string", "enum": ["defined_readback", "candidate_readback"] },
+    "domainId": { "$ref": "common.schema.json#/$defs/id" },
+    "domainKey": { "$ref": "common.schema.json#/$defs/domain" },
+    "displayName": { "type": "string", "minLength": 3, "maxLength": 120 },
+    "version": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "questionTemplates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/questionTemplate" }
+    },
+    "horizons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/horizonTemplate" }
+    },
+    "resolutionCriteria": { "$ref": "#/$defs/resolutionCriteria" },
+    "baselineMethod": { "$ref": "#/$defs/baselineMethod" },
+    "acceptedSourceRoles": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/acceptedSourceRole" }
+    },
+    "exclusionRules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/exclusionRule" }
+    },
+    "sampleThresholds": { "$ref": "#/$defs/sampleThresholds" },
+    "claimBoundaries": { "$ref": "#/$defs/claimBoundaries" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 10,
+      "items": { "type": "string", "minLength": 8, "maxLength": 240 }
+    }
+  },
+  "$defs": {
+    "snakeKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "questionTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateId",
+        "templateKey",
+        "templateText",
+        "outputType",
+        "requiredParameters",
+        "forecastClosePolicy"
+      ],
+      "properties": {
+        "templateId": { "$ref": "common.schema.json#/$defs/id" },
+        "templateKey": { "$ref": "#/$defs/snakeKey" },
+        "templateText": { "type": "string", "minLength": 20, "maxLength": 500 },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "requiredParameters": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/snakeKey" }
+        },
+        "forecastClosePolicy": { "type": "string", "minLength": 8, "maxLength": 200 }
+      }
+    },
+    "horizonTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horizonId", "horizonKey", "label", "startsAfter", "endsAfter"],
+      "properties": {
+        "horizonId": { "$ref": "common.schema.json#/$defs/id" },
+        "horizonKey": { "$ref": "#/$defs/snakeKey" },
+        "label": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "startsAfter": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "endsAfter": { "type": "string", "minLength": 2, "maxLength": 80 }
+      }
+    },
+    "resolutionCriteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primaryOutcomeRole",
+        "resolutionTiming",
+        "yesCriteria",
+        "noCriteria",
+        "ambiguousCriteria",
+        "annulledCriteria"
+      ],
+      "properties": {
+        "primaryOutcomeRole": { "$ref": "#/$defs/snakeKey" },
+        "resolutionTiming": { "type": "string", "enum": ["post_horizon", "post_window", "manual_review"] },
+        "yesCriteria": { "type": "string", "minLength": 12, "maxLength": 360 },
+        "noCriteria": { "type": "string", "minLength": 12, "maxLength": 360 },
+        "ambiguousCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 8, "maxLength": 240 }
+        },
+        "annulledCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 8, "maxLength": 240 }
+        }
+      }
+    },
+    "baselineMethod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodId",
+        "methodKey",
+        "methodClass",
+        "minimumRows",
+        "minimumPositiveOutcomes",
+        "fallbackAllowed",
+        "defaultUntilApprovedUpdate"
+      ],
+      "properties": {
+        "methodId": { "$ref": "common.schema.json#/$defs/id" },
+        "methodKey": { "$ref": "#/$defs/snakeKey" },
+        "methodClass": {
+          "type": "string",
+          "enum": ["historical_frequency", "climatology_frequency", "manual_prior"]
+        },
+        "minimumRows": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "minimumPositiveOutcomes": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "fallbackAllowed": { "type": "boolean" },
+        "defaultUntilApprovedUpdate": { "type": "boolean" }
+      }
+    },
+    "acceptedSourceRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roleId",
+        "roleKey",
+        "timing",
+        "acceptedSourceKinds",
+        "requiredFields",
+        "forecastTimeAllowed",
+        "credentialValuesStored"
+      ],
+      "properties": {
+        "roleId": { "$ref": "common.schema.json#/$defs/id" },
+        "roleKey": { "$ref": "#/$defs/snakeKey" },
+        "timing": {
+          "type": "string",
+          "enum": ["historical_training", "forecast_time", "baseline", "resolution", "supporting"]
+        },
+        "acceptedSourceKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "enum": ["fixture", "local_file", "source_adapter_output", "api", "database"]
+          }
+        },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/snakeKey" }
+        },
+        "forecastTimeAllowed": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" }
+      }
+    },
+    "exclusionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "reasonCode", "description", "scoreTreatment"],
+      "properties": {
+        "ruleId": { "$ref": "common.schema.json#/$defs/id" },
+        "reasonCode": { "$ref": "#/$defs/snakeKey" },
+        "description": { "type": "string", "minLength": 12, "maxLength": 240 },
+        "scoreTreatment": { "type": "string", "enum": ["exclude_from_scoring", "manual_review_required"] }
+      }
+    },
+    "sampleThresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimumComparableForecastsForCalibration",
+        "minimumComparableForecastsForQualityClaim",
+        "minimumBaselineRows",
+        "minimumPositiveOutcomes"
+      ],
+      "properties": {
+        "minimumComparableForecastsForCalibration": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "minimumComparableForecastsForQualityClaim": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "minimumBaselineRows": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "minimumPositiveOutcomes": { "type": "integer", "minimum": 0, "maximum": 100000 }
+      }
+    },
+    "claimBoundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "stateOfTheArtClaimAllowed",
+        "productionReadinessClaimAllowed",
+        "claimReviewRequired"
+      ],
+      "properties": {
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "stateOfTheArtClaimAllowed": { "type": "boolean" },
+        "productionReadinessClaimAllowed": { "type": "boolean" },
+        "claimReviewRequired": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createsForecasts",
+        "readsPrivateData",
+        "storesCredentialValues",
+        "liveFetchAllowed",
+        "rawSqlAllowed"
+      ],
+      "properties": {
+        "createsForecasts": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "liveFetchAllowed": { "type": "boolean" },
+        "rawSqlAllowed": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionTemplatesDefined",
+        "horizonsDefined",
+        "resolutionCriteriaDefined",
+        "baselineMethodDefined",
+        "acceptedSourceRolesDefined",
+        "exclusionRulesDefined",
+        "sampleThresholdsDefined",
+        "claimBoundariesDefined",
+        "normalChecksNonMutating",
+        "credentialsExcluded"
+      ],
+      "properties": {
+        "questionTemplatesDefined": { "type": "boolean" },
+        "horizonsDefined": { "type": "boolean" },
+        "resolutionCriteriaDefined": { "type": "boolean" },
+        "baselineMethodDefined": { "type": "boolean" },
+        "acceptedSourceRolesDefined": { "type": "boolean" },
+        "exclusionRulesDefined": { "type": "boolean" },
+        "sampleThresholdsDefined": { "type": "boolean" },
+        "claimBoundariesDefined": { "type": "boolean" },
+        "normalChecksNonMutating": { "type": "boolean" },
+        "credentialsExcluded": { "type": "boolean" }
+      }
+    }
+  }
+}

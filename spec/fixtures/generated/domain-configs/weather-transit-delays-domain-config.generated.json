@@ -1,0 +1,165 @@
+{
+  "domainConfigId": "domainconfig-001",
+  "generatedAt": "2026-06-03T03:15:00Z",
+  "configStatus": "defined_readback",
+  "domainId": "domainweathertransitdelays-001",
+  "domainKey": "weather-transit-delays",
+  "displayName": "Weather Transit Delay Domain Config",
+  "version": "1.0",
+  "questionTemplates": [
+    {
+      "templateId": "questiontemplate-115001",
+      "templateKey": "transit_delay_threshold",
+      "templateText": "Will {transit_network} in {geography} exceed the beta delay threshold during {service_window} on {service_date}?",
+      "outputType": "binary",
+      "requiredParameters": [
+        "transit_network",
+        "geography",
+        "service_window",
+        "service_date"
+      ],
+      "forecastClosePolicy": "Forecast must close before the service window starts."
+    }
+  ],
+  "horizons": [
+    {
+      "horizonId": "horizon-115001",
+      "horizonKey": "same_day_service_window",
+      "label": "Same-day service window",
+      "startsAfter": "forecast close",
+      "endsAfter": "declared service window end"
+    }
+  ],
+  "resolutionCriteria": {
+    "primaryOutcomeRole": "transit_delay_outcome",
+    "resolutionTiming": "post_window",
+    "yesCriteria": "Observed outcome rows show the beta delay threshold was exceeded in the service window.",
+    "noCriteria": "Observed outcome rows show the beta delay threshold was not exceeded in the service window.",
+    "ambiguousCriteria": [
+      "Outcome rows conflict for the same network, geography, service date, and service window.",
+      "Coverage is too low to classify threshold exceedance."
+    ],
+    "annulledCriteria": [
+      "The service window was canceled before forecast close.",
+      "The configured network or geography was invalid before forecast close."
+    ]
+  },
+  "baselineMethod": {
+    "methodId": "transitmethod-100",
+    "methodKey": "historical_frequency",
+    "methodClass": "historical_frequency",
+    "minimumRows": 30,
+    "minimumPositiveOutcomes": 1,
+    "fallbackAllowed": true,
+    "defaultUntilApprovedUpdate": true
+  },
+  "acceptedSourceRoles": [
+    {
+      "roleId": "sourcerole-115001",
+      "roleKey": "weather_forecast",
+      "timing": "forecast_time",
+      "acceptedSourceKinds": [
+        "fixture",
+        "local_file",
+        "source_adapter_output",
+        "api"
+      ],
+      "requiredFields": [
+        "geography",
+        "service_date",
+        "retrieved_at",
+        "precipitation_mm"
+      ],
+      "forecastTimeAllowed": true,
+      "credentialValuesStored": false
+    },
+    {
+      "roleId": "sourcerole-115002",
+      "roleKey": "historical_delay_baseline",
+      "timing": "baseline",
+      "acceptedSourceKinds": [
+        "fixture",
+        "local_file",
+        "source_adapter_output",
+        "database"
+      ],
+      "requiredFields": [
+        "service_date",
+        "service_window",
+        "delay_threshold_exceeded"
+      ],
+      "forecastTimeAllowed": true,
+      "credentialValuesStored": false
+    },
+    {
+      "roleId": "sourcerole-115003",
+      "roleKey": "transit_delay_outcome",
+      "timing": "resolution",
+      "acceptedSourceKinds": [
+        "fixture",
+        "local_file",
+        "source_adapter_output",
+        "api"
+      ],
+      "requiredFields": [
+        "service_date",
+        "service_window",
+        "delay_threshold_exceeded",
+        "observed_after"
+      ],
+      "forecastTimeAllowed": false,
+      "credentialValuesStored": false
+    }
+  ],
+  "exclusionRules": [
+    {
+      "ruleId": "exclusionrule-115001",
+      "reasonCode": "ambiguous_outcome",
+      "description": "Ambiguous outcomes are excluded from scoring and calibration.",
+      "scoreTreatment": "exclude_from_scoring"
+    },
+    {
+      "ruleId": "exclusionrule-115002",
+      "reasonCode": "post_outcome_leakage",
+      "description": "Sources retrieved after outcome availability cannot be used as forecast-time evidence.",
+      "scoreTreatment": "manual_review_required"
+    }
+  ],
+  "sampleThresholds": {
+    "minimumComparableForecastsForCalibration": 100,
+    "minimumComparableForecastsForQualityClaim": 100,
+    "minimumBaselineRows": 30,
+    "minimumPositiveOutcomes": 1
+  },
+  "claimBoundaries": {
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "stateOfTheArtClaimAllowed": false,
+    "productionReadinessClaimAllowed": false,
+    "claimReviewRequired": true
+  },
+  "executionBoundary": {
+    "createsForecasts": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "liveFetchAllowed": false,
+    "rawSqlAllowed": false
+  },
+  "summary": {
+    "questionTemplatesDefined": true,
+    "horizonsDefined": true,
+    "resolutionCriteriaDefined": true,
+    "baselineMethodDefined": true,
+    "acceptedSourceRolesDefined": true,
+    "exclusionRulesDefined": true,
+    "sampleThresholdsDefined": true,
+    "claimBoundariesDefined": true,
+    "normalChecksNonMutating": true,
+    "credentialsExcluded": true
+  },
+  "warnings": [
+    "Domain config defines allowed shape only; it does not bind concrete sources or create forecasts.",
+    "The historical-frequency baseline remains default until approved method-update evidence exists.",
+    "Outcome sources are resolution-only and must not enter forecast-time evidence."
+  ]
+}

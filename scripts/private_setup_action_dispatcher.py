@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from generate_private_setup_requests import build_request_set, render_json
+from generate_private_setup_requests import build_request_set, load_generated_request_set, render_json
 from ope_schema import SPEC, validate_record
 
 
@@ -302,7 +302,7 @@ def validate_action(action: dict[str, Any]) -> None:
 
 
 def dispatch_action(request_id: str | None = None, input_path: Path | None = None) -> dict[str, Any]:
-    request_set = build_request_set()
+    request_set = load_generated_request_set() or build_request_set()
     if request_id and input_path:
         return bad_request_action("provide either --request-id or --input, not both")
     if request_id:

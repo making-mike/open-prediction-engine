@@ -82,6 +82,7 @@ The contracts are intentionally record-first:
 - `prediction-campaign-resume.schema.json`: checked non-mutating campaign resume readback with local-state inspection, recovery actions, and overwrite boundary.
 - `prediction-campaign-evidence-ledger.schema.json`: checked append-only campaign evidence ledger readback with comparable/excluded row separation and idempotent local-write boundary.
 - `prediction-campaign-calibration-status.schema.json`: checked campaign calibration-status readback, threshold cases, and post-calibration continuation boundary.
+- `prediction-campaign-pre-calibration.schema.json`: optional historical-only pre-pilot calibration binding for campaign baseline probability.
 - `prediction-campaign-method-update-gate.schema.json`: checked read-only gate before campaign calibration can influence method updates.
 - `prediction-campaign-method-update-plan.schema.json`: checked non-effectful approval, command-shape, and rollback plan before future method updates.
 - `prediction-campaign-method-update-action.schema.json`: guarded apply and rollback command readback for approved local campaign method bindings.
@@ -89,6 +90,10 @@ The contracts are intentionally record-first:
 - `helsinki-traffic-disturbance-pilot-runbook.schema.json`: checked local operations runbook for the 100-run Helsinki traffic disturbance pilot, including mini-smoke, operator status, success, and abort criteria.
 - `helsinki-traffic-pilot-readiness.schema.json`: checked local launch-readiness readback for the 100-run Helsinki pilot before effectful local writes.
 - `lifecycle-operation.schema.json`: checked lifecycle operation store readback for database-backed multi-agent execution, idempotency, leases, read models, SQLite scenarios, and delete replacements.
+- `internal-api.schema.json`: checked embedded internal API operation surface for host and agent callers.
+- `prediction-workspace-registry.schema.json`: checked multi-prediction workspace registry readback with stable prediction, campaign, domain, source-binding, schedule, workspace read-model, configuration-lifecycle, idempotency, lease, resource-control, and isolation statuses.
+- `domain-config.schema.json`: checked reusable domain configuration records for weather-transit and candidate seaport prediction setup.
+- `source-binding.schema.json`: checked source binding setup records covering accepted, partial, rejected, and blocked configurations across local files, source-adapter outputs, APIs, and database adapter manifests.
 - `private-setup-adapter-chain-runbook.schema.json`: checked adapter operation sequence and readback guidance for private setup callers.
 - `private-setup-adapter-conformance-matrix.schema.json`: checked conformance examples across private setup adapter operation envelopes.
 - `private-setup-adapter-conformance-summary.schema.json`: compact read surface over private setup adapter conformance.
@@ -156,6 +161,7 @@ The contracts are intentionally record-first:
 - `prediction-campaign-resume.md`: checked campaign resume readback and recovery boundary.
 - `prediction-campaign-evidence-ledger.md`: checked append-ready and append readback boundary for local campaign evidence ledgers.
 - `prediction-campaign-calibration-status.md`: checked campaign calibration status and post-calibration continuation readback.
+- `prediction-campaign-pre-calibration.md`: optional historical-only campaign pre-calibration boundary.
 - `prediction-campaign-method-update-gate.md`: checked campaign method-update gate and non-effectful update boundary.
 - `prediction-campaign-method-update-plan.md`: checked campaign method-update approval, command-shape, rollback, and preflight plan.
 - `prediction-campaign-method-update-action.md`: checked apply/rollback command boundary for approved local method bindings.
@@ -163,6 +169,10 @@ The contracts are intentionally record-first:
 - `helsinki-traffic-disturbance-pilot-runbook.md`: checked local 100-run Helsinki traffic disturbance pilot operations runbook.
 - `helsinki-traffic-pilot-readiness.md`: checked local launch-readiness gate for the 100-run Helsinki pilot.
 - `lifecycle-operation-store.md`: checked local SQLite lifecycle operation store and multi-agent operation boundary.
+- `internal-api.md`: checked embedded internal API surface and transport boundary.
+- `prediction-workspace-registry.md`: checked multi-prediction workspace registry, workspace read-model, configuration-lifecycle, idempotency, lease, resource-control, and isolation readback boundary.
+- `domain-config.md`: checked reusable domain configuration record boundary.
+- `source-binding.md`: checked concrete source binding setup and pre-forecast safety boundary.
 - `storage-adapter.md`: checked storage adapter boundary for ignored JSON compatibility, local SQLite, and Postgres-compatible backends.
 - `repeating-prediction-pilot-runbook.md`: checked local pilot workflow for 100-run and open-ended repeating prediction campaigns.
 - `private-setup-adapter-chain-runbook.md`: checked private setup adapter-chain runbook boundary.
@@ -245,6 +255,11 @@ The prediction campaign doctor generator writes a checked compact readback under
 The prediction campaign resume generator writes a checked non-mutating recovery readback under `spec/fixtures/generated/prediction-campaign-resume/`, joining the campaign manifest, write plan, open forecast, and resolution queue without reading or writing ignored live state during normal checks. `prediction-campaign resume --resume-case interrupted_after_forecast_write --view state` exposes the interrupted-state readback, and `--from-local` explicitly reads ignored local campaign state without writing or overwriting prior evidence.
 The prediction campaign evidence ledger generator writes a checked append-only readback under `spec/fixtures/generated/prediction-campaign-evidence-ledger/`, separating comparable rows from excluded audit rows and checking forecast timing, source-policy, no-leakage, resolution, score, coverage, scope, and duplicate row keys. `prediction-campaign append --write-local` is explicit and writes only to ignored local ledger state.
 The prediction campaign calibration-status generator writes a checked readback under `spec/fixtures/generated/prediction-campaign-calibration-status/`, covering below-threshold, threshold-met, too-many-exclusions, and post-calibration restart cases without tuning models or mutating campaign cycles.
+The prediction campaign pre-calibration generator writes a checked readback under `spec/fixtures/generated/prediction-campaign-pre-calibration/`, using historical transit delay rows to prepare an optional baseline probability binding before pilot launch without live fetches or method changes.
+
+The prediction workspace registry generator writes a checked readback under `spec/fixtures/generated/prediction-workspace-registry/`, showing multiple prediction definitions with stable IDs, compact workspace read models, audit-backed configuration operation definitions, per-prediction idempotency/lease controls, resource limits, and cross-prediction isolation checks.
+The domain config generator writes checked reusable domain configs under `spec/fixtures/generated/domain-configs/` for weather-transit delays and a candidate seaport berth-availability domain.
+The source binding generator writes checked setup cases under `spec/fixtures/generated/source-bindings/`, covering accepted, partial, rejected, and blocked bindings with mapping-confidence, source-quality, leakage, freshness, privacy, and outcome-availability gates before forecast generation.
 The prediction campaign method-update gate generator writes a checked readback under `spec/fixtures/generated/prediction-campaign-method-update-gate/`, covering below-threshold, approval-needed, approved-plan-ready, and regression-risk cases without changing probabilities, forecast methods, method weights, method registries, or campaign state.
 The prediction campaign method-update plan generator writes a checked readback under `spec/fixtures/generated/prediction-campaign-method-update-plan/`, covering gate-blocked, regression-risk, approval-missing, rollback-missing, and plan-ready cases before any explicit effectful command runs.
 The prediction campaign method-update action generator writes a checked readback under `spec/fixtures/generated/prediction-campaign-method-update-action/`, covering default blocked apply semantics plus explicit apply/rollback command readiness and local-only method-binding writes behind `--write-local`.

@@ -16,6 +16,10 @@ python3 scripts/ope.py lifecycle-operation-store --scenario lease-conflict
 python3 scripts/ope.py lifecycle-operation-store --scenario archive
 python3 scripts/ope.py lifecycle-operation-store --scenario redaction
 python3 scripts/ope.py lifecycle-operation-store --scenario method-rollback
+python3 scripts/ope.py lifecycle-operation-store --scenario pre-calibration-bind
+python3 scripts/ope.py lifecycle-operation-store --scenario campaign-forecast-create
+python3 scripts/ope.py lifecycle-operation-store --scenario campaign-evidence-append
+python3 scripts/ope.py lifecycle-operation-store --scenario json-state-import
 python3 scripts/ope.py lifecycle-operation-store --scenario recovery
 python3 scripts/ope.py lifecycle-operation-store --check
 ```
@@ -36,6 +40,12 @@ The database stores:
 
 The checked SQLite schema plan covers `operation_receipts`, `operation_idempotency_keys`, `operation_leases`, `ope_records`, `forecast_history_events`, `operation_audit_records`, `evidence_ledger_rows`, and `read_model_rows`.
 
+## JSON Compatibility Adapter
+
+Ignored `.ope/live/prediction-campaigns` state remains an explicit compatibility adapter while the database bridge is introduced. Compatibility reads and explicit local writes remain available for existing campaign workflows, but normal checks do not write ignored state and migration is never automatic.
+
+The adapter covers forecast lifecycle records, run state, campaign state, evidence ledger rows, method bindings, and method-update audit artifacts. Importing any of those files into SQLite must use an explicit migration operation, preserve source content hashes and forecast probabilities, retain source provenance, and append a migration receipt.
+
 ## Operation Model
 
 Agents should call lifecycle operations, not raw SQL updates:
@@ -48,6 +58,7 @@ Agents should call lifecycle operations, not raw SQL updates:
 - `resolution.record`
 - `score.create`
 - `evidence.append`
+- `pre_calibration.bind`
 - `method.apply`
 - `method.rollback`
 - `record.archive`
@@ -55,11 +66,17 @@ Agents should call lifecycle operations, not raw SQL updates:
 
 Every effectful operation needs a preflight, idempotency key, planned-write list, blocking-guard list, operation receipt, and safe retry behavior. Operations that can race across agents also need a lease.
 
-The checked runtime scenarios cover create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, and recovery. Scenario readbacks expose planned writes, blocking guards, idempotency keys, lease plans, claim boundaries, and recovery paths before mutation.
+The checked runtime scenarios cover create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, pre-calibration-bind, campaign forecast creation, campaign resolution, campaign scoring, campaign evidence append, campaign method apply/rollback, JSON state import, and recovery. Scenario readbacks expose planned writes, blocking guards, idempotency keys, lease plans, source payload hash bindings, migration summaries, claim boundaries, and recovery paths before mutation.
+
+The generated `writeLocalOperationCoverage` table maps the current explicit local mutation commands to lifecycle operations: `start --write-local`, `start --pre-calibrate --write-local`, `forecast-write --write-local`, `resolve --execute-resolvers --write-local`, `append --write-local`, `pre-calibration --write-local`, `apply-method-update --write-local`, and `rollback-method-update --write-local`. Each mapping requires operation receipts, idempotency, leases, and the read models agents need after the mutation.
+
+The generated `fileDatabaseCompatibilityChecks` table compares local file-mode repeat statuses with SQLite idempotent replay for forecast lifecycle records, resolution records, scoring reports, evidence ledger rows, pre-calibration method bindings, method apply bindings, and method rollback bindings. Replays must return existing receipts, create no duplicate records, perform no physical deletes, and never rewrite forecast history.
 
 ## Migration Rules
 
 Ignored `.ope/live` JSON state remains the compatibility source until a migration operation imports it into SQLite. Migration must append a migration receipt, preserve original content hashes, preserve forecast probabilities and source provenance exactly, and avoid rewriting historical forecast histories. Normal checks do not run migration or require a persistent database.
+
+The checked `json-state-import` scenario exercises the migration operation shape against an ephemeral SQLite database. It imports representative forecast lifecycle, run-state, campaign-state, evidence-ledger, method-binding, and migration-receipt payloads with matching source and SQLite content hashes. This proves the migration receipt contract without creating a persistent database file or changing ignored local state.
 
 ## Delete Replacement
 

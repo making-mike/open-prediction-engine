@@ -67,8 +67,8 @@
     },
     "operations": {
       "type": "array",
-      "minItems": 23,
-      "maxItems": 23,
+      "minItems": 24,
+      "maxItems": 24,
       "items": { "$ref": "#/$defs/operationMap" }
     },
     "exitCodeMapping": {
@@ -123,6 +123,7 @@
         "campaign_health",
         "campaign_append_readiness",
         "campaign_calibration_status",
+        "internal_api",
         "resolution_jobs",
         "resolution_scheduler_status",
         "resolution_status",
@@ -151,6 +152,7 @@
         "prediction_campaign_doctor",
         "prediction_campaign_evidence_ledger",
         "prediction_campaign_calibration_status",
+        "internal_api_request",
         "resolution_job_registry",
         "resolution_scheduler_status",
         "resolution_status",

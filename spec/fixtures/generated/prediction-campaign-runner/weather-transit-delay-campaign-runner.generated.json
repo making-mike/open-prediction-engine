@@ -30,6 +30,8 @@
       "--manifest-json",
       "--live-weather",
       "--execute-resolvers",
+      "--pre-calibrate",
+      "--history-source",
       "--full-materialization",
       "--watch",
       "--max-ticks",
@@ -58,6 +60,8 @@
     "candidatePlanCount": "4",
     "liveWeatherRequested": false,
     "resolverExecutionRequested": false,
+    "preCalibrationRequested": false,
+    "historySourcePath": "spec/fixtures/local-source-files/transit-delay-history.csv",
     "acceptedForDryRun": true,
     "createsCampaignManifest": false,
     "writesCampaignState": false,
@@ -132,6 +136,22 @@
     "normalChecksChangeMethod": false,
     "futureForecastsOnly": true,
     "priorForecastHistoryRewriteAllowed": false
+  },
+  "preCalibration": {
+    "requestStatus": "not_requested",
+    "preCalibrationStatus": "not_requested",
+    "predictionCampaignPreCalibrationId": "none",
+    "historySourcePath": "none",
+    "resolvedOutcomeRowCount": 0,
+    "calibratedProbability": 0.25,
+    "activeMethodId": "transitmethod-100",
+    "preCalibrationArtifactPath": "none",
+    "methodBindingPath": ".ope/live/prediction-campaigns/predictioncampaign-001/method-binding.json",
+    "forecastProbabilitySource": "default_checked_baseline",
+    "localWriteRequiredBeforeUse": false,
+    "writesDuringDryRun": false,
+    "qualityClaimAllowed": false,
+    "nextAction": "Add --pre-calibrate to compute a historical-only baseline binding before launch."
   },
   "supportedRecurrenceModes": [
     {
@@ -253,6 +273,7 @@
     "resolverExecutionImplemented": false,
     "writesLiveState": false,
     "normalChecksUseLiveNetwork": false,
+    "preCalibrationImplemented": true,
     "qualityClaimAllowed": false,
     "recommendedNextMilestone": "Milestone 105 campaign outcome resolver execution"
   },
@@ -262,6 +283,7 @@
     "executesForecastRunner": false,
     "sleepsOrPolls": false,
     "writesIgnoredLiveState": false,
+    "writesPreCalibrationState": false,
     "fetchesLiveData": false,
     "executesResolvers": false,
     "appendsCorpusEvidence": false,
@@ -272,6 +294,7 @@
   },
   "warnings": [
     "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+    "Optional --pre-calibrate uses historical data only and writes a prospective baseline binding only when --write-local is explicit.",
     "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
     "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
     "No calibration or quality claim is allowed from dry-run runner decisions."

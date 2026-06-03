@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -523,6 +524,14 @@ def check_gate(gate: dict[str, Any]) -> None:
     check_generated(OUTPUT_PATH, gate, label="expansion readiness gate", regen="python3 scripts/generate_expansion_readiness_gate.py --write")
 
 
+def load_generated_gate() -> dict[str, Any] | None:
+    if not OUTPUT_PATH.exists():
+        return None
+    gate = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    validate_gate(gate)
+    return gate
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -532,9 +541,13 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="check generated expansion readiness gate drift")
     parser.add_argument("--write", action="store_true", help="refresh generated expansion readiness gate")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        gate = build_expansion_readiness_gate()
+        if args.write or args.check or args.rebuild:
+            gate = build_expansion_readiness_gate()
+        else:
+            gate = load_generated_gate() or build_expansion_readiness_gate()
     except ExpansionReadinessGateError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

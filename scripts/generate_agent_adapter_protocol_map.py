@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,7 @@ OPERATIONS = [
     "campaign_health",
     "campaign_append_readiness",
     "campaign_calibration_status",
+    "internal_api",
     "resolution_jobs",
     "resolution_scheduler_status",
     "resolution_status",
@@ -66,6 +68,7 @@ INPUT_RECORD_TYPES = {
     "campaign_health": "prediction_campaign_doctor",
     "campaign_append_readiness": "prediction_campaign_evidence_ledger",
     "campaign_calibration_status": "prediction_campaign_calibration_status",
+    "internal_api": "internal_api_request",
     "resolution_jobs": "resolution_job_registry",
     "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
@@ -92,6 +95,7 @@ SIDE_EFFECT_LEVELS = {
     "campaign_health": "read_only",
     "campaign_append_readiness": "read_only",
     "campaign_calibration_status": "read_only",
+    "internal_api": "dry_run_generation",
     "resolution_jobs": "read_only",
     "resolution_scheduler_status": "read_only",
     "resolution_status": "status_read",
@@ -118,6 +122,7 @@ USAGE_GUIDANCE = {
     "campaign_health": "Use when an agent needs campaign doctor health, queue, duplicate, and recovery guidance without executing resolvers.",
     "campaign_append_readiness": "Use when an agent needs campaign evidence append-readiness without appending corpus evidence.",
     "campaign_calibration_status": "Use when an agent needs campaign calibration threshold and post-calibration policy status without tuning probabilities or methods.",
+    "internal_api": "Use when an agent needs to call the embedded internal API wrapper in non-mutating dry-run mode.",
     "resolution_jobs": "Use when an agent needs pending, due, resolved, invalid, and waiting resolution-job guidance without reading local state files or executing resolvers.",
     "resolution_scheduler_status": "Use when an agent needs the last scheduler tick, shutdown reason, log path, execution mode, queue state readbacks, and next action without starting a scheduler.",
     "resolution_status": "Use when an agent needs to decide whether a normal or setup-generated forecast is resolved, pending, ambiguous, or annulled.",
@@ -144,6 +149,7 @@ HTTP_PATHS = {
     "campaign_health": "/agent/campaign-health",
     "campaign_append_readiness": "/agent/campaign-append-readiness",
     "campaign_calibration_status": "/agent/campaign-calibration-status",
+    "internal_api": "/agent/internal-api",
     "resolution_jobs": "/agent/resolution-jobs",
     "resolution_scheduler_status": "/agent/resolution-scheduler-status",
     "resolution_status": "/agent/resolution-status",
@@ -252,6 +258,31 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
         "campaign_calibration_status",
     }:
         return [
+            *common,
+        ]
+    if operation == "internal_api":
+        return [
+            field(
+                "internalOperation",
+                True,
+                "string",
+                "agent-call --internal-operation",
+                "Stable embedded internal API operation name to call in dry-run mode.",
+            ),
+            field(
+                "predictionId",
+                False,
+                "id",
+                "agent-call --prediction-id",
+                "Prediction or campaign ID used by the internal API wrapper.",
+            ),
+            field(
+                "idempotencyKey",
+                False,
+                "string",
+                "agent-call --idempotency-key",
+                "Caller-provided retry key for effectful internal API operations.",
+            ),
             *common,
         ]
     if operation == "private_source_adapter_guidance":
@@ -827,13 +858,25 @@ def check_protocol_map(protocol_map: dict[str, Any]) -> None:
     check_generated(MAP_PATH, protocol_map, label="agent adapter protocol map", regen="python3 scripts/generate_agent_adapter_protocol_map.py --write")
 
 
+def load_generated_protocol_map() -> dict[str, Any] | None:
+    if not MAP_PATH.exists():
+        return None
+    protocol_map = json.loads(MAP_PATH.read_text(encoding="utf-8"))
+    validate_protocol_map(protocol_map)
+    return protocol_map
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated protocol-map drift")
     parser.add_argument("--write", action="store_true", help="write generated protocol map")
+    parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
-        protocol_map = build_protocol_map()
+        if args.write or args.check or args.rebuild:
+            protocol_map = build_protocol_map()
+        else:
+            protocol_map = load_generated_protocol_map() or build_protocol_map()
     except ProtocolMapError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

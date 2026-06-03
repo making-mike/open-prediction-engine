@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import json
+import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from generate_release_manifest import build_manifest
@@ -20,13 +22,26 @@ def require(condition: bool, message: str) -> None:
 
 
 def run_cli(*args: str) -> dict[str, object]:
+    command = [sys.executable, "scripts/ope.py", *args]
+    rendered = shlex.join(command)
+    started = time.perf_counter()
+    print(f"[check_mvp_release_surface] start {rendered}", file=sys.stderr, flush=True)
     result = subprocess.run(
-        [sys.executable, "scripts/ope.py", *args],
+        command,
         cwd=ROOT,
-        check=True,
+        check=False,
         text=True,
         capture_output=True,
     )
+    print(
+        (
+            f"[check_mvp_release_surface] done exit={result.returncode} "
+            f"elapsed={time.perf_counter() - started:.2f}s {rendered}"
+        ),
+        file=sys.stderr,
+        flush=True,
+    )
+    result.check_returncode()
     return json.loads(result.stdout)
 
 
@@ -103,7 +118,14 @@ def main() -> None:
     require(campaign_runner["runnerStatus"] == "dry_run_ready_non_executing", "prediction campaign runner status drifted")
     require(campaign_runner["summary"]["terminalRunnerSurfaceImplemented"] is True, "prediction campaign runner surface should be implemented")
     require(campaign_runner["summary"]["forecastCreationImplemented"] is True, "prediction campaign runner should expose explicit local forecast creation")
+    require(campaign_runner["summary"]["preCalibrationImplemented"] is True, "prediction campaign runner should expose pre-calibration")
     require(campaign_runner["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign runner must not write live state")
+
+    campaign_pre_calibration = run_cli("prediction-campaign", "pre-calibration")
+    require(campaign_pre_calibration["preCalibrationStatus"] == "ready", "prediction campaign pre-calibration status drifted")
+    require(campaign_pre_calibration["calibrationMethod"]["calibratedProbability"] == 0.25, "prediction campaign pre-calibration probability drifted")
+    require(campaign_pre_calibration["summary"]["historicalOnly"] is True, "prediction campaign pre-calibration must be historical-only")
+    require(campaign_pre_calibration["executionBoundary"]["writesIgnoredLiveState"] is False, "prediction campaign pre-calibration must not write by default")
 
     campaign_forecast_creation = run_cli("prediction-campaign", "forecast-create")
     require(campaign_forecast_creation["creationStatus"] == "ready_dry_run_creation_request", "prediction campaign forecast creation status drifted")

@@ -22,12 +22,22 @@ def main() -> None:
     require(record["domain"] == "weather-transit-delays", "readiness domain drifted")
     require(bindings["campaignId"] == "predictioncampaign-001", "campaign binding drifted")
     require(bindings["sourcePolicyId"] == "sourcepolicy-1201", "source policy binding drifted")
+    require(
+        bindings["predictionCampaignPreCalibrationId"] == "predictioncampaignprecalibration-001",
+        "pre-calibration binding drifted",
+    )
 
     require(readiness["targetRunCount"] == 100, "target run count drifted")
     require(readiness["miniSmokeRunCount"] == 3, "mini smoke run count drifted")
     require(readiness["plannedRunCount"] == 100, "planned run count drifted")
     require(readiness["duplicateConflictCount"] == 0, "duplicate conflict count drifted")
     require(readiness["bestAvailableMethodId"] == "transitmethod-100", "best available method drifted")
+    require(readiness["optionalPreCalibrationStatus"] == "ready", "optional pre-calibration status drifted")
+    require(readiness["optionalPreCalibrationProbability"] == 0.25, "optional pre-calibration probability drifted")
+    require(
+        readiness["preCalibrationCommand"] == "python3 scripts/ope.py prediction-campaign pre-calibration",
+        "pre-calibration command drifted",
+    )
     require(readiness["explicitWriteRequired"] is True, "pilot launch should require explicit write")
     require(readiness["manualLivePrerequisitesRequired"] is True, "manual prerequisites should be required")
     require(readiness["normalChecksMutateState"] is False, "normal checks must not mutate state")
@@ -42,6 +52,7 @@ def main() -> None:
             "full_materialization_unique",
             "baseline_method_default",
             "forecast_before_close_policy",
+            "optional_pre_calibration_ready",
             "operator_source_confirmation",
         },
         "readiness check coverage drifted",
@@ -52,6 +63,7 @@ def main() -> None:
         "full_materialization_unique",
         "baseline_method_default",
         "forecast_before_close_policy",
+        "optional_pre_calibration_ready",
     ]:
         require(check_keys[key]["checkStatus"] == "pass", f"{key} should pass")
         require(check_keys[key]["blocksLaunch"] is False, f"{key} should not block launch")
@@ -83,13 +95,19 @@ def main() -> None:
             "readiness",
             "mini_smoke",
             "full_plan",
+            "optional_pre_calibration",
             "launch_first_write",
             "operator_status",
         },
         "launch command coverage drifted",
     )
     require(launch_keys["launch_first_write"]["mutatesState"] is True, "launch command should be marked effectful")
+    require("--pre-calibrate" in launch_keys["launch_first_write"]["command"], "launch command should request pre-calibration")
     require(launch_keys["mini_smoke"]["mutatesState"] is False, "mini smoke should be non-mutating")
+    require(
+        launch_keys["optional_pre_calibration"]["mutatesState"] is False,
+        "pre-calibration inspection command should be non-mutating",
+    )
 
     blocked_keys = {item["actionKey"] for item in record["blockedActions"]}
     require(
@@ -108,6 +126,7 @@ def main() -> None:
     require(summary["manualPrerequisitesRequired"] is True, "manual prerequisites should be visible")
     require(summary["launchCommandReady"] is True, "launch command should be ready")
     require(summary["miniSmokeFirst"] is True, "mini smoke should come first")
+    require(summary["optionalPreCalibrationAvailable"] is True, "optional pre-calibration should be available")
     require(summary["qualityClaimAllowed"] is False, "summary quality claim must stay blocked")
 
     require(boundary["readOnlyReadback"] is True, "readiness boundary should be read-only")

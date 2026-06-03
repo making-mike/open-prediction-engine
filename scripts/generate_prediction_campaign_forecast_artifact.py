@@ -8,6 +8,7 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
+from generate_prediction_campaign_pre_calibration import artifact_record
 from generate_prediction_campaign_forecast_creation import build_prediction_campaign_forecast_creation
 from ope_schema import SPEC, validate_record
 from ope_fixtures import render_json
@@ -72,6 +73,8 @@ def source_ref(
     source_type: str,
     path: Path | None = None,
     retrieved_at: str | None = None,
+    uri: str | None = None,
+    content_hash: str | None = None,
 ) -> dict[str, Any]:
     ref: dict[str, Any] = {
         "sourceId": source_id,
@@ -81,6 +84,10 @@ def source_ref(
     if path is not None:
         ref["uri"] = local_uri(path)
         ref["contentHash"] = sha256(path)
+    if uri is not None:
+        ref["uri"] = uri
+    if content_hash is not None:
+        ref["contentHash"] = content_hash
     if retrieved_at is not None:
         ref["retrievedAt"] = retrieved_at
     return ref
@@ -125,6 +132,7 @@ def build_prediction_campaign_forecast_artifact(
     run_id: str | None = None,
     *,
     creation: dict[str, Any] | None = None,
+    pre_calibration: dict[str, Any] | None = None,
 ) -> dict[str, dict[str, Any]]:
     if creation is None:
         creation = build_prediction_campaign_forecast_creation(run_id=run_id)
@@ -165,13 +173,35 @@ def build_prediction_campaign_forecast_artifact(
             GENERATED_AT,
         ),
     ]
+    forecast_probability_value = BASELINE_PROBABILITY
+    model_version = "weather-transit-delay-campaign-baseline-v0"
+    configuration_hash = "sha256-campaign-baseline-v0"
+    pre_calibration_factor = None
+    if pre_calibration is not None:
+        forecast_probability_value = pre_calibration["calibrationMethod"]["calibratedProbability"]
+        model_version = "weather-transit-delay-campaign-precalibrated-baseline-v0"
+        configuration_hash = "sha256-campaign-precalibrated-baseline-v0"
+        pre_calibration_factor = (
+            f"pre-calibrated baseline probability {forecast_probability_value:g} from "
+            f"{pre_calibration['historySource']['resolvedOutcomeRowCount']} historical rows"
+        )
+        provenance_refs.append(
+            source_ref(
+                run_source_id(run, 5),
+                "Historical pre-calibration binding",
+                "other",
+                retrieved_at=pre_calibration["generatedAt"],
+                uri=f"local://{pre_calibration['engineBinding']['preCalibrationArtifactPath']}",
+                content_hash=hashlib.sha256(render_json(artifact_record(pre_calibration)).encode("utf-8")).hexdigest(),
+            )
+        )
     model = {
         "modelId": run_record_id("model", run),
-        "version": "weather-transit-delay-campaign-baseline-v0",
+        "version": model_version,
         "trainingCutoff": run["forecastCloseAt"],
-        "configurationHash": "sha256-campaign-baseline-v0",
+        "configurationHash": configuration_hash,
     }
-    forecast_output = {"outputType": "binary", "probability": BASELINE_PROBABILITY}
+    forecast_output = {"outputType": "binary", "probability": forecast_probability_value}
     question = {
         "questionId": run["questionId"],
         "title": (
@@ -230,6 +260,7 @@ def build_prediction_campaign_forecast_artifact(
             f"runner decision {bindings['runnerDecisionId']}",
             f"source policy {bindings['sourcePolicyId']}",
             "baseline-only default selected below transit comparable-outcome threshold",
+            pre_calibration_factor or "no optional pre-calibration binding requested",
             f"forecast closes at {run['forecastCloseAt']} before horizon start {run['horizonStartsAt']}",
             "normal checks do not write .ope/live campaign state",
             "resolution and scoring remain pending until post-window evidence is explicitly resolved",
