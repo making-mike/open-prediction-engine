@@ -58,6 +58,8 @@ def main() -> None:
         raise AssertionError("CLI generate-fixtures should list the Helsinki pilot runbook generator")
     if "scripts/generate_helsinki_traffic_pilot_readiness.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the Helsinki pilot readiness generator")
+    if "scripts/generate_lifecycle_operation_store.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the lifecycle operation store generator")
     if "fixture commands" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures list output drifted")
     run_cli("resolve-live")
@@ -72,6 +74,7 @@ def main() -> None:
     run_cli("resolution-jobs", "--check")
     run_cli("resolution-scheduler", "--check")
     run_cli("resolution-runtime-reliability", "--check")
+    run_cli("lifecycle-operation-store", "--check")
     run_cli("transit-forward-run-corpus", "--check")
     transit_corpus_growth = run_cli("transit-corpus-growth")
     transit_corpus_growth_payload = json.loads(transit_corpus_growth.stdout)
@@ -1386,6 +1389,48 @@ def main() -> None:
     runtime_reliability_check = run_cli("resolution-runtime-reliability", "--check")
     if "checked resolution runtime reliability" not in runtime_reliability_check.stdout:
         raise AssertionError("CLI resolution-runtime-reliability --check did not check generated output")
+
+    lifecycle_store = run_cli("lifecycle-operation-store")
+    lifecycle_store_payload = json.loads(lifecycle_store.stdout)
+    lifecycle_operations = {item["operationName"]: item for item in lifecycle_store_payload["operationCatalog"]}
+    if {"forecast.create", "resolution.record", "score.create", "record.archive", "record.redact"} - set(lifecycle_operations):
+        raise AssertionError("CLI lifecycle-operation-store should expose core lifecycle operations")
+    if lifecycle_store_payload["summary"]["firstBackend"] != "local_sqlite":
+        raise AssertionError("CLI lifecycle-operation-store should plan SQLite as the first backend")
+    if lifecycle_store_payload["summary"]["productionDesignBackend"] != "postgres_design":
+        raise AssertionError("CLI lifecycle-operation-store should keep Postgres as the production design target")
+    if not lifecycle_store_payload["summary"]["sqliteRuntimeChecked"]:
+        raise AssertionError("CLI lifecycle-operation-store should expose a checked SQLite runtime")
+    if lifecycle_store_payload["summary"]["runtimeScenarioCount"] != 7:
+        raise AssertionError("CLI lifecycle-operation-store should expose the seven required runtime scenarios")
+    lifecycle_boundary = lifecycle_store_payload["executionBoundary"]
+    if lifecycle_boundary["readbackExecutesDatabaseWrites"] or lifecycle_boundary["rawCrudExposedToAgents"]:
+        raise AssertionError("CLI lifecycle-operation-store must remain non-mutating and block raw CRUD")
+    if not lifecycle_boundary["sqliteRuntimeImplemented"] or not lifecycle_boundary["sqliteScenarioUsesEphemeralDatabase"]:
+        raise AssertionError("CLI lifecycle-operation-store should exercise the local SQLite adapter")
+    if lifecycle_store_payload["mutationSemantics"]["forecastArtifactsMutable"]:
+        raise AssertionError("CLI lifecycle-operation-store must keep forecast artifacts immutable")
+    if lifecycle_store_payload["mutationSemantics"]["deleteAllowedAsPhysicalDefault"]:
+        raise AssertionError("CLI lifecycle-operation-store must replace physical delete with lifecycle operations")
+    lifecycle_read_models = {item["readModelName"] for item in lifecycle_store_payload["readModels"]}
+    if "next_due_forecast" not in lifecycle_read_models or "recovery_actions" not in lifecycle_read_models:
+        raise AssertionError("CLI lifecycle-operation-store should expose agent read models")
+    lifecycle_scenarios = {item["scenarioName"]: item for item in lifecycle_store_payload["runtimeScenarios"]}
+    if lifecycle_scenarios["retry-idempotent"]["duplicateRecordsCreated"] != 0:
+        raise AssertionError("CLI lifecycle-operation-store retry scenario should avoid duplicate records")
+    if lifecycle_scenarios["lease-conflict"]["executionStatus"] != "blocked_lease_conflict":
+        raise AssertionError("CLI lifecycle-operation-store should expose a blocked lease-conflict scenario")
+    if lifecycle_scenarios["archive"]["physicalDeletes"] != 0 or lifecycle_scenarios["redaction"]["physicalDeletes"] != 0:
+        raise AssertionError("CLI lifecycle-operation-store should replace delete-like operations with audit records")
+    lifecycle_scenario = run_cli("lifecycle-operation-store", "--scenario", "method-rollback")
+    lifecycle_scenario_payload = json.loads(lifecycle_scenario.stdout)
+    if lifecycle_scenario_payload["scenarioName"] != "method-rollback":
+        raise AssertionError("CLI lifecycle-operation-store --scenario should print the requested scenario")
+    if lifecycle_scenario_payload["preflight"]["plannedWrites"][1]["writeMode"] != "prospective_binding":
+        raise AssertionError("CLI lifecycle-operation-store method rollback should be prospective")
+    lifecycle_store_check = run_cli("lifecycle-operation-store", "--check")
+    if "checked lifecycle operation store" not in lifecycle_store_check.stdout:
+        raise AssertionError("CLI lifecycle-operation-store --check did not check generated output")
 
     transit_corpus = run_cli("transit-forward-run-corpus")
     transit_corpus_payload = json.loads(transit_corpus.stdout)

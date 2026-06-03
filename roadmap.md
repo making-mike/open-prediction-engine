@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-06-01
+Last updated: 2026-06-03
 
 ## Purpose
 
@@ -160,6 +160,7 @@ Not started:
 - Production hosted, HTTP, or queue agent adapter runtime.
 - Hosted service runtime and network API.
 - Production forecast use of live connector results.
+- Database-backed lifecycle operation store beyond ignored local JSON state, including durable idempotency, leases, operation audit logs, and read models for multi-agent execution.
 - Generated language-specific runtime types remain deferred until pilot/adoption evidence shows they reduce setup friction.
 
 In progress:
@@ -172,7 +173,8 @@ Next:
 2. Keep `transitmethod-100` historical-frequency baseline as the default method until at least 30 comparable resolved outcomes exist for non-baseline selection evidence and 100 comparable resolved outcomes exist for calibration.
 3. During the pilot, use the checked resolve, append, track-record, calibration-status, doctor, and explain readbacks to preserve forecast-before-outcome guarantees and separate implementation evidence from quality claims.
 4. Consider `apply-method-update` only after real campaign evidence, approvals, benchmark evidence, source-policy review, and rollback records make the method-update gate and plan eligible.
-5. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
+5. Design the database-backed lifecycle operation store before broad hosted runtime work: keep forecast records immutable, expose create/update/delete as domain lifecycle operations, and use SQLite/Postgres-style storage only to provide durability, idempotency, leases, and read models.
+6. Revisit one next source runtime, generated runtime types, hosted service boundaries, or stronger methods only when the expansion-readiness gate has evidence to unblock them.
 
 MVP path:
 
@@ -180,6 +182,7 @@ MVP path:
 - Milestones 81-90 should validate that product with real agent/developer use, add local measurement, grow evidence toward claim thresholds, and improve adoption before expanding into hosted or broad private-source runtimes.
 - Milestones 91-102 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, calibration readbacks, a non-effectful method-update gate, a non-effectful update plan, and release-time static coverage for the campaign readbacks without hosted scheduling.
 - Milestones 103-110 turn the Helsinki campaign from checked readbacks into a local pilot that can materialize 100 planned baseline predictions, collect them, resolve and score them, append evidence, report calibration readiness, and pass a launch-readiness gate before any hosted scheduler or default non-baseline method exists.
+- Milestone 111 should define the storage/runtime architecture for real multi-agent execution: a lifecycle operation log, immutable record store, idempotency table, leases, read models, and tombstone/archive rules, starting with local SQLite and leaving Postgres/hosted service implementation behind explicit readiness gates.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -3514,9 +3517,48 @@ Completed outputs:
 - `python3 scripts/ope.py prediction-campaign pilot-readiness --view commands`
 - checked schema/fixture coverage for `spec/fixtures/generated/helsinki-traffic-pilot-readiness/helsinki-traffic-pilot-readiness.generated.json`
 
+## Milestone 111: Lifecycle Operation Store And Database Backend
+
+Status: Completed 2026-06-03.
+
+Goal: define the database-backed runtime architecture OPE needs for real multi-agent repeated predictions while preserving the record/lifecycle-first model. The database must provide durability, idempotency, leases, operation auditability, and queryable read models; it must not turn forecast artifacts into mutable CRUD rows.
+
+Tasks:
+
+- [x] Add a lifecycle operation model that represents effectful work as explicit operations such as `campaign.create_run`, `forecast.create`, `forecast.recalculate`, `question.cancel`, `question.annul`, `resolution.record`, `score.create`, `evidence.append`, `method.apply`, `method.rollback`, `record.archive`, and `record.redact`.
+- [x] Define immutable record storage for forecast questions, evidence packets, forecast artifacts, forecast histories, resolution records, scoring reports, calibration summaries, method-update audit records, and operation receipts.
+- [x] Define idempotency storage keyed by operation type, campaign/run identifiers, caller-provided idempotency key, and source record hashes so agent retries cannot duplicate forecasts, resolutions, scores, or ledger rows.
+- [x] Define lease/lock semantics for due-run creation, resolver execution, ledger append, calibration readback, and method-update application so multiple agents can coordinate without racing.
+- [x] Define read models for campaign status, next due forecast, due resolution jobs, unresolved forecasts, append readiness, calibration status, track-record progress, failed operations, and recovery actions.
+- [x] Define tombstone/archive/redaction records as the replacement for generic delete, preserving audit metadata while allowing privacy or safety cleanup when policy requires it.
+- [x] Specify a local SQLite backend as the first implementation target and a Postgres-compatible schema as the production design target, behind a storage adapter that keeps OPE record semantics independent from the database.
+- [x] Add migration rules from the current ignored `.ope/live` JSON state into the operation store without rewriting historical forecast probabilities or source provenance.
+- [x] Add agent-facing operation preflight/readback commands that show planned writes, blocking guards, idempotency keys, leases, rollback/tombstone behavior, and claim boundaries before mutation.
+- [x] Keep hosted service, network API, OS scheduler, private-source credential storage, and production live-source execution out of scope unless a later readiness gate explicitly unblocks them.
+
+Exit criteria:
+
+- OPE has a documented storage adapter boundary that can run locally with SQLite while preserving the existing fixture and ignored-file workflows.
+- Every effectful operation has a preflight, idempotency rule, operation receipt, and recovery path.
+- Forecast artifacts and histories remain immutable after creation; updates are represented as appended lifecycle records or prospective state changes.
+- Delete-like requests resolve to cancel, annul, archive, tombstone, or redact operations with audit records instead of silent physical deletion.
+- Multi-agent execution has a clear lease model for forecast creation, resolution, scoring, ledger append, and method-update actions.
+
+Expected outputs:
+
+- `spec/lifecycle-operation-store.md`
+- `spec/lifecycle-operation.schema.json`
+- `spec/storage-adapter.md`
+- SQLite schema notes and Postgres compatibility notes.
+- Checked fixtures for create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, and recovery scenarios.
+- CLI/readback surface for inspecting lifecycle operations without requiring a hosted runtime.
+
 ## Open Decisions
 
 - When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
+- When should OPE add a persistent user-selected SQLite database path beyond the checked ephemeral SQLite runtime scenarios?
+- Which lifecycle operations need strict leases versus idempotency-only guards?
+- What retention/redaction policy should distinguish audit-preserving tombstones from rare physical deletion?
 - What is the smallest domain setup contract that remains useful across private operational domains?
 - Which source-manifest and mapping format should agents use for local files, APIs, and databases?
 - How should OPE represent agent-inferred mappings without treating them as verified facts?

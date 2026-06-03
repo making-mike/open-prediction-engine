@@ -71,6 +71,8 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/prediction-campaign-forecast-artifact.md`: checked unresolved campaign forecast artifact using the standard lifecycle contracts.
 - `spec/prediction-campaign-forecast-write.md`: checked non-mutating campaign forecast lifecycle write plan and local-state guard boundary.
 - `spec/prediction-campaign-resume.md`: checked non-mutating campaign resume readback and recovery boundary.
+- `spec/lifecycle-operation-store.md`: checked local SQLite lifecycle operation store, storage adapter boundary, idempotency, leases, read models, and delete replacements for multi-agent execution.
+- `spec/storage-adapter.md`: checked storage adapter responsibilities for ignored JSON compatibility, local SQLite, and Postgres-compatible backends.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.

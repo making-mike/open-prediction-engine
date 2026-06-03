@@ -273,6 +273,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "resolution-scheduler-run.schema.json"
     if name.endswith("resolution-runtime-reliability.generated.json"):
         return spec_root / "resolution-runtime-reliability.schema.json"
+    if name.endswith("lifecycle-operation-store.generated.json"):
+        return spec_root / "lifecycle-operation.schema.json"
     if name.endswith("-domain-setup.generated.json"):
         return spec_root / "domain-setup.schema.json"
     if name.endswith("-source-manifest-build.generated.json"):

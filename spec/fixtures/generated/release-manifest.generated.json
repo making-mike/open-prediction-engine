@@ -25,7 +25,7 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 96,
+    "schemaFileCount": 97,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
@@ -52,6 +52,7 @@
       "spec/forecast-run-summary.schema.json",
       "spec/helsinki-traffic-disturbance-pilot-runbook.schema.json",
       "spec/helsinki-traffic-pilot-readiness.schema.json",
+      "spec/lifecycle-operation.schema.json",
       "spec/live-connector-readiness.schema.json",
       "spec/local-source-runtime.schema.json",
       "spec/local-usage-trace.schema.json",

@@ -100,6 +100,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     resolution_jobs_command = [sys.executable, "scripts/generate_resolution_jobs.py"]
     resolution_scheduler_command = [sys.executable, "scripts/run_resolution_scheduler.py"]
     resolution_runtime_reliability_command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
+    lifecycle_operation_store_command = [sys.executable, "scripts/generate_lifecycle_operation_store.py"]
     transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
     transit_corpus_growth_command = [sys.executable, "scripts/generate_transit_corpus_growth_loop.py"]
     transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
@@ -215,6 +216,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_jobs_command.append("--write")
         resolution_scheduler_command.append("--write")
         resolution_runtime_reliability_command.append("--write")
+        lifecycle_operation_store_command.append("--write")
         transit_forward_run_corpus_command.append("--write")
         transit_corpus_growth_command.append("--write")
         transit_track_record_gate_command.append("--write")
@@ -300,6 +302,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_jobs_command.append("--check")
         resolution_scheduler_command.append("--check")
         resolution_runtime_reliability_command.append("--check")
+        lifecycle_operation_store_command.append("--check")
         transit_forward_run_corpus_command.append("--check")
         transit_corpus_growth_command.append("--check")
         transit_track_record_gate_command.append("--check")
@@ -380,6 +383,7 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         resolution_jobs_command,
         resolution_scheduler_command,
         resolution_runtime_reliability_command,
+        lifecycle_operation_store_command,
         transit_forward_run_corpus_command,
         transit_corpus_growth_command,
         transit_track_record_gate_command,
@@ -839,6 +843,17 @@ def cmd_resolution_scheduler(args: argparse.Namespace) -> None:
 
 def cmd_resolution_runtime_reliability(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_resolution_runtime_reliability.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_lifecycle_operation_store(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_lifecycle_operation_store.py"]
+    if args.scenario:
+        command.extend(["--scenario", args.scenario])
     if args.check:
         command.append("--check")
     if args.write:
@@ -2048,6 +2063,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated resolution runtime reliability fixture",
     )
     resolution_runtime_reliability.set_defaults(func=cmd_resolution_runtime_reliability)
+
+    lifecycle_operation_store = subparsers.add_parser(
+        "lifecycle-operation-store",
+        help="print checked lifecycle operation store and database backend guidance",
+    )
+    lifecycle_operation_store.add_argument(
+        "--scenario",
+        choices=[
+            "create",
+            "retry-idempotent",
+            "lease-conflict",
+            "archive",
+            "redaction",
+            "method-rollback",
+            "recovery",
+        ],
+        help="print one checked SQLite runtime preflight/readback scenario",
+    )
+    lifecycle_operation_store.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated lifecycle operation store drift",
+    )
+    lifecycle_operation_store.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated lifecycle operation store fixture",
+    )
+    lifecycle_operation_store.set_defaults(func=cmd_lifecycle_operation_store)
 
     transit_forward_run_corpus = subparsers.add_parser(
         "transit-forward-run-corpus",

@@ -57,6 +57,8 @@ CHECKS: list[list[str]] = [
     py("scripts/check_resolution_scheduler.py"),
     py("scripts/generate_resolution_runtime_reliability.py", "--check"),
     py("scripts/check_resolution_runtime_reliability.py"),
+    py("scripts/generate_lifecycle_operation_store.py", "--check"),
+    py("scripts/check_lifecycle_operation_store.py"),
     py("scripts/generate_transit_forward_run_corpus.py", "--check"),
     py("scripts/check_transit_forward_run_corpus.py"),
     py("scripts/generate_transit_corpus_growth_loop.py", "--check"),

@@ -88,6 +88,7 @@ The contracts are intentionally record-first:
 - `prediction-campaign-explain.schema.json`: checked pilot readback for next forecast, next resolution, evidence threshold, agent readbacks, sanitized error envelopes, and claim boundary.
 - `helsinki-traffic-disturbance-pilot-runbook.schema.json`: checked local operations runbook for the 100-run Helsinki traffic disturbance pilot, including mini-smoke, operator status, success, and abort criteria.
 - `helsinki-traffic-pilot-readiness.schema.json`: checked local launch-readiness readback for the 100-run Helsinki pilot before effectful local writes.
+- `lifecycle-operation.schema.json`: checked lifecycle operation store readback for database-backed multi-agent execution, idempotency, leases, read models, SQLite scenarios, and delete replacements.
 - `private-setup-adapter-chain-runbook.schema.json`: checked adapter operation sequence and readback guidance for private setup callers.
 - `private-setup-adapter-conformance-matrix.schema.json`: checked conformance examples across private setup adapter operation envelopes.
 - `private-setup-adapter-conformance-summary.schema.json`: compact read surface over private setup adapter conformance.
@@ -161,6 +162,8 @@ The contracts are intentionally record-first:
 - `prediction-campaign-explain.md`: checked repeating campaign pilot explanation readback.
 - `helsinki-traffic-disturbance-pilot-runbook.md`: checked local 100-run Helsinki traffic disturbance pilot operations runbook.
 - `helsinki-traffic-pilot-readiness.md`: checked local launch-readiness gate for the 100-run Helsinki pilot.
+- `lifecycle-operation-store.md`: checked local SQLite lifecycle operation store and multi-agent operation boundary.
+- `storage-adapter.md`: checked storage adapter boundary for ignored JSON compatibility, local SQLite, and Postgres-compatible backends.
 - `repeating-prediction-pilot-runbook.md`: checked local pilot workflow for 100-run and open-ended repeating prediction campaigns.
 - `private-setup-adapter-chain-runbook.md`: checked private setup adapter-chain runbook boundary.
 - `private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix.
