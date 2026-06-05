@@ -53,7 +53,7 @@
     {
       "inputId": "expansionevidence-005",
       "source": "local usage trace",
-      "observedValue": "events=20; forecastCompletionRate=1.0",
+      "observedValue": "events=24; forecastCompletionRate=1.0",
       "threshold": "local deterministic usage signals without hosted telemetry",
       "status": "met",
       "implication": "Local measurement exists, but it is not a substitute for real hosted telemetry or support evidence."
@@ -217,7 +217,7 @@
     {
       "criterionId": "expansioncriterion-001",
       "area": "local MVP adoption",
-      "currentStatus": "quickstart validated; usage events=20",
+      "currentStatus": "quickstart validated; usage events=24",
       "target": "A new developer or agent reaches forecast-1102 card and bundle locally.",
       "ready": true
     },

@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Purpose
 
@@ -23,7 +23,20 @@ The project should advance in this order:
 13. Add an embedded internal OPE API so host software can manage many predictions without exposing raw files or raw SQL.
 14. Add domain and source configuration contracts so agents can set up new prediction domains from approved files, APIs, or databases.
 15. Add background worker coordination only after idempotency, leases, recovery read models, and resource limits are enforced.
-16. Keep hosted service, broader private-source parsing, and stronger methods behind explicit readiness gates.
+16. Harden the embedded runtime so local agents can run it safely without hidden services, raw SQL, or credential leakage.
+17. Publish an agent prediction implementation kit that gives coding agents a prediction manual, question-discovery intake, and the shortest correct path from "this feature needs prediction" to validated OPE records.
+18. Prove the SQLite operation-store semantics map cleanly to a Postgres-compatible backend before making production storage claims.
+19. Add a bounded, approved database source-adapter runtime only after source bindings, credential references, leakage checks, and runtime hardening are stable.
+20. Add optional Open Prediction Protocol provider interoperability only as a transport adapter over OPE records, not as a replacement for OPE engine semantics.
+21. Gate persistent local SQLite paths behind explicit caller approval, allowlisted workspace state paths, and migration/backup/lock checks before any durable local database file is used.
+22. Classify lifecycle operations into strict-lease and idempotency-only guard modes before broadening local worker or hosted runtime behavior.
+23. Gate runtime transport promotion before implementing local HTTP, queue, hosted service, or OPP HTTP provider behavior.
+24. Scope multi-tenant workspace resources, source bindings, operation queues, credential references, and idempotency namespaces before hosted tenant runtime behavior.
+25. Classify universal domain/source fields, domain-specific extension containers, and blocked raw/credential/claim fields before broadening domain setup behavior.
+26. Define scoped opaque credential references for private APIs and databases before any richer private-source runtime resolves secrets.
+27. Define retention, redaction, tombstone, sanitized projection, and physical-delete exception gates before any hosted erasure or broader private-source retention behavior.
+28. Define private `data: auto` source-policy gates before allowing broader private-source discovery, web search, raw SQL, or secret resolution.
+29. Keep hosted service, broader private-source parsing, and stronger methods behind explicit readiness gates.
 
 The roadmap is intentionally contract-first, agent-native, and domain-agnostic. OPE should not start as a generic LLM forecast endpoint or an unbounded web crawler. Weather-logistics is the reference wedge used to prove the standard, not the product's long-term boundary.
 
@@ -153,11 +166,27 @@ Done:
 - The lifecycle operation store now defines and checks a local SQLite runtime boundary for immutable records, operation receipts, idempotency keys, leases, operation audit records, read models, ignored `.ope/live` JSON migration rules, write-local command coverage, and file/database duplicate-prevention compatibility.
 - The embedded internal API now has a checked stable operation surface through `python3 scripts/ope.py internal-api`, plus shared in-process, CLI dry-run, and agent-call wrappers over one `call_internal_api()` function; effectful calls return receipt/readback fields, request/response envelopes stay compact, and HTTP, queue, and hosted service are explicit future transports over the same semantics.
 - The multi-prediction workspace registry now has a checked readback through `python3 scripts/ope.py prediction-workspace-registry`, binding stable prediction, campaign, domain, source-binding, and schedule IDs with owner/caller metadata, lifecycle operation summaries, workspace read models for active, due, blocked, failed, source-health, calibration, and track-record status, audit-backed configuration lifecycle operation definitions for create, update, archive, and redact, per-prediction idempotency namespaces and leases, workspace resource controls, and cross-prediction isolation checks.
+- The background worker runtime now has a checked local readback, bounded dry-run loop, approved ephemeral SQLite commit path, lifecycle-backed control-state readback, and durable local sidecar execution semantics through `python3 scripts/ope.py background-worker`, defining health, pause, resume, drain, shutdown, one-tick, and bounded-loop command semantics, workspace read-model polling, `run_tick` foreground equivalence through the shared internal API, receipt-backed `forecast.create` commits with idempotency keys and lease reserve/release readbacks, pause/resume/drain/shutdown control writes into a worker control read model, host non-interference, heartbeat/shutdown readbacks, operation guards, cancellation/backoff policy, resource limits, blocked operation readbacks, and a non-networked sidecar boundary without starting a daemon or writing persistent state.
+- Lightweight runtime security now has a checked hardening readback through `python3 scripts/ope.py runtime-security`, declaring the stdlib-only dependency budget, module and adapter boundaries, path/symlink/database guards, input and response byte limits, credential-reference-only policy, threat-model notes, blocked examples, and local execution boundary without hidden services, live source fetches, credential storage, or hosted runtime claims.
+- The agent prediction implementation kit now has a checked readback through `python3 scripts/ope.py agent-implementation-kit`, exposing the compact prediction manual, question-discovery intake, forecastable/needs-clarification/blocked/rejected candidate readbacks, mechanical validation reports, first-run source paths, in-process/CLI/agent-call/local MCP/future transport guidance, starter-template descriptors, conformance counts, and disallowed behavior boundaries without creating forecast artifacts or adding a question-discovery-specific forecast path.
+- Postgres compatibility now has a checked storage-semantics readback through `python3 scripts/ope.py postgres-compatibility`, mapping all eight lifecycle operation-store tables, dialect-neutral adapter semantics, all fifteen lifecycle runtime scenarios, SQLite-only assumption guards, and migration/execution boundaries without opening Postgres, running migrations, or making hosted-storage claims.
 - Domain/source setup now has checked `domain-configs` and `source-bindings` readbacks: reusable weather-transit and seaport domain configs, accepted/partial/rejected/blocked source-binding cases, approved local-file/source-adapter/API/database coverage, mapping-confidence/source-quality/leakage/freshness/privacy/outcome-availability pre-forecast checks, setup operation lifecycle mappings, credential-reference-only policy, and adapter boundaries that keep private API/database parsing outside OPE records.
+- Domain/source field policy now has a checked readback through `python3 scripts/ope.py domain-source-field-policy`, classifying universal domain fields, universal source-binding fields, domain-specific extension containers, source-kind credential-reference rules, blocked raw/credential/claim fields, decision cases, and non-mutating no-runtime-types boundaries.
+- Credential reference policy now has a checked readback through `python3 scripts/ope.py credential-reference-policy`, defining opaque caller-owned references, tenant/workspace/source/adapter/source-policy scope, lifecycle and consumer rules, blocked raw token, connection-string, cross-scope, and revoked-reference cases, and a no secret resolution or storage boundary.
+- Retention/redaction policy now has a checked readback through `python3 scripts/ope.py retention-redaction-policy`, defining append-only retention classes, archive tombstones, redaction receipts, sanitized projection rebuilds, physical-delete exception gates, blocked forecast-history deletion, and a no silent or normal-check physical deletion boundary.
+- Private auto-evidence policy now has a checked readback through `python3 scripts/ope.py private-auto-evidence-policy`, defining the private `data: auto` source-policy overlay for source kinds, policy gates, manifest-only API/database boundaries, blocked web search/raw SQL/raw payload cases, and a no private-source read or secret-resolution normal-check boundary.
+- Approved database source-adapter runtime now has a checked readback through `python3 scripts/ope.py database-source-adapter-runtime`, defining a caller-approved database request, sanitized adapter output, eight blocked cases, source-intake/method-gate routing, CLI/internal API/agent-call readbacks, and boundaries that keep production database connections, credentials, raw rows, stack traces, unapproved schema scans, and database-specific forecast paths out of normal checks.
+- Optional OPP provider adapter now has a checked readback through `python3 scripts/ope.py opp-provider-adapter`, defining OPP-style request/response mappings, a local fixture Agent Card, one accepted response bound to existing OPE records, five blocked conformance cases, future endpoint guidance, and boundaries that keep HTTP, SSE, payment, aggregation, hosted service, and network listeners out of normal checks.
+- Persistent SQLite path policy now has a checked readback through `python3 scripts/ope.py persistent-sqlite-policy`, defining caller approval, `.ope/state` allowlisting, traversal and symlink blockers, explicit JSON-state import dry-run, backup-before-migration, lease alignment, stale-lock receipts, and the boundary that normal checks keep using ephemeral SQLite without creating a persistent database.
+- Lifecycle lease policy now has a checked readback through `python3 scripts/ope.py lifecycle-lease-policy`, classifying fourteen lifecycle operations into nine strict-lease operations and five idempotency-only operations, with conflict cases and a boundary that normal checks acquire no leases, write no state, expose no raw lock CRUD, and make no hosted-runtime claims.
+- Runtime transport readiness now has a checked readback through `python3 scripts/ope.py runtime-transport-readiness`, preserving in-process internal API, CLI, `agent-call`, and local MCP stdio as current surfaces while local HTTP, queue, hosted service, and OPP HTTP provider behavior remain deferred behind explicit readiness gates.
+- Workspace tenant isolation now has a checked readback through `python3 scripts/ope.py workspace-tenant-isolation`, layering tenant/workspace scope over the prediction workspace registry with tenant-local resources, operation queues, source bindings, credential scopes, idempotency namespaces, blocked cross-tenant access cases, and a non-mutating boundary before hosted tenant runtime behavior.
 
 Not started:
 
-- Arbitrary private API/database parsing beyond checked setup, local source-builder fixtures, and the approved local-folder runtime.
+- Arbitrary private API parsing and arbitrary database parsing beyond checked setup, local source-builder fixtures, the approved local-folder runtime, and the approved database source-adapter fixture path.
+- Persistent SQLite as the default runtime, normal-check persistent database creation, and automatic ignored-JSON state migration.
+- Raw lock control, lease acquisition during normal checks, and hosted queue coordination beyond checked policy readbacks.
 - Additional setup-aware method classes beyond the current deterministic fixture path.
 - Repeated public transport delay forward runs across enough comparable windows for calibration evidence.
 - Actual supervised 100-run Helsinki traffic-disturbance pilot execution and real outcome collection beyond the checked launch-readiness surfaces.
@@ -167,24 +196,27 @@ Not started:
 - Hosted watch or scheduler runtime beyond the local foreground scheduler.
 - OS scheduler installation.
 - Production hosted, HTTP, or queue agent adapter runtime.
+- Local HTTP listeners, queue runtime, hosted service runtime, and OPP HTTP provider runtime beyond checked readiness-gate readbacks.
 - Hosted service runtime and network API.
+- Hosted tenant runtime, tenant administration APIs, and cross-tenant workspace operations beyond the checked isolation policy readback.
 - Production forecast use of live connector results.
 - Effectful workspace queues beyond the checked stable-ID, read-model, configuration-lifecycle, idempotency, lease, resource-control, and isolation registry readback.
-- Domain/source configuration package that lets agents set up new domains from approved local files, source-adapter outputs, APIs, or databases while preserving source policy, leakage, privacy, and mapping-confidence boundaries.
-- Background local worker loop that runs OPE in-process or as a small sidecar without interfering with the host application, with bounded resource use, cancellation, backoff, and health checks.
-- Lightweight runtime hardening for dependency budget, minimal persistent state, secret redaction, path/database allow-listing, encrypted or isolated credential references, response-size limits, and agent-readable code organization.
+- Explicit local sidecar process command beyond the checked embedded/default sidecar semantics.
+- Direct question-discovery agent-call, HTTP, or queue operations beyond the checked agent implementation kit adapter guidance.
+- OPP HTTP/SSE/payment/aggregation provider runtime beyond the checked optional adapter fixture.
 - Generated language-specific runtime types remain deferred until pilot/adoption evidence shows they reduce setup friction.
 
 In progress:
 
-- Starting post-114 domain/source configuration package work.
+- Post-Milestone 129 open-decision review. The numbered roadmap is checked through Milestone 129; the next work is to select the next narrow roadmap slice from the remaining post-MVP quality-gate, type-generation, and source-manifest/database-manifest open decisions without expanding hosted or live behavior prematurely.
 
 Next:
 
-1. Add domain configuration records for question templates, horizons, resolution criteria, baseline method, accepted source roles, exclusion rules, sample thresholds, and claim boundaries.
-2. Add domain/source configuration contracts for approved local files, source-adapter outputs, APIs, and databases, with mapping confidence, leakage checks, privacy boundaries, and source-policy binding.
-3. Add a lightweight background worker mode only after database idempotency, leases, bounded resource use, cancellation, and recovery read models are checked.
-4. Keep `transitmethod-100` historical-frequency baseline as the default method until comparable evidence, approvals, benchmark evidence, and method-update plans allow stronger methods.
+1. Review the remaining open decisions and choose the next narrow roadmap slice with a clear local, schema-bound boundary.
+2. Decide whether the next slice should advance source-manifest/database-manifest semantics, benchmark/quality-gate semantics, generated runtime types, or public transport calibration evidence.
+3. Keep any future HTTP, OPP provider runtime, hosted service, richer private-source execution, or non-baseline method behavior behind explicit readiness gates.
+4. Keep hosted runtime, arbitrary private API/database parsing, and default network service behavior outside the normal runtime.
+5. Keep `transitmethod-100` historical-frequency baseline as the default method until comparable evidence, approvals, benchmark evidence, and method-update plans allow stronger methods.
 
 MVP path:
 
@@ -193,7 +225,18 @@ MVP path:
 - Milestones 91-102 should make repeated prediction setup easy for agents: one local campaign manifest, one foreground terminal loop, flexible recurrence policy, unique run state, resolver execution, append-only corpus evidence, calibration readbacks, a non-effectful method-update gate, a non-effectful update plan, and release-time static coverage for the campaign readbacks without hosted scheduling.
 - Milestones 103-110 turn the Helsinki campaign from checked readbacks into a local pilot that can materialize 100 planned baseline predictions, collect them, resolve and score them, append evidence, report calibration readiness, and pass a launch-readiness gate before any hosted scheduler or default non-baseline method exists.
 - Milestone 111 defined the storage/runtime architecture for real multi-agent execution: a lifecycle operation log, immutable record store, idempotency table, leases, read models, and tombstone/archive rules, starting with local SQLite and leaving Postgres/hosted service implementation behind explicit readiness gates.
-- Milestones 112-118 should move from checked database architecture to an embedded, database-native, multi-prediction OPE runtime: first migrate current campaign operations into lifecycle operations, then add a stable internal API, multi-prediction registry, domain/source configuration package, background worker loop, and lightweight security hardening.
+- Milestones 112-118 should move from checked database architecture to an embedded, database-native, multi-prediction OPE runtime: first migrate current campaign operations into lifecycle operations, then add a stable internal API, multi-prediction registry, domain/source configuration package, background worker loop, lightweight security hardening, and an agent prediction implementation kit with question discovery.
+- Milestone 119 should prove that the SQLite-first operation store does not bake in SQLite-only semantics before OPE makes stronger storage portability claims.
+- Milestone 120 turned database source bindings into one bounded approved source-adapter runtime, with credentials outside OPE records and query execution behind caller approval.
+- Milestone 121 exposes OPE through Open Prediction Protocol only as an optional provider adapter fixture over OPE's internal API, forecast cards, evidence traces, and lifecycle bundles.
+- Milestone 122 gates persistent SQLite file paths behind explicit caller approval, workspace-state allowlisting, migration dry-runs, backup/lock guards, and normal-check ephemeral runtime boundaries.
+- Milestone 123 classifies lifecycle operation guard modes into strict leases for race-prone writes and idempotency-only guards for retry-safe operations, without letting readbacks acquire leases or expose raw lock controls.
+- Milestone 124 gates runtime transport promotion: local in-process API, CLI, agent-call, and MCP remain current while local HTTP, queue, hosted service, and OPP HTTP provider runtimes stay deferred until checked readiness evidence exists.
+- Milestone 125 defines tenant-scoped workspace isolation for multi-prediction host contexts: resource controls, source bindings, operation queues, credential references, and idempotency namespaces are tenant/workspace-scoped while hosted tenant runtime behavior remains unimplemented.
+- Milestone 126 classifies universal domain and source-binding fields versus domain-specific extensions, with blocked raw/credential/claim/hosted-runtime fields and no generated runtime types.
+- Milestone 127 defines scoped opaque credential references for private API and database source bindings without storing secrets or resolving them in normal checks.
+- Milestone 128 defines retention/redaction policy for append-only records, archive tombstones, redaction receipts, sanitized projection rebuilds, and future physical-delete exception gates without implementing silent deletion or normal-check erasure.
+- Milestone 129 defines the private `data: auto` source-policy overlay for source kinds, required policy gates, manifest-only private API/database paths, and blocked web search, raw SQL, raw payload retention, private-source reads, and secret resolution in normal checks.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -3679,46 +3722,52 @@ Expected outputs:
 
 ## Milestone 116: Background Worker And Sidecar Runtime
 
-Status: Planned.
+Status: Complete.
 
-Goal: run OPE in the background as an embedded worker or small local sidecar so host software can keep operating while predictions are scheduled, resolved, and monitored.
+Goal: run OPE in the background as a bounded embedded worker or small local sidecar so host software can keep operating while predictions are scheduled, resolved, and monitored.
 
 Tasks:
 
-- [ ] Add a bounded worker loop that polls database read models for due forecast, resolution, append, recovery, and maintenance operations.
-- [ ] Use leases, idempotency keys, cancellation flags, and retry/backoff policies for every worker-executed operation.
-- [ ] Add health, pause, resume, drain, shutdown, and one-tick commands.
-- [ ] Keep foreground `run_tick` behavior equivalent to worker behavior for deterministic checks.
-- [ ] Add resource limits for CPU time, wall-clock time, queue size, operation count, output size, and source fetch policy.
-- [ ] Keep OS scheduler installation, hosted workers, and network listeners optional adapters, not default behavior.
+- [x] Add a checked local worker runtime readback over the lifecycle operation store, internal API, and workspace registry.
+- [x] Add a bounded dry-run worker loop that polls database read models for due forecast, resolution, append, recovery, and maintenance operations.
+- [x] Use leases, idempotency keys, cancellation flags, and retry/backoff policies for every checked worker-executed dry-run operation.
+- [x] Add an approved ephemeral SQLite worker commit path that reserves and releases leases, writes operation receipts, and reports idempotency/read-model effects without writing persistent state in normal checks.
+- [x] Add persistent worker control-state read/write semantics for pause, resume, drain, shutdown, and health only through lifecycle operations.
+- [x] Add durable sidecar execution semantics over the checked control state without installing hidden daemons, OS schedulers, hosted workers, or network listeners.
+- [x] Add health, pause, resume, drain, shutdown, and one-tick command readbacks.
+- [x] Keep foreground `run_tick` behavior equivalent to worker behavior for deterministic checks and coding-agent integration examples.
+- [x] Add resource limits for CPU time, wall-clock time, queue size, operation count, output size, and source fetch policy.
+- [x] Keep the first worker local and non-networked by default: no OS scheduler installation, hosted workers, network listeners, hidden daemons, or automatic live-source execution.
+- [x] Add worker readbacks that show which operation would run next, which lease/idempotency guard applies, and why an operation is blocked.
 
 Exit criteria:
 
 - OPE can run one bounded background loop without blocking or interfering with host application workflows.
 - A host can stop, pause, resume, or inspect the worker safely.
 - Worker execution cannot bypass operation preflight, leases, idempotency, or claim boundaries.
+- Normal checks can verify one-tick worker behavior without starting a long-running process or writing persistent local state.
 
 Expected outputs:
 
-- Local worker runtime module.
+- Checked local worker runtime readback module.
 - Worker status and recovery readbacks.
 - One-tick and bounded-loop checks.
 - Sidecar boundary documentation.
 
 ## Milestone 117: Lightweight Security And Runtime Hardening
 
-Status: Planned.
+Status: Complete.
 
 Goal: keep OPE small, secure, and understandable for agents and developers before expanding sources, transports, or hosted runtime.
 
 Tasks:
 
-- [ ] Define a dependency budget and keep the core runtime on the Python standard library where practical.
-- [ ] Separate core lifecycle logic, storage adapters, source adapters, method adapters, and transport adapters into small modules with clear boundaries.
-- [ ] Add path allow-listing, symlink escape checks, database path checks, response-size limits, input-size limits, and sanitized diagnostics to every new runtime surface.
-- [ ] Keep credentials out of OPE records; store only credential references, source policy IDs, and sanitized provenance.
-- [ ] Add threat-model notes for malicious source data, prompt/source injection, path traversal, idempotency replay, lease abuse, oversized responses, and accidental private-data exposure.
-- [ ] Add static and runtime checks that agents can read and run locally without hidden services.
+- [x] Define a dependency budget and keep the core runtime on the Python standard library where practical.
+- [x] Separate core lifecycle logic, storage adapters, source adapters, method adapters, and transport adapters into small modules with clear boundaries.
+- [x] Add path allow-listing, symlink escape checks, database path checks, response-size limits, input-size limits, and sanitized diagnostics to every new runtime surface.
+- [x] Keep credentials out of OPE records; store only credential references, source policy IDs, and sanitized provenance.
+- [x] Add threat-model notes for malicious source data, prompt/source injection, path traversal, idempotency replay, lease abuse, oversized responses, and accidental private-data exposure.
+- [x] Add static and runtime checks that agents can read and run locally without hidden services.
 
 Exit criteria:
 
@@ -3729,54 +3778,506 @@ Exit criteria:
 Expected outputs:
 
 - `spec/runtime-security.md`
-- Dependency and module-boundary checklist.
-- Runtime hardening checks for the embedded API, database adapter, worker, and domain/source setup.
-- Updated contributor and agent implementation guidance.
+- Dependency and module-boundary checklist through `python3 scripts/ope.py runtime-security --view budget` and `--view modules`.
+- Runtime hardening checks for the embedded API, database adapter, worker, and domain/source setup through `python3 scripts/check_runtime_security.py`, `python3 scripts/check_hardening.py`, and `python3 scripts/ope.py runtime-security --check`.
+- Updated contributor and agent implementation guidance through the spec index, fixture index, release manifest smoke check, and roadmap status.
 
-## Milestone 118: Agent Implementation Kit And Conformance
+## Milestone 118: Agent Prediction Implementation Kit And Question Discovery
 
-Status: Planned.
+Status: Complete.
 
-Goal: make it easy for independent agents to implement OPE flows in their own software while preserving the same lifecycle, database, and safety semantics.
+Goal: make it easy for coding agents to add OPE-backed prediction features in host software by turning an app goal and approved source context into candidate forecast contracts, mechanical validation reports, and normal OPE lifecycle records while preserving the same database and safety semantics.
 
 Tasks:
 
-- [ ] Add a compact implementation guide that explains the minimal OPE integration path: configure domain/source, create prediction, start, run tick or worker, read status, resolve, append, score, and inspect calibration.
-- [ ] Add conformance fixtures for embedded API calls, operation receipts, source configuration, multi-prediction registry, worker ticks, and blocked-path examples.
-- [ ] Add adapter examples for in-process use, CLI use, local MCP use, and future HTTP/queue transports over the same internal API.
-- [ ] Add "do not implement" guidance for raw CRUD writes, unbounded background loops, silent deletion, hidden live fetches, credential storage in records, and automatic method upgrades.
-- [ ] Add small starter templates that keep OPE encapsulated from the host application's main business logic.
-- [ ] Keep generated language-specific SDKs deferred until conformance evidence shows agents need them.
+- [x] Add a compact prediction manual that explains the minimal OPE integration path for a coding agent prompted to add a prediction feature: detect the decision under uncertainty, describe the app goal, bind approved sources, discover candidate forecast contracts, validate one or more contracts, create prediction, start, run tick or worker, read forecast card, resolve, append evidence, score, and inspect calibration.
+- [x] Add a question-discovery intake contract that carries app goal, decision to support, approved source references, source roles, forecast-time versus resolution-only evidence, candidate outcome windows, resolution-source hints, safety impact, and optional existing setup/domain hints.
+- [x] Add candidate forecast contract readbacks that can return forecastable, needs-clarification, blocked, and rejected candidates with canonical question wording, output type, close time, resolve time, resolution rule, allowed and forbidden evidence, baseline feasibility, source readiness, method boundary, and claim boundary.
+- [x] Add a mechanical validation report for candidate contracts covering schema validity, future boundary, resolvability, source-policy binding, leakage risk, outcome availability, mapping confidence, baseline feasibility, method eligibility, scoring readiness, calibration-readiness boundary, and blocker explanations.
+- [x] Add a first-run recipe that distinguishes three source paths: approved local files now, sanitized source-adapter output now, and database/API source bindings that wait for a checked runtime.
+- [x] Add conformance fixtures for question-discovery intake, candidate contract readbacks, validation reports, embedded API calls, operation receipts, source configuration, multi-prediction registry, worker ticks, and blocked-path examples.
+- [x] Add adapter examples for in-process use, CLI use, local MCP use, and future HTTP/queue transports over the same internal API.
+- [x] Add "do not implement" guidance for free-form oracle behavior, raw CRUD writes, unbounded background loops, silent deletion, hidden live fetches, credential storage in records, and automatic method upgrades.
+- [x] Add small starter templates that keep OPE encapsulated from the host application's main business logic.
+- [x] Keep OPE's core role clear: caller agents provide app context and may draft intent, while OPE mechanically validates, canonicalizes, routes, forecasts through registered methods, resolves, scores, and calibrates. Optional agent-assisted question drafting must be explicit, labeled, and kept outside default forecast execution.
+- [x] Keep generated language-specific SDKs deferred until conformance evidence shows agents need them.
 
 Exit criteria:
 
 - An agent can add OPE to a host application as an encapsulated internal service without re-learning the full repository.
+- An agent can ask "given this app goal and these approved sources, what forecast contracts are valid?" and receive compact candidate and validation readbacks without requiring a domain to be chosen first.
+- Accepted candidates can route into existing source-intake, source-handoff, setup benchmark, method decision, forecast execution, resolution, scoring, and calibration surfaces without a question-discovery-specific forecast path.
+- Ambiguous, unresolvable, post-outcome, leaky, low-confidence, unsupported-source, or safety-sensitive candidates stop before forecast artifacts are created.
 - Conformance checks catch lifecycle, storage, safety, and claim-boundary drift.
-- OPE remains a standard plus runtime surface, not a one-off application script.
+- Domains remain reusable setup memory and stricter validation templates, not a hard product boundary that prevents agents from trying to forecast from approved data in a new setup.
+- OPE remains a standard plus runtime surface, not a one-off application script or autonomous prediction oracle.
 
 Expected outputs:
 
 - `spec/agent-implementation-kit.md`
-- Conformance fixture pack.
-- Minimal embedded-runtime examples.
-- Updated MCP/agent-call/internal API mapping.
+- `spec/agent-prediction-manual.md`
+- `spec/forecast-question-discovery.md`
+- Candidate forecast contract schema and fixture pack through `spec/agent-implementation-kit.schema.json` and `spec/fixtures/generated/agent-implementation-kit/`.
+- Question-discovery CLI readbacks and internal API, agent-call, local MCP, and future HTTP/queue adapter guidance through `python3 scripts/ope.py agent-implementation-kit --view adapters`.
+- Conformance fixture pack through `python3 scripts/ope.py agent-implementation-kit --view validation`, `--view candidates`, and the generated kit summary.
+- Minimal embedded-runtime examples through `python3 scripts/ope.py agent-implementation-kit --view templates`.
+- Updated local agent implementation guidance through the spec index, fixture index, release manifest smoke check, MVP release-surface check, and roadmap status.
+
+## Milestone 119: Postgres Compatibility Checkpoint
+
+Status: Complete.
+
+Goal: prove that the SQLite-first lifecycle operation store can map to a Postgres-compatible backend without changing OPE record semantics or making hosted-service claims.
+
+Tasks:
+
+- [x] Add a Postgres compatibility document for `operation_receipts`, `operation_idempotency_keys`, `operation_leases`, `ope_records`, `forecast_history_events`, `operation_audit_records`, `evidence_ledger_rows`, and `read_model_rows`.
+- [x] Define the dialect-neutral storage adapter contract for JSON payloads, content hashes, unique idempotency keys, lease acquisition, lease expiry, append-only records, and read-model upserts.
+- [x] Add a SQLite-to-Postgres compatibility matrix for every checked lifecycle scenario: create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, pre-calibration-bind, campaign forecast creation, resolution, scoring, evidence append, method apply/rollback, JSON state import, and recovery.
+- [x] Add checks that detect SQLite-only assumptions such as rowid dependence, loose typing dependence, non-portable upsert behavior, missing timestamp normalization, or JSON query behavior that cannot be represented in Postgres.
+- [x] Keep actual Postgres connection, migrations, hosted storage, and production database operations optional and outside normal checks.
+
+Exit criteria:
+
+- OPE can explain how each lifecycle operation maps from the local SQLite runtime to a Postgres-compatible schema.
+- Postgres compatibility is checked as a storage-semantics claim, not as a hosted-service or production-readiness claim.
+- The SQLite runtime remains the default local agent runtime while Postgres remains the production-compatible target.
+
+Expected outputs:
+
+- `spec/postgres-compatibility.md`
+- Postgres compatibility readback and checker.
+- Updated storage-adapter documentation.
+- Compatibility fixture or generated matrix covering every lifecycle operation-store scenario.
+
+## Milestone 120: Approved Database Source Adapter Runtime
+
+Status: Accepted.
+
+Goal: turn checked database source bindings into one bounded, caller-approved source-adapter runtime path without giving OPE arbitrary database access or storing credentials/raw private rows.
+
+Tasks:
+
+- [x] Define a database source-adapter runtime request that carries a source-binding ID, source role, approved query-manifest reference, credential reference, row/time limits, freshness window, leakage window, and caller approval state.
+- [x] Define the sanitized database adapter output shape that can enter existing source-adapter intake: source manifest, field mapping, provenance summary, source-quality signals, mapping-confidence signals, outcome-availability status, and query-boundary summary.
+- [x] Keep credential values, raw SQL with secrets, raw private rows, stack traces, and unapproved schema scans out of OPE records and agent-visible diagnostics.
+- [x] Add dry-run and blocked cases for missing approval, missing credential reference, unsafe query boundary, oversized result, stale source, leakage risk, missing outcome source, and insufficient comparable history.
+- [x] Add one explicit approved execution path using a controlled local fixture or caller-provided adapter output, while keeping arbitrary private API/database parsing and live production database connections outside normal checks.
+- [x] Route accepted database adapter outputs through existing source-intake, source-handoff, setup benchmark, method decision, and forecast execution gates instead of creating a database-specific forecast path.
+
+Exit criteria:
+
+- A coding agent can use an approved database source binding without inventing its own OPE source records.
+- OPE records show what database source was connected, how it was mapped, what was rejected or unavailable, and whether forecast execution is allowed.
+- Unsafe, unapproved, or low-confidence database cases stop before forecast artifacts are created.
+
+Expected outputs:
+
+- `spec/database-source-adapter-runtime.md`
+- Database source-adapter runtime schema and checked fixtures.
+- Agent-call/internal API readback for database adapter runtime status.
+- Source-intake and method-gate examples for accepted and blocked database adapter outputs.
+
+Completed outputs:
+
+- `spec/database-source-adapter-runtime.schema.json`
+- `spec/database-source-adapter-runtime.md`
+- `scripts/generate_database_source_adapter_runtime.py`
+- `scripts/check_database_source_adapter_runtime.py`
+- checked fixture at `spec/fixtures/generated/database-source-adapter-runtime/ope-database-source-adapter-runtime.generated.json`
+- CLI command `python3 scripts/ope.py database-source-adapter-runtime`
+- internal API operation `database_source_adapter_status`
+- agent-call operation `database_source_adapter_runtime_status`
+- release, schema, hardening, CLI, and normal-check wiring for the runtime boundary
+
+## Milestone 121: Optional Open Prediction Protocol Provider Adapter
+
+Status: Accepted.
+
+Goal: expose OPE through Open Prediction Protocol as an optional provider adapter for external agent interoperability while keeping OPE's internal API and lifecycle records authoritative.
+
+Tasks:
+
+- [x] Define an OPP-to-OPE request mapping from OPP `PredictionRequest` fields to OPE domain config, forecast request, source policy, horizon, output type, and caller identity fields.
+- [x] Define an OPE-to-OPP response mapping from OPE forecast cards and forecast artifacts to OPP `PredictionResponse`, with OPE `forecastId`, `questionId`, evidence-trace ID, lifecycle-bundle ID, score status, and claim boundaries carried through OPP `audit` or `provenance` metadata.
+- [x] Add an OPP Agent Card fixture that advertises only domains, horizons, output types, calibration status, compliance status, and pricing modes that OPE can honestly support.
+- [x] Keep OPP HTTP, SSE, payment, and aggregation behavior as adapter surfaces over OPE's internal API; do not redefine OPE forecast generation, evidence, resolution, scoring, or calibration semantics.
+- [x] Add conformance guidance for the minimal OPP provider surface, while keeping hosted network listeners out of normal OPE checks unless explicitly enabled.
+- [x] Document that OPP is optional interoperability and not a replacement for OPE's schema-bound lifecycle bundles, evidence traces, operation receipts, or claim-boundary gates.
+
+Exit criteria:
+
+- OPE has a clear adapter plan for speaking OPP without weakening OPE records or overclaiming protocol support.
+- External agents can discover the planned OPE provider capabilities and receive a compact forecast response that points back to auditable OPE records.
+- OPE docs remain clear that local MCP stdio is the tested current agent protocol, and OPP/HTTP support is future adapter work until implemented and checked.
+
+Expected outputs:
+
+- `spec/opp-provider-adapter.md`
+- `spec/opp-provider-adapter.schema.json`
+- `spec/fixtures/generated/opp-provider-adapter/ope-opp-provider-adapter.generated.json`
+- `python3 scripts/ope.py opp-provider-adapter`
+- `scripts/generate_opp_provider_adapter.py` and `scripts/check_opp_provider_adapter.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the optional OPP provider-adapter boundary
+
+## Milestone 122: Persistent SQLite Path Policy
+
+Status: Accepted.
+
+Goal: decide when and how OPE may use a user-selected persistent SQLite path beyond checked ephemeral SQLite scenarios, while keeping normal checks ephemeral and making durable local state an explicit opt-in runtime choice.
+
+Tasks:
+
+- [x] Define a persistent SQLite path policy with caller approval, workspace root requirements, `.ope/state` allowlisting, path traversal blockers, symlink escape blockers, and credential-value rejection.
+- [x] Define ready and blocked cases for ephemeral default, approved workspace path, missing approval, outside-workspace path, symlink escape, existing unmigrated JSON state, schema mismatch, missing backup, lock conflict, and read-only filesystem.
+- [x] Define JSON-state migration as explicit `state.import_json` only, with dry-run, backup, receipt, content-hash, source-provenance, and no-history-rewrite requirements.
+- [x] Define backup and lock guards for persistent local writes, including SQLite busy timeout, lifecycle lease alignment, and stale-lock recovery receipts.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks create no persistent database and do not read ignored live state.
+
+Exit criteria:
+
+- OPE can tell agents when a persistent local SQLite path is ready for explicit local write mode and when the agent must stop for safer input.
+- Normal repository checks remain offline, non-mutating, and ephemeral for SQLite runtime validation.
+- Persistent local state is not conflated with hosted runtime, Postgres execution, production database parsing, automatic migration, or stronger forecast-quality claims.
+
+Expected outputs:
+
+- `spec/persistent-sqlite-policy.md`
+- `spec/persistent-sqlite-policy.schema.json`
+- `spec/fixtures/generated/persistent-sqlite-policy/ope-persistent-sqlite-policy.generated.json`
+- `python3 scripts/ope.py persistent-sqlite-policy`
+- `scripts/generate_persistent_sqlite_policy.py` and `scripts/check_persistent_sqlite_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the opt-in persistent SQLite path policy
+
+## Milestone 123: Lifecycle Operation Lease Policy
+
+Status: Accepted.
+
+Goal: decide which lifecycle operations require strict leases and which can rely on idempotency-only guards, while keeping the policy readback non-mutating and avoiding hosted/runtime lock-control claims.
+
+Tasks:
+
+- [x] Define a lifecycle lease policy over the fourteen checked lifecycle operations from the operation store.
+- [x] Mark `campaign.create_run`, `forecast.create`, `resolution.record`, `score.create`, `evidence.append`, `pre_calibration.bind`, `method.apply`, `method.rollback`, and `state.import_json` as strict-lease operations.
+- [x] Mark `forecast.recalculate`, `question.cancel`, `question.annul`, `record.archive`, and `record.redact` as idempotency-only operations.
+- [x] Add conflict and replay cases that show no leases acquired, no operation receipts written, no immutable records written, and sanitized diagnostics only.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks and readbacks acquire no leases, write no state, expose no raw lock CRUD, and make no hosted-runtime or quality claims.
+
+Exit criteria:
+
+- OPE can tell agents which lifecycle writes need strict lease handling before explicit local mutation commands run.
+- Retry-safe lifecycle operations have idempotency-only behavior with safe existing-readback or blocked terminal-state responses.
+- The policy does not implement a hosted queue, Postgres runtime, raw lock-control API, physical delete path, forecast-history rewrite, or stronger forecast-quality claim.
+
+Expected outputs:
+
+- `spec/lifecycle-lease-policy.md`
+- `spec/lifecycle-lease-policy.schema.json`
+- `spec/fixtures/generated/lifecycle-lease-policy/ope-lifecycle-lease-policy.generated.json`
+- `python3 scripts/ope.py lifecycle-lease-policy`
+- `scripts/generate_lifecycle_lease_policy.py` and `scripts/check_lifecycle_lease_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the lifecycle operation lease policy
+
+## Milestone 124: Runtime Transport Readiness Gate
+
+Status: Accepted.
+
+Goal: decide when OPE should introduce local HTTP, queue, hosted service, or OPP HTTP provider runtime behavior beyond current local surfaces, while keeping normal checks non-networked and non-mutating.
+
+Tasks:
+
+- [x] Define current runtime transport surfaces as in-process internal API, CLI, `agent-call`, and local MCP stdio.
+- [x] Define future/deferred surfaces for local HTTP, queue adapter, hosted service runtime, and OPP HTTP provider behavior.
+- [x] Add readiness criteria that distinguish local-readback readiness from hosted or HTTP runtime readiness.
+- [x] Add blocked cases for normal-check HTTP servers, implicit hosted service startup, OPP HTTP endpoint requests, queue workers without readiness, credential values in records, default live fetches, and unbounded background daemons.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks start no listeners, hosted services, queues, OPP HTTP providers, live-fetch defaults, or unbounded background daemons.
+
+Exit criteria:
+
+- OPE can tell agents and contributors that the first embedded runtime remains in-process/CLI/agent-call/local MCP.
+- Local HTTP, queue, hosted service, and OPP HTTP provider behavior remain blocked or deferred until explicit readiness criteria are met.
+- The checked gate does not implement a network listener, hosted service, queue worker, payment settlement, credential storage, production live fetch, or stronger quality claim.
+
+Expected outputs:
+
+- `spec/runtime-transport-readiness.md`
+- `spec/runtime-transport-readiness.schema.json`
+- `spec/fixtures/generated/runtime-transport-readiness/ope-runtime-transport-readiness.generated.json`
+- `python3 scripts/ope.py runtime-transport-readiness`
+- `scripts/generate_runtime_transport_readiness.py` and `scripts/check_runtime_transport_readiness.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the runtime transport readiness gate
+
+## Milestone 125: Workspace Tenant Isolation Policy
+
+Status: Accepted.
+
+Goal: decide how the multi-prediction workspace isolates resources, source bindings, operation queues, credential references, and idempotency namespaces across host application tenants or users while keeping the policy readback non-mutating.
+
+Tasks:
+
+- [x] Define tenant and workspace scope over the checked prediction workspace registry.
+- [x] Add tenant-local workspace bindings with unique prediction IDs, source binding IDs, operation queue refs, idempotency namespace prefixes, resource policies, and credential scopes.
+- [x] Define required scope keys for tenant, workspace, prediction, source binding, and operation idempotency namespace lookup and audit.
+- [x] Add tenant resource controls for active predictions, queued operations, readback bytes, source bindings, and tick runtime budgets.
+- [x] Add queue policies for active, due, blocked, failed, source-health, calibration, and track-record read models that block cross-tenant queue peeks and raw queue CRUD.
+- [x] Add source-binding policies that block cross-tenant raw source reuse, require a new sanitized binding for target tenants, and keep credential values and raw private rows outside OPE records.
+- [x] Add one accepted same-tenant read and blocked cases for cross-tenant prediction reads, cross-workspace source binding reuse, cross-tenant queue peeks, idempotency namespace collisions, foreign credential references, and unaudited admin overrides.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks write no state, implement no hosted tenant runtime, allow no cross-tenant reads, store no credential values or raw private rows, expose no raw CRUD, and make no stronger forecast-quality claims.
+
+Exit criteria:
+
+- OPE can tell agents how tenant/workspace scope should be applied before host software manages multiple tenants or users.
+- Cross-tenant reads, source binding reuse, queue peeks, idempotency namespace collisions, foreign credential references, and unaudited admin overrides have explicit blocked readbacks.
+- The checked policy does not implement hosted multitenancy, tenant admin APIs, raw CRUD, network listeners, credential storage, raw private row storage, cross-tenant queue scans, or quality-claim upgrades.
+
+Expected outputs:
+
+- `spec/workspace-tenant-isolation.md`
+- `spec/workspace-tenant-isolation.schema.json`
+- `spec/fixtures/generated/workspace-tenant-isolation/ope-workspace-tenant-isolation.generated.json`
+- `python3 scripts/ope.py workspace-tenant-isolation`
+- `scripts/generate_workspace_tenant_isolation.py` and `scripts/check_workspace_tenant_isolation.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for tenant-scoped workspace isolation
+
+## Milestone 126: Domain/Source Field Policy
+
+Status: Accepted.
+
+Goal: decide which domain and source-binding fields are universal, which are domain-specific extensions, and which are blocked before OPE broadens private setup behavior, generated runtime types, or richer private-source parsing.
+
+Tasks:
+
+- [x] Define universal domain config fields for identity, question templates, horizons, resolution criteria, baseline method, accepted source roles, exclusion rules, sample thresholds, claim boundaries, and execution boundary.
+- [x] Define universal source-binding fields for identity, binding mode, credential policy, source role bindings, pre-forecast checks, setup operations, configuration input boundary, execution boundary, next action, and summary.
+- [x] Define domain-specific extension-safe fields for question parameters, role vocabulary, role-required fields, resolution prose, exclusion reason codes, horizon labels, baseline thresholds, and source-quality threshold values.
+- [x] Define blocked fields for credential values, raw SQL query text, raw private rows, post-outcome forecast evidence, production quality claims, and hosted runtime flags.
+- [x] Add source-kind field rules for fixture, local-file, source-adapter-output, API, and database bindings, including credential-reference requirements for private API/database bindings while blocking credential values and raw payload storage.
+- [x] Add decision cases for accepted core fields, accepted extension fields, missing required fields, credential values, raw SQL fields, premature quality claims, and resolution-only outcome roles marked as forecast-time evidence.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks write no state, create no forecasts, read no private data, store no credential values, allow no raw SQL, perform no arbitrary private API/database parsing, implement no hosted runtime, generate no runtime types, and make no stronger forecast-quality claims.
+
+Exit criteria:
+
+- OPE can tell agents which domain/source fields must exist for every setup and which values stay inside domain-specific extension containers.
+- Credential values, raw SQL, raw private rows, resolution-only evidence as forecast input, hosted runtime flags, and premature quality claims have explicit blocked readbacks.
+- The checked policy does not execute private sources, create forecast artifacts, generate language-specific runtime types, implement hosted behavior, store credentials, store raw rows, or upgrade quality claims.
+
+Expected outputs:
+
+- `spec/domain-source-field-policy.md`
+- `spec/domain-source-field-policy.schema.json`
+- `spec/fixtures/generated/domain-source-field-policy/ope-domain-source-field-policy.generated.json`
+- `python3 scripts/ope.py domain-source-field-policy`
+- `scripts/generate_domain_source_field_policy.py` and `scripts/check_domain_source_field_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the domain/source field policy
+
+## Milestone 127: Credential Reference Policy
+
+Status: Accepted.
+
+Goal: decide which credential-reference mechanism is acceptable for private APIs and databases without storing secrets in OPE records or resolving them during normal checks.
+
+Tasks:
+
+- [x] Define accepted reference mechanisms for caller secret-store aliases, host runtime secret handles, local operator session references, and public no-credential sources.
+- [x] Define required scope keys for tenant, workspace, source binding, source role, adapter, source kind, source policy, and credential purpose.
+- [x] Define credential lifecycle states for proposed, approved, active, rotation-due, revoked, and redaction-required references.
+- [x] Define consumer rules for private API adapters, database adapters, source-binding validation, runtime readbacks, agent envelopes, and normal checks.
+- [x] Add accepted and blocked policy cases for private API references, database references, public no-credential sources, missing references, raw tokens, password-bearing connection strings, cross-tenant reuse, unscoped references, adapter mismatches, revoked references, and normal-check resolution attempts.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks write no state, store no credential values, print no credential values, resolve no secrets, read no environment secrets, open no database connections, call no APIs, implement no hosted secret manager, and upgrade no quality claims.
+
+Exit criteria:
+
+- Private API and database setup can refer to credentials only through scoped opaque caller-owned references.
+- Raw API tokens, passwords in connection strings, cross-tenant references, unscoped references, adapter mismatches, revoked references, and normal-check secret resolution have explicit blocked readbacks.
+- The checked policy does not implement a secret resolver, secret store, hosted credential manager, database connection, API call, or production private-source runtime.
+
+Expected outputs:
+
+- `spec/credential-reference-policy.md`
+- `spec/credential-reference-policy.schema.json`
+- `spec/fixtures/generated/credential-reference-policy/ope-credential-reference-policy.generated.json`
+- `python3 scripts/ope.py credential-reference-policy`
+- `scripts/generate_credential_reference_policy.py` and `scripts/check_credential_reference_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the credential-reference policy
+
+## Milestone 128: Retention Redaction Policy
+
+Status: Accepted.
+
+Goal: decide how OPE distinguishes audit-preserving tombstones and redaction receipts from rare physical deletion while preserving forecast lifecycle integrity, provenance, idempotency, and private-data boundaries.
+
+Tasks:
+
+- [x] Define retention classes for forecast lifecycle records, evidence traces, source connector results, source-binding configs, credential references, pilot summaries, local usage traces, and operation receipts.
+- [x] Define policy actions for append-only retention, archive tombstones, redaction receipts, sanitized projection rebuilds, and physical-delete exception preflight.
+- [x] Define physical-delete exception gates for erasure basis, tenant/workspace scope, record-class eligibility, legal or safety review, retained audit tombstone, retained redaction receipt, forecast-history integrity, and operator approval.
+- [x] Add decision cases for normal lifecycle retention, inactive prediction archive, private source-detail redaction, credential-like redaction, pilot-summary redaction, usage aggregation, raw connector preview blocking, missing erasure basis, authorized erasure preflight, forecast-history physical-delete blocking, redaction replay, and tombstone read-model rebuild.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks write no state, physically delete no records, allow no silent delete, rewrite no forecast histories, retain no credential values, raw private rows, or raw pilot transcripts, implement no hosted erasure workflow, and upgrade no quality claims.
+
+Exit criteria:
+
+- OPE can tell agents when to retain records, archive with tombstones, redact with receipts, rebuild sanitized projections, or stop for physical-delete exception preflight.
+- Physical deletion is blocked by default and requires every checked gate before any future effectful runtime can attempt it.
+- Forecast lifecycle records are not physically deleted; affected forecasts must become explicitly unscorable rather than silently rewritten if required evidence is removed.
+
+Expected outputs:
+
+- `spec/retention-redaction-policy.md`
+- `spec/retention-redaction-policy.schema.json`
+- `spec/fixtures/generated/retention-redaction-policy/ope-retention-redaction-policy.generated.json`
+- `python3 scripts/ope.py retention-redaction-policy`
+- `scripts/generate_retention_redaction_policy.py` and `scripts/check_retention_redaction_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the retention/redaction policy
+
+## Milestone 129: Private Auto-Evidence Policy
+
+Status: Accepted.
+
+Goal: decide which source-policy boundary governs `data: auto` in private engine setups without allowing broad private-source discovery, web search, secret resolution, raw SQL execution, raw payload retention, or hosted/runtime claims.
+
+Tasks:
+
+- [x] Define private `data: auto` source-kind policy rows for local files, manual mappings, auto-evidence connectors, sanitized source-adapter outputs, database query manifests, private API manifests, manual uploads, and web search.
+- [x] Define required policy gates for domain config, source binding, source policy, tenant/workspace scope, caller approval, credential reference scope, adapter capability, freshness, retention, leakage checks, forecast-before-close timing, and non-effectful normal checks.
+- [x] Add decision cases for approved local files, approved adapter outputs, database query manifests, private API manifests, manual mappings, manual upload blockers, missing credential references, raw SQL, private web search, cross-tenant binding, post-outcome forecast evidence, raw payload retention, and unregistered private connectors.
+- [x] Add schema, fixture, generator, checker, CLI, release manifest, hardening, MVP smoke, docs, roadmap, and decision-log wiring.
+- [x] Preserve the boundary that normal checks read no private sources, resolve no secrets, call no networks, write no state, allow no arbitrary web search, parse no arbitrary private API/database source, execute no raw SQL, retain no raw private payload, treat no post-outcome evidence as forecast evidence, implement no hosted runtime, generate no runtime types, and upgrade no quality claims.
+
+Exit criteria:
+
+- OPE can tell agents which private `data: auto` source kinds are policy-ready, manifest-only, planned, or blocked.
+- Private API and database manifests can describe future runtime boundaries only through scoped credential references, source-policy bindings, freshness, retention, and adapter gates.
+- Broad web search, raw SQL, raw private payload retention, post-outcome forecast evidence, cross-tenant source reuse, and unregistered private connectors have explicit blocked readbacks.
+
+Expected outputs:
+
+- `spec/private-auto-evidence-policy.md`
+- `spec/private-auto-evidence-policy.schema.json`
+- `spec/fixtures/generated/private-auto-evidence-policy/ope-private-auto-evidence-policy.generated.json`
+- `python3 scripts/ope.py private-auto-evidence-policy`
+- `scripts/generate_private_auto_evidence_policy.py` and `scripts/check_private_auto_evidence_policy.py`
+- release, schema, hardening, CLI, documentation, decision-log, and normal-check wiring for the private auto-evidence policy
+
+## Milestone 130: Agent Integration Question Discovery
+
+Status: Accepted.
+
+Goal: give agents one checked surface that validates and ranks forecastable candidate questions from app intent and approved source context.
+
+Tasks:
+
+- [x] Add `agent-integrate` readback with `summary`, `intake`, `candidates`, `validation`, `blocked`, `boundary`, `commands`, and `efficiency` views.
+- [x] Define candidate statuses: `forecastable`, `needs_clarification`, `blocked`, and `rejected`.
+- [x] Validate candidates against future boundary, resolvability, source policy, source roles, leakage, baseline feasibility, and claim boundary.
+- [x] Reuse existing domain/source setup boundaries and normal forecast-card readbacks instead of creating a new forecast path.
+- [x] Add schema, generated fixture, generator, checker, CLI, hardening, release, docs, roadmap, and decision-log wiring.
+
+Exit criteria:
+
+- `python3 scripts/ope.py agent-integrate --view candidates` returns forecastable and non-forecastable candidate contracts with exact reason codes.
+- The Helsinki candidate is forecastable: `Will HSL surface transit exceed the beta delay threshold during morning peak on {service_date}?`
+- Vague questions such as `Will transit be bad next week?` return `needs_clarification`.
+
+Expected outputs:
+
+- `spec/agent-integration.md`
+- `spec/agent-integration.schema.json`
+- `spec/fixtures/generated/agent-integration/ope-agent-integration.generated.json`
+- `python3 scripts/ope.py agent-integrate --view candidates`
+- `scripts/generate_agent_integration.py` and `scripts/check_agent_integration.py`
+
+## Milestone 131: Helsinki Bus Disruption Starter Pack
+
+Status: Accepted.
+
+Goal: provide a reusable starter scenario for agents building Helsinki traffic apps.
+
+Tasks:
+
+- [x] Add `--scenario helsinki_bus_disruption` to `agent-integrate`.
+- [x] Bind required source roles: `weather_forecast`, `historical_delay_baseline`, and `transit_delay_outcome`.
+- [x] Use approved files and sanitized adapter outputs only.
+- [x] Include source readiness, required fields, missing-field blockers, and resolution-only boundaries.
+- [x] Keep HSL outcome evidence resolution-only.
+
+Exit criteria:
+
+- `python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption` returns the ready starter pack.
+- Missing weather, baseline, or outcome source roles produce clear blockers.
+- No private rows, raw credentials, raw SQL, or unapproved live fetches are accepted.
+
+## Milestone 132: Guided First Forecast Path
+
+Status: Accepted.
+
+Goal: let an agent reach a forecast card in no more than three OPE tool calls after approved sources are available.
+
+Tasks:
+
+- [x] Add `python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output`.
+- [x] Reuse the checked source-adapter intake, source handoff, method gate, setup forecast, and normal forecast-card readback boundary.
+- [x] Return `forecastId`, `questionId`, `forecastCardCommand`, and `lifecycleBundleCommand`.
+- [x] Preserve normal claim warnings and the baseline-first method boundary.
+
+Exit criteria:
+
+- Accepted guided case returns a forecast-card read command for `forecast-1102` and `question-1102`.
+- Blocked guided cases do not return forecast IDs or forecast-card commands.
+- Guided output tells the agent exactly what to do next.
+
+## Milestone 133: MCP Agent Integration Tools
+
+Status: Accepted.
+
+Goal: expose the same integration flow through local MCP stdio for agent hosts.
+
+Tasks:
+
+- [x] Add MCP/agent operations `ope_agent_integration_readiness`, `ope_agent_integration_candidates`, and `ope_agent_integration_guided_forecast`.
+- [x] Preserve the same schema-bound readback through transport-neutral agent envelopes.
+- [x] Update protocol map and MCP checks.
+- [x] Keep credential, raw row, raw SQL, hidden live fetch, hosted runtime, and private-source execution boundaries blocked.
+
+Exit criteria:
+
+- MCP and CLI expose equivalent candidate, validation, and guided forecast outputs.
+- MCP tools do not expose credentials, raw source rows, hidden live fetches, hosted runtime behavior, or private-source execution.
+
+## Milestone 134: Agent Incorporation Efficiency Gate
+
+Status: Accepted.
+
+Goal: measure whether OPE is easier than an agent building the forecast workflow itself.
+
+Tasks:
+
+- [x] Add efficiency metrics to the integration readback: OPE tool call count, elapsed local readback time, decisions avoided, forecast-card success status, and blockers encountered.
+- [x] Add local usage trace rows for the Helsinki starter flow.
+- [x] Add release-surface checks that report whether the first-forecast-fast target is met.
+- [x] Keep calibration, quality, hosted, and production-readiness claims blocked below thresholds.
+
+Exit criteria:
+
+- Release surface reports whether the starter flow reaches a forecast-card command in no more than three routine agent tool calls.
+- Usage trace shows why a flow failed, including missing source, ambiguous question, unsafe source, leakage, or unsupported runtime categories.
+- No quality, calibration, hosted, or production-readiness claims are upgraded.
 
 ## Open Decisions
 
-- When should OPE introduce a hosted service runtime beyond local file and CLI surfaces?
-- When should OPE add a persistent user-selected SQLite database path beyond the checked ephemeral SQLite runtime scenarios?
-- Which lifecycle operations need strict leases versus idempotency-only guards?
-- Should pre-calibration be represented as `method.pre_calibrate`, `pre_calibration.bind`, or a subtype of `method.apply`?
-- What is the smallest internal API shape that can manage many predictions without becoming a hosted service too early?
-- Should the first embedded runtime expose only in-process and CLI adapters, or should local HTTP be added once the internal API is stable?
-- How should the multi-prediction workspace isolate resources, source bindings, and operation queues across host application tenants or users?
-- Which domain/source configuration fields are required for every domain, and which remain domain-specific extensions?
-- What credential-reference mechanism is acceptable for private APIs and databases without storing secrets in OPE records?
-- What retention/redaction policy should distinguish audit-preserving tombstones from rare physical deletion?
 - What is the smallest domain setup contract that remains useful across private operational domains?
+- What minimum app-goal, decision, source, and resolution-hint fields are required before OPE can answer "what can be forecasted from these approved sources?"
+- How much candidate question synthesis should OPE core perform from structured inputs and setup templates versus leaving to the caller's agent or an optional labeled helper agent?
+- Should candidate forecast contract confidence be represented separately from source quality and mapping confidence, or derived from those existing gates?
 - Which source-manifest and mapping format should agents use for local files, APIs, and databases?
 - How should OPE represent agent-inferred mappings without treating them as verified facts?
-- Which source-policy contract should govern `data: auto` in private engine setups?
+- What is the smallest approved database query-manifest shape that is useful to coding agents without allowing arbitrary raw SQL execution?
 - Which live public sources are acceptable for the reference weather-logistics setup beyond Open-Meteo fixture replay?
 - Should the first auto-evidence implementation include web search, or only allow-listed APIs and feeds?
 - What minimum benchmark evidence is required before OPE can describe a method as state of the art for a domain?

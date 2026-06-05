@@ -75,6 +75,9 @@ python3 scripts/generate_private_source_adapter_intake_bridge.py --write
 python3 scripts/generate_private_source_kind_selection_examples.py --write
 python3 scripts/generate_private_source_kind_query_matrix.py --write
 python3 scripts/generate_recalculation_history.py --write
+python3 scripts/generate_persistent_sqlite_policy.py --write
+python3 scripts/generate_lifecycle_lease_policy.py --write
+python3 scripts/generate_runtime_transport_readiness.py --write
 python3 scripts/run_agent_forecast.py --write
 python3 scripts/generate_forecast_run_intake_matrix.py --write
 python3 scripts/generate_agent_forecast_runbook.py --write
@@ -195,6 +198,32 @@ The recalculation history generator emits trigger, run, evidence, artifact, feat
 The local forecast pipeline emits provisional request-bound forecast records under `generated/pipeline/`. It rejects blocked requests and does not resolve or score the forecast.
 
 The pipeline resolver emits request-bound resolution, scoring, calibration, and track-record records under `generated/pipeline-resolution/`.
+
+The runtime security generator emits a checked lightweight hardening readback under `generated/runtime-security/`, covering dependency budget, module boundaries, runtime surface controls, credential handling, threat notes, blocked examples, and execution boundary.
+
+The agent implementation kit generator emits a checked prediction-kit readback under `generated/agent-implementation-kit/`, covering the compact manual, question-discovery intake, candidate contracts, validation reports, first-run source paths, adapter guidance, starter templates, and blocked implementation behaviors.
+
+The Postgres compatibility generator emits a checked storage-semantics readback under `generated/postgres-compatibility/`, covering lifecycle table mappings, dialect-neutral adapter semantics, scenario compatibility, SQLite-only assumption guards, migration boundaries, and the no-Postgres-runtime execution boundary.
+
+The database source-adapter runtime generator emits a checked approved-runtime readback under `generated/database-source-adapter-runtime/`, covering one caller-approved fixture path, eight blocked database adapter cases, sanitized adapter output compatibility, source-intake routing, and boundaries that keep production database connections, credential values, raw rows, and DB-specific forecast paths out of normal checks.
+
+The OPP provider adapter generator emits a checked optional interoperability readback under `generated/opp-provider-adapter/`, covering request and response mappings, a local fixture Agent Card, one accepted response bound to existing OPE records, five blocked cases, and a conformance plan that keeps HTTP, SSE, payment, aggregation, hosted service, and network-listener behavior out of normal checks.
+
+The persistent SQLite policy generator emits a checked opt-in path policy under `generated/persistent-sqlite-policy/`, covering caller approval, `.ope/state` allowlisting, blocked path and migration cases, backup/lock guards, and the boundary that normal checks continue using ephemeral SQLite without creating a persistent database.
+
+The lifecycle lease policy generator emits a checked operation guard policy under `generated/lifecycle-lease-policy/`, covering nine strict-lease lifecycle operations, five idempotency-only operations, conflict-case readbacks, and the boundary that normal checks acquire no leases and write no lifecycle state.
+
+The runtime transport readiness generator emits a checked transport gate under `generated/runtime-transport-readiness/`, covering current local in-process/CLI/agent-call/MCP surfaces, deferred local HTTP/queue/hosted/OPP HTTP surfaces, readiness criteria, blocked cases, and the no-network-listener normal-check boundary.
+
+The workspace tenant isolation generator emits a checked tenant-scope policy under `generated/workspace-tenant-isolation/`, covering tenant/workspace bindings, scope keys, resource controls, queue policies, source-binding policies, blocked access cases, and the non-mutating hosted-runtime boundary.
+
+The domain/source field policy generator emits a checked field policy under `generated/domain-source-field-policy/`, covering universal domain fields, universal source-binding fields, domain-specific extension containers, source-kind credential-reference rules, blocked raw/credential/claim fields, and the non-mutating no-runtime-types boundary.
+
+The credential-reference policy generator emits a checked policy under `generated/credential-reference-policy/`, covering opaque caller-owned references, required tenant/workspace/source/adapter scope, lifecycle states, consumer rules, blocked raw secret and cross-scope cases, and boundaries that normal checks do not resolve or store secrets.
+
+The retention/redaction policy generator emits a checked policy under `generated/retention-redaction-policy/`, covering append-only retention, archive tombstones, redaction receipts, sanitized projection rebuilds, physical-delete exception gates, blocked forecast-history deletion, and boundaries that normal checks do not physically delete or mutate records.
+
+The private auto-evidence policy generator emits a checked policy under `generated/private-auto-evidence-policy/`, covering private `data: auto` source kinds, required gates, manifest-only private API/database boundaries, blocked web search/raw SQL/raw payload cases, and boundaries that normal checks do not read private sources or resolve secrets.
 
 The release manifest emits a schema-bound local surface summary at `generated/release-manifest.generated.json`.
 

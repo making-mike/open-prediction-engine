@@ -2,7 +2,7 @@
 
 Status: checked local SQLite runtime.
 
-Last reviewed: 2026-06-03.
+Last reviewed: 2026-06-04.
 
 OPE is record/lifecycle-first, not CRUD-first. The lifecycle operation store defines the database-backed runtime shape needed for multi-agent prediction execution while preserving immutable forecast records and append-only histories.
 
@@ -22,6 +22,8 @@ python3 scripts/ope.py lifecycle-operation-store --scenario campaign-evidence-ap
 python3 scripts/ope.py lifecycle-operation-store --scenario json-state-import
 python3 scripts/ope.py lifecycle-operation-store --scenario recovery
 python3 scripts/ope.py lifecycle-operation-store --check
+python3 scripts/ope.py persistent-sqlite-policy
+python3 scripts/ope.py lifecycle-lease-policy
 ```
 
 The default readback runs checked scenarios against an ephemeral SQLite database. It does not create a persistent SQLite file, open Postgres, migrate `.ope/live`, fetch live data, create live forecast artifacts, resolve outcomes, score forecasts in live state, store credentials, or expose raw database CRUD.
@@ -43,6 +45,10 @@ The checked SQLite schema plan covers `operation_receipts`, `operation_idempoten
 ## JSON Compatibility Adapter
 
 Ignored `.ope/live/prediction-campaigns` state remains an explicit compatibility adapter while the database bridge is introduced. Compatibility reads and explicit local writes remain available for existing campaign workflows, but normal checks do not write ignored state and migration is never automatic.
+
+Persistent local database files are gated by `spec/persistent-sqlite-policy.md`. The policy requires caller approval, an allowlisted workspace state path, traversal and symlink blockers, dry-run JSON-state import, backup-before-migration, lease alignment, and stale-lock recovery receipts before a persistent SQLite path is ready for explicit local writes.
+
+Lease requirements are classified by `spec/lifecycle-lease-policy.md`. That readback marks `campaign.create_run`, `forecast.create`, `resolution.record`, `score.create`, `evidence.append`, `pre_calibration.bind`, `method.apply`, `method.rollback`, and `state.import_json` as strict-lease operations, while retry-style operations such as `forecast.recalculate`, cancel/annul, archive, and redact remain idempotency-only. The policy readback itself does not acquire leases or mutate lifecycle state.
 
 The adapter covers forecast lifecycle records, run state, campaign state, evidence ledger rows, method bindings, and method-update audit artifacts. Importing any of those files into SQLite must use an explicit migration operation, preserve source content hashes and forecast probabilities, retain source provenance, and append a migration receipt.
 

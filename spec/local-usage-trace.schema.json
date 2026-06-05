@@ -47,8 +47,8 @@
     },
     "eventLog": {
       "type": "array",
-      "minItems": 20,
-      "maxItems": 20,
+      "minItems": 24,
+      "maxItems": 24,
       "items": { "$ref": "#/$defs/usageEvent" }
     },
     "traceSummary": {
@@ -112,7 +112,8 @@
         "mcp_stdio",
         "claim_gate",
         "validation_pack",
-        "campaign"
+        "campaign",
+        "agent_integration"
       ]
     },
     "outcome": {
@@ -123,7 +124,7 @@
       "oneOf": [
         {
           "type": "string",
-          "enum": ["response_too_large", "blocked_unsafe", "none"]
+          "enum": ["response_too_large", "blocked_unsafe", "missing_source", "none"]
         },
         { "type": "null" }
       ]
@@ -293,7 +294,8 @@
             "agent_forecast_completion_rate",
             "agent_read_success_rate",
             "blocked_path_frequency",
-            "local_only_privacy_rate"
+            "local_only_privacy_rate",
+            "agent_integration_first_forecast_fast"
           ]
         },
         "description": { "$ref": "#/$defs/boundedString" },

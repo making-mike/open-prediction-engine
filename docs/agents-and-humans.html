@@ -462,11 +462,11 @@
       <div class="grid three">
         <article class="card">
           <h3>What OPE does now</h3>
-          <p>It validates contracts, generates checked fixtures, reads forecast cards and bundles, runs local forecast paths, resolves outcomes, scores forecasts, explains recurring campaign state, and exposes agent-readable envelopes.</p>
+          <p>It validates contracts, generates checked fixtures, answers what can be forecasted from approved starter context, reads forecast cards and bundles, runs local forecast paths, resolves outcomes, scores forecasts, explains recurring campaign state, exposes agent-readable envelopes, checks an optional OPP provider-adapter fixture, records an opt-in persistent SQLite path policy, classifies lifecycle lease guards, and gates runtime transport readiness.</p>
         </article>
         <article class="card">
           <h3>What OPE does not claim</h3>
-          <p>It is not a universal prediction oracle, hosted service runtime, unbounded crawler, trust authority, payment layer, or production live-data workflow.</p>
+          <p>It is not a universal prediction oracle, hosted service runtime, default persistent database runtime, OPP HTTP provider, unbounded crawler, trust authority, payment layer, or production live-data workflow.</p>
         </article>
         <article class="card">
           <h3>Reference wedges</h3>
@@ -625,8 +625,44 @@ python3 scripts/ope.py agent-call \
           <span>Checked local quickstart, integration notes, and release-note boundaries.</span>
         </li>
         <li>
+          <strong><a href="../spec/agent-integration.md">agent-integration.md</a></strong>
+          <span>Checked local CLI/MCP golden path for agents asking what can be forecasted.</span>
+        </li>
+        <li>
           <strong><a href="../spec/mvp-local-runtime.md">mvp-local-runtime.md</a></strong>
           <span>Compact runtime runbook, machine interfaces, and smoke checks.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/persistent-sqlite-policy.md">persistent-sqlite-policy.md</a></strong>
+          <span>Checked opt-in local SQLite path policy, migration guards, and normal-check ephemeral boundary.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/lifecycle-lease-policy.md">lifecycle-lease-policy.md</a></strong>
+          <span>Checked strict-lease versus idempotency-only guard policy for lifecycle operations.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/runtime-transport-readiness.md">runtime-transport-readiness.md</a></strong>
+          <span>Checked current local transport surfaces and deferred HTTP, queue, hosted, and OPP provider runtimes.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/workspace-tenant-isolation.md">workspace-tenant-isolation.md</a></strong>
+          <span>Checked tenant-scoped workspace resources, queues, source bindings, credential references, and blocked cross-tenant access.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/domain-source-field-policy.md">domain-source-field-policy.md</a></strong>
+          <span>Checked universal domain/source fields, domain-specific extension containers, source-kind rules, and blocked raw/credential/claim fields.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/credential-reference-policy.md">credential-reference-policy.md</a></strong>
+          <span>Checked opaque credential references, scope, lifecycle, consumer rules, and blocked raw-secret cases.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/retention-redaction-policy.md">retention-redaction-policy.md</a></strong>
+          <span>Checked retention classes, tombstones, redaction receipts, physical-delete gates, and blocked silent deletion.</span>
+        </li>
+        <li>
+          <strong><a href="../spec/private-auto-evidence-policy.md">private-auto-evidence-policy.md</a></strong>
+          <span>Checked private data:auto source-policy gates, source-kind boundaries, and blocked private-source execution.</span>
         </li>
         <li>
           <strong><a href="../spec/repeating-prediction-setup.md">repeating-prediction-setup.md</a></strong>

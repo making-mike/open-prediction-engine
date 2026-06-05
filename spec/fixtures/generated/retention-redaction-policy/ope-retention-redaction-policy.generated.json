@@ -1,0 +1,533 @@
+{
+  "retentionRedactionPolicyId": "retentionredactionpolicy-001",
+  "generatedAt": "2026-06-04T23:58:00Z",
+  "policyStatus": "retention_redaction_policy_checked",
+  "decisionStatus": "tombstones_and_redaction_receipts_default_physical_delete_exception_only",
+  "normalChecksMutateState": false,
+  "physicalDeleteDefaultEnabled": false,
+  "sourceBindings": {
+    "lifecycleOperationStoreStatus": "local_sqlite_runtime_checked",
+    "persistentSqlitePolicyStatus": "persistent_sqlite_path_policy_checked",
+    "runtimeSecurityStatus": "runtime_security_checked",
+    "workspaceTenantIsolationStatus": "workspace_tenant_isolation_checked",
+    "pilotSummaryIntakeStatus": "checked_sanitized_pilot_summary_intake_classifier",
+    "credentialReferencePolicyStatus": "credential_reference_policy_checked",
+    "normalChecksWriteState": false,
+    "physicalDeletesInLifecycleScenarios": 0,
+    "notes": "Policy binds existing lifecycle, storage, security, tenant, pilot, and credential readbacks without executing deletion."
+  },
+  "retentionClasses": [
+    {
+      "recordClass": "forecast_lifecycle_record",
+      "defaultAction": "retain_append_only",
+      "minimumRetention": "indefinite_for_audit_and_scoring",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": true,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Forecast questions, artifacts, histories, resolutions, and scores are append-only evidence."
+    },
+    {
+      "recordClass": "evidence_trace_record",
+      "defaultAction": "retain_append_only",
+      "minimumRetention": "indefinite_for_provenance",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Evidence traces preserve source and connector bindings while keeping raw source payloads out of readbacks."
+    },
+    {
+      "recordClass": "source_connector_result",
+      "defaultAction": "redaction_receipt",
+      "minimumRetention": "metadata_only_until_source_policy_expires",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": true,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Connector records keep metadata, normalized fields, hashes, and provenance rather than raw previews."
+    },
+    {
+      "recordClass": "source_binding_config",
+      "defaultAction": "archive_tombstone",
+      "minimumRetention": "while_prediction_or_workspace_exists",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Source bindings can leave active read models, but audit metadata and tombstones remain."
+    },
+    {
+      "recordClass": "credential_reference_record",
+      "defaultAction": "redaction_receipt",
+      "minimumRetention": "until_reference_revoked_and_audit_receipt_recorded",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Credential records retain only opaque references, scope, lifecycle, and redaction receipts."
+    },
+    {
+      "recordClass": "pilot_session_summary",
+      "defaultAction": "redaction_receipt",
+      "minimumRetention": "sanitized_summary_only_until_pilot_evidence_window_closes",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": true,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Pilot evidence keeps sanitized summaries and blocks raw transcripts or private rows."
+    },
+    {
+      "recordClass": "local_usage_trace_event",
+      "defaultAction": "sanitized_projection_rebuild",
+      "minimumRetention": "aggregate_after_local_metric_window",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": false,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": true,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Usage traces are local-only and can be rolled into aggregate product metrics after the evidence window."
+    },
+    {
+      "recordClass": "operation_receipt",
+      "defaultAction": "retain_append_only",
+      "minimumRetention": "indefinite_for_idempotency_and_audit",
+      "archiveAction": "archive_tombstone",
+      "redactionAction": "redaction_receipt",
+      "physicalDeleteEligible": false,
+      "auditMetadataRetained": true,
+      "rawContentRetained": true,
+      "retainCredentialValues": false,
+      "aggregateOnlyAfterWindow": false,
+      "silentDeleteAllowed": false,
+      "normalChecksWriteState": false,
+      "rationale": "Operation receipts prove what happened, support idempotent retry, and remain audit metadata."
+    }
+  ],
+  "policyActions": [
+    {
+      "actionName": "retain_append_only",
+      "actionStatus": "default_retention",
+      "operationName": "none",
+      "writesAuditTombstone": false,
+      "writesRedactionReceipt": false,
+      "rebuildsSanitizedProjection": false,
+      "requiresAllPhysicalDeleteGates": false,
+      "physicallyDeletesRecords": false,
+      "normalChecksExecuteAction": false,
+      "silentDeleteAllowed": false,
+      "safeNextAction": "keep immutable records and receipts available for scoring, provenance, and retry readbacks"
+    },
+    {
+      "actionName": "archive_tombstone",
+      "actionStatus": "audit_tombstone_append",
+      "operationName": "record.archive",
+      "writesAuditTombstone": true,
+      "writesRedactionReceipt": false,
+      "rebuildsSanitizedProjection": false,
+      "requiresAllPhysicalDeleteGates": false,
+      "physicallyDeletesRecords": false,
+      "normalChecksExecuteAction": false,
+      "silentDeleteAllowed": false,
+      "safeNextAction": "append an archive tombstone and rebuild active read models without deleting records"
+    },
+    {
+      "actionName": "redaction_receipt",
+      "actionStatus": "redaction_receipt_append",
+      "operationName": "record.redact",
+      "writesAuditTombstone": false,
+      "writesRedactionReceipt": true,
+      "rebuildsSanitizedProjection": false,
+      "requiresAllPhysicalDeleteGates": false,
+      "physicallyDeletesRecords": false,
+      "normalChecksExecuteAction": false,
+      "silentDeleteAllowed": false,
+      "safeNextAction": "append a redaction receipt and replace unsafe fields with sanitized projections"
+    },
+    {
+      "actionName": "sanitized_projection_rebuild",
+      "actionStatus": "projection_rebuild",
+      "operationName": "read_model.rebuild",
+      "writesAuditTombstone": false,
+      "writesRedactionReceipt": false,
+      "rebuildsSanitizedProjection": true,
+      "requiresAllPhysicalDeleteGates": false,
+      "physicallyDeletesRecords": false,
+      "normalChecksExecuteAction": false,
+      "silentDeleteAllowed": false,
+      "safeNextAction": "rebuild local read models from retained receipts and sanitized aggregate inputs"
+    },
+    {
+      "actionName": "physical_delete_exception",
+      "actionStatus": "exception_preflight_only",
+      "operationName": "future.physical_delete_exception",
+      "writesAuditTombstone": false,
+      "writesRedactionReceipt": false,
+      "rebuildsSanitizedProjection": false,
+      "requiresAllPhysicalDeleteGates": true,
+      "physicallyDeletesRecords": true,
+      "normalChecksExecuteAction": false,
+      "silentDeleteAllowed": false,
+      "safeNextAction": "require every gate and retain audit tombstone plus redaction receipt before any future delete path"
+    }
+  ],
+  "physicalDeleteGates": [
+    {
+      "gateName": "authorized_erasure_basis",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A recorded legal, safety, or operator-approved erasure basis scoped to the target record.",
+      "failureStatus": "blocked_missing_erasure_basis"
+    },
+    {
+      "gateName": "tenant_workspace_scope_verified",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A tenant and workspace scope match proving the caller can request this exception.",
+      "failureStatus": "blocked_scope_mismatch"
+    },
+    {
+      "gateName": "record_class_allows_physical_delete",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": true,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A record-class policy that allows physical delete exceptions for the target class.",
+      "failureStatus": "blocked_record_class"
+    },
+    {
+      "gateName": "legal_or_safety_review_recorded",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A review receipt explaining why tombstone and redaction are insufficient.",
+      "failureStatus": "blocked_missing_review"
+    },
+    {
+      "gateName": "audit_tombstone_retained",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "An archive tombstone that preserves record identity, scope, reason, actor, and timestamp.",
+      "failureStatus": "blocked_missing_audit_tombstone"
+    },
+    {
+      "gateName": "redaction_receipt_retained",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A redaction receipt that records removed field classes without retaining unsafe values.",
+      "failureStatus": "blocked_missing_redaction_receipt"
+    },
+    {
+      "gateName": "immutable_forecast_history_preserved_or_rendered_unscorable",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": true,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Forecast lifecycle integrity must be preserved, or the affected forecast becomes explicitly unscorable.",
+      "failureStatus": "blocked_forecast_integrity_risk"
+    },
+    {
+      "gateName": "operator_approval_recorded",
+      "gateStatus": "required_exception_gate",
+      "requiredForException": true,
+      "blocksForecastHistory": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "An explicit operator approval receipt for the physical delete exception preflight.",
+      "failureStatus": "blocked_missing_operator_approval"
+    }
+  ],
+  "decisionCases": [
+    {
+      "caseName": "normal_forecast_lifecycle_retention",
+      "caseStatus": "retained_append_only",
+      "recordClass": "forecast_lifecycle_record",
+      "selectedAction": "retain_append_only",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "keep the lifecycle record available for provenance, scoring, and calibration readbacks"
+    },
+    {
+      "caseName": "archive_inactive_prediction",
+      "caseStatus": "archived_with_tombstone",
+      "recordClass": "source_binding_config",
+      "selectedAction": "archive_tombstone",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "append a tombstone and remove the config from active read models"
+    },
+    {
+      "caseName": "redact_private_source_detail",
+      "caseStatus": "redaction_required",
+      "recordClass": "source_binding_config",
+      "selectedAction": "redaction_receipt",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "append a redaction receipt and replace unsafe source details with a sanitized summary"
+    },
+    {
+      "caseName": "redact_credential_like_field",
+      "caseStatus": "redaction_required",
+      "recordClass": "credential_reference_record",
+      "selectedAction": "redaction_receipt",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "redact the submitted field and retain only the scoped opaque credential reference"
+    },
+    {
+      "caseName": "pilot_summary_needs_redaction",
+      "caseStatus": "redaction_required",
+      "recordClass": "pilot_session_summary",
+      "selectedAction": "redaction_receipt",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "rewrite the summary without raw transcript, participant identity, private rows, or source details"
+    },
+    {
+      "caseName": "usage_trace_aggregate_only",
+      "caseStatus": "aggregate_projection_only",
+      "recordClass": "local_usage_trace_event",
+      "selectedAction": "sanitized_projection_rebuild",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "rebuild aggregate local metrics and keep no raw prompt, credential, or private row content"
+    },
+    {
+      "caseName": "source_connector_raw_preview_requested",
+      "caseStatus": "blocked_raw_retention",
+      "recordClass": "source_connector_result",
+      "selectedAction": "redaction_receipt",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "store metadata, hashes, and normalized fields only; block raw preview retention"
+    },
+    {
+      "caseName": "physical_delete_missing_legal_basis",
+      "caseStatus": "blocked_missing_gate",
+      "recordClass": "pilot_session_summary",
+      "selectedAction": "physical_delete_exception",
+      "gateCoverage": [
+        "tenant_workspace_scope_verified",
+        "record_class_allows_physical_delete"
+      ],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "fall back to redaction receipt until every physical-delete exception gate is documented"
+    },
+    {
+      "caseName": "physical_delete_with_authorized_erasure",
+      "caseStatus": "exception_preflight_ready",
+      "recordClass": "pilot_session_summary",
+      "selectedAction": "physical_delete_exception",
+      "gateCoverage": [
+        "authorized_erasure_basis",
+        "tenant_workspace_scope_verified",
+        "record_class_allows_physical_delete",
+        "legal_or_safety_review_recorded",
+        "audit_tombstone_retained",
+        "redaction_receipt_retained",
+        "immutable_forecast_history_preserved_or_rendered_unscorable",
+        "operator_approval_recorded"
+      ],
+      "physicallyDeletesRecords": true,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "future effectful runtime may execute only after retaining tombstone and redaction receipts"
+    },
+    {
+      "caseName": "physical_delete_for_forecast_history",
+      "caseStatus": "blocked_record_class",
+      "recordClass": "forecast_lifecycle_record",
+      "selectedAction": "retain_append_only",
+      "gateCoverage": [
+        "record_class_allows_physical_delete"
+      ],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "preserve immutable forecast history or render affected forecasts explicitly unscorable"
+    },
+    {
+      "caseName": "redaction_receipt_replay",
+      "caseStatus": "idempotent_replay",
+      "recordClass": "credential_reference_record",
+      "selectedAction": "redaction_receipt",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "return the existing redaction receipt instead of writing a duplicate receipt"
+    },
+    {
+      "caseName": "tombstone_rebuild_read_model",
+      "caseStatus": "projection_rebuild_only",
+      "recordClass": "source_binding_config",
+      "selectedAction": "sanitized_projection_rebuild",
+      "gateCoverage": [],
+      "physicallyDeletesRecords": false,
+      "normalChecksWriteState": false,
+      "credentialValuesRetained": false,
+      "sanitizedDiagnosticsOnly": true,
+      "auditMetadataRetained": true,
+      "safeNextAction": "rebuild active read models from retained tombstones without changing immutable records"
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py retention-redaction-policy",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Prints this checked retention/redaction policy."
+    },
+    {
+      "readbackSurface": "lifecycle_operation_store",
+      "command": "python3 scripts/ope.py lifecycle-operation-store",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Provides archive, redaction, receipt, and no-physical-delete lifecycle evidence."
+    },
+    {
+      "readbackSurface": "persistent_sqlite_policy",
+      "command": "python3 scripts/ope.py persistent-sqlite-policy",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Keeps physical delete disabled for default and normal-check storage paths."
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Blocks physical delete, credential values, raw SQL, and raw file layout exposure."
+    },
+    {
+      "readbackSurface": "workspace_tenant_isolation",
+      "command": "python3 scripts/ope.py workspace-tenant-isolation",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Scopes any future erasure preflight to tenant and workspace ownership."
+    },
+    {
+      "readbackSurface": "pilot_summary_intake",
+      "command": "python3 scripts/ope.py pilot-summary-intake",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Classifies summaries that need redaction or block raw transcripts and private data."
+    },
+    {
+      "readbackSurface": "credential_reference_policy",
+      "command": "python3 scripts/ope.py credential-reference-policy",
+      "mutatesState": false,
+      "physicallyDeletesRecords": false,
+      "notes": "Requires redaction receipts for unsafe credential-like submissions."
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksPhysicallyDelete": false,
+    "normalChecksWriteState": false,
+    "silentDeleteAllowed": false,
+    "forecastHistoryRewriteAllowed": false,
+    "credentialValuesRetained": false,
+    "rawPrivateRowsRetained": false,
+    "rawPilotTranscriptsRetained": false,
+    "physicalDeleteDefaultEnabled": false,
+    "hostedErasureWorkflowImplemented": false,
+    "qualityClaimsUpgraded": false
+  },
+  "summary": {
+    "retentionClassCount": 8,
+    "policyActionCount": 5,
+    "decisionCaseCount": 12,
+    "physicalDeleteGateCount": 8,
+    "readbackCount": 7,
+    "normalChecksMutateState": false,
+    "physicalDeleteDefaultEnabled": false,
+    "physicalDeleteExceptionCaseCount": 2,
+    "blockedPhysicalDeleteCaseCount": 3
+  },
+  "warnings": [
+    "Archive tombstones and redaction receipts are the default delete replacements for OPE records.",
+    "Rare physical deletion is an exception preflight only and is not implemented as a normal-check or hosted workflow.",
+    "Immutable forecast histories are preserved; if required evidence is removed, affected forecasts must become explicitly unscorable rather than silently rewritten."
+  ]
+}

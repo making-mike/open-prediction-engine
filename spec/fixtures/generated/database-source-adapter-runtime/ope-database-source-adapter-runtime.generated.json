@@ -1,0 +1,770 @@
+{
+  "databaseSourceAdapterRuntimeId": "databasesourceadapterruntime-001",
+  "generatedAt": "2026-06-04T22:10:00Z",
+  "runtimeStatus": "approved_database_source_adapter_runtime_checked",
+  "runtimeScope": "bounded_caller_approved_database_adapter",
+  "normalChecksOffline": true,
+  "sourceBindingId": "sourcebinding-115002",
+  "domainKey": "seaport-berth-availability",
+  "runtimeCases": [
+    {
+      "caseName": "approved_fixture",
+      "caseStatus": "adapter_output_ready",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "sourcemanifest-1501",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 42,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "fieldmapping-1501",
+          "sourceManifestId": "sourcemanifest-1501",
+          "mappingStatus": "confirmed",
+          "mappedFieldCount": 8,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "databaseadapterrun-1501",
+          "contentHashesStored": true,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "pass",
+          "coverageStatus": "pass",
+          "sourceQualityScore": 0.86,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "confirmed",
+          "mappingConfidence": 0.91,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "available_resolution_only",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": true
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": true,
+      "canEnterSourceAdapterIntake": true,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "run_source_adapter_intake"
+    },
+    {
+      "caseName": "missing_approval",
+      "caseStatus": "blocked_missing_approval",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "not_requested"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "missing_approval",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "confirm_caller_approval"
+    },
+    {
+      "caseName": "missing_credential_reference",
+      "caseStatus": "blocked_missing_credential_reference",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "none",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "missing_credential_reference",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "provide_credential_reference"
+    },
+    {
+      "caseName": "unsafe_query_boundary",
+      "caseStatus": "blocked_unsafe_query_boundary",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "unsafe-raw-sql-detected",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "unsafe_query_boundary",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "replace_query_manifest"
+    },
+    {
+      "caseName": "oversized_result",
+      "caseStatus": "blocked_oversized_result",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 10000,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "oversized_result",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "reduce_row_or_time_limits"
+    },
+    {
+      "caseName": "stale_source",
+      "caseStatus": "blocked_stale_source",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 72,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "stale_source",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "refresh_source_within_policy"
+    },
+    {
+      "caseName": "leakage_risk",
+      "caseStatus": "blocked_leakage_risk",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "leakage_risk",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "separate_resolution_evidence"
+    },
+    {
+      "caseName": "missing_outcome_source",
+      "caseStatus": "blocked_missing_outcome_source",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "missing_outcome_source",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "bind_resolution_only_outcome"
+    },
+    {
+      "caseName": "insufficient_comparable_history",
+      "caseStatus": "blocked_insufficient_comparable_history",
+      "runtimeRequest": {
+        "sourceBindingId": "sourcebinding-115002",
+        "sourceRole": "vessel_schedule",
+        "approvedQueryManifestRef": "querymanifest-seaport-vessel-schedule-001",
+        "credentialRef": "credentialref-seaport-readonly-001",
+        "rowLimit": 250,
+        "timeLimitSeconds": 15,
+        "freshnessWindowHours": 12,
+        "leakageWindow": {
+          "forecastCloseTime": "2026-06-12T08:00:00Z",
+          "resolutionEvidenceAfter": "2026-06-12T18:00:00Z"
+        },
+        "callerApprovalStatus": "approved"
+      },
+      "sanitizedAdapterOutput": {
+        "sourceManifest": {
+          "sourceManifestId": "none",
+          "domainSetupId": "domainsetup-002",
+          "domain": "seaport-berth-availability",
+          "sourceRole": "vessel_schedule",
+          "sourceKind": "private_database",
+          "rowCount": 0,
+          "rawRowsIncluded": false
+        },
+        "fieldMapping": {
+          "fieldMappingId": "none",
+          "sourceManifestId": "none",
+          "mappingStatus": "not_created",
+          "mappedFieldCount": 0,
+          "agentInferredFieldsRequireConfirmation": false
+        },
+        "provenanceSummary": {
+          "adapterRunId": "none",
+          "contentHashesStored": false,
+          "credentialValuesIncluded": false,
+          "rawRowsIncluded": false,
+          "stackTraceIncluded": false,
+          "diagnosticsSanitized": true
+        },
+        "sourceQualitySignals": {
+          "freshnessStatus": "not_evaluated",
+          "coverageStatus": "not_evaluated",
+          "sourceQualityScore": 0.0,
+          "minimumSourceQualityScore": 0.75
+        },
+        "mappingConfidenceSignals": {
+          "mappingStatus": "not_evaluated",
+          "mappingConfidence": 0.0,
+          "minimumMappingConfidence": 0.8
+        },
+        "outcomeAvailabilityStatus": {
+          "status": "insufficient_comparable_history",
+          "forecastTimeOutcomeEvidenceAllowed": false,
+          "resolutionSourceBound": false
+        },
+        "queryBoundarySummary": {
+          "queryManifestRef": "blocked",
+          "readOnly": true,
+          "rawSqlIncluded": false,
+          "rawSqlWithSecretsIncluded": false,
+          "unapprovedSchemaScan": false,
+          "rowLimitApplied": true,
+          "timeLimitApplied": true
+        }
+      },
+      "sourceAdapterOutputCompatible": false,
+      "canEnterSourceAdapterIntake": false,
+      "databaseSpecificForecastPathCreated": false,
+      "forecastArtifactsCreated": false,
+      "rawPrivateRowsStored": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "collect_more_history"
+    }
+  ],
+  "routing": {
+    "acceptedOutputRoutesToSourceAdapterIntake": true,
+    "routesToSourceIntake": true,
+    "routesToSourceHandoff": true,
+    "routesToSetupBenchmark": true,
+    "routesToSetupMethodDecision": true,
+    "routesToForecastExecutionGate": true,
+    "databaseSpecificForecastPathCreated": false,
+    "commands": [
+      "python3 scripts/ope.py database-source-adapter-runtime --case approved_fixture",
+      "python3 scripts/ope.py source-adapter-intake --check",
+      "python3 scripts/ope.py source-intake --check",
+      "python3 scripts/ope.py source-handoff --case confirmed_builder_draft",
+      "python3 scripts/ope.py setup-benchmark --check",
+      "python3 scripts/ope.py setup-method --check"
+    ]
+  },
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py database-source-adapter-runtime",
+      "operationName": "database_source_adapter_runtime",
+      "mutatesState": false,
+      "requiresCredentialValues": false
+    },
+    {
+      "readbackSurface": "internal_api",
+      "command": "python3 scripts/ope.py internal-api --operation database_source_adapter_status",
+      "operationName": "database_source_adapter_status",
+      "mutatesState": false,
+      "requiresCredentialValues": false
+    },
+    {
+      "readbackSurface": "agent_call",
+      "command": "python3 scripts/ope.py agent-call --operation database_source_adapter_runtime_status",
+      "operationName": "database_source_adapter_runtime_status",
+      "mutatesState": false,
+      "requiresCredentialValues": false
+    }
+  ],
+  "executionBoundary": {
+    "productionDatabaseConnectionOpened": false,
+    "normalChecksConnectToDatabase": false,
+    "credentialValuesStored": false,
+    "rawSqlWithSecretsAccepted": false,
+    "rawPrivateRowsStored": false,
+    "stackTracesExposed": false,
+    "unapprovedSchemaScansAllowed": false,
+    "arbitraryDatabaseAccessAllowed": false,
+    "forecastArtifactsCreated": false,
+    "scoringRecordsCreated": false,
+    "hostedRuntimeRequired": false
+  },
+  "summary": {
+    "caseCount": 9,
+    "blockedCaseCount": 8,
+    "approvedExecutionPathCount": 1,
+    "sourceAdapterOutputCompatibleCount": 1,
+    "forecastArtifactsCreated": false,
+    "credentialsStored": false
+  },
+  "warnings": [
+    "This runtime readback uses a controlled local fixture and sanitized adapter output, not a production database connection.",
+    "Credential values, raw SQL with secrets, raw private rows, stack traces, and unapproved schema scans remain blocked.",
+    "Accepted database adapter output still routes through source-adapter intake, source intake, source handoff, setup benchmark, method decision, and forecast execution gates."
+  ]
+}

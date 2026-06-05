@@ -1,0 +1,820 @@
+{
+  "agentImplementationKitId": "agentimplementationkit-001",
+  "generatedAt": "2026-06-04T19:15:00Z",
+  "kitStatus": "agent_prediction_implementation_kit_checked",
+  "kitScope": "local_agent_readback_and_templates",
+  "predictionManual": {
+    "manualId": "agentpredictionmanual-001",
+    "manualStatus": "compact_local_manual_checked",
+    "summary": "Shortest checked path from a host app prediction need to OPE forecast, resolution, score, and calibration readbacks.",
+    "steps": [
+      {
+        "stepId": "predictionmanualstep-001",
+        "order": 1,
+        "stepKey": "detect_decision_under_uncertainty",
+        "action": "Confirm the host feature depends on a future uncertain outcome, not a static lookup.",
+        "exampleCommand": "python3 scripts/ope.py agent-implementation-kit --view manual",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-002",
+        "order": 2,
+        "stepKey": "describe_app_goal",
+        "action": "Record the host app goal, user decision, safety impact, and forecast value.",
+        "exampleCommand": "python3 scripts/ope.py agent-implementation-kit --view intake",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-003",
+        "order": 3,
+        "stepKey": "bind_approved_sources",
+        "action": "Bind caller-approved source references, source roles, and source policies before discovery.",
+        "exampleCommand": "python3 scripts/ope.py source-bindings",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-004",
+        "order": 4,
+        "stepKey": "discover_candidate_contracts",
+        "action": "Ask OPE for candidate forecast contracts from the app goal and approved source context.",
+        "exampleCommand": "python3 scripts/ope.py agent-implementation-kit --view candidates",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-005",
+        "order": 5,
+        "stepKey": "validate_candidate_contracts",
+        "action": "Run mechanical validation before any forecast artifact can be created.",
+        "exampleCommand": "python3 scripts/ope.py agent-implementation-kit --view validation",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-006",
+        "order": 6,
+        "stepKey": "create_prediction",
+        "action": "Create the prediction configuration through the internal API and lifecycle receipts.",
+        "exampleCommand": "python3 scripts/ope.py internal-api --operation create_prediction",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-007",
+        "order": 7,
+        "stepKey": "start_prediction",
+        "action": "Start the accepted prediction so normal lifecycle records can be produced.",
+        "exampleCommand": "python3 scripts/ope.py internal-api --operation start_prediction",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": true,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-008",
+        "order": 8,
+        "stepKey": "run_tick_or_worker",
+        "action": "Run one foreground tick or bounded worker loop using the shared internal API semantics.",
+        "exampleCommand": "python3 scripts/ope.py background-worker --view tick",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-009",
+        "order": 9,
+        "stepKey": "read_forecast_card",
+        "action": "Read the compact forecast card for host decision support.",
+        "exampleCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-010",
+        "order": 10,
+        "stepKey": "resolve_outcome",
+        "action": "Resolve due outcomes through checked resolution rules and source policies.",
+        "exampleCommand": "python3 scripts/ope.py resolve-source-handoff",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-011",
+        "order": 11,
+        "stepKey": "append_evidence_and_score",
+        "action": "Append comparable evidence, create scores, and preserve exclusions.",
+        "exampleCommand": "python3 scripts/ope.py prediction-campaign append-ready",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      },
+      {
+        "stepId": "predictionmanualstep-012",
+        "order": 12,
+        "stepKey": "inspect_calibration",
+        "action": "Inspect calibration and track-record gates without making premature quality claims.",
+        "exampleCommand": "python3 scripts/ope.py transit-track-record-gate",
+        "requiresApprovedSources": true,
+        "createsForecastArtifacts": false,
+        "claimBoundaryReminder": "Keep setup, forecast, scoring, and calibration claims tied to checked OPE readbacks."
+      }
+    ]
+  },
+  "questionDiscoveryIntakeContract": {
+    "contractId": "questiondiscoveryintake-001",
+    "contractStatus": "checked_local_intake_contract",
+    "requiredFields": [
+      {
+        "fieldName": "appGoal",
+        "fieldType": "string",
+        "purpose": "What host feature or workflow should the prediction support?",
+        "maxItems": 1,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "decisionToSupport",
+        "fieldType": "string",
+        "purpose": "What user or system decision changes if the forecast is informative?",
+        "maxItems": 1,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "approvedSourceRefs",
+        "fieldType": "array",
+        "purpose": "Caller-approved source references, not credential values.",
+        "maxItems": 8,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "sourceRoles",
+        "fieldType": "array",
+        "purpose": "Forecast-time, resolution-only, historical, or context roles.",
+        "maxItems": 8,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "forecastTimeEvidencePolicy",
+        "fieldType": "string",
+        "purpose": "Evidence allowed before forecast close time.",
+        "maxItems": 1,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "resolutionEvidencePolicy",
+        "fieldType": "string",
+        "purpose": "Evidence allowed only for outcome resolution.",
+        "maxItems": 1,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "candidateOutcomeWindows",
+        "fieldType": "array",
+        "purpose": "Candidate close and resolve windows.",
+        "maxItems": 6,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "resolutionSourceHints",
+        "fieldType": "array",
+        "purpose": "Potential outcome source references and availability notes.",
+        "maxItems": 6,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "safetyImpact",
+        "fieldType": "string",
+        "purpose": "Safety or privacy sensitivity of the host decision.",
+        "maxItems": 1,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      }
+    ],
+    "optionalFields": [
+      "existingSetupId",
+      "domainHint",
+      "methodPreferenceHint"
+    ],
+    "credentialValuesAccepted": false,
+    "rawPrivateRowsAccepted": false,
+    "normalizesToExistingSetupContracts": true,
+    "createsForecastArtifacts": false
+  },
+  "candidateContractReadbacks": [
+    {
+      "candidateId": "candidateforecast-001",
+      "candidateStatus": "forecastable",
+      "canonicalQuestion": "Will morning peak tram delay exceed 10 minutes in the approved service area on 2026-06-12?",
+      "outputType": "binary",
+      "closeTime": "2026-06-12T06:00:00Z",
+      "resolveTime": "2026-06-12T10:00:00Z",
+      "resolutionRule": "Resolve from approved resolution source rows after the outcome window closes.",
+      "allowedEvidence": [
+        "approved forecast-time source bindings",
+        "historical comparable rows before close time",
+        "declared setup context"
+      ],
+      "forbiddenEvidence": [
+        "post-close outcome rows before forecast creation",
+        "raw private rows",
+        "credential values",
+        "unapproved live fetches"
+      ],
+      "baselineFeasible": true,
+      "sourceReadiness": "ready",
+      "methodBoundary": "Baseline-first unless setup benchmark and method gate approve another method.",
+      "claimBoundary": "No quality or calibration claim until comparable resolved evidence reaches thresholds.",
+      "blockerCode": "none",
+      "routesToExistingSurfaces": true,
+      "nextSurfaceCommands": [
+        "source-intake",
+        "setup-benchmark",
+        "setup-method",
+        "setup-forecast",
+        "read forecast-card"
+      ]
+    },
+    {
+      "candidateId": "candidateforecast-002",
+      "candidateStatus": "needs_clarification",
+      "canonicalQuestion": "Will the delivery arrive late next week?",
+      "outputType": "binary",
+      "closeTime": "2026-06-12T06:00:00Z",
+      "resolveTime": "2026-06-12T10:00:00Z",
+      "resolutionRule": "Resolve from approved resolution source rows after the outcome window closes.",
+      "allowedEvidence": [
+        "approved forecast-time source bindings",
+        "historical comparable rows before close time",
+        "declared setup context"
+      ],
+      "forbiddenEvidence": [
+        "post-close outcome rows before forecast creation",
+        "raw private rows",
+        "credential values",
+        "unapproved live fetches"
+      ],
+      "baselineFeasible": true,
+      "sourceReadiness": "partial",
+      "methodBoundary": "Baseline-first unless setup benchmark and method gate approve another method.",
+      "claimBoundary": "No quality or calibration claim until comparable resolved evidence reaches thresholds.",
+      "blockerCode": "ambiguous_resolution_window",
+      "routesToExistingSurfaces": false,
+      "nextSurfaceCommands": [
+        "agent-implementation-kit --view intake"
+      ]
+    },
+    {
+      "candidateId": "candidateforecast-003",
+      "candidateStatus": "blocked",
+      "canonicalQuestion": "Will a private customer churn based on unapproved CRM rows?",
+      "outputType": "binary",
+      "closeTime": "2026-06-12T06:00:00Z",
+      "resolveTime": "2026-06-12T10:00:00Z",
+      "resolutionRule": "Resolve from approved resolution source rows after the outcome window closes.",
+      "allowedEvidence": [
+        "approved forecast-time source bindings",
+        "historical comparable rows before close time",
+        "declared setup context"
+      ],
+      "forbiddenEvidence": [
+        "post-close outcome rows before forecast creation",
+        "raw private rows",
+        "credential values",
+        "unapproved live fetches"
+      ],
+      "baselineFeasible": false,
+      "sourceReadiness": "blocked",
+      "methodBoundary": "Baseline-first unless setup benchmark and method gate approve another method.",
+      "claimBoundary": "No quality or calibration claim until comparable resolved evidence reaches thresholds.",
+      "blockerCode": "source_policy_or_safety_blocker",
+      "routesToExistingSurfaces": false,
+      "nextSurfaceCommands": [
+        "source-bindings",
+        "runtime-security --view boundary"
+      ]
+    },
+    {
+      "candidateId": "candidateforecast-004",
+      "candidateStatus": "rejected",
+      "canonicalQuestion": "Did yesterday's shipment miss its SLA?",
+      "outputType": "binary",
+      "closeTime": "2026-06-12T06:00:00Z",
+      "resolveTime": "2026-06-12T10:00:00Z",
+      "resolutionRule": "Resolve from approved resolution source rows after the outcome window closes.",
+      "allowedEvidence": [
+        "approved forecast-time source bindings",
+        "historical comparable rows before close time",
+        "declared setup context"
+      ],
+      "forbiddenEvidence": [
+        "post-close outcome rows before forecast creation",
+        "raw private rows",
+        "credential values",
+        "unapproved live fetches"
+      ],
+      "baselineFeasible": false,
+      "sourceReadiness": "rejected",
+      "methodBoundary": "Baseline-first unless setup benchmark and method gate approve another method.",
+      "claimBoundary": "No quality or calibration claim until comparable resolved evidence reaches thresholds.",
+      "blockerCode": "post_outcome_or_unresolvable",
+      "routesToExistingSurfaces": false,
+      "nextSurfaceCommands": [
+        "forecast-question-discovery.md"
+      ]
+    }
+  ],
+  "mechanicalValidationReports": [
+    {
+      "validationReportId": "candidatevalidation-001",
+      "candidateId": "candidateforecast-001",
+      "candidateStatus": "forecastable",
+      "checks": [
+        {
+          "checkName": "schema_validity",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "schema_validity is pass for this candidate."
+        },
+        {
+          "checkName": "future_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "future_boundary is pass for this candidate."
+        },
+        {
+          "checkName": "resolvability",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "resolvability is pass for this candidate."
+        },
+        {
+          "checkName": "source_policy_binding",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "source_policy_binding is pass for this candidate."
+        },
+        {
+          "checkName": "leakage_risk",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "leakage_risk is pass for this candidate."
+        },
+        {
+          "checkName": "outcome_availability",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "outcome_availability is pass for this candidate."
+        },
+        {
+          "checkName": "mapping_confidence",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "mapping_confidence is pass for this candidate."
+        },
+        {
+          "checkName": "baseline_feasibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "baseline_feasibility is pass for this candidate."
+        },
+        {
+          "checkName": "method_eligibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "method_eligibility is pass for this candidate."
+        },
+        {
+          "checkName": "scoring_readiness",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "scoring_readiness is pass for this candidate."
+        },
+        {
+          "checkName": "calibration_readiness_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "calibration_readiness_boundary is pass for this candidate."
+        }
+      ],
+      "createsForecastArtifacts": false,
+      "rawSourceDataExposed": false,
+      "nextAction": "route_to_existing_surfaces"
+    },
+    {
+      "validationReportId": "candidatevalidation-002",
+      "candidateId": "candidateforecast-002",
+      "candidateStatus": "needs_clarification",
+      "checks": [
+        {
+          "checkName": "schema_validity",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "schema_validity is pass for this candidate."
+        },
+        {
+          "checkName": "future_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "future_boundary is pass for this candidate."
+        },
+        {
+          "checkName": "resolvability",
+          "checkStatus": "needs_clarification",
+          "blockerCode": "ambiguous_resolution_window",
+          "message": "resolvability is needs_clarification for this candidate."
+        },
+        {
+          "checkName": "source_policy_binding",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "source_policy_binding is pass for this candidate."
+        },
+        {
+          "checkName": "leakage_risk",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "leakage_risk is pass for this candidate."
+        },
+        {
+          "checkName": "outcome_availability",
+          "checkStatus": "needs_clarification",
+          "blockerCode": "ambiguous_resolution_window",
+          "message": "outcome_availability is needs_clarification for this candidate."
+        },
+        {
+          "checkName": "mapping_confidence",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "mapping_confidence is pass for this candidate."
+        },
+        {
+          "checkName": "baseline_feasibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "baseline_feasibility is pass for this candidate."
+        },
+        {
+          "checkName": "method_eligibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "method_eligibility is pass for this candidate."
+        },
+        {
+          "checkName": "scoring_readiness",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "scoring_readiness is pass for this candidate."
+        },
+        {
+          "checkName": "calibration_readiness_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "calibration_readiness_boundary is pass for this candidate."
+        }
+      ],
+      "createsForecastArtifacts": false,
+      "rawSourceDataExposed": false,
+      "nextAction": "stop_before_forecast_artifact"
+    },
+    {
+      "validationReportId": "candidatevalidation-003",
+      "candidateId": "candidateforecast-003",
+      "candidateStatus": "blocked",
+      "checks": [
+        {
+          "checkName": "schema_validity",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "schema_validity is pass for this candidate."
+        },
+        {
+          "checkName": "future_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "future_boundary is pass for this candidate."
+        },
+        {
+          "checkName": "resolvability",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "resolvability is pass for this candidate."
+        },
+        {
+          "checkName": "source_policy_binding",
+          "checkStatus": "blocked",
+          "blockerCode": "source_policy_or_safety_blocker",
+          "message": "source_policy_binding is blocked for this candidate."
+        },
+        {
+          "checkName": "leakage_risk",
+          "checkStatus": "blocked",
+          "blockerCode": "source_policy_or_safety_blocker",
+          "message": "leakage_risk is blocked for this candidate."
+        },
+        {
+          "checkName": "outcome_availability",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "outcome_availability is pass for this candidate."
+        },
+        {
+          "checkName": "mapping_confidence",
+          "checkStatus": "blocked",
+          "blockerCode": "source_policy_or_safety_blocker",
+          "message": "mapping_confidence is blocked for this candidate."
+        },
+        {
+          "checkName": "baseline_feasibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "baseline_feasibility is pass for this candidate."
+        },
+        {
+          "checkName": "method_eligibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "method_eligibility is pass for this candidate."
+        },
+        {
+          "checkName": "scoring_readiness",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "scoring_readiness is pass for this candidate."
+        },
+        {
+          "checkName": "calibration_readiness_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "calibration_readiness_boundary is pass for this candidate."
+        }
+      ],
+      "createsForecastArtifacts": false,
+      "rawSourceDataExposed": false,
+      "nextAction": "stop_before_forecast_artifact"
+    },
+    {
+      "validationReportId": "candidatevalidation-004",
+      "candidateId": "candidateforecast-004",
+      "candidateStatus": "rejected",
+      "checks": [
+        {
+          "checkName": "schema_validity",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "schema_validity is pass for this candidate."
+        },
+        {
+          "checkName": "future_boundary",
+          "checkStatus": "rejected",
+          "blockerCode": "post_outcome_or_unresolvable",
+          "message": "future_boundary is rejected for this candidate."
+        },
+        {
+          "checkName": "resolvability",
+          "checkStatus": "rejected",
+          "blockerCode": "post_outcome_or_unresolvable",
+          "message": "resolvability is rejected for this candidate."
+        },
+        {
+          "checkName": "source_policy_binding",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "source_policy_binding is pass for this candidate."
+        },
+        {
+          "checkName": "leakage_risk",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "leakage_risk is pass for this candidate."
+        },
+        {
+          "checkName": "outcome_availability",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "outcome_availability is pass for this candidate."
+        },
+        {
+          "checkName": "mapping_confidence",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "mapping_confidence is pass for this candidate."
+        },
+        {
+          "checkName": "baseline_feasibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "baseline_feasibility is pass for this candidate."
+        },
+        {
+          "checkName": "method_eligibility",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "method_eligibility is pass for this candidate."
+        },
+        {
+          "checkName": "scoring_readiness",
+          "checkStatus": "rejected",
+          "blockerCode": "post_outcome_or_unresolvable",
+          "message": "scoring_readiness is rejected for this candidate."
+        },
+        {
+          "checkName": "calibration_readiness_boundary",
+          "checkStatus": "pass",
+          "blockerCode": "none",
+          "message": "calibration_readiness_boundary is pass for this candidate."
+        }
+      ],
+      "createsForecastArtifacts": false,
+      "rawSourceDataExposed": false,
+      "nextAction": "stop_before_forecast_artifact"
+    }
+  ],
+  "firstRunSourcePaths": [
+    {
+      "pathKey": "approved_local_files_now",
+      "sourceKind": "local_files",
+      "immediateAction": "run_source_builder",
+      "entryCommand": "python3 scripts/ope.py source-builder",
+      "credentialValuesStored": false,
+      "createsForecastArtifacts": false
+    },
+    {
+      "pathKey": "sanitized_adapter_output_now",
+      "sourceKind": "source_adapter_output",
+      "immediateAction": "run_source_adapter_intake",
+      "entryCommand": "python3 scripts/ope.py source-adapter-intake",
+      "credentialValuesStored": false,
+      "createsForecastArtifacts": false
+    },
+    {
+      "pathKey": "database_or_private_api_waits",
+      "sourceKind": "private_api_or_database",
+      "immediateAction": "wait_for_checked_runtime",
+      "entryCommand": "python3 scripts/ope.py private-source-kind-selection --source-kind private_database",
+      "credentialValuesStored": false,
+      "createsForecastArtifacts": false
+    }
+  ],
+  "adapterReadbacks": [
+    {
+      "adapterName": "in_process",
+      "implementedStatus": "local_embedding_guidance",
+      "exampleCommand": "from scripts.generate_agent_implementation_kit import build_agent_implementation_kit",
+      "sharesInternalApiSemantics": true,
+      "rawSqlExposed": false,
+      "hiddenServiceRequired": false,
+      "notes": "Host apps can embed OPE by calling checked internal operation functions."
+    },
+    {
+      "adapterName": "cli",
+      "implementedStatus": "implemented_local",
+      "exampleCommand": "python3 scripts/ope.py agent-implementation-kit",
+      "sharesInternalApiSemantics": true,
+      "rawSqlExposed": false,
+      "hiddenServiceRequired": false,
+      "notes": "CLI emits compact JSON readbacks."
+    },
+    {
+      "adapterName": "agent_call",
+      "implementedStatus": "local_envelope_guidance",
+      "exampleCommand": "python3 scripts/ope.py agent-call --operation forecast_card --forecast-id forecast-1102 --question-id question-1102",
+      "sharesInternalApiSemantics": true,
+      "rawSqlExposed": false,
+      "hiddenServiceRequired": false,
+      "notes": "Agent-call wrappers should reuse existing read operations and compact envelopes."
+    },
+    {
+      "adapterName": "local_mcp_stdio",
+      "implementedStatus": "local_scaffold_guidance",
+      "exampleCommand": "python3 scripts/ope.py mcp-stdio",
+      "sharesInternalApiSemantics": true,
+      "rawSqlExposed": false,
+      "hiddenServiceRequired": false,
+      "notes": "Local MCP remains a wrapper over the dispatcher."
+    },
+    {
+      "adapterName": "future_http_queue",
+      "implementedStatus": "future_transport_only",
+      "exampleCommand": "spec/agent-adapter-protocol-map.md",
+      "sharesInternalApiSemantics": true,
+      "rawSqlExposed": false,
+      "hiddenServiceRequired": false,
+      "notes": "HTTP and queue transports stay future wrappers."
+    }
+  ],
+  "doNotImplementGuidance": [
+    {
+      "behaviorKey": "free_form_oracle",
+      "allowed": false,
+      "guidance": "Do not let agents produce forecasts without OPE contracts and resolution rules."
+    },
+    {
+      "behaviorKey": "raw_crud_writes",
+      "allowed": false,
+      "guidance": "Do not bypass lifecycle operation receipts, idempotency, leases, or read models."
+    },
+    {
+      "behaviorKey": "unbounded_background_loops",
+      "allowed": false,
+      "guidance": "Do not start long-running loops without explicit bounds and control state."
+    },
+    {
+      "behaviorKey": "silent_deletion",
+      "allowed": false,
+      "guidance": "Use archive tombstones or redaction receipts instead of physical delete."
+    },
+    {
+      "behaviorKey": "hidden_live_fetches",
+      "allowed": false,
+      "guidance": "Do not fetch live sources unless an explicit checked command allows it."
+    },
+    {
+      "behaviorKey": "credential_storage_in_records",
+      "allowed": false,
+      "guidance": "Store credential references, not credential values."
+    },
+    {
+      "behaviorKey": "automatic_method_upgrades",
+      "allowed": false,
+      "guidance": "Do not upgrade methods without benchmark evidence, approvals, and rollback plans."
+    }
+  ],
+  "starterTemplates": [
+    {
+      "templateKey": "embedded_service",
+      "templateName": "Embedded OPE service wrapper",
+      "templatePath": "spec/agent-implementation-kit.md#embedded-service-template",
+      "usesExistingSurfaces": true,
+      "createsHostedService": false,
+      "storesCredentials": false
+    },
+    {
+      "templateKey": "cli_flow",
+      "templateName": "CLI prediction setup flow",
+      "templatePath": "spec/agent-prediction-manual.md#cli-flow-template",
+      "usesExistingSurfaces": true,
+      "createsHostedService": false,
+      "storesCredentials": false
+    },
+    {
+      "templateKey": "mcp_host_wrapper",
+      "templateName": "Local MCP host wrapper",
+      "templatePath": "spec/forecast-question-discovery.md#mcp-host-wrapper-template",
+      "usesExistingSurfaces": true,
+      "createsHostedService": false,
+      "storesCredentials": false
+    }
+  ],
+  "conformanceFixturePack": {
+    "fixturePackId": "agentimplementationkitfixtures-001",
+    "questionDiscoveryIntakeCount": 1,
+    "candidateReadbackCount": 4,
+    "validationReportCount": 4,
+    "embeddedApiCallExampleCount": 2,
+    "operationReceiptExampleCount": 2,
+    "sourceConfigurationExampleCount": 2,
+    "workerTickExampleCount": 1,
+    "blockedPathExampleCount": 4,
+    "normalChecksCreateForecastArtifacts": false
+  },
+  "executionBoundary": {
+    "freeFormOracleAllowed": false,
+    "questionDiscoveryCreatesForecastArtifacts": false,
+    "rawCrudWritesAllowed": false,
+    "unboundedBackgroundLoopsAllowed": false,
+    "silentDeletionAllowed": false,
+    "hiddenLiveFetchAllowed": false,
+    "credentialValuesStored": false,
+    "automaticMethodUpgradeAllowed": false,
+    "hostedRuntimeRequired": false
+  },
+  "summary": {
+    "manualStepCount": 12,
+    "candidateReadbackCount": 4,
+    "validationReportCount": 4,
+    "adapterReadbackCount": 5,
+    "starterTemplateCount": 3
+  },
+  "warnings": [
+    "The implementation kit is guidance and conformance readback, not a new forecast execution path.",
+    "Question discovery never creates forecast artifacts; accepted candidates route to existing OPE lifecycle surfaces.",
+    "Private API and database source execution remains blocked until checked runtimes are added."
+  ]
+}

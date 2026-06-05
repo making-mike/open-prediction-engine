@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/persistent-sqlite-policy.schema.json",
+  "title": "Persistent SQLite Path Policy",
+  "description": "Checked opt-in persistent SQLite path policy and readiness boundary over the local lifecycle operation store.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "persistentSqlitePolicyId",
+    "generatedAt",
+    "policyStatus",
+    "decisionStatus",
+    "normalChecksUseEphemeralSqlite",
+    "persistentSqliteDefaultEnabled",
+    "hostedRuntimeRequired",
+    "pathPolicy",
+    "pathCases",
+    "migrationPolicy",
+    "backupAndLockPolicy",
+    "operationGuards",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "persistentSqlitePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyStatus": { "type": "string", "enum": ["persistent_sqlite_path_policy_checked"] },
+    "decisionStatus": { "type": "string", "enum": ["explicit_opt_in_ready_not_default"] },
+    "normalChecksUseEphemeralSqlite": { "type": "boolean" },
+    "persistentSqliteDefaultEnabled": { "type": "boolean" },
+    "hostedRuntimeRequired": { "type": "boolean" },
+    "pathPolicy": { "$ref": "#/$defs/pathPolicy" },
+    "pathCases": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/pathCase" }
+    },
+    "migrationPolicy": { "$ref": "#/$defs/migrationPolicy" },
+    "backupAndLockPolicy": { "$ref": "#/$defs/backupAndLockPolicy" },
+    "operationGuards": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/operationGuard" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "pathPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pathPolicyStatus",
+        "defaultPathTemplate",
+        "allowedRelativeRoots",
+        "allowedFileExtensions",
+        "workspaceRootRequired",
+        "callerApprovalRequired",
+        "absolutePathRequiresApproval",
+        "pathTraversalBlocked",
+        "symlinkEscapeBlocked",
+        "parentDirectoryCreatedOnlyWithExplicitWrite",
+        "credentialValuesAccepted",
+        "rawSqlPathParametersAllowed",
+        "normalChecksUseEphemeralSqlite"
+      ],
+      "properties": {
+        "pathPolicyStatus": { "type": "string", "enum": ["checked"] },
+        "defaultPathTemplate": { "type": "string", "enum": [".ope/state/{workspaceId}/ope.sqlite3"] },
+        "allowedRelativeRoots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "allowedFileExtensions": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "string", "enum": [".sqlite", ".sqlite3", ".db"] }
+        },
+        "workspaceRootRequired": { "type": "boolean" },
+        "callerApprovalRequired": { "type": "boolean" },
+        "absolutePathRequiresApproval": { "type": "boolean" },
+        "pathTraversalBlocked": { "type": "boolean" },
+        "symlinkEscapeBlocked": { "type": "boolean" },
+        "parentDirectoryCreatedOnlyWithExplicitWrite": { "type": "boolean" },
+        "credentialValuesAccepted": { "type": "boolean" },
+        "rawSqlPathParametersAllowed": { "type": "boolean" },
+        "normalChecksUseEphemeralSqlite": { "type": "boolean" }
+      }
+    },
+    "pathCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "requestedPath",
+        "callerApprovalStatus",
+        "readyForExplicitWrite",
+        "requiresExplicitWriteFlag",
+        "persistentDatabaseCreated",
+        "normalChecksCreatePersistentDatabase",
+        "operationReceiptsWritten",
+        "sanitizedDiagnosticsOnly",
+        "blockedReason",
+        "nextAction"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "ephemeral_default",
+            "approved_workspace_path",
+            "missing_approval",
+            "outside_workspace",
+            "symlink_escape",
+            "existing_unmigrated_json_state",
+            "schema_version_mismatch",
+            "backup_missing",
+            "lock_conflict",
+            "readonly_filesystem"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "ephemeral_runtime_ready",
+            "persistent_path_ready_for_explicit_write",
+            "blocked_missing_approval",
+            "blocked_path_not_allowlisted",
+            "blocked_symlink_escape",
+            "blocked_needs_migration_plan",
+            "blocked_schema_version_mismatch",
+            "blocked_backup_missing",
+            "blocked_lock_conflict",
+            "blocked_readonly_filesystem"
+          ]
+        },
+        "requestedPath": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "callerApprovalStatus": { "type": "string", "enum": ["approved", "not_requested"] },
+        "readyForExplicitWrite": { "type": "boolean" },
+        "requiresExplicitWriteFlag": { "type": "boolean" },
+        "persistentDatabaseCreated": { "type": "boolean" },
+        "normalChecksCreatePersistentDatabase": { "type": "boolean" },
+        "operationReceiptsWritten": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "blockedReason": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "nextAction": {
+          "type": "string",
+          "enum": [
+            "continue_ephemeral_runtime",
+            "run_with_explicit_write_local",
+            "ask_for_persistent_path_approval",
+            "choose_workspace_state_path",
+            "replace_with_real_workspace_path",
+            "run_json_state_import_dry_run",
+            "run_schema_compatibility_check",
+            "create_backup_before_migration",
+            "wait_or_recover_stale_lock",
+            "choose_writable_state_path"
+          ]
+        }
+      }
+    },
+    "migrationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationPolicyStatus",
+        "automaticMigrationAllowed",
+        "migrationOperationName",
+        "dryRunRequiredBeforeWrite",
+        "backupRequiredBeforeWrite",
+        "migrationReceiptRequired",
+        "contentHashesPreserved",
+        "sourceRecordHashesPreserved",
+        "forecastProbabilitiesPreserved",
+        "sourceProvenancePreserved",
+        "historicalForecastRewriteAllowed",
+        "normalChecksRunMigration",
+        "ignoredLiveStateReadByDefault"
+      ],
+      "properties": {
+        "migrationPolicyStatus": { "type": "string", "enum": ["explicit_receipt_backed_import_only"] },
+        "automaticMigrationAllowed": { "type": "boolean" },
+        "migrationOperationName": { "type": "string", "enum": ["state.import_json"] },
+        "dryRunRequiredBeforeWrite": { "type": "boolean" },
+        "backupRequiredBeforeWrite": { "type": "boolean" },
+        "migrationReceiptRequired": { "type": "boolean" },
+        "contentHashesPreserved": { "type": "boolean" },
+        "sourceRecordHashesPreserved": { "type": "boolean" },
+        "forecastProbabilitiesPreserved": { "type": "boolean" },
+        "sourceProvenancePreserved": { "type": "boolean" },
+        "historicalForecastRewriteAllowed": { "type": "boolean" },
+        "normalChecksRunMigration": { "type": "boolean" },
+        "ignoredLiveStateReadByDefault": { "type": "boolean" }
+      }
+    },
+    "backupAndLockPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backupPolicyStatus",
+        "backupBeforeMigrationRequired",
+        "backupPathTemplate",
+        "backupContentHashRequired",
+        "sqliteBusyTimeoutMs",
+        "operationLeaseAlignmentRequired",
+        "staleLockRecoveryRequiresReceipt",
+        "walModeAllowedAfterExplicitWrite",
+        "normalChecksEnableWalMode"
+      ],
+      "properties": {
+        "backupPolicyStatus": { "type": "string", "enum": ["checked_before_effectful_persistence"] },
+        "backupBeforeMigrationRequired": { "type": "boolean" },
+        "backupPathTemplate": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "backupContentHashRequired": { "type": "boolean" },
+        "sqliteBusyTimeoutMs": { "type": "integer", "minimum": 1000, "maximum": 30000 },
+        "operationLeaseAlignmentRequired": { "type": "boolean" },
+        "staleLockRecoveryRequiresReceipt": { "type": "boolean" },
+        "walModeAllowedAfterExplicitWrite": { "type": "boolean" },
+        "normalChecksEnableWalMode": { "type": "boolean" }
+      }
+    },
+    "operationGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationName",
+        "preflightRequired",
+        "idempotencyKeyRequired",
+        "leaseRequired",
+        "operationReceiptRequired",
+        "persistentPathPolicyChecked",
+        "rawSqlExposedToAgents"
+      ],
+      "properties": {
+        "operationName": {
+          "type": "string",
+          "enum": [
+            "campaign.create_run",
+            "forecast.create",
+            "resolution.record",
+            "score.create",
+            "evidence.append",
+            "state.import_json",
+            "method.apply",
+            "method.rollback",
+            "record.archive",
+            "record.redact"
+          ]
+        },
+        "preflightRequired": { "type": "boolean" },
+        "idempotencyKeyRequired": { "type": "boolean" },
+        "leaseRequired": { "type": "boolean" },
+        "operationReceiptRequired": { "type": "boolean" },
+        "persistentPathPolicyChecked": { "type": "boolean" },
+        "rawSqlExposedToAgents": { "type": "boolean" }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackSurface",
+        "command",
+        "operationName",
+        "mutatesState",
+        "createsPersistentDatabase"
+      ],
+      "properties": {
+        "readbackSurface": { "type": "string", "enum": ["cli", "lifecycle_operation_store", "runtime_security"] },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "operationName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "mutatesState": { "type": "boolean" },
+        "createsPersistentDatabase": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistentDatabaseCreatedByDefault",
+        "normalChecksCreatePersistentDatabase",
+        "normalChecksReadIgnoredLiveState",
+        "hostedRuntimeImplemented",
+        "postgresConnectionOpened",
+        "rawSqlExposedToAgents",
+        "credentialValuesStored",
+        "destructiveMigrationAllowed",
+        "physicalDeleteAllowed",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "persistentDatabaseCreatedByDefault": { "type": "boolean" },
+        "normalChecksCreatePersistentDatabase": { "type": "boolean" },
+        "normalChecksReadIgnoredLiveState": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "postgresConnectionOpened": { "type": "boolean" },
+        "rawSqlExposedToAgents": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "destructiveMigrationAllowed": { "type": "boolean" },
+        "physicalDeleteAllowed": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseCount",
+        "blockedCaseCount",
+        "readyCaseCount",
+        "operationGuardCount",
+        "persistentSqliteDefaultEnabled",
+        "normalChecksUseEphemeralSqlite"
+      ],
+      "properties": {
+        "caseCount": { "type": "integer", "minimum": 10, "maximum": 10 },
+        "blockedCaseCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "readyCaseCount": { "type": "integer", "minimum": 2, "maximum": 2 },
+        "operationGuardCount": { "type": "integer", "minimum": 10, "maximum": 10 },
+        "persistentSqliteDefaultEnabled": { "type": "boolean" },
+        "normalChecksUseEphemeralSqlite": { "type": "boolean" }
+      }
+    },
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 260
+    }
+  }
+}

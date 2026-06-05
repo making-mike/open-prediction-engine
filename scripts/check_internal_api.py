@@ -21,7 +21,7 @@ REQUIRED_EFFECTFUL = {
     "redact_record",
 }
 
-REQUIRED_READS = {"read_status", "read_forecast_card", "read_lifecycle_bundle"}
+REQUIRED_READS = {"read_status", "database_source_adapter_status", "read_forecast_card", "read_lifecycle_bundle"}
 
 
 def require(condition: bool, message: str) -> None:
@@ -101,9 +101,9 @@ def main() -> None:
     require(len(compact_response.encode("utf-8")) < 4096, "representative internal API response should stay compact")
 
     summary = api["summary"]
-    require(summary["operationCount"] == 13, "internal API operation count drifted")
+    require(summary["operationCount"] == 14, "internal API operation count drifted")
     require(summary["effectfulOperationCount"] == 10, "internal API effectful count drifted")
-    require(summary["readOnlyOperationCount"] == 3, "internal API read-only count drifted")
+    require(summary["readOnlyOperationCount"] == 4, "internal API read-only count drifted")
     require(summary["allEffectfulOperationsReceiptBacked"] is True, "effectful operations should be receipt-backed")
     require(summary["allEffectfulOperationsIdempotent"] is True, "effectful operations should be idempotent")
     require(summary["allEffectfulOperationsLeaseAware"] is True, "effectful operations should be lease-aware")

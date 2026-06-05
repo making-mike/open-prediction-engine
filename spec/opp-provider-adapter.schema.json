@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/opp-provider-adapter.schema.json",
+  "title": "Optional OPP Provider Adapter",
+  "description": "Checked optional Open Prediction Protocol provider-adapter mapping over authoritative OPE lifecycle records, without implementing hosted HTTP, SSE, payment, or aggregation runtimes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "oppProviderAdapterId",
+    "generatedAt",
+    "providerAdapterStatus",
+    "adapterScope",
+    "normalChecksOffline",
+    "localMcpStdioTested",
+    "httpProviderRuntimeImplemented",
+    "sseStreamingImplemented",
+    "paymentSettlementImplemented",
+    "aggregationImplemented",
+    "hostedServiceRequired",
+    "requestMapping",
+    "responseMapping",
+    "agentCard",
+    "conformanceCases",
+    "conformancePlan",
+    "protocolBoundary",
+    "readbacks",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "oppProviderAdapterId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "providerAdapterStatus": { "type": "string", "enum": ["optional_opp_provider_adapter_checked"] },
+    "adapterScope": { "type": "string", "enum": ["interop_mapping_over_ope_lifecycle_records"] },
+    "normalChecksOffline": { "type": "boolean" },
+    "localMcpStdioTested": { "type": "boolean" },
+    "httpProviderRuntimeImplemented": { "type": "boolean" },
+    "sseStreamingImplemented": { "type": "boolean" },
+    "paymentSettlementImplemented": { "type": "boolean" },
+    "aggregationImplemented": { "type": "boolean" },
+    "hostedServiceRequired": { "type": "boolean" },
+    "requestMapping": { "$ref": "#/$defs/requestMapping" },
+    "responseMapping": { "$ref": "#/$defs/responseMapping" },
+    "agentCard": { "$ref": "#/$defs/agentCard" },
+    "conformanceCases": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/conformanceCase" }
+    },
+    "conformancePlan": { "$ref": "#/$defs/conformancePlan" },
+    "protocolBoundary": { "$ref": "#/$defs/protocolBoundary" },
+    "readbacks": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "requestMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mappingStatus", "mapsToOpeForecastRequest", "createsOpeRecordsDirectly", "mappingRows"],
+      "properties": {
+        "mappingStatus": { "type": "string", "enum": ["checked_mapping_fixture"] },
+        "mapsToOpeForecastRequest": { "type": "boolean" },
+        "createsOpeRecordsDirectly": { "type": "boolean" },
+        "mappingRows": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/requestMappingRow" }
+        }
+      }
+    },
+    "requestMappingRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oppField",
+        "opeMapping",
+        "requiredForFixtureAdapter",
+        "mappingStatus",
+        "rawPromptStored",
+        "credentialValuesAccepted"
+      ],
+      "properties": {
+        "oppField": {
+          "type": "string",
+          "enum": [
+            "predictionRequestId",
+            "marketOrQuestion",
+            "domain",
+            "horizon",
+            "outputType",
+            "sourcePolicy",
+            "callerIdentity",
+            "constraints"
+          ]
+        },
+        "opeMapping": { "$ref": "#/$defs/boundedString" },
+        "requiredForFixtureAdapter": { "type": "boolean" },
+        "mappingStatus": { "type": "string", "enum": ["mapped_to_ope_contract"] },
+        "rawPromptStored": { "type": "boolean" },
+        "credentialValuesAccepted": { "type": "boolean" }
+      }
+    },
+    "responseMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mappingStatus",
+        "mapsFromForecastCard",
+        "mapsFromForecastArtifact",
+        "predictionResponseShape",
+        "auditMetadataChannel",
+        "requiredOpeRecordRefs",
+        "claimBoundaryCarried",
+        "scoreStatusCarried",
+        "rawLifecycleBundleEmbedded"
+      ],
+      "properties": {
+        "mappingStatus": { "type": "string", "enum": ["checked_mapping_fixture"] },
+        "mapsFromForecastCard": { "type": "boolean" },
+        "mapsFromForecastArtifact": { "type": "boolean" },
+        "predictionResponseShape": { "$ref": "#/$defs/boundedString" },
+        "auditMetadataChannel": { "type": "string", "enum": ["audit", "provenance"] },
+        "requiredOpeRecordRefs": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "enum": [
+              "forecastId",
+              "questionId",
+              "evidenceTraceId",
+              "lifecycleBundleId",
+              "forecastCardRecordType",
+              "forecastArtifactRecordType"
+            ]
+          }
+        },
+        "claimBoundaryCarried": { "type": "boolean" },
+        "scoreStatusCarried": { "type": "boolean" },
+        "rawLifecycleBundleEmbedded": { "type": "boolean" }
+      }
+    },
+    "agentCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentCardStatus",
+        "providerId",
+        "providerName",
+        "advertisedRuntime",
+        "httpEndpointAdvertised",
+        "sseEndpointAdvertised",
+        "aggregationAdvertised",
+        "supportedPricingModes",
+        "supportedOutputTypes",
+        "supportedHorizons",
+        "domainCapabilities"
+      ],
+      "properties": {
+        "agentCardStatus": { "type": "string", "enum": ["checked_fixture"] },
+        "providerId": { "type": "string", "enum": ["ope-local-fixture-provider"] },
+        "providerName": { "$ref": "#/$defs/boundedString" },
+        "advertisedRuntime": { "type": "string", "enum": ["local_cli_fixture_only"] },
+        "httpEndpointAdvertised": { "type": "boolean" },
+        "sseEndpointAdvertised": { "type": "boolean" },
+        "aggregationAdvertised": { "type": "boolean" },
+        "supportedPricingModes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "type": "string", "enum": ["free_local_fixture"] }
+        },
+        "supportedOutputTypes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "common.schema.json#/$defs/outputType" }
+        },
+        "supportedHorizons": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "domainCapabilities": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/domainCapability" }
+        }
+      }
+    },
+    "domainCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "supportedHorizons",
+        "supportedOutputTypes",
+        "supportedEvidenceModes",
+        "maturityLabel",
+        "calibrationStatus",
+        "complianceStatus",
+        "liveCalibrationClaimAllowed",
+        "paidProviderRequired"
+      ],
+      "properties": {
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "supportedHorizons": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "supportedOutputTypes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "common.schema.json#/$defs/outputType" }
+        },
+        "supportedEvidenceModes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "maturityLabel": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "calibrationStatus": { "type": "string", "enum": ["below_threshold_no_live_claim"] },
+        "complianceStatus": { "type": "string", "enum": ["policy_boundary_only"] },
+        "liveCalibrationClaimAllowed": { "type": "boolean" },
+        "paidProviderRequired": { "type": "boolean" }
+      }
+    },
+    "conformanceCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "nextAction",
+        "predictionRequest",
+        "forecastArtifactsCreated",
+        "opeRecordsMutated",
+        "usesExistingOpeRecords",
+        "claimBoundaryPreserved",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "accepted_forecast_card",
+            "unsupported_market",
+            "malformed_outcome_spec",
+            "missing_source_policy",
+            "provider_timeout",
+            "response_too_large"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "response_ready",
+            "blocked_unsupported_market",
+            "blocked_malformed_outcome_spec",
+            "blocked_missing_source_policy",
+            "blocked_provider_timeout",
+            "blocked_response_too_large"
+          ]
+        },
+        "nextAction": {
+          "type": "string",
+          "enum": [
+            "return_prediction_response",
+            "choose_supported_domain",
+            "repair_resolution_rule",
+            "provide_source_policy",
+            "retry_or_use_ope_readback",
+            "request_compact_response"
+          ]
+        },
+        "predictionRequest": { "$ref": "#/$defs/predictionRequest" },
+        "opeForecastCard": { "$ref": "#/$defs/opeForecastCard" },
+        "predictionResponse": { "$ref": "#/$defs/predictionResponse" },
+        "blockedReason": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "diagnostic": { "$ref": "#/$defs/diagnostic" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "opeRecordsMutated": { "type": "boolean" },
+        "usesExistingOpeRecords": { "type": "boolean" },
+        "claimBoundaryPreserved": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "predictionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionRequestId",
+        "marketOrQuestion",
+        "domain",
+        "horizon",
+        "outputType",
+        "sourcePolicy",
+        "callerIdentity",
+        "constraints"
+      ],
+      "properties": {
+        "predictionRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "marketOrQuestion": { "$ref": "#/$defs/boundedString" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "sourcePolicy": { "$ref": "#/$defs/oppSourcePolicy" },
+        "callerIdentity": { "$ref": "#/$defs/callerIdentity" },
+        "constraints": { "$ref": "#/$defs/constraints" }
+      }
+    },
+    "oppSourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "sourcePolicyId", "normalChecksOffline"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["fixture", "missing"] },
+        "sourcePolicyId": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "normalChecksOffline": { "type": "boolean" }
+      }
+    },
+    "callerIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["callerId", "credentialValuesIncluded"],
+      "properties": {
+        "callerId": { "$ref": "common.schema.json#/$defs/id" },
+        "credentialValuesIncluded": { "type": "boolean" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxResponseBytes", "requireAuditRefs", "requestedMetadataChannel"],
+      "properties": {
+        "maxResponseBytes": { "type": "integer", "minimum": 256, "maximum": 65536 },
+        "requireAuditRefs": { "type": "boolean" },
+        "requestedMetadataChannel": { "type": "string", "enum": ["audit", "provenance"] }
+      }
+    },
+    "opeForecastCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "questionId",
+        "forecastCardRecordType",
+        "forecastArtifactRecordType",
+        "title",
+        "domain",
+        "horizon",
+        "outputType",
+        "probability",
+        "scoreStatus",
+        "claimBoundary",
+        "evidenceTraceId",
+        "evidenceTraceLinkId",
+        "lifecycleBundleId",
+        "lifecycleBundleLinkId"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastCardRecordType": { "type": "string", "enum": ["forecast-card"] },
+        "forecastArtifactRecordType": { "type": "string", "enum": ["forecast-artifact"] },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "horizon": { "$ref": "common.schema.json#/$defs/horizon" },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scoreStatus": { "type": "string", "enum": ["scored", "unscored"] },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" },
+        "evidenceTraceId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceTraceLinkId": { "$ref": "common.schema.json#/$defs/id" },
+        "lifecycleBundleId": { "$ref": "common.schema.json#/$defs/id" },
+        "lifecycleBundleLinkId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "predictionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predictionResponseId",
+        "predictionRequestId",
+        "providerId",
+        "responseStatus",
+        "outputType",
+        "probability",
+        "scoreStatus",
+        "claimBoundary",
+        "audit"
+      ],
+      "properties": {
+        "predictionResponseId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "providerId": { "type": "string", "enum": ["ope-local-fixture-provider"] },
+        "responseStatus": { "type": "string", "enum": ["prediction_ready"] },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scoreStatus": { "type": "string", "enum": ["scored", "unscored"] },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" },
+        "audit": { "$ref": "#/$defs/responseAudit" }
+      }
+    },
+    "responseAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "questionId",
+        "evidenceTraceId",
+        "evidenceTraceLinkId",
+        "lifecycleBundleId",
+        "lifecycleBundleLinkId",
+        "forecastCardRecordType",
+        "forecastArtifactRecordType",
+        "scoreStatus",
+        "claimBoundary",
+        "responseGeneratedFromExistingOpeRecords",
+        "rawLifecycleBundleEmbedded"
+      ],
+      "properties": {
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceTraceId": { "$ref": "common.schema.json#/$defs/id" },
+        "evidenceTraceLinkId": { "$ref": "common.schema.json#/$defs/id" },
+        "lifecycleBundleId": { "$ref": "common.schema.json#/$defs/id" },
+        "lifecycleBundleLinkId": { "$ref": "common.schema.json#/$defs/id" },
+        "forecastCardRecordType": { "type": "string", "enum": ["forecast-card"] },
+        "forecastArtifactRecordType": { "type": "string", "enum": ["forecast-artifact"] },
+        "scoreStatus": { "type": "string", "enum": ["scored", "unscored"] },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" },
+        "responseGeneratedFromExistingOpeRecords": { "type": "boolean" },
+        "rawLifecycleBundleEmbedded": { "type": "boolean" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "safeForCaller"],
+      "properties": {
+        "code": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "message": { "$ref": "#/$defs/boundedString" },
+        "safeForCaller": { "type": "boolean" }
+      }
+    },
+    "conformancePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimalSurfaceStatus",
+        "normalChecksStartHttpServer",
+        "providerCardChecked",
+        "requestResponseFixturesChecked",
+        "errorFixturesChecked",
+        "requiredFutureEndpoints",
+        "localFixtureCommand",
+        "futureHttpBoundary"
+      ],
+      "properties": {
+        "minimalSurfaceStatus": { "type": "string", "enum": ["plan_checked_no_http_listener"] },
+        "normalChecksStartHttpServer": { "type": "boolean" },
+        "providerCardChecked": { "type": "boolean" },
+        "requestResponseFixturesChecked": { "type": "boolean" },
+        "errorFixturesChecked": { "type": "boolean" },
+        "requiredFutureEndpoints": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "string", "minLength": 6, "maxLength": 80 }
+        },
+        "localFixtureCommand": { "$ref": "#/$defs/boundedString" },
+        "futureHttpBoundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "protocolBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opeRecordsAuthoritative",
+        "oppOptionalInterop",
+        "localMcpStdioCurrentTestedProtocol",
+        "preservesForecastSemantics",
+        "preservesEvidenceSemantics",
+        "preservesResolutionScoringCalibrationSemantics",
+        "oppReplacesOpeLifecycleRecords",
+        "httpRuntimeImplemented",
+        "sseRuntimeImplemented",
+        "paymentSettlementImplemented",
+        "aggregationRuntimeImplemented",
+        "hostedServiceImplemented",
+        "networkListenerStarted",
+        "normalChecksUseNetwork",
+        "rawLifecycleBundleEmbeddedByDefault",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "opeRecordsAuthoritative": { "type": "boolean" },
+        "oppOptionalInterop": { "type": "boolean" },
+        "localMcpStdioCurrentTestedProtocol": { "type": "boolean" },
+        "preservesForecastSemantics": { "type": "boolean" },
+        "preservesEvidenceSemantics": { "type": "boolean" },
+        "preservesResolutionScoringCalibrationSemantics": { "type": "boolean" },
+        "oppReplacesOpeLifecycleRecords": { "type": "boolean" },
+        "httpRuntimeImplemented": { "type": "boolean" },
+        "sseRuntimeImplemented": { "type": "boolean" },
+        "paymentSettlementImplemented": { "type": "boolean" },
+        "aggregationRuntimeImplemented": { "type": "boolean" },
+        "hostedServiceImplemented": { "type": "boolean" },
+        "networkListenerStarted": { "type": "boolean" },
+        "normalChecksUseNetwork": { "type": "boolean" },
+        "rawLifecycleBundleEmbeddedByDefault": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackSurface", "command", "operationName", "mutatesState", "startsNetworkListener"],
+      "properties": {
+        "readbackSurface": { "type": "string", "enum": ["cli", "agent_card", "accepted_response"] },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "operationName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "mutatesState": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestMappingCount",
+        "conformanceCaseCount",
+        "blockedCaseCount",
+        "supportedDomainCount",
+        "httpRuntimeImplemented",
+        "oppReplacesOpeRecords"
+      ],
+      "properties": {
+        "requestMappingCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "conformanceCaseCount": { "type": "integer", "minimum": 6, "maximum": 6 },
+        "blockedCaseCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "supportedDomainCount": { "type": "integer", "minimum": 3, "maximum": 8 },
+        "httpRuntimeImplemented": { "type": "boolean" },
+        "oppReplacesOpeRecords": { "type": "boolean" }
+      }
+    },
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 260
+    }
+  }
+}

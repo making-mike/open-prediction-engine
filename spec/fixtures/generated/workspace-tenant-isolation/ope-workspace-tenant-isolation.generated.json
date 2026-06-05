@@ -1,0 +1,506 @@
+{
+  "workspaceTenantIsolationId": "workspacetenantisolation-001",
+  "generatedAt": "2026-06-04T23:59:30Z",
+  "isolationStatus": "workspace_tenant_isolation_checked",
+  "decisionStatus": "tenant_scoped_workspaces_with_resource_source_and_queue_isolation",
+  "normalChecksMutateState": false,
+  "hostedTenantRuntimeImplemented": false,
+  "sourceBinding": {
+    "sourceSurface": "prediction_workspace_registry",
+    "sourceCommand": "python3 scripts/ope.py prediction-workspace-registry",
+    "sourceRegistryId": "workspace-registry-001",
+    "sourceWorkspaceId": "opeworkspace-001",
+    "rawRegistryMutationAllowed": false,
+    "notes": "Tenant isolation is layered over the checked multi-prediction workspace registry."
+  },
+  "tenantWorkspaceBindings": [
+    {
+      "tenantId": "tenant-001",
+      "workspaceId": "opeworkspace-001",
+      "workspaceStatus": "active",
+      "owner": {
+        "ownerId": "operatorlocal-001",
+        "ownerType": "team",
+        "contactRef": "local-operator-record"
+      },
+      "predictionIds": [
+        "prediction-001"
+      ],
+      "sourceBindingIds": [
+        "sourcebinding-001"
+      ],
+      "operationQueueRefs": [
+        "queueactive-001",
+        "queuedueforecast-001",
+        "queuedueresolution-001",
+        "queuecalibration-001"
+      ],
+      "idempotencyNamespacePrefix": "tenant-001/opeworkspace-001",
+      "resourcePolicyId": "resourcepolicy-001",
+      "credentialScopeId": "credentialscope-001",
+      "rawSqlExposed": false,
+      "rawPrivateRowsExposed": false
+    },
+    {
+      "tenantId": "tenant-002",
+      "workspaceId": "opeworkspace-002",
+      "workspaceStatus": "paused",
+      "owner": {
+        "ownerId": "serviceops-001",
+        "ownerType": "service",
+        "contactRef": "ops-service-record"
+      },
+      "predictionIds": [
+        "prediction-002"
+      ],
+      "sourceBindingIds": [
+        "sourcebinding-002"
+      ],
+      "operationQueueRefs": [
+        "queueactive-002",
+        "queueblocked-002",
+        "queuefailed-002",
+        "queuesourcehealth-002"
+      ],
+      "idempotencyNamespacePrefix": "tenant-002/opeworkspace-002",
+      "resourcePolicyId": "resourcepolicy-002",
+      "credentialScopeId": "credentialscope-002",
+      "rawSqlExposed": false,
+      "rawPrivateRowsExposed": false
+    }
+  ],
+  "isolationModel": {
+    "tenantIdRequired": true,
+    "workspaceIdRequired": true,
+    "predictionIdsTenantScoped": true,
+    "sourceBindingsTenantScoped": true,
+    "operationQueuesTenantScoped": true,
+    "idempotencyNamespacesTenantScoped": true,
+    "credentialReferencesTenantScoped": true,
+    "crossTenantReadsBlocked": true,
+    "crossTenantWritesBlocked": true,
+    "sanitizedDiagnosticsOnly": true,
+    "auditRequiredForAdministrativeOverride": true
+  },
+  "scopeKeys": [
+    {
+      "scopeKeyName": "tenant_id",
+      "sourceField": "tenantId",
+      "requiredForLookup": true,
+      "includedInAudit": true,
+      "rawValuePublic": false,
+      "notes": "Every workspace readback and write preflight must bind a tenant."
+    },
+    {
+      "scopeKeyName": "workspace_id",
+      "sourceField": "workspaceId",
+      "requiredForLookup": true,
+      "includedInAudit": true,
+      "rawValuePublic": false,
+      "notes": "Workspace ID separates tenant-local prediction definitions and queues."
+    },
+    {
+      "scopeKeyName": "prediction_id",
+      "sourceField": "predictionId",
+      "requiredForLookup": true,
+      "includedInAudit": true,
+      "rawValuePublic": false,
+      "notes": "Prediction IDs are resolved only inside a tenant/workspace scope."
+    },
+    {
+      "scopeKeyName": "source_binding_id",
+      "sourceField": "sourceBindingId",
+      "requiredForLookup": true,
+      "includedInAudit": true,
+      "rawValuePublic": false,
+      "notes": "Source bindings remain tenant/workspace-owned and cannot be reused raw."
+    },
+    {
+      "scopeKeyName": "operation_idempotency_namespace",
+      "sourceField": "idempotencyNamespacePrefix",
+      "requiredForLookup": true,
+      "includedInAudit": true,
+      "rawValuePublic": false,
+      "notes": "Idempotency keys include the tenant/workspace namespace before operation-specific keys."
+    }
+  ],
+  "tenantResourceControls": [
+    {
+      "tenantId": "tenant-001",
+      "workspaceId": "opeworkspace-001",
+      "resourcePolicyId": "resourcepolicy-001",
+      "maximumActivePredictions": 8,
+      "currentActivePredictions": 1,
+      "maximumQueuedOperations": 32,
+      "currentQueuedOperations": 3,
+      "maximumReadbackBytes": 65536,
+      "currentReadbackBytes": 12288,
+      "maximumSourceBindings": 8,
+      "currentSourceBindings": 1,
+      "maxRuntimeSecondsPerTick": 30,
+      "resourceStatus": "within_limits",
+      "rawLimitMutationAllowed": false
+    },
+    {
+      "tenantId": "tenant-002",
+      "workspaceId": "opeworkspace-002",
+      "resourcePolicyId": "resourcepolicy-002",
+      "maximumActivePredictions": 4,
+      "currentActivePredictions": 0,
+      "maximumQueuedOperations": 16,
+      "currentQueuedOperations": 2,
+      "maximumReadbackBytes": 32768,
+      "currentReadbackBytes": 8192,
+      "maximumSourceBindings": 4,
+      "currentSourceBindings": 1,
+      "maxRuntimeSecondsPerTick": 15,
+      "resourceStatus": "blocked",
+      "rawLimitMutationAllowed": false
+    }
+  ],
+  "operationQueuePolicies": [
+    {
+      "queueName": "active_predictions",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:active_predictions",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "due_forecasts",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:due_forecasts",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "due_resolutions",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:due_resolutions",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "blocked_operations",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:blocked_operations",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "failed_operations",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:failed_operations",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "source_health_blockers",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:source_health_blockers",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "calibration_progress",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:calibration_progress",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    },
+    {
+      "queueName": "track_record_progress",
+      "queueScopeKeyTemplate": "{tenantId}:{workspaceId}:track_record_progress",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "readModelOnly": true,
+      "crossTenantPeekAllowed": false,
+      "rawQueueCrudExposed": false,
+      "sanitizedDiagnosticsOnly": true,
+      "nextAction": "read scoped workspace status or request an audited internal API operation"
+    }
+  ],
+  "sourceBindingPolicies": [
+    {
+      "policyName": "tenant_owned_source_binding",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "crossTenantReuseAllowed": false,
+      "cloningRequiresNewBinding": false,
+      "credentialValuesStored": false,
+      "rawPrivateRowsStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "keep source binding lookup inside the tenant workspace"
+    },
+    {
+      "policyName": "cross_tenant_source_clone_requires_new_binding",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "crossTenantReuseAllowed": false,
+      "cloningRequiresNewBinding": true,
+      "credentialValuesStored": false,
+      "rawPrivateRowsStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "create a new sanitized source binding under the target tenant"
+    },
+    {
+      "policyName": "credential_reference_tenant_owned",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "crossTenantReuseAllowed": false,
+      "cloningRequiresNewBinding": false,
+      "credentialValuesStored": false,
+      "rawPrivateRowsStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "replace foreign credential references with a caller-owned reference"
+    },
+    {
+      "policyName": "sanitized_source_diagnostics_only",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "crossTenantReuseAllowed": false,
+      "cloningRequiresNewBinding": false,
+      "credentialValuesStored": false,
+      "rawPrivateRowsStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "return diagnostic codes without source payloads or private row values"
+    },
+    {
+      "policyName": "private_payload_not_in_records",
+      "tenantScoped": true,
+      "workspaceScoped": true,
+      "crossTenantReuseAllowed": false,
+      "cloningRequiresNewBinding": false,
+      "credentialValuesStored": false,
+      "rawPrivateRowsStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "store only manifest, mapping, quality, provenance, and policy references"
+    }
+  ],
+  "accessCases": [
+    {
+      "caseName": "same_tenant_workspace_read",
+      "caseStatus": "accepted_same_tenant_workspace",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-001",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-001",
+      "requestedResourceKind": "prediction",
+      "accessAllowed": true,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "return scoped compact workspace readback"
+    },
+    {
+      "caseName": "cross_tenant_prediction_read",
+      "caseStatus": "blocked_cross_tenant_prediction_read",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "prediction",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "ask the caller for the correct tenant workspace scope"
+    },
+    {
+      "caseName": "cross_workspace_source_binding_reuse",
+      "caseStatus": "blocked_cross_workspace_source_binding_reuse",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "source_binding",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "create a new source binding after explicit target-tenant approval"
+    },
+    {
+      "caseName": "cross_tenant_queue_peek",
+      "caseStatus": "blocked_cross_tenant_queue_peek",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "operation_queue",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "read only queue summaries scoped to the caller tenant workspace"
+    },
+    {
+      "caseName": "idempotency_namespace_collision",
+      "caseStatus": "blocked_idempotency_namespace_collision",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "idempotency_namespace",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "prefix the idempotency key with the tenant and workspace namespace"
+    },
+    {
+      "caseName": "credential_reference_other_tenant",
+      "caseStatus": "blocked_credential_reference_scope",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "credential_reference",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "request a caller-owned credential reference instead of reusing another tenant reference"
+    },
+    {
+      "caseName": "admin_override_without_audit",
+      "caseStatus": "blocked_admin_override_missing_audit",
+      "requestingTenantId": "tenant-001",
+      "targetTenantId": "tenant-002",
+      "requestingWorkspaceId": "opeworkspace-001",
+      "targetWorkspaceId": "opeworkspace-002",
+      "requestedResourceKind": "admin_override",
+      "accessAllowed": false,
+      "operationReceiptsWritten": false,
+      "immutableRecordsWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "require an audited administrative override record before scoped access changes"
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py workspace-tenant-isolation",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Prints the checked tenant isolation readback without writing workspace state."
+    },
+    {
+      "readbackSurface": "prediction_workspace_registry",
+      "command": "python3 scripts/ope.py prediction-workspace-registry",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Source registry remains prediction/workspace scoped and readback-only."
+    },
+    {
+      "readbackSurface": "internal_api",
+      "command": "python3 scripts/ope.py internal-api",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Future effectful tenant-aware operations must use internal API preflight and receipts."
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Runtime security keeps path, credential, and raw private data boundaries checked."
+    },
+    {
+      "readbackSurface": "runtime_transport_readiness",
+      "command": "python3 scripts/ope.py runtime-transport-readiness",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Tenant isolation does not promote HTTP, hosted, queue, or provider runtimes."
+    },
+    {
+      "readbackSurface": "database_source_adapter_runtime",
+      "command": "python3 scripts/ope.py database-source-adapter-runtime",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Database source adapter output stays sanitized and credential-reference-only."
+    },
+    {
+      "readbackSurface": "lifecycle_lease_policy",
+      "command": "python3 scripts/ope.py lifecycle-lease-policy",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Lease and idempotency policies include tenant/workspace scope before operation keys."
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksWriteState": false,
+    "hostedTenantRuntimeImplemented": false,
+    "crossTenantReadAllowed": false,
+    "crossTenantSourceReuseAllowed": false,
+    "crossTenantQueueScanAllowed": false,
+    "credentialValuesStored": false,
+    "rawPrivateRowsStored": false,
+    "networkListenerStarted": false,
+    "rawCrudExposed": false,
+    "qualityClaimsUpgraded": false
+  },
+  "summary": {
+    "tenantWorkspaceCount": 2,
+    "scopeKeyCount": 5,
+    "queuePolicyCount": 8,
+    "sourcePolicyCount": 5,
+    "accessCaseCount": 7,
+    "blockedAccessCaseCount": 6,
+    "tenantScopeRequired": true,
+    "workspaceScopeRequired": true,
+    "queueIsolationEnforced": true,
+    "sourceBindingIsolationEnforced": true,
+    "credentialReferenceIsolationEnforced": true,
+    "normalChecksMutateState": false,
+    "hostedTenantRuntimeImplemented": false
+  },
+  "warnings": [
+    "This is a checked isolation policy readback and does not implement hosted multitenancy.",
+    "Tenant/workspace scope is required before reading prediction resources, source bindings, or operation queues.",
+    "Cross-tenant source reuse requires a new sanitized binding and caller-owned credential reference.",
+    "Normal checks write no state, start no network listener, and store no credential values or raw private rows."
+  ]
+}

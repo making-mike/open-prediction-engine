@@ -1,0 +1,813 @@
+{
+  "backgroundWorkerRuntimeId": "backgroundworker-001",
+  "generatedAt": "2026-06-04T16:30:00Z",
+  "runtimeStatus": "bounded_local_worker_defined",
+  "runtimeScope": "embedded_or_local_sidecar",
+  "workerCommands": [
+    {
+      "commandName": "health",
+      "cliCommand": "python3 scripts/ope.py background-worker health",
+      "commandStatus": "readback_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Return compact worker health, queue, and boundary status."
+    },
+    {
+      "commandName": "pause",
+      "cliCommand": "python3 scripts/ope.py background-worker pause",
+      "commandStatus": "control_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Request pause through lifecycle-aware control state, not raw mutation."
+    },
+    {
+      "commandName": "resume",
+      "cliCommand": "python3 scripts/ope.py background-worker resume",
+      "commandStatus": "control_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Request resume through lifecycle-aware control state after pause is cleared."
+    },
+    {
+      "commandName": "drain",
+      "cliCommand": "python3 scripts/ope.py background-worker drain",
+      "commandStatus": "control_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Stop taking new operations and finish only the bounded current tick."
+    },
+    {
+      "commandName": "shutdown",
+      "cliCommand": "python3 scripts/ope.py background-worker shutdown",
+      "commandStatus": "control_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Return a clean shutdown readback without installing a hidden service."
+    },
+    {
+      "commandName": "run_one_tick",
+      "cliCommand": "python3 scripts/ope.py background-worker run-one-tick",
+      "commandStatus": "tick_defined",
+      "bounded": true,
+      "requiresMaxTicks": false,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Run or preview one deterministic foreground-equivalent worker tick."
+    },
+    {
+      "commandName": "run_bounded_loop",
+      "cliCommand": "python3 scripts/ope.py background-worker run-bounded-loop",
+      "commandStatus": "tick_defined",
+      "bounded": true,
+      "requiresMaxTicks": true,
+      "writesState": false,
+      "exposesRawStorage": false,
+      "startsNetworkListener": false,
+      "notes": "Run a local bounded loop with explicit max ticks; normal checks use one tick."
+    }
+  ],
+  "operationQueue": {
+    "queueSource": "prediction_workspace_read_models",
+    "polledReadModels": [
+      "active_predictions",
+      "due_forecasts",
+      "due_resolution_jobs",
+      "append_readiness",
+      "failed_operations",
+      "recovery_actions",
+      "source_health_blockers"
+    ],
+    "operationPriority": [
+      "recover_stale_lease",
+      "resolve_due",
+      "append_evidence",
+      "run_tick",
+      "maintenance_readback"
+    ],
+    "rawSqlExposed": false,
+    "rawFileLayoutExposed": false
+  },
+  "executionGuards": {
+    "operationPreflightRequired": true,
+    "idempotencyKeyRequired": true,
+    "leaseRequired": true,
+    "cancellationFlagSupported": true,
+    "retryBackoffRequired": true,
+    "responseSizeLimitRequired": true,
+    "sourceFetchPolicyRequired": true
+  },
+  "resourceLimits": {
+    "maxTicksPerLoop": 1,
+    "maxOperationsPerTick": 3,
+    "maxWallClockSecondsPerTick": 5,
+    "maxQueueDepth": 32,
+    "maxReadbackBytes": 65536,
+    "sourceFetchPolicy": "disabled_by_default"
+  },
+  "oneTickReadback": {
+    "tickId": "workertick-001",
+    "tickStatus": "would_run",
+    "foregroundEquivalent": true,
+    "internalApiOperation": "run_tick",
+    "writesState": false,
+    "nextOperation": {
+      "operationName": "run_tick",
+      "predictionId": "prediction-001",
+      "campaignId": "predictioncampaign-001",
+      "operationReceiptId": "operationreceipt-worker-001",
+      "idempotencyKey": "prediction-001:run_tick:2026-06-04T16:30:00Z",
+      "leaseId": "predictionlease-001",
+      "leaseScope": "prediction_execution",
+      "preflightStatus": "pass"
+    },
+    "readModelRefs": [
+      "campaign_status",
+      "next_due_forecast",
+      "due_resolution_jobs",
+      "recovery_actions"
+    ],
+    "blockingGuards": [
+      {
+        "guardName": "operation_preflight",
+        "guardStatus": "pass",
+        "blocksOperation": false,
+        "message": "Worker tick uses the same run_tick preflight as the internal API."
+      },
+      {
+        "guardName": "lease_and_idempotency",
+        "guardStatus": "pass",
+        "blocksOperation": false,
+        "message": "Worker tick reports the lease and idempotency key before execution."
+      },
+      {
+        "guardName": "source_fetch_policy",
+        "guardStatus": "pass",
+        "blocksOperation": false,
+        "message": "Default worker tick does not perform automatic live-source execution."
+      }
+    ],
+    "safeNextAction": "Run the same operation through internal-api --operation run_tick --call or keep preview-only."
+  },
+  "blockedOperationReadbacks": [
+    {
+      "caseId": "paused_prediction",
+      "operationName": "run_tick",
+      "predictionId": "prediction-002",
+      "blocked": true,
+      "reasonCode": "prediction_paused",
+      "safeNextAction": "Resume the prediction through the internal API before worker execution.",
+      "sanitizedDiagnosticCode": "paused_prediction_blocked"
+    },
+    {
+      "caseId": "lease_conflict",
+      "operationName": "resolve_due",
+      "predictionId": "prediction-001",
+      "blocked": true,
+      "reasonCode": "same_prediction_lease_active",
+      "safeNextAction": "Wait for the active lease to expire or inspect stale-lease recovery.",
+      "sanitizedDiagnosticCode": "lease_conflict_blocked"
+    },
+    {
+      "caseId": "resource_limit",
+      "operationName": "append_evidence",
+      "predictionId": "prediction-001",
+      "blocked": true,
+      "reasonCode": "operation_budget_exhausted",
+      "safeNextAction": "Drain the worker and inspect workspace resource controls.",
+      "sanitizedDiagnosticCode": "resource_limit_blocked"
+    },
+    {
+      "caseId": "source_policy_blocks_live_fetch",
+      "operationName": "run_tick",
+      "predictionId": "prediction-001",
+      "blocked": true,
+      "reasonCode": "automatic_live_source_execution_disabled",
+      "safeNextAction": "Provide approved source evidence or run an explicit opt-in connector command.",
+      "sanitizedDiagnosticCode": "source_policy_blocks_live_fetch_blocked"
+    }
+  ],
+  "sidecarBoundary": {
+    "localOnly": true,
+    "networkListenerStarted": false,
+    "osSchedulerInstalled": false,
+    "hostedWorkerRequired": false,
+    "credentialValuesStored": false,
+    "rawSqlExposed": false,
+    "rawFileLayoutExposed": false,
+    "automaticLiveSourceExecution": false,
+    "automaticMethodUpgrade": false
+  },
+  "summary": {
+    "commandCount": 7,
+    "boundedLoopDefined": true,
+    "oneTickEquivalenceDefined": true,
+    "workerReadbacksPresent": true,
+    "allEffectfulWorkPreflighted": true,
+    "idempotencyAndLeasesRequired": true,
+    "resourceLimitsPresent": true,
+    "nonNetworkedByDefault": true
+  },
+  "warnings": [
+    "This is a checked local worker readback, not a long-running daemon in normal checks.",
+    "Worker execution must use the internal API and lifecycle operation receipts, never raw SQL or raw files.",
+    "The default worker is local and non-networked; live source execution remains explicit and opt-in.",
+    "Hosted workers, queue transports, and OS scheduler installation remain future adapter work."
+  ],
+  "boundedLoopExecution": {
+    "loopId": "workerloop-001",
+    "workerId": "backgroundworker-001",
+    "loopStatus": "completed_dry_run",
+    "dryRun": true,
+    "writesState": false,
+    "maxTicksRequested": 1,
+    "ticksExecuted": 1,
+    "operationsAttempted": 1,
+    "queuePoll": {
+      "queueSource": "prediction_workspace_read_models",
+      "readModelsPolled": [
+        "active_predictions",
+        "due_forecasts",
+        "due_resolution_jobs",
+        "append_readiness",
+        "failed_operations",
+        "recovery_actions",
+        "source_health_blockers"
+      ],
+      "candidateOperationNames": [
+        "recover_stale_lease",
+        "resolve_due",
+        "append_evidence",
+        "run_tick",
+        "maintenance_readback"
+      ],
+      "selectedOperationName": "run_tick",
+      "selectedReadModel": "due_forecasts",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false
+    },
+    "tickExecutions": [
+      {
+        "tickId": "workertick-001",
+        "tickStatus": "completed_dry_run",
+        "foregroundEquivalent": true,
+        "internalApiOperation": "run_tick",
+        "predictionId": "prediction-001",
+        "campaignId": "predictioncampaign-001",
+        "operationReceiptId": "operationreceipt-internal-406",
+        "idempotencyKey": "prediction-001:run_tick:2026-06-04T16:30:00Z",
+        "leaseId": "predictionlease-001",
+        "leaseScope": "prediction_execution",
+        "preflightStatus": "pass",
+        "internalApiCall": {
+          "internalApiCallId": "internalapicall-006",
+          "operationName": "run_tick",
+          "callerId": "backgroundworker-001",
+          "predictionId": "prediction-001",
+          "callStatus": "dry_run_ready",
+          "dryRun": true,
+          "operationKind": "bounded_tick",
+          "lifecycleOperations": [
+            "prediction.tick"
+          ],
+          "operationReceiptId": "operationreceipt-internal-406",
+          "idempotencyKey": "prediction-001:run_tick:2026-06-04T16:30:00Z",
+          "idempotencyStatus": "required",
+          "leaseStatus": "required",
+          "blockingGuards": [
+            {
+              "guardId": "internalapiguard-001",
+              "guardStatus": "pass",
+              "blocksOperation": false,
+              "message": "Internal API call uses lifecycle semantics, not raw files or raw SQL."
+            },
+            {
+              "guardId": "internalapiguard-002",
+              "guardStatus": "pass",
+              "blocksOperation": false,
+              "message": "Dry-run wrapper does not mutate state; effectful adapters must commit through operation receipts."
+            }
+          ],
+          "readModelRefs": [
+            "campaign_status",
+            "next_due_forecast",
+            "due_resolution_jobs",
+            "recovery_actions"
+          ],
+          "nextActions": [
+            "use_same_internal_operation_for_in_process_cli_and_agent_call",
+            "commit_effectful_call_only_through_lifecycle_operation_store"
+          ],
+          "sanitizedDiagnostics": "Internal API wrapper executed in non-mutating dry-run mode.",
+          "maxBytes": 65536,
+          "executionBoundary": {
+            "writesState": false,
+            "rawSqlExposed": false,
+            "rawFileLayoutExposed": false,
+            "surpriseNetworkCalls": false,
+            "unboundedLoop": false,
+            "hiddenSchedulerInstallation": false,
+            "automaticMethodUpgrade": false
+          }
+        }
+      }
+    ],
+    "cancellation": {
+      "supported": true,
+      "cancellationRequested": false,
+      "checkedBeforeTick": true,
+      "checkedBetweenOperations": true,
+      "stopsBeforeMutation": true
+    },
+    "retryBackoff": {
+      "policy": "bounded_exponential",
+      "maxAttemptsPerOperation": 2,
+      "initialDelayMilliseconds": 100,
+      "maxDelayMilliseconds": 1000,
+      "sameIdempotencyKeyOnRetry": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    "resourceUsage": {
+      "withinLimits": true,
+      "ticksAttempted": 1,
+      "operationsAttempted": 1,
+      "maxOperationsPerTick": 3,
+      "wallClockSecondsBudgeted": 5,
+      "readbackBytes": 1599,
+      "maxReadbackBytes": 65536,
+      "sourceFetchAttempted": false
+    },
+    "terminationReason": "max_ticks_reached",
+    "sourceFetchAttempted": false,
+    "sidecarBoundary": {
+      "localOnly": true,
+      "networkListenerStarted": false,
+      "osSchedulerInstalled": false,
+      "hostedWorkerRequired": false,
+      "credentialValuesStored": false,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "automaticLiveSourceExecution": false,
+      "automaticMethodUpgrade": false
+    }
+  },
+  "approvedCommitExecution": {
+    "commitId": "workercommit-001",
+    "approvalRequired": true,
+    "approvalStatus": "fixture_approved",
+    "stateWritingMode": "ephemeral_sqlite_check",
+    "normalChecksWritePersistentState": false,
+    "workerOperationName": "run_tick",
+    "internalApiOperation": "run_tick",
+    "lifecycleOperationName": "forecast.create",
+    "operationReceiptId": "operationreceipt-worker-commit-001",
+    "idempotencyKey": "prediction-001:forecast.create:2026-06-04T16:30:00Z",
+    "sameIdempotencyKeyOnRetry": true,
+    "leaseLifecycle": {
+      "leaseKey": "forecast.create:predictionrun-1301",
+      "leaseReserved": true,
+      "leaseReleased": true,
+      "leaseCountAfterCommit": 1,
+      "leaseCountAfterRelease": 0,
+      "releasePolicy": "release_after_receipt_or_expiry"
+    },
+    "lifecycleResult": {
+      "operationName": "forecast.create",
+      "operationReceiptId": "operationreceipt-worker-commit-001",
+      "operationStatus": "committed",
+      "preflightStatus": "preflight_pass",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "plannedWriteCount": 5,
+      "sqliteWrites": {
+        "operationReceiptsWritten": 1,
+        "idempotencyKeysWritten": 1,
+        "leasesWritten": 1,
+        "immutableRecordsInserted": 4,
+        "auditRecordsInserted": 0,
+        "readModelRowsWritten": 3,
+        "physicalDeletes": 0,
+        "rawCrudExposed": false,
+        "historyRewriteCount": 0
+      },
+      "readModelEffects": [
+        "campaign_status",
+        "next_due_forecast",
+        "unresolved_forecasts"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "claimBoundary": {
+        "createsQualityClaim": false,
+        "allowsPostOutcomeRewrite": false,
+        "allowsSilentDelete": false,
+        "allowsRawCrud": false
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    "executionBoundary": {
+      "persistentStateWritten": false,
+      "ephemeralSqliteOnly": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "networkAccessed": false,
+      "sourceFetchAttempted": false,
+      "automaticMethodUpgrade": false,
+      "qualityClaimCreated": false
+    }
+  },
+  "controlStateExecution": {
+    "controlStateExecutionId": "workercontrolstate-001",
+    "controlStateStatus": "lifecycle_backed_control_state_checked",
+    "persistentStateSemantics": true,
+    "stateWritingMode": "ephemeral_sqlite_check",
+    "normalChecksWritePersistentState": false,
+    "controlReadModelName": "worker_control_state",
+    "controlCommands": [
+      {
+        "commandName": "health",
+        "commandKind": "read",
+        "lifecycleOperationName": "read_model",
+        "operationReceiptId": "",
+        "idempotencyKey": "",
+        "leaseReserved": false,
+        "leaseReleased": false,
+        "writesState": false,
+        "readsControlState": true,
+        "rawControlMutationAllowed": false
+      },
+      {
+        "commandName": "pause",
+        "commandKind": "write",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-001",
+        "idempotencyKey": "backgroundworker-001:pause:control:2026-06-04T16:30:00Z",
+        "leaseReserved": true,
+        "leaseReleased": true,
+        "writesState": true,
+        "workerStateAfter": "paused",
+        "acceptsNewOperationsAfter": false,
+        "readModelUpdated": true,
+        "rawControlMutationAllowed": false
+      },
+      {
+        "commandName": "resume",
+        "commandKind": "write",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-002",
+        "idempotencyKey": "backgroundworker-001:resume:control:2026-06-04T16:30:00Z",
+        "leaseReserved": true,
+        "leaseReleased": true,
+        "writesState": true,
+        "workerStateAfter": "running",
+        "acceptsNewOperationsAfter": true,
+        "readModelUpdated": true,
+        "rawControlMutationAllowed": false
+      },
+      {
+        "commandName": "drain",
+        "commandKind": "write",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-003",
+        "idempotencyKey": "backgroundworker-001:drain:control:2026-06-04T16:30:00Z",
+        "leaseReserved": true,
+        "leaseReleased": true,
+        "writesState": true,
+        "workerStateAfter": "draining",
+        "acceptsNewOperationsAfter": false,
+        "readModelUpdated": true,
+        "rawControlMutationAllowed": false
+      },
+      {
+        "commandName": "shutdown",
+        "commandKind": "write",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-004",
+        "idempotencyKey": "backgroundworker-001:shutdown:control:2026-06-04T16:30:00Z",
+        "leaseReserved": true,
+        "leaseReleased": true,
+        "writesState": true,
+        "workerStateAfter": "stopped",
+        "acceptsNewOperationsAfter": false,
+        "readModelUpdated": true,
+        "rawControlMutationAllowed": false
+      }
+    ],
+    "controlWrites": [
+      {
+        "commandName": "pause",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-001",
+        "operationStatus": "committed",
+        "preflightStatus": "preflight_pass",
+        "idempotencyStatus": "new_key_available",
+        "leaseStatus": "available",
+        "sqliteWrites": {
+          "operationReceiptsWritten": 1,
+          "idempotencyKeysWritten": 1,
+          "leasesWritten": 1,
+          "immutableRecordsInserted": 0,
+          "auditRecordsInserted": 0,
+          "readModelRowsWritten": 3,
+          "physicalDeletes": 0,
+          "rawCrudExposed": false,
+          "historyRewriteCount": 0
+        },
+        "readModelEffects": [
+          "worker_control_state",
+          "campaign_status",
+          "next_due_forecast",
+          "append_readiness",
+          "calibration_status",
+          "track_record_progress",
+          "recovery_actions"
+        ],
+        "leaseKey": "state.import_json:backgroundworker-001:control-state",
+        "leaseReleased": true,
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      {
+        "commandName": "resume",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-002",
+        "operationStatus": "committed",
+        "preflightStatus": "preflight_pass",
+        "idempotencyStatus": "new_key_available",
+        "leaseStatus": "available",
+        "sqliteWrites": {
+          "operationReceiptsWritten": 1,
+          "idempotencyKeysWritten": 1,
+          "leasesWritten": 1,
+          "immutableRecordsInserted": 0,
+          "auditRecordsInserted": 0,
+          "readModelRowsWritten": 1,
+          "physicalDeletes": 0,
+          "rawCrudExposed": false,
+          "historyRewriteCount": 0
+        },
+        "readModelEffects": [
+          "worker_control_state",
+          "campaign_status",
+          "next_due_forecast",
+          "append_readiness",
+          "calibration_status",
+          "track_record_progress",
+          "recovery_actions"
+        ],
+        "leaseKey": "state.import_json:backgroundworker-001:control-state",
+        "leaseReleased": true,
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      {
+        "commandName": "drain",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-003",
+        "operationStatus": "committed",
+        "preflightStatus": "preflight_pass",
+        "idempotencyStatus": "new_key_available",
+        "leaseStatus": "available",
+        "sqliteWrites": {
+          "operationReceiptsWritten": 1,
+          "idempotencyKeysWritten": 1,
+          "leasesWritten": 1,
+          "immutableRecordsInserted": 0,
+          "auditRecordsInserted": 0,
+          "readModelRowsWritten": 1,
+          "physicalDeletes": 0,
+          "rawCrudExposed": false,
+          "historyRewriteCount": 0
+        },
+        "readModelEffects": [
+          "worker_control_state",
+          "campaign_status",
+          "next_due_forecast",
+          "append_readiness",
+          "calibration_status",
+          "track_record_progress",
+          "recovery_actions"
+        ],
+        "leaseKey": "state.import_json:backgroundworker-001:control-state",
+        "leaseReleased": true,
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      {
+        "commandName": "shutdown",
+        "lifecycleOperationName": "state.import_json",
+        "operationReceiptId": "operationreceipt-worker-control-004",
+        "operationStatus": "committed",
+        "preflightStatus": "preflight_pass",
+        "idempotencyStatus": "new_key_available",
+        "leaseStatus": "available",
+        "sqliteWrites": {
+          "operationReceiptsWritten": 1,
+          "idempotencyKeysWritten": 1,
+          "leasesWritten": 1,
+          "immutableRecordsInserted": 0,
+          "auditRecordsInserted": 0,
+          "readModelRowsWritten": 1,
+          "physicalDeletes": 0,
+          "rawCrudExposed": false,
+          "historyRewriteCount": 0
+        },
+        "readModelEffects": [
+          "worker_control_state",
+          "campaign_status",
+          "next_due_forecast",
+          "append_readiness",
+          "calibration_status",
+          "track_record_progress",
+          "recovery_actions"
+        ],
+        "leaseKey": "state.import_json:backgroundworker-001:control-state",
+        "leaseReleased": true,
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      }
+    ],
+    "healthReadback": {
+      "workerId": "backgroundworker-001",
+      "readsControlState": true,
+      "lastControlCommand": "shutdown",
+      "workerState": "stopped",
+      "acceptsNewOperations": false,
+      "cancellationRequested": true,
+      "updatedByOperationReceiptId": "operationreceipt-worker-control-004",
+      "rawControlMutationAllowed": false
+    },
+    "summary": {
+      "controlWriteCount": 4,
+      "lifecycleReceiptsWritten": 4,
+      "idempotencyKeysWritten": 4,
+      "leasesReserved": 4,
+      "leasesReleased": 4,
+      "rawControlMutationAllowed": false
+    },
+    "executionBoundary": {
+      "persistentStateWritten": false,
+      "ephemeralSqliteOnly": true,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "networkAccessed": false,
+      "sourceFetchAttempted": false,
+      "hiddenSchedulerInstallation": false
+    }
+  },
+  "durableSidecarExecution": {
+    "sidecarExecutionId": "workersidecar-001",
+    "sidecarStatus": "checked_local_sidecar_semantics",
+    "controlStateReadModel": "worker_control_state",
+    "defaultLaunchMode": "embedded_in_process",
+    "normalChecksStartProcess": false,
+    "bounded": true,
+    "maxTicksPerActivation": 1,
+    "launchModes": [
+      {
+        "modeName": "embedded_in_process",
+        "implementationStatus": "checked_default",
+        "localOnly": true,
+        "networkListenerStarted": false,
+        "osSchedulerInstalled": false,
+        "hiddenDaemon": false,
+        "hostedWorkerRequired": false,
+        "notes": "Host calls the worker loop in-process for one bounded activation and keeps control state in read models."
+      },
+      {
+        "modeName": "local_sidecar_process",
+        "implementationStatus": "planned_explicit_local_process",
+        "localOnly": true,
+        "networkListenerStarted": false,
+        "osSchedulerInstalled": false,
+        "hiddenDaemon": false,
+        "hostedWorkerRequired": false,
+        "notes": "A future explicit local process may wrap the same commands without installing a daemon or listener."
+      }
+    ],
+    "hostNonInterference": {
+      "hostCanContinueWhileWorkerIdle": true,
+      "hostCanInspectHealthWithoutBlocking": true,
+      "workerDoesNotOwnHostEventLoop": true,
+      "activationRequiresExplicitCall": true,
+      "maxReadbackBytes": 65536
+    },
+    "activationReadback": {
+      "activationId": "workersidecaractivation-001",
+      "activationStatus": "ready_for_bounded_activation",
+      "readsControlStateBeforeTick": true,
+      "runsBoundedLoop": true,
+      "usesApprovedCommitPath": true,
+      "stopsOnControlState": true,
+      "boundedLoopId": "workerloop-001",
+      "commitId": "workercommit-001",
+      "heartbeatReadback": {
+        "heartbeatId": "workerheartbeat-001",
+        "heartbeatStatus": "healthy_idle",
+        "workerState": "running",
+        "controlReadModelName": "worker_control_state",
+        "queueSource": "prediction_workspace_read_models",
+        "rawStorageExposed": false
+      },
+      "shutdownReadback": {
+        "shutdownId": "workershutdown-001",
+        "shutdownStatus": "clean_shutdown_readback",
+        "workerState": "stopped",
+        "lastControlCommand": "shutdown",
+        "acceptsNewOperations": false
+      }
+    },
+    "executionSequence": [
+      {
+        "stepName": "start",
+        "command": "python3 scripts/ope.py background-worker --view control",
+        "expectedReadback": "Read lifecycle-backed worker control state before accepting a tick.",
+        "bounded": true,
+        "lifecycleBacked": true,
+        "rawStateMutationAllowed": false
+      },
+      {
+        "stepName": "heartbeat",
+        "command": "python3 scripts/ope.py background-worker --view sidecar",
+        "expectedReadback": "Return compact healthy-idle heartbeat without raw storage access.",
+        "bounded": true,
+        "lifecycleBacked": false,
+        "rawStateMutationAllowed": false
+      },
+      {
+        "stepName": "run_tick",
+        "command": "python3 scripts/ope.py background-worker --view loop",
+        "expectedReadback": "Run one foreground-equivalent bounded dry-run tick.",
+        "bounded": true,
+        "lifecycleBacked": true,
+        "rawStateMutationAllowed": false
+      },
+      {
+        "stepName": "commit",
+        "command": "python3 scripts/ope.py background-worker --view commit",
+        "expectedReadback": "Commit through ephemeral SQLite operation receipts in normal checks.",
+        "bounded": true,
+        "lifecycleBacked": true,
+        "rawStateMutationAllowed": false
+      },
+      {
+        "stepName": "drain",
+        "command": "python3 scripts/ope.py background-worker --view control",
+        "expectedReadback": "Observe drain control state and stop taking new operations.",
+        "bounded": true,
+        "lifecycleBacked": true,
+        "rawStateMutationAllowed": false
+      },
+      {
+        "stepName": "shutdown",
+        "command": "python3 scripts/ope.py background-worker --view control",
+        "expectedReadback": "Observe shutdown control state and return clean shutdown readback.",
+        "bounded": true,
+        "lifecycleBacked": true,
+        "rawStateMutationAllowed": false
+      }
+    ],
+    "executionBoundary": {
+      "networkListenerStarted": false,
+      "osSchedulerInstalled": false,
+      "hostedWorkerRequired": false,
+      "hiddenDaemonStarted": false,
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "automaticLiveSourceExecution": false,
+      "automaticMethodUpgrade": false,
+      "normalChecksStartProcess": false,
+      "normalChecksWritePersistentState": false
+    }
+  }
+}

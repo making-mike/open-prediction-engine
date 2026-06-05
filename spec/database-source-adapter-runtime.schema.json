@@ -1,0 +1,397 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/database-source-adapter-runtime.schema.json",
+  "title": "Database Source Adapter Runtime",
+  "description": "Checked bounded database source-adapter runtime readback with caller approval, query-manifest, credential-reference, sanitized output, and non-execution boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "databaseSourceAdapterRuntimeId",
+    "generatedAt",
+    "runtimeStatus",
+    "runtimeScope",
+    "normalChecksOffline",
+    "sourceBindingId",
+    "domainKey",
+    "runtimeCases",
+    "routing",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "databaseSourceAdapterRuntimeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "runtimeStatus": { "type": "string", "enum": ["approved_database_source_adapter_runtime_checked"] },
+    "runtimeScope": { "type": "string", "enum": ["bounded_caller_approved_database_adapter"] },
+    "normalChecksOffline": { "type": "boolean" },
+    "sourceBindingId": { "$ref": "common.schema.json#/$defs/id" },
+    "domainKey": { "$ref": "common.schema.json#/$defs/domain" },
+    "runtimeCases": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": { "$ref": "#/$defs/runtimeCase" }
+    },
+    "routing": { "$ref": "#/$defs/routing" },
+    "readbacks": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "runtimeCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "runtimeRequest",
+        "sanitizedAdapterOutput",
+        "sourceAdapterOutputCompatible",
+        "canEnterSourceAdapterIntake",
+        "databaseSpecificForecastPathCreated",
+        "forecastArtifactsCreated",
+        "rawPrivateRowsStored",
+        "credentialValuesStored",
+        "sanitizedDiagnosticsOnly",
+        "nextAction"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "approved_fixture",
+            "missing_approval",
+            "missing_credential_reference",
+            "unsafe_query_boundary",
+            "oversized_result",
+            "stale_source",
+            "leakage_risk",
+            "missing_outcome_source",
+            "insufficient_comparable_history"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "adapter_output_ready",
+            "blocked_missing_approval",
+            "blocked_missing_credential_reference",
+            "blocked_unsafe_query_boundary",
+            "blocked_oversized_result",
+            "blocked_stale_source",
+            "blocked_leakage_risk",
+            "blocked_missing_outcome_source",
+            "blocked_insufficient_comparable_history"
+          ]
+        },
+        "runtimeRequest": { "$ref": "#/$defs/runtimeRequest" },
+        "sanitizedAdapterOutput": { "$ref": "#/$defs/sanitizedAdapterOutput" },
+        "sourceAdapterOutputCompatible": { "type": "boolean" },
+        "canEnterSourceAdapterIntake": { "type": "boolean" },
+        "databaseSpecificForecastPathCreated": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "rawPrivateRowsStored": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "nextAction": {
+          "type": "string",
+          "enum": [
+            "run_source_adapter_intake",
+            "confirm_caller_approval",
+            "provide_credential_reference",
+            "replace_query_manifest",
+            "reduce_row_or_time_limits",
+            "refresh_source_within_policy",
+            "separate_resolution_evidence",
+            "bind_resolution_only_outcome",
+            "collect_more_history"
+          ]
+        }
+      }
+    },
+    "runtimeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceBindingId",
+        "sourceRole",
+        "approvedQueryManifestRef",
+        "credentialRef",
+        "rowLimit",
+        "timeLimitSeconds",
+        "freshnessWindowHours",
+        "leakageWindow",
+        "callerApprovalStatus"
+      ],
+      "properties": {
+        "sourceBindingId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceRole": {
+          "type": "string",
+          "enum": ["vessel_schedule", "historical_berth_baseline", "berth_availability_outcome"]
+        },
+        "approvedQueryManifestRef": { "type": "string", "minLength": 3, "maxLength": 140 },
+        "credentialRef": { "type": "string", "minLength": 3, "maxLength": 140 },
+        "rowLimit": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "timeLimitSeconds": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "freshnessWindowHours": { "type": "integer", "minimum": 1, "maximum": 168 },
+        "leakageWindow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["forecastCloseTime", "resolutionEvidenceAfter"],
+          "properties": {
+            "forecastCloseTime": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "resolutionEvidenceAfter": { "$ref": "common.schema.json#/$defs/timestamp" }
+          }
+        },
+        "callerApprovalStatus": {
+          "type": "string",
+          "enum": ["approved", "not_requested", "rejected"]
+        }
+      }
+    },
+    "sanitizedAdapterOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceManifest",
+        "fieldMapping",
+        "provenanceSummary",
+        "sourceQualitySignals",
+        "mappingConfidenceSignals",
+        "outcomeAvailabilityStatus",
+        "queryBoundarySummary"
+      ],
+      "properties": {
+        "sourceManifest": { "$ref": "#/$defs/sourceManifestSummary" },
+        "fieldMapping": { "$ref": "#/$defs/fieldMappingSummary" },
+        "provenanceSummary": { "$ref": "#/$defs/provenanceSummary" },
+        "sourceQualitySignals": { "$ref": "#/$defs/sourceQualitySignals" },
+        "mappingConfidenceSignals": { "$ref": "#/$defs/mappingConfidenceSignals" },
+        "outcomeAvailabilityStatus": { "$ref": "#/$defs/outcomeAvailabilityStatus" },
+        "queryBoundarySummary": { "$ref": "#/$defs/queryBoundarySummary" }
+      }
+    },
+    "sourceManifestSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceManifestId", "domainSetupId", "domain", "sourceRole", "sourceKind", "rowCount", "rawRowsIncluded"],
+      "properties": {
+        "sourceManifestId": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "domainSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "domain": { "$ref": "common.schema.json#/$defs/domain" },
+        "sourceRole": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "sourceKind": { "type": "string", "enum": ["private_database"] },
+        "rowCount": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "rawRowsIncluded": { "type": "boolean" }
+      }
+    },
+    "fieldMappingSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldMappingId",
+        "sourceManifestId",
+        "mappingStatus",
+        "mappedFieldCount",
+        "agentInferredFieldsRequireConfirmation"
+      ],
+      "properties": {
+        "fieldMappingId": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "sourceManifestId": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "mappingStatus": { "type": "string", "enum": ["confirmed", "not_created", "not_evaluated"] },
+        "mappedFieldCount": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "agentInferredFieldsRequireConfirmation": { "type": "boolean" }
+      }
+    },
+    "provenanceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterRunId",
+        "contentHashesStored",
+        "credentialValuesIncluded",
+        "rawRowsIncluded",
+        "stackTraceIncluded",
+        "diagnosticsSanitized"
+      ],
+      "properties": {
+        "adapterRunId": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "contentHashesStored": { "type": "boolean" },
+        "credentialValuesIncluded": { "type": "boolean" },
+        "rawRowsIncluded": { "type": "boolean" },
+        "stackTraceIncluded": { "type": "boolean" },
+        "diagnosticsSanitized": { "type": "boolean" }
+      }
+    },
+    "sourceQualitySignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["freshnessStatus", "coverageStatus", "sourceQualityScore", "minimumSourceQualityScore"],
+      "properties": {
+        "freshnessStatus": { "type": "string", "enum": ["pass", "not_evaluated"] },
+        "coverageStatus": { "type": "string", "enum": ["pass", "not_evaluated"] },
+        "sourceQualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumSourceQualityScore": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "mappingConfidenceSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mappingStatus", "mappingConfidence", "minimumMappingConfidence"],
+      "properties": {
+        "mappingStatus": { "type": "string", "enum": ["confirmed", "not_evaluated"] },
+        "mappingConfidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumMappingConfidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "outcomeAvailabilityStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "forecastTimeOutcomeEvidenceAllowed", "resolutionSourceBound"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "available_resolution_only",
+            "missing_approval",
+            "missing_credential_reference",
+            "unsafe_query_boundary",
+            "oversized_result",
+            "stale_source",
+            "leakage_risk",
+            "missing_outcome_source",
+            "insufficient_comparable_history"
+          ]
+        },
+        "forecastTimeOutcomeEvidenceAllowed": { "type": "boolean" },
+        "resolutionSourceBound": { "type": "boolean" }
+      }
+    },
+    "queryBoundarySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queryManifestRef",
+        "readOnly",
+        "rawSqlIncluded",
+        "rawSqlWithSecretsIncluded",
+        "unapprovedSchemaScan",
+        "rowLimitApplied",
+        "timeLimitApplied"
+      ],
+      "properties": {
+        "queryManifestRef": { "type": "string", "minLength": 3, "maxLength": 140 },
+        "readOnly": { "type": "boolean" },
+        "rawSqlIncluded": { "type": "boolean" },
+        "rawSqlWithSecretsIncluded": { "type": "boolean" },
+        "unapprovedSchemaScan": { "type": "boolean" },
+        "rowLimitApplied": { "type": "boolean" },
+        "timeLimitApplied": { "type": "boolean" }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedOutputRoutesToSourceAdapterIntake",
+        "routesToSourceIntake",
+        "routesToSourceHandoff",
+        "routesToSetupBenchmark",
+        "routesToSetupMethodDecision",
+        "routesToForecastExecutionGate",
+        "databaseSpecificForecastPathCreated",
+        "commands"
+      ],
+      "properties": {
+        "acceptedOutputRoutesToSourceAdapterIntake": { "type": "boolean" },
+        "routesToSourceIntake": { "type": "boolean" },
+        "routesToSourceHandoff": { "type": "boolean" },
+        "routesToSetupBenchmark": { "type": "boolean" },
+        "routesToSetupMethodDecision": { "type": "boolean" },
+        "routesToForecastExecutionGate": { "type": "boolean" },
+        "databaseSpecificForecastPathCreated": { "type": "boolean" },
+        "commands": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 8, "maxLength": 240 }
+        }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackSurface", "command", "operationName", "mutatesState", "requiresCredentialValues"],
+      "properties": {
+        "readbackSurface": { "type": "string", "enum": ["cli", "internal_api", "agent_call"] },
+        "command": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "operationName": { "type": "string", "minLength": 8, "maxLength": 120 },
+        "mutatesState": { "type": "boolean" },
+        "requiresCredentialValues": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productionDatabaseConnectionOpened",
+        "normalChecksConnectToDatabase",
+        "credentialValuesStored",
+        "rawSqlWithSecretsAccepted",
+        "rawPrivateRowsStored",
+        "stackTracesExposed",
+        "unapprovedSchemaScansAllowed",
+        "arbitraryDatabaseAccessAllowed",
+        "forecastArtifactsCreated",
+        "scoringRecordsCreated",
+        "hostedRuntimeRequired"
+      ],
+      "properties": {
+        "productionDatabaseConnectionOpened": { "type": "boolean" },
+        "normalChecksConnectToDatabase": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawSqlWithSecretsAccepted": { "type": "boolean" },
+        "rawPrivateRowsStored": { "type": "boolean" },
+        "stackTracesExposed": { "type": "boolean" },
+        "unapprovedSchemaScansAllowed": { "type": "boolean" },
+        "arbitraryDatabaseAccessAllowed": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "scoringRecordsCreated": { "type": "boolean" },
+        "hostedRuntimeRequired": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseCount",
+        "blockedCaseCount",
+        "approvedExecutionPathCount",
+        "sourceAdapterOutputCompatibleCount",
+        "forecastArtifactsCreated",
+        "credentialsStored"
+      ],
+      "properties": {
+        "caseCount": { "type": "integer", "minimum": 9, "maximum": 9 },
+        "blockedCaseCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "approvedExecutionPathCount": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "sourceAdapterOutputCompatibleCount": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" }
+      }
+    }
+  }
+}

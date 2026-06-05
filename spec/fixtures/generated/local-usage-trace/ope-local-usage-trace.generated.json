@@ -649,17 +649,145 @@
         "credentialsStored": false
       },
       "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-021",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "agent_integration",
+      "command": "python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption --view summary",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "agent-integration",
+        "recordId": "agentintegration-001",
+        "sourceCase": "agent_integration_readiness"
+      },
+      "trace": {
+        "elapsedMs": 110,
+        "exitCode": 0,
+        "responseBytes": 5600,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-022",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "agent_integration",
+      "command": "python3 scripts/ope.py agent-integrate --view candidates",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "agent-integration",
+        "recordId": "agentintegration-001",
+        "sourceCase": "agent_integration_candidates"
+      },
+      "trace": {
+        "elapsedMs": 115,
+        "exitCode": 0,
+        "responseBytes": 7200,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-023",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "agent_integration",
+      "command": "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "recordType": "agent-integration",
+        "recordId": "guidedforecastcase-001",
+        "sourceCase": "agent_integration_guided_forecast"
+      },
+      "trace": {
+        "elapsedMs": 95,
+        "exitCode": 0,
+        "responseBytes": 900,
+        "responseSizeClass": "compact",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-024",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "agent_integration",
+      "command": "python3 scripts/ope.py agent-integrate --run-guided --case missing_weather_source",
+      "outcome": "blocked",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "agent-integration",
+        "recordId": "guidedforecastcase-002",
+        "sourceCase": "agent_integration_missing_weather_block"
+      },
+      "trace": {
+        "elapsedMs": 90,
+        "exitCode": 0,
+        "responseBytes": 850,
+        "responseSizeClass": "compact",
+        "sanitizedErrorClass": "missing_source"
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
     }
   ],
   "traceSummary": [
     {
       "interface": "cli",
-      "eventCount": 16,
-      "successCount": 14,
-      "blockedCount": 2,
-      "sanitizedErrorCount": 2,
-      "averageElapsedMs": 277,
-      "maxResponseBytes": 4200
+      "eventCount": 20,
+      "successCount": 17,
+      "blockedCount": 3,
+      "sanitizedErrorCount": 3,
+      "averageElapsedMs": 242,
+      "maxResponseBytes": 7200
     },
     {
       "interface": "agent_call",
@@ -690,14 +818,14 @@
     }
   ],
   "aggregateReadbacks": {
-    "totalEvents": 20,
-    "successfulEvents": 18,
-    "blockedEvents": 2,
-    "sanitizedErrorEvents": 2,
-    "localOnlyEvents": 20,
+    "totalEvents": 24,
+    "successfulEvents": 21,
+    "blockedEvents": 3,
+    "sanitizedErrorEvents": 3,
+    "localOnlyEvents": 24,
     "forecastCompletionRate": 1.0,
     "agentReadSuccessRate": 0.6667,
-    "blockedPathFrequency": 0.1,
+    "blockedPathFrequency": 0.125,
     "normalChecksUseLiveNetwork": false,
     "hostedTelemetryEnabled": false
   },
@@ -721,18 +849,26 @@
     {
       "metricId": "blocked_path_frequency",
       "description": "Share of checked local events that intentionally stop before forecast or readback completion.",
-      "numerator": 2,
-      "denominator": 20,
-      "value": 0.1,
+      "numerator": 3,
+      "denominator": 24,
+      "value": 0.125,
       "interpretation": "Blocked path frequency is a usability signal, not a runtime failure rate."
     },
     {
       "metricId": "local_only_privacy_rate",
       "description": "Share of checked trace events that stay local-only and store no private rows, credentials, prompts, or transcripts.",
-      "numerator": 20,
-      "denominator": 20,
+      "numerator": 24,
+      "denominator": 24,
       "value": 1.0,
       "interpretation": "The checked trace model remains local-only and privacy-preserving."
+    },
+    {
+      "metricId": "agent_integration_first_forecast_fast",
+      "description": "Whether the Helsinki starter flow reaches a forecast-card command within the three-call target.",
+      "numerator": 1,
+      "denominator": 1,
+      "value": 1.0,
+      "interpretation": "Readiness, candidates, and guided forecast produce a forecast-card command while blocked source cases remain explicit."
     }
   ],
   "executionBoundary": {

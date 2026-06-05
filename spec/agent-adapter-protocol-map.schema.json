@@ -67,8 +67,8 @@
     },
     "operations": {
       "type": "array",
-      "minItems": 24,
-      "maxItems": 24,
+      "minItems": 27,
+      "maxItems": 27,
       "items": { "$ref": "#/$defs/operationMap" }
     },
     "exitCodeMapping": {
@@ -86,7 +86,7 @@
     "decisionExamples": {
       "type": "array",
       "minItems": 4,
-      "maxItems": 16,
+      "maxItems": 20,
       "items": { "$ref": "#/$defs/decisionExample" }
     },
     "warnings": {
@@ -118,6 +118,9 @@
         "private_setup_source_handoff",
         "private_setup_method_gate",
         "private_setup_forecast_execution",
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -147,6 +150,7 @@
         "source_intake_handoff",
         "source_handoff_method_gate",
         "setup_forecast_run",
+        "agent_integration",
         "prediction_campaign_manifest",
         "prediction_campaign_explain",
         "prediction_campaign_doctor",

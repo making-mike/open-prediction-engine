@@ -28,4 +28,6 @@ In-process functions in `scripts/internal_api_runtime.py`, the `internal-api --c
 
 HTTP, queue, and hosted service adapters are declared only as future transports over this same internal API. They must share internal semantics, return the same envelopes, and avoid raw SQL or raw file-layout exposure.
 
+`python3 scripts/ope.py runtime-transport-readiness` is the checked readiness gate for those future transports. It keeps local HTTP, queue, hosted service, and OPP HTTP provider behavior deferred while the current runtime remains in-process, CLI, `agent-call`, and local MCP stdio.
+
 The internal API does not permit surprise network calls, unbounded loops, hidden scheduler installation, automatic method upgrades, credential values in records, raw SQL exposure, raw file-layout exposure, or hosted-runtime requirements.

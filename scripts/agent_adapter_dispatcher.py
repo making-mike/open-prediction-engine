@@ -70,6 +70,8 @@ from generate_private_setup_agent_bundles import (
 from generate_private_source_adapter_capabilities import build_capabilities, load_generated_capabilities
 from generate_private_source_adapter_intake_bridge import build_bridge, load_generated_bridge
 from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
+from generate_database_source_adapter_runtime import build_database_source_adapter_runtime
+from generate_agent_integration import GUIDED_CASES, build_agent_integration, guided_case_payload, view_payload
 from generate_internal_api import OPERATION_ORDER
 from internal_api_runtime import call_internal_api
 from read_ope_record import DEFAULT_MAX_BYTES, PublicError, read_record
@@ -80,6 +82,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FORECAST_ID = "forecast-602"
 DEFAULT_QUESTION_ID = "question-601"
 DEFAULT_PRIVATE_SETUP_REQUEST_ID = "privatesetuprequest-001"
+DEFAULT_AGENT_INTEGRATION_SCENARIO = "helsinki_bus_disruption"
 DEFAULT_CALLER_INTENT = "Call one local OPE agent adapter operation."
 CAPABILITY_BY_OPERATION = {
     "forecast_request_validation": "validation",
@@ -96,12 +99,16 @@ CAPABILITY_BY_OPERATION = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "agent_integration_readiness": "read_only",
+    "agent_integration_candidates": "read_only",
+    "agent_integration_guided_forecast": "read_only",
     "campaign_plan": "read_only",
     "campaign_status": "read_only",
     "campaign_health": "read_only",
     "campaign_append_readiness": "read_only",
     "campaign_calibration_status": "read_only",
     "internal_api": "dry_run_generation",
+    "database_source_adapter_runtime_status": "read_only",
     "resolution_jobs": "read_only",
     "resolution_scheduler_status": "read_only",
     "resolution_status": "resolution_check",
@@ -122,12 +129,16 @@ INPUT_TYPE_BY_OPERATION = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "agent_integration_readiness": "agent_integration",
+    "agent_integration_candidates": "agent_integration",
+    "agent_integration_guided_forecast": "agent_integration",
     "campaign_plan": "prediction_campaign_manifest",
     "campaign_status": "prediction_campaign_explain",
     "campaign_health": "prediction_campaign_doctor",
     "campaign_append_readiness": "prediction_campaign_evidence_ledger",
     "campaign_calibration_status": "prediction_campaign_calibration_status",
     "internal_api": "internal_api_request",
+    "database_source_adapter_runtime_status": "database_source_adapter_runtime",
     "resolution_jobs": "resolution_job_registry",
     "resolution_scheduler_status": "resolution_scheduler_status",
     "resolution_status": "resolution_status",
@@ -212,6 +223,11 @@ def input_ref_for(args: argparse.Namespace) -> str:
     if args.operation == "private_setup_forecast_execution":
         payload = forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"]
+    if args.operation in {"agent_integration_readiness", "agent_integration_candidates"}:
+        return build_agent_integration(args.scenario)["agentIntegrationId"]
+    if args.operation == "agent_integration_guided_forecast":
+        record = build_agent_integration(args.scenario)
+        return guided_case_payload(record, args.guided_case)["guidedCaseId"]
     if args.operation == "campaign_plan":
         payload, _binding, _state, _warnings = campaign_plan_adapter_payload()
         return payload["predictionCampaignManifestId"]
@@ -229,6 +245,9 @@ def input_ref_for(args: argparse.Namespace) -> str:
         return payload["predictionCampaignCalibrationStatusId"]
     if args.operation == "internal_api":
         return internal_api_payload(args)["internalApiCallId"]
+    if args.operation == "database_source_adapter_runtime_status":
+        runtime = build_database_source_adapter_runtime()
+        return runtime["databaseSourceAdapterRuntimeId"]
     if args.operation == "resolution_jobs":
         registry = load_resolution_job_registry()
         return registry["resolutionJobRegistryId"]
@@ -449,6 +468,100 @@ def internal_api_adapter_payload(args: argparse.Namespace) -> tuple[dict[str, An
             "Effectful internal API operations must commit through lifecycle operation receipts outside this dry-run readback.",
         ],
     )
+
+
+def database_source_adapter_runtime_status_payload() -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    runtime = build_database_source_adapter_runtime()
+    return (
+        runtime,
+        nullable_binding(sourcePolicyId=runtime["sourceBindingId"]),
+        nullable_state(
+            approvalStatus="approved",
+            planStatus=runtime["runtimeStatus"],
+            executionMode="read_only_status",
+            sourceMode="private_database",
+            forecastStatus="not_created",
+            resolutionStatus="not_started",
+            scoreStatus="not_created",
+            qualityClaimStatus="not_allowed",
+        ),
+        [
+            *runtime["warnings"],
+            "The adapter envelope is read-only and does not open database connections or require credential values.",
+        ],
+    )
+
+
+def agent_integration_state(record: dict[str, Any], forecast_status: str) -> dict[str, str | None]:
+    return nullable_state(
+        decisionStatus="agent_integration_ready",
+        approvalStatus="approved_sources_required",
+        dataMode="approved_files_and_sanitized_adapters",
+        planStatus=record["integrationStatus"],
+        executionMode="local_cli_mcp_readback",
+        sourceMode="approved_files_sanitized_adapters",
+        forecastStatus=forecast_status,
+        resolutionStatus="resolution_only_outcome_required",
+        scoreStatus="not_created_by_integration",
+        qualityClaimStatus="not_allowed",
+    )
+
+
+def agent_integration_binding(payload: dict[str, Any]) -> dict[str, str | None]:
+    forecast_id = payload.get("forecastId")
+    question_id = payload.get("questionId")
+    return nullable_binding(
+        questionId=question_id if isinstance(question_id, str) else None,
+        forecastId=forecast_id if isinstance(forecast_id, str) else None,
+    )
+
+
+def agent_integration_readiness_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    record = build_agent_integration(args.scenario)
+    payload = view_payload(record, "summary")
+    summary = record["summary"]
+    binding = nullable_binding(questionId=summary["questionId"], forecastId=summary["forecastId"])
+    warnings = [
+        *record["warnings"],
+        "Readiness is local and read-only; it does not inspect private sources or create forecast artifacts.",
+    ]
+    return payload, binding, agent_integration_state(record, "candidate_discovery_ready"), warnings
+
+
+def agent_integration_candidates_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    record = build_agent_integration(args.scenario)
+    payload = {
+        "agentIntegrationId": record["agentIntegrationId"],
+        "scenario": record["scenario"],
+        "candidateQuestions": view_payload(record, "candidates"),
+        "validationCommand": "python3 scripts/ope.py agent-integrate --view validation",
+        "executionBoundary": record["executionBoundary"],
+    }
+    summary = record["summary"]
+    binding = nullable_binding(questionId=summary["questionId"], forecastId=summary["forecastId"])
+    warnings = [
+        "Candidate discovery validates forecastability and exact reason codes but does not create forecast artifacts.",
+        "Only forecastable candidates may proceed to guided forecast readback.",
+    ]
+    return payload, binding, agent_integration_state(record, "candidate_discovery_ready"), warnings
+
+
+def agent_integration_guided_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    record = build_agent_integration(args.scenario)
+    payload = guided_case_payload(record, args.guided_case)
+    forecast_status = payload["guidedStatus"]
+    warnings = [
+        "Guided forecast readback returns checked command fields and does not accept raw source rows.",
+        "Blocked guided cases return no forecastId, questionId, or forecast-card command.",
+        "No quality, calibration, hosted runtime, or production-readiness claim is upgraded.",
+    ]
+    return payload, agent_integration_binding(payload), agent_integration_state(record, forecast_status), warnings
 
 
 def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, Any]:
@@ -863,6 +976,15 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "private_setup_forecast_execution":
         payload, binding, state, warnings = private_setup_forecast_execution_payload(args)
         return payload["setupForecastRun"]["setupForecastRunId"], payload, binding, state, warnings
+    if args.operation == "agent_integration_readiness":
+        payload, binding, state, warnings = agent_integration_readiness_payload(args)
+        return build_agent_integration(args.scenario)["agentIntegrationId"], payload, binding, state, warnings
+    if args.operation == "agent_integration_candidates":
+        payload, binding, state, warnings = agent_integration_candidates_payload(args)
+        return payload["agentIntegrationId"], payload, binding, state, warnings
+    if args.operation == "agent_integration_guided_forecast":
+        payload, binding, state, warnings = agent_integration_guided_payload(args)
+        return payload["guidedCaseId"], payload, binding, state, warnings
     if args.operation == "campaign_plan":
         payload, binding, state, warnings = campaign_plan_adapter_payload()
         return payload["predictionCampaignManifestId"], payload, binding, state, warnings
@@ -884,6 +1006,9 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "internal_api":
         payload, binding, state, warnings = internal_api_adapter_payload(args)
         return payload["internalApiCallId"], payload, binding, state, warnings
+    if args.operation == "database_source_adapter_runtime_status":
+        payload, binding, state, warnings = database_source_adapter_runtime_status_payload()
+        return payload["databaseSourceAdapterRuntimeId"], payload, binding, state, warnings
     if args.operation == "resolution_jobs":
         payload, binding, state, warnings = resolution_jobs_payload()
         return payload["resolutionJobRegistryId"], payload, binding, state, warnings
@@ -979,6 +1104,10 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "sourcehandoffmethodgate-000"
     if args.operation == "private_setup_forecast_execution":
         return "setupforecastrun-000"
+    if args.operation in {"agent_integration_readiness", "agent_integration_candidates"}:
+        return "agentintegration-001"
+    if args.operation == "agent_integration_guided_forecast":
+        return "guidedforecastcase-000"
     if args.operation == "campaign_plan":
         return "predictioncampaignmanifest-001"
     if args.operation == "campaign_status":
@@ -991,6 +1120,8 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "predictioncampaigncalibrationstatus-001"
     if args.operation == "internal_api":
         return "internalapicall-001"
+    if args.operation == "database_source_adapter_runtime_status":
+        return "databasesourceadapterruntime-001"
     if args.operation == "resolution_jobs":
         return "resolutionjobregistry-001"
     if args.operation == "resolution_scheduler_status":
@@ -1043,6 +1174,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-handoff-case", choices=SOURCE_HANDOFF_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--method-gate-case", choices=METHOD_GATE_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--forecast-execution-case", choices=FORECAST_EXECUTION_CASES, default="unconfirmed_builder_draft")
+    parser.add_argument("--scenario", default=DEFAULT_AGENT_INTEGRATION_SCENARIO)
+    parser.add_argument("--case", choices=GUIDED_CASES, default="accepted_adapter_output", dest="guided_case")
     parser.add_argument("--internal-operation", choices=OPERATION_ORDER, default="read_status")
     parser.add_argument("--prediction-id", default="predictioncampaign-001")
     parser.add_argument("--idempotency-key")

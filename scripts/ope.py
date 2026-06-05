@@ -11,6 +11,239 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+DOMAIN_SOURCE_FIELD_POLICY_FIELDS = [
+    "domain_identity",
+    "question_templates",
+    "horizons",
+    "resolution_criteria",
+    "baseline_method",
+    "accepted_source_roles",
+    "exclusion_rules",
+    "sample_thresholds",
+    "claim_boundaries",
+    "execution_boundary",
+    "source_binding_identity",
+    "source_binding_mode",
+    "credential_policy",
+    "source_role_bindings",
+    "pre_forecast_checks",
+    "setup_operations",
+    "configuration_input_boundary",
+    "next_action",
+    "summary",
+    "question_parameters",
+    "role_keys",
+    "role_required_fields",
+    "resolution_text_criteria",
+    "exclusion_reason_codes",
+    "domain_specific_horizon_labels",
+    "baseline_threshold_values",
+    "source_quality_threshold_values",
+    "credential_value",
+    "raw_sql_query",
+    "raw_private_row",
+    "post_outcome_forecast_evidence",
+    "production_quality_claim",
+    "hosted_runtime_flag",
+]
+
+DOMAIN_SOURCE_FIELD_POLICY_CASES = [
+    "weather_transit_core_ready",
+    "seaport_extension_ready",
+    "missing_resolution_criteria",
+    "credential_value_in_source_binding",
+    "raw_sql_query_as_binding_field",
+    "domain_quality_claim_enabled",
+    "outcome_role_marked_forecast_time",
+]
+
+DOMAIN_SOURCE_FIELD_POLICY_VIEWS = [
+    "full",
+    "source",
+    "domain-fields",
+    "source-fields",
+    "extensions",
+    "blocked",
+    "source-kinds",
+    "cases",
+    "readbacks",
+    "boundary",
+    "summary",
+]
+
+CREDENTIAL_REFERENCE_POLICY_MECHANISMS = [
+    "caller_secret_store_alias",
+    "host_runtime_secret_handle",
+    "local_operator_session_ref",
+    "public_no_credential",
+]
+
+CREDENTIAL_REFERENCE_POLICY_SCOPE_KEYS = [
+    "tenant_id",
+    "workspace_id",
+    "source_binding_id",
+    "source_role",
+    "adapter_ref",
+    "source_kind",
+    "source_policy_id",
+    "credential_purpose",
+]
+
+CREDENTIAL_REFERENCE_POLICY_STATES = [
+    "proposed",
+    "approved",
+    "active",
+    "rotation_due",
+    "revoked",
+    "redaction_required",
+]
+
+CREDENTIAL_REFERENCE_POLICY_CONSUMERS = [
+    "private_api_adapter",
+    "database_adapter",
+    "source_binding_validation",
+    "runtime_readback",
+    "agent_envelope",
+    "normal_checks",
+]
+
+CREDENTIAL_REFERENCE_POLICY_CASES = [
+    "accepted_private_api_reference",
+    "accepted_database_reference",
+    "public_source_no_credential",
+    "missing_reference_for_private_api",
+    "raw_api_token_submitted",
+    "database_password_in_connection_string",
+    "cross_tenant_reference",
+    "unscoped_reference",
+    "adapter_mismatch",
+    "revoked_reference",
+    "normal_check_resolution_attempt",
+]
+
+CREDENTIAL_REFERENCE_POLICY_VIEWS = [
+    "full",
+    "source",
+    "mechanisms",
+    "scope",
+    "lifecycle",
+    "consumers",
+    "cases",
+    "readbacks",
+    "boundary",
+    "summary",
+]
+
+RETENTION_REDACTION_POLICY_CLASSES = [
+    "forecast_lifecycle_record",
+    "evidence_trace_record",
+    "source_connector_result",
+    "source_binding_config",
+    "credential_reference_record",
+    "pilot_session_summary",
+    "local_usage_trace_event",
+    "operation_receipt",
+]
+
+RETENTION_REDACTION_POLICY_ACTIONS = [
+    "retain_append_only",
+    "archive_tombstone",
+    "redaction_receipt",
+    "sanitized_projection_rebuild",
+    "physical_delete_exception",
+]
+
+RETENTION_REDACTION_POLICY_GATES = [
+    "authorized_erasure_basis",
+    "tenant_workspace_scope_verified",
+    "record_class_allows_physical_delete",
+    "legal_or_safety_review_recorded",
+    "audit_tombstone_retained",
+    "redaction_receipt_retained",
+    "immutable_forecast_history_preserved_or_rendered_unscorable",
+    "operator_approval_recorded",
+]
+
+RETENTION_REDACTION_POLICY_CASES = [
+    "normal_forecast_lifecycle_retention",
+    "archive_inactive_prediction",
+    "redact_private_source_detail",
+    "redact_credential_like_field",
+    "pilot_summary_needs_redaction",
+    "usage_trace_aggregate_only",
+    "source_connector_raw_preview_requested",
+    "physical_delete_missing_legal_basis",
+    "physical_delete_with_authorized_erasure",
+    "physical_delete_for_forecast_history",
+    "redaction_receipt_replay",
+    "tombstone_rebuild_read_model",
+]
+
+RETENTION_REDACTION_POLICY_VIEWS = [
+    "full",
+    "source",
+    "classes",
+    "actions",
+    "gates",
+    "cases",
+    "readbacks",
+    "boundary",
+    "summary",
+]
+
+PRIVATE_AUTO_EVIDENCE_POLICY_SOURCE_KINDS = [
+    "local_file",
+    "manual_mapping",
+    "auto_evidence_connector",
+    "source_adapter_output",
+    "database_query_manifest",
+    "private_api_manifest",
+    "manual_upload",
+    "web_search",
+]
+
+PRIVATE_AUTO_EVIDENCE_POLICY_GATES = [
+    "domain_config_bound",
+    "source_binding_bound",
+    "source_policy_bound",
+    "tenant_workspace_scope_bound",
+    "caller_approval_recorded",
+    "credential_reference_scoped",
+    "adapter_capability_checked",
+    "freshness_window_declared",
+    "retention_policy_bound",
+    "leakage_checks_declared",
+    "forecast_before_close_preserved",
+    "normal_checks_non_effectful",
+]
+
+PRIVATE_AUTO_EVIDENCE_POLICY_CASES = [
+    "approved_local_file_auto",
+    "approved_adapter_output_auto",
+    "approved_database_query_manifest",
+    "private_api_manifest_with_scoped_credential",
+    "manual_mapping_with_confirmation",
+    "manual_upload_without_adapter_contract",
+    "private_api_missing_credential_ref",
+    "database_raw_sql_auto",
+    "web_search_private_setup",
+    "cross_tenant_source_binding",
+    "post_outcome_capture_as_forecast_evidence",
+    "raw_private_payload_retention",
+    "unregistered_private_connector",
+]
+
+PRIVATE_AUTO_EVIDENCE_POLICY_VIEWS = [
+    "full",
+    "source",
+    "source-kinds",
+    "gates",
+    "cases",
+    "readbacks",
+    "boundary",
+    "summary",
+]
+
 
 def run(command: list[str]) -> None:
     try:
@@ -96,6 +329,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     domain_setups_command = [sys.executable, "scripts/generate_domain_setups.py"]
     domain_configs_command = [sys.executable, "scripts/generate_domain_configs.py"]
     source_bindings_command = [sys.executable, "scripts/generate_source_bindings.py"]
+    domain_source_field_policy_command = [sys.executable, "scripts/generate_domain_source_field_policy.py"]
+    credential_reference_policy_command = [sys.executable, "scripts/generate_credential_reference_policy.py"]
+    retention_redaction_policy_command = [sys.executable, "scripts/generate_retention_redaction_policy.py"]
+    private_auto_evidence_policy_command = [sys.executable, "scripts/generate_private_auto_evidence_policy.py"]
     transit_delay_forecast_command = [sys.executable, "scripts/run_transit_delay_forecast.py"]
     transit_delay_forward_command = [sys.executable, "scripts/run_transit_delay_forward.py"]
     transit_forward_resolver_command = [sys.executable, "scripts/resolve_due_transit_forward_runs.py"]
@@ -105,6 +342,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     lifecycle_operation_store_command = [sys.executable, "scripts/generate_lifecycle_operation_store.py"]
     internal_api_command = [sys.executable, "scripts/generate_internal_api.py"]
     prediction_workspace_registry_command = [sys.executable, "scripts/generate_prediction_workspace_registry.py"]
+    background_worker_command = [sys.executable, "scripts/generate_background_worker_runtime.py"]
+    runtime_security_command = [sys.executable, "scripts/generate_runtime_security.py"]
+    agent_implementation_kit_command = [sys.executable, "scripts/generate_agent_implementation_kit.py"]
+    agent_integration_command = [sys.executable, "scripts/generate_agent_integration.py"]
+    postgres_compatibility_command = [sys.executable, "scripts/generate_postgres_compatibility.py"]
+    database_source_adapter_runtime_command = [sys.executable, "scripts/generate_database_source_adapter_runtime.py"]
+    opp_provider_adapter_command = [sys.executable, "scripts/generate_opp_provider_adapter.py"]
+    persistent_sqlite_policy_command = [sys.executable, "scripts/generate_persistent_sqlite_policy.py"]
+    lifecycle_lease_policy_command = [sys.executable, "scripts/generate_lifecycle_lease_policy.py"]
+    runtime_transport_readiness_command = [sys.executable, "scripts/generate_runtime_transport_readiness.py"]
+    workspace_tenant_isolation_command = [sys.executable, "scripts/generate_workspace_tenant_isolation.py"]
     transit_forward_run_corpus_command = [sys.executable, "scripts/generate_transit_forward_run_corpus.py"]
     transit_corpus_growth_command = [sys.executable, "scripts/generate_transit_corpus_growth_loop.py"]
     transit_track_record_gate_command = [sys.executable, "scripts/generate_transit_baseline_track_record_gate.py"]
@@ -220,6 +468,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         domain_setups_command.append("--write")
         domain_configs_command.append("--write")
         source_bindings_command.append("--write")
+        domain_source_field_policy_command.append("--write")
+        credential_reference_policy_command.append("--write")
+        retention_redaction_policy_command.append("--write")
+        private_auto_evidence_policy_command.append("--write")
         transit_delay_forecast_command.append("--write")
         transit_delay_forward_command.append("--write")
         transit_forward_resolver_command.append("--write")
@@ -229,6 +481,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         lifecycle_operation_store_command.append("--write")
         internal_api_command.append("--write")
         prediction_workspace_registry_command.append("--write")
+        background_worker_command.append("--write")
+        runtime_security_command.append("--write")
+        agent_implementation_kit_command.append("--write")
+        agent_integration_command.append("--write")
+        postgres_compatibility_command.append("--write")
+        database_source_adapter_runtime_command.append("--write")
+        opp_provider_adapter_command.append("--write")
+        persistent_sqlite_policy_command.append("--write")
+        lifecycle_lease_policy_command.append("--write")
+        runtime_transport_readiness_command.append("--write")
+        workspace_tenant_isolation_command.append("--write")
         transit_forward_run_corpus_command.append("--write")
         transit_corpus_growth_command.append("--write")
         transit_track_record_gate_command.append("--write")
@@ -311,6 +574,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         domain_setups_command.append("--check")
         domain_configs_command.append("--check")
         source_bindings_command.append("--check")
+        domain_source_field_policy_command.append("--check")
+        credential_reference_policy_command.append("--check")
+        retention_redaction_policy_command.append("--check")
+        private_auto_evidence_policy_command.append("--check")
         transit_delay_forecast_command.append("--check")
         transit_delay_forward_command.append("--check")
         transit_forward_resolver_command.append("--check")
@@ -320,6 +587,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         lifecycle_operation_store_command.append("--check")
         internal_api_command.append("--check")
         prediction_workspace_registry_command.append("--check")
+        background_worker_command.append("--check")
+        runtime_security_command.append("--check")
+        agent_implementation_kit_command.append("--check")
+        agent_integration_command.append("--check")
+        postgres_compatibility_command.append("--check")
+        database_source_adapter_runtime_command.append("--check")
+        opp_provider_adapter_command.append("--check")
+        persistent_sqlite_policy_command.append("--check")
+        lifecycle_lease_policy_command.append("--check")
+        runtime_transport_readiness_command.append("--check")
+        workspace_tenant_isolation_command.append("--check")
         transit_forward_run_corpus_command.append("--check")
         transit_corpus_growth_command.append("--check")
         transit_track_record_gate_command.append("--check")
@@ -397,6 +675,10 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         domain_setups_command,
         domain_configs_command,
         source_bindings_command,
+        domain_source_field_policy_command,
+        credential_reference_policy_command,
+        retention_redaction_policy_command,
+        private_auto_evidence_policy_command,
         transit_delay_forecast_command,
         transit_delay_forward_command,
         transit_forward_resolver_command,
@@ -406,6 +688,17 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         lifecycle_operation_store_command,
         internal_api_command,
         prediction_workspace_registry_command,
+        background_worker_command,
+        runtime_security_command,
+        agent_implementation_kit_command,
+        agent_integration_command,
+        postgres_compatibility_command,
+        database_source_adapter_runtime_command,
+        opp_provider_adapter_command,
+        persistent_sqlite_policy_command,
+        lifecycle_lease_policy_command,
+        runtime_transport_readiness_command,
+        workspace_tenant_isolation_command,
         transit_forward_run_corpus_command,
         transit_corpus_growth_command,
         transit_track_record_gate_command,
@@ -677,6 +970,78 @@ def cmd_source_bindings(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_domain_source_field_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_domain_source_field_policy.py"]
+    if args.field:
+        command.extend(["--field", args.field])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_credential_reference_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_credential_reference_policy.py"]
+    if args.mechanism:
+        command.extend(["--mechanism", args.mechanism])
+    if args.scope_key:
+        command.extend(["--scope-key", args.scope_key])
+    if args.state:
+        command.extend(["--state", args.state])
+    if args.consumer:
+        command.extend(["--consumer", args.consumer])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_retention_redaction_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_retention_redaction_policy.py"]
+    if args.record_class:
+        command.extend(["--record-class", args.record_class])
+    if args.action:
+        command.extend(["--action", args.action])
+    if args.gate:
+        command.extend(["--gate", args.gate])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_private_auto_evidence_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_private_auto_evidence_policy.py"]
+    if args.source_kind:
+        command.extend(["--source-kind", args.source_kind])
+    if args.gate:
+        command.extend(["--gate", args.gate])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
 def cmd_transit_delay_forecast(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/run_transit_delay_forecast.py"]
     if args.weather_forecast:
@@ -931,6 +1296,149 @@ def cmd_prediction_workspace_registry(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_prediction_workspace_registry.py"]
     if args.prediction_id:
         command.extend(["--prediction-id", args.prediction_id])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_background_worker(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_background_worker_runtime.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_runtime_security(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_runtime_security.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_agent_implementation_kit(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_agent_implementation_kit.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_agent_integrate(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_agent_integration.py"]
+    if args.scenario:
+        command.extend(["--scenario", args.scenario])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.run_guided:
+        command.append("--run-guided")
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_postgres_compatibility(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_postgres_compatibility.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_database_source_adapter_runtime(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_database_source_adapter_runtime.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_opp_provider_adapter(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_opp_provider_adapter.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_persistent_sqlite_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_persistent_sqlite_policy.py"]
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_lifecycle_lease_policy(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_lifecycle_lease_policy.py"]
+    if args.operation:
+        command.extend(["--operation", args.operation])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_runtime_transport_readiness(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_runtime_transport_readiness.py"]
+    if args.surface:
+        command.extend(["--surface", args.surface])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_workspace_tenant_isolation(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_workspace_tenant_isolation.py"]
+    if args.tenant_id:
+        command.extend(["--tenant-id", args.tenant_id])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.view:
+        command.extend(["--view", args.view])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1792,6 +2300,10 @@ def cmd_agent_call(args: argparse.Namespace) -> None:
         command.extend(["--method-gate-case", args.method_gate_case])
     if args.forecast_execution_case:
         command.extend(["--forecast-execution-case", args.forecast_execution_case])
+    if args.scenario:
+        command.extend(["--scenario", args.scenario])
+    if args.guided_case:
+        command.extend(["--case", args.guided_case])
     if args.internal_operation:
         command.extend(["--internal-operation", args.internal_operation])
     if args.prediction_id:
@@ -2056,6 +2568,164 @@ def build_parser() -> argparse.ArgumentParser:
     source_bindings.add_argument("--write", action="store_true", help="refresh generated source binding records")
     source_bindings.set_defaults(func=cmd_source_bindings)
 
+    domain_source_field_policy = subparsers.add_parser(
+        "domain-source-field-policy",
+        help="print checked domain/source field requirement policy readback",
+    )
+    domain_source_field_policy.add_argument(
+        "--field",
+        choices=DOMAIN_SOURCE_FIELD_POLICY_FIELDS,
+        help="print one field policy row",
+    )
+    domain_source_field_policy.add_argument(
+        "--case",
+        choices=DOMAIN_SOURCE_FIELD_POLICY_CASES,
+        help="print one field decision case",
+    )
+    domain_source_field_policy.add_argument(
+        "--view",
+        choices=DOMAIN_SOURCE_FIELD_POLICY_VIEWS,
+        default="full",
+        help="print a focused domain/source field policy view",
+    )
+    domain_source_field_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated domain/source field policy drift",
+    )
+    domain_source_field_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated domain/source field policy fixture",
+    )
+    domain_source_field_policy.set_defaults(func=cmd_domain_source_field_policy)
+
+    credential_reference_policy = subparsers.add_parser(
+        "credential-reference-policy",
+        help="print checked credential-reference mechanism policy readback",
+    )
+    credential_reference_policy.add_argument(
+        "--mechanism",
+        choices=CREDENTIAL_REFERENCE_POLICY_MECHANISMS,
+        help="print one accepted credential-reference mechanism",
+    )
+    credential_reference_policy.add_argument(
+        "--scope-key",
+        choices=CREDENTIAL_REFERENCE_POLICY_SCOPE_KEYS,
+        help="print one required credential-reference scope key",
+    )
+    credential_reference_policy.add_argument(
+        "--state",
+        choices=CREDENTIAL_REFERENCE_POLICY_STATES,
+        help="print one credential-reference lifecycle state",
+    )
+    credential_reference_policy.add_argument(
+        "--consumer",
+        choices=CREDENTIAL_REFERENCE_POLICY_CONSUMERS,
+        help="print one credential-reference consumer rule",
+    )
+    credential_reference_policy.add_argument(
+        "--case",
+        choices=CREDENTIAL_REFERENCE_POLICY_CASES,
+        help="print one credential-reference policy case",
+    )
+    credential_reference_policy.add_argument(
+        "--view",
+        choices=CREDENTIAL_REFERENCE_POLICY_VIEWS,
+        default="full",
+        help="print a focused credential-reference policy view",
+    )
+    credential_reference_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated credential-reference policy drift",
+    )
+    credential_reference_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated credential-reference policy fixture",
+    )
+    credential_reference_policy.set_defaults(func=cmd_credential_reference_policy)
+
+    retention_redaction_policy = subparsers.add_parser(
+        "retention-redaction-policy",
+        help="print checked retention, redaction, tombstone, and physical-delete policy readback",
+    )
+    retention_redaction_policy.add_argument(
+        "--record-class",
+        choices=RETENTION_REDACTION_POLICY_CLASSES,
+        help="print one retention class policy",
+    )
+    retention_redaction_policy.add_argument(
+        "--action",
+        choices=RETENTION_REDACTION_POLICY_ACTIONS,
+        help="print one retention/redaction policy action",
+    )
+    retention_redaction_policy.add_argument(
+        "--gate",
+        choices=RETENTION_REDACTION_POLICY_GATES,
+        help="print one physical-delete exception gate",
+    )
+    retention_redaction_policy.add_argument(
+        "--case",
+        choices=RETENTION_REDACTION_POLICY_CASES,
+        help="print one retention/redaction policy case",
+    )
+    retention_redaction_policy.add_argument(
+        "--view",
+        choices=RETENTION_REDACTION_POLICY_VIEWS,
+        default="full",
+        help="print a focused retention/redaction policy view",
+    )
+    retention_redaction_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated retention/redaction policy drift",
+    )
+    retention_redaction_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated retention/redaction policy fixture",
+    )
+    retention_redaction_policy.set_defaults(func=cmd_retention_redaction_policy)
+
+    private_auto_evidence_policy = subparsers.add_parser(
+        "private-auto-evidence-policy",
+        help="print checked private data:auto source-policy readback",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--source-kind",
+        choices=PRIVATE_AUTO_EVIDENCE_POLICY_SOURCE_KINDS,
+        help="print one private data:auto source-kind policy",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--gate",
+        choices=PRIVATE_AUTO_EVIDENCE_POLICY_GATES,
+        help="print one private data:auto policy gate",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--case",
+        choices=PRIVATE_AUTO_EVIDENCE_POLICY_CASES,
+        help="print one private data:auto policy case",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--view",
+        choices=PRIVATE_AUTO_EVIDENCE_POLICY_VIEWS,
+        default="full",
+        help="print a focused private data:auto policy view",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated private data:auto policy drift",
+    )
+    private_auto_evidence_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated private data:auto policy fixture",
+    )
+    private_auto_evidence_policy.set_defaults(func=cmd_private_auto_evidence_policy)
+
     transit_delay_forecast = subparsers.add_parser(
         "transit-delay-forecast",
         help="run a local weather-transit-delay forecast from approved CSV/JSON files",
@@ -2251,6 +2921,7 @@ def build_parser() -> argparse.ArgumentParser:
             "resolve_due",
             "append_evidence",
             "read_status",
+            "database_source_adapter_status",
             "read_forecast_card",
             "read_lifecycle_bundle",
             "archive_record",
@@ -2298,6 +2969,443 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated prediction workspace registry fixture",
     )
     prediction_workspace_registry.set_defaults(func=cmd_prediction_workspace_registry)
+
+    background_worker = subparsers.add_parser(
+        "background-worker",
+        help="print checked bounded background worker and sidecar runtime readback",
+    )
+    background_worker.add_argument(
+        "--view",
+        choices=["full", "health", "tick", "loop", "commit", "control", "sidecar", "blocked", "boundary"],
+        default="full",
+        help="print a compact worker readback view",
+    )
+    background_worker.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated background worker runtime drift",
+    )
+    background_worker.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated background worker runtime fixture",
+    )
+    background_worker.set_defaults(func=cmd_background_worker)
+
+    runtime_security = subparsers.add_parser(
+        "runtime-security",
+        help="print checked lightweight runtime security and hardening readback",
+    )
+    runtime_security.add_argument(
+        "--view",
+        choices=["full", "budget", "modules", "surfaces", "threats", "blocked", "boundary"],
+        default="full",
+        help="print a focused runtime-security readback view",
+    )
+    runtime_security.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated runtime security hardening drift",
+    )
+    runtime_security.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated runtime security hardening fixture",
+    )
+    runtime_security.set_defaults(func=cmd_runtime_security)
+
+    agent_implementation_kit = subparsers.add_parser(
+        "agent-implementation-kit",
+        help="print checked agent prediction implementation kit and question-discovery readback",
+    )
+    agent_implementation_kit.add_argument(
+        "--view",
+        choices=["full", "manual", "intake", "candidates", "validation", "adapters", "templates", "blocked", "boundary"],
+        default="full",
+        help="print a focused agent implementation kit view",
+    )
+    agent_implementation_kit.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated agent implementation kit drift",
+    )
+    agent_implementation_kit.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated agent implementation kit fixture",
+    )
+    agent_implementation_kit.set_defaults(func=cmd_agent_implementation_kit)
+
+    agent_integrate = subparsers.add_parser(
+        "agent-integrate",
+        help="print checked agent incorporation readiness, candidate discovery, and guided forecast readbacks",
+    )
+    agent_integrate.add_argument(
+        "--scenario",
+        choices=["helsinki_bus_disruption"],
+        default="helsinki_bus_disruption",
+        help="starter incorporation scenario",
+    )
+    agent_integrate.add_argument(
+        "--view",
+        choices=["full", "summary", "intake", "candidates", "validation", "commands", "blocked", "boundary", "efficiency"],
+        default="full",
+        help="print a focused agent integration readback view",
+    )
+    agent_integrate.add_argument(
+        "--case",
+        choices=[
+            "accepted_adapter_output",
+            "missing_weather_source",
+            "missing_baseline_source",
+            "missing_outcome_source",
+            "ambiguous_service_window",
+            "vague_geography",
+            "missing_resolution_source",
+            "unapproved_source",
+            "raw_credential_value",
+            "raw_sql_query",
+            "unsafe_adapter_output",
+            "private_row_exposure",
+            "post_outcome_evidence",
+        ],
+        help="print one guided forecast case",
+    )
+    agent_integrate.add_argument(
+        "--run-guided",
+        action="store_true",
+        help="return the guided first-forecast readback for the selected case",
+    )
+    agent_integrate.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated agent integration drift",
+    )
+    agent_integrate.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated agent integration fixture",
+    )
+    agent_integrate.set_defaults(func=cmd_agent_integrate)
+
+    postgres_compatibility = subparsers.add_parser(
+        "postgres-compatibility",
+        help="print checked SQLite-to-Postgres lifecycle storage compatibility readback",
+    )
+    postgres_compatibility.add_argument(
+        "--view",
+        choices=["full", "tables", "contract", "scenarios", "guards", "migration", "boundary"],
+        default="full",
+        help="print a focused Postgres compatibility view",
+    )
+    postgres_compatibility.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated Postgres compatibility drift",
+    )
+    postgres_compatibility.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated Postgres compatibility fixture",
+    )
+    postgres_compatibility.set_defaults(func=cmd_postgres_compatibility)
+
+    database_source_adapter_runtime = subparsers.add_parser(
+        "database-source-adapter-runtime",
+        help="print checked approved database source-adapter runtime readback",
+    )
+    database_source_adapter_runtime.add_argument(
+        "--case",
+        choices=[
+            "approved_fixture",
+            "missing_approval",
+            "missing_credential_reference",
+            "unsafe_query_boundary",
+            "oversized_result",
+            "stale_source",
+            "leakage_risk",
+            "missing_outcome_source",
+            "insufficient_comparable_history",
+        ],
+        help="print one checked database adapter runtime case",
+    )
+    database_source_adapter_runtime.add_argument(
+        "--view",
+        choices=["full", "cases", "approved", "blocked", "routing", "readbacks", "boundary", "summary"],
+        default="full",
+        help="print a focused database source-adapter runtime view",
+    )
+    database_source_adapter_runtime.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated database source-adapter runtime drift",
+    )
+    database_source_adapter_runtime.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated database source-adapter runtime fixture",
+    )
+    database_source_adapter_runtime.set_defaults(func=cmd_database_source_adapter_runtime)
+
+    opp_provider_adapter = subparsers.add_parser(
+        "opp-provider-adapter",
+        help="print checked optional Open Prediction Protocol provider-adapter readback",
+    )
+    opp_provider_adapter.add_argument(
+        "--case",
+        choices=[
+            "accepted_forecast_card",
+            "unsupported_market",
+            "malformed_outcome_spec",
+            "missing_source_policy",
+            "provider_timeout",
+            "response_too_large",
+        ],
+        help="print one checked OPP provider-adapter conformance case",
+    )
+    opp_provider_adapter.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "request",
+            "response",
+            "agent-card",
+            "cases",
+            "accepted",
+            "blocked",
+            "conformance",
+            "boundary",
+            "readbacks",
+            "summary",
+        ],
+        default="full",
+        help="print a focused OPP provider-adapter view",
+    )
+    opp_provider_adapter.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated OPP provider-adapter drift",
+    )
+    opp_provider_adapter.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated OPP provider-adapter fixture",
+    )
+    opp_provider_adapter.set_defaults(func=cmd_opp_provider_adapter)
+
+    persistent_sqlite_policy = subparsers.add_parser(
+        "persistent-sqlite-policy",
+        help="print checked persistent SQLite path policy and readiness boundary",
+    )
+    persistent_sqlite_policy.add_argument(
+        "--case",
+        choices=[
+            "ephemeral_default",
+            "approved_workspace_path",
+            "missing_approval",
+            "outside_workspace",
+            "symlink_escape",
+            "existing_unmigrated_json_state",
+            "schema_version_mismatch",
+            "backup_missing",
+            "lock_conflict",
+            "readonly_filesystem",
+        ],
+        help="print one checked persistent SQLite path policy case",
+    )
+    persistent_sqlite_policy.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "path",
+            "cases",
+            "ready",
+            "blocked",
+            "migration",
+            "backup-lock",
+            "guards",
+            "readbacks",
+            "boundary",
+            "summary",
+        ],
+        default="full",
+        help="print a focused persistent SQLite policy view",
+    )
+    persistent_sqlite_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated persistent SQLite policy drift",
+    )
+    persistent_sqlite_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated persistent SQLite policy fixture",
+    )
+    persistent_sqlite_policy.set_defaults(func=cmd_persistent_sqlite_policy)
+
+    lifecycle_lease_policy = subparsers.add_parser(
+        "lifecycle-lease-policy",
+        help="print checked lifecycle operation lease and idempotency policy readback",
+    )
+    lifecycle_lease_policy.add_argument(
+        "--operation",
+        choices=[
+            "campaign.create_run",
+            "forecast.create",
+            "forecast.recalculate",
+            "question.cancel",
+            "question.annul",
+            "resolution.record",
+            "score.create",
+            "evidence.append",
+            "pre_calibration.bind",
+            "method.apply",
+            "method.rollback",
+            "state.import_json",
+            "record.archive",
+            "record.redact",
+        ],
+        help="print one lifecycle operation lease policy",
+    )
+    lifecycle_lease_policy.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "source",
+            "operations",
+            "strict",
+            "idempotency",
+            "cases",
+            "readbacks",
+            "boundary",
+            "summary",
+        ],
+        default="full",
+        help="print a focused lifecycle lease policy view",
+    )
+    lifecycle_lease_policy.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated lifecycle lease policy drift",
+    )
+    lifecycle_lease_policy.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated lifecycle lease policy fixture",
+    )
+    lifecycle_lease_policy.set_defaults(func=cmd_lifecycle_lease_policy)
+
+    runtime_transport_readiness = subparsers.add_parser(
+        "runtime-transport-readiness",
+        help="print checked runtime transport readiness and hosted/HTTP boundary readback",
+    )
+    runtime_transport_readiness.add_argument(
+        "--surface",
+        choices=[
+            "embedded_internal_api",
+            "cli",
+            "agent_call",
+            "local_mcp_stdio",
+            "local_http_adapter",
+            "queue_adapter",
+            "hosted_service_runtime",
+            "opp_http_provider",
+        ],
+        help="print one runtime transport surface",
+    )
+    runtime_transport_readiness.add_argument(
+        "--case",
+        choices=[
+            "normal_check_http_server",
+            "implicit_hosted_service",
+            "opp_http_endpoint_request",
+            "queue_worker_without_readiness",
+            "production_secret_value_in_record",
+            "default_live_fetch",
+            "unbounded_background_daemon",
+        ],
+        help="print one blocked runtime transport case",
+    )
+    runtime_transport_readiness.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "current",
+            "future",
+            "decisions",
+            "criteria",
+            "blocked",
+            "readbacks",
+            "boundary",
+            "summary",
+        ],
+        default="full",
+        help="print a focused runtime transport readiness view",
+    )
+    runtime_transport_readiness.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated runtime transport readiness drift",
+    )
+    runtime_transport_readiness.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated runtime transport readiness fixture",
+    )
+    runtime_transport_readiness.set_defaults(func=cmd_runtime_transport_readiness)
+
+    workspace_tenant_isolation = subparsers.add_parser(
+        "workspace-tenant-isolation",
+        help="print checked tenant-scoped workspace isolation policy readback",
+    )
+    workspace_tenant_isolation.add_argument(
+        "--tenant-id",
+        choices=["tenant-001", "tenant-002"],
+        help="print one tenant workspace binding",
+    )
+    workspace_tenant_isolation.add_argument(
+        "--case",
+        choices=[
+            "same_tenant_workspace_read",
+            "cross_tenant_prediction_read",
+            "cross_workspace_source_binding_reuse",
+            "cross_tenant_queue_peek",
+            "idempotency_namespace_collision",
+            "credential_reference_other_tenant",
+            "admin_override_without_audit",
+        ],
+        help="print one checked tenant access case",
+    )
+    workspace_tenant_isolation.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "source",
+            "tenants",
+            "model",
+            "scope",
+            "resources",
+            "queues",
+            "sources",
+            "cases",
+            "readbacks",
+            "boundary",
+            "summary",
+        ],
+        default="full",
+        help="print a focused workspace tenant isolation view",
+    )
+    workspace_tenant_isolation.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated workspace tenant isolation drift",
+    )
+    workspace_tenant_isolation.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated workspace tenant isolation fixture",
+    )
+    workspace_tenant_isolation.set_defaults(func=cmd_workspace_tenant_isolation)
 
     transit_forward_run_corpus = subparsers.add_parser(
         "transit-forward-run-corpus",
@@ -3067,6 +4175,10 @@ def build_parser() -> argparse.ArgumentParser:
             "campaign_paused",
             "campaign_resumed",
             "campaign_stopped",
+            "agent_integration_readiness",
+            "agent_integration_candidates",
+            "agent_integration_guided_forecast",
+            "agent_integration_missing_weather_block",
         ],
         help="print one usage trace event",
     )
@@ -3487,12 +4599,16 @@ def build_parser() -> argparse.ArgumentParser:
             "private_setup_source_handoff",
             "private_setup_method_gate",
             "private_setup_forecast_execution",
+            "agent_integration_readiness",
+            "agent_integration_candidates",
+            "agent_integration_guided_forecast",
             "campaign_plan",
             "campaign_status",
             "campaign_health",
             "campaign_append_readiness",
             "campaign_calibration_status",
             "internal_api",
+            "database_source_adapter_runtime_status",
             "resolution_jobs",
             "resolution_scheduler_status",
             "resolution_status",
@@ -3566,6 +4682,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="checked source-handoff forecast-execution fixture case for private setup forecast adapter",
     )
     agent_call.add_argument(
+        "--scenario",
+        choices=["helsinki_bus_disruption"],
+        help="checked agent integration starter scenario",
+    )
+    agent_call.add_argument(
+        "--case",
+        choices=[
+            "accepted_adapter_output",
+            "missing_weather_source",
+            "missing_baseline_source",
+            "missing_outcome_source",
+            "ambiguous_service_window",
+            "vague_geography",
+            "missing_resolution_source",
+            "unapproved_source",
+            "raw_credential_value",
+            "raw_sql_query",
+            "unsafe_adapter_output",
+            "private_row_exposure",
+            "post_outcome_evidence",
+        ],
+        dest="guided_case",
+        help="checked agent integration guided forecast case",
+    )
+    agent_call.add_argument(
         "--internal-operation",
         choices=[
             "create_prediction",
@@ -3577,6 +4718,7 @@ def build_parser() -> argparse.ArgumentParser:
             "resolve_due",
             "append_evidence",
             "read_status",
+            "database_source_adapter_status",
             "read_forecast_card",
             "read_lifecycle_bundle",
             "archive_record",

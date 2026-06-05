@@ -1,0 +1,500 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/workspace-tenant-isolation.schema.json",
+  "title": "Workspace Tenant Isolation",
+  "description": "Checked tenant-scoped workspace isolation policy for resources, source bindings, queues, credentials, and readbacks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workspaceTenantIsolationId",
+    "generatedAt",
+    "isolationStatus",
+    "decisionStatus",
+    "normalChecksMutateState",
+    "hostedTenantRuntimeImplemented",
+    "sourceBinding",
+    "tenantWorkspaceBindings",
+    "isolationModel",
+    "scopeKeys",
+    "tenantResourceControls",
+    "operationQueuePolicies",
+    "sourceBindingPolicies",
+    "accessCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "workspaceTenantIsolationId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "isolationStatus": { "type": "string", "enum": ["workspace_tenant_isolation_checked"] },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["tenant_scoped_workspaces_with_resource_source_and_queue_isolation"]
+    },
+    "normalChecksMutateState": { "type": "boolean" },
+    "hostedTenantRuntimeImplemented": { "type": "boolean" },
+    "sourceBinding": { "$ref": "#/$defs/sourceBinding" },
+    "tenantWorkspaceBindings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/tenantWorkspaceBinding" }
+    },
+    "isolationModel": { "$ref": "#/$defs/isolationModel" },
+    "scopeKeys": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/scopeKey" }
+    },
+    "tenantResourceControls": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/tenantResourceControl" }
+    },
+    "operationQueuePolicies": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/operationQueuePolicy" }
+    },
+    "sourceBindingPolicies": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/sourceBindingPolicy" }
+    },
+    "accessCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/accessCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceSurface",
+        "sourceCommand",
+        "sourceRegistryId",
+        "sourceWorkspaceId",
+        "rawRegistryMutationAllowed",
+        "notes"
+      ],
+      "properties": {
+        "sourceSurface": { "type": "string", "enum": ["prediction_workspace_registry"] },
+        "sourceCommand": { "type": "string", "enum": ["python3 scripts/ope.py prediction-workspace-registry"] },
+        "sourceRegistryId": { "$ref": "common.schema.json#/$defs/id" },
+        "sourceWorkspaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "rawRegistryMutationAllowed": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "tenantWorkspaceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantId",
+        "workspaceId",
+        "workspaceStatus",
+        "owner",
+        "predictionIds",
+        "sourceBindingIds",
+        "operationQueueRefs",
+        "idempotencyNamespacePrefix",
+        "resourcePolicyId",
+        "credentialScopeId",
+        "rawSqlExposed",
+        "rawPrivateRowsExposed"
+      ],
+      "properties": {
+        "tenantId": { "$ref": "common.schema.json#/$defs/id" },
+        "workspaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "workspaceStatus": { "type": "string", "enum": ["active", "paused"] },
+        "owner": { "$ref": "#/$defs/owner" },
+        "predictionIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "sourceBindingIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "operationQueueRefs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": { "$ref": "common.schema.json#/$defs/id" }
+        },
+        "idempotencyNamespacePrefix": { "type": "string", "minLength": 12, "maxLength": 96 },
+        "resourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "credentialScopeId": { "$ref": "common.schema.json#/$defs/id" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawPrivateRowsExposed": { "type": "boolean" }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ownerId", "ownerType", "contactRef"],
+      "properties": {
+        "ownerId": { "$ref": "common.schema.json#/$defs/id" },
+        "ownerType": { "type": "string", "enum": ["team", "service"] },
+        "contactRef": { "type": "string", "minLength": 8, "maxLength": 120 }
+      }
+    },
+    "isolationModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantIdRequired",
+        "workspaceIdRequired",
+        "predictionIdsTenantScoped",
+        "sourceBindingsTenantScoped",
+        "operationQueuesTenantScoped",
+        "idempotencyNamespacesTenantScoped",
+        "credentialReferencesTenantScoped",
+        "crossTenantReadsBlocked",
+        "crossTenantWritesBlocked",
+        "sanitizedDiagnosticsOnly",
+        "auditRequiredForAdministrativeOverride"
+      ],
+      "properties": {
+        "tenantIdRequired": { "type": "boolean" },
+        "workspaceIdRequired": { "type": "boolean" },
+        "predictionIdsTenantScoped": { "type": "boolean" },
+        "sourceBindingsTenantScoped": { "type": "boolean" },
+        "operationQueuesTenantScoped": { "type": "boolean" },
+        "idempotencyNamespacesTenantScoped": { "type": "boolean" },
+        "credentialReferencesTenantScoped": { "type": "boolean" },
+        "crossTenantReadsBlocked": { "type": "boolean" },
+        "crossTenantWritesBlocked": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "auditRequiredForAdministrativeOverride": { "type": "boolean" }
+      }
+    },
+    "scopeKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scopeKeyName",
+        "sourceField",
+        "requiredForLookup",
+        "includedInAudit",
+        "rawValuePublic",
+        "notes"
+      ],
+      "properties": {
+        "scopeKeyName": {
+          "type": "string",
+          "enum": [
+            "tenant_id",
+            "workspace_id",
+            "prediction_id",
+            "source_binding_id",
+            "operation_idempotency_namespace"
+          ]
+        },
+        "sourceField": { "type": "string", "minLength": 4, "maxLength": 80 },
+        "requiredForLookup": { "type": "boolean" },
+        "includedInAudit": { "type": "boolean" },
+        "rawValuePublic": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "tenantResourceControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantId",
+        "workspaceId",
+        "resourcePolicyId",
+        "maximumActivePredictions",
+        "currentActivePredictions",
+        "maximumQueuedOperations",
+        "currentQueuedOperations",
+        "maximumReadbackBytes",
+        "currentReadbackBytes",
+        "maximumSourceBindings",
+        "currentSourceBindings",
+        "maxRuntimeSecondsPerTick",
+        "resourceStatus",
+        "rawLimitMutationAllowed"
+      ],
+      "properties": {
+        "tenantId": { "$ref": "common.schema.json#/$defs/id" },
+        "workspaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "resourcePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+        "maximumActivePredictions": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "currentActivePredictions": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "maximumQueuedOperations": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "currentQueuedOperations": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "maximumReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 262144 },
+        "currentReadbackBytes": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "maximumSourceBindings": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "currentSourceBindings": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "maxRuntimeSecondsPerTick": { "type": "integer", "minimum": 1, "maximum": 120 },
+        "resourceStatus": { "type": "string", "enum": ["within_limits", "blocked"] },
+        "rawLimitMutationAllowed": { "type": "boolean" }
+      }
+    },
+    "operationQueuePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queueName",
+        "queueScopeKeyTemplate",
+        "tenantScoped",
+        "workspaceScoped",
+        "readModelOnly",
+        "crossTenantPeekAllowed",
+        "rawQueueCrudExposed",
+        "sanitizedDiagnosticsOnly",
+        "nextAction"
+      ],
+      "properties": {
+        "queueName": { "$ref": "#/$defs/queueName" },
+        "queueScopeKeyTemplate": { "type": "string", "minLength": 12, "maxLength": 120 },
+        "tenantScoped": { "type": "boolean" },
+        "workspaceScoped": { "type": "boolean" },
+        "readModelOnly": { "type": "boolean" },
+        "crossTenantPeekAllowed": { "type": "boolean" },
+        "rawQueueCrudExposed": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "nextAction": { "type": "string", "minLength": 8, "maxLength": 140 }
+      }
+    },
+    "sourceBindingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyName",
+        "tenantScoped",
+        "workspaceScoped",
+        "crossTenantReuseAllowed",
+        "cloningRequiresNewBinding",
+        "credentialValuesStored",
+        "rawPrivateRowsStored",
+        "sanitizedDiagnosticsOnly",
+        "safeNextAction"
+      ],
+      "properties": {
+        "policyName": {
+          "type": "string",
+          "enum": [
+            "tenant_owned_source_binding",
+            "cross_tenant_source_clone_requires_new_binding",
+            "credential_reference_tenant_owned",
+            "sanitized_source_diagnostics_only",
+            "private_payload_not_in_records"
+          ]
+        },
+        "tenantScoped": { "type": "boolean" },
+        "workspaceScoped": { "type": "boolean" },
+        "crossTenantReuseAllowed": { "type": "boolean" },
+        "cloningRequiresNewBinding": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawPrivateRowsStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 140 }
+      }
+    },
+    "accessCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "requestingTenantId",
+        "targetTenantId",
+        "requestingWorkspaceId",
+        "targetWorkspaceId",
+        "requestedResourceKind",
+        "accessAllowed",
+        "operationReceiptsWritten",
+        "immutableRecordsWritten",
+        "credentialValuesStored",
+        "sanitizedDiagnosticsOnly",
+        "safeNextAction"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "same_tenant_workspace_read",
+            "cross_tenant_prediction_read",
+            "cross_workspace_source_binding_reuse",
+            "cross_tenant_queue_peek",
+            "idempotency_namespace_collision",
+            "credential_reference_other_tenant",
+            "admin_override_without_audit"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "accepted_same_tenant_workspace",
+            "blocked_cross_tenant_prediction_read",
+            "blocked_cross_workspace_source_binding_reuse",
+            "blocked_cross_tenant_queue_peek",
+            "blocked_idempotency_namespace_collision",
+            "blocked_credential_reference_scope",
+            "blocked_admin_override_missing_audit"
+          ]
+        },
+        "requestingTenantId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetTenantId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestingWorkspaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetWorkspaceId": { "$ref": "common.schema.json#/$defs/id" },
+        "requestedResourceKind": {
+          "type": "string",
+          "enum": [
+            "prediction",
+            "source_binding",
+            "operation_queue",
+            "idempotency_namespace",
+            "credential_reference",
+            "admin_override"
+          ]
+        },
+        "accessAllowed": { "type": "boolean" },
+        "operationReceiptsWritten": { "type": "boolean" },
+        "immutableRecordsWritten": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 140 }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackSurface",
+        "command",
+        "mutatesState",
+        "startsNetworkListener",
+        "credentialValuesReturned",
+        "notes"
+      ],
+      "properties": {
+        "readbackSurface": {
+          "type": "string",
+          "enum": [
+            "cli",
+            "prediction_workspace_registry",
+            "internal_api",
+            "runtime_security",
+            "runtime_transport_readiness",
+            "database_source_adapter_runtime",
+            "lifecycle_lease_policy"
+          ]
+        },
+        "command": { "$ref": "#/$defs/commandString" },
+        "mutatesState": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" },
+        "credentialValuesReturned": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksWriteState",
+        "hostedTenantRuntimeImplemented",
+        "crossTenantReadAllowed",
+        "crossTenantSourceReuseAllowed",
+        "crossTenantQueueScanAllowed",
+        "credentialValuesStored",
+        "rawPrivateRowsStored",
+        "networkListenerStarted",
+        "rawCrudExposed",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "normalChecksWriteState": { "type": "boolean" },
+        "hostedTenantRuntimeImplemented": { "type": "boolean" },
+        "crossTenantReadAllowed": { "type": "boolean" },
+        "crossTenantSourceReuseAllowed": { "type": "boolean" },
+        "crossTenantQueueScanAllowed": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawPrivateRowsStored": { "type": "boolean" },
+        "networkListenerStarted": { "type": "boolean" },
+        "rawCrudExposed": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantWorkspaceCount",
+        "scopeKeyCount",
+        "queuePolicyCount",
+        "sourcePolicyCount",
+        "accessCaseCount",
+        "blockedAccessCaseCount",
+        "tenantScopeRequired",
+        "workspaceScopeRequired",
+        "queueIsolationEnforced",
+        "sourceBindingIsolationEnforced",
+        "credentialReferenceIsolationEnforced",
+        "normalChecksMutateState",
+        "hostedTenantRuntimeImplemented"
+      ],
+      "properties": {
+        "tenantWorkspaceCount": { "type": "integer", "minimum": 2, "maximum": 8 },
+        "scopeKeyCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "queuePolicyCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "sourcePolicyCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "accessCaseCount": { "type": "integer", "minimum": 7, "maximum": 7 },
+        "blockedAccessCaseCount": { "type": "integer", "minimum": 6, "maximum": 6 },
+        "tenantScopeRequired": { "type": "boolean" },
+        "workspaceScopeRequired": { "type": "boolean" },
+        "queueIsolationEnforced": { "type": "boolean" },
+        "sourceBindingIsolationEnforced": { "type": "boolean" },
+        "credentialReferenceIsolationEnforced": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" },
+        "hostedTenantRuntimeImplemented": { "type": "boolean" }
+      }
+    },
+    "queueName": {
+      "type": "string",
+      "enum": [
+        "active_predictions",
+        "due_forecasts",
+        "due_resolutions",
+        "blocked_operations",
+        "failed_operations",
+        "source_health_blockers",
+        "calibration_progress",
+        "track_record_progress"
+      ]
+    },
+    "boundedString": { "type": "string", "minLength": 8, "maxLength": 260 },
+    "commandString": { "type": "string", "minLength": 10, "maxLength": 180 }
+  }
+}

@@ -116,7 +116,7 @@ def assert_forecast_run_result(
 def main() -> None:
     matrix, _summaries = build_matrix()
     expected_outcomes = {item["outcomeClass"]: item for item in matrix["outcomes"]}
-    forecast_run_start_id = 23
+    forecast_run_start_id = 26
     forecast_run_ids = {
         case.outcome_class: forecast_run_start_id + index
         for index, case in enumerate(CASES)
@@ -330,6 +330,37 @@ def main() -> None:
                 {
                     "name": "ope_campaign_calibration_status",
                     "arguments": {},
+                },
+            ),
+            message(
+                23,
+                "tools/call",
+                {
+                    "name": "ope_agent_integration_readiness",
+                    "arguments": {
+                        "scenario": "helsinki_bus_disruption",
+                    },
+                },
+            ),
+            message(
+                24,
+                "tools/call",
+                {
+                    "name": "ope_agent_integration_candidates",
+                    "arguments": {
+                        "scenario": "helsinki_bus_disruption",
+                    },
+                },
+            ),
+            message(
+                25,
+                "tools/call",
+                {
+                    "name": "ope_agent_integration_guided_forecast",
+                    "arguments": {
+                        "scenario": "helsinki_bus_disruption",
+                        "guidedCase": "accepted_adapter_output",
+                    },
                 },
             ),
             *forecast_run_messages,
@@ -661,6 +692,60 @@ def main() -> None:
         raise AssertionError("campaign-calibration-status MCP tool should expose below-threshold status")
     if campaign_calibration_envelope["payload"]["executionBoundary"]["updatesForecastProbabilities"] is not False:
         raise AssertionError("campaign-calibration-status MCP tool must not update probabilities")
+
+    integration_readiness = indexed[23]["result"]
+    if integration_readiness.get("isError"):
+        raise AssertionError("agent-integration-readiness MCP tool should succeed")
+    readiness_envelope = integration_readiness["structuredContent"]
+    assert_envelope(readiness_envelope)
+    if readiness_envelope["operation"] != "agent_integration_readiness":
+        raise AssertionError("agent-integration-readiness MCP tool returned the wrong operation")
+    readiness_payload = readiness_envelope["payload"]
+    if readiness_payload["summary"]["firstForecastFastTargetMet"] is not True:
+        raise AssertionError("agent-integration-readiness MCP tool should report the fast first forecast gate")
+    readiness_roles = {
+        item["roleKey"]: item
+        for item in readiness_payload["starterPack"]["sourceRoles"]
+    }
+    if set(readiness_roles) != {"weather_forecast", "historical_delay_baseline", "transit_delay_outcome"}:
+        raise AssertionError("agent-integration-readiness MCP tool should expose required source roles")
+    if readiness_roles["transit_delay_outcome"]["forecastTimeAllowed"] is not False:
+        raise AssertionError("agent-integration-readiness MCP tool should keep HSL outcome resolution-only")
+
+    integration_candidates = indexed[24]["result"]
+    if integration_candidates.get("isError"):
+        raise AssertionError("agent-integration-candidates MCP tool should succeed")
+    candidates_envelope = integration_candidates["structuredContent"]
+    assert_envelope(candidates_envelope)
+    if candidates_envelope["operation"] != "agent_integration_candidates":
+        raise AssertionError("agent-integration-candidates MCP tool returned the wrong operation")
+    candidate_rows = {
+        item["caseKey"]: item
+        for item in candidates_envelope["payload"]["candidateQuestions"]
+    }
+    if candidate_rows["helsinki_surface_transit_peak_delay"]["status"] != "forecastable":
+        raise AssertionError("agent-integration-candidates MCP tool should expose the forecastable Helsinki candidate")
+    if candidate_rows["vague_next_week_transit"]["status"] != "needs_clarification":
+        raise AssertionError("agent-integration-candidates MCP tool should classify vague next-week transit as needs_clarification")
+    if "raw_credential_value" not in candidate_rows["raw_credential_value"]["reasonCodes"]:
+        raise AssertionError("agent-integration-candidates MCP tool should expose raw credential blocker code")
+
+    integration_guided = indexed[25]["result"]
+    if integration_guided.get("isError"):
+        raise AssertionError("agent-integration-guided-forecast MCP tool should succeed")
+    guided_envelope = integration_guided["structuredContent"]
+    assert_envelope(guided_envelope)
+    if guided_envelope["operation"] != "agent_integration_guided_forecast":
+        raise AssertionError("agent-integration-guided-forecast MCP tool returned the wrong operation")
+    guided_payload = guided_envelope["payload"]
+    if guided_payload["guidedStatus"] != "forecast_card_ready":
+        raise AssertionError("agent-integration-guided-forecast MCP tool should reach a forecast card")
+    if guided_payload["toolCallCount"] > 3:
+        raise AssertionError("agent-integration-guided-forecast MCP tool should meet the three-call target")
+    if guided_payload["forecastId"] != "forecast-1102" or guided_payload["questionId"] != "question-1102":
+        raise AssertionError("agent-integration-guided-forecast MCP tool should bind forecast-1102/question-1102")
+    if guided_payload["createsForecastArtifacts"] is not False:
+        raise AssertionError("agent-integration-guided-forecast MCP tool should stay readback-only")
 
     for case in CASES:
         result = indexed[forecast_run_ids[case.outcome_class]]["result"]

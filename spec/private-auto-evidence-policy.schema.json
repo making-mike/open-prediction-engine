@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/private-auto-evidence-policy.schema.json",
+  "title": "Private Auto Evidence Policy",
+  "description": "Checked policy overlay for using data:auto in private engine setups without broad private-source execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "privateAutoEvidencePolicyId",
+    "generatedAt",
+    "policyStatus",
+    "decisionStatus",
+    "normalChecksMutateState",
+    "normalChecksReadPrivateSources",
+    "sourceBindings",
+    "sourceKindPolicies",
+    "policyGates",
+    "decisionCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "privateAutoEvidencePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyStatus": { "type": "string", "enum": ["private_auto_evidence_policy_checked"] },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["private_data_auto_requires_bound_source_policy_and_approved_adapters"]
+    },
+    "normalChecksMutateState": { "type": "boolean" },
+    "normalChecksReadPrivateSources": { "type": "boolean" },
+    "sourceBindings": { "$ref": "#/$defs/sourceBindings" },
+    "sourceKindPolicies": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/sourceKindPolicy" }
+    },
+    "policyGates": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/policyGate" }
+    },
+    "decisionCases": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "items": { "$ref": "#/$defs/decisionCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 8, "maxLength": 300 }
+    }
+  },
+  "$defs": {
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector",
+        "source_adapter_output",
+        "database_query_manifest",
+        "private_api_manifest",
+        "manual_upload",
+        "web_search"
+      ]
+    },
+    "policyGateName": {
+      "type": "string",
+      "enum": [
+        "domain_config_bound",
+        "source_binding_bound",
+        "source_policy_bound",
+        "tenant_workspace_scope_bound",
+        "caller_approval_recorded",
+        "credential_reference_scoped",
+        "adapter_capability_checked",
+        "freshness_window_declared",
+        "retention_policy_bound",
+        "leakage_checks_declared",
+        "forecast_before_close_preserved",
+        "normal_checks_non_effectful"
+      ]
+    },
+    "decisionCaseName": {
+      "type": "string",
+      "enum": [
+        "approved_local_file_auto",
+        "approved_adapter_output_auto",
+        "approved_database_query_manifest",
+        "private_api_manifest_with_scoped_credential",
+        "manual_mapping_with_confirmation",
+        "manual_upload_without_adapter_contract",
+        "private_api_missing_credential_ref",
+        "database_raw_sql_auto",
+        "web_search_private_setup",
+        "cross_tenant_source_binding",
+        "post_outcome_capture_as_forecast_evidence",
+        "raw_private_payload_retention",
+        "unregistered_private_connector"
+      ]
+    },
+    "sourceBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePolicySchemaId",
+        "autoEvidenceStatus",
+        "privateSourceAdapterStatus",
+        "domainSourceFieldPolicyStatus",
+        "credentialReferencePolicyStatus",
+        "retentionRedactionPolicyStatus",
+        "runtimeSecurityStatus",
+        "workspaceTenantIsolationStatus",
+        "databaseSourceAdapterRuntimeStatus",
+        "normalChecksWriteState",
+        "notes"
+      ],
+      "properties": {
+        "sourcePolicySchemaId": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "autoEvidenceStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "privateSourceAdapterStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "domainSourceFieldPolicyStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "credentialReferencePolicyStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "retentionRedactionPolicyStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "runtimeSecurityStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "workspaceTenantIsolationStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "databaseSourceAdapterRuntimeStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "normalChecksWriteState": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 8, "maxLength": 300 }
+      }
+    },
+    "sourceKindPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKind",
+        "currentPolicyStatus",
+        "dataAutoRole",
+        "sourcePolicyRequired",
+        "tenantWorkspaceScopeRequired",
+        "callerApprovalRequired",
+        "credentialReferenceRequired",
+        "adapterContractRequired",
+        "networkAccessAllowed",
+        "normalChecksReadPrivateSource",
+        "normalChecksResolveCredential",
+        "rawPayloadRetentionAllowed",
+        "safeNextAction"
+      ],
+      "properties": {
+        "sourceKind": { "$ref": "#/$defs/sourceKind" },
+        "currentPolicyStatus": {
+          "type": "string",
+          "enum": [
+            "allowed_with_approved_local_runtime",
+            "allowed_with_confirmed_mapping",
+            "allowed_fixture_replay_only",
+            "allowed_with_sanitized_adapter_output",
+            "manifest_only_no_raw_sql_execution",
+            "manifest_only_no_runtime_execution",
+            "planned_adapter_contract_required",
+            "blocked_for_private_data_auto"
+          ]
+        },
+        "dataAutoRole": {
+          "type": "string",
+          "enum": ["forecast_time_evidence", "baseline_reference", "resolution_only", "not_allowed"]
+        },
+        "sourcePolicyRequired": { "type": "boolean" },
+        "tenantWorkspaceScopeRequired": { "type": "boolean" },
+        "callerApprovalRequired": { "type": "boolean" },
+        "credentialReferenceRequired": { "type": "boolean" },
+        "adapterContractRequired": { "type": "boolean" },
+        "networkAccessAllowed": { "type": "boolean" },
+        "normalChecksReadPrivateSource": { "type": "boolean" },
+        "normalChecksResolveCredential": { "type": "boolean" },
+        "rawPayloadRetentionAllowed": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "policyGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateName",
+        "gateStatus",
+        "requiredForPrivateAuto",
+        "blocksCredentialValues",
+        "blocksUnregisteredAdapters",
+        "blocksPostOutcomeEvidence",
+        "normalChecksEvaluateAsEffectful",
+        "evidenceRequired",
+        "failureStatus"
+      ],
+      "properties": {
+        "gateName": { "$ref": "#/$defs/policyGateName" },
+        "gateStatus": { "type": "string", "enum": ["required_private_auto_gate"] },
+        "requiredForPrivateAuto": { "type": "boolean" },
+        "blocksCredentialValues": { "type": "boolean" },
+        "blocksUnregisteredAdapters": { "type": "boolean" },
+        "blocksPostOutcomeEvidence": { "type": "boolean" },
+        "normalChecksEvaluateAsEffectful": { "type": "boolean" },
+        "evidenceRequired": { "type": "string", "minLength": 8, "maxLength": 260 },
+        "failureStatus": { "type": "string", "minLength": 8, "maxLength": 100 }
+      }
+    },
+    "decisionCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "selectedSourceKind",
+        "selectedGateFailures",
+        "sourcePolicyBound",
+        "eligibleForForecastExecution",
+        "credentialValuesStored",
+        "normalChecksReadPrivateSources",
+        "normalChecksWriteState",
+        "sanitizedDiagnosticsOnly",
+        "safeNextAction"
+      ],
+      "properties": {
+        "caseName": { "$ref": "#/$defs/decisionCaseName" },
+        "caseStatus": { "type": "string", "minLength": 8, "maxLength": 100 },
+        "selectedSourceKind": { "$ref": "#/$defs/sourceKind" },
+        "selectedGateFailures": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/policyGateName" }
+        },
+        "sourcePolicyBound": { "type": "boolean" },
+        "eligibleForForecastExecution": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "normalChecksReadPrivateSources": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackSurface",
+        "command",
+        "mutatesState",
+        "readsPrivateSource",
+        "resolvesCredentials",
+        "notes"
+      ],
+      "properties": {
+        "readbackSurface": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "command": { "type": "string", "minLength": 4, "maxLength": 160 },
+        "mutatesState": { "type": "boolean" },
+        "readsPrivateSource": { "type": "boolean" },
+        "resolvesCredentials": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksReadPrivateSources",
+        "normalChecksResolveSecrets",
+        "normalChecksNetworkAccess",
+        "normalChecksWriteState",
+        "arbitraryWebSearchAllowed",
+        "arbitraryPrivateApiParsingAllowed",
+        "arbitraryDatabaseParsingAllowed",
+        "rawSqlExecutionAllowed",
+        "rawPrivatePayloadRetentionAllowed",
+        "postOutcomeEvidenceAsForecastEvidenceAllowed",
+        "hostedRuntimeImplemented",
+        "qualityClaimsUpgraded",
+        "generatedRuntimeTypesEnabled"
+      ],
+      "properties": {
+        "normalChecksReadPrivateSources": { "type": "boolean" },
+        "normalChecksResolveSecrets": { "type": "boolean" },
+        "normalChecksNetworkAccess": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "arbitraryWebSearchAllowed": { "type": "boolean" },
+        "arbitraryPrivateApiParsingAllowed": { "type": "boolean" },
+        "arbitraryDatabaseParsingAllowed": { "type": "boolean" },
+        "rawSqlExecutionAllowed": { "type": "boolean" },
+        "rawPrivatePayloadRetentionAllowed": { "type": "boolean" },
+        "postOutcomeEvidenceAsForecastEvidenceAllowed": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "generatedRuntimeTypesEnabled": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKindCount",
+        "policyGateCount",
+        "decisionCaseCount",
+        "readbackCount",
+        "blockedCaseCount",
+        "manifestOnlyCaseCount",
+        "normalChecksReadPrivateSources",
+        "normalChecksMutateState"
+      ],
+      "properties": {
+        "sourceKindCount": { "type": "integer", "minimum": 0 },
+        "policyGateCount": { "type": "integer", "minimum": 0 },
+        "decisionCaseCount": { "type": "integer", "minimum": 0 },
+        "readbackCount": { "type": "integer", "minimum": 0 },
+        "blockedCaseCount": { "type": "integer", "minimum": 0 },
+        "manifestOnlyCaseCount": { "type": "integer", "minimum": 0 },
+        "normalChecksReadPrivateSources": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" }
+      }
+    }
+  }
+}

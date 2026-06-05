@@ -24,9 +24,12 @@ The protocol map is checked with:
 python3 scripts/ope.py agent-protocol-map --check
 python3 scripts/check_agent_adapter_protocol_map.py
 python3 scripts/check_mcp_adapter.py
+python3 scripts/ope.py runtime-transport-readiness
 ```
 
 Every mapped operation returns `spec/agent-envelope.schema.json`. The local MCP scaffold and future HTTP endpoints or queue workers must preserve the envelope `status`, `exitCode`, `recordBinding`, `state`, `payload`, `error`, and `warnings` fields.
+
+`spec/runtime-transport-readiness.md` is the checked gate for deciding when local HTTP, queue, hosted service, or OPP HTTP provider behavior can move from future mapping to implementation. The current gate keeps those surfaces deferred.
 
 ## Operations
 
@@ -46,6 +49,9 @@ Every mapped operation returns `spec/agent-envelope.schema.json`. The local MCP 
 | `private_setup_source_handoff` | dry-run generation | Implemented | `ope_private_setup_source_handoff` |
 | `private_setup_method_gate` | dry-run generation | Implemented | `ope_private_setup_method_gate` |
 | `private_setup_forecast_execution` | forecast execution | Implemented | `ope_private_setup_forecast_execution` |
+| `agent_integration_readiness` | read-only | Implemented | `ope_agent_integration_readiness` |
+| `agent_integration_candidates` | read-only | Implemented | `ope_agent_integration_candidates` |
+| `agent_integration_guided_forecast` | read-only | Implemented | `ope_agent_integration_guided_forecast` |
 | `resolution_jobs` | read-only | Implemented | `ope_resolution_jobs` |
 | `resolution_scheduler_status` | read-only | Implemented | `ope_resolution_scheduler_status` |
 | `resolution_status` | status-read | Implemented | `ope_resolution_status` |
@@ -55,7 +61,7 @@ Every mapped operation returns `spec/agent-envelope.schema.json`. The local MCP 
 
 The generated map assigns deterministic tool names such as `ope_forecast_card` and `ope_scoring_summary`. The local MCP stdio scaffold exposes one tool per operation, keeps arguments minimal, and returns the same agent envelope object as `structuredContent` plus serialized JSON text content.
 
-The scaffold also exposes `ope_forecast_run` for the local fixture-safe run orchestrator. Unlike the eighteen mapped adapter operations, this tool returns `spec/forecast-run-summary.schema.json` instead of an agent envelope.
+The scaffold also exposes `ope_forecast_run` for the local fixture-safe run orchestrator. Unlike the mapped adapter operations, this tool returns `spec/forecast-run-summary.schema.json` instead of an agent envelope.
 
 Credentials must remain in MCP server configuration or host-controlled credential stores. They must not appear in prompt-visible tool arguments, forecast artifacts, provenance metadata, warnings, or returned records. The current scaffold exposes only validation, dry-run, read, status, scoring, setup-guidance, and fixture-safe orchestration tools; it does not expose paid, private-source execution, or production live-fetch work.
 
@@ -108,6 +114,12 @@ Use `private_setup_forecast_execution` when a method gate explicitly allows setu
 
 After `private_setup_forecast_execution` returns a generated forecast, use the returned `forecastId` and `questionId` with `forecast_card`, `lifecycle_bundle`, `resolution_status`, and `scoring_summary`. Do not add a private setup read API for forecast records.
 
+Use `agent_integration_readiness` when an agent wants to know whether OPE can be incorporated into a local app from approved files or sanitized adapter outputs.
+
+Use `agent_integration_candidates` when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.
+
+Use `agent_integration_guided_forecast` when an agent has accepted starter context and needs the fastest checked path to a forecast-card read command. Blocked guided cases return no forecast IDs and no forecast-card command.
+
 Use `resolution_jobs` when an agent needs pending, due, waiting, resolved, or invalid forward-run resolution-job guidance without reading local state files or executing resolver commands.
 
 Use `resolution_scheduler_status` when an agent needs the latest scheduler tick, shutdown reason, log path, execution mode, compact queue-state readbacks, and next recommended action without starting a scheduler or executing due jobs.
@@ -118,4 +130,4 @@ Use `scoring_summary` before making quality, baseline-lift, or calibration-sensi
 
 ## Boundary
 
-This document and the generated map claim only local MCP stdio scaffold support for the eighteen mapped tools. They do not claim HTTP API support, queue support, hosted service support, production live fetching, production agent adapter readiness, private source execution, or state-of-the-art forecast quality. They are implementation instructions for future adapters and a checked guard against protocol drift.
+This document and the generated map claim only local MCP stdio scaffold support for the mapped tools. They do not claim HTTP API support, queue support, hosted service support, production live fetching, production agent adapter readiness, private source execution, or state-of-the-art forecast quality. They are implementation instructions for future adapters and a checked guard against protocol drift.

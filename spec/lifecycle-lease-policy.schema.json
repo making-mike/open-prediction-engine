@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/lifecycle-lease-policy.schema.json",
+  "title": "Lifecycle Lease Policy",
+  "description": "Checked lifecycle operation policy for strict leases versus idempotency-only guards.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lifecycleLeasePolicyId",
+    "generatedAt",
+    "policyStatus",
+    "decisionStatus",
+    "normalChecksAcquireLeases",
+    "allEffectfulOperationsRequireIdempotency",
+    "sourceBinding",
+    "operationPolicies",
+    "conflictCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "lifecycleLeasePolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyStatus": { "type": "string", "enum": ["lifecycle_operation_lease_policy_checked"] },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["strict_leases_for_race_prone_writes_idempotency_for_append_only_receipts"]
+    },
+    "normalChecksAcquireLeases": { "type": "boolean" },
+    "allEffectfulOperationsRequireIdempotency": { "type": "boolean" },
+    "sourceBinding": { "$ref": "#/$defs/sourceBinding" },
+    "operationPolicies": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": { "$ref": "#/$defs/operationPolicy" }
+    },
+    "conflictCases": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/conflictCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceSurface",
+        "sourceCommand",
+        "sourceStoreStatus",
+        "sourceLeaseModelTable",
+        "sourceIdempotencyModelTable"
+      ],
+      "properties": {
+        "sourceSurface": { "type": "string", "enum": ["lifecycle_operation_store"] },
+        "sourceCommand": { "type": "string", "enum": ["python3 scripts/ope.py lifecycle-operation-store"] },
+        "sourceStoreStatus": { "type": "string", "enum": ["local_sqlite_runtime_checked"] },
+        "sourceLeaseModelTable": { "type": "string", "enum": ["operation_leases"] },
+        "sourceIdempotencyModelTable": { "type": "string", "enum": ["operation_idempotency_keys"] }
+      }
+    },
+    "operationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationName",
+        "operationClass",
+        "lifecyclePhase",
+        "guardMode",
+        "policyReason",
+        "preflightRequired",
+        "idempotencyKeyRequired",
+        "leaseRequired",
+        "operationReceiptRequired",
+        "normalChecksAcquireLease",
+        "leaseKeyTemplate",
+        "blockedConflictStatus",
+        "staleRecoveryAction",
+        "allowedWriteMode",
+        "deleteReplacement",
+        "rawCrudExposed",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "operationName": { "$ref": "#/$defs/operationName" },
+        "operationClass": {
+          "type": "string",
+          "enum": ["create", "append_update", "terminal_state", "method_state", "migration", "delete_replacement"]
+        },
+        "lifecyclePhase": {
+          "type": "string",
+          "enum": ["planning", "forecasting", "recalculation", "governance", "resolution", "scoring", "evidence", "method_update", "migration", "retention"]
+        },
+        "guardMode": { "type": "string", "enum": ["strict_lease", "idempotency_only"] },
+        "policyReason": { "type": "string", "minLength": 12, "maxLength": 120 },
+        "preflightRequired": { "type": "boolean" },
+        "idempotencyKeyRequired": { "type": "boolean" },
+        "leaseRequired": { "type": "boolean" },
+        "operationReceiptRequired": { "type": "boolean" },
+        "normalChecksAcquireLease": { "type": "boolean" },
+        "leaseKeyTemplate": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "blockedConflictStatus": {
+          "type": "string",
+          "enum": ["blocked_lease_conflict", "return_existing_receipt_or_block_mismatch"]
+        },
+        "staleRecoveryAction": {
+          "type": "string",
+          "enum": ["inspect_failed_operations_or_recover_stale_lease", "not_applicable"]
+        },
+        "allowedWriteMode": {
+          "type": "string",
+          "enum": ["insert_once", "append_only", "prospective_binding", "tombstone_append", "redaction_append"]
+        },
+        "deleteReplacement": { "type": "string", "enum": ["not_delete", "archive_tombstone", "redaction_receipt"] },
+        "rawCrudExposed": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "conflictCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "operationName",
+        "guardMode",
+        "caseStatus",
+        "expectedResult",
+        "safeNextAction",
+        "leaseAcquired",
+        "operationReceiptsWritten",
+        "immutableRecordsWritten",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "same_due_forecast",
+            "duplicate_forecast_retry",
+            "recalculate_same_evidence",
+            "cancel_after_forecast_created",
+            "resolution_record_race",
+            "method_apply_race",
+            "stale_import_lease",
+            "archive_repeat"
+          ]
+        },
+        "operationName": { "$ref": "#/$defs/operationName" },
+        "guardMode": { "type": "string", "enum": ["strict_lease", "idempotency_only"] },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "blocked_lease_conflict",
+            "idempotent_replay",
+            "blocked_terminal_state_conflict",
+            "stale_lease_recovery_required"
+          ]
+        },
+        "expectedResult": { "type": "string", "minLength": 8, "maxLength": 120 },
+        "safeNextAction": {
+          "type": "string",
+          "enum": [
+            "wait_or_inspect_active_lease",
+            "reuse_existing_forecast_readback",
+            "reuse_existing_recalculation_receipt",
+            "read_resolution_or_archive_path",
+            "inspect_failed_operations_or_recover_stale_lease",
+            "reuse_existing_archive_readback"
+          ]
+        },
+        "leaseAcquired": { "type": "boolean" },
+        "operationReceiptsWritten": { "type": "boolean" },
+        "immutableRecordsWritten": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackSurface", "command", "mutatesState", "acquiresLeases", "notes"],
+      "properties": {
+        "readbackSurface": {
+          "type": "string",
+          "enum": ["cli", "lifecycle_operation_store", "background_worker", "persistent_sqlite_policy"]
+        },
+        "command": { "type": "string", "minLength": 10, "maxLength": 120 },
+        "mutatesState": { "type": "boolean" },
+        "acquiresLeases": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 12, "maxLength": 180 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksWriteState",
+        "leasesAcquiredByReadback",
+        "persistentDatabaseCreated",
+        "hostedRuntimeImplemented",
+        "postgresConnectionOpened",
+        "rawCrudExposed",
+        "credentialValuesStored",
+        "physicalDeleteAllowed",
+        "forecastHistoryRewriteAllowed",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "normalChecksWriteState": { "type": "boolean" },
+        "leasesAcquiredByReadback": { "type": "boolean" },
+        "persistentDatabaseCreated": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "postgresConnectionOpened": { "type": "boolean" },
+        "rawCrudExposed": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "physicalDeleteAllowed": { "type": "boolean" },
+        "forecastHistoryRewriteAllowed": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationCount",
+        "strictLeaseCount",
+        "idempotencyOnlyCount",
+        "conflictCaseCount",
+        "allEffectfulOperationsRequireIdempotency",
+        "normalChecksAcquireLeases"
+      ],
+      "properties": {
+        "operationCount": { "type": "integer", "minimum": 14, "maximum": 14 },
+        "strictLeaseCount": { "type": "integer", "minimum": 9, "maximum": 9 },
+        "idempotencyOnlyCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "conflictCaseCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "allEffectfulOperationsRequireIdempotency": { "type": "boolean" },
+        "normalChecksAcquireLeases": { "type": "boolean" }
+      }
+    },
+    "operationName": {
+      "type": "string",
+      "enum": [
+        "campaign.create_run",
+        "forecast.create",
+        "forecast.recalculate",
+        "question.cancel",
+        "question.annul",
+        "resolution.record",
+        "score.create",
+        "evidence.append",
+        "pre_calibration.bind",
+        "method.apply",
+        "method.rollback",
+        "state.import_json",
+        "record.archive",
+        "record.redact"
+      ]
+    }
+  }
+}

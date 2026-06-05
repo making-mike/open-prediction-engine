@@ -303,6 +303,29 @@ def main() -> None:
     if internal_api_record["executionBoundary"]["writesState"] is not False:
         raise AssertionError("internal-api agent call must be non-mutating")
 
+    database_runtime = run_dispatcher(
+        "--operation",
+        "database_source_adapter_runtime_status",
+    )
+    database_runtime_payload = payload(database_runtime)
+    if database_runtime.returncode != 0:
+        raise AssertionError(f"database source-adapter runtime agent call should succeed: {database_runtime.stderr}")
+    database_runtime_record = database_runtime_payload["payload"]
+    if database_runtime_record["runtimeStatus"] != "approved_database_source_adapter_runtime_checked":
+        raise AssertionError("database source-adapter runtime agent call status drifted")
+    if database_runtime_payload["adapterRequest"]["inputRecordType"] != "database_source_adapter_runtime":
+        raise AssertionError("database source-adapter runtime agent call input type drifted")
+    if database_runtime_record["summary"]["approvedExecutionPathCount"] != 1:
+        raise AssertionError("database source-adapter runtime should expose one approved path")
+    if database_runtime_record["executionBoundary"]["normalChecksConnectToDatabase"] is not False:
+        raise AssertionError("database source-adapter runtime agent call must stay offline")
+    if database_runtime_record["executionBoundary"]["credentialValuesStored"] is not False:
+        raise AssertionError("database source-adapter runtime agent call must not store credentials")
+    if database_runtime_record["executionBoundary"]["rawPrivateRowsStored"] is not False:
+        raise AssertionError("database source-adapter runtime agent call must not store raw rows")
+    if database_runtime_record["routing"]["databaseSpecificForecastPathCreated"] is not False:
+        raise AssertionError("database source-adapter runtime must not create a database-specific forecast path")
+
     source_guidance = run_dispatcher(
         "--operation",
         "private_source_adapter_guidance",

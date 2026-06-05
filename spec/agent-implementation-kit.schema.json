@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-implementation-kit.schema.json",
+  "title": "Agent Prediction Implementation Kit",
+  "description": "Checked local implementation kit for coding agents adding OPE-backed prediction features.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentImplementationKitId",
+    "generatedAt",
+    "kitStatus",
+    "kitScope",
+    "predictionManual",
+    "questionDiscoveryIntakeContract",
+    "candidateContractReadbacks",
+    "mechanicalValidationReports",
+    "firstRunSourcePaths",
+    "adapterReadbacks",
+    "doNotImplementGuidance",
+    "starterTemplates",
+    "conformanceFixturePack",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "agentImplementationKitId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "kitStatus": { "type": "string", "enum": ["agent_prediction_implementation_kit_checked"] },
+    "kitScope": { "type": "string", "enum": ["local_agent_readback_and_templates"] },
+    "predictionManual": { "$ref": "#/$defs/predictionManual" },
+    "questionDiscoveryIntakeContract": { "$ref": "#/$defs/questionDiscoveryIntakeContract" },
+    "candidateContractReadbacks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/candidateContractReadback" }
+    },
+    "mechanicalValidationReports": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/mechanicalValidationReport" }
+    },
+    "firstRunSourcePaths": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/firstRunSourcePath" }
+    },
+    "adapterReadbacks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/adapterReadback" }
+    },
+    "doNotImplementGuidance": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/doNotImplementGuidance" }
+    },
+    "starterTemplates": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/starterTemplate" }
+    },
+    "conformanceFixturePack": { "$ref": "#/$defs/conformanceFixturePack" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    }
+  },
+  "$defs": {
+    "predictionManual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manualId", "manualStatus", "summary", "steps"],
+      "properties": {
+        "manualId": { "$ref": "common.schema.json#/$defs/id" },
+        "manualStatus": { "type": "string", "enum": ["compact_local_manual_checked"] },
+        "summary": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "steps": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/manualStep" }
+        }
+      }
+    },
+    "manualStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "order",
+        "stepKey",
+        "action",
+        "exampleCommand",
+        "requiresApprovedSources",
+        "createsForecastArtifacts",
+        "claimBoundaryReminder"
+      ],
+      "properties": {
+        "stepId": { "$ref": "common.schema.json#/$defs/id" },
+        "order": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "stepKey": {
+          "type": "string",
+          "enum": [
+            "detect_decision_under_uncertainty",
+            "describe_app_goal",
+            "bind_approved_sources",
+            "discover_candidate_contracts",
+            "validate_candidate_contracts",
+            "create_prediction",
+            "start_prediction",
+            "run_tick_or_worker",
+            "read_forecast_card",
+            "resolve_outcome",
+            "append_evidence_and_score",
+            "inspect_calibration"
+          ]
+        },
+        "action": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "exampleCommand": { "type": "string", "minLength": 8, "maxLength": 200 },
+        "requiresApprovedSources": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "claimBoundaryReminder": { "type": "string", "minLength": 20, "maxLength": 220 }
+      }
+    },
+    "questionDiscoveryIntakeContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractId",
+        "contractStatus",
+        "requiredFields",
+        "optionalFields",
+        "credentialValuesAccepted",
+        "rawPrivateRowsAccepted",
+        "normalizesToExistingSetupContracts",
+        "createsForecastArtifacts"
+      ],
+      "properties": {
+        "contractId": { "$ref": "common.schema.json#/$defs/id" },
+        "contractStatus": { "type": "string", "enum": ["checked_local_intake_contract"] },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/intakeField" }
+        },
+        "optionalFields": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "string", "enum": ["existingSetupId", "domainHint", "methodPreferenceHint"] }
+        },
+        "credentialValuesAccepted": { "type": "boolean" },
+        "rawPrivateRowsAccepted": { "type": "boolean" },
+        "normalizesToExistingSetupContracts": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "intakeField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldName",
+        "fieldType",
+        "purpose",
+        "maxItems",
+        "credentialValueAllowed",
+        "rawPrivateRowsAllowed"
+      ],
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "enum": [
+            "appGoal",
+            "decisionToSupport",
+            "approvedSourceRefs",
+            "sourceRoles",
+            "forecastTimeEvidencePolicy",
+            "resolutionEvidencePolicy",
+            "candidateOutcomeWindows",
+            "resolutionSourceHints",
+            "safetyImpact"
+          ]
+        },
+        "fieldType": { "type": "string", "enum": ["string", "array"] },
+        "purpose": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "credentialValueAllowed": { "type": "boolean" },
+        "rawPrivateRowsAllowed": { "type": "boolean" }
+      }
+    },
+    "candidateContractReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateStatus",
+        "canonicalQuestion",
+        "outputType",
+        "closeTime",
+        "resolveTime",
+        "resolutionRule",
+        "allowedEvidence",
+        "forbiddenEvidence",
+        "baselineFeasible",
+        "sourceReadiness",
+        "methodBoundary",
+        "claimBoundary",
+        "blockerCode",
+        "routesToExistingSurfaces",
+        "nextSurfaceCommands"
+      ],
+      "properties": {
+        "candidateId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateStatus": { "type": "string", "enum": ["forecastable", "needs_clarification", "blocked", "rejected"] },
+        "canonicalQuestion": { "type": "string", "minLength": 12, "maxLength": 260 },
+        "outputType": { "$ref": "common.schema.json#/$defs/outputType" },
+        "closeTime": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "resolveTime": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "resolutionRule": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "allowedEvidence": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 8, "maxLength": 160 }
+        },
+        "forbiddenEvidence": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 8, "maxLength": 160 }
+        },
+        "baselineFeasible": { "type": "boolean" },
+        "sourceReadiness": { "type": "string", "enum": ["ready", "partial", "blocked", "rejected"] },
+        "methodBoundary": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "claimBoundary": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "blockerCode": {
+          "type": "string",
+          "enum": ["none", "ambiguous_resolution_window", "source_policy_or_safety_blocker", "post_outcome_or_unresolvable"]
+        },
+        "routesToExistingSurfaces": { "type": "boolean" },
+        "nextSurfaceCommands": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 120 }
+        }
+      }
+    },
+    "mechanicalValidationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validationReportId",
+        "candidateId",
+        "candidateStatus",
+        "checks",
+        "createsForecastArtifacts",
+        "rawSourceDataExposed",
+        "nextAction"
+      ],
+      "properties": {
+        "validationReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateStatus": { "type": "string", "enum": ["forecastable", "needs_clarification", "blocked", "rejected"] },
+        "checks": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": { "$ref": "#/$defs/validationCheck" }
+        },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "rawSourceDataExposed": { "type": "boolean" },
+        "nextAction": { "type": "string", "enum": ["route_to_existing_surfaces", "stop_before_forecast_artifact"] }
+      }
+    },
+    "validationCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkName", "checkStatus", "blockerCode", "message"],
+      "properties": {
+        "checkName": {
+          "type": "string",
+          "enum": [
+            "schema_validity",
+            "future_boundary",
+            "resolvability",
+            "source_policy_binding",
+            "leakage_risk",
+            "outcome_availability",
+            "mapping_confidence",
+            "baseline_feasibility",
+            "method_eligibility",
+            "scoring_readiness",
+            "calibration_readiness_boundary"
+          ]
+        },
+        "checkStatus": { "type": "string", "enum": ["pass", "needs_clarification", "blocked", "rejected"] },
+        "blockerCode": {
+          "type": "string",
+          "enum": ["none", "ambiguous_resolution_window", "source_policy_or_safety_blocker", "post_outcome_or_unresolvable"]
+        },
+        "message": { "type": "string", "minLength": 12, "maxLength": 180 }
+      }
+    },
+    "firstRunSourcePath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pathKey", "sourceKind", "immediateAction", "entryCommand", "credentialValuesStored", "createsForecastArtifacts"],
+      "properties": {
+        "pathKey": { "type": "string", "enum": ["approved_local_files_now", "sanitized_adapter_output_now", "database_or_private_api_waits"] },
+        "sourceKind": { "type": "string", "enum": ["local_files", "source_adapter_output", "private_api_or_database"] },
+        "immediateAction": { "type": "string", "enum": ["run_source_builder", "run_source_adapter_intake", "wait_for_checked_runtime"] },
+        "entryCommand": { "type": "string", "minLength": 8, "maxLength": 200 },
+        "credentialValuesStored": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "adapterReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapterName",
+        "implementedStatus",
+        "exampleCommand",
+        "sharesInternalApiSemantics",
+        "rawSqlExposed",
+        "hiddenServiceRequired",
+        "notes"
+      ],
+      "properties": {
+        "adapterName": { "type": "string", "enum": ["in_process", "cli", "agent_call", "local_mcp_stdio", "future_http_queue"] },
+        "implementedStatus": {
+          "type": "string",
+          "enum": ["local_embedding_guidance", "implemented_local", "local_envelope_guidance", "local_scaffold_guidance", "future_transport_only"]
+        },
+        "exampleCommand": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "sharesInternalApiSemantics": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "hiddenServiceRequired": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "doNotImplementGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["behaviorKey", "allowed", "guidance"],
+      "properties": {
+        "behaviorKey": {
+          "type": "string",
+          "enum": [
+            "free_form_oracle",
+            "raw_crud_writes",
+            "unbounded_background_loops",
+            "silent_deletion",
+            "hidden_live_fetches",
+            "credential_storage_in_records",
+            "automatic_method_upgrades"
+          ]
+        },
+        "allowed": { "type": "boolean" },
+        "guidance": { "type": "string", "minLength": 20, "maxLength": 240 }
+      }
+    },
+    "starterTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["templateKey", "templateName", "templatePath", "usesExistingSurfaces", "createsHostedService", "storesCredentials"],
+      "properties": {
+        "templateKey": { "type": "string", "enum": ["embedded_service", "cli_flow", "mcp_host_wrapper"] },
+        "templateName": { "type": "string", "minLength": 8, "maxLength": 120 },
+        "templatePath": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "usesExistingSurfaces": { "type": "boolean" },
+        "createsHostedService": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" }
+      }
+    },
+    "conformanceFixturePack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixturePackId",
+        "questionDiscoveryIntakeCount",
+        "candidateReadbackCount",
+        "validationReportCount",
+        "embeddedApiCallExampleCount",
+        "operationReceiptExampleCount",
+        "sourceConfigurationExampleCount",
+        "workerTickExampleCount",
+        "blockedPathExampleCount",
+        "normalChecksCreateForecastArtifacts"
+      ],
+      "properties": {
+        "fixturePackId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionDiscoveryIntakeCount": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "candidateReadbackCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "validationReportCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "embeddedApiCallExampleCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "operationReceiptExampleCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "sourceConfigurationExampleCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "workerTickExampleCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "blockedPathExampleCount": { "type": "integer", "minimum": 4, "maximum": 12 },
+        "normalChecksCreateForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "freeFormOracleAllowed",
+        "questionDiscoveryCreatesForecastArtifacts",
+        "rawCrudWritesAllowed",
+        "unboundedBackgroundLoopsAllowed",
+        "silentDeletionAllowed",
+        "hiddenLiveFetchAllowed",
+        "credentialValuesStored",
+        "automaticMethodUpgradeAllowed",
+        "hostedRuntimeRequired"
+      ],
+      "properties": {
+        "freeFormOracleAllowed": { "type": "boolean" },
+        "questionDiscoveryCreatesForecastArtifacts": { "type": "boolean" },
+        "rawCrudWritesAllowed": { "type": "boolean" },
+        "unboundedBackgroundLoopsAllowed": { "type": "boolean" },
+        "silentDeletionAllowed": { "type": "boolean" },
+        "hiddenLiveFetchAllowed": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "automaticMethodUpgradeAllowed": { "type": "boolean" },
+        "hostedRuntimeRequired": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manualStepCount",
+        "candidateReadbackCount",
+        "validationReportCount",
+        "adapterReadbackCount",
+        "starterTemplateCount"
+      ],
+      "properties": {
+        "manualStepCount": { "type": "integer", "minimum": 12, "maximum": 12 },
+        "candidateReadbackCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "validationReportCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "adapterReadbackCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "starterTemplateCount": { "type": "integer", "minimum": 3, "maximum": 3 }
+      }
+    }
+  }
+}

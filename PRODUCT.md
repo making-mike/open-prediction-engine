@@ -64,10 +64,11 @@ Current checked surfaces are grouped here so future milestones can add focused b
 
 - Core lifecycle: contracts, fixtures, scoring, request intake, source policy, evidence plans, evidence-source sets, forecast cards, evidence traces, lifecycle bundles, recalculation history, historical-only baseline forecasts, local forecast-run summaries, intake matrices, and runbooks.
 - Source and connector gates: source connector contracts, opt-in live connector readiness, ignored live-capture workspace, source adapter output, source adapter intake, source-quality and mapping-confidence readbacks, source manifest builder, source-intake reports, source-builder handoffs, source-handoff method gates, confirmed source-handoff forecast execution for `forecast-1102`, and source-handoff resolution and scoring with quality claims still sample-size-blocked.
-- Domain setup and local source runtime: a fixture-ready weather-logistics setup, a candidate seaport berth-availability setup, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, and an approved local-folder runtime with caller approval, path allow-listing, size limits, source-policy binding, and sanitized diagnostics.
+- Domain setup and local source runtime: a fixture-ready weather-logistics setup, a candidate seaport berth-availability setup, a checked domain/source field policy that separates universal fields from domain-specific extensions and blocked credential/raw/claim fields, checked credential-reference and private auto-evidence policies for opaque caller-owned private API/database references and private `data: auto` source-policy gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, and an approved local-folder runtime with caller approval, path allow-listing, size limits, source-policy binding, and sanitized diagnostics.
 - Private setup guidance: private setup workflow, request routing, first-action dispatch, first-action runbook, agent bundle, local orchestrator summary, private adapter-chain runbook, adapter conformance matrix and compact summary, private source adapter capabilities, outcome matrix, intake bridge, guidance operation, source-kind examples, and source-kind selection/query readbacks. These surfaces guide agents without executing private sources.
-- Agent interfaces: transport-neutral agent envelopes, local `agent-call`, local MCP stdio scaffold, protocol map for MCP plus future HTTP/queue adapters, private setup source-builder/source-handoff/method-gate/forecast-execution operations, forecast readback operations, campaign plan/status/health/append-readiness/calibration-status operations, method-update gate and plan readbacks, and the forecast-run tool.
-- Pilot and adoption: agent pilot validation pack, pilot evidence ledger, pilot session packet, pilot summary intake classifier, local usage trace read model, developer adoption surface, expansion-readiness gate, release manifest, MVP local runtime runbook, CI release gate, hardening checks, and the local CLI wrapper.
+- Agent interfaces: transport-neutral agent envelopes, local `agent-call`, local MCP stdio scaffold, protocol map for MCP plus future HTTP/queue adapters, optional OPP provider-adapter fixture, runtime transport readiness gate, agent integration readiness/candidates/guided-forecast readbacks, private setup source-builder/source-handoff/method-gate/forecast-execution operations, forecast readback operations, campaign plan/status/health/append-readiness/calibration-status operations, method-update gate and plan readbacks, and the forecast-run tool.
+- Runtime and storage: lifecycle operation store, storage adapter, Postgres compatibility checkpoint, approved database source-adapter runtime boundary, runtime hardening, an opt-in persistent SQLite path policy that requires caller approval and keeps normal checks ephemeral, a lifecycle lease policy that separates strict leases from idempotency-only retry guards, a runtime transport readiness gate that keeps HTTP, queue, hosted service, and OPP HTTP provider behavior deferred, a tenant-scoped workspace isolation readback for resources, queues, source bindings, credential references, and blocked cross-tenant access, a retention/redaction policy that keeps tombstones and receipts as default delete replacements while physical deletion remains an exception preflight, and a private auto-evidence policy that keeps private-source reads, raw SQL, broad web search, and secret resolution out of normal checks.
+- Pilot and adoption: agent pilot validation pack, pilot evidence ledger, pilot session packet, pilot summary intake classifier, local usage trace read model, developer adoption surface, agent incorporation golden path, expansion-readiness gate, release manifest, MVP local runtime runbook, CI release gate, hardening checks, and the local CLI wrapper.
 - Public beta transit wedge: opt-in HSL GTFS-RT TripUpdates capture, static GTFS schedule join, transit forward-run workflow, transit corpus growth loop, baseline track-record gate, method options, live evidence promotion gate, resolution job registry, foreground scheduler, resolver-agent command, and runtime reliability readback.
 - Repeating prediction campaigns: repeating setup contract, campaign manifest, terminal runner, forecast scheduling, bounded foreground ticks, runner-clock `--now`, missed-run policy, guarded `--write-local` creation, forecast-creation handoff, unresolved `forecast-1301` artifact, forecast-write plan and explicit local write runtime, resolution-attempt readback, doctor, resume, append-only evidence ledger, calibration-status readback, method-update gate/plan/apply/rollback, pilot explain readback, the 100-run Helsinki pilot operations runbook with a 3-run smoke path, and a pilot launch-readiness gate.
 
@@ -80,12 +81,15 @@ The repository does not yet implement:
 - Additional setup-aware methods beyond the current deterministic fixture path.
 - Source-quality-driven source execution or artifact creation.
 - Canonical corpus mutation from the checked transit corpus growth loop.
+- Persistent SQLite as the default runtime, persistent database creation during normal checks, or automatic ignored-JSON migration.
+- Lease acquisition during normal readbacks or raw lock-control APIs for agents.
+- Local HTTP listeners, hosted service runtime, queue runtime, or OPP HTTP provider runtime during normal checks.
 - Forecast execution from ignored local live drafts outside the explicit transit forward-run workflow.
 - General source-builder forecast execution beyond the checked source-handoff fixture path.
 - Production forecast use of live connector results.
 - Hosted polling or hosted scheduling of transit captures or resolver execution.
 - Repeated live transit calibration runs, live auto-evidence gathering, or unrestricted live evidence gathering.
-- A hosted service, HTTP API, production agent adapter runtime, production source discovery, or OS scheduler installation.
+- A hosted service, HTTP API, OPP HTTP/SSE/payment/aggregation provider runtime, production agent adapter runtime, production source discovery, or OS scheduler installation.
 - Live calibration claims.
 
 The expansion-readiness gate keeps those areas blocked or deferred until real pilot sessions, corpus growth, and adoption evidence justify a specific next runtime investment.
@@ -115,6 +119,8 @@ This is not a quality claim yet. Current checked beta-candidate surfaces are:
 - `python3 scripts/ope.py prediction-campaign method-update-plan`: records the approval artifact, explicit apply/rollback command shape, rollback record, and preflight checks without running that command during normal checks.
 - `python3 scripts/ope.py prediction-campaign pilot-runbook`: records the local 100-run Helsinki pilot procedure, 3-run smoke command sequence, operator status commands, success criteria, abort criteria, and baseline-first method boundary.
 - `python3 scripts/ope.py prediction-campaign pilot-readiness`: records checked launch prerequisites, manual operator confirmations, launch commands, and blocked actions before any effectful 100-run pilot write.
+- `python3 scripts/ope.py agent-integrate --view candidates`: answers what can be forecasted from the Helsinki starter context with forecastable, needs-clarification, blocked, and rejected candidate contracts and exact reason codes.
+- `python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output`: returns the `forecast-1102` forecast-card command within the three-call target while blocked guided cases return no forecast IDs.
 - `python3 scripts/ope.py transit-live-evidence-promotion`: records the gate for turning an approved ignored live weather draft into a sanitized forecast-time source set, while rejecting post-close and resolution-only captures as forecast evidence.
 - `python3 scripts/ope.py resolution-jobs` and `python3 scripts/ope.py resolution-jobs --campaign predictioncampaign-001`: expose the safe read-only job queue and the checked campaign forecast wait state without executing campaign resolvers.
 - `python3 scripts/ope.py resolution-scheduler --campaign predictioncampaign-001` and `python3 scripts/ope.py resolution-scheduler --live --watch`: expose campaign-aware scheduler ticks and local foreground polling.
@@ -151,7 +157,7 @@ OPE must not claim:
 - best possible performance without tying the claim to connected data, enabled methods, baseline comparisons, and observed track record
 - live calibration before enough comparable outcomes resolve
 - production service readiness before a service runtime exists
-- agent protocol compatibility beyond the tested local MCP stdio scaffold
+- agent protocol compatibility beyond the tested local MCP stdio scaffold and checked fixture-level OPP mapping
 
 The stronger claim to earn is:
 
@@ -172,6 +178,7 @@ Agent forecast completion rate for resolvable requests with valid forecast cards
 Supporting metrics:
 
 - time from request to forecast card
+- percentage of agent incorporation flows that reach a forecast-card command within the routine call-count target
 - percentage of requests accepted, clarified, rejected, or approval-gated
 - percentage of forecasts with valid source policy and provenance
 - baseline coverage by domain and horizon

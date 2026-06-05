@@ -277,6 +277,36 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "internal-api.schema.json"
     if name.endswith("prediction-workspace-registry.generated.json"):
         return spec_root / "prediction-workspace-registry.schema.json"
+    if name.endswith("background-worker-runtime.generated.json"):
+        return spec_root / "background-worker-runtime.schema.json"
+    if name.endswith("runtime-security.generated.json"):
+        return spec_root / "runtime-security.schema.json"
+    if name.endswith("agent-implementation-kit.generated.json"):
+        return spec_root / "agent-implementation-kit.schema.json"
+    if name.endswith("agent-integration.generated.json"):
+        return spec_root / "agent-integration.schema.json"
+    if name.endswith("postgres-compatibility.generated.json"):
+        return spec_root / "postgres-compatibility.schema.json"
+    if name.endswith("database-source-adapter-runtime.generated.json"):
+        return spec_root / "database-source-adapter-runtime.schema.json"
+    if name.endswith("opp-provider-adapter.generated.json"):
+        return spec_root / "opp-provider-adapter.schema.json"
+    if name.endswith("persistent-sqlite-policy.generated.json"):
+        return spec_root / "persistent-sqlite-policy.schema.json"
+    if name.endswith("lifecycle-lease-policy.generated.json"):
+        return spec_root / "lifecycle-lease-policy.schema.json"
+    if name.endswith("runtime-transport-readiness.generated.json"):
+        return spec_root / "runtime-transport-readiness.schema.json"
+    if name.endswith("workspace-tenant-isolation.generated.json"):
+        return spec_root / "workspace-tenant-isolation.schema.json"
+    if name.endswith("domain-source-field-policy.generated.json"):
+        return spec_root / "domain-source-field-policy.schema.json"
+    if name.endswith("credential-reference-policy.generated.json"):
+        return spec_root / "credential-reference-policy.schema.json"
+    if name.endswith("retention-redaction-policy.generated.json"):
+        return spec_root / "retention-redaction-policy.schema.json"
+    if name.endswith("private-auto-evidence-policy.generated.json"):
+        return spec_root / "private-auto-evidence-policy.schema.json"
     if name.endswith("lifecycle-operation-store.generated.json"):
         return spec_root / "lifecycle-operation.schema.json"
     if name.endswith("-domain-config.generated.json"):

@@ -1,0 +1,578 @@
+{
+  "privateAutoEvidencePolicyId": "privateautoevidencepolicy-001",
+  "generatedAt": "2026-06-05T08:40:00Z",
+  "policyStatus": "private_auto_evidence_policy_checked",
+  "decisionStatus": "private_data_auto_requires_bound_source_policy_and_approved_adapters",
+  "normalChecksMutateState": false,
+  "normalChecksReadPrivateSources": false,
+  "sourceBindings": {
+    "sourcePolicySchemaId": "https://openprediction.engine/spec/source-policy.schema.json",
+    "autoEvidenceStatus": "fixture_replay_auto_evidence_checked",
+    "privateSourceAdapterStatus": "private_source_adapter_capabilities_checked",
+    "domainSourceFieldPolicyStatus": "domain_source_field_policy_checked",
+    "credentialReferencePolicyStatus": "credential_reference_policy_checked",
+    "retentionRedactionPolicyStatus": "retention_redaction_policy_checked",
+    "runtimeSecurityStatus": "runtime_security_checked",
+    "workspaceTenantIsolationStatus": "workspace_tenant_isolation_checked",
+    "databaseSourceAdapterRuntimeStatus": "approved_database_source_adapter_runtime_checked",
+    "normalChecksWriteState": false,
+    "notes": "Private data:auto uses source-policy plus checked adapter, credential, retention, security, and tenant readbacks; adapter runtime status is capability_contract_only."
+  },
+  "sourceKindPolicies": [
+    {
+      "sourceKind": "local_file",
+      "currentPolicyStatus": "allowed_with_approved_local_runtime",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "route through approved local-source runtime and source-intake gates"
+    },
+    {
+      "sourceKind": "manual_mapping",
+      "currentPolicyStatus": "allowed_with_confirmed_mapping",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "require caller confirmation before treating inferred mappings as setup inputs"
+    },
+    {
+      "sourceKind": "auto_evidence_connector",
+      "currentPolicyStatus": "allowed_fixture_replay_only",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "use existing fixture-replay auto-evidence connectors until a live readiness gate lands"
+    },
+    {
+      "sourceKind": "source_adapter_output",
+      "currentPolicyStatus": "allowed_with_sanitized_adapter_output",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "accept only sanitized adapter-output handoffs that pass source-adapter intake"
+    },
+    {
+      "sourceKind": "database_query_manifest",
+      "currentPolicyStatus": "manifest_only_no_raw_sql_execution",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": true,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "declare approved dataset, query boundary, freshness, and audit fields before any future execution"
+    },
+    {
+      "sourceKind": "private_api_manifest",
+      "currentPolicyStatus": "manifest_only_no_runtime_execution",
+      "dataAutoRole": "forecast_time_evidence",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": true,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "declare endpoint family, source policy, credential reference, rate limit, freshness, and audit fields"
+    },
+    {
+      "sourceKind": "manual_upload",
+      "currentPolicyStatus": "planned_adapter_contract_required",
+      "dataAutoRole": "not_allowed",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "wait for a manual-upload adapter contract before allowing data:auto source discovery"
+    },
+    {
+      "sourceKind": "web_search",
+      "currentPolicyStatus": "blocked_for_private_data_auto",
+      "dataAutoRole": "not_allowed",
+      "sourcePolicyRequired": true,
+      "tenantWorkspaceScopeRequired": true,
+      "callerApprovalRequired": true,
+      "credentialReferenceRequired": false,
+      "adapterContractRequired": true,
+      "networkAccessAllowed": false,
+      "normalChecksReadPrivateSource": false,
+      "normalChecksResolveCredential": false,
+      "rawPayloadRetentionAllowed": false,
+      "safeNextAction": "keep broad web search outside private data:auto setup until a separate allow-listed policy exists"
+    }
+  ],
+  "policyGates": [
+    {
+      "gateName": "domain_config_bound",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A checked domain config with question templates, horizons, resolution criteria, and claim boundaries.",
+      "failureStatus": "blocked_missing_domain_config"
+    },
+    {
+      "gateName": "source_binding_bound",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A source binding that maps source roles, setup operations, and pre-forecast checks.",
+      "failureStatus": "blocked_missing_source_binding"
+    },
+    {
+      "gateName": "source_policy_bound",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A source policy ID with source classes, connectors or source kinds, freshness, approval, and retention posture.",
+      "failureStatus": "blocked_missing_source_policy"
+    },
+    {
+      "gateName": "tenant_workspace_scope_bound",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Tenant, workspace, prediction, and source-binding IDs must agree before private setup guidance is returned.",
+      "failureStatus": "blocked_scope_mismatch"
+    },
+    {
+      "gateName": "caller_approval_recorded",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "A caller approval or explicit fixture replay boundary must exist before private data:auto setup can proceed.",
+      "failureStatus": "blocked_missing_approval"
+    },
+    {
+      "gateName": "credential_reference_scoped",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": true,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Private API and database manifests require scoped opaque credential references, never credential values.",
+      "failureStatus": "blocked_missing_or_unsafe_credential_reference"
+    },
+    {
+      "gateName": "adapter_capability_checked",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": true,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "The source kind must map to a checked adapter capability and cannot imply unregistered connector execution.",
+      "failureStatus": "blocked_unregistered_adapter"
+    },
+    {
+      "gateName": "freshness_window_declared",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Forecast-time evidence requires retrieved-at, max age, and close-time compatibility.",
+      "failureStatus": "blocked_missing_freshness_window"
+    },
+    {
+      "gateName": "retention_policy_bound",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Private setup evidence must bind to metadata-only or redaction-receipt retention rules.",
+      "failureStatus": "blocked_retention_policy_mismatch"
+    },
+    {
+      "gateName": "leakage_checks_declared",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "The source binding must declare leakage, privacy, mapping-confidence, and outcome-availability checks.",
+      "failureStatus": "blocked_missing_leakage_checks"
+    },
+    {
+      "gateName": "forecast_before_close_preserved",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": true,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Evidence gathered after the outcome or close-time cannot be treated as forecast-time evidence.",
+      "failureStatus": "blocked_post_outcome_evidence"
+    },
+    {
+      "gateName": "normal_checks_non_effectful",
+      "gateStatus": "required_private_auto_gate",
+      "requiredForPrivateAuto": true,
+      "blocksCredentialValues": false,
+      "blocksUnregisteredAdapters": false,
+      "blocksPostOutcomeEvidence": false,
+      "normalChecksEvaluateAsEffectful": false,
+      "evidenceRequired": "Normal checks must not read private sources, resolve secrets, call networks, or write runtime state.",
+      "failureStatus": "blocked_effectful_normal_check"
+    }
+  ],
+  "decisionCases": [
+    {
+      "caseName": "approved_local_file_auto",
+      "caseStatus": "policy_ready",
+      "selectedSourceKind": "local_file",
+      "selectedGateFailures": [],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": true,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "route to local-source runtime, source intake, source handoff, method gate, and setup forecast execution"
+    },
+    {
+      "caseName": "approved_adapter_output_auto",
+      "caseStatus": "policy_ready",
+      "selectedSourceKind": "source_adapter_output",
+      "selectedGateFailures": [],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": true,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "accept sanitized adapter output and continue through source-adapter intake and source handoff"
+    },
+    {
+      "caseName": "approved_database_query_manifest",
+      "caseStatus": "manifest_ready_no_execution",
+      "selectedSourceKind": "database_query_manifest",
+      "selectedGateFailures": [],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "record the manifest boundary and wait for an explicit approved database runtime execution path"
+    },
+    {
+      "caseName": "private_api_manifest_with_scoped_credential",
+      "caseStatus": "manifest_ready_no_execution",
+      "selectedSourceKind": "private_api_manifest",
+      "selectedGateFailures": [],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "record endpoint family, source policy, credential reference, rate limit, and freshness without calling the API"
+    },
+    {
+      "caseName": "manual_mapping_with_confirmation",
+      "caseStatus": "policy_ready",
+      "selectedSourceKind": "manual_mapping",
+      "selectedGateFailures": [],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": true,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "treat confirmed mapping as setup input and preserve mapping confidence separately from source quality"
+    },
+    {
+      "caseName": "manual_upload_without_adapter_contract",
+      "caseStatus": "blocked_missing_adapter_contract",
+      "selectedSourceKind": "manual_upload",
+      "selectedGateFailures": [
+        "adapter_capability_checked"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "add a checked manual-upload adapter contract before using manual uploads in data:auto private setup"
+    },
+    {
+      "caseName": "private_api_missing_credential_ref",
+      "caseStatus": "blocked_missing_credential_reference",
+      "selectedSourceKind": "private_api_manifest",
+      "selectedGateFailures": [
+        "credential_reference_scoped"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "replace credential values with a scoped opaque credential reference before retrying"
+    },
+    {
+      "caseName": "database_raw_sql_auto",
+      "caseStatus": "blocked_raw_sql",
+      "selectedSourceKind": "database_query_manifest",
+      "selectedGateFailures": [
+        "source_binding_bound",
+        "credential_reference_scoped"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "replace raw SQL with an approved query manifest boundary and sanitized adapter output handoff"
+    },
+    {
+      "caseName": "web_search_private_setup",
+      "caseStatus": "blocked_private_web_search",
+      "selectedSourceKind": "web_search",
+      "selectedGateFailures": [
+        "adapter_capability_checked",
+        "normal_checks_non_effectful"
+      ],
+      "sourcePolicyBound": false,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "use allow-listed APIs or checked adapters; broad web search remains outside private data:auto"
+    },
+    {
+      "caseName": "cross_tenant_source_binding",
+      "caseStatus": "blocked_scope_mismatch",
+      "selectedSourceKind": "source_adapter_output",
+      "selectedGateFailures": [
+        "tenant_workspace_scope_bound"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "return sanitized scope diagnostics and require matching tenant/workspace/source-binding IDs"
+    },
+    {
+      "caseName": "post_outcome_capture_as_forecast_evidence",
+      "caseStatus": "blocked_post_outcome_evidence",
+      "selectedSourceKind": "auto_evidence_connector",
+      "selectedGateFailures": [
+        "forecast_before_close_preserved"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "classify the capture as resolution-only or excluded evidence instead of forecast-time evidence"
+    },
+    {
+      "caseName": "raw_private_payload_retention",
+      "caseStatus": "blocked_raw_payload_retention",
+      "selectedSourceKind": "source_adapter_output",
+      "selectedGateFailures": [
+        "retention_policy_bound"
+      ],
+      "sourcePolicyBound": true,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "keep hashes, normalized fields, and redaction receipts; reject raw private payload retention"
+    },
+    {
+      "caseName": "unregistered_private_connector",
+      "caseStatus": "blocked_unregistered_adapter",
+      "selectedSourceKind": "private_api_manifest",
+      "selectedGateFailures": [
+        "adapter_capability_checked"
+      ],
+      "sourcePolicyBound": false,
+      "eligibleForForecastExecution": false,
+      "credentialValuesStored": false,
+      "normalChecksReadPrivateSources": false,
+      "normalChecksWriteState": false,
+      "sanitizedDiagnosticsOnly": true,
+      "safeNextAction": "add a checked adapter capability and source-policy binding before source discovery"
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py private-auto-evidence-policy",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Prints this checked private data:auto policy."
+    },
+    {
+      "readbackSurface": "source_policy_schema",
+      "command": "spec/source-policy.schema.json",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Keeps the base source-policy contract explicit and schema-bound."
+    },
+    {
+      "readbackSurface": "auto_evidence",
+      "command": "python3 scripts/ope.py evidence-plan",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Preserves fixture-replay auto-evidence as the current executable data:auto path."
+    },
+    {
+      "readbackSurface": "private_source_adapters",
+      "command": "python3 scripts/ope.py private-source-adapters",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Declares source-kind capabilities without executing private reads."
+    },
+    {
+      "readbackSurface": "domain_source_field_policy",
+      "command": "python3 scripts/ope.py domain-source-field-policy",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Blocks raw credential, SQL, private-row, and claim fields in setup records."
+    },
+    {
+      "readbackSurface": "credential_reference_policy",
+      "command": "python3 scripts/ope.py credential-reference-policy",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Requires scoped opaque credential references for private API and database manifests."
+    },
+    {
+      "readbackSurface": "retention_redaction_policy",
+      "command": "python3 scripts/ope.py retention-redaction-policy",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Keeps raw payload retention blocked and redaction receipts available."
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Keeps normal checks offline, non-networked, and credential-free."
+    },
+    {
+      "readbackSurface": "workspace_tenant_isolation",
+      "command": "python3 scripts/ope.py workspace-tenant-isolation",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Scopes private source bindings to tenant and workspace ownership."
+    },
+    {
+      "readbackSurface": "database_source_adapter_runtime",
+      "command": "python3 scripts/ope.py database-source-adapter-runtime",
+      "mutatesState": false,
+      "readsPrivateSource": false,
+      "resolvesCredentials": false,
+      "notes": "Shows the only approved database adapter fixture path."
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksReadPrivateSources": false,
+    "normalChecksResolveSecrets": false,
+    "normalChecksNetworkAccess": false,
+    "normalChecksWriteState": false,
+    "arbitraryWebSearchAllowed": false,
+    "arbitraryPrivateApiParsingAllowed": false,
+    "arbitraryDatabaseParsingAllowed": false,
+    "rawSqlExecutionAllowed": false,
+    "rawPrivatePayloadRetentionAllowed": false,
+    "postOutcomeEvidenceAsForecastEvidenceAllowed": false,
+    "hostedRuntimeImplemented": false,
+    "qualityClaimsUpgraded": false,
+    "generatedRuntimeTypesEnabled": false
+  },
+  "summary": {
+    "sourceKindCount": 8,
+    "policyGateCount": 12,
+    "decisionCaseCount": 13,
+    "readbackCount": 10,
+    "blockedCaseCount": 8,
+    "manifestOnlyCaseCount": 2,
+    "normalChecksReadPrivateSources": false,
+    "normalChecksMutateState": false
+  },
+  "warnings": [
+    "Private data:auto does not mean arbitrary private-source discovery; it requires bound source policy and checked adapter capabilities.",
+    "Private API and database manifests may describe future runtime boundaries, but normal checks do not call APIs, open databases, run SQL, or resolve secrets.",
+    "Broad web search remains blocked for private setup until a separate allow-listed policy and readiness gate exists."
+  ]
+}

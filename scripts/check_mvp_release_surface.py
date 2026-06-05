@@ -73,6 +73,357 @@ def main() -> None:
     require(local_runtime["summary"]["blockedCount"] == 6, "local source runtime should expose blocked examples")
     require(local_runtime["summary"]["qualityClaimAllowed"] is False, "local source runtime must keep quality claims blocked")
 
+    runtime_security = run_cli("runtime-security")
+    require(
+        runtime_security["securityStatus"] == "lightweight_runtime_hardening_checked",
+        "runtime security status drifted",
+    )
+    require(runtime_security["dependencyBudget"]["runtimeDependencyCount"] == 0, "runtime dependencies should stay zero")
+    require(runtime_security["summary"]["moduleBoundaryCount"] == 7, "runtime security module boundary count drifted")
+    require(runtime_security["summary"]["surfaceControlCount"] == 5, "runtime security surface control count drifted")
+    require(runtime_security["executionBoundary"]["hostedRuntimeRequired"] is False, "runtime security must not require hosted runtime")
+    require(runtime_security["executionBoundary"]["credentialValuesStored"] is False, "runtime security must block credential values")
+
+    agent_kit = run_cli("agent-implementation-kit")
+    require(agent_kit["kitStatus"] == "agent_prediction_implementation_kit_checked", "agent kit status drifted")
+    require(agent_kit["summary"]["manualStepCount"] == 12, "agent kit manual step count drifted")
+    require(agent_kit["summary"]["candidateReadbackCount"] == 4, "agent kit candidate readback count drifted")
+    require(agent_kit["summary"]["validationReportCount"] == 4, "agent kit validation report count drifted")
+    require(agent_kit["executionBoundary"]["questionDiscoveryCreatesForecastArtifacts"] is False, "question discovery must not create artifacts")
+    require(agent_kit["executionBoundary"]["freeFormOracleAllowed"] is False, "agent kit must block free-form oracle behavior")
+
+    agent_integration = run_cli("agent-integrate")
+    require(
+        agent_integration["integrationStatus"] == "agent_integration_golden_path_checked",
+        "agent integration status drifted",
+    )
+    require(
+        agent_integration["summary"]["firstForecastFastTargetMet"] is True,
+        "agent integration should meet the first forecast fast gate",
+    )
+    require(
+        agent_integration["summary"]["forecastId"] == "forecast-1102",
+        "agent integration forecast binding drifted",
+    )
+    require(
+        agent_integration["efficiencyGate"]["acceptedCaseToolCallCount"] <= 3,
+        "agent integration accepted case should stay within three routine calls",
+    )
+    require(
+        agent_integration["executionBoundary"]["qualityClaimsUpgraded"] is False,
+        "agent integration must not upgrade quality claims",
+    )
+    require(
+        agent_integration["executionBoundary"]["hostedRuntimeImplemented"] is False,
+        "agent integration must not claim hosted runtime",
+    )
+
+    postgres = run_cli("postgres-compatibility")
+    require(postgres["compatibilityStatus"] == "sqlite_to_postgres_semantics_checked", "Postgres compatibility status drifted")
+    require(postgres["summary"]["tableCount"] == 8, "Postgres compatibility table count drifted")
+    require(postgres["summary"]["scenarioCount"] == 15, "Postgres compatibility scenario count drifted")
+    require(postgres["normalChecksConnectToPostgres"] is False, "Postgres compatibility checks must stay offline")
+    require(postgres["postgresRuntimeImplemented"] is False, "Postgres compatibility must not claim runtime implementation")
+    require(postgres["executionBoundary"]["schemaMigrationExecuted"] is False, "Postgres compatibility must not execute migrations")
+
+    database_runtime = run_cli("database-source-adapter-runtime")
+    require(
+        database_runtime["runtimeStatus"] == "approved_database_source_adapter_runtime_checked",
+        "database source-adapter runtime status drifted",
+    )
+    require(database_runtime["summary"]["caseCount"] == 9, "database source-adapter runtime case count drifted")
+    require(database_runtime["summary"]["approvedExecutionPathCount"] == 1, "database source-adapter runtime approved path count drifted")
+    require(database_runtime["summary"]["blockedCaseCount"] == 8, "database source-adapter runtime blocked count drifted")
+    require(database_runtime["executionBoundary"]["normalChecksConnectToDatabase"] is False, "database runtime checks must stay offline")
+    require(database_runtime["executionBoundary"]["credentialValuesStored"] is False, "database runtime must not store credentials")
+    require(database_runtime["executionBoundary"]["rawPrivateRowsStored"] is False, "database runtime must not store raw rows")
+    require(database_runtime["routing"]["databaseSpecificForecastPathCreated"] is False, "database runtime must not create a DB-specific forecast path")
+
+    opp_provider = run_cli("opp-provider-adapter")
+    require(
+        opp_provider["providerAdapterStatus"] == "optional_opp_provider_adapter_checked",
+        "OPP provider adapter status drifted",
+    )
+    require(opp_provider["normalChecksOffline"] is True, "OPP provider adapter normal checks must stay offline")
+    require(opp_provider["localMcpStdioTested"] is True, "OPP provider adapter should keep local MCP stdio as tested protocol")
+    require(opp_provider["httpProviderRuntimeImplemented"] is False, "OPP provider adapter must keep HTTP runtime future")
+    require(opp_provider["sseStreamingImplemented"] is False, "OPP provider adapter must keep SSE future")
+    require(opp_provider["paymentSettlementImplemented"] is False, "OPP provider adapter must keep payment settlement future")
+    require(opp_provider["aggregationImplemented"] is False, "OPP provider adapter must keep aggregation future")
+    require(
+        opp_provider["protocolBoundary"]["opeRecordsAuthoritative"] is True,
+        "OPP provider adapter must keep OPE records authoritative",
+    )
+    require(
+        opp_provider["protocolBoundary"]["qualityClaimsUpgraded"] is False,
+        "OPP provider adapter must not upgrade quality claims",
+    )
+    require(opp_provider["summary"]["supportedDomainCount"] >= 3, "OPP provider adapter domain coverage drifted")
+
+    persistent_sqlite_policy = run_cli("persistent-sqlite-policy")
+    require(
+        persistent_sqlite_policy["policyStatus"] == "persistent_sqlite_path_policy_checked",
+        "persistent SQLite policy status drifted",
+    )
+    require(
+        persistent_sqlite_policy["persistentSqliteDefaultEnabled"] is False,
+        "persistent SQLite must not become default",
+    )
+    require(
+        persistent_sqlite_policy["normalChecksUseEphemeralSqlite"] is True,
+        "persistent SQLite policy should keep normal checks ephemeral",
+    )
+    require(
+        persistent_sqlite_policy["executionBoundary"]["normalChecksCreatePersistentDatabase"] is False,
+        "persistent SQLite policy must not create persistent databases in normal checks",
+    )
+    require(
+        persistent_sqlite_policy["executionBoundary"]["credentialValuesStored"] is False,
+        "persistent SQLite policy must not store credential values",
+    )
+    require(
+        persistent_sqlite_policy["summary"]["readyCaseCount"] == 2,
+        "persistent SQLite policy ready count drifted",
+    )
+
+    lifecycle_lease_policy = run_cli("lifecycle-lease-policy")
+    require(
+        lifecycle_lease_policy["policyStatus"] == "lifecycle_operation_lease_policy_checked",
+        "lifecycle lease policy status drifted",
+    )
+    require(
+        lifecycle_lease_policy["summary"]["strictLeaseCount"] == 9,
+        "lifecycle lease policy strict lease count drifted",
+    )
+    require(
+        lifecycle_lease_policy["summary"]["idempotencyOnlyCount"] == 5,
+        "lifecycle lease policy idempotency-only count drifted",
+    )
+    require(
+        lifecycle_lease_policy["summary"]["allEffectfulOperationsRequireIdempotency"] is True,
+        "lifecycle lease policy should require idempotency for all effectful operations",
+    )
+    require(
+        lifecycle_lease_policy["summary"]["normalChecksAcquireLeases"] is False,
+        "lifecycle lease policy should keep normal checks lease-free",
+    )
+    require(
+        lifecycle_lease_policy["executionBoundary"]["rawCrudExposed"] is False,
+        "lifecycle lease policy must not expose raw CRUD",
+    )
+    require(
+        lifecycle_lease_policy["executionBoundary"]["hostedRuntimeImplemented"] is False,
+        "lifecycle lease policy must not claim hosted runtime implementation",
+    )
+    require(
+        lifecycle_lease_policy["executionBoundary"]["leasesAcquiredByReadback"] is False,
+        "lifecycle lease policy readbacks must not acquire leases",
+    )
+
+    runtime_transport = run_cli("runtime-transport-readiness")
+    require(
+        runtime_transport["readinessStatus"] == "runtime_transport_readiness_checked",
+        "runtime transport readiness status drifted",
+    )
+    require(
+        runtime_transport["summary"]["currentSurfaceCount"] == 4,
+        "runtime transport current surface count drifted",
+    )
+    require(
+        runtime_transport["summary"]["futureSurfaceCount"] == 4,
+        "runtime transport future surface count drifted",
+    )
+    require(
+        runtime_transport["summary"]["metLocalCriteriaCount"] == 6,
+        "runtime transport met local criteria count drifted",
+    )
+    require(
+        runtime_transport["summary"]["blockedCaseCount"] == 7,
+        "runtime transport blocked case count drifted",
+    )
+    require(
+        runtime_transport["hostedRuntimeAllowedNow"] is False,
+        "runtime transport readiness must keep hosted runtime blocked",
+    )
+    require(
+        runtime_transport["localHttpAllowedNow"] is False,
+        "runtime transport readiness must keep local HTTP deferred",
+    )
+    require(
+        runtime_transport["executionBoundary"]["networkListenerStarted"] is False,
+        "runtime transport readiness must not start network listeners",
+    )
+    require(
+        runtime_transport["executionBoundary"]["hostedServiceImplemented"] is False,
+        "runtime transport readiness must not implement hosted service",
+    )
+
+    workspace_tenant = run_cli("workspace-tenant-isolation")
+    require(
+        workspace_tenant["isolationStatus"] == "workspace_tenant_isolation_checked",
+        "workspace tenant isolation status drifted",
+    )
+    require(
+        workspace_tenant["summary"]["tenantWorkspaceCount"] == 2,
+        "workspace tenant isolation should expose two tenant workspaces",
+    )
+    require(
+        workspace_tenant["summary"]["blockedAccessCaseCount"] == 6,
+        "workspace tenant isolation should expose six blocked access cases",
+    )
+    require(
+        workspace_tenant["normalChecksMutateState"] is False,
+        "workspace tenant isolation must keep normal checks non-mutating",
+    )
+    require(
+        workspace_tenant["hostedTenantRuntimeImplemented"] is False,
+        "workspace tenant isolation must not implement hosted tenant runtime",
+    )
+    require(
+        workspace_tenant["executionBoundary"]["crossTenantReadAllowed"] is False,
+        "workspace tenant isolation must block cross-tenant reads",
+    )
+    require(
+        workspace_tenant["executionBoundary"]["crossTenantSourceReuseAllowed"] is False,
+        "workspace tenant isolation must block cross-tenant source reuse",
+    )
+
+    domain_source_policy = run_cli("domain-source-field-policy")
+    require(
+        domain_source_policy["policyStatus"] == "domain_source_field_policy_checked",
+        "domain/source field policy status drifted",
+    )
+    require(
+        domain_source_policy["summary"]["universalDomainFieldCount"] == 10,
+        "domain/source field policy domain field count drifted",
+    )
+    require(
+        domain_source_policy["summary"]["universalSourceBindingFieldCount"] == 10,
+        "domain/source field policy source field count drifted",
+    )
+    require(
+        domain_source_policy["summary"]["domainSpecificExtensionFieldCount"] == 8,
+        "domain/source field policy extension count drifted",
+    )
+    require(
+        domain_source_policy["normalChecksMutateState"] is False,
+        "domain/source field policy must keep normal checks non-mutating",
+    )
+    require(
+        domain_source_policy["generatedRuntimeTypesIncluded"] is False,
+        "domain/source field policy must not generate runtime types",
+    )
+    require(
+        domain_source_policy["executionBoundary"]["rawSqlAllowed"] is False,
+        "domain/source field policy must block raw SQL fields",
+    )
+    require(
+        domain_source_policy["executionBoundary"]["hostedRuntimeImplemented"] is False,
+        "domain/source field policy must not implement hosted runtime",
+    )
+
+    credential_policy = run_cli("credential-reference-policy")
+    require(
+        credential_policy["policyStatus"] == "credential_reference_policy_checked",
+        "credential reference policy status drifted",
+    )
+    require(
+        credential_policy["summary"]["acceptedReferenceMechanismCount"] == 4,
+        "credential reference mechanism count drifted",
+    )
+    require(
+        credential_policy["summary"]["requiredScopeKeyCount"] == 8,
+        "credential reference scope key count drifted",
+    )
+    require(
+        credential_policy["summary"]["blockedCaseCount"] == 8,
+        "credential reference blocked case count drifted",
+    )
+    require(
+        credential_policy["normalChecksMutateState"] is False,
+        "credential reference policy must keep normal checks non-mutating",
+    )
+    require(
+        credential_policy["secretResolverImplemented"] is False,
+        "credential reference policy must not implement a secret resolver",
+    )
+    require(
+        credential_policy["executionBoundary"]["normalChecksResolveSecrets"] is False,
+        "credential reference policy must not resolve secrets in normal checks",
+    )
+
+    retention_policy = run_cli("retention-redaction-policy")
+    require(
+        retention_policy["policyStatus"] == "retention_redaction_policy_checked",
+        "retention/redaction policy status drifted",
+    )
+    require(
+        retention_policy["summary"]["retentionClassCount"] == 8,
+        "retention/redaction class count drifted",
+    )
+    require(
+        retention_policy["summary"]["physicalDeleteGateCount"] == 8,
+        "retention/redaction physical delete gate count drifted",
+    )
+    require(
+        retention_policy["summary"]["decisionCaseCount"] == 12,
+        "retention/redaction case count drifted",
+    )
+    require(
+        retention_policy["normalChecksMutateState"] is False,
+        "retention/redaction policy must keep normal checks non-mutating",
+    )
+    require(
+        retention_policy["physicalDeleteDefaultEnabled"] is False,
+        "retention/redaction policy must keep physical delete non-default",
+    )
+    require(
+        retention_policy["executionBoundary"]["normalChecksPhysicallyDelete"] is False,
+        "retention/redaction policy must not physically delete in normal checks",
+    )
+    require(
+        retention_policy["executionBoundary"]["silentDeleteAllowed"] is False,
+        "retention/redaction policy must block silent delete",
+    )
+    require(
+        credential_policy["executionBoundary"]["storesCredentialValues"] is False,
+        "credential reference policy must not store credential values",
+    )
+
+    private_auto_policy = run_cli("private-auto-evidence-policy")
+    require(
+        private_auto_policy["policyStatus"] == "private_auto_evidence_policy_checked",
+        "private auto-evidence policy status drifted",
+    )
+    require(
+        private_auto_policy["summary"]["sourceKindCount"] == 8,
+        "private auto-evidence source-kind count drifted",
+    )
+    require(
+        private_auto_policy["summary"]["policyGateCount"] == 12,
+        "private auto-evidence gate count drifted",
+    )
+    require(
+        private_auto_policy["summary"]["decisionCaseCount"] == 13,
+        "private auto-evidence case count drifted",
+    )
+    require(
+        private_auto_policy["normalChecksReadPrivateSources"] is False,
+        "private auto-evidence policy must not read private sources in normal checks",
+    )
+    require(
+        private_auto_policy["executionBoundary"]["arbitraryWebSearchAllowed"] is False,
+        "private auto-evidence policy must block arbitrary web search",
+    )
+    require(
+        private_auto_policy["executionBoundary"]["rawSqlExecutionAllowed"] is False,
+        "private auto-evidence policy must block raw SQL execution",
+    )
+    require(
+        private_auto_policy["executionBoundary"]["generatedRuntimeTypesEnabled"] is False,
+        "private auto-evidence policy must not enable generated runtime types",
+    )
+
     adoption = run_cli("developer-adoption")
     require(adoption["summary"]["quickstartStepCount"] == 7, "developer adoption quickstart count drifted")
     require(adoption["bindings"]["forecastId"] == "forecast-1102", "developer adoption forecast binding drifted")
@@ -419,6 +770,12 @@ def main() -> None:
     require(campaign_agent["status"] == "ok", "campaign status agent-call should return ok")
     require(campaign_agent["payload"]["campaignSnapshot"]["nextForecastId"] == "forecast-1301", "campaign status agent-call next forecast drifted")
     require(campaign_agent["payload"]["executionBoundary"]["createsForecastArtifacts"] is False, "campaign status agent-call must not create artifacts")
+
+    database_agent = run_cli("agent-call", "--operation", "database_source_adapter_runtime_status")
+    require(database_agent["status"] == "ok", "database runtime agent-call should return ok")
+    require(database_agent["payload"]["summary"]["approvedExecutionPathCount"] == 1, "database runtime agent-call approved path count drifted")
+    require(database_agent["payload"]["executionBoundary"]["normalChecksConnectToDatabase"] is False, "database runtime agent-call must stay offline")
+    require(database_agent["payload"]["executionBoundary"]["credentialValuesStored"] is False, "database runtime agent-call must not store credentials")
 
     print("checked MVP release surface")
 

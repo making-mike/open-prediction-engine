@@ -1,0 +1,444 @@
+{
+  "runtimeSecurityId": "runtime-security-001",
+  "generatedAt": "2026-06-04T18:20:00Z",
+  "securityStatus": "lightweight_runtime_hardening_checked",
+  "runtimeScope": "embedded_local_runtime",
+  "dependencyBudget": {
+    "coreRuntimeDependencyPolicy": "python_stdlib_only",
+    "allowedRuntimeDependencyGroups": [
+      "python_standard_library"
+    ],
+    "runtimeDependencies": [],
+    "runtimeDependencyCount": 0,
+    "thirdPartyRuntimeDependenciesAllowed": false,
+    "devOnlyDependencies": [
+      "ruff",
+      "mypy"
+    ],
+    "packageInstallRequiredForNormalChecks": false,
+    "checkedBy": [
+      "python3 scripts/check_runtime_security.py",
+      "python3 scripts/check_hardening.py",
+      "python3 scripts/release_check.py"
+    ],
+    "notes": "Core OPE runtime checks use the Python standard library; ruff and mypy remain release-only static tools."
+  },
+  "moduleBoundaries": [
+    {
+      "moduleName": "core_lifecycle",
+      "modulePath": "scripts/lifecycle_operation_store_runtime.py",
+      "responsibility": "Validate operation preflight, idempotency, leases, immutable writes, and read-model effects.",
+      "allowedCallClasses": [
+        "storage_adapter",
+        "read_model_projection"
+      ],
+      "forbiddenCallClasses": [
+        "transport_listener",
+        "source_fetch",
+        "credential_value_storage"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "storage_adapter",
+      "modulePath": "scripts/lifecycle_operation_store_runtime.py",
+      "responsibility": "Provide local SQLite-compatible storage semantics without exposing raw SQL to agent callers.",
+      "allowedCallClasses": [
+        "sqlite_connection",
+        "schema_migration",
+        "projection_upsert"
+      ],
+      "forbiddenCallClasses": [
+        "network_database_endpoint",
+        "raw_sql_agent_surface",
+        "physical_delete"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "source_adapter",
+      "modulePath": "scripts/generate_source_adapter_intake.py",
+      "responsibility": "Accept sanitized adapter output and source-policy bindings without executing private source reads.",
+      "allowedCallClasses": [
+        "source_policy_reference",
+        "sanitized_adapter_output"
+      ],
+      "forbiddenCallClasses": [
+        "credential_value_storage",
+        "unbounded_source_scan",
+        "implicit_live_fetch"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "method_adapter",
+      "modulePath": "scripts/select_setup_method.py",
+      "responsibility": "Select allowed forecasting methods only after setup benchmark and method-gate checks.",
+      "allowedCallClasses": [
+        "method_registry",
+        "benchmark_gate",
+        "claim_boundary"
+      ],
+      "forbiddenCallClasses": [
+        "automatic_method_upgrade",
+        "training_data_leakage",
+        "quality_overclaim"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "transport_adapter",
+      "modulePath": "scripts/agent_adapter_dispatcher.py",
+      "responsibility": "Wrap internal operations for CLI, agent-call, and local MCP surfaces without changing semantics.",
+      "allowedCallClasses": [
+        "internal_api_operation",
+        "compact_envelope"
+      ],
+      "forbiddenCallClasses": [
+        "raw_file_layout",
+        "raw_sql_agent_surface",
+        "hidden_network_listener"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "worker_runtime",
+      "modulePath": "scripts/background_worker_runtime.py",
+      "responsibility": "Run bounded foreground-equivalent worker ticks with explicit control state and no hidden daemon.",
+      "allowedCallClasses": [
+        "internal_api_run_tick",
+        "worker_control_state",
+        "bounded_loop"
+      ],
+      "forbiddenCallClasses": [
+        "unbounded_background_loop",
+        "implicit_live_fetch",
+        "host_event_loop_ownership"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    },
+    {
+      "moduleName": "domain_source_setup",
+      "modulePath": "scripts/generate_source_bindings.py",
+      "responsibility": "Bind approved domain/source setup records with mapping confidence, source quality, and leakage checks.",
+      "allowedCallClasses": [
+        "domain_config",
+        "source_binding",
+        "credential_reference"
+      ],
+      "forbiddenCallClasses": [
+        "credential_value_storage",
+        "raw_private_rows",
+        "unchecked_database_query"
+      ],
+      "singleResponsibility": true,
+      "rawSqlExposed": false,
+      "credentialValuesAccepted": false,
+      "hiddenServiceRequired": false,
+      "adapterBoundaryDocumented": true
+    }
+  ],
+  "runtimeSurfaceControls": [
+    {
+      "surfaceName": "embedded_internal_api",
+      "ownerModule": "core_lifecycle",
+      "pathAllowlistRequired": true,
+      "symlinkEscapeCheckRequired": true,
+      "databasePathCheckRequired": true,
+      "inputSizeLimitBytes": 65536,
+      "responseSizeLimitBytes": 65536,
+      "sanitizedDiagnosticsRequired": true,
+      "credentialReferenceOnly": true,
+      "credentialValuesStored": false,
+      "networkAccessDefault": "disabled",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Internal API calls are bounded, receipt-backed, and return sanitized read models."
+    },
+    {
+      "surfaceName": "local_sqlite_storage_adapter",
+      "ownerModule": "storage_adapter",
+      "pathAllowlistRequired": true,
+      "symlinkEscapeCheckRequired": true,
+      "databasePathCheckRequired": true,
+      "inputSizeLimitBytes": 262144,
+      "responseSizeLimitBytes": 65536,
+      "sanitizedDiagnosticsRequired": true,
+      "credentialReferenceOnly": true,
+      "credentialValuesStored": false,
+      "networkAccessDefault": "disabled",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "SQLite checks run in memory or approved local state paths and never expose raw SQL to agents."
+    },
+    {
+      "surfaceName": "background_worker_runtime",
+      "ownerModule": "worker_runtime",
+      "pathAllowlistRequired": true,
+      "symlinkEscapeCheckRequired": true,
+      "databasePathCheckRequired": true,
+      "inputSizeLimitBytes": 65536,
+      "responseSizeLimitBytes": 65536,
+      "sanitizedDiagnosticsRequired": true,
+      "credentialReferenceOnly": true,
+      "credentialValuesStored": false,
+      "networkAccessDefault": "disabled",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Worker checks run one bounded tick, honor control state, and avoid live source execution by default."
+    },
+    {
+      "surfaceName": "local_source_runtime",
+      "ownerModule": "source_adapter",
+      "pathAllowlistRequired": true,
+      "symlinkEscapeCheckRequired": true,
+      "databasePathCheckRequired": true,
+      "inputSizeLimitBytes": 262144,
+      "responseSizeLimitBytes": 65536,
+      "sanitizedDiagnosticsRequired": true,
+      "credentialReferenceOnly": true,
+      "credentialValuesStored": false,
+      "networkAccessDefault": "disabled",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Local source intake accepts only caller-approved files under an allow-listed folder."
+    },
+    {
+      "surfaceName": "domain_source_setup",
+      "ownerModule": "domain_source_setup",
+      "pathAllowlistRequired": true,
+      "symlinkEscapeCheckRequired": true,
+      "databasePathCheckRequired": true,
+      "inputSizeLimitBytes": 131072,
+      "responseSizeLimitBytes": 65536,
+      "sanitizedDiagnosticsRequired": true,
+      "credentialReferenceOnly": true,
+      "credentialValuesStored": false,
+      "networkAccessDefault": "disabled",
+      "rawSqlExposed": false,
+      "rawFileLayoutExposed": false,
+      "notes": "Domain and source setup records expose references, confidence, and blockers without private payloads."
+    }
+  ],
+  "pathAndDatabaseGuards": {
+    "allowedLocalStateRoots": [
+      ".ope/state"
+    ],
+    "allowedFixtureRoots": [
+      "spec/fixtures",
+      "spec/fixtures/generated"
+    ],
+    "pathTraversalBlocked": true,
+    "symlinkEscapeBlocked": true,
+    "absolutePathRequiresApproval": true,
+    "localSourcePathAllowlistRequired": true,
+    "databasePathAllowlistRequired": true,
+    "persistentDatabaseDefaultAllowed": false,
+    "normalChecksUseEphemeralSqlite": true,
+    "sanitizedDiagnostics": [
+      "path_traversal_blocked",
+      "symlink_escape_blocked",
+      "database_path_not_allowlisted",
+      "response_too_large"
+    ]
+  },
+  "credentialHandling": {
+    "credentialValuesStoredInRecords": false,
+    "credentialReferencesAllowed": true,
+    "allowedCredentialFields": [
+      "credentialRef",
+      "sourcePolicyId",
+      "sanitizedProvenance"
+    ],
+    "redactionReceiptRequiredForUnsafeFields": true,
+    "sourcePolicyIdRequired": true,
+    "sanitizedProvenanceRequired": true,
+    "environmentSecretEchoAllowed": false,
+    "notes": "Records may point at caller-managed credential references but must not contain secret values."
+  },
+  "threatModelNotes": [
+    {
+      "threatName": "malicious_source_data",
+      "risk": "Caller-provided source rows may contain malformed, adversarial, or misleading data.",
+      "mitigation": "Source intake and local runtime checks bind source policy, mapping confidence, size limits, and sanitized diagnostics before forecast use.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_source_intake.py",
+        "scripts/check_local_source_runtime.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "prompt_source_injection",
+      "risk": "Source text could try to override agent instructions or forecast method boundaries.",
+      "mitigation": "OPE treats source payloads as evidence records, never instructions, and keeps method selection behind checked gates.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_setup_method_decision.py",
+        "scripts/check_source_handoff_method_gate.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "path_traversal",
+      "risk": "A caller could try to bind files outside the approved local source or state roots.",
+      "mitigation": "Path traversal, symlink escape, and database path checks are explicit runtime surface controls.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_local_source_runtime.py",
+        "scripts/check_runtime_security.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "idempotency_replay",
+      "risk": "Repeated agent calls could duplicate lifecycle writes or replay stale operations.",
+      "mitigation": "Effectful operations require idempotency keys and receipt-backed lifecycle preflight before mutation.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_lifecycle_operation_store.py",
+        "scripts/check_internal_api.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "lease_abuse",
+      "risk": "A caller could monopolize a prediction lease or race another mutation.",
+      "mitigation": "Per-prediction leases block concurrent mutation, expose stale recovery, and keep worker ticks bounded.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_prediction_workspace_registry.py",
+        "scripts/check_background_worker_runtime.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "oversized_responses",
+      "risk": "Large readbacks could overwhelm agent callers or hide oversized matrices in compact surfaces.",
+      "mitigation": "Read responses, adapter summaries, and runtime surfaces declare byte budgets and response_too_large blockers.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_hardening.py",
+        "scripts/check_private_setup_adapter_conformance_summary.py"
+      ],
+      "rawSensitiveDataExposed": false
+    },
+    {
+      "threatName": "accidental_private_data_exposure",
+      "risk": "Private rows, raw transcripts, credentials, or participant identity could leak into checked records.",
+      "mitigation": "Pilot, source, adapter, and credential records use sanitized summaries, redaction receipts, and credential references only.",
+      "mitigationStatus": "checked_or_bounded",
+      "checkedBy": [
+        "scripts/check_pilot_summary_intake.py",
+        "scripts/check_private_source_adapter_capabilities.py"
+      ],
+      "rawSensitiveDataExposed": false
+    }
+  ],
+  "agentReadableChecks": [
+    {
+      "command": "python3 scripts/check_runtime_security.py",
+      "purpose": "Validate the runtime security readback contract and Milestone 117 invariants.",
+      "hiddenServiceRequired": false
+    },
+    {
+      "command": "python3 scripts/check_hardening.py",
+      "purpose": "Run repo-wide secret, size, binding, duplicate, and adapter payload guards.",
+      "hiddenServiceRequired": false
+    },
+    {
+      "command": "python3 scripts/ope.py runtime-security --check",
+      "purpose": "Check the generated runtime-security fixture through the CLI.",
+      "hiddenServiceRequired": false
+    },
+    {
+      "command": "python3 scripts/ope.py check",
+      "purpose": "Run all local canonical checks without live source fetches or hidden services.",
+      "hiddenServiceRequired": false
+    }
+  ],
+  "blockedExamples": [
+    {
+      "caseName": "path_traversal",
+      "blocked": true,
+      "sanitizedDiagnosticCode": "path_traversal_blocked",
+      "rawValueEchoed": false,
+      "safeNextAction": "Choose a caller-approved file under the configured source allow-list."
+    },
+    {
+      "caseName": "symlink_escape",
+      "blocked": true,
+      "sanitizedDiagnosticCode": "symlink_escape_blocked",
+      "rawValueEchoed": false,
+      "safeNextAction": "Resolve the path and bind only files that remain under the approved root."
+    },
+    {
+      "caseName": "database_outside_allowlist",
+      "blocked": true,
+      "sanitizedDiagnosticCode": "database_path_not_allowlisted",
+      "rawValueEchoed": false,
+      "safeNextAction": "Use ephemeral SQLite for checks or an approved local state database path."
+    },
+    {
+      "caseName": "oversized_response",
+      "blocked": true,
+      "sanitizedDiagnosticCode": "response_too_large",
+      "rawValueEchoed": false,
+      "safeNextAction": "Use a compact readback view or explicitly request the larger matrix surface."
+    },
+    {
+      "caseName": "credential_value_in_record",
+      "blocked": true,
+      "sanitizedDiagnosticCode": "credential_value_redacted",
+      "rawValueEchoed": false,
+      "safeNextAction": "Replace the value with a caller-managed credential reference and source policy id."
+    }
+  ],
+  "executionBoundary": {
+    "hostedRuntimeRequired": false,
+    "networkListenerStarted": false,
+    "liveSourceFetchDefault": false,
+    "credentialValuesStored": false,
+    "rawSqlExposed": false,
+    "rawFileLayoutExposed": false,
+    "unboundedBackgroundLoopAllowed": false,
+    "physicalDeleteAllowed": false
+  },
+  "summary": {
+    "runtimeDependencyCount": 0,
+    "moduleBoundaryCount": 7,
+    "surfaceControlCount": 5,
+    "threatModelNoteCount": 7,
+    "blockedExampleCount": 5,
+    "normalChecksStartHiddenService": false
+  },
+  "warnings": [
+    "This readback is a lightweight hardening contract, not an independent security audit.",
+    "Credential references remain caller-managed and must not be expanded into OPE records.",
+    "Future hosted or database-backed runtimes must pass equivalent controls before promotion."
+  ]
+}

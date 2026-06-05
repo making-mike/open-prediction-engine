@@ -1,0 +1,655 @@
+{
+  "postgresCompatibilityId": "postgrescompatibility-001",
+  "generatedAt": "2026-06-04T20:10:00Z",
+  "compatibilityStatus": "sqlite_to_postgres_semantics_checked",
+  "runtimeScope": "storage_semantics_only",
+  "normalChecksConnectToPostgres": false,
+  "sqliteRuntimeRemainsDefault": true,
+  "postgresRuntimeImplemented": false,
+  "tableCompatibility": [
+    {
+      "tableName": "operation_receipts",
+      "sqlitePurpose": "Append-only receipt log for effectful lifecycle operation attempts and commits.",
+      "sqliteWriteMode": "append_only",
+      "sqlitePrimaryKey": [
+        "operation_receipt_id"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "TEXT primary keys become text primary keys",
+        "planned_writes_json and diagnostics become jsonb payload columns",
+        "created_at text timestamps become timestamptz with UTC normalization"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": true,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "operation_idempotency_keys",
+      "sqlitePurpose": "Unique retry keys keyed by operation, campaign/run/forecast, caller key, and source hash.",
+      "sqliteWriteMode": "insert_once",
+      "sqlitePrimaryKey": [
+        "operation_name",
+        "campaign_id",
+        "run_id",
+        "forecast_id",
+        "caller_id",
+        "idempotency_key",
+        "source_record_hash"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "Composite SQLite primary key becomes equivalent Postgres unique constraint",
+        "request_hash and source_record_hash remain text hashes",
+        "created_at text timestamp becomes timestamptz with UTC normalization"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": true,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": false,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "operation_leases",
+      "sqlitePurpose": "Short coordination leases for operations that can race across agents.",
+      "sqliteWriteMode": "upsert_expiring_lease",
+      "sqlitePrimaryKey": [
+        "lease_key"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "lease_key primary key remains text primary key",
+        "expires_at becomes timestamptz for expiry comparisons",
+        "acquisition remains transactional with conflict detection"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": true,
+      "upsertPortable": false,
+      "appendOnlyPortable": false,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "ope_records",
+      "sqlitePurpose": "Immutable JSON record payloads and hashes for core OPE records.",
+      "sqliteWriteMode": "insert_once",
+      "sqlitePrimaryKey": [
+        "record_id"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "content_json and provenance_json become jsonb payload columns",
+        "content_hash and source_record_hash remain text hashes",
+        "record_id primary key preserves immutable record identity"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": true,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "forecast_history_events",
+      "sqlitePurpose": "Append-only forecast history events rather than mutable forecast rewrites.",
+      "sqliteWriteMode": "append_only",
+      "sqlitePrimaryKey": [
+        "history_event_id"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "content_json becomes jsonb payload",
+        "history_event_id remains primary key",
+        "created_at becomes timestamptz with UTC normalization"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": true,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "operation_audit_records",
+      "sqlitePurpose": "Archive, redaction, annulment, cancellation, and method-update audit records.",
+      "sqliteWriteMode": "append_only",
+      "sqlitePrimaryKey": [
+        "audit_record_id"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "content_json becomes jsonb payload",
+        "audit_record_id remains primary key",
+        "archive and redaction receipts remain append-only audit rows"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": true,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "evidence_ledger_rows",
+      "sqlitePurpose": "Append-only comparable evidence rows for later calibration and track-record readbacks.",
+      "sqliteWriteMode": "append_only",
+      "sqlitePrimaryKey": [
+        "ledger_row_id"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "content_json becomes jsonb payload",
+        "ledger_row_id remains primary key",
+        "append-only evidence rows preserve operation receipt binding"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": false,
+      "appendOnlyPortable": true,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "tableName": "read_model_rows",
+      "sqlitePurpose": "Rebuildable projections for agent queues, status, calibration, and recovery readbacks.",
+      "sqliteWriteMode": "projection_upsert",
+      "sqlitePrimaryKey": [
+        "read_model_name",
+        "row_key"
+      ],
+      "sqliteTableExists": true,
+      "postgresTablePlanned": true,
+      "postgresTypeMappings": [
+        "row_json becomes jsonb payload",
+        "Composite primary key remains read_model_name plus row_key",
+        "Projection upserts use ON CONFLICT on the composite key"
+      ],
+      "jsonPayloadPortable": true,
+      "contentHashPortable": true,
+      "timestampNormalized": true,
+      "uniqueConstraintPortable": false,
+      "leaseExpiryPortable": false,
+      "upsertPortable": true,
+      "appendOnlyPortable": false,
+      "rawCrudExposed": false,
+      "hostedRuntimeRequired": false
+    }
+  ],
+  "dialectNeutralAdapterContract": [
+    {
+      "semanticName": "json_payloads",
+      "sqliteMapping": "TEXT columns containing canonical JSON",
+      "postgresMapping": "jsonb payload columns with canonical render hashes",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "content_hashes",
+      "sqliteMapping": "TEXT SHA-style content hashes",
+      "postgresMapping": "text hash columns with identical comparison semantics",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "unique_idempotency_keys",
+      "sqliteMapping": "Composite primary key in operation_idempotency_keys",
+      "postgresMapping": "Equivalent composite unique constraint in operation_idempotency_keys",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "lease_acquisition",
+      "sqliteMapping": "Transactional insert after lease conflict check",
+      "postgresMapping": "Transactional insert or upsert guarded by lease key",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "lease_expiry",
+      "sqliteMapping": "UTC timestamp text comparison",
+      "postgresMapping": "timestamptz comparison after UTC normalization",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "append_only_records",
+      "sqliteMapping": "Insert-only immutable record tables",
+      "postgresMapping": "Insert-only immutable record tables with primary key conflicts blocked",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    },
+    {
+      "semanticName": "read_model_upserts",
+      "sqliteMapping": "SQLite ON CONFLICT read_model_name,row_key update",
+      "postgresMapping": "Postgres ON CONFLICT read_model_name,row_key DO UPDATE",
+      "portable": true,
+      "normalChecksRequirePostgres": false
+    }
+  ],
+  "scenarioCompatibilityMatrix": [
+    {
+      "scenarioName": "create",
+      "operationName": "forecast.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "forecast_history_events",
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "retry-idempotent",
+      "operationName": "forecast.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "idempotent_replay",
+      "expectedPostgresBehavior": "return_existing_receipt",
+      "plannedWriteTables": [
+        "forecast_history_events",
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "lease-conflict",
+      "operationName": "forecast.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "blocked_lease_conflict",
+      "expectedPostgresBehavior": "blocked_lease_conflict",
+      "plannedWriteTables": [
+        "forecast_history_events",
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "archive",
+      "operationName": "record.archive",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "redaction",
+      "operationName": "record.redact",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "method-rollback",
+      "operationName": "method.rollback",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "pre-calibration-bind",
+      "operationName": "pre_calibration.bind",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-forecast-create",
+      "operationName": "forecast.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "forecast_history_events",
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-resolution-record",
+      "operationName": "resolution.record",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-score-create",
+      "operationName": "score.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-evidence-append",
+      "operationName": "evidence.append",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "evidence_ledger_rows",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-method-apply",
+      "operationName": "method.apply",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "campaign-method-rollback",
+      "operationName": "method.rollback",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "operation_audit_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "json-state-import",
+      "operationName": "state.import_json",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "evidence_ledger_rows",
+        "forecast_history_events",
+        "ope_records",
+        "operation_audit_records",
+        "operation_receipts",
+        "read_model_rows"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "explicit_receipt_backed_import",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
+      "scenarioName": "recovery",
+      "operationName": "score.create",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "failed_preflight_guard",
+      "expectedPostgresBehavior": "failed_preflight_guard",
+      "plannedWriteTables": [
+        "ope_records",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    }
+  ],
+  "sqliteOnlyAssumptionChecks": [
+    {
+      "guardName": "rowid_dependence",
+      "guardStatus": "checked",
+      "sqliteOnlyAssumptionDetected": false,
+      "blocksPostgresClaimIfFailed": true,
+      "checkedBy": [
+        "scripts/check_lifecycle_operation_store.py"
+      ],
+      "notes": "All runtime tables use explicit primary keys; rowid is not part of record identity."
+    },
+    {
+      "guardName": "loose_typing_dependence",
+      "guardStatus": "checked",
+      "sqliteOnlyAssumptionDetected": false,
+      "blocksPostgresClaimIfFailed": true,
+      "checkedBy": [
+        "scripts/check_postgres_compatibility.py"
+      ],
+      "notes": "Schema plans declare text/json/timestamp semantics instead of relying on SQLite affinity coercion."
+    },
+    {
+      "guardName": "nonportable_upsert_behavior",
+      "guardStatus": "checked",
+      "sqliteOnlyAssumptionDetected": false,
+      "blocksPostgresClaimIfFailed": true,
+      "checkedBy": [
+        "scripts/check_postgres_compatibility.py"
+      ],
+      "notes": "Read-model upserts are constrained to the composite read_model_name,row_key key supported by both backends."
+    },
+    {
+      "guardName": "missing_timestamp_normalization",
+      "guardStatus": "checked",
+      "sqliteOnlyAssumptionDetected": false,
+      "blocksPostgresClaimIfFailed": true,
+      "checkedBy": [
+        "scripts/check_postgres_compatibility.py"
+      ],
+      "notes": "Postgres mappings require UTC timestamptz normalization for created_at, updated_at, acquired_at, and expires_at fields."
+    },
+    {
+      "guardName": "sqlite_only_json_query_behavior",
+      "guardStatus": "checked",
+      "sqliteOnlyAssumptionDetected": false,
+      "blocksPostgresClaimIfFailed": true,
+      "checkedBy": [
+        "scripts/check_postgres_compatibility.py"
+      ],
+      "notes": "JSON payloads stay opaque/canonical in compatibility checks; read models avoid backend-specific JSON query claims."
+    }
+  ],
+  "migrationBoundary": {
+    "automaticMigrationAllowed": false,
+    "explicitOperationRequired": true,
+    "migrationOperationName": "state.import_json",
+    "migrationReceiptRequired": true,
+    "normalChecksRunMigrations": false,
+    "historicalForecastRewriteAllowed": false,
+    "contentHashesPreserved": true,
+    "sourceRecordHashesPreserved": true
+  },
+  "executionBoundary": {
+    "postgresConnectionOpened": false,
+    "postgresRuntimeImplemented": false,
+    "hostedStorageClaimAllowed": false,
+    "productionDatabaseOperationAllowed": false,
+    "normalChecksRequireDatabase": false,
+    "rawSqlExposedToAgents": false,
+    "schemaMigrationExecuted": false,
+    "credentialValuesStored": false
+  },
+  "summary": {
+    "tableCount": 8,
+    "scenarioCount": 15,
+    "sqliteOnlyGuardCount": 5,
+    "postgresRuntimeImplemented": false,
+    "normalChecksConnectToPostgres": false
+  },
+  "warnings": [
+    "This is a storage-semantics compatibility readback, not an implemented Postgres runtime.",
+    "Normal checks do not connect to Postgres, run migrations, or claim hosted storage readiness.",
+    "Future Postgres adapters must preserve lifecycle receipts, idempotency, leases, immutable records, and read-model semantics."
+  ]
+}

@@ -17,13 +17,13 @@ def main() -> None:
     aggregate = trace_model["aggregateReadbacks"]
 
     require([item["recordBinding"]["sourceCase"] for item in events] == EVENT_ORDER, "usage events should stay in checked order")
-    require(aggregate["totalEvents"] == 20, "usage trace should expose twenty checked events")
-    require(aggregate["successfulEvents"] == 18, "usage trace success count drifted")
-    require(aggregate["blockedEvents"] == 2, "usage trace blocked count drifted")
-    require(aggregate["sanitizedErrorEvents"] == 2, "usage trace sanitized error count drifted")
+    require(aggregate["totalEvents"] == 24, "usage trace should expose twenty-four checked events")
+    require(aggregate["successfulEvents"] == 21, "usage trace success count drifted")
+    require(aggregate["blockedEvents"] == 3, "usage trace blocked count drifted")
+    require(aggregate["sanitizedErrorEvents"] == 3, "usage trace sanitized error count drifted")
     require(aggregate["forecastCompletionRate"] == 1.0, "forecast completion rate drifted")
     require(aggregate["agentReadSuccessRate"] == 0.6667, "agent read success rate drifted")
-    require(aggregate["blockedPathFrequency"] == 0.1, "blocked path frequency drifted")
+    require(aggregate["blockedPathFrequency"] == 0.125, "blocked path frequency drifted")
     require(aggregate["hostedTelemetryEnabled"] is False, "hosted telemetry must remain disabled")
     require(aggregate["normalChecksUseLiveNetwork"] is False, "normal checks should stay offline")
 
@@ -33,11 +33,12 @@ def main() -> None:
     metrics = {row["metricId"]: row for row in trace_model["productMetricReadbacks"]}
     require(metrics["agent_forecast_completion_rate"]["value"] == 1.0, "forecast completion metric drifted")
     require(metrics["agent_read_success_rate"]["value"] == 0.6667, "read success metric drifted")
-    require(metrics["blocked_path_frequency"]["value"] == 0.1, "blocked path metric drifted")
+    require(metrics["blocked_path_frequency"]["value"] == 0.125, "blocked path metric drifted")
     require(metrics["local_only_privacy_rate"]["value"] == 1.0, "privacy metric drifted")
+    require(metrics["agent_integration_first_forecast_fast"]["value"] == 1.0, "agent integration fast forecast metric drifted")
 
     blocked = [item for item in events if item["outcome"] == "blocked"]
-    require({item["trace"]["sanitizedErrorClass"] for item in blocked} == {"blocked_unsafe", "response_too_large"}, "blocked events should have sanitized classes")
+    require({item["trace"]["sanitizedErrorClass"] for item in blocked} == {"blocked_unsafe", "response_too_large", "missing_source"}, "blocked events should have sanitized classes")
     campaign_events = [item for item in events if item["eventClass"] == "campaign"]
     require(len(campaign_events) == 10, "usage trace should include ten campaign lifecycle events")
     require(

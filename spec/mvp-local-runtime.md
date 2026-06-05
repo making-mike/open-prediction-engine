@@ -11,6 +11,8 @@ python3 --version
 python3 scripts/run_checks.py
 python3 scripts/ope.py check
 python3 scripts/ope.py developer-adoption --section quickstart
+python3 scripts/ope.py agent-integrate --view candidates
+python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output
 python3 scripts/ope.py pilot-evidence --section summary
 python3 scripts/ope.py pilot-session-packet --section sanitization
 python3 scripts/ope.py pilot-summary-intake --section rules
@@ -101,6 +103,7 @@ python3 scripts/ope.py resolution-runtime-reliability
 
 - CLI: `python3 scripts/ope.py` is the minimum local interface for checks, setup summaries, forecast runs, reads, resolution, scoring, corpus gates, and release manifests.
 - Agent envelope: `python3 scripts/ope.py agent-call` returns one schema-bound envelope with status, exit code, record binding, and payload, including campaign plan/status/health/append-readiness/calibration-status readbacks.
+- Agent incorporation: `python3 scripts/ope.py agent-integrate` answers what can be forecasted from approved starter context and returns the guided first forecast-card command for the accepted Helsinki case.
 - Campaign method-update gate: `python3 scripts/ope.py prediction-campaign method-update-gate` reports method-update readiness without changing probabilities, methods, method weights, registries, or campaign state.
 - Campaign method-update plan: `python3 scripts/ope.py prediction-campaign method-update-plan` reports approval, guarded command, rollback, and preflight requirements without mutating state.
 - Campaign method-update action: `python3 scripts/ope.py prediction-campaign apply-method-update` and `rollback-method-update` expose guarded local method-binding writes only when `--write-local` is explicit.

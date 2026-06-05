@@ -1,0 +1,729 @@
+{
+  "domainSourceFieldPolicyId": "domainsourcefieldpolicy-001",
+  "generatedAt": "2026-06-04T23:59:45Z",
+  "policyStatus": "domain_source_field_policy_checked",
+  "decisionStatus": "universal_domain_and_source_fields_with_domain_extension_boundary",
+  "normalChecksMutateState": false,
+  "generatedRuntimeTypesIncluded": false,
+  "sourceBinding": {
+    "domainConfigCommand": "python3 scripts/ope.py domain-configs",
+    "sourceBindingCommand": "python3 scripts/ope.py source-bindings",
+    "domainConfigCount": 2,
+    "sourceBindingCaseCount": 4,
+    "boundDomainKeys": [
+      "weather-transit-delays",
+      "seaport-berth-availability"
+    ],
+    "boundSourceBindingCases": [
+      "accepted",
+      "partial",
+      "rejected",
+      "blocked"
+    ],
+    "rawSourceDataRead": false,
+    "notes": "Field policy is derived from checked domain config and source binding surfaces."
+  },
+  "universalDomainFields": [
+    {
+      "fieldPolicyName": "domain_identity",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "domainConfigId",
+        "domainId",
+        "domainKey",
+        "version"
+      ],
+      "reason": "Every domain needs stable identity and versioned readback binding.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep identity fields in the core domain config record"
+    },
+    {
+      "fieldPolicyName": "question_templates",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "questionTemplates"
+      ],
+      "reason": "Forecast contracts start from reusable question templates and output type shape.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "define at least one question template before setup intake"
+    },
+    {
+      "fieldPolicyName": "horizons",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "horizons"
+      ],
+      "reason": "Forecast close and resolution timing need a declared horizon boundary.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "define at least one horizon template before source binding"
+    },
+    {
+      "fieldPolicyName": "resolution_criteria",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "resolutionCriteria"
+      ],
+      "reason": "Outcome interpretation must be declared before forecast artifacts can be meaningful.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "add yes/no/ambiguous/annulled resolution criteria"
+    },
+    {
+      "fieldPolicyName": "baseline_method",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "baselineMethod"
+      ],
+      "reason": "Every domain needs a baseline fallback before stronger method claims.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "bind a baseline method and keep it default until approved evidence exists"
+    },
+    {
+      "fieldPolicyName": "accepted_source_roles",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "acceptedSourceRoles"
+      ],
+      "reason": "Source roles define what evidence can be mapped before forecast execution.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "define forecast-time, baseline, and resolution roles as needed"
+    },
+    {
+      "fieldPolicyName": "exclusion_rules",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "exclusionRules"
+      ],
+      "reason": "Unscorable and non-comparable outcomes must be explicit before scoring.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "add exclusion rules instead of silently dropping outcomes"
+    },
+    {
+      "fieldPolicyName": "sample_thresholds",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "sampleThresholds"
+      ],
+      "reason": "Calibration and quality claims need domain-specific sample gates.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "declare thresholds and keep claims blocked below them"
+    },
+    {
+      "fieldPolicyName": "claim_boundaries",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "claimBoundaries"
+      ],
+      "reason": "Domain configs must not imply quality, calibration, or readiness claims prematurely.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep claim flags false until checked evidence permits a separate update"
+    },
+    {
+      "fieldPolicyName": "execution_boundary",
+      "recordSurface": "domain_config",
+      "requirementLevel": "required_every_domain",
+      "fieldPaths": [
+        "executionBoundary"
+      ],
+      "reason": "Domain config readbacks define shape only and do not execute forecasts or private reads.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep domain config execution boundary non-mutating"
+    }
+  ],
+  "universalSourceBindingFields": [
+    {
+      "fieldPolicyName": "source_binding_identity",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "sourceBindingId",
+        "domainConfigId",
+        "domainKey",
+        "predictionId"
+      ],
+      "reason": "A source binding must attach to a known domain config and prediction setup.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "bind source records by ID instead of by raw file or SQL layout"
+    },
+    {
+      "fieldPolicyName": "source_binding_mode",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "sourceBindingMode"
+      ],
+      "reason": "The binding mode tells agents whether the source came from a manifest, adapter, or database manifest.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "choose an approved binding mode before field mapping"
+    },
+    {
+      "fieldPolicyName": "credential_policy",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "credentialPolicy"
+      ],
+      "reason": "Credential handling must be explicit and reference-only for every source binding.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "replace secret values with caller-owned credential references"
+    },
+    {
+      "fieldPolicyName": "source_role_bindings",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "sourceRoleBindings"
+      ],
+      "reason": "Each accepted source role needs source kind, source reference, adapter reference, and boundary metadata.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "map sources to configured role keys through sanitized bindings"
+    },
+    {
+      "fieldPolicyName": "pre_forecast_checks",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "preForecastChecks"
+      ],
+      "reason": "Mapping, quality, leakage, freshness, privacy, and outcome availability checks gate forecast execution.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "run every pre-forecast check before allowing forecast generation"
+    },
+    {
+      "fieldPolicyName": "setup_operations",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "setupOperations"
+      ],
+      "reason": "Draft, validate, confirm, update, archive, and redact operations stay receipt-backed.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "use setup operations instead of raw config mutation"
+    },
+    {
+      "fieldPolicyName": "configuration_input_boundary",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "configurationInputBoundary"
+      ],
+      "reason": "Source setup must declare sanitized manifest, mapping, provenance, and query boundaries.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "stop unsafe inputs before source intake or method gates"
+    },
+    {
+      "fieldPolicyName": "execution_boundary",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "executionBoundary"
+      ],
+      "reason": "Source binding readbacks do not execute APIs, database queries, or forecast creation.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep source binding execution boundary non-mutating"
+    },
+    {
+      "fieldPolicyName": "next_action",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "nextAction"
+      ],
+      "reason": "Agents need deterministic routing from accepted, partial, rejected, and blocked bindings.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "return an agent-readable next action for every binding case"
+    },
+    {
+      "fieldPolicyName": "summary",
+      "recordSurface": "source_binding",
+      "requirementLevel": "required_every_source_binding",
+      "fieldPaths": [
+        "summary"
+      ],
+      "reason": "Summary flags give compact checks for approved kinds, blockers, role coverage, and forecast allowance.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep source binding summary aligned with checks and roles"
+    }
+  ],
+  "domainSpecificExtensionFields": [
+    {
+      "fieldPolicyName": "question_parameters",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "questionTemplates[].requiredParameters"
+      ],
+      "reason": "Parameter names vary by domain while the template container remains universal.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep parameter names inside question template requiredParameters"
+    },
+    {
+      "fieldPolicyName": "role_keys",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "acceptedSourceRoles[].roleKey",
+        "resolutionCriteria.primaryOutcomeRole"
+      ],
+      "reason": "Role names are domain vocabulary but must stay inside universal role containers.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "define role keys in acceptedSourceRoles and reference them from resolution criteria"
+    },
+    {
+      "fieldPolicyName": "role_required_fields",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "acceptedSourceRoles[].requiredFields"
+      ],
+      "reason": "Required source columns differ by domain and source role.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "declare role-specific fields without adding new top-level source schemas"
+    },
+    {
+      "fieldPolicyName": "resolution_text_criteria",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "resolutionCriteria.yesCriteria",
+        "resolutionCriteria.noCriteria"
+      ],
+      "reason": "Outcome interpretation prose is domain-specific while resolution criteria are universal.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "write domain-specific criteria inside the resolutionCriteria object"
+    },
+    {
+      "fieldPolicyName": "exclusion_reason_codes",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "exclusionRules[].reasonCode"
+      ],
+      "reason": "Domains need their own unscorable and manual-review reason codes.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "add domain-specific reason codes inside exclusion rules"
+    },
+    {
+      "fieldPolicyName": "domain_specific_horizon_labels",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "horizons[].label",
+        "horizons[].startsAfter",
+        "horizons[].endsAfter"
+      ],
+      "reason": "Horizon wording varies by operational domain, but each domain still needs horizons.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "store domain horizon labels and timing descriptions inside horizon templates"
+    },
+    {
+      "fieldPolicyName": "baseline_threshold_values",
+      "recordSurface": "domain_config",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "baselineMethod.minimumRows",
+        "baselineMethod.minimumPositiveOutcomes"
+      ],
+      "reason": "Baseline sample requirements vary by domain but the baseline method object remains universal.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "set domain-specific thresholds without changing the baseline method container"
+    },
+    {
+      "fieldPolicyName": "source_quality_threshold_values",
+      "recordSurface": "source_binding",
+      "requirementLevel": "domain_specific_extension",
+      "fieldPaths": [
+        "preForecastChecks[].minimumScore"
+      ],
+      "reason": "Quality thresholds may differ by domain and source role while the check set stays universal.",
+      "domainExtensionAllowed": true,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "set source quality thresholds inside preForecastChecks"
+    }
+  ],
+  "blockedFields": [
+    {
+      "fieldPolicyName": "credential_value",
+      "recordSurface": "shared_boundary",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "credentialValue",
+        "apiToken",
+        "password",
+        "secret"
+      ],
+      "reason": "OPE records may reference credentials but must not store secret values.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "replace raw secrets with caller-managed credentialRef values"
+    },
+    {
+      "fieldPolicyName": "raw_sql_query",
+      "recordSurface": "source_binding",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "rawSql",
+        "queryText"
+      ],
+      "reason": "Database setup uses approved query manifests, not arbitrary raw SQL fields.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "use an approved database adapter manifest with a query boundary"
+    },
+    {
+      "fieldPolicyName": "raw_private_row",
+      "recordSurface": "source_binding",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "rows[]",
+        "privatePayload"
+      ],
+      "reason": "OPE setup records store sanitized manifests and mappings, not raw private rows.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "emit sanitized source-adapter output before source intake"
+    },
+    {
+      "fieldPolicyName": "post_outcome_forecast_evidence",
+      "recordSurface": "domain_config",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "forecastTimeEvidence.outcomeRows",
+        "acceptedSourceRoles[].forecastTimeAllowed"
+      ],
+      "reason": "Resolution-only evidence must not become forecast-time evidence.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "mark outcome roles as resolution-only and exclude them before forecast close"
+    },
+    {
+      "fieldPolicyName": "production_quality_claim",
+      "recordSurface": "domain_config",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "claimBoundaries.qualityClaimAllowed",
+        "claimBoundaries.productionReadinessClaimAllowed"
+      ],
+      "reason": "New domain configs cannot claim quality or production readiness without scored evidence.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "keep claim boundaries false until a separate evidence gate passes"
+    },
+    {
+      "fieldPolicyName": "hosted_runtime_flag",
+      "recordSurface": "shared_boundary",
+      "requirementLevel": "blocked",
+      "fieldPaths": [
+        "hostedRuntimeEnabled",
+        "startsNetworkListener"
+      ],
+      "reason": "Domain/source field policy does not promote hosted runtime or listeners.",
+      "domainExtensionAllowed": false,
+      "credentialValuesAllowed": false,
+      "rawPrivateDataAllowed": false,
+      "safeNextAction": "use runtime transport readiness before adding hosted or network surfaces"
+    }
+  ],
+  "sourceKindFieldRules": [
+    {
+      "sourceKind": "fixture",
+      "sourceRefRequired": true,
+      "adapterRefRequired": true,
+      "credentialReferenceRequired": false,
+      "credentialValueAllowed": false,
+      "rawPayloadStored": false,
+      "sanitizedManifestRequired": true,
+      "queryBoundaryRequired": false,
+      "notes": "Committed fixtures need source and adapter references but no credentials."
+    },
+    {
+      "sourceKind": "local_file",
+      "sourceRefRequired": true,
+      "adapterRefRequired": true,
+      "credentialReferenceRequired": false,
+      "credentialValueAllowed": false,
+      "rawPayloadStored": false,
+      "sanitizedManifestRequired": true,
+      "queryBoundaryRequired": false,
+      "notes": "Approved local files use sanitized manifests and path boundaries."
+    },
+    {
+      "sourceKind": "source_adapter_output",
+      "sourceRefRequired": true,
+      "adapterRefRequired": true,
+      "credentialReferenceRequired": false,
+      "credentialValueAllowed": false,
+      "rawPayloadStored": false,
+      "sanitizedManifestRequired": true,
+      "queryBoundaryRequired": false,
+      "notes": "Adapter outputs hand OPE sanitized manifests, mappings, and provenance."
+    },
+    {
+      "sourceKind": "api",
+      "sourceRefRequired": true,
+      "adapterRefRequired": true,
+      "credentialReferenceRequired": true,
+      "credentialValueAllowed": false,
+      "rawPayloadStored": false,
+      "sanitizedManifestRequired": true,
+      "queryBoundaryRequired": true,
+      "notes": "Private API bindings require credential references and approved adapter boundaries."
+    },
+    {
+      "sourceKind": "database",
+      "sourceRefRequired": true,
+      "adapterRefRequired": true,
+      "credentialReferenceRequired": true,
+      "credentialValueAllowed": false,
+      "rawPayloadStored": false,
+      "sanitizedManifestRequired": true,
+      "queryBoundaryRequired": true,
+      "notes": "Database bindings require credential references and approved query manifests."
+    }
+  ],
+  "fieldDecisionCases": [
+    {
+      "caseName": "weather_transit_core_ready",
+      "caseStatus": "accepted_universal_domain_fields",
+      "targetRecordSurface": "domain_config",
+      "fieldPolicyName": "domain_identity",
+      "caseResult": "weather transit config carries every universal domain field",
+      "safeNextAction": "allow source binding checks to continue",
+      "policyViolation": false,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "seaport_extension_ready",
+      "caseStatus": "accepted_domain_specific_extensions",
+      "targetRecordSurface": "domain_config",
+      "fieldPolicyName": "role_required_fields",
+      "caseResult": "seaport parameters and role fields stay inside extension-safe containers",
+      "safeNextAction": "keep candidate setup behind source confirmation",
+      "policyViolation": false,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "missing_resolution_criteria",
+      "caseStatus": "blocked_missing_required_domain_field",
+      "targetRecordSurface": "domain_config",
+      "fieldPolicyName": "resolution_criteria",
+      "caseResult": "domain config cannot omit outcome interpretation",
+      "safeNextAction": "add resolution criteria before source binding or forecast execution",
+      "policyViolation": true,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "credential_value_in_source_binding",
+      "caseStatus": "blocked_credential_value_storage",
+      "targetRecordSurface": "source_binding",
+      "fieldPolicyName": "credential_value",
+      "caseResult": "raw credential-like content must be redacted and rejected",
+      "safeNextAction": "replace the value with a caller-owned credential reference",
+      "policyViolation": true,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "raw_sql_query_as_binding_field",
+      "caseStatus": "blocked_raw_sql_field",
+      "targetRecordSurface": "source_binding",
+      "fieldPolicyName": "raw_sql_query",
+      "caseResult": "raw SQL cannot become an OPE source-binding field",
+      "safeNextAction": "use an approved database query manifest boundary",
+      "policyViolation": true,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "domain_quality_claim_enabled",
+      "caseStatus": "blocked_claim_boundary_violation",
+      "targetRecordSurface": "domain_config",
+      "fieldPolicyName": "production_quality_claim",
+      "caseResult": "new domain configs must keep quality and production claims false",
+      "safeNextAction": "wait for scored evidence and a separate readiness gate",
+      "policyViolation": true,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "outcome_role_marked_forecast_time",
+      "caseStatus": "blocked_resolution_role_forecast_time_leakage",
+      "targetRecordSurface": "domain_config",
+      "fieldPolicyName": "post_outcome_forecast_evidence",
+      "caseResult": "resolution-only roles cannot be forecast-time evidence",
+      "safeNextAction": "mark outcome roles resolution-only and rerun leakage checks",
+      "policyViolation": true,
+      "forecastArtifactsCreated": false,
+      "credentialValuesStored": false,
+      "rawPrivateDataStored": false,
+      "sanitizedDiagnosticsOnly": true
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py domain-source-field-policy",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Prints the checked field policy readback."
+    },
+    {
+      "readbackSurface": "domain_configs",
+      "command": "python3 scripts/ope.py domain-configs",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Source domain configs for required field containers."
+    },
+    {
+      "readbackSurface": "source_bindings",
+      "command": "python3 scripts/ope.py source-bindings",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Source binding cases for source field and safety boundaries."
+    },
+    {
+      "readbackSurface": "source_quality",
+      "command": "python3 scripts/ope.py source-quality",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Source quality and mapping confidence remain separate readbacks."
+    },
+    {
+      "readbackSurface": "source_intake",
+      "command": "python3 scripts/ope.py source-intake",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Source intake uses the resulting manifests and mappings."
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Runtime security blocks credentials, raw SQL, and private payloads."
+    },
+    {
+      "readbackSurface": "workspace_tenant_isolation",
+      "command": "python3 scripts/ope.py workspace-tenant-isolation",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "credentialValuesReturned": false,
+      "notes": "Tenant isolation scopes source bindings and credential references."
+    }
+  ],
+  "executionBoundary": {
+    "normalChecksWriteState": false,
+    "createsForecasts": false,
+    "readsPrivateData": false,
+    "storesCredentialValues": false,
+    "rawSqlAllowed": false,
+    "arbitraryPrivateApiParsingByOpe": false,
+    "arbitraryDatabaseParsingByOpe": false,
+    "hostedRuntimeImplemented": false,
+    "qualityClaimsUpgraded": false
+  },
+  "summary": {
+    "universalDomainFieldCount": 10,
+    "universalSourceBindingFieldCount": 10,
+    "domainSpecificExtensionFieldCount": 8,
+    "blockedFieldCount": 6,
+    "sourceKindRuleCount": 5,
+    "fieldDecisionCaseCount": 7,
+    "normalChecksMutateState": false,
+    "generatedRuntimeTypesIncluded": false
+  },
+  "warnings": [
+    "This policy classifies fields only; it does not create forecasts or execute private sources.",
+    "Domain-specific vocabulary belongs inside approved extension containers, not new top-level records.",
+    "Credential values, raw SQL, raw private rows, hosted runtime flags, and premature quality claims are blocked."
+  ]
+}

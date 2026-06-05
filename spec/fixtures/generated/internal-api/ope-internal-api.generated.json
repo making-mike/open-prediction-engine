@@ -230,6 +230,27 @@
       "notes": "Read prediction and campaign status from read models without mutating state."
     },
     {
+      "operationName": "database_source_adapter_status",
+      "operationKind": "read_only",
+      "implementationStatus": "mapped_to_existing_read_surface",
+      "sideEffectLevel": "read_only",
+      "inProcessFunctionName": "database_source_adapter_status",
+      "cliCommand": "python3 scripts/ope.py internal-api --operation database_source_adapter_status",
+      "agentCallOperation": "database_source_adapter_status",
+      "lifecycleOperations": [],
+      "requiresOperationReceipt": false,
+      "returnsOperationReceipt": false,
+      "requiresIdempotencyKey": false,
+      "requiresLease": false,
+      "returnsReadModels": [
+        "source_adapter_runtime_status"
+      ],
+      "returnsSanitizedDiagnostics": true,
+      "rawFileLayoutExposed": false,
+      "rawSqlExposed": false,
+      "notes": "Read approved database source-adapter runtime status and blocked-case diagnostics without opening database connections."
+    },
+    {
       "operationName": "read_forecast_card",
       "operationKind": "read_only",
       "implementationStatus": "mapped_to_existing_read_surface",
@@ -435,9 +456,9 @@
     "hostedRuntimeRequired": false
   },
   "summary": {
-    "operationCount": 13,
+    "operationCount": 14,
     "effectfulOperationCount": 10,
-    "readOnlyOperationCount": 3,
+    "readOnlyOperationCount": 4,
     "allEffectfulOperationsReceiptBacked": true,
     "allEffectfulOperationsIdempotent": true,
     "allEffectfulOperationsLeaseAware": true,

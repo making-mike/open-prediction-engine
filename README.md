@@ -28,7 +28,7 @@ Open `docs/agents-and-humans.html` for a compact role-oriented guide for human c
 
 The repository currently contains:
 
-- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, local source runtimes, developer adoption surfaces, private setup requests, first actions, orchestrators, runbooks, agent pilot validation, local usage traces, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, prediction campaign readbacks, forecast cards, agent envelopes, the public record index, and the release manifest
+- JSON Schema contracts for forecast questions, evidence packets, evidence traces, forecast artifacts, histories, aggregate forecasts, resolution records, scoring reports, calibration summaries, track records, benchmark runs, method registries, source adapter outputs, source adapter intake gates, local source runtimes, persistent SQLite path policy, lifecycle lease policy, runtime transport readiness, developer adoption surfaces, agent integration readbacks, private setup requests, first actions, orchestrators, runbooks, agent pilot validation, local usage traces, agent bundles, adapter-chain runbooks, private source adapter capabilities and outcomes, prediction campaign readbacks, forecast cards, agent envelopes, the public record index, and the release manifest
 - fixture examples for binary and interval-style forecasts
 - a selected first domain wedge: `weather-logistics`
 - a selected public beta candidate wedge: `weather-transit-delays`, with a local custom-file prototype command, checked forward-run workflow, policy-bound live evidence promotion gate, agent-facing resolution job registry, foreground terminal scheduler, local resolver-agent scan, and opt-in HSL GTFS-RT connector
@@ -38,13 +38,17 @@ The repository currently contains:
 - a schema-bound weather-logistics method registry that separates enabled baseline/deterministic methods from proposed stronger methods
 - a generated method-comparison report that checks each non-baseline method against the baseline when comparable benchmark evidence exists
 - a generated method-selection record that explains baseline fallback when comparable method evidence is insufficient
-- a schema-bound agent adapter envelope contract with local examples for request validation, evidence planning, evidence-trace reads, card reads, bundle reads, private setup bundle reads, private setup adapter-chain runbook reads, private setup conformance-summary reads, private source adapter guidance reads, private source-kind selection reads, local-file source-builder drafts, source-handoff next actions, method-gate guidance, forecast-execution runs, generated private setup forecast readbacks, resolution status, scoring summary, and sanitized errors
+- a schema-bound agent adapter envelope contract with local examples for request validation, evidence planning, evidence-trace reads, card reads, bundle reads, private setup bundle reads, private setup adapter-chain runbook reads, private setup conformance-summary reads, private source adapter guidance reads, private source-kind selection reads, local-file source-builder drafts, source-handoff next actions, method-gate guidance, forecast-execution runs, agent integration readiness/candidates/guided forecast readbacks, generated private setup forecast readbacks, resolution status, scoring summary, and sanitized errors
 - a local single-operation `agent-call` dispatcher that returns one schema-bound envelope with standardized exit codes
 - a local MCP stdio scaffold that exposes the checked agent adapter operations as tools and returns the same schema-bound envelopes
 - a local fixture-safe `forecast-run` orchestrator that returns one bound forecast-run summary for agents
 - a checked forecast-run intake matrix covering accepted, rejected, blocked, canceled, unsupported-fixture-path, and response-too-large outcomes
 - a checked agent forecast runbook that maps forecast-run outcomes to safe next actions and read surfaces
 - a checked mapping from the local agent dispatcher to MCP, future HTTP, and future queue adapters without claiming hosted or production adapter support
+- a checked optional Open Prediction Protocol provider-adapter fixture with request/response mappings, Agent Card discovery, accepted and blocked conformance cases, and a future HTTP boundary over authoritative OPE records
+- a checked persistent SQLite path policy that keeps normal checks on ephemeral SQLite while defining explicit caller approval, `.ope/state` allowlisting, migration, backup, and lock guards for opt-in local persistent state
+- a checked lifecycle lease policy that separates strict-lease operations from idempotency-only retry guards without acquiring locks in normal readbacks
+- a checked runtime transport readiness gate that keeps in-process, CLI, agent-call, and local MCP as the current surfaces while HTTP, queue, hosted service, and OPP HTTP provider behavior remain deferred
 - an allow-listed Open-Meteo weather connector that runs in deterministic fixture mode by default
 - a deterministic baseline builder for fixture-mode live weather input
 - a provisional evidence-bundle builder for fixture-mode live weather forecasts
@@ -97,8 +101,9 @@ The repository currently contains:
 - a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, and zero real sessions counted so far
 - a checked pilot session packet with task cards, moderator and participant checklists, sanitized evidence template, sanitization review, and stop conditions for real local MVP pilot sessions
 - a checked pilot summary intake classifier that marks sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions
-- a checked local usage trace read model with synthetic local MVP event rows, campaign lifecycle events, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
+- a checked local usage trace read model with synthetic local MVP event rows, agent integration starter rows, campaign lifecycle events, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
 - a checked developer adoption surface with a quickstart, one complete local source setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision
+- a checked agent incorporation golden path through `agent-integrate` that lets agents ask what can be forecasted, validates candidate questions with exact reason codes, exposes a Helsinki bus/tram disruption starter pack, returns a guided `forecast-1102` forecast-card command within three routine calls, and keeps hosted runtime, private-source execution, and quality/calibration claims blocked
 - a checked private setup bundle adapter operation that returns the same guidance through the transport-neutral agent envelope and local MCP scaffold without executing setup commands
 - a checked private setup source-builder adapter operation that inspects only caller-approved local CSV/JSON files and returns draft manifest/mapping guidance without creating forecast or score records
 - a checked private setup source-handoff adapter operation that returns source-handoff confirmation and method-gate readiness guidance without creating forecast or score records
@@ -110,6 +115,7 @@ The repository currently contains:
 - a checked private source adapter guidance adapter operation that joins capability, outcome, and intake-bridge guidance through the transport-neutral envelope and local MCP scaffold without executing source reads
 - a checked private source-kind selection adapter operation that returns compact source-kind path examples, or one selected source-kind recommendation, through the same envelope and MCP surfaces without executing the selected path
 - checked campaign plan, status, health, append-readiness, and calibration-status adapter operations through the same transport-neutral envelope and MCP surfaces without starting campaign execution
+- checked agent integration readiness, candidates, and guided-forecast adapter operations through the same transport-neutral envelope and MCP surfaces without accepting credentials, raw SQL, raw private rows, hidden live fetches, or hosted runtime behavior
 - source manifest and field mapping intake fixtures that classify data as accepted, accepted-partial, needs-confirmation, or rejected before forecasting
 - source-quality and mapping-confidence readbacks that explain freshness, coverage, role fit, entity scope, leakage, missingness, outcome availability, and mapping confidence before method gates
 - setup-specific benchmark gates that allow deterministic fixture execution only when source intake, benchmark binding, anti-leakage controls, and execution thresholds pass
@@ -127,7 +133,7 @@ The repository currently contains:
 - a small local CLI wrapper for common repository workflows
 - a reusable local contract validator and single-record validation command
 
-It does not yet contain the live auto-evidence runtime. Current auto-evidence behavior is fixture-replay only, and current live-source behavior remains fixture-checked and bounded.
+It does not yet contain the live auto-evidence runtime or an OPP HTTP provider runtime. Current auto-evidence behavior is fixture-replay only, current live-source behavior remains fixture-checked and bounded, and current OPP support is an optional checked adapter fixture over existing OPE records.
 
 ## First Domain Wedge
 
@@ -169,7 +175,12 @@ Current checked transit surfaces are grouped here so new work can be added as a 
 - Lifecycle operation storage: `lifecycle-operation-store` checks the local SQLite operation store for multi-agent execution, including Postgres-compatible schema notes, operation receipts, idempotency keys, leases, read models, immutable forecast records, the explicit ignored `.ope/live` JSON compatibility adapter, archive/redaction replacements for generic delete, write-local command coverage, file/database duplicate-prevention checks, and scenario readbacks for create, retry, lease-conflict, campaign operation bridges, pre-calibration binding, JSON state import, and recovery.
 - Embedded internal API: `internal-api` defines the stable host/agent operation surface for create, update, start, pause, resume, tick, resolve, append, read, archive, and redact calls without exposing raw files, raw SQL, hidden schedulers, or transport-specific behavior. Its in-process runtime, CLI `--call`, and `agent-call --operation internal_api` wrappers share one internal function; HTTP, queue, and hosted service remain future transports over that same function.
 - Workspace registry: `prediction-workspace-registry` exposes stable prediction, campaign, domain, source-binding, and schedule IDs for multiple predictions, with owner/caller metadata, lifecycle operation summaries, workspace read models for active, due, blocked, failed, source-health, calibration, and track-record status, audit-backed create/update/archive/redact configuration operation definitions, per-prediction idempotency namespaces and leases, workspace resource limits and execution budgets, and cross-prediction isolation checks.
+- Workspace tenant isolation: `workspace-tenant-isolation` checks tenant-scoped workspace bindings, resource controls, operation queues, source-binding reuse blockers, credential-reference ownership, blocked cross-tenant access cases, and non-mutating readback boundaries before any hosted tenant runtime exists.
 - Domain/source setup: `domain-configs` defines reusable domain shape records, while `source-bindings` checks accepted, partial, rejected, and blocked source setup cases across local files, source-adapter outputs, APIs, and database adapter manifests. Source binding readbacks include mapping-confidence, source-quality, leakage, freshness, privacy, and outcome-availability checks, setup operations for draft/validate/confirm/update/archive/redact, internal API operation mappings, credential-reference-only policy, and non-mutating private API/database adapter boundaries.
+- Domain/source field policy: `domain-source-field-policy` classifies universal domain fields, universal source-binding fields, domain-specific extension containers, source-kind credential-reference rules, and blocked credential/raw/claim/hosted-runtime fields before broader domain setup behavior expands.
+- Credential reference policy: `credential-reference-policy` defines acceptable opaque caller-owned credential references for private API/database sources, including tenant/workspace/source/adapter scope, lifecycle states, consumer rules, blocked raw-secret cases, and no secret resolution or storage in normal checks.
+- Retention/redaction policy: `retention-redaction-policy` defines append-only retention, archive tombstones, redaction receipts, sanitized projection rebuilds, and physical-delete exception gates while keeping silent delete and normal-check physical deletion blocked.
+- Private auto-evidence policy: `private-auto-evidence-policy` defines the source-policy overlay for private `data: auto` setup source kinds, required policy gates, blocked web search/raw SQL/raw payload cases, and no private-source reads or secret resolution in normal checks.
 
 Normal checks stay offline and non-mutating. Effectful local writes require explicit flags, live connector calls remain opt-in, campaign resolver execution is separated from forecast writing and ledger append, and quality/calibration claims remain blocked until enough comparable outcomes exist.
 
@@ -233,8 +244,22 @@ python3 scripts/ope.py internal-api --operation start_prediction --call
 python3 scripts/ope.py agent-call --operation internal_api --internal-operation start_prediction
 python3 scripts/ope.py prediction-workspace-registry
 python3 scripts/ope.py prediction-workspace-registry --prediction-id prediction-001
+python3 scripts/ope.py workspace-tenant-isolation
+python3 scripts/ope.py workspace-tenant-isolation --view boundary
 python3 scripts/ope.py domain-configs
 python3 scripts/ope.py source-bindings
+python3 scripts/ope.py domain-source-field-policy
+python3 scripts/ope.py domain-source-field-policy --view extensions
+python3 scripts/ope.py domain-source-field-policy --view blocked
+python3 scripts/ope.py credential-reference-policy
+python3 scripts/ope.py credential-reference-policy --view scope
+python3 scripts/ope.py credential-reference-policy --case raw_api_token_submitted
+python3 scripts/ope.py retention-redaction-policy
+python3 scripts/ope.py retention-redaction-policy --view gates
+python3 scripts/ope.py retention-redaction-policy --case physical_delete_for_forecast_history
+python3 scripts/ope.py private-auto-evidence-policy
+python3 scripts/ope.py private-auto-evidence-policy --view source-kinds
+python3 scripts/ope.py private-auto-evidence-policy --case web_search_private_setup
 python3 scripts/ope.py source-bindings --case accepted
 python3 scripts/ope.py source-bindings --case blocked
 python3 scripts/ope.py transit-track-record-gate --campaign predictioncampaign-001

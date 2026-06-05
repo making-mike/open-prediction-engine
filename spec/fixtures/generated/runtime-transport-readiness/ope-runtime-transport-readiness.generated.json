@@ -1,0 +1,379 @@
+{
+  "runtimeTransportReadinessId": "runtimetransportreadiness-001",
+  "generatedAt": "2026-06-04T23:59:00Z",
+  "readinessStatus": "runtime_transport_readiness_checked",
+  "decisionStatus": "local_surfaces_ready_http_queue_and_hosted_deferred",
+  "normalChecksOffline": true,
+  "hostedRuntimeAllowedNow": false,
+  "localHttpAllowedNow": false,
+  "currentSurfaces": [
+    {
+      "surfaceName": "embedded_internal_api",
+      "surfaceStatus": "implemented_local",
+      "command": "python3 scripts/ope.py internal-api",
+      "adapterRole": "in_process_operation_surface",
+      "testedInNormalChecks": true,
+      "startsNetworkListener": false,
+      "hostedRuntimeRequired": false,
+      "mutatesStateByDefault": false,
+      "credentialValuesAccepted": false,
+      "notes": "Stable internal API operation surface for host software and adapters."
+    },
+    {
+      "surfaceName": "cli",
+      "surfaceStatus": "implemented_local",
+      "command": "python3 scripts/ope.py",
+      "adapterRole": "local_terminal_surface",
+      "testedInNormalChecks": true,
+      "startsNetworkListener": false,
+      "hostedRuntimeRequired": false,
+      "mutatesStateByDefault": false,
+      "credentialValuesAccepted": false,
+      "notes": "Local command surface for checks, readbacks, and explicit opt-in operations."
+    },
+    {
+      "surfaceName": "agent_call",
+      "surfaceStatus": "implemented_local",
+      "command": "python3 scripts/ope.py agent-call",
+      "adapterRole": "transport_neutral_envelope_surface",
+      "testedInNormalChecks": true,
+      "startsNetworkListener": false,
+      "hostedRuntimeRequired": false,
+      "mutatesStateByDefault": false,
+      "credentialValuesAccepted": false,
+      "notes": "Compact agent envelopes over checked internal operations."
+    },
+    {
+      "surfaceName": "local_mcp_stdio",
+      "surfaceStatus": "implemented_local",
+      "command": "python3 scripts/ope.py mcp-stdio",
+      "adapterRole": "local_stdio_tool_surface",
+      "testedInNormalChecks": true,
+      "startsNetworkListener": false,
+      "hostedRuntimeRequired": false,
+      "mutatesStateByDefault": false,
+      "credentialValuesAccepted": false,
+      "notes": "Local MCP stdio scaffold over the dispatcher without network listeners."
+    }
+  ],
+  "futureSurfaces": [
+    {
+      "surfaceName": "local_http_adapter",
+      "surfaceStatus": "deferred_pending_adoption_evidence",
+      "proposedCommand": "python3 scripts/ope.py http-serve",
+      "readinessGate": "adoption_need_and_security_gate",
+      "implementedNow": false,
+      "advertisedNow": false,
+      "normalChecksStartSurface": false,
+      "requiresReadinessGate": true,
+      "reason": "Local HTTP should wait until CLI, agent-call, and MCP usage show a concrete need and security controls are checked."
+    },
+    {
+      "surfaceName": "queue_adapter",
+      "surfaceStatus": "deferred_pending_hosted_runtime_gate",
+      "proposedCommand": "python3 scripts/ope.py queue-worker",
+      "readinessGate": "hosted_runtime_readiness_gate",
+      "implementedNow": false,
+      "advertisedNow": false,
+      "normalChecksStartSurface": false,
+      "requiresReadinessGate": true,
+      "reason": "Queue workers require hosted/runtime readiness, durable operation leases, and observability before implementation."
+    },
+    {
+      "surfaceName": "hosted_service_runtime",
+      "surfaceStatus": "blocked_pending_readiness_gate",
+      "proposedCommand": "not_implemented",
+      "readinessGate": "pilot_security_storage_and_ops_readiness",
+      "implementedNow": false,
+      "advertisedNow": false,
+      "normalChecksStartSurface": false,
+      "requiresReadinessGate": true,
+      "reason": "Hosted service runtime waits for pilot evidence, storage migration, secret handling, and operational readiness."
+    },
+    {
+      "surfaceName": "opp_http_provider",
+      "surfaceStatus": "future_adapter_only",
+      "proposedCommand": "python3 scripts/ope.py opp-http-provider",
+      "readinessGate": "provider_runtime_readiness_gate",
+      "implementedNow": false,
+      "advertisedNow": false,
+      "normalChecksStartSurface": false,
+      "requiresReadinessGate": true,
+      "reason": "OPP remains a checked fixture adapter over OPE records until an explicit HTTP provider gate is met."
+    }
+  ],
+  "runtimeDecisions": {
+    "firstEmbeddedRuntime": "in_process_cli_agent_call_and_local_mcp",
+    "localHttpDecision": "deferred_until_adoption_need_and_security_gate",
+    "hostedRuntimeDecision": "deferred_until_pilot_security_storage_and_ops_readiness",
+    "queueDecision": "deferred_until_hosted_runtime_gate",
+    "oppProviderDecision": "fixture_adapter_now_http_provider_future"
+  },
+  "readinessCriteria": [
+    {
+      "criterionName": "internal_api_stable",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py internal-api",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "The internal API surface is checked for local readbacks and adapter wrapping."
+    },
+    {
+      "criterionName": "lifecycle_operation_store_checked",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py lifecycle-operation-store",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Lifecycle operation receipts, leases, idempotency, and read models are checked locally."
+    },
+    {
+      "criterionName": "runtime_security_checked",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py runtime-security",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Runtime hardening covers dependency, module, path, size, credential, and boundary controls."
+    },
+    {
+      "criterionName": "persistent_sqlite_policy_checked",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py persistent-sqlite-policy",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Persistent local SQLite paths are explicit opt-in and normal checks remain ephemeral."
+    },
+    {
+      "criterionName": "lifecycle_lease_policy_checked",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py lifecycle-lease-policy",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Strict leases and idempotency-only guards are classified before effectful runtime expansion."
+    },
+    {
+      "criterionName": "agent_adapter_protocol_map_checked",
+      "criterionStatus": "met_for_local_readbacks",
+      "evidenceCommand": "python3 scripts/ope.py agent-protocol-map",
+      "evidenceStatus": "checked",
+      "blocksHostedRuntime": false,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "MCP stdio is tested locally while HTTP and queue adapters stay future transports."
+    },
+    {
+      "criterionName": "pilot_evidence_threshold_met",
+      "criterionStatus": "not_met_for_hosted_or_http_runtime",
+      "evidenceCommand": "python3 scripts/ope.py pilot-evidence",
+      "evidenceStatus": "not_met",
+      "blocksHostedRuntime": true,
+      "blocksLocalHttp": true,
+      "normalChecksMutateState": false,
+      "notes": "Real pilot sessions and enough comparable outcomes are still needed before runtime promotion."
+    },
+    {
+      "criterionName": "hosted_observability_plan_checked",
+      "criterionStatus": "not_met_for_hosted_or_http_runtime",
+      "evidenceCommand": "python3 scripts/ope.py expansion-readiness",
+      "evidenceStatus": "not_met",
+      "blocksHostedRuntime": true,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Hosted runtime needs checked logs, metrics, traces, incident handling, and operator readbacks."
+    },
+    {
+      "criterionName": "production_secret_reference_policy_checked",
+      "criterionStatus": "not_met_for_hosted_or_http_runtime",
+      "evidenceCommand": "python3 scripts/ope.py expansion-readiness",
+      "evidenceStatus": "not_met",
+      "blocksHostedRuntime": true,
+      "blocksLocalHttp": true,
+      "normalChecksMutateState": false,
+      "notes": "Private API and hosted database credentials still need a checked reference-only mechanism."
+    },
+    {
+      "criterionName": "hosted_storage_migration_checked",
+      "criterionStatus": "not_met_for_hosted_or_http_runtime",
+      "evidenceCommand": "python3 scripts/ope.py postgres-compatibility",
+      "evidenceStatus": "not_met",
+      "blocksHostedRuntime": true,
+      "blocksLocalHttp": false,
+      "normalChecksMutateState": false,
+      "notes": "Postgres compatibility is checked, but hosted storage migration and execution are not implemented."
+    }
+  ],
+  "blockedCases": [
+    {
+      "caseName": "normal_check_http_server",
+      "caseStatus": "blocked_normal_check_network_listener",
+      "requestedSurface": "local_http_adapter",
+      "safeNextAction": "use_cli_or_agent_call_readback",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "implicit_hosted_service",
+      "caseStatus": "blocked_hosted_runtime_not_ready",
+      "requestedSurface": "hosted_service_runtime",
+      "safeNextAction": "read_expansion_readiness_gate",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "opp_http_endpoint_request",
+      "caseStatus": "blocked_opp_http_provider_future",
+      "requestedSurface": "opp_http_provider",
+      "safeNextAction": "use_opp_provider_adapter_fixture",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "queue_worker_without_readiness",
+      "caseStatus": "blocked_queue_runtime_not_ready",
+      "requestedSurface": "queue_adapter",
+      "safeNextAction": "use_background_worker_readback",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "production_secret_value_in_record",
+      "caseStatus": "blocked_credential_value_storage",
+      "requestedSurface": "hosted_service_runtime",
+      "safeNextAction": "replace_with_credential_reference",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "default_live_fetch",
+      "caseStatus": "blocked_default_live_network",
+      "requestedSurface": "hosted_service_runtime",
+      "safeNextAction": "use_fixture_or_explicit_live_gate",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "unbounded_background_daemon",
+      "caseStatus": "blocked_unbounded_daemon",
+      "requestedSurface": "queue_adapter",
+      "safeNextAction": "use_bounded_foreground_scheduler",
+      "networkListenerStarted": false,
+      "hostedRuntimeStarted": false,
+      "stateWritten": false,
+      "credentialValuesStored": false,
+      "sanitizedDiagnosticsOnly": true
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py runtime-transport-readiness",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Prints the checked runtime transport readiness gate."
+    },
+    {
+      "readbackSurface": "internal_api",
+      "command": "python3 scripts/ope.py internal-api",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Current in-process operation surface remains the tested runtime core."
+    },
+    {
+      "readbackSurface": "agent_protocol_map",
+      "command": "python3 scripts/ope.py agent-protocol-map",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Protocol map keeps MCP stdio tested and HTTP/queue future."
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Runtime hardening blocks hidden services, raw SQL, and credential leakage."
+    },
+    {
+      "readbackSurface": "opp_provider_adapter",
+      "command": "python3 scripts/ope.py opp-provider-adapter",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "OPP provider mapping stays a fixture adapter, not an HTTP runtime."
+    },
+    {
+      "readbackSurface": "lifecycle_lease_policy",
+      "command": "python3 scripts/ope.py lifecycle-lease-policy",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Lease policy must be stable before worker or hosted queue promotion."
+    },
+    {
+      "readbackSurface": "expansion_readiness",
+      "command": "python3 scripts/ope.py expansion-readiness",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "Expansion readiness keeps hosted runtime, broader sources, and stronger methods blocked."
+    },
+    {
+      "readbackSurface": "mvp_release_surface",
+      "command": "python3 scripts/check_mvp_release_surface.py",
+      "mutatesState": false,
+      "startsNetworkListener": false,
+      "notes": "MVP smoke checks cover local runtime readbacks and blocked paths."
+    }
+  ],
+  "executionBoundary": {
+    "networkListenerStarted": false,
+    "localHttpServerImplemented": false,
+    "hostedServiceImplemented": false,
+    "queueRuntimeImplemented": false,
+    "oppHttpProviderImplemented": false,
+    "normalChecksUseNetwork": false,
+    "normalChecksWriteState": false,
+    "credentialValuesStored": false,
+    "paymentSettlementImplemented": false,
+    "productionLiveFetchEnabled": false,
+    "qualityClaimsUpgraded": false
+  },
+  "summary": {
+    "currentSurfaceCount": 4,
+    "futureSurfaceCount": 4,
+    "readinessCriteriaCount": 10,
+    "metLocalCriteriaCount": 6,
+    "blockedCaseCount": 7,
+    "hostedRuntimeAllowedNow": false,
+    "localHttpAllowedNow": false,
+    "normalChecksOffline": true
+  },
+  "warnings": [
+    "Current tested transport surfaces are local, compact, and non-networked.",
+    "Local HTTP is deferred until adoption evidence and security controls justify a listener.",
+    "Hosted runtime, queue workers, and OPP HTTP provider behavior require explicit readiness gates before implementation."
+  ]
+}

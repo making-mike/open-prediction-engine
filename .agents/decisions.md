@@ -2262,3 +2262,73 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add `prediction-campaign pilot-readiness` as a checked, read-only launch gate that joins the pilot runbook, mini-smoke path, full 100-run materialization, baseline method boundary, manual prerequisites, launch commands, and blocked actions.
 - **Why:** The runbook explains the procedure, but an operator also needs a compact go/no-go readback before the first effectful `--write-local` launch command; live source availability, local clock, terminal supervision, outcome paths, and workspace capacity must stay explicit manual confirmations rather than fixture claims.
 - **Alternatives rejected:** Starting the pilot directly from the runbook, treating live source readiness as a committed fixture fact, adding OS scheduler automation, folding readiness into the broad `doctor` readback, or making normal checks execute the launch path.
+
+### DEC-129 — Treat OPP As Optional Provider Interoperability
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `opp-provider-adapter` as a schema-bound optional Open Prediction Protocol mapping fixture over authoritative OPE forecast cards, artifacts, evidence traces, lifecycle bundles, and claim boundaries.
+- **Why:** External forecast RPC interoperability is useful, but OPE records and local MCP stdio remain the tested semantics today; HTTP, SSE, payment, aggregation, and hosted service behavior should stay future adapter work until explicitly implemented and checked.
+- **Alternatives rejected:** Claiming a live OPP HTTP provider now, embedding full lifecycle bundles by default, treating OPP as the authoritative lifecycle model, or adding payment/aggregation hooks before OPE's internal records and claim gates remain stable.
+
+### DEC-130 — Gate Persistent SQLite Paths Behind Explicit Policy
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `persistent-sqlite-policy` as a schema-bound readback that defines when a caller-approved local SQLite file path is ready for explicit write mode while keeping normal checks on ephemeral SQLite.
+- **Why:** OPE needs a practical path from the checked lifecycle operation store to local durable state, but persistent files must not appear silently during checks or bypass path, migration, backup, lease, and credential boundaries.
+- **Alternatives rejected:** Enabling persistent SQLite by default, auto-migrating ignored JSON state, accepting unapproved or outside-workspace paths, letting normal checks create local database files, or treating persistent local state as hosted runtime readiness.
+
+### DEC-131 — Gate Race-Prone Lifecycle Operations With Strict Leases
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `lifecycle-lease-policy` as a schema-bound readback that splits fourteen lifecycle operations into nine strict-lease operations and five idempotency-only operations.
+- **Why:** OPE needs a concrete answer for which lifecycle writes can race across agents before broadening local worker or hosted runtime behavior, while keeping normal checks as readbacks that do not acquire locks or write state.
+- **Alternatives rejected:** Requiring leases for every readback, relying only on idempotency for race-prone writes, exposing raw lock CRUD to agents, making normal checks acquire leases, or treating the lease policy as hosted queue coordination.
+
+### DEC-132 — Gate Runtime Transport Promotion
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `runtime-transport-readiness` as a schema-bound readback that keeps in-process internal API, CLI, `agent-call`, and local MCP stdio as the current tested runtime surfaces while deferring local HTTP, queue, hosted service, and OPP HTTP provider behavior.
+- **Why:** OPE needs a concrete answer for when hosted or HTTP runtimes may be introduced without accidentally starting listeners, creating hosted-service claims, bypassing security gates, or treating OPP/provider interoperability as core runtime behavior.
+- **Alternatives rejected:** Adding local HTTP once the internal API is stable without adoption evidence, starting network listeners during normal checks, treating queue workers as ready before hosted/runtime gates, advertising OPP HTTP provider support from the fixture adapter, or using hosted runtime as the first embedded runtime.
+
+### DEC-133 — Scope Workspaces By Tenant Before Hosted Runtime
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `workspace-tenant-isolation` as a schema-bound readback that requires tenant/workspace scope for resources, source bindings, operation queues, credential references, and idempotency namespaces.
+- **Why:** Host applications may eventually manage multiple tenants or users, but OPE needs a checked local policy before adding hosted tenant runtime, tenant administration APIs, or cross-tenant operation surfaces.
+- **Alternatives rejected:** Treating the existing prediction workspace registry as enough for tenant isolation, allowing raw cross-tenant source reuse, sharing idempotency namespaces across tenants, storing credential values in OPE records, or implementing hosted tenant runtime before the policy is checked.
+
+### DEC-134 — Classify Domain/Source Fields Before New Domains
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `domain-source-field-policy` as a schema-bound readback that classifies universal domain fields, universal source-binding fields, domain-specific extension containers, source-kind field rules, blocked fields, and decision cases.
+- **Why:** OPE needs a concrete answer for which fields every domain and source binding must carry before adding broader private setup domains, generated runtime types, or richer private-source behavior. Domain vocabulary can vary, but credentials, raw SQL, raw private rows, post-outcome forecast evidence, hosted runtime flags, and premature quality claims must remain blocked.
+- **Alternatives rejected:** Letting each domain invent top-level configuration shapes, treating role and parameter vocabulary as universal fields, allowing raw SQL query text in source bindings, storing credential values in OPE records, generating runtime types from the policy before adoption evidence, or upgrading quality claims from field configuration alone.
+
+### DEC-135 — Use Scoped Opaque Credential References
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `credential-reference-policy` as a schema-bound readback that requires opaque caller-owned credential references scoped to tenant, workspace, source binding, source role, adapter, source kind, source policy, and purpose.
+- **Why:** Private API and database setup needs a concrete credential mechanism without storing secrets or resolving them in normal checks.
+- **Alternatives rejected:** Storing API tokens, passwords, or connection strings in OPE records; using unscoped references; sharing references cross-tenant; resolving environment variables or secrets in normal checks; or implementing a hosted secret manager now.
+
+### DEC-136 — Prefer Tombstones And Redaction Receipts Over Physical Delete
+- **Date:** 2026-06-04
+- **Status:** accepted
+- **Choice:** Add `retention-redaction-policy` as a schema-bound readback that keeps append-only retention, archive tombstones, redaction receipts, and sanitized projections as the default delete replacements, with physical deletion only as a future gated exception preflight.
+- **Why:** OPE needs to preserve auditability, provenance, idempotency, scoring, and calibration while still giving agents a concrete answer for unsafe private details, credential-like submissions, raw pilot notes, and rare erasure requests.
+- **Alternatives rejected:** Silent physical deletion, rewriting forecast histories, retaining raw transcripts or credential values until later cleanup, treating archive/redact as generic CRUD delete, or implementing hosted erasure workflow before the policy and gates are checked.
+
+### DEC-137 — Require Bound Source Policy For Private Data Auto
+- **Date:** 2026-06-05
+- **Status:** accepted
+- **Choice:** Add `private-auto-evidence-policy` as a schema-bound readback that makes private `data: auto` depend on bound source policy, tenant/workspace scope, caller approval, checked source-kind capabilities, credential references, freshness, retention/redaction policy, leakage checks, and a forecast-before-close gate.
+- **Why:** Agents need a concrete answer for whether private setup sources can be discovered automatically without interpreting `data: auto` as permission for broad web search, arbitrary private API/database parsing, secret resolution, raw SQL execution, or raw private payload retention.
+- **Alternatives rejected:** Reusing public weather auto-evidence policy for private setups, allowing broad web search in private `data: auto`, treating private API/database manifests as executable runtimes, storing credential values, accepting raw SQL as a source-policy field, retaining raw private payloads, or generating runtime types before adoption evidence.
+
+### DEC-138 — Add A Local Agent Integration Golden Path
+- **Date:** 2026-06-05
+- **Status:** accepted
+- **Choice:** Add `agent-integrate` plus three envelope/MCP operations for local agent incorporation: readiness, candidates, and guided forecast. The first checked starter scenario is `helsinki_bus_disruption`, with source roles for weather forecast, historical delay baseline, and resolution-only transit delay outcome evidence.
+- **Why:** Agents building domain apps need OPE to answer "what can be forecasted" faster and more safely than building question validation, source-role checks, method gates, forecast-card binding, and claim boundaries themselves.
+- **Alternatives rejected:** A hosted API first, an unbounded question-synthesis agent, accepting raw private rows or raw SQL as integration inputs, letting guided blocked cases create forecast artifacts, or claiming calibration/quality improvement from a fast first forecast card.

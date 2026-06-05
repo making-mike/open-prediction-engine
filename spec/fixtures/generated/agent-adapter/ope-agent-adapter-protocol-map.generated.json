@@ -2206,6 +2206,465 @@
       ]
     },
     {
+      "operation": "agent_integration_readiness",
+      "inputRecordType": "agent_integration",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "scenario",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --scenario",
+          "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation agent_integration_readiness --scenario helsinki_bus_disruption",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_agent_integration_readiness",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/agent-integration-readiness",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.agent_integration_readiness.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent wants to know whether OPE can be incorporated into a local app from approved files or sanitized adapter outputs without executing source reads.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "agent_integration_candidates",
+      "inputRecordType": "agent_integration",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "scenario",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --scenario",
+          "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation agent_integration_candidates --scenario helsinki_bus_disruption",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_agent_integration_candidates",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/agent-integration-candidates",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.agent_integration_candidates.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
+      "operation": "agent_integration_guided_forecast",
+      "inputRecordType": "agent_integration",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "scenario",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --scenario",
+          "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+        },
+        {
+          "name": "guidedCase",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --case",
+          "notes": "Checked guided forecast case; blocked cases return blocker codes and no forecast artifacts."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation agent_integration_guided_forecast --scenario helsinki_bus_disruption --case accepted_adapter_output",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_agent_integration_guided_forecast",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "guidedCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --case",
+            "notes": "Checked guided forecast case; blocked cases return blocker codes and no forecast artifacts."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/agent-integration-guided-forecast",
+        "argumentFields": [
+          {
+            "name": "scenario",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --scenario",
+            "notes": "Optional checked starter scenario; currently helsinki_bus_disruption."
+          },
+          {
+            "name": "guidedCase",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --case",
+            "notes": "Checked guided forecast case; blocked cases return blocker codes and no forecast artifacts."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.agent_integration_guided_forecast.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+      },
+      "usageGuidance": "Use when an agent has accepted source context and wants the fastest checked path to a forecast-card read command without hidden live fetches or private-source execution.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
       "operation": "campaign_plan",
       "inputRecordType": "prediction_campaign_manifest",
       "sideEffectLevel": "read_only",
@@ -3836,6 +4295,42 @@
         "forecastId"
       ],
       "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API."
+    },
+    {
+      "situation": "The agent wants to incorporate OPE into a local app and needs to know whether the starter source roles are ready.",
+      "preferredOperation": "agent_integration_readiness",
+      "reason": "The readiness readback returns the starter pack, source roles, local surface, and first-forecast fast target without executing source reads.",
+      "requiredSignals": [
+        "scenario",
+        "sourceRoles",
+        "sourceReadiness",
+        "executionBoundary"
+      ],
+      "downstreamRule": "Use readiness before candidate discovery; do not treat it as hosted runtime, private-source execution, or quality validation."
+    },
+    {
+      "situation": "The agent asks what can be forecasted from app intent and approved source context.",
+      "preferredOperation": "agent_integration_candidates",
+      "reason": "The candidates readback returns forecastable, clarification, blocked, and rejected contracts with exact reason codes.",
+      "requiredSignals": [
+        "status",
+        "questionText",
+        "reasonCodes",
+        "forecastArtifactsAllowed"
+      ],
+      "downstreamRule": "Only forecastable candidates may proceed; needs_clarification, blocked, and rejected cases must not create forecast artifacts."
+    },
+    {
+      "situation": "The agent has an accepted Helsinki starter case and needs the fastest path to a forecast card.",
+      "preferredOperation": "agent_integration_guided_forecast",
+      "reason": "The guided readback returns forecastId, questionId, forecast-card command, lifecycle-bundle command, call-count metrics, and blockers.",
+      "requiredSignals": [
+        "guidedStatus",
+        "toolCallCount",
+        "forecastCardCommand",
+        "blockerCodes"
+      ],
+      "downstreamRule": "Run only from accepted approved-source context; blocked guided cases must return no forecast IDs and no forecast-card command."
     },
     {
       "situation": "The agent needs to know whether any forward-run forecasts are due for outcome resolution.",

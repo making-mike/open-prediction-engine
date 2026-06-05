@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/runtime-transport-readiness.schema.json",
+  "title": "Runtime Transport Readiness",
+  "description": "Checked readiness gate for local, HTTP, queue, hosted, and provider transport surfaces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runtimeTransportReadinessId",
+    "generatedAt",
+    "readinessStatus",
+    "decisionStatus",
+    "normalChecksOffline",
+    "hostedRuntimeAllowedNow",
+    "localHttpAllowedNow",
+    "currentSurfaces",
+    "futureSurfaces",
+    "runtimeDecisions",
+    "readinessCriteria",
+    "blockedCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "runtimeTransportReadinessId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "readinessStatus": { "type": "string", "enum": ["runtime_transport_readiness_checked"] },
+    "decisionStatus": { "type": "string", "enum": ["local_surfaces_ready_http_queue_and_hosted_deferred"] },
+    "normalChecksOffline": { "type": "boolean" },
+    "hostedRuntimeAllowedNow": { "type": "boolean" },
+    "localHttpAllowedNow": { "type": "boolean" },
+    "currentSurfaces": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/currentSurface" }
+    },
+    "futureSurfaces": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/futureSurface" }
+    },
+    "runtimeDecisions": { "$ref": "#/$defs/runtimeDecisions" },
+    "readinessCriteria": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/readinessCriterion" }
+    },
+    "blockedCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/blockedCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "currentSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceName",
+        "surfaceStatus",
+        "command",
+        "adapterRole",
+        "testedInNormalChecks",
+        "startsNetworkListener",
+        "hostedRuntimeRequired",
+        "mutatesStateByDefault",
+        "credentialValuesAccepted",
+        "notes"
+      ],
+      "properties": {
+        "surfaceName": {
+          "type": "string",
+          "enum": ["embedded_internal_api", "cli", "agent_call", "local_mcp_stdio"]
+        },
+        "surfaceStatus": { "type": "string", "enum": ["implemented_local"] },
+        "command": { "$ref": "#/$defs/commandString" },
+        "adapterRole": {
+          "type": "string",
+          "enum": [
+            "in_process_operation_surface",
+            "local_terminal_surface",
+            "transport_neutral_envelope_surface",
+            "local_stdio_tool_surface"
+          ]
+        },
+        "testedInNormalChecks": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" },
+        "hostedRuntimeRequired": { "type": "boolean" },
+        "mutatesStateByDefault": { "type": "boolean" },
+        "credentialValuesAccepted": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "futureSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceName",
+        "surfaceStatus",
+        "proposedCommand",
+        "readinessGate",
+        "implementedNow",
+        "advertisedNow",
+        "normalChecksStartSurface",
+        "requiresReadinessGate",
+        "reason"
+      ],
+      "properties": {
+        "surfaceName": {
+          "type": "string",
+          "enum": ["local_http_adapter", "queue_adapter", "hosted_service_runtime", "opp_http_provider"]
+        },
+        "surfaceStatus": {
+          "type": "string",
+          "enum": [
+            "deferred_pending_adoption_evidence",
+            "deferred_pending_hosted_runtime_gate",
+            "blocked_pending_readiness_gate",
+            "future_adapter_only"
+          ]
+        },
+        "proposedCommand": { "$ref": "#/$defs/commandString" },
+        "readinessGate": {
+          "type": "string",
+          "enum": [
+            "adoption_need_and_security_gate",
+            "hosted_runtime_readiness_gate",
+            "pilot_security_storage_and_ops_readiness",
+            "provider_runtime_readiness_gate"
+          ]
+        },
+        "implementedNow": { "type": "boolean" },
+        "advertisedNow": { "type": "boolean" },
+        "normalChecksStartSurface": { "type": "boolean" },
+        "requiresReadinessGate": { "type": "boolean" },
+        "reason": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "runtimeDecisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "firstEmbeddedRuntime",
+        "localHttpDecision",
+        "hostedRuntimeDecision",
+        "queueDecision",
+        "oppProviderDecision"
+      ],
+      "properties": {
+        "firstEmbeddedRuntime": { "type": "string", "enum": ["in_process_cli_agent_call_and_local_mcp"] },
+        "localHttpDecision": { "type": "string", "enum": ["deferred_until_adoption_need_and_security_gate"] },
+        "hostedRuntimeDecision": { "type": "string", "enum": ["deferred_until_pilot_security_storage_and_ops_readiness"] },
+        "queueDecision": { "type": "string", "enum": ["deferred_until_hosted_runtime_gate"] },
+        "oppProviderDecision": { "type": "string", "enum": ["fixture_adapter_now_http_provider_future"] }
+      }
+    },
+    "readinessCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterionName",
+        "criterionStatus",
+        "evidenceCommand",
+        "evidenceStatus",
+        "blocksHostedRuntime",
+        "blocksLocalHttp",
+        "normalChecksMutateState",
+        "notes"
+      ],
+      "properties": {
+        "criterionName": {
+          "type": "string",
+          "enum": [
+            "internal_api_stable",
+            "lifecycle_operation_store_checked",
+            "runtime_security_checked",
+            "persistent_sqlite_policy_checked",
+            "lifecycle_lease_policy_checked",
+            "agent_adapter_protocol_map_checked",
+            "pilot_evidence_threshold_met",
+            "hosted_observability_plan_checked",
+            "production_secret_reference_policy_checked",
+            "hosted_storage_migration_checked"
+          ]
+        },
+        "criterionStatus": {
+          "type": "string",
+          "enum": ["met_for_local_readbacks", "not_met_for_hosted_or_http_runtime"]
+        },
+        "evidenceCommand": { "$ref": "#/$defs/commandString" },
+        "evidenceStatus": { "type": "string", "enum": ["checked", "not_met"] },
+        "blocksHostedRuntime": { "type": "boolean" },
+        "blocksLocalHttp": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "blockedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "requestedSurface",
+        "safeNextAction",
+        "networkListenerStarted",
+        "hostedRuntimeStarted",
+        "stateWritten",
+        "credentialValuesStored",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "normal_check_http_server",
+            "implicit_hosted_service",
+            "opp_http_endpoint_request",
+            "queue_worker_without_readiness",
+            "production_secret_value_in_record",
+            "default_live_fetch",
+            "unbounded_background_daemon"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "blocked_normal_check_network_listener",
+            "blocked_hosted_runtime_not_ready",
+            "blocked_opp_http_provider_future",
+            "blocked_queue_runtime_not_ready",
+            "blocked_credential_value_storage",
+            "blocked_default_live_network",
+            "blocked_unbounded_daemon"
+          ]
+        },
+        "requestedSurface": {
+          "type": "string",
+          "enum": ["local_http_adapter", "queue_adapter", "hosted_service_runtime", "opp_http_provider"]
+        },
+        "safeNextAction": {
+          "type": "string",
+          "enum": [
+            "use_cli_or_agent_call_readback",
+            "read_expansion_readiness_gate",
+            "use_opp_provider_adapter_fixture",
+            "use_background_worker_readback",
+            "replace_with_credential_reference",
+            "use_fixture_or_explicit_live_gate",
+            "use_bounded_foreground_scheduler"
+          ]
+        },
+        "networkListenerStarted": { "type": "boolean" },
+        "hostedRuntimeStarted": { "type": "boolean" },
+        "stateWritten": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readbackSurface", "command", "mutatesState", "startsNetworkListener", "notes"],
+      "properties": {
+        "readbackSurface": {
+          "type": "string",
+          "enum": [
+            "cli",
+            "internal_api",
+            "agent_protocol_map",
+            "runtime_security",
+            "opp_provider_adapter",
+            "lifecycle_lease_policy",
+            "expansion_readiness",
+            "mvp_release_surface"
+          ]
+        },
+        "command": { "$ref": "#/$defs/commandString" },
+        "mutatesState": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "networkListenerStarted",
+        "localHttpServerImplemented",
+        "hostedServiceImplemented",
+        "queueRuntimeImplemented",
+        "oppHttpProviderImplemented",
+        "normalChecksUseNetwork",
+        "normalChecksWriteState",
+        "credentialValuesStored",
+        "paymentSettlementImplemented",
+        "productionLiveFetchEnabled",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "networkListenerStarted": { "type": "boolean" },
+        "localHttpServerImplemented": { "type": "boolean" },
+        "hostedServiceImplemented": { "type": "boolean" },
+        "queueRuntimeImplemented": { "type": "boolean" },
+        "oppHttpProviderImplemented": { "type": "boolean" },
+        "normalChecksUseNetwork": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "paymentSettlementImplemented": { "type": "boolean" },
+        "productionLiveFetchEnabled": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentSurfaceCount",
+        "futureSurfaceCount",
+        "readinessCriteriaCount",
+        "metLocalCriteriaCount",
+        "blockedCaseCount",
+        "hostedRuntimeAllowedNow",
+        "localHttpAllowedNow",
+        "normalChecksOffline"
+      ],
+      "properties": {
+        "currentSurfaceCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "futureSurfaceCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "readinessCriteriaCount": { "type": "integer", "minimum": 10, "maximum": 10 },
+        "metLocalCriteriaCount": { "type": "integer", "minimum": 6, "maximum": 6 },
+        "blockedCaseCount": { "type": "integer", "minimum": 7, "maximum": 7 },
+        "hostedRuntimeAllowedNow": { "type": "boolean" },
+        "localHttpAllowedNow": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" }
+      }
+    },
+    "boundedString": { "type": "string", "minLength": 8, "maxLength": 260 },
+    "commandString": { "type": "string", "minLength": 8, "maxLength": 160 }
+  }
+}

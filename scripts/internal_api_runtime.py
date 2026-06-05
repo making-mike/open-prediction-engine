@@ -126,6 +126,10 @@ def read_status(**kwargs: Any) -> dict[str, Any]:
     return call_internal_api("read_status", **kwargs)
 
 
+def database_source_adapter_status(**kwargs: Any) -> dict[str, Any]:
+    return call_internal_api("database_source_adapter_status", **kwargs)
+
+
 def read_forecast_card(**kwargs: Any) -> dict[str, Any]:
     return call_internal_api("read_forecast_card", **kwargs)
 

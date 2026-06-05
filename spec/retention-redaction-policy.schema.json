@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/retention-redaction-policy.schema.json",
+  "title": "Retention Redaction Policy",
+  "description": "Checked policy for audit-preserving tombstones, redaction receipts, sanitized projections, and rare physical delete exceptions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retentionRedactionPolicyId",
+    "generatedAt",
+    "policyStatus",
+    "decisionStatus",
+    "normalChecksMutateState",
+    "physicalDeleteDefaultEnabled",
+    "sourceBindings",
+    "retentionClasses",
+    "policyActions",
+    "physicalDeleteGates",
+    "decisionCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "retentionRedactionPolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyStatus": { "type": "string", "enum": ["retention_redaction_policy_checked"] },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["tombstones_and_redaction_receipts_default_physical_delete_exception_only"]
+    },
+    "normalChecksMutateState": { "type": "boolean" },
+    "physicalDeleteDefaultEnabled": { "type": "boolean" },
+    "sourceBindings": { "$ref": "#/$defs/sourceBindings" },
+    "retentionClasses": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/retentionClass" }
+    },
+    "policyActions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/policyAction" }
+    },
+    "physicalDeleteGates": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/physicalDeleteGate" }
+    },
+    "decisionCases": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/decisionCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 8, "maxLength": 300 }
+    }
+  },
+  "$defs": {
+    "recordClassName": {
+      "type": "string",
+      "enum": [
+        "forecast_lifecycle_record",
+        "evidence_trace_record",
+        "source_connector_result",
+        "source_binding_config",
+        "credential_reference_record",
+        "pilot_session_summary",
+        "local_usage_trace_event",
+        "operation_receipt"
+      ]
+    },
+    "actionName": {
+      "type": "string",
+      "enum": [
+        "retain_append_only",
+        "archive_tombstone",
+        "redaction_receipt",
+        "sanitized_projection_rebuild",
+        "physical_delete_exception"
+      ]
+    },
+    "gateName": {
+      "type": "string",
+      "enum": [
+        "authorized_erasure_basis",
+        "tenant_workspace_scope_verified",
+        "record_class_allows_physical_delete",
+        "legal_or_safety_review_recorded",
+        "audit_tombstone_retained",
+        "redaction_receipt_retained",
+        "immutable_forecast_history_preserved_or_rendered_unscorable",
+        "operator_approval_recorded"
+      ]
+    },
+    "caseName": {
+      "type": "string",
+      "enum": [
+        "normal_forecast_lifecycle_retention",
+        "archive_inactive_prediction",
+        "redact_private_source_detail",
+        "redact_credential_like_field",
+        "pilot_summary_needs_redaction",
+        "usage_trace_aggregate_only",
+        "source_connector_raw_preview_requested",
+        "physical_delete_missing_legal_basis",
+        "physical_delete_with_authorized_erasure",
+        "physical_delete_for_forecast_history",
+        "redaction_receipt_replay",
+        "tombstone_rebuild_read_model"
+      ]
+    },
+    "sourceBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lifecycleOperationStoreStatus",
+        "persistentSqlitePolicyStatus",
+        "runtimeSecurityStatus",
+        "workspaceTenantIsolationStatus",
+        "pilotSummaryIntakeStatus",
+        "credentialReferencePolicyStatus",
+        "normalChecksWriteState",
+        "physicalDeletesInLifecycleScenarios",
+        "notes"
+      ],
+      "properties": {
+        "lifecycleOperationStoreStatus": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "persistentSqlitePolicyStatus": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "runtimeSecurityStatus": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "workspaceTenantIsolationStatus": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "pilotSummaryIntakeStatus": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "credentialReferencePolicyStatus": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "normalChecksWriteState": { "type": "boolean" },
+        "physicalDeletesInLifecycleScenarios": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string", "minLength": 8, "maxLength": 300 }
+      }
+    },
+    "retentionClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordClass",
+        "defaultAction",
+        "minimumRetention",
+        "archiveAction",
+        "redactionAction",
+        "physicalDeleteEligible",
+        "auditMetadataRetained",
+        "rawContentRetained",
+        "retainCredentialValues",
+        "aggregateOnlyAfterWindow",
+        "silentDeleteAllowed",
+        "normalChecksWriteState",
+        "rationale"
+      ],
+      "properties": {
+        "recordClass": { "$ref": "#/$defs/recordClassName" },
+        "defaultAction": { "$ref": "#/$defs/actionName" },
+        "minimumRetention": { "type": "string", "minLength": 4, "maxLength": 120 },
+        "archiveAction": { "$ref": "#/$defs/actionName" },
+        "redactionAction": { "$ref": "#/$defs/actionName" },
+        "physicalDeleteEligible": { "type": "boolean" },
+        "auditMetadataRetained": { "type": "boolean" },
+        "rawContentRetained": { "type": "boolean" },
+        "retainCredentialValues": { "type": "boolean" },
+        "aggregateOnlyAfterWindow": { "type": "boolean" },
+        "silentDeleteAllowed": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "rationale": { "type": "string", "minLength": 8, "maxLength": 300 }
+      }
+    },
+    "policyAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actionName",
+        "actionStatus",
+        "operationName",
+        "writesAuditTombstone",
+        "writesRedactionReceipt",
+        "rebuildsSanitizedProjection",
+        "requiresAllPhysicalDeleteGates",
+        "physicallyDeletesRecords",
+        "normalChecksExecuteAction",
+        "silentDeleteAllowed",
+        "safeNextAction"
+      ],
+      "properties": {
+        "actionName": { "$ref": "#/$defs/actionName" },
+        "actionStatus": {
+          "type": "string",
+          "enum": [
+            "default_retention",
+            "audit_tombstone_append",
+            "redaction_receipt_append",
+            "projection_rebuild",
+            "exception_preflight_only"
+          ]
+        },
+        "operationName": { "type": "string", "minLength": 4, "maxLength": 80 },
+        "writesAuditTombstone": { "type": "boolean" },
+        "writesRedactionReceipt": { "type": "boolean" },
+        "rebuildsSanitizedProjection": { "type": "boolean" },
+        "requiresAllPhysicalDeleteGates": { "type": "boolean" },
+        "physicallyDeletesRecords": { "type": "boolean" },
+        "normalChecksExecuteAction": { "type": "boolean" },
+        "silentDeleteAllowed": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "physicalDeleteGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateName",
+        "gateStatus",
+        "requiredForException",
+        "blocksForecastHistory",
+        "normalChecksEvaluateAsEffectful",
+        "evidenceRequired",
+        "failureStatus"
+      ],
+      "properties": {
+        "gateName": { "$ref": "#/$defs/gateName" },
+        "gateStatus": { "type": "string", "enum": ["required_exception_gate"] },
+        "requiredForException": { "type": "boolean" },
+        "blocksForecastHistory": { "type": "boolean" },
+        "normalChecksEvaluateAsEffectful": { "type": "boolean" },
+        "evidenceRequired": { "type": "string", "minLength": 8, "maxLength": 260 },
+        "failureStatus": { "type": "string", "minLength": 8, "maxLength": 100 }
+      }
+    },
+    "decisionCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "recordClass",
+        "selectedAction",
+        "gateCoverage",
+        "physicallyDeletesRecords",
+        "normalChecksWriteState",
+        "credentialValuesRetained",
+        "sanitizedDiagnosticsOnly",
+        "auditMetadataRetained",
+        "safeNextAction"
+      ],
+      "properties": {
+        "caseName": { "$ref": "#/$defs/caseName" },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "retained_append_only",
+            "archived_with_tombstone",
+            "redaction_required",
+            "aggregate_projection_only",
+            "blocked_raw_retention",
+            "blocked_missing_gate",
+            "exception_preflight_ready",
+            "blocked_record_class",
+            "idempotent_replay",
+            "projection_rebuild_only"
+          ]
+        },
+        "recordClass": { "$ref": "#/$defs/recordClassName" },
+        "selectedAction": { "$ref": "#/$defs/actionName" },
+        "gateCoverage": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/gateName" }
+        },
+        "physicallyDeletesRecords": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "credentialValuesRetained": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" },
+        "auditMetadataRetained": { "type": "boolean" },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 260 }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackSurface",
+        "command",
+        "mutatesState",
+        "physicallyDeletesRecords",
+        "notes"
+      ],
+      "properties": {
+        "readbackSurface": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "command": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "mutatesState": { "type": "boolean" },
+        "physicallyDeletesRecords": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 8, "maxLength": 280 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksPhysicallyDelete",
+        "normalChecksWriteState",
+        "silentDeleteAllowed",
+        "forecastHistoryRewriteAllowed",
+        "credentialValuesRetained",
+        "rawPrivateRowsRetained",
+        "rawPilotTranscriptsRetained",
+        "physicalDeleteDefaultEnabled",
+        "hostedErasureWorkflowImplemented",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "normalChecksPhysicallyDelete": { "type": "boolean" },
+        "normalChecksWriteState": { "type": "boolean" },
+        "silentDeleteAllowed": { "type": "boolean" },
+        "forecastHistoryRewriteAllowed": { "type": "boolean" },
+        "credentialValuesRetained": { "type": "boolean" },
+        "rawPrivateRowsRetained": { "type": "boolean" },
+        "rawPilotTranscriptsRetained": { "type": "boolean" },
+        "physicalDeleteDefaultEnabled": { "type": "boolean" },
+        "hostedErasureWorkflowImplemented": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retentionClassCount",
+        "policyActionCount",
+        "decisionCaseCount",
+        "physicalDeleteGateCount",
+        "readbackCount",
+        "normalChecksMutateState",
+        "physicalDeleteDefaultEnabled",
+        "physicalDeleteExceptionCaseCount",
+        "blockedPhysicalDeleteCaseCount"
+      ],
+      "properties": {
+        "retentionClassCount": { "type": "integer", "minimum": 0 },
+        "policyActionCount": { "type": "integer", "minimum": 0 },
+        "decisionCaseCount": { "type": "integer", "minimum": 0 },
+        "physicalDeleteGateCount": { "type": "integer", "minimum": 0 },
+        "readbackCount": { "type": "integer", "minimum": 0 },
+        "normalChecksMutateState": { "type": "boolean" },
+        "physicalDeleteDefaultEnabled": { "type": "boolean" },
+        "physicalDeleteExceptionCaseCount": { "type": "integer", "minimum": 0 },
+        "blockedPhysicalDeleteCaseCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

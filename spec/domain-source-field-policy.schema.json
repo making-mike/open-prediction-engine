@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/domain-source-field-policy.schema.json",
+  "title": "Domain Source Field Policy",
+  "description": "Checked policy for universal domain/source configuration fields versus domain-specific extension fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domainSourceFieldPolicyId",
+    "generatedAt",
+    "policyStatus",
+    "decisionStatus",
+    "normalChecksMutateState",
+    "generatedRuntimeTypesIncluded",
+    "sourceBinding",
+    "universalDomainFields",
+    "universalSourceBindingFields",
+    "domainSpecificExtensionFields",
+    "blockedFields",
+    "sourceKindFieldRules",
+    "fieldDecisionCases",
+    "readbacks",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "domainSourceFieldPolicyId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyStatus": { "type": "string", "enum": ["domain_source_field_policy_checked"] },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["universal_domain_and_source_fields_with_domain_extension_boundary"]
+    },
+    "normalChecksMutateState": { "type": "boolean" },
+    "generatedRuntimeTypesIncluded": { "type": "boolean" },
+    "sourceBinding": { "$ref": "#/$defs/sourceBinding" },
+    "universalDomainFields": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/fieldPolicy" }
+    },
+    "universalSourceBindingFields": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/fieldPolicy" }
+    },
+    "domainSpecificExtensionFields": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/fieldPolicy" }
+    },
+    "blockedFields": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/fieldPolicy" }
+    },
+    "sourceKindFieldRules": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/sourceKindFieldRule" }
+    },
+    "fieldDecisionCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/fieldDecisionCase" }
+    },
+    "readbacks": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/readback" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domainConfigCommand",
+        "sourceBindingCommand",
+        "domainConfigCount",
+        "sourceBindingCaseCount",
+        "boundDomainKeys",
+        "boundSourceBindingCases",
+        "rawSourceDataRead",
+        "notes"
+      ],
+      "properties": {
+        "domainConfigCommand": { "type": "string", "enum": ["python3 scripts/ope.py domain-configs"] },
+        "sourceBindingCommand": { "type": "string", "enum": ["python3 scripts/ope.py source-bindings"] },
+        "domainConfigCount": { "type": "integer", "minimum": 2, "maximum": 8 },
+        "sourceBindingCaseCount": { "type": "integer", "minimum": 4, "maximum": 12 },
+        "boundDomainKeys": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "$ref": "common.schema.json#/$defs/domain" }
+        },
+        "boundSourceBindingCases": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 12,
+          "items": { "type": "string", "enum": ["accepted", "partial", "rejected", "blocked"] }
+        },
+        "rawSourceDataRead": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "fieldPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldPolicyName",
+        "recordSurface",
+        "requirementLevel",
+        "fieldPaths",
+        "reason",
+        "domainExtensionAllowed",
+        "credentialValuesAllowed",
+        "rawPrivateDataAllowed",
+        "safeNextAction"
+      ],
+      "properties": {
+        "fieldPolicyName": { "$ref": "#/$defs/fieldPolicyName" },
+        "recordSurface": { "type": "string", "enum": ["domain_config", "source_binding", "shared_boundary"] },
+        "requirementLevel": {
+          "type": "string",
+          "enum": ["required_every_domain", "required_every_source_binding", "domain_specific_extension", "blocked"]
+        },
+        "fieldPaths": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 120 }
+        },
+        "reason": { "$ref": "#/$defs/boundedString" },
+        "domainExtensionAllowed": { "type": "boolean" },
+        "credentialValuesAllowed": { "type": "boolean" },
+        "rawPrivateDataAllowed": { "type": "boolean" },
+        "safeNextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "sourceKindFieldRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKind",
+        "sourceRefRequired",
+        "adapterRefRequired",
+        "credentialReferenceRequired",
+        "credentialValueAllowed",
+        "rawPayloadStored",
+        "sanitizedManifestRequired",
+        "queryBoundaryRequired",
+        "notes"
+      ],
+      "properties": {
+        "sourceKind": {
+          "type": "string",
+          "enum": ["fixture", "local_file", "source_adapter_output", "api", "database"]
+        },
+        "sourceRefRequired": { "type": "boolean" },
+        "adapterRefRequired": { "type": "boolean" },
+        "credentialReferenceRequired": { "type": "boolean" },
+        "credentialValueAllowed": { "type": "boolean" },
+        "rawPayloadStored": { "type": "boolean" },
+        "sanitizedManifestRequired": { "type": "boolean" },
+        "queryBoundaryRequired": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "fieldDecisionCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseName",
+        "caseStatus",
+        "targetRecordSurface",
+        "fieldPolicyName",
+        "caseResult",
+        "safeNextAction",
+        "policyViolation",
+        "forecastArtifactsCreated",
+        "credentialValuesStored",
+        "rawPrivateDataStored",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "caseName": {
+          "type": "string",
+          "enum": [
+            "weather_transit_core_ready",
+            "seaport_extension_ready",
+            "missing_resolution_criteria",
+            "credential_value_in_source_binding",
+            "raw_sql_query_as_binding_field",
+            "domain_quality_claim_enabled",
+            "outcome_role_marked_forecast_time"
+          ]
+        },
+        "caseStatus": {
+          "type": "string",
+          "enum": [
+            "accepted_universal_domain_fields",
+            "accepted_domain_specific_extensions",
+            "blocked_missing_required_domain_field",
+            "blocked_credential_value_storage",
+            "blocked_raw_sql_field",
+            "blocked_claim_boundary_violation",
+            "blocked_resolution_role_forecast_time_leakage"
+          ]
+        },
+        "targetRecordSurface": { "type": "string", "enum": ["domain_config", "source_binding"] },
+        "fieldPolicyName": { "$ref": "#/$defs/fieldPolicyName" },
+        "caseResult": { "$ref": "#/$defs/boundedString" },
+        "safeNextAction": { "$ref": "#/$defs/boundedString" },
+        "policyViolation": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawPrivateDataStored": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readbackSurface",
+        "command",
+        "mutatesState",
+        "startsNetworkListener",
+        "credentialValuesReturned",
+        "notes"
+      ],
+      "properties": {
+        "readbackSurface": {
+          "type": "string",
+          "enum": [
+            "cli",
+            "domain_configs",
+            "source_bindings",
+            "source_quality",
+            "source_intake",
+            "runtime_security",
+            "workspace_tenant_isolation"
+          ]
+        },
+        "command": { "$ref": "#/$defs/commandString" },
+        "mutatesState": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" },
+        "credentialValuesReturned": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksWriteState",
+        "createsForecasts",
+        "readsPrivateData",
+        "storesCredentialValues",
+        "rawSqlAllowed",
+        "arbitraryPrivateApiParsingByOpe",
+        "arbitraryDatabaseParsingByOpe",
+        "hostedRuntimeImplemented",
+        "qualityClaimsUpgraded"
+      ],
+      "properties": {
+        "normalChecksWriteState": { "type": "boolean" },
+        "createsForecasts": { "type": "boolean" },
+        "readsPrivateData": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "rawSqlAllowed": { "type": "boolean" },
+        "arbitraryPrivateApiParsingByOpe": { "type": "boolean" },
+        "arbitraryDatabaseParsingByOpe": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "universalDomainFieldCount",
+        "universalSourceBindingFieldCount",
+        "domainSpecificExtensionFieldCount",
+        "blockedFieldCount",
+        "sourceKindRuleCount",
+        "fieldDecisionCaseCount",
+        "normalChecksMutateState",
+        "generatedRuntimeTypesIncluded"
+      ],
+      "properties": {
+        "universalDomainFieldCount": { "type": "integer", "minimum": 10, "maximum": 10 },
+        "universalSourceBindingFieldCount": { "type": "integer", "minimum": 10, "maximum": 10 },
+        "domainSpecificExtensionFieldCount": { "type": "integer", "minimum": 8, "maximum": 8 },
+        "blockedFieldCount": { "type": "integer", "minimum": 6, "maximum": 6 },
+        "sourceKindRuleCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "fieldDecisionCaseCount": { "type": "integer", "minimum": 7, "maximum": 7 },
+        "normalChecksMutateState": { "type": "boolean" },
+        "generatedRuntimeTypesIncluded": { "type": "boolean" }
+      }
+    },
+    "fieldPolicyName": {
+      "type": "string",
+      "enum": [
+        "domain_identity",
+        "question_templates",
+        "horizons",
+        "resolution_criteria",
+        "baseline_method",
+        "accepted_source_roles",
+        "exclusion_rules",
+        "sample_thresholds",
+        "claim_boundaries",
+        "execution_boundary",
+        "source_binding_identity",
+        "source_binding_mode",
+        "credential_policy",
+        "source_role_bindings",
+        "pre_forecast_checks",
+        "setup_operations",
+        "configuration_input_boundary",
+        "next_action",
+        "summary",
+        "question_parameters",
+        "role_keys",
+        "role_required_fields",
+        "resolution_text_criteria",
+        "exclusion_reason_codes",
+        "domain_specific_horizon_labels",
+        "baseline_threshold_values",
+        "source_quality_threshold_values",
+        "credential_value",
+        "raw_sql_query",
+        "raw_private_row",
+        "post_outcome_forecast_evidence",
+        "production_quality_claim",
+        "hosted_runtime_flag"
+      ]
+    },
+    "boundedString": { "type": "string", "minLength": 8, "maxLength": 260 },
+    "commandString": { "type": "string", "minLength": 10, "maxLength": 180 }
+  }
+}

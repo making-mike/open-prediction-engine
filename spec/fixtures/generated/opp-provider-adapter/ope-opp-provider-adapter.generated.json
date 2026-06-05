@@ -1,0 +1,536 @@
+{
+  "oppProviderAdapterId": "oppprovideradapter-001",
+  "generatedAt": "2026-06-04T23:10:00Z",
+  "providerAdapterStatus": "optional_opp_provider_adapter_checked",
+  "adapterScope": "interop_mapping_over_ope_lifecycle_records",
+  "normalChecksOffline": true,
+  "localMcpStdioTested": true,
+  "httpProviderRuntimeImplemented": false,
+  "sseStreamingImplemented": false,
+  "paymentSettlementImplemented": false,
+  "aggregationImplemented": false,
+  "hostedServiceRequired": false,
+  "requestMapping": {
+    "mappingStatus": "checked_mapping_fixture",
+    "mapsToOpeForecastRequest": true,
+    "createsOpeRecordsDirectly": false,
+    "mappingRows": [
+      {
+        "oppField": "predictionRequestId",
+        "opeMapping": "OPE forecast request requestId plus internal API idempotency metadata.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "marketOrQuestion",
+        "opeMapping": "OPE forecast-request question text, resolution criteria, and domain setup hints after validation.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "domain",
+        "opeMapping": "OPE domain-config domain key or setup domain label.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "horizon",
+        "opeMapping": "OPE horizon startsAt, endsAt, close time, and scheduled resolution timing.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "outputType",
+        "opeMapping": "OPE outputType contract, currently checked through binary forecast fixtures.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "sourcePolicy",
+        "opeMapping": "OPE source-policy contract, including fixture, provided, or approved source boundaries.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "callerIdentity",
+        "opeMapping": "Internal API caller identity and operation metadata; credential values remain outside OPE records.",
+        "requiredForFixtureAdapter": true,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      },
+      {
+        "oppField": "constraints",
+        "opeMapping": "Adapter constraints such as max response bytes, requested audit metadata, and supported output modes.",
+        "requiredForFixtureAdapter": false,
+        "mappingStatus": "mapped_to_ope_contract",
+        "rawPromptStored": false,
+        "credentialValuesAccepted": false
+      }
+    ]
+  },
+  "responseMapping": {
+    "mappingStatus": "checked_mapping_fixture",
+    "mapsFromForecastCard": true,
+    "mapsFromForecastArtifact": true,
+    "predictionResponseShape": "compact_binary_probability_with_audit_refs",
+    "auditMetadataChannel": "audit",
+    "requiredOpeRecordRefs": [
+      "forecastId",
+      "questionId",
+      "evidenceTraceId",
+      "lifecycleBundleId",
+      "forecastCardRecordType",
+      "forecastArtifactRecordType"
+    ],
+    "claimBoundaryCarried": true,
+    "scoreStatusCarried": true,
+    "rawLifecycleBundleEmbedded": false
+  },
+  "agentCard": {
+    "agentCardStatus": "checked_fixture",
+    "providerId": "ope-local-fixture-provider",
+    "providerName": "Open Prediction Engine local fixture provider",
+    "advertisedRuntime": "local_cli_fixture_only",
+    "httpEndpointAdvertised": false,
+    "sseEndpointAdvertised": false,
+    "aggregationAdvertised": false,
+    "supportedPricingModes": [
+      "free_local_fixture"
+    ],
+    "supportedOutputTypes": [
+      "binary"
+    ],
+    "supportedHorizons": [
+      "1-day",
+      "service-window",
+      "campaign-window"
+    ],
+    "domainCapabilities": [
+      {
+        "domain": "weather-logistics",
+        "supportedHorizons": [
+          "1-day"
+        ],
+        "supportedOutputTypes": [
+          "binary"
+        ],
+        "supportedEvidenceModes": [
+          "fixture",
+          "auto_evidence_fixture_replay",
+          "provided"
+        ],
+        "maturityLabel": "fixture_ready_reference",
+        "calibrationStatus": "below_threshold_no_live_claim",
+        "complianceStatus": "policy_boundary_only",
+        "liveCalibrationClaimAllowed": false,
+        "paidProviderRequired": false
+      },
+      {
+        "domain": "weather-transit-delays",
+        "supportedHorizons": [
+          "service-window",
+          "campaign-window"
+        ],
+        "supportedOutputTypes": [
+          "binary"
+        ],
+        "supportedEvidenceModes": [
+          "fixture",
+          "approved_local_live_capture",
+          "campaign_ledger"
+        ],
+        "maturityLabel": "public_beta_candidate",
+        "calibrationStatus": "below_threshold_no_live_claim",
+        "complianceStatus": "policy_boundary_only",
+        "liveCalibrationClaimAllowed": false,
+        "paidProviderRequired": false
+      },
+      {
+        "domain": "seaport-berth-availability",
+        "supportedHorizons": [
+          "service-window"
+        ],
+        "supportedOutputTypes": [
+          "binary"
+        ],
+        "supportedEvidenceModes": [
+          "approved_local_file",
+          "approved_database_adapter_fixture",
+          "external_source_adapter_output"
+        ],
+        "maturityLabel": "candidate_private_setup",
+        "calibrationStatus": "below_threshold_no_live_claim",
+        "complianceStatus": "policy_boundary_only",
+        "liveCalibrationClaimAllowed": false,
+        "paidProviderRequired": false
+      }
+    ]
+  },
+  "conformanceCases": [
+    {
+      "caseName": "accepted_forecast_card",
+      "caseStatus": "response_ready",
+      "nextAction": "return_prediction_response",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-001",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "fixture",
+          "sourcePolicyId": "sourcepolicy-019",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "opeForecastCard": {
+        "forecastId": "forecast-602",
+        "questionId": "question-601",
+        "forecastCardRecordType": "forecast-card",
+        "forecastArtifactRecordType": "forecast-artifact",
+        "title": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "probability": 0.41,
+        "scoreStatus": "scored",
+        "claimBoundary": "not_enough_resolved_auto_evidence_outcomes",
+        "evidenceTraceId": "forecast-602",
+        "evidenceTraceLinkId": "evidencetrace-602",
+        "lifecycleBundleId": "forecast-602",
+        "lifecycleBundleLinkId": "forecastbundle-forecast-602"
+      },
+      "predictionResponse": {
+        "predictionResponseId": "opppredictionresponse-001",
+        "predictionRequestId": "opppredictionrequest-001",
+        "providerId": "ope-local-fixture-provider",
+        "responseStatus": "prediction_ready",
+        "outputType": "binary",
+        "probability": 0.41,
+        "scoreStatus": "scored",
+        "claimBoundary": "not_enough_resolved_auto_evidence_outcomes",
+        "audit": {
+          "forecastId": "forecast-602",
+          "questionId": "question-601",
+          "evidenceTraceId": "forecast-602",
+          "evidenceTraceLinkId": "evidencetrace-602",
+          "lifecycleBundleId": "forecast-602",
+          "lifecycleBundleLinkId": "forecastbundle-forecast-602",
+          "forecastCardRecordType": "forecast-card",
+          "forecastArtifactRecordType": "forecast-artifact",
+          "scoreStatus": "scored",
+          "claimBoundary": "not_enough_resolved_auto_evidence_outcomes",
+          "responseGeneratedFromExistingOpeRecords": true,
+          "rawLifecycleBundleEmbedded": false
+        }
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": true,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "unsupported_market",
+      "caseStatus": "blocked_unsupported_market",
+      "nextAction": "choose_supported_domain",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-002",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "unsupported-election-market",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "fixture",
+          "sourcePolicyId": "sourcepolicy-019",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "blockedReason": "unsupported_market",
+      "diagnostic": {
+        "code": "unsupported_market",
+        "message": "OPP provider adapter fixture blocked unsupported_market before OPE record mutation.",
+        "safeForCaller": true
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": false,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "malformed_outcome_spec",
+      "caseStatus": "blocked_malformed_outcome_spec",
+      "nextAction": "repair_resolution_rule",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-003",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "fixture",
+          "sourcePolicyId": "sourcepolicy-019",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "blockedReason": "malformed_outcome_spec",
+      "diagnostic": {
+        "code": "malformed_outcome_spec",
+        "message": "OPP provider adapter fixture blocked malformed_outcome_spec before OPE record mutation.",
+        "safeForCaller": true
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": false,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "missing_source_policy",
+      "caseStatus": "blocked_missing_source_policy",
+      "nextAction": "provide_source_policy",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-004",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "missing",
+          "sourcePolicyId": "none",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "blockedReason": "missing_source_policy",
+      "diagnostic": {
+        "code": "missing_source_policy",
+        "message": "OPP provider adapter fixture blocked missing_source_policy before OPE record mutation.",
+        "safeForCaller": true
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": false,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "provider_timeout",
+      "caseStatus": "blocked_provider_timeout",
+      "nextAction": "retry_or_use_ope_readback",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-005",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "fixture",
+          "sourcePolicyId": "sourcepolicy-019",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "blockedReason": "provider_timeout",
+      "diagnostic": {
+        "code": "provider_timeout",
+        "message": "OPP provider adapter fixture blocked provider_timeout before OPE record mutation.",
+        "safeForCaller": true
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": false,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    },
+    {
+      "caseName": "response_too_large",
+      "caseStatus": "blocked_response_too_large",
+      "nextAction": "request_compact_response",
+      "predictionRequest": {
+        "predictionRequestId": "opppredictionrequest-006",
+        "marketOrQuestion": "Will heavy rain disrupt last-mile delivery operations in Warsaw on 2026-06-03?",
+        "domain": "weather-logistics",
+        "horizon": {
+          "startsAt": "2026-06-03T00:00:00Z",
+          "endsAt": "2026-06-03T23:59:59Z",
+          "label": "1-day"
+        },
+        "outputType": "binary",
+        "sourcePolicy": {
+          "mode": "fixture",
+          "sourcePolicyId": "sourcepolicy-019",
+          "normalChecksOffline": true
+        },
+        "callerIdentity": {
+          "callerId": "caller-opp-fixture-001",
+          "credentialValuesIncluded": false
+        },
+        "constraints": {
+          "maxResponseBytes": 8192,
+          "requireAuditRefs": true,
+          "requestedMetadataChannel": "audit"
+        }
+      },
+      "blockedReason": "response_too_large",
+      "diagnostic": {
+        "code": "response_too_large",
+        "message": "OPP provider adapter fixture blocked response_too_large before OPE record mutation.",
+        "safeForCaller": true
+      },
+      "forecastArtifactsCreated": false,
+      "opeRecordsMutated": false,
+      "usesExistingOpeRecords": false,
+      "claimBoundaryPreserved": true,
+      "sanitizedDiagnosticsOnly": true
+    }
+  ],
+  "conformancePlan": {
+    "minimalSurfaceStatus": "plan_checked_no_http_listener",
+    "normalChecksStartHttpServer": false,
+    "providerCardChecked": true,
+    "requestResponseFixturesChecked": true,
+    "errorFixturesChecked": true,
+    "requiredFutureEndpoints": [
+      "/opp/v1/agent-card",
+      "/opp/v1/predictions"
+    ],
+    "localFixtureCommand": "python3 scripts/ope.py opp-provider-adapter",
+    "futureHttpBoundary": "HTTP provider endpoints should call the internal API and read OPE records; they should not redefine forecast semantics."
+  },
+  "protocolBoundary": {
+    "opeRecordsAuthoritative": true,
+    "oppOptionalInterop": true,
+    "localMcpStdioCurrentTestedProtocol": true,
+    "preservesForecastSemantics": true,
+    "preservesEvidenceSemantics": true,
+    "preservesResolutionScoringCalibrationSemantics": true,
+    "oppReplacesOpeLifecycleRecords": false,
+    "httpRuntimeImplemented": false,
+    "sseRuntimeImplemented": false,
+    "paymentSettlementImplemented": false,
+    "aggregationRuntimeImplemented": false,
+    "hostedServiceImplemented": false,
+    "networkListenerStarted": false,
+    "normalChecksUseNetwork": false,
+    "rawLifecycleBundleEmbeddedByDefault": false,
+    "qualityClaimsUpgraded": false
+  },
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py opp-provider-adapter",
+      "operationName": "opp_provider_adapter",
+      "mutatesState": false,
+      "startsNetworkListener": false
+    },
+    {
+      "readbackSurface": "agent_card",
+      "command": "python3 scripts/ope.py opp-provider-adapter --view agent-card",
+      "operationName": "opp_provider_agent_card",
+      "mutatesState": false,
+      "startsNetworkListener": false
+    },
+    {
+      "readbackSurface": "accepted_response",
+      "command": "python3 scripts/ope.py opp-provider-adapter --case accepted_forecast_card",
+      "operationName": "opp_provider_prediction_response",
+      "mutatesState": false,
+      "startsNetworkListener": false
+    }
+  ],
+  "summary": {
+    "requestMappingCount": 8,
+    "conformanceCaseCount": 6,
+    "blockedCaseCount": 5,
+    "supportedDomainCount": 3,
+    "httpRuntimeImplemented": false,
+    "oppReplacesOpeRecords": false
+  },
+  "warnings": [
+    "This is an optional interoperability adapter fixture, not a claim that OPE currently runs an OPP HTTP provider.",
+    "OPE forecast cards, artifacts, evidence traces, lifecycle bundles, scoring records, and claim gates remain authoritative.",
+    "Normal checks stay offline and do not start HTTP, SSE, payment, aggregation, or hosted service runtimes."
+  ]
+}

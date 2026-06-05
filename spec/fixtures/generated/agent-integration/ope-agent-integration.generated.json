@@ -1,0 +1,1509 @@
+{
+  "agentIntegrationId": "agentintegration-001",
+  "generatedAt": "2026-06-11T09:30:00Z",
+  "integrationStatus": "agent_integration_golden_path_checked",
+  "scenario": "helsinki_bus_disruption",
+  "surface": {
+    "primaryTransport": "local_cli_mcp",
+    "cliCommand": "python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption",
+    "mcpTools": [
+      "ope_agent_integration_readiness",
+      "ope_agent_integration_candidates",
+      "ope_agent_integration_guided_forecast"
+    ],
+    "hostedRuntimeImplemented": false,
+    "normalChecksFetchLiveData": false,
+    "normalChecksCreateArtifacts": false
+  },
+  "intake": {
+    "intakeContractId": "agentintegrationintake-001",
+    "appIntent": "A Helsinki bus and tram traffic app wants to attach approved context sources and ask OPE what disruption outcomes can be forecasted.",
+    "decisionToSupport": "Prioritize warnings, dispatch attention, and rider-facing disruption explanations before a future morning peak window.",
+    "requiredFields": [
+      {
+        "fieldName": "appIntent",
+        "fieldType": "string",
+        "purpose": "Host app goal and decision under uncertainty.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "candidateQuestion",
+        "fieldType": "string",
+        "purpose": "Future-facing question or question family to normalize.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "serviceArea",
+        "fieldType": "string",
+        "purpose": "Bounded geography such as HSL surface transit in Helsinki.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "serviceWindow",
+        "fieldType": "string",
+        "purpose": "Specific future window such as morning peak.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "threshold",
+        "fieldType": "string",
+        "purpose": "Declared beta delay threshold or setup-specific threshold.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "approvedSourceRefs",
+        "fieldType": "array",
+        "purpose": "Caller-approved file refs or sanitized adapter outputs.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "sourceRoles",
+        "fieldType": "array",
+        "purpose": "Forecast-time, historical-baseline, and resolution-only roles.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      },
+      {
+        "fieldName": "resolutionSource",
+        "fieldType": "string",
+        "purpose": "Outcome source usable only after the outcome window closes.",
+        "required": true,
+        "credentialValueAllowed": false,
+        "rawPrivateRowsAllowed": false
+      }
+    ],
+    "approvedSourceContext": [
+      "Use existing domain configs for transit disruption and weather-transit delay setup fields.",
+      "Use existing source-binding readbacks for role and policy checks.",
+      "Use approved local files and sanitized source-adapter outputs only."
+    ],
+    "forbiddenInputs": [
+      "raw credential values",
+      "raw SQL strings",
+      "raw private source rows",
+      "unapproved live fetches",
+      "post-outcome evidence as forecast-time evidence"
+    ],
+    "normalizesToExistingSurfaces": true,
+    "createsForecastArtifacts": false
+  },
+  "starterPack": {
+    "starterPackId": "helsinkistarterpack-001",
+    "domainKey": "weather-transit-delays",
+    "sourceRoles": [
+      {
+        "roleKey": "weather_forecast",
+        "sourceKind": "source_adapter_output",
+        "purpose": "Forecast-time weather conditions that may affect surface transit delays.",
+        "required": true,
+        "forecastTimeAllowed": true,
+        "resolutionOnly": false,
+        "approvedInputKinds": [
+          "approved_local_file",
+          "sanitized_adapter_output"
+        ],
+        "requiredFields": [
+          "valid_time",
+          "temperature_c",
+          "precipitation_mm",
+          "wind_speed_mps"
+        ]
+      },
+      {
+        "roleKey": "historical_delay_baseline",
+        "sourceKind": "approved_local_file",
+        "purpose": "Comparable historical delay rows used for the baseline-first method gate.",
+        "required": true,
+        "forecastTimeAllowed": true,
+        "resolutionOnly": false,
+        "approvedInputKinds": [
+          "approved_local_file",
+          "sanitized_adapter_output"
+        ],
+        "requiredFields": [
+          "service_date",
+          "route_family",
+          "service_window",
+          "delay_minutes"
+        ]
+      },
+      {
+        "roleKey": "transit_delay_outcome",
+        "sourceKind": "sanitized_adapter_output",
+        "purpose": "HSL outcome rows used only after the outcome window closes.",
+        "required": true,
+        "forecastTimeAllowed": false,
+        "resolutionOnly": true,
+        "approvedInputKinds": [
+          "approved_local_file",
+          "sanitized_adapter_output"
+        ],
+        "requiredFields": [
+          "service_date",
+          "service_window",
+          "surface_transit_delay_minutes",
+          "outcome_observed_at"
+        ]
+      }
+    ],
+    "sourceReadiness": [
+      {
+        "roleKey": "weather_forecast",
+        "readinessStatus": "ready",
+        "missingFields": [],
+        "blockerCode": "none"
+      },
+      {
+        "roleKey": "historical_delay_baseline",
+        "readinessStatus": "ready",
+        "missingFields": [],
+        "blockerCode": "none"
+      },
+      {
+        "roleKey": "transit_delay_outcome",
+        "readinessStatus": "ready_resolution_only",
+        "missingFields": [],
+        "blockerCode": "none"
+      }
+    ],
+    "requiredFields": [
+      {
+        "roleKey": "weather_forecast",
+        "fieldName": "valid_time",
+        "purpose": "Forecast-time weather validity timestamp."
+      },
+      {
+        "roleKey": "weather_forecast",
+        "fieldName": "precipitation_mm",
+        "purpose": "Weather disruption feature."
+      },
+      {
+        "roleKey": "weather_forecast",
+        "fieldName": "wind_speed_mps",
+        "purpose": "Weather disruption feature."
+      },
+      {
+        "roleKey": "historical_delay_baseline",
+        "fieldName": "service_date",
+        "purpose": "Historical baseline date."
+      },
+      {
+        "roleKey": "historical_delay_baseline",
+        "fieldName": "service_window",
+        "purpose": "Comparable peak-window label."
+      },
+      {
+        "roleKey": "historical_delay_baseline",
+        "fieldName": "delay_minutes",
+        "purpose": "Comparable delay outcome value."
+      },
+      {
+        "roleKey": "transit_delay_outcome",
+        "fieldName": "surface_transit_delay_minutes",
+        "purpose": "Resolution outcome value."
+      },
+      {
+        "roleKey": "transit_delay_outcome",
+        "fieldName": "outcome_observed_at",
+        "purpose": "Resolution observation timestamp."
+      }
+    ],
+    "missingFieldBlockers": [
+      {
+        "blockerCode": "missing_weather_source",
+        "sourceRole": "weather_forecast",
+        "message": "Weather forecast role is required before a weather-sensitive disruption candidate is forecastable.",
+        "nextAction": "Attach an approved weather forecast file or sanitized adapter output."
+      },
+      {
+        "blockerCode": "missing_baseline_source",
+        "sourceRole": "historical_delay_baseline",
+        "message": "Historical comparable delay rows are required for the baseline-first method boundary.",
+        "nextAction": "Attach an approved baseline file with service_date, service_window, and delay_minutes."
+      },
+      {
+        "blockerCode": "missing_outcome_source",
+        "sourceRole": "transit_delay_outcome",
+        "message": "A resolution-only HSL outcome source is required before the question is forecastable.",
+        "nextAction": "Attach sanitized outcome adapter output and keep it resolution-only."
+      }
+    ],
+    "resolutionBoundary": {
+      "outcomeEvidenceResolutionOnly": true,
+      "forecastTimeOutcomeRowsAllowed": false,
+      "usesApprovedFilesAndSanitizedAdaptersOnly": true
+    }
+  },
+  "candidateQuestions": [
+    {
+      "candidateId": "agentcandidate-001",
+      "caseKey": "helsinki_surface_transit_peak_delay",
+      "status": "forecastable",
+      "questionText": "Will HSL surface transit exceed the beta delay threshold during morning peak on {service_date}?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "candidate_validated"
+      ],
+      "nextAction": "Run the guided path from accepted sanitized adapter output, then read the forecast card.",
+      "routesToExistingSurfaces": true,
+      "forecastArtifactsAllowed": true
+    },
+    {
+      "candidateId": "agentcandidate-002",
+      "caseKey": "vague_next_week_transit",
+      "status": "needs_clarification",
+      "questionText": "Will transit be bad next week?",
+      "outputType": "binary",
+      "serviceArea": "vague",
+      "serviceWindow": "next week",
+      "threshold": "missing",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "missing_threshold",
+        "ambiguous_service_window",
+        "vague_geography"
+      ],
+      "nextAction": "Ask the caller for service area, threshold, and a specific future service window.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-003",
+      "caseKey": "missing_threshold",
+      "status": "needs_clarification",
+      "questionText": "Will Helsinki bus traffic be disrupted tomorrow morning?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "missing",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "missing_threshold"
+      ],
+      "nextAction": "Ask for the disruption threshold or bind the beta delay threshold.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-004",
+      "caseKey": "missing_resolution_source",
+      "status": "needs_clarification",
+      "questionText": "Will HSL surface transit exceed the beta delay threshold during morning peak?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "missing_resolution_source"
+      ],
+      "nextAction": "Bind a resolution-only HSL outcome source before accepting the candidate.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-005",
+      "caseKey": "unapproved_source",
+      "status": "blocked",
+      "questionText": "Will HSL delays exceed threshold using an unapproved web scrape?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "unapproved_source"
+      ],
+      "nextAction": "Replace the source with an approved file or sanitized adapter output.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-006",
+      "caseKey": "raw_credential_value",
+      "status": "blocked",
+      "questionText": "Will HSL delays exceed threshold using this raw API token?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "raw_credential_value"
+      ],
+      "nextAction": "Replace credential material with a caller-owned credential reference outside prompt-visible records.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-007",
+      "caseKey": "raw_sql_query",
+      "status": "blocked",
+      "questionText": "Will HSL delays exceed threshold using this raw SQL query?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "raw_sql_query"
+      ],
+      "nextAction": "Use a checked adapter output or future query-manifest contract instead of raw SQL.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-008",
+      "caseKey": "unsafe_adapter_output",
+      "status": "blocked",
+      "questionText": "Will HSL delays exceed threshold from an adapter output with failed sanitization?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "unsafe_adapter_output"
+      ],
+      "nextAction": "Sanitize and validate the adapter output before intake.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-009",
+      "caseKey": "private_row_exposure",
+      "status": "blocked",
+      "questionText": "Will this specific passenger-linked transit row predict a disruption?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "private_row_exposure"
+      ],
+      "nextAction": "Use aggregate or sanitized source rows; do not expose raw private rows.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-010",
+      "caseKey": "post_outcome_evidence",
+      "status": "blocked",
+      "questionText": "Will HSL delays exceed threshold using outcome rows captured after the service window?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "post_outcome_evidence"
+      ],
+      "nextAction": "Keep outcome rows resolution-only and exclude them from forecast-time evidence.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-011",
+      "caseKey": "past_tense_transit_delay",
+      "status": "rejected",
+      "questionText": "Did HSL surface transit exceed the beta delay threshold yesterday morning?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "past_tense_question"
+      ],
+      "nextAction": "Use resolution or historical analysis surfaces, not forecast creation.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "candidateId": "agentcandidate-012",
+      "caseKey": "unresolvable_outcome",
+      "status": "rejected",
+      "questionText": "Will Helsinki transit feel frustrating?",
+      "outputType": "binary",
+      "serviceArea": "HSL surface transit in Helsinki",
+      "serviceWindow": "morning peak",
+      "threshold": "beta delay threshold",
+      "closeTimePolicy": "Forecast must be created before the service window begins.",
+      "resolveTimePolicy": "Resolve only after the service window closes and HSL outcome rows are available.",
+      "sourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "reasonCodes": [
+        "unresolvable_outcome"
+      ],
+      "nextAction": "Rewrite as a measurable future outcome with a declared source and threshold.",
+      "routesToExistingSurfaces": false,
+      "forecastArtifactsAllowed": false
+    }
+  ],
+  "validationReports": [
+    {
+      "validationReportId": "agentintegrationvalidation-001",
+      "candidateCaseKey": "helsinki_surface_transit_peak_delay",
+      "status": "forecastable",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "future_boundary returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "resolvability returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "source_policy returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "source_roles returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "leakage returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "baseline_feasibility returned passed with reason code candidate_validated."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "candidate_validated",
+          "message": "claim_boundary returned passed with reason code candidate_validated."
+        }
+      ],
+      "exactReasonCodes": [
+        "candidate_validated"
+      ],
+      "forecastArtifactsAllowed": true
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-002",
+      "candidateCaseKey": "vague_next_week_transit",
+      "status": "needs_clarification",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "future_boundary returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "needs_clarification",
+          "reasonCode": "missing_threshold",
+          "message": "resolvability returned needs_clarification with reason code missing_threshold."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "source_policy returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "source_roles returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "leakage returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "baseline_feasibility returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "claim_boundary returned passed with reason code missing_threshold."
+        }
+      ],
+      "exactReasonCodes": [
+        "missing_threshold",
+        "ambiguous_service_window",
+        "vague_geography"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-003",
+      "candidateCaseKey": "missing_threshold",
+      "status": "needs_clarification",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "future_boundary returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "needs_clarification",
+          "reasonCode": "missing_threshold",
+          "message": "resolvability returned needs_clarification with reason code missing_threshold."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "source_policy returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "source_roles returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "leakage returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "baseline_feasibility returned passed with reason code missing_threshold."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "missing_threshold",
+          "message": "claim_boundary returned passed with reason code missing_threshold."
+        }
+      ],
+      "exactReasonCodes": [
+        "missing_threshold"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-004",
+      "candidateCaseKey": "missing_resolution_source",
+      "status": "needs_clarification",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "missing_resolution_source",
+          "message": "future_boundary returned passed with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "needs_clarification",
+          "reasonCode": "missing_resolution_source",
+          "message": "resolvability returned needs_clarification with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "missing_resolution_source",
+          "message": "source_policy returned passed with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "needs_clarification",
+          "reasonCode": "missing_resolution_source",
+          "message": "source_roles returned needs_clarification with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "missing_resolution_source",
+          "message": "leakage returned passed with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "missing_resolution_source",
+          "message": "baseline_feasibility returned passed with reason code missing_resolution_source."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "missing_resolution_source",
+          "message": "claim_boundary returned passed with reason code missing_resolution_source."
+        }
+      ],
+      "exactReasonCodes": [
+        "missing_resolution_source"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-005",
+      "candidateCaseKey": "unapproved_source",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "future_boundary returned passed with reason code unapproved_source."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "resolvability returned passed with reason code unapproved_source."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "unapproved_source",
+          "message": "source_policy returned blocked with reason code unapproved_source."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "source_roles returned passed with reason code unapproved_source."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "leakage returned passed with reason code unapproved_source."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "baseline_feasibility returned passed with reason code unapproved_source."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "unapproved_source",
+          "message": "claim_boundary returned passed with reason code unapproved_source."
+        }
+      ],
+      "exactReasonCodes": [
+        "unapproved_source"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-006",
+      "candidateCaseKey": "raw_credential_value",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "raw_credential_value",
+          "message": "future_boundary returned passed with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "raw_credential_value",
+          "message": "resolvability returned passed with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "raw_credential_value",
+          "message": "source_policy returned blocked with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "raw_credential_value",
+          "message": "source_roles returned passed with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "blocked",
+          "reasonCode": "raw_credential_value",
+          "message": "leakage returned blocked with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "raw_credential_value",
+          "message": "baseline_feasibility returned passed with reason code raw_credential_value."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "raw_credential_value",
+          "message": "claim_boundary returned passed with reason code raw_credential_value."
+        }
+      ],
+      "exactReasonCodes": [
+        "raw_credential_value"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-007",
+      "candidateCaseKey": "raw_sql_query",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "raw_sql_query",
+          "message": "future_boundary returned passed with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "raw_sql_query",
+          "message": "resolvability returned passed with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "raw_sql_query",
+          "message": "source_policy returned blocked with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "raw_sql_query",
+          "message": "source_roles returned passed with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "blocked",
+          "reasonCode": "raw_sql_query",
+          "message": "leakage returned blocked with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "raw_sql_query",
+          "message": "baseline_feasibility returned passed with reason code raw_sql_query."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "raw_sql_query",
+          "message": "claim_boundary returned passed with reason code raw_sql_query."
+        }
+      ],
+      "exactReasonCodes": [
+        "raw_sql_query"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-008",
+      "candidateCaseKey": "unsafe_adapter_output",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "future_boundary returned passed with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "resolvability returned passed with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "source_policy returned blocked with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "source_roles returned passed with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "blocked",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "leakage returned blocked with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "baseline_feasibility returned passed with reason code unsafe_adapter_output."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "unsafe_adapter_output",
+          "message": "claim_boundary returned passed with reason code unsafe_adapter_output."
+        }
+      ],
+      "exactReasonCodes": [
+        "unsafe_adapter_output"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-009",
+      "candidateCaseKey": "private_row_exposure",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "private_row_exposure",
+          "message": "future_boundary returned passed with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "private_row_exposure",
+          "message": "resolvability returned passed with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "private_row_exposure",
+          "message": "source_policy returned blocked with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "private_row_exposure",
+          "message": "source_roles returned passed with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "blocked",
+          "reasonCode": "private_row_exposure",
+          "message": "leakage returned blocked with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "private_row_exposure",
+          "message": "baseline_feasibility returned passed with reason code private_row_exposure."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "private_row_exposure",
+          "message": "claim_boundary returned passed with reason code private_row_exposure."
+        }
+      ],
+      "exactReasonCodes": [
+        "private_row_exposure"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-010",
+      "candidateCaseKey": "post_outcome_evidence",
+      "status": "blocked",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "blocked",
+          "reasonCode": "post_outcome_evidence",
+          "message": "future_boundary returned blocked with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "passed",
+          "reasonCode": "post_outcome_evidence",
+          "message": "resolvability returned passed with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "blocked",
+          "reasonCode": "post_outcome_evidence",
+          "message": "source_policy returned blocked with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "post_outcome_evidence",
+          "message": "source_roles returned passed with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "blocked",
+          "reasonCode": "post_outcome_evidence",
+          "message": "leakage returned blocked with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "passed",
+          "reasonCode": "post_outcome_evidence",
+          "message": "baseline_feasibility returned passed with reason code post_outcome_evidence."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "post_outcome_evidence",
+          "message": "claim_boundary returned passed with reason code post_outcome_evidence."
+        }
+      ],
+      "exactReasonCodes": [
+        "post_outcome_evidence"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-011",
+      "candidateCaseKey": "past_tense_transit_delay",
+      "status": "rejected",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "rejected",
+          "reasonCode": "past_tense_question",
+          "message": "future_boundary returned rejected with reason code past_tense_question."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "rejected",
+          "reasonCode": "past_tense_question",
+          "message": "resolvability returned rejected with reason code past_tense_question."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "past_tense_question",
+          "message": "source_policy returned passed with reason code past_tense_question."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "past_tense_question",
+          "message": "source_roles returned passed with reason code past_tense_question."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "past_tense_question",
+          "message": "leakage returned passed with reason code past_tense_question."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "rejected",
+          "reasonCode": "past_tense_question",
+          "message": "baseline_feasibility returned rejected with reason code past_tense_question."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "past_tense_question",
+          "message": "claim_boundary returned passed with reason code past_tense_question."
+        }
+      ],
+      "exactReasonCodes": [
+        "past_tense_question"
+      ],
+      "forecastArtifactsAllowed": false
+    },
+    {
+      "validationReportId": "agentintegrationvalidation-012",
+      "candidateCaseKey": "unresolvable_outcome",
+      "status": "rejected",
+      "checks": [
+        {
+          "checkKey": "future_boundary",
+          "result": "passed",
+          "reasonCode": "unresolvable_outcome",
+          "message": "future_boundary returned passed with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "resolvability",
+          "result": "rejected",
+          "reasonCode": "unresolvable_outcome",
+          "message": "resolvability returned rejected with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "source_policy",
+          "result": "passed",
+          "reasonCode": "unresolvable_outcome",
+          "message": "source_policy returned passed with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "source_roles",
+          "result": "passed",
+          "reasonCode": "unresolvable_outcome",
+          "message": "source_roles returned passed with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "leakage",
+          "result": "passed",
+          "reasonCode": "unresolvable_outcome",
+          "message": "leakage returned passed with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "baseline_feasibility",
+          "result": "rejected",
+          "reasonCode": "unresolvable_outcome",
+          "message": "baseline_feasibility returned rejected with reason code unresolvable_outcome."
+        },
+        {
+          "checkKey": "claim_boundary",
+          "result": "passed",
+          "reasonCode": "unresolvable_outcome",
+          "message": "claim_boundary returned passed with reason code unresolvable_outcome."
+        }
+      ],
+      "exactReasonCodes": [
+        "unresolvable_outcome"
+      ],
+      "forecastArtifactsAllowed": false
+    }
+  ],
+  "guidedForecastCases": [
+    {
+      "guidedCaseId": "guidedforecastcase-001",
+      "caseKey": "accepted_adapter_output",
+      "guidedStatus": "forecast_card_ready",
+      "toolCallCount": 3,
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "forecastCardCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "lifecycleBundleCommand": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "nextAction": "Read the forecast card command returned by this payload, then inspect the lifecycle bundle if needed.",
+      "blockerCodes": [],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-002",
+      "caseKey": "missing_weather_source",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Attach weather_forecast source role before running guided forecast.",
+      "blockerCodes": [
+        "missing_weather_source"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-003",
+      "caseKey": "missing_baseline_source",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Attach historical_delay_baseline source role before running guided forecast.",
+      "blockerCodes": [
+        "missing_baseline_source"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-004",
+      "caseKey": "missing_outcome_source",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Attach transit_delay_outcome role as resolution-only evidence.",
+      "blockerCodes": [
+        "missing_outcome_source"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-005",
+      "caseKey": "ambiguous_service_window",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Clarify the service window before guided forecast execution.",
+      "blockerCodes": [
+        "ambiguous_service_window"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-006",
+      "caseKey": "vague_geography",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Clarify the geography before guided forecast execution.",
+      "blockerCodes": [
+        "vague_geography"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-007",
+      "caseKey": "missing_resolution_source",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Bind a resolution source before guided forecast execution.",
+      "blockerCodes": [
+        "missing_resolution_source"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-008",
+      "caseKey": "unapproved_source",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Replace the source with an approved file or sanitized adapter output.",
+      "blockerCodes": [
+        "unapproved_source"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-009",
+      "caseKey": "raw_credential_value",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Remove raw credentials and use caller-owned credential references outside OPE records.",
+      "blockerCodes": [
+        "raw_credential_value"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-010",
+      "caseKey": "raw_sql_query",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Use a checked adapter output instead of raw SQL.",
+      "blockerCodes": [
+        "raw_sql_query"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-011",
+      "caseKey": "unsafe_adapter_output",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Regenerate the adapter output with the checked sanitized schema.",
+      "blockerCodes": [
+        "unsafe_adapter_output"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-012",
+      "caseKey": "private_row_exposure",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Remove raw private rows from prompt-visible records.",
+      "blockerCodes": [
+        "private_row_exposure"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    },
+    {
+      "guidedCaseId": "guidedforecastcase-013",
+      "caseKey": "post_outcome_evidence",
+      "guidedStatus": "blocked",
+      "toolCallCount": 1,
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "nextAction": "Keep outcome rows resolution-only and rerun candidate validation.",
+      "blockerCodes": [
+        "post_outcome_evidence"
+      ],
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false,
+      "claimBoundary": "Baseline-first readback only; no quality or calibration claim is upgraded by agent integration."
+    }
+  ],
+  "commands": [
+    {
+      "commandKey": "readiness",
+      "command": "python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption --view summary",
+      "purpose": "Check whether the starter pack is ready for agent incorporation.",
+      "routineToolCall": true
+    },
+    {
+      "commandKey": "candidates",
+      "command": "python3 scripts/ope.py agent-integrate --view candidates",
+      "purpose": "Return forecastable and non-forecastable candidate contracts with reason codes.",
+      "routineToolCall": true
+    },
+    {
+      "commandKey": "validation",
+      "command": "python3 scripts/ope.py agent-integrate --view validation",
+      "purpose": "Return mechanical validation reports for each candidate.",
+      "routineToolCall": true
+    },
+    {
+      "commandKey": "guided_forecast",
+      "command": "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+      "purpose": "Return the first forecast-card command from accepted source context.",
+      "routineToolCall": true
+    },
+    {
+      "commandKey": "forecast_card",
+      "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "purpose": "Read the compact forecast card returned by the guided case.",
+      "routineToolCall": true
+    },
+    {
+      "commandKey": "lifecycle_bundle",
+      "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "purpose": "Inspect the lifecycle bundle after the card read.",
+      "routineToolCall": false
+    }
+  ],
+  "mcpTools": [
+    {
+      "toolName": "ope_agent_integration_readiness",
+      "equivalentCliCommand": "python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption --view summary",
+      "returns": "agent-integration summary and starter-pack readiness",
+      "createsForecastArtifacts": false
+    },
+    {
+      "toolName": "ope_agent_integration_candidates",
+      "equivalentCliCommand": "python3 scripts/ope.py agent-integrate --view candidates",
+      "returns": "schema-bound candidate question readbacks",
+      "createsForecastArtifacts": false
+    },
+    {
+      "toolName": "ope_agent_integration_guided_forecast",
+      "equivalentCliCommand": "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+      "returns": "guided forecast readback with forecast-card command",
+      "createsForecastArtifacts": false
+    }
+  ],
+  "efficiencyGate": {
+    "efficiencyGateId": "agentintegrationefficiency-001",
+    "routineToolCallTarget": 3,
+    "acceptedCaseToolCallCount": 3,
+    "elapsedLocalReadbackSeconds": 0.4,
+    "decisionsAvoided": 10,
+    "forecastCardSuccessStatus": "forecast_card_ready",
+    "firstForecastFastTargetMet": true,
+    "blockersEncountered": [
+      "missing_source",
+      "ambiguous_question",
+      "unsafe_source",
+      "leakage",
+      "unsupported_runtime"
+    ],
+    "blockedClaimUpgrades": [
+      "quality_claim",
+      "calibration_claim",
+      "hosted_runtime_claim"
+    ]
+  },
+  "summary": {
+    "forecastableCandidateCount": 1,
+    "needsClarificationCandidateCount": 3,
+    "blockedCandidateCount": 6,
+    "rejectedCandidateCount": 2,
+    "guidedCaseCount": 13,
+    "acceptedGuidedCaseCount": 1,
+    "firstForecastFastTargetMet": true,
+    "forecastId": "forecast-1102",
+    "questionId": "question-1102",
+    "qualityClaimAllowed": false,
+    "hostedRuntimeImplemented": false
+  },
+  "executionBoundary": {
+    "approvedFilesAndSanitizedAdaptersOnly": true,
+    "normalChecksAreReadOnly": true,
+    "hostedRuntimeImplemented": false,
+    "arbitraryPrivateApiParsingAllowed": false,
+    "arbitraryDatabaseParsingAllowed": false,
+    "generatedRuntimeTypesEnabled": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hiddenLiveFetchAllowed": false,
+    "rawSqlAllowed": false,
+    "credentialValuesAccepted": false,
+    "rawPrivateRowsExposed": false,
+    "privateSourceExecutionAllowed": false,
+    "normalChecksMutateState": false,
+    "normalChecksNetworkAccess": false,
+    "forecastArtifactsCreatedByBlockedCases": false,
+    "hostedRuntimeBlocked": true,
+    "qualityClaimUpgradeBlocked": true,
+    "calibrationClaimUpgradeBlocked": true
+  },
+  "warnings": [
+    "Agent integration is local CLI/MCP only; hosted runtime and HTTP transport remain future work.",
+    "Guided forecast output returns checked commands and readbacks; blocked cases do not expose forecast IDs.",
+    "No quality, calibration, production-readiness, or private-source execution claim is upgraded."
+  ]
+}

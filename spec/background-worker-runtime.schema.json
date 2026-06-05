@@ -1,0 +1,1152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/background-worker-runtime.schema.json",
+  "title": "Background Worker Runtime",
+  "description": "Checked local worker and sidecar runtime readback for bounded one-tick OPE execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "backgroundWorkerRuntimeId",
+    "generatedAt",
+    "runtimeStatus",
+    "runtimeScope",
+    "workerCommands",
+    "operationQueue",
+    "executionGuards",
+    "resourceLimits",
+    "oneTickReadback",
+    "boundedLoopExecution",
+    "approvedCommitExecution",
+    "controlStateExecution",
+    "durableSidecarExecution",
+    "blockedOperationReadbacks",
+    "sidecarBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "backgroundWorkerRuntimeId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "runtimeStatus": { "type": "string", "enum": ["bounded_local_worker_defined"] },
+    "runtimeScope": { "type": "string", "enum": ["embedded_or_local_sidecar"] },
+    "workerCommands": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/workerCommand" }
+    },
+    "operationQueue": { "$ref": "#/$defs/operationQueue" },
+    "executionGuards": { "$ref": "#/$defs/executionGuards" },
+    "resourceLimits": { "$ref": "#/$defs/resourceLimits" },
+    "oneTickReadback": { "$ref": "#/$defs/oneTickReadback" },
+    "boundedLoopExecution": { "$ref": "#/$defs/boundedLoopExecution" },
+    "approvedCommitExecution": { "$ref": "#/$defs/approvedCommitExecution" },
+    "controlStateExecution": { "$ref": "#/$defs/controlStateExecution" },
+    "durableSidecarExecution": { "$ref": "#/$defs/durableSidecarExecution" },
+    "blockedOperationReadbacks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/blockedOperationReadback" }
+    },
+    "sidecarBoundary": { "$ref": "#/$defs/sidecarBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 220 }
+    }
+  },
+  "$defs": {
+    "workerCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandName",
+        "cliCommand",
+        "commandStatus",
+        "bounded",
+        "requiresMaxTicks",
+        "writesState",
+        "exposesRawStorage",
+        "startsNetworkListener",
+        "notes"
+      ],
+      "properties": {
+        "commandName": {
+          "type": "string",
+          "enum": ["health", "pause", "resume", "drain", "shutdown", "run_one_tick", "run_bounded_loop"]
+        },
+        "cliCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "commandStatus": { "type": "string", "enum": ["readback_defined", "control_defined", "tick_defined"] },
+        "bounded": { "type": "boolean" },
+        "requiresMaxTicks": { "type": "boolean" },
+        "writesState": { "type": "boolean" },
+        "exposesRawStorage": { "type": "boolean" },
+        "startsNetworkListener": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "operationQueue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queueSource",
+        "polledReadModels",
+        "operationPriority",
+        "rawSqlExposed",
+        "rawFileLayoutExposed"
+      ],
+      "properties": {
+        "queueSource": { "type": "string", "enum": ["prediction_workspace_read_models"] },
+        "polledReadModels": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "active_predictions",
+              "due_forecasts",
+              "due_resolution_jobs",
+              "append_readiness",
+              "failed_operations",
+              "recovery_actions",
+              "source_health_blockers",
+              "calibration_progress"
+            ]
+          }
+        },
+        "operationPriority": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["recover_stale_lease", "resolve_due", "append_evidence", "run_tick", "maintenance_readback"]
+          }
+        },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" }
+      }
+    },
+    "executionGuards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationPreflightRequired",
+        "idempotencyKeyRequired",
+        "leaseRequired",
+        "cancellationFlagSupported",
+        "retryBackoffRequired",
+        "responseSizeLimitRequired",
+        "sourceFetchPolicyRequired"
+      ],
+      "properties": {
+        "operationPreflightRequired": { "type": "boolean" },
+        "idempotencyKeyRequired": { "type": "boolean" },
+        "leaseRequired": { "type": "boolean" },
+        "cancellationFlagSupported": { "type": "boolean" },
+        "retryBackoffRequired": { "type": "boolean" },
+        "responseSizeLimitRequired": { "type": "boolean" },
+        "sourceFetchPolicyRequired": { "type": "boolean" }
+      }
+    },
+    "resourceLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxTicksPerLoop",
+        "maxOperationsPerTick",
+        "maxWallClockSecondsPerTick",
+        "maxQueueDepth",
+        "maxReadbackBytes",
+        "sourceFetchPolicy"
+      ],
+      "properties": {
+        "maxTicksPerLoop": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "maxOperationsPerTick": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "maxWallClockSecondsPerTick": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "maxQueueDepth": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "maxReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 },
+        "sourceFetchPolicy": { "type": "string", "enum": ["disabled_by_default", "explicit_approved_only"] }
+      }
+    },
+    "oneTickReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tickId",
+        "tickStatus",
+        "foregroundEquivalent",
+        "internalApiOperation",
+        "writesState",
+        "nextOperation",
+        "readModelRefs",
+        "blockingGuards",
+        "safeNextAction"
+      ],
+      "properties": {
+        "tickId": { "$ref": "common.schema.json#/$defs/id" },
+        "tickStatus": { "type": "string", "enum": ["would_run", "blocked"] },
+        "foregroundEquivalent": { "type": "boolean" },
+        "internalApiOperation": { "type": "string", "enum": ["run_tick"] },
+        "writesState": { "type": "boolean" },
+        "nextOperation": { "$ref": "#/$defs/nextOperation" },
+        "readModelRefs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "blockingGuards": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/blockingGuard" }
+        },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 160 }
+      }
+    },
+    "boundedLoopExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "loopId",
+        "workerId",
+        "loopStatus",
+        "dryRun",
+        "writesState",
+        "maxTicksRequested",
+        "ticksExecuted",
+        "operationsAttempted",
+        "queuePoll",
+        "tickExecutions",
+        "cancellation",
+        "retryBackoff",
+        "resourceUsage",
+        "terminationReason",
+        "sourceFetchAttempted",
+        "sidecarBoundary"
+      ],
+      "properties": {
+        "loopId": { "$ref": "common.schema.json#/$defs/id" },
+        "workerId": { "$ref": "common.schema.json#/$defs/id" },
+        "loopStatus": { "type": "string", "enum": ["completed_dry_run", "blocked", "stopped"] },
+        "dryRun": { "type": "boolean" },
+        "writesState": { "type": "boolean" },
+        "maxTicksRequested": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "ticksExecuted": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "operationsAttempted": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "queuePoll": { "$ref": "#/$defs/queuePoll" },
+        "tickExecutions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/tickExecution" }
+        },
+        "cancellation": { "$ref": "#/$defs/cancellationReadback" },
+        "retryBackoff": { "$ref": "#/$defs/retryBackoff" },
+        "resourceUsage": { "$ref": "#/$defs/resourceUsage" },
+        "terminationReason": {
+          "type": "string",
+          "enum": ["max_ticks_reached", "cancelled", "paused", "drained", "resource_limit"]
+        },
+        "sourceFetchAttempted": { "type": "boolean" },
+        "sidecarBoundary": { "$ref": "#/$defs/sidecarBoundary" }
+      }
+    },
+    "approvedCommitExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitId",
+        "approvalRequired",
+        "approvalStatus",
+        "stateWritingMode",
+        "normalChecksWritePersistentState",
+        "workerOperationName",
+        "internalApiOperation",
+        "lifecycleOperationName",
+        "operationReceiptId",
+        "idempotencyKey",
+        "sameIdempotencyKeyOnRetry",
+        "leaseLifecycle",
+        "lifecycleResult",
+        "executionBoundary"
+      ],
+      "properties": {
+        "commitId": { "$ref": "common.schema.json#/$defs/id" },
+        "approvalRequired": { "type": "boolean" },
+        "approvalStatus": { "type": "string", "enum": ["fixture_approved"] },
+        "stateWritingMode": { "type": "string", "enum": ["ephemeral_sqlite_check"] },
+        "normalChecksWritePersistentState": { "type": "boolean" },
+        "workerOperationName": { "type": "string", "enum": ["run_tick"] },
+        "internalApiOperation": { "type": "string", "enum": ["run_tick"] },
+        "lifecycleOperationName": { "type": "string", "enum": ["forecast.create"] },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "sameIdempotencyKeyOnRetry": { "type": "boolean" },
+        "leaseLifecycle": { "$ref": "#/$defs/commitLeaseLifecycle" },
+        "lifecycleResult": { "$ref": "#/$defs/commitLifecycleResult" },
+        "executionBoundary": { "$ref": "#/$defs/commitExecutionBoundary" }
+      }
+    },
+    "controlStateExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controlStateExecutionId",
+        "controlStateStatus",
+        "persistentStateSemantics",
+        "stateWritingMode",
+        "normalChecksWritePersistentState",
+        "controlReadModelName",
+        "controlCommands",
+        "controlWrites",
+        "healthReadback",
+        "summary",
+        "executionBoundary"
+      ],
+      "properties": {
+        "controlStateExecutionId": { "$ref": "common.schema.json#/$defs/id" },
+        "controlStateStatus": { "type": "string", "enum": ["lifecycle_backed_control_state_checked"] },
+        "persistentStateSemantics": { "type": "boolean" },
+        "stateWritingMode": { "type": "string", "enum": ["ephemeral_sqlite_check"] },
+        "normalChecksWritePersistentState": { "type": "boolean" },
+        "controlReadModelName": { "type": "string", "enum": ["worker_control_state"] },
+        "controlCommands": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/controlCommand" }
+        },
+        "controlWrites": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/controlWrite" }
+        },
+        "healthReadback": { "$ref": "#/$defs/controlHealthReadback" },
+        "summary": { "$ref": "#/$defs/controlSummary" },
+        "executionBoundary": { "$ref": "#/$defs/controlExecutionBoundary" }
+      }
+    },
+    "controlCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandName",
+        "commandKind",
+        "lifecycleOperationName",
+        "operationReceiptId",
+        "idempotencyKey",
+        "leaseReserved",
+        "leaseReleased",
+        "writesState",
+        "rawControlMutationAllowed"
+      ],
+      "properties": {
+        "commandName": { "type": "string", "enum": ["health", "pause", "resume", "drain", "shutdown"] },
+        "commandKind": { "type": "string", "enum": ["read", "write"] },
+        "lifecycleOperationName": { "type": "string", "enum": ["read_model", "state.import_json"] },
+        "operationReceiptId": { "type": "string", "maxLength": 96 },
+        "idempotencyKey": { "type": "string", "maxLength": 180 },
+        "leaseReserved": { "type": "boolean" },
+        "leaseReleased": { "type": "boolean" },
+        "writesState": { "type": "boolean" },
+        "readsControlState": { "type": "boolean" },
+        "workerStateAfter": { "type": "string", "enum": ["paused", "running", "draining", "stopped"] },
+        "acceptsNewOperationsAfter": { "type": "boolean" },
+        "readModelUpdated": { "type": "boolean" },
+        "rawControlMutationAllowed": { "type": "boolean" }
+      }
+    },
+    "controlWrite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandName",
+        "lifecycleOperationName",
+        "operationReceiptId",
+        "operationStatus",
+        "preflightStatus",
+        "idempotencyStatus",
+        "leaseStatus",
+        "sqliteWrites",
+        "readModelEffects",
+        "leaseKey",
+        "leaseReleased",
+        "claimBoundary"
+      ],
+      "properties": {
+        "commandName": { "type": "string", "enum": ["pause", "resume", "drain", "shutdown"] },
+        "lifecycleOperationName": { "type": "string", "enum": ["state.import_json"] },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationStatus": { "type": "string", "enum": ["committed"] },
+        "preflightStatus": { "type": "string", "enum": ["preflight_pass"] },
+        "idempotencyStatus": { "type": "string", "enum": ["new_key_available"] },
+        "leaseStatus": { "type": "string", "enum": ["available"] },
+        "sqliteWrites": { "$ref": "#/$defs/commitSqliteWrites" },
+        "readModelEffects": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "worker_control_state",
+              "campaign_status",
+              "next_due_forecast",
+              "unresolved_forecasts",
+              "append_readiness",
+              "calibration_status",
+              "track_record_progress",
+              "failed_operations",
+              "recovery_actions"
+            ]
+          }
+        },
+        "leaseKey": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "leaseReleased": { "type": "boolean" },
+        "claimBoundary": { "$ref": "#/$defs/commitClaimBoundary" }
+      }
+    },
+    "controlHealthReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workerId",
+        "readsControlState",
+        "lastControlCommand",
+        "workerState",
+        "acceptsNewOperations",
+        "cancellationRequested",
+        "updatedByOperationReceiptId",
+        "rawControlMutationAllowed"
+      ],
+      "properties": {
+        "workerId": { "$ref": "common.schema.json#/$defs/id" },
+        "readsControlState": { "type": "boolean" },
+        "lastControlCommand": { "type": "string", "enum": ["pause", "resume", "drain", "shutdown"] },
+        "workerState": { "type": "string", "enum": ["paused", "running", "draining", "stopped"] },
+        "acceptsNewOperations": { "type": "boolean" },
+        "cancellationRequested": { "type": "boolean" },
+        "updatedByOperationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "rawControlMutationAllowed": { "type": "boolean" }
+      }
+    },
+    "controlSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controlWriteCount",
+        "lifecycleReceiptsWritten",
+        "idempotencyKeysWritten",
+        "leasesReserved",
+        "leasesReleased",
+        "rawControlMutationAllowed"
+      ],
+      "properties": {
+        "controlWriteCount": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "lifecycleReceiptsWritten": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "idempotencyKeysWritten": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "leasesReserved": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "leasesReleased": { "type": "integer", "minimum": 4, "maximum": 4 },
+        "rawControlMutationAllowed": { "type": "boolean" }
+      }
+    },
+    "controlExecutionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistentStateWritten",
+        "ephemeralSqliteOnly",
+        "rawSqlExposed",
+        "rawFileLayoutExposed",
+        "networkAccessed",
+        "sourceFetchAttempted",
+        "hiddenSchedulerInstallation"
+      ],
+      "properties": {
+        "persistentStateWritten": { "type": "boolean" },
+        "ephemeralSqliteOnly": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "networkAccessed": { "type": "boolean" },
+        "sourceFetchAttempted": { "type": "boolean" },
+        "hiddenSchedulerInstallation": { "type": "boolean" }
+      }
+    },
+    "durableSidecarExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sidecarExecutionId",
+        "sidecarStatus",
+        "controlStateReadModel",
+        "defaultLaunchMode",
+        "normalChecksStartProcess",
+        "bounded",
+        "maxTicksPerActivation",
+        "launchModes",
+        "hostNonInterference",
+        "activationReadback",
+        "executionSequence",
+        "executionBoundary"
+      ],
+      "properties": {
+        "sidecarExecutionId": { "$ref": "common.schema.json#/$defs/id" },
+        "sidecarStatus": { "type": "string", "enum": ["checked_local_sidecar_semantics"] },
+        "controlStateReadModel": { "type": "string", "enum": ["worker_control_state"] },
+        "defaultLaunchMode": { "type": "string", "enum": ["embedded_in_process"] },
+        "normalChecksStartProcess": { "type": "boolean" },
+        "bounded": { "type": "boolean" },
+        "maxTicksPerActivation": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "launchModes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/sidecarLaunchMode" }
+        },
+        "hostNonInterference": { "$ref": "#/$defs/hostNonInterference" },
+        "activationReadback": { "$ref": "#/$defs/sidecarActivationReadback" },
+        "executionSequence": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/sidecarSequenceStep" }
+        },
+        "executionBoundary": { "$ref": "#/$defs/sidecarExecutionBoundary" }
+      }
+    },
+    "sidecarLaunchMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modeName",
+        "implementationStatus",
+        "localOnly",
+        "networkListenerStarted",
+        "osSchedulerInstalled",
+        "hiddenDaemon",
+        "hostedWorkerRequired",
+        "notes"
+      ],
+      "properties": {
+        "modeName": { "type": "string", "enum": ["embedded_in_process", "local_sidecar_process"] },
+        "implementationStatus": { "type": "string", "enum": ["checked_default", "planned_explicit_local_process"] },
+        "localOnly": { "type": "boolean" },
+        "networkListenerStarted": { "type": "boolean" },
+        "osSchedulerInstalled": { "type": "boolean" },
+        "hiddenDaemon": { "type": "boolean" },
+        "hostedWorkerRequired": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "hostNonInterference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostCanContinueWhileWorkerIdle",
+        "hostCanInspectHealthWithoutBlocking",
+        "workerDoesNotOwnHostEventLoop",
+        "activationRequiresExplicitCall",
+        "maxReadbackBytes"
+      ],
+      "properties": {
+        "hostCanContinueWhileWorkerIdle": { "type": "boolean" },
+        "hostCanInspectHealthWithoutBlocking": { "type": "boolean" },
+        "workerDoesNotOwnHostEventLoop": { "type": "boolean" },
+        "activationRequiresExplicitCall": { "type": "boolean" },
+        "maxReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 }
+      }
+    },
+    "sidecarActivationReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activationId",
+        "activationStatus",
+        "readsControlStateBeforeTick",
+        "runsBoundedLoop",
+        "usesApprovedCommitPath",
+        "stopsOnControlState",
+        "boundedLoopId",
+        "commitId",
+        "heartbeatReadback",
+        "shutdownReadback"
+      ],
+      "properties": {
+        "activationId": { "$ref": "common.schema.json#/$defs/id" },
+        "activationStatus": { "type": "string", "enum": ["ready_for_bounded_activation"] },
+        "readsControlStateBeforeTick": { "type": "boolean" },
+        "runsBoundedLoop": { "type": "boolean" },
+        "usesApprovedCommitPath": { "type": "boolean" },
+        "stopsOnControlState": { "type": "boolean" },
+        "boundedLoopId": { "$ref": "common.schema.json#/$defs/id" },
+        "commitId": { "$ref": "common.schema.json#/$defs/id" },
+        "heartbeatReadback": { "$ref": "#/$defs/sidecarHeartbeatReadback" },
+        "shutdownReadback": { "$ref": "#/$defs/sidecarShutdownReadback" }
+      }
+    },
+    "sidecarHeartbeatReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "heartbeatId",
+        "heartbeatStatus",
+        "workerState",
+        "controlReadModelName",
+        "queueSource",
+        "rawStorageExposed"
+      ],
+      "properties": {
+        "heartbeatId": { "$ref": "common.schema.json#/$defs/id" },
+        "heartbeatStatus": { "type": "string", "enum": ["healthy_idle"] },
+        "workerState": { "type": "string", "enum": ["running"] },
+        "controlReadModelName": { "type": "string", "enum": ["worker_control_state"] },
+        "queueSource": { "type": "string", "enum": ["prediction_workspace_read_models"] },
+        "rawStorageExposed": { "type": "boolean" }
+      }
+    },
+    "sidecarShutdownReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shutdownId", "shutdownStatus", "workerState", "lastControlCommand", "acceptsNewOperations"],
+      "properties": {
+        "shutdownId": { "$ref": "common.schema.json#/$defs/id" },
+        "shutdownStatus": { "type": "string", "enum": ["clean_shutdown_readback"] },
+        "workerState": { "type": "string", "enum": ["stopped"] },
+        "lastControlCommand": { "type": "string", "enum": ["shutdown"] },
+        "acceptsNewOperations": { "type": "boolean" }
+      }
+    },
+    "sidecarSequenceStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepName",
+        "command",
+        "expectedReadback",
+        "bounded",
+        "lifecycleBacked",
+        "rawStateMutationAllowed"
+      ],
+      "properties": {
+        "stepName": { "type": "string", "enum": ["start", "heartbeat", "run_tick", "commit", "drain", "shutdown"] },
+        "command": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "expectedReadback": { "type": "string", "minLength": 12, "maxLength": 220 },
+        "bounded": { "type": "boolean" },
+        "lifecycleBacked": { "type": "boolean" },
+        "rawStateMutationAllowed": { "type": "boolean" }
+      }
+    },
+    "sidecarExecutionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "networkListenerStarted",
+        "osSchedulerInstalled",
+        "hostedWorkerRequired",
+        "hiddenDaemonStarted",
+        "rawSqlExposed",
+        "rawFileLayoutExposed",
+        "automaticLiveSourceExecution",
+        "automaticMethodUpgrade",
+        "normalChecksStartProcess",
+        "normalChecksWritePersistentState"
+      ],
+      "properties": {
+        "networkListenerStarted": { "type": "boolean" },
+        "osSchedulerInstalled": { "type": "boolean" },
+        "hostedWorkerRequired": { "type": "boolean" },
+        "hiddenDaemonStarted": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "automaticLiveSourceExecution": { "type": "boolean" },
+        "automaticMethodUpgrade": { "type": "boolean" },
+        "normalChecksStartProcess": { "type": "boolean" },
+        "normalChecksWritePersistentState": { "type": "boolean" }
+      }
+    },
+    "commitLeaseLifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "leaseKey",
+        "leaseReserved",
+        "leaseReleased",
+        "leaseCountAfterCommit",
+        "leaseCountAfterRelease",
+        "releasePolicy"
+      ],
+      "properties": {
+        "leaseKey": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "leaseReserved": { "type": "boolean" },
+        "leaseReleased": { "type": "boolean" },
+        "leaseCountAfterCommit": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "leaseCountAfterRelease": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "releasePolicy": { "type": "string", "enum": ["release_after_receipt_or_expiry"] }
+      }
+    },
+    "commitLifecycleResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationName",
+        "operationReceiptId",
+        "operationStatus",
+        "preflightStatus",
+        "idempotencyStatus",
+        "leaseStatus",
+        "plannedWriteCount",
+        "sqliteWrites",
+        "readModelEffects",
+        "recoveryPath",
+        "claimBoundary",
+        "message"
+      ],
+      "properties": {
+        "operationName": { "type": "string", "enum": ["forecast.create"] },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationStatus": { "type": "string", "enum": ["committed"] },
+        "preflightStatus": { "type": "string", "enum": ["preflight_pass"] },
+        "idempotencyStatus": { "type": "string", "enum": ["new_key_available"] },
+        "leaseStatus": { "type": "string", "enum": ["available"] },
+        "plannedWriteCount": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "sqliteWrites": { "$ref": "#/$defs/commitSqliteWrites" },
+        "readModelEffects": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "campaign_status",
+              "next_due_forecast",
+              "unresolved_forecasts",
+              "due_resolution_jobs",
+              "append_readiness",
+              "failed_operations",
+              "recovery_actions"
+            ]
+          }
+        },
+        "recoveryPath": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "claimBoundary": { "$ref": "#/$defs/commitClaimBoundary" },
+        "message": { "type": "string", "minLength": 8, "maxLength": 180 }
+      }
+    },
+    "commitSqliteWrites": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationReceiptsWritten",
+        "idempotencyKeysWritten",
+        "leasesWritten",
+        "immutableRecordsInserted",
+        "auditRecordsInserted",
+        "readModelRowsWritten",
+        "physicalDeletes",
+        "rawCrudExposed",
+        "historyRewriteCount"
+      ],
+      "properties": {
+        "operationReceiptsWritten": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "idempotencyKeysWritten": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "leasesWritten": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "immutableRecordsInserted": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "auditRecordsInserted": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "readModelRowsWritten": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "physicalDeletes": { "type": "integer", "minimum": 0, "maximum": 0 },
+        "rawCrudExposed": { "type": "boolean" },
+        "historyRewriteCount": { "type": "integer", "minimum": 0, "maximum": 0 }
+      }
+    },
+    "commitClaimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["createsQualityClaim", "allowsPostOutcomeRewrite", "allowsSilentDelete", "allowsRawCrud"],
+      "properties": {
+        "createsQualityClaim": { "type": "boolean" },
+        "allowsPostOutcomeRewrite": { "type": "boolean" },
+        "allowsSilentDelete": { "type": "boolean" },
+        "allowsRawCrud": { "type": "boolean" }
+      }
+    },
+    "commitExecutionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistentStateWritten",
+        "ephemeralSqliteOnly",
+        "rawSqlExposed",
+        "rawFileLayoutExposed",
+        "networkAccessed",
+        "sourceFetchAttempted",
+        "automaticMethodUpgrade",
+        "qualityClaimCreated"
+      ],
+      "properties": {
+        "persistentStateWritten": { "type": "boolean" },
+        "ephemeralSqliteOnly": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "networkAccessed": { "type": "boolean" },
+        "sourceFetchAttempted": { "type": "boolean" },
+        "automaticMethodUpgrade": { "type": "boolean" },
+        "qualityClaimCreated": { "type": "boolean" }
+      }
+    },
+    "queuePoll": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queueSource",
+        "readModelsPolled",
+        "candidateOperationNames",
+        "selectedOperationName",
+        "selectedReadModel",
+        "rawSqlExposed",
+        "rawFileLayoutExposed"
+      ],
+      "properties": {
+        "queueSource": { "type": "string", "enum": ["prediction_workspace_read_models"] },
+        "readModelsPolled": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "active_predictions",
+              "due_forecasts",
+              "due_resolution_jobs",
+              "append_readiness",
+              "failed_operations",
+              "recovery_actions",
+              "source_health_blockers",
+              "calibration_progress"
+            ]
+          }
+        },
+        "candidateOperationNames": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["recover_stale_lease", "resolve_due", "append_evidence", "run_tick", "maintenance_readback"]
+          }
+        },
+        "selectedOperationName": { "type": "string", "enum": ["run_tick"] },
+        "selectedReadModel": { "type": "string", "enum": ["due_forecasts"] },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" }
+      }
+    },
+    "tickExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tickId",
+        "tickStatus",
+        "foregroundEquivalent",
+        "internalApiOperation",
+        "predictionId",
+        "campaignId",
+        "operationReceiptId",
+        "idempotencyKey",
+        "leaseId",
+        "leaseScope",
+        "preflightStatus",
+        "internalApiCall"
+      ],
+      "properties": {
+        "tickId": { "$ref": "common.schema.json#/$defs/id" },
+        "tickStatus": { "type": "string", "enum": ["completed_dry_run", "blocked"] },
+        "foregroundEquivalent": { "type": "boolean" },
+        "internalApiOperation": { "type": "string", "enum": ["run_tick"] },
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "leaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "leaseScope": { "type": "string", "enum": ["prediction_execution", "prediction_config", "workspace_maintenance"] },
+        "preflightStatus": { "type": "string", "enum": ["pass", "blocked"] },
+        "internalApiCall": { "$ref": "#/$defs/internalApiCall" }
+      }
+    },
+    "internalApiCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "internalApiCallId",
+        "operationName",
+        "callerId",
+        "predictionId",
+        "callStatus",
+        "dryRun",
+        "operationKind",
+        "lifecycleOperations",
+        "operationReceiptId",
+        "idempotencyKey",
+        "idempotencyStatus",
+        "leaseStatus",
+        "blockingGuards",
+        "readModelRefs",
+        "nextActions",
+        "sanitizedDiagnostics",
+        "maxBytes",
+        "executionBoundary"
+      ],
+      "properties": {
+        "internalApiCallId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationName": { "type": "string", "enum": ["run_tick"] },
+        "callerId": { "$ref": "common.schema.json#/$defs/id" },
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "callStatus": { "type": "string", "enum": ["dry_run_ready"] },
+        "dryRun": { "type": "boolean" },
+        "operationKind": { "type": "string", "enum": ["bounded_tick"] },
+        "lifecycleOperations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "idempotencyStatus": { "type": "string", "enum": ["required"] },
+        "leaseStatus": { "type": "string", "enum": ["required"] },
+        "blockingGuards": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/internalApiGuard" }
+        },
+        "readModelRefs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "nextActions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "string", "minLength": 8, "maxLength": 120 }
+        },
+        "sanitizedDiagnostics": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "maxBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 },
+        "executionBoundary": { "$ref": "#/$defs/internalApiExecutionBoundary" }
+      }
+    },
+    "internalApiGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardId", "guardStatus", "blocksOperation", "message"],
+      "properties": {
+        "guardId": { "$ref": "common.schema.json#/$defs/id" },
+        "guardStatus": { "type": "string", "enum": ["pass", "blocked"] },
+        "blocksOperation": { "type": "boolean" },
+        "message": { "type": "string", "minLength": 8, "maxLength": 220 }
+      }
+    },
+    "internalApiExecutionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writesState",
+        "rawSqlExposed",
+        "rawFileLayoutExposed",
+        "surpriseNetworkCalls",
+        "unboundedLoop",
+        "hiddenSchedulerInstallation",
+        "automaticMethodUpgrade"
+      ],
+      "properties": {
+        "writesState": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "surpriseNetworkCalls": { "type": "boolean" },
+        "unboundedLoop": { "type": "boolean" },
+        "hiddenSchedulerInstallation": { "type": "boolean" },
+        "automaticMethodUpgrade": { "type": "boolean" }
+      }
+    },
+    "cancellationReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported",
+        "cancellationRequested",
+        "checkedBeforeTick",
+        "checkedBetweenOperations",
+        "stopsBeforeMutation"
+      ],
+      "properties": {
+        "supported": { "type": "boolean" },
+        "cancellationRequested": { "type": "boolean" },
+        "checkedBeforeTick": { "type": "boolean" },
+        "checkedBetweenOperations": { "type": "boolean" },
+        "stopsBeforeMutation": { "type": "boolean" }
+      }
+    },
+    "retryBackoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "maxAttemptsPerOperation",
+        "initialDelayMilliseconds",
+        "maxDelayMilliseconds",
+        "sameIdempotencyKeyOnRetry",
+        "sanitizedDiagnosticsOnly"
+      ],
+      "properties": {
+        "policy": { "type": "string", "enum": ["bounded_exponential"] },
+        "maxAttemptsPerOperation": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "initialDelayMilliseconds": { "type": "integer", "minimum": 0, "maximum": 60000 },
+        "maxDelayMilliseconds": { "type": "integer", "minimum": 0, "maximum": 60000 },
+        "sameIdempotencyKeyOnRetry": { "type": "boolean" },
+        "sanitizedDiagnosticsOnly": { "type": "boolean" }
+      }
+    },
+    "resourceUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "withinLimits",
+        "ticksAttempted",
+        "operationsAttempted",
+        "maxOperationsPerTick",
+        "wallClockSecondsBudgeted",
+        "readbackBytes",
+        "maxReadbackBytes",
+        "sourceFetchAttempted"
+      ],
+      "properties": {
+        "withinLimits": { "type": "boolean" },
+        "ticksAttempted": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "operationsAttempted": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "maxOperationsPerTick": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "wallClockSecondsBudgeted": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "readbackBytes": { "type": "integer", "minimum": 1, "maximum": 1048576 },
+        "maxReadbackBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 },
+        "sourceFetchAttempted": { "type": "boolean" }
+      }
+    },
+    "nextOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationName",
+        "predictionId",
+        "campaignId",
+        "operationReceiptId",
+        "idempotencyKey",
+        "leaseId",
+        "leaseScope",
+        "preflightStatus"
+      ],
+      "properties": {
+        "operationName": { "type": "string", "enum": ["run_tick", "resolve_due", "append_evidence", "maintenance_readback"] },
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "campaignId": { "$ref": "common.schema.json#/$defs/id" },
+        "operationReceiptId": { "$ref": "common.schema.json#/$defs/id" },
+        "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "leaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "leaseScope": { "type": "string", "enum": ["prediction_execution", "prediction_config", "workspace_maintenance"] },
+        "preflightStatus": { "type": "string", "enum": ["pass", "blocked"] }
+      }
+    },
+    "blockingGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardName", "guardStatus", "blocksOperation", "message"],
+      "properties": {
+        "guardName": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "guardStatus": { "type": "string", "enum": ["pass", "blocked"] },
+        "blocksOperation": { "type": "boolean" },
+        "message": { "type": "string", "minLength": 8, "maxLength": 220 }
+      }
+    },
+    "blockedOperationReadback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "operationName",
+        "predictionId",
+        "blocked",
+        "reasonCode",
+        "safeNextAction",
+        "sanitizedDiagnosticCode"
+      ],
+      "properties": {
+        "caseId": {
+          "type": "string",
+          "enum": ["paused_prediction", "lease_conflict", "resource_limit", "source_policy_blocks_live_fetch"]
+        },
+        "operationName": { "type": "string", "enum": ["run_tick", "resolve_due", "append_evidence"] },
+        "predictionId": { "$ref": "common.schema.json#/$defs/id" },
+        "blocked": { "type": "boolean" },
+        "reasonCode": { "type": "string", "minLength": 3, "maxLength": 96 },
+        "safeNextAction": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "sanitizedDiagnosticCode": { "type": "string", "minLength": 3, "maxLength": 96 }
+      }
+    },
+    "sidecarBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localOnly",
+        "networkListenerStarted",
+        "osSchedulerInstalled",
+        "hostedWorkerRequired",
+        "credentialValuesStored",
+        "rawSqlExposed",
+        "rawFileLayoutExposed",
+        "automaticLiveSourceExecution",
+        "automaticMethodUpgrade"
+      ],
+      "properties": {
+        "localOnly": { "type": "boolean" },
+        "networkListenerStarted": { "type": "boolean" },
+        "osSchedulerInstalled": { "type": "boolean" },
+        "hostedWorkerRequired": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "rawSqlExposed": { "type": "boolean" },
+        "rawFileLayoutExposed": { "type": "boolean" },
+        "automaticLiveSourceExecution": { "type": "boolean" },
+        "automaticMethodUpgrade": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandCount",
+        "boundedLoopDefined",
+        "oneTickEquivalenceDefined",
+        "workerReadbacksPresent",
+        "allEffectfulWorkPreflighted",
+        "idempotencyAndLeasesRequired",
+        "resourceLimitsPresent",
+        "nonNetworkedByDefault"
+      ],
+      "properties": {
+        "commandCount": { "type": "integer", "minimum": 7, "maximum": 7 },
+        "boundedLoopDefined": { "type": "boolean" },
+        "oneTickEquivalenceDefined": { "type": "boolean" },
+        "workerReadbacksPresent": { "type": "boolean" },
+        "allEffectfulWorkPreflighted": { "type": "boolean" },
+        "idempotencyAndLeasesRequired": { "type": "boolean" },
+        "resourceLimitsPresent": { "type": "boolean" },
+        "nonNetworkedByDefault": { "type": "boolean" }
+      }
+    }
+  }
+}

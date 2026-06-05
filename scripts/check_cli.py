@@ -89,12 +89,32 @@ def main() -> None:
         raise AssertionError("CLI generate-fixtures should list the Helsinki pilot readiness generator")
     if "scripts/generate_lifecycle_operation_store.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the lifecycle operation store generator")
+    if "scripts/generate_postgres_compatibility.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the Postgres compatibility generator")
+    if "scripts/generate_database_source_adapter_runtime.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the database source-adapter runtime generator")
+    if "scripts/generate_opp_provider_adapter.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the OPP provider-adapter generator")
+    if "scripts/generate_persistent_sqlite_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the persistent SQLite policy generator")
+    if "scripts/generate_lifecycle_lease_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the lifecycle lease policy generator")
+    if "scripts/generate_runtime_transport_readiness.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the runtime transport readiness generator")
     if "scripts/generate_internal_api.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the internal API generator")
     if "scripts/generate_prediction_workspace_registry.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the prediction workspace registry generator")
     if "scripts/generate_source_bindings.py --check" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures should list the source binding generator")
+    if "scripts/generate_domain_source_field_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the domain/source field policy generator")
+    if "scripts/generate_credential_reference_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the credential-reference policy generator")
+    if "scripts/generate_retention_redaction_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the retention/redaction policy generator")
+    if "scripts/generate_private_auto_evidence_policy.py --check" not in generate_fixtures_list.stdout:
+        raise AssertionError("CLI generate-fixtures should list the private auto-evidence policy generator")
     if "fixture commands" not in generate_fixtures_list.stdout:
         raise AssertionError("CLI generate-fixtures list output drifted")
     run_cli("resolve-live")
@@ -106,6 +126,10 @@ def main() -> None:
     run_cli("domain-setups", "--check")
     run_cli("domain-configs", "--check")
     run_cli("source-bindings", "--check")
+    run_cli("domain-source-field-policy", "--check")
+    run_cli("credential-reference-policy", "--check")
+    run_cli("retention-redaction-policy", "--check")
+    run_cli("private-auto-evidence-policy", "--check")
     run_cli("transit-delay-forward-run", "--check")
     run_cli("resolve-due-forward-runs", "--check")
     run_cli("resolution-jobs", "--check")
@@ -390,8 +414,8 @@ def main() -> None:
     )
     local_usage_trace = run_cli("local-usage-trace")
     local_usage_trace_payload = json.loads(local_usage_trace.stdout)
-    if local_usage_trace_payload["totalEvents"] != 20:
-        raise AssertionError("CLI local-usage-trace should expose twenty events")
+    if local_usage_trace_payload["totalEvents"] != 24:
+        raise AssertionError("CLI local-usage-trace should expose twenty-four events")
     if local_usage_trace_payload["forecastCompletionRate"] != 1.0:
         raise AssertionError("CLI local-usage-trace forecast completion rate drifted")
     if local_usage_trace_payload["hostedTelemetryEnabled"] is not False:
@@ -405,6 +429,10 @@ def main() -> None:
         raise AssertionError("CLI local-usage-trace should expose sanitized oversized readback")
     if usage_events["campaign_calibration_threshold_met"]["eventClass"] != "campaign":
         raise AssertionError("CLI local-usage-trace should expose campaign lifecycle events")
+    if usage_events["agent_integration_guided_forecast"]["forecastId"] != "forecast-1102":
+        raise AssertionError("CLI local-usage-trace should expose guided agent integration forecast binding")
+    if usage_events["agent_integration_missing_weather_block"]["sanitizedErrorClass"] != "missing_source":
+        raise AssertionError("CLI local-usage-trace should expose missing-source integration blocker")
     run_optional_drift_check(
         "local-usage-trace",
         "--check",
@@ -1519,6 +1547,583 @@ def main() -> None:
     if not all(item["blocksForecast"] for item in blocked_binding_payload["preForecastChecks"]):
         raise AssertionError("CLI source-bindings blocked case should block every pre-forecast check")
 
+    domain_source_policy = run_cli("domain-source-field-policy")
+    domain_source_policy_payload = json.loads(domain_source_policy.stdout)
+    if domain_source_policy_payload["policyStatus"] != "domain_source_field_policy_checked":
+        raise AssertionError("CLI domain-source-field-policy status drifted")
+    if (
+        domain_source_policy_payload["decisionStatus"]
+        != "universal_domain_and_source_fields_with_domain_extension_boundary"
+    ):
+        raise AssertionError("CLI domain-source-field-policy decision status drifted")
+    if domain_source_policy_payload["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI domain-source-field-policy must keep normal checks non-mutating")
+    if domain_source_policy_payload["generatedRuntimeTypesIncluded"] is not False:
+        raise AssertionError("CLI domain-source-field-policy must not generate runtime types")
+    domain_source_summary = domain_source_policy_payload["summary"]
+    expected_domain_source_counts = {
+        "universalDomainFieldCount": 10,
+        "universalSourceBindingFieldCount": 10,
+        "domainSpecificExtensionFieldCount": 8,
+        "blockedFieldCount": 6,
+        "sourceKindRuleCount": 5,
+        "fieldDecisionCaseCount": 7,
+    }
+    for key, expected in expected_domain_source_counts.items():
+        if domain_source_summary[key] != expected:
+            raise AssertionError(f"CLI domain-source-field-policy {key} drifted")
+    domain_source_fields = run_cli("domain-source-field-policy", "--view", "domain-fields")
+    domain_source_fields_payload = json.loads(domain_source_fields.stdout)
+    if len(domain_source_fields_payload) != 10:
+        raise AssertionError("CLI domain-source-field-policy should expose ten universal domain fields")
+    if any(item["requirementLevel"] != "required_every_domain" for item in domain_source_fields_payload):
+        raise AssertionError("CLI domain-source-field-policy domain fields should be required")
+    if any(item["domainExtensionAllowed"] for item in domain_source_fields_payload):
+        raise AssertionError("CLI domain-source-field-policy domain fields must not move to extensions")
+    if any(item["credentialValuesAllowed"] or item["rawPrivateDataAllowed"] for item in domain_source_fields_payload):
+        raise AssertionError("CLI domain-source-field-policy domain fields must block secrets and raw private data")
+    domain_source_source_fields = run_cli("domain-source-field-policy", "--view", "source-fields")
+    domain_source_source_fields_payload = json.loads(domain_source_source_fields.stdout)
+    if len(domain_source_source_fields_payload) != 10:
+        raise AssertionError("CLI domain-source-field-policy should expose ten universal source fields")
+    if any(item["requirementLevel"] != "required_every_source_binding" for item in domain_source_source_fields_payload):
+        raise AssertionError("CLI domain-source-field-policy source fields should be required")
+    domain_source_extensions = run_cli("domain-source-field-policy", "--view", "extensions")
+    domain_source_extensions_payload = json.loads(domain_source_extensions.stdout)
+    if len(domain_source_extensions_payload) != 8:
+        raise AssertionError("CLI domain-source-field-policy should expose eight extension fields")
+    if any(item["requirementLevel"] != "domain_specific_extension" for item in domain_source_extensions_payload):
+        raise AssertionError("CLI domain-source-field-policy extensions should be extension level")
+    if any(not item["domainExtensionAllowed"] for item in domain_source_extensions_payload):
+        raise AssertionError("CLI domain-source-field-policy extensions should be domain-extension allowed")
+    if any(item["credentialValuesAllowed"] or item["rawPrivateDataAllowed"] for item in domain_source_extensions_payload):
+        raise AssertionError("CLI domain-source-field-policy extensions must block secrets and raw private data")
+    domain_source_blocked = run_cli("domain-source-field-policy", "--view", "blocked")
+    domain_source_blocked_payload = json.loads(domain_source_blocked.stdout)
+    if len(domain_source_blocked_payload) != 6:
+        raise AssertionError("CLI domain-source-field-policy should expose six blocked fields")
+    if any(item["requirementLevel"] != "blocked" for item in domain_source_blocked_payload):
+        raise AssertionError("CLI domain-source-field-policy blocked fields should stay blocked")
+    if any(item["domainExtensionAllowed"] for item in domain_source_blocked_payload):
+        raise AssertionError("CLI domain-source-field-policy blocked fields must not be extensions")
+    domain_source_kinds = run_cli("domain-source-field-policy", "--view", "source-kinds")
+    domain_source_kinds_payload = json.loads(domain_source_kinds.stdout)
+    source_kind_rules = {item["sourceKind"]: item for item in domain_source_kinds_payload}
+    if set(source_kind_rules) != {"fixture", "local_file", "source_adapter_output", "api", "database"}:
+        raise AssertionError("CLI domain-source-field-policy source kind coverage drifted")
+    for source_kind, rule in source_kind_rules.items():
+        if rule["sourceRefRequired"] is not True or rule["adapterRefRequired"] is not True:
+            raise AssertionError(f"CLI domain-source-field-policy {source_kind} should require refs")
+        if rule["credentialValueAllowed"] or rule["rawPayloadStored"]:
+            raise AssertionError(f"CLI domain-source-field-policy {source_kind} must block raw payloads and credentials")
+    if source_kind_rules["api"]["credentialReferenceRequired"] is not True:
+        raise AssertionError("CLI domain-source-field-policy private API sources should require credential refs")
+    if source_kind_rules["database"]["credentialReferenceRequired"] is not True:
+        raise AssertionError("CLI domain-source-field-policy database sources should require credential refs")
+    domain_source_case = run_cli("domain-source-field-policy", "--case", "raw_sql_query_as_binding_field")
+    domain_source_case_payload = json.loads(domain_source_case.stdout)
+    if domain_source_case_payload["caseStatus"] != "blocked_raw_sql_field":
+        raise AssertionError("CLI domain-source-field-policy raw SQL case status drifted")
+    if domain_source_case_payload["forecastArtifactsCreated"] is not False:
+        raise AssertionError("CLI domain-source-field-policy raw SQL case must not create forecast artifacts")
+    if domain_source_case_payload["sanitizedDiagnosticsOnly"] is not True:
+        raise AssertionError("CLI domain-source-field-policy raw SQL case must keep diagnostics sanitized")
+    domain_source_field = run_cli("domain-source-field-policy", "--field", "role_required_fields")
+    domain_source_field_payload = json.loads(domain_source_field.stdout)
+    if domain_source_field_payload["requirementLevel"] != "domain_specific_extension":
+        raise AssertionError("CLI domain-source-field-policy role_required_fields should be an extension")
+    if domain_source_field_payload["domainExtensionAllowed"] is not True:
+        raise AssertionError("CLI domain-source-field-policy role_required_fields should allow extension")
+    domain_source_boundary = run_cli("domain-source-field-policy", "--view", "boundary")
+    domain_source_boundary_payload = json.loads(domain_source_boundary.stdout)
+    for key in [
+        "normalChecksWriteState",
+        "createsForecasts",
+        "readsPrivateData",
+        "storesCredentialValues",
+        "rawSqlAllowed",
+        "arbitraryPrivateApiParsingByOpe",
+        "arbitraryDatabaseParsingByOpe",
+        "hostedRuntimeImplemented",
+        "qualityClaimsUpgraded",
+    ]:
+        if domain_source_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI domain-source-field-policy boundary {key} should stay false")
+    if any(domain_source_boundary_payload.values()):
+        raise AssertionError("CLI domain-source-field-policy boundary flags should all stay false")
+    domain_source_check = run_cli("domain-source-field-policy", "--check")
+    if "checked domain source field policy" not in domain_source_check.stdout:
+        raise AssertionError("CLI domain-source-field-policy --check did not check generated output")
+
+    credential_policy = run_cli("credential-reference-policy")
+    credential_policy_payload = json.loads(credential_policy.stdout)
+    if credential_policy_payload["policyStatus"] != "credential_reference_policy_checked":
+        raise AssertionError("CLI credential-reference-policy status drifted")
+    if (
+        credential_policy_payload["decisionStatus"]
+        != "opaque_caller_owned_references_scoped_to_workspace_source_and_adapter"
+    ):
+        raise AssertionError("CLI credential-reference-policy decision status drifted")
+    if credential_policy_payload["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI credential-reference-policy must keep normal checks non-mutating")
+    if credential_policy_payload["secretResolverImplemented"] is not False:
+        raise AssertionError("CLI credential-reference-policy must not implement a secret resolver")
+    credential_summary = credential_policy_payload["summary"]
+    expected_credential_counts = {
+        "acceptedReferenceMechanismCount": 4,
+        "requiredScopeKeyCount": 8,
+        "lifecycleStateCount": 6,
+        "consumerRuleCount": 6,
+        "credentialReferenceCaseCount": 11,
+        "blockedCaseCount": 8,
+    }
+    for key, expected in expected_credential_counts.items():
+        if credential_summary[key] != expected:
+            raise AssertionError(f"CLI credential-reference-policy {key} drifted")
+    if credential_summary["normalChecksResolveSecrets"] is not False:
+        raise AssertionError("CLI credential-reference-policy summary must block normal-check secret resolution")
+    if credential_summary["secretResolverImplemented"] is not False:
+        raise AssertionError("CLI credential-reference-policy summary must not implement a secret resolver")
+
+    credential_mechanisms = run_cli("credential-reference-policy", "--view", "mechanisms")
+    credential_mechanisms_payload = json.loads(credential_mechanisms.stdout)
+    if [item["mechanismName"] for item in credential_mechanisms_payload] != [
+        "caller_secret_store_alias",
+        "host_runtime_secret_handle",
+        "local_operator_session_ref",
+        "public_no_credential",
+    ]:
+        raise AssertionError("CLI credential-reference-policy mechanism order drifted")
+    for item in credential_mechanisms_payload:
+        if item["secretValueStored"] or item["secretLookupDuringNormalChecks"] or item["promptVisibleSecretAllowed"]:
+            raise AssertionError("CLI credential-reference-policy mechanisms must not expose secret values")
+        if len(item["requiredScopeKeys"]) != 8:
+            raise AssertionError("CLI credential-reference-policy mechanisms should carry eight scope keys")
+    credential_mechanism = run_cli("credential-reference-policy", "--mechanism", "host_runtime_secret_handle")
+    credential_mechanism_payload = json.loads(credential_mechanism.stdout)
+    if "database" not in credential_mechanism_payload["allowedForSourceKinds"]:
+        raise AssertionError("CLI credential-reference-policy host runtime handles should allow database references")
+    if credential_mechanism_payload["secretLookupDuringNormalChecks"] is not False:
+        raise AssertionError("CLI credential-reference-policy host runtime handles must not resolve in normal checks")
+
+    credential_scope = run_cli("credential-reference-policy", "--view", "scope")
+    credential_scope_payload = json.loads(credential_scope.stdout)
+    if len(credential_scope_payload) != 8:
+        raise AssertionError("CLI credential-reference-policy should expose eight scope keys")
+    if any(not item["requiredForPrivateApi"] or not item["requiredForDatabase"] for item in credential_scope_payload):
+        raise AssertionError("CLI credential-reference-policy scope keys should apply to APIs and databases")
+    if any(item["containsSecretMaterial"] for item in credential_scope_payload):
+        raise AssertionError("CLI credential-reference-policy scope keys must not contain secret material")
+    credential_scope_key = run_cli("credential-reference-policy", "--scope-key", "tenant_id")
+    credential_scope_key_payload = json.loads(credential_scope_key.stdout)
+    if "cross-tenant" not in credential_scope_key_payload["prevents"]:
+        raise AssertionError("CLI credential-reference-policy tenant scope should prevent cross-tenant reuse")
+
+    credential_lifecycle = run_cli("credential-reference-policy", "--view", "lifecycle")
+    credential_lifecycle_payload = json.loads(credential_lifecycle.stdout)
+    lifecycle_rows = {item["stateName"]: item for item in credential_lifecycle_payload}
+    if set(lifecycle_rows) != {"proposed", "approved", "active", "rotation_due", "revoked", "redaction_required"}:
+        raise AssertionError("CLI credential-reference-policy lifecycle coverage drifted")
+    if lifecycle_rows["active"]["allowsRuntimeUse"] is not True:
+        raise AssertionError("CLI credential-reference-policy active state should allow explicit runtime use")
+    if lifecycle_rows["revoked"]["allowsRuntimeUse"] is not False:
+        raise AssertionError("CLI credential-reference-policy revoked state must block runtime use")
+    if any(item["allowsNormalCheckSecretResolution"] for item in credential_lifecycle_payload):
+        raise AssertionError("CLI credential-reference-policy lifecycle must block normal-check secret resolution")
+    credential_state = run_cli("credential-reference-policy", "--state", "redaction_required")
+    credential_state_payload = json.loads(credential_state.stdout)
+    if credential_state_payload["requiresRedactionReceipt"] is not True:
+        raise AssertionError("CLI credential-reference-policy redaction state should require a redaction receipt")
+
+    credential_consumers = run_cli("credential-reference-policy", "--view", "consumers")
+    credential_consumers_payload = json.loads(credential_consumers.stdout)
+    consumer_rows = {item["consumerName"]: item for item in credential_consumers_payload}
+    if set(consumer_rows) != {
+        "private_api_adapter",
+        "database_adapter",
+        "source_binding_validation",
+        "runtime_readback",
+        "agent_envelope",
+        "normal_checks",
+    }:
+        raise AssertionError("CLI credential-reference-policy consumer coverage drifted")
+    if consumer_rows["normal_checks"]["mayUseCredentialReference"] is not False:
+        raise AssertionError("CLI credential-reference-policy normal checks must not use credential references")
+    for item in consumer_rows.values():
+        if item["canReceiveCredentialValue"] or item["canResolveSecretInNormalChecks"]:
+            raise AssertionError("CLI credential-reference-policy consumers must not receive or resolve credentials")
+        if not item["requiresScopeMatch"] or not item["requiresAdapterMatch"]:
+            raise AssertionError("CLI credential-reference-policy consumers should require scope and adapter matches")
+    credential_consumer = run_cli("credential-reference-policy", "--consumer", "database_adapter")
+    credential_consumer_payload = json.loads(credential_consumer.stdout)
+    if "explicit_runtime_query" not in credential_consumer_payload["allowedOperations"]:
+        raise AssertionError("CLI credential-reference-policy database adapter operation coverage drifted")
+
+    credential_cases = run_cli("credential-reference-policy", "--view", "cases")
+    credential_cases_payload = json.loads(credential_cases.stdout)
+    if len(credential_cases_payload) != 11:
+        raise AssertionError("CLI credential-reference-policy should expose eleven cases")
+    credential_case_rows = {item["caseName"]: item for item in credential_cases_payload}
+    if credential_case_rows["accepted_database_reference"]["canEnterAdapterRuntime"] is not True:
+        raise AssertionError("CLI credential-reference-policy accepted database ref should enter adapter runtime")
+    if credential_case_rows["accepted_private_api_reference"]["canEnterAdapterRuntime"] is not False:
+        raise AssertionError("CLI credential-reference-policy private API runtime should remain deferred")
+    for name, item in credential_case_rows.items():
+        if item["credentialValuesStored"] or item["secretResolvedInNormalChecks"] or item["crossTenantReuseAllowed"]:
+            raise AssertionError(f"CLI credential-reference-policy case {name} must not store or resolve credentials")
+        if item["sanitizedDiagnosticsOnly"] is not True:
+            raise AssertionError(f"CLI credential-reference-policy case {name} should keep diagnostics sanitized")
+    for name in [
+        "missing_reference_for_private_api",
+        "raw_api_token_submitted",
+        "database_password_in_connection_string",
+        "cross_tenant_reference",
+        "unscoped_reference",
+        "adapter_mismatch",
+        "revoked_reference",
+        "normal_check_resolution_attempt",
+    ]:
+        if not credential_case_rows[name]["caseStatus"].startswith("blocked_"):
+            raise AssertionError(f"CLI credential-reference-policy {name} should be blocked")
+        if credential_case_rows[name]["sourceBindingAccepted"] is not False:
+            raise AssertionError(f"CLI credential-reference-policy {name} must not accept source binding")
+    credential_case = run_cli("credential-reference-policy", "--case", "database_password_in_connection_string")
+    credential_case_payload = json.loads(credential_case.stdout)
+    if credential_case_payload["caseStatus"] != "blocked_database_password_connection_string":
+        raise AssertionError("CLI credential-reference-policy connection-string case status drifted")
+    if credential_case_payload["canEnterAdapterRuntime"] is not False:
+        raise AssertionError("CLI credential-reference-policy connection-string case must not enter adapter runtime")
+
+    credential_boundary = run_cli("credential-reference-policy", "--view", "boundary")
+    credential_boundary_payload = json.loads(credential_boundary.stdout)
+    for key in [
+        "normalChecksResolveSecrets",
+        "storesCredentialValues",
+        "printsCredentialValues",
+        "readsEnvironmentSecrets",
+        "writesSecretStore",
+        "crossTenantCredentialReuseAllowed",
+        "unscopedReferencesAllowed",
+        "rawConnectionStringsAllowed",
+        "databaseConnectionsOpened",
+        "apiCallsExecuted",
+        "hostedSecretManagerImplemented",
+        "qualityClaimsUpgraded",
+    ]:
+        if credential_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI credential-reference-policy boundary {key} should stay false")
+    if any(credential_boundary_payload.values()):
+        raise AssertionError("CLI credential-reference-policy boundary flags should all stay false")
+    credential_check = run_cli("credential-reference-policy", "--check")
+    if "checked credential reference policy" not in credential_check.stdout:
+        raise AssertionError("CLI credential-reference-policy --check did not check generated output")
+
+    retention_policy = run_cli("retention-redaction-policy")
+    retention_policy_payload = json.loads(retention_policy.stdout)
+    if retention_policy_payload["policyStatus"] != "retention_redaction_policy_checked":
+        raise AssertionError("CLI retention-redaction-policy status drifted")
+    if (
+        retention_policy_payload["decisionStatus"]
+        != "tombstones_and_redaction_receipts_default_physical_delete_exception_only"
+    ):
+        raise AssertionError("CLI retention-redaction-policy decision status drifted")
+    if retention_policy_payload["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI retention-redaction-policy must keep normal checks non-mutating")
+    if retention_policy_payload["physicalDeleteDefaultEnabled"] is not False:
+        raise AssertionError("CLI retention-redaction-policy must keep physical delete non-default")
+    retention_summary = retention_policy_payload["summary"]
+    expected_retention_counts = {
+        "retentionClassCount": 8,
+        "policyActionCount": 5,
+        "decisionCaseCount": 12,
+        "physicalDeleteGateCount": 8,
+        "readbackCount": 7,
+        "physicalDeleteExceptionCaseCount": 2,
+        "blockedPhysicalDeleteCaseCount": 3,
+    }
+    for key, expected in expected_retention_counts.items():
+        if retention_summary[key] != expected:
+            raise AssertionError(f"CLI retention-redaction-policy {key} drifted")
+    if retention_summary["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI retention-redaction-policy summary must keep normal checks non-mutating")
+    if retention_summary["physicalDeleteDefaultEnabled"] is not False:
+        raise AssertionError("CLI retention-redaction-policy summary must keep physical delete non-default")
+
+    retention_classes = run_cli("retention-redaction-policy", "--view", "classes")
+    retention_classes_payload = json.loads(retention_classes.stdout)
+    retention_class_rows = {item["recordClass"]: item for item in retention_classes_payload}
+    if set(retention_class_rows) != {
+        "forecast_lifecycle_record",
+        "evidence_trace_record",
+        "source_connector_result",
+        "source_binding_config",
+        "credential_reference_record",
+        "pilot_session_summary",
+        "local_usage_trace_event",
+        "operation_receipt",
+    }:
+        raise AssertionError("CLI retention-redaction-policy class coverage drifted")
+    if retention_class_rows["forecast_lifecycle_record"]["physicalDeleteEligible"] is not False:
+        raise AssertionError("CLI retention-redaction-policy must not physically delete forecast lifecycles")
+    if retention_class_rows["credential_reference_record"]["retainCredentialValues"] is not False:
+        raise AssertionError("CLI retention-redaction-policy must not retain credential values")
+    if retention_class_rows["pilot_session_summary"]["rawContentRetained"] is not False:
+        raise AssertionError("CLI retention-redaction-policy must not retain raw pilot content")
+    if retention_class_rows["local_usage_trace_event"]["aggregateOnlyAfterWindow"] is not True:
+        raise AssertionError("CLI retention-redaction-policy should aggregate usage traces after the window")
+    for item in retention_class_rows.values():
+        if item["silentDeleteAllowed"] or item["normalChecksWriteState"]:
+            raise AssertionError("CLI retention-redaction-policy classes must not silently delete or write state")
+        if item["auditMetadataRetained"] is not True:
+            raise AssertionError("CLI retention-redaction-policy classes should retain audit metadata")
+
+    retention_class = run_cli("retention-redaction-policy", "--record-class", "forecast_lifecycle_record")
+    retention_class_payload = json.loads(retention_class.stdout)
+    if retention_class_payload["defaultAction"] != "retain_append_only":
+        raise AssertionError("CLI retention-redaction-policy forecast lifecycle default action drifted")
+
+    retention_actions = run_cli("retention-redaction-policy", "--view", "actions")
+    retention_actions_payload = json.loads(retention_actions.stdout)
+    retention_action_rows = {item["actionName"]: item for item in retention_actions_payload}
+    if retention_action_rows["archive_tombstone"]["writesAuditTombstone"] is not True:
+        raise AssertionError("CLI retention-redaction-policy archive should write tombstones")
+    if retention_action_rows["redaction_receipt"]["writesRedactionReceipt"] is not True:
+        raise AssertionError("CLI retention-redaction-policy redaction should write receipts")
+    if retention_action_rows["physical_delete_exception"]["requiresAllPhysicalDeleteGates"] is not True:
+        raise AssertionError("CLI retention-redaction-policy physical delete should require all gates")
+    for name, item in retention_action_rows.items():
+        if item["normalChecksExecuteAction"] or item["silentDeleteAllowed"]:
+            raise AssertionError(f"CLI retention-redaction-policy action {name} must not execute or silently delete")
+        if name != "physical_delete_exception" and item["physicallyDeletesRecords"]:
+            raise AssertionError(f"CLI retention-redaction-policy action {name} must not physically delete")
+    retention_action = run_cli("retention-redaction-policy", "--action", "physical_delete_exception")
+    retention_action_payload = json.loads(retention_action.stdout)
+    if retention_action_payload["operationName"] != "future.physical_delete_exception":
+        raise AssertionError("CLI retention-redaction-policy physical delete operation should stay future-only")
+
+    retention_gates = run_cli("retention-redaction-policy", "--view", "gates")
+    retention_gates_payload = json.loads(retention_gates.stdout)
+    retention_gate_rows = {item["gateName"]: item for item in retention_gates_payload}
+    if len(retention_gate_rows) != 8:
+        raise AssertionError("CLI retention-redaction-policy should expose eight physical-delete gates")
+    if retention_gate_rows["record_class_allows_physical_delete"]["blocksForecastHistory"] is not True:
+        raise AssertionError("CLI retention-redaction-policy record-class gate should block forecast history")
+    if retention_gate_rows["audit_tombstone_retained"]["requiredForException"] is not True:
+        raise AssertionError("CLI retention-redaction-policy audit tombstone gate should be required")
+    if retention_gate_rows["redaction_receipt_retained"]["requiredForException"] is not True:
+        raise AssertionError("CLI retention-redaction-policy redaction receipt gate should be required")
+    for item in retention_gate_rows.values():
+        if not item["requiredForException"] or item["normalChecksEvaluateAsEffectful"]:
+            raise AssertionError("CLI retention-redaction-policy gates must be required and non-effectful")
+    retention_gate = run_cli("retention-redaction-policy", "--gate", "record_class_allows_physical_delete")
+    retention_gate_payload = json.loads(retention_gate.stdout)
+    if retention_gate_payload["failureStatus"] != "blocked_record_class":
+        raise AssertionError("CLI retention-redaction-policy record-class gate failure status drifted")
+
+    retention_cases = run_cli("retention-redaction-policy", "--view", "cases")
+    retention_cases_payload = json.loads(retention_cases.stdout)
+    retention_case_rows = {item["caseName"]: item for item in retention_cases_payload}
+    if len(retention_case_rows) != 12:
+        raise AssertionError("CLI retention-redaction-policy should expose twelve cases")
+    if retention_case_rows["archive_inactive_prediction"]["selectedAction"] != "archive_tombstone":
+        raise AssertionError("CLI retention-redaction-policy archive case action drifted")
+    if retention_case_rows["redact_credential_like_field"]["selectedAction"] != "redaction_receipt":
+        raise AssertionError("CLI retention-redaction-policy credential redaction action drifted")
+    if retention_case_rows["source_connector_raw_preview_requested"]["caseStatus"] != "blocked_raw_retention":
+        raise AssertionError("CLI retention-redaction-policy raw preview case should block")
+    if retention_case_rows["physical_delete_with_authorized_erasure"]["caseStatus"] != "exception_preflight_ready":
+        raise AssertionError("CLI retention-redaction-policy authorized erasure case drifted")
+    if retention_case_rows["physical_delete_for_forecast_history"]["caseStatus"] != "blocked_record_class":
+        raise AssertionError("CLI retention-redaction-policy forecast physical delete case should block")
+    for name, item in retention_case_rows.items():
+        if item["normalChecksWriteState"] or item["credentialValuesRetained"]:
+            raise AssertionError(f"CLI retention-redaction-policy case {name} must not write state or retain credentials")
+        if item["sanitizedDiagnosticsOnly"] is not True:
+            raise AssertionError(f"CLI retention-redaction-policy case {name} should keep diagnostics sanitized")
+        if item["selectedAction"] != "physical_delete_exception" and item["physicallyDeletesRecords"]:
+            raise AssertionError(f"CLI retention-redaction-policy case {name} must not physically delete")
+    retention_case = run_cli("retention-redaction-policy", "--case", "physical_delete_missing_legal_basis")
+    retention_case_payload = json.loads(retention_case.stdout)
+    if retention_case_payload["caseStatus"] != "blocked_missing_gate":
+        raise AssertionError("CLI retention-redaction-policy missing legal basis case should block")
+
+    retention_boundary = run_cli("retention-redaction-policy", "--view", "boundary")
+    retention_boundary_payload = json.loads(retention_boundary.stdout)
+    for key in [
+        "normalChecksPhysicallyDelete",
+        "normalChecksWriteState",
+        "silentDeleteAllowed",
+        "forecastHistoryRewriteAllowed",
+        "credentialValuesRetained",
+        "rawPrivateRowsRetained",
+        "rawPilotTranscriptsRetained",
+        "physicalDeleteDefaultEnabled",
+        "hostedErasureWorkflowImplemented",
+        "qualityClaimsUpgraded",
+    ]:
+        if retention_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI retention-redaction-policy boundary {key} should stay false")
+    if any(retention_boundary_payload.values()):
+        raise AssertionError("CLI retention-redaction-policy boundary flags should all stay false")
+    retention_check = run_cli("retention-redaction-policy", "--check")
+    if "checked retention redaction policy" not in retention_check.stdout:
+        raise AssertionError("CLI retention-redaction-policy --check did not check generated output")
+
+    private_auto_policy = run_cli("private-auto-evidence-policy")
+    private_auto_policy_payload = json.loads(private_auto_policy.stdout)
+    if private_auto_policy_payload["policyStatus"] != "private_auto_evidence_policy_checked":
+        raise AssertionError("CLI private-auto-evidence-policy status drifted")
+    if (
+        private_auto_policy_payload["decisionStatus"]
+        != "private_data_auto_requires_bound_source_policy_and_approved_adapters"
+    ):
+        raise AssertionError("CLI private-auto-evidence-policy decision status drifted")
+    if private_auto_policy_payload["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy must keep normal checks non-mutating")
+    if private_auto_policy_payload["normalChecksReadPrivateSources"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy must not read private sources")
+    private_auto_summary = private_auto_policy_payload["summary"]
+    expected_private_auto_counts = {
+        "sourceKindCount": 8,
+        "policyGateCount": 12,
+        "decisionCaseCount": 13,
+        "readbackCount": 10,
+        "blockedCaseCount": 8,
+        "manifestOnlyCaseCount": 2,
+    }
+    for key, expected in expected_private_auto_counts.items():
+        if private_auto_summary[key] != expected:
+            raise AssertionError(f"CLI private-auto-evidence-policy {key} drifted")
+    if private_auto_summary["normalChecksReadPrivateSources"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy summary must not read private sources")
+    if private_auto_summary["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy summary must keep normal checks non-mutating")
+
+    private_auto_source = run_cli("private-auto-evidence-policy", "--view", "source")
+    private_auto_source_payload = json.loads(private_auto_source.stdout)
+    if private_auto_source_payload["sourcePolicySchemaId"] != "https://openprediction.engine/spec/source-policy.schema.json":
+        raise AssertionError("CLI private-auto-evidence-policy source-policy schema binding drifted")
+    if private_auto_source_payload["credentialReferencePolicyStatus"] != "credential_reference_policy_checked":
+        raise AssertionError("CLI private-auto-evidence-policy credential source drifted")
+    if private_auto_source_payload["retentionRedactionPolicyStatus"] != "retention_redaction_policy_checked":
+        raise AssertionError("CLI private-auto-evidence-policy retention source drifted")
+    if private_auto_source_payload["normalChecksWriteState"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy source bindings must stay read-only")
+
+    private_auto_kinds = run_cli("private-auto-evidence-policy", "--view", "source-kinds")
+    private_auto_kinds_payload = json.loads(private_auto_kinds.stdout)
+    private_auto_kind_rows = {item["sourceKind"]: item for item in private_auto_kinds_payload}
+    if set(private_auto_kind_rows) != {
+        "local_file",
+        "manual_mapping",
+        "auto_evidence_connector",
+        "source_adapter_output",
+        "database_query_manifest",
+        "private_api_manifest",
+        "manual_upload",
+        "web_search",
+    }:
+        raise AssertionError("CLI private-auto-evidence-policy source-kind coverage drifted")
+    if private_auto_kind_rows["local_file"]["currentPolicyStatus"] != "allowed_with_approved_local_runtime":
+        raise AssertionError("CLI private-auto-evidence-policy local file status drifted")
+    if private_auto_kind_rows["source_adapter_output"]["currentPolicyStatus"] != "allowed_with_sanitized_adapter_output":
+        raise AssertionError("CLI private-auto-evidence-policy adapter output status drifted")
+    if private_auto_kind_rows["database_query_manifest"]["currentPolicyStatus"] != "manifest_only_no_raw_sql_execution":
+        raise AssertionError("CLI private-auto-evidence-policy database manifest status drifted")
+    if private_auto_kind_rows["private_api_manifest"]["credentialReferenceRequired"] is not True:
+        raise AssertionError("CLI private-auto-evidence-policy private API should require credentials by reference")
+    if private_auto_kind_rows["web_search"]["currentPolicyStatus"] != "blocked_for_private_data_auto":
+        raise AssertionError("CLI private-auto-evidence-policy should block private web search")
+    if private_auto_kind_rows["web_search"]["networkAccessAllowed"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy should not allow private web search network access")
+    for name, item in private_auto_kind_rows.items():
+        if not item["sourcePolicyRequired"] or not item["tenantWorkspaceScopeRequired"]:
+            raise AssertionError(f"CLI private-auto-evidence-policy source kind {name} must require policy and scope")
+        if item["normalChecksReadPrivateSource"] or item["normalChecksResolveCredential"]:
+            raise AssertionError(f"CLI private-auto-evidence-policy source kind {name} must stay non-effectful")
+        if item["rawPayloadRetentionAllowed"]:
+            raise AssertionError(f"CLI private-auto-evidence-policy source kind {name} must not retain raw payloads")
+
+    private_auto_kind = run_cli("private-auto-evidence-policy", "--source-kind", "private_api_manifest")
+    private_auto_kind_payload = json.loads(private_auto_kind.stdout)
+    if private_auto_kind_payload["currentPolicyStatus"] != "manifest_only_no_runtime_execution":
+        raise AssertionError("CLI private-auto-evidence-policy private API source-kind status drifted")
+
+    private_auto_gates = run_cli("private-auto-evidence-policy", "--view", "gates")
+    private_auto_gates_payload = json.loads(private_auto_gates.stdout)
+    private_auto_gate_rows = {item["gateName"]: item for item in private_auto_gates_payload}
+    if len(private_auto_gate_rows) != 12:
+        raise AssertionError("CLI private-auto-evidence-policy should expose twelve gates")
+    if private_auto_gate_rows["credential_reference_scoped"]["blocksCredentialValues"] is not True:
+        raise AssertionError("CLI private-auto-evidence-policy credential gate should block credential values")
+    if private_auto_gate_rows["adapter_capability_checked"]["blocksUnregisteredAdapters"] is not True:
+        raise AssertionError("CLI private-auto-evidence-policy adapter gate should block unregistered adapters")
+    if private_auto_gate_rows["forecast_before_close_preserved"]["blocksPostOutcomeEvidence"] is not True:
+        raise AssertionError("CLI private-auto-evidence-policy forecast timing gate should block post-outcome evidence")
+    for item in private_auto_gate_rows.values():
+        if not item["requiredForPrivateAuto"] or item["normalChecksEvaluateAsEffectful"]:
+            raise AssertionError("CLI private-auto-evidence-policy gates must be required and non-effectful")
+    private_auto_gate = run_cli("private-auto-evidence-policy", "--gate", "adapter_capability_checked")
+    private_auto_gate_payload = json.loads(private_auto_gate.stdout)
+    if private_auto_gate_payload["failureStatus"] != "blocked_unregistered_adapter":
+        raise AssertionError("CLI private-auto-evidence-policy adapter gate failure status drifted")
+
+    private_auto_cases = run_cli("private-auto-evidence-policy", "--view", "cases")
+    private_auto_cases_payload = json.loads(private_auto_cases.stdout)
+    private_auto_case_rows = {item["caseName"]: item for item in private_auto_cases_payload}
+    if len(private_auto_case_rows) != 13:
+        raise AssertionError("CLI private-auto-evidence-policy should expose thirteen cases")
+    if private_auto_case_rows["approved_local_file_auto"]["caseStatus"] != "policy_ready":
+        raise AssertionError("CLI private-auto-evidence-policy approved local file case drifted")
+    if private_auto_case_rows["approved_database_query_manifest"]["caseStatus"] != "manifest_ready_no_execution":
+        raise AssertionError("CLI private-auto-evidence-policy database manifest case drifted")
+    if private_auto_case_rows["manual_upload_without_adapter_contract"]["caseStatus"] != "blocked_missing_adapter_contract":
+        raise AssertionError("CLI private-auto-evidence-policy manual upload case should block")
+    if private_auto_case_rows["database_raw_sql_auto"]["caseStatus"] != "blocked_raw_sql":
+        raise AssertionError("CLI private-auto-evidence-policy raw SQL case should block")
+    if private_auto_case_rows["web_search_private_setup"]["caseStatus"] != "blocked_private_web_search":
+        raise AssertionError("CLI private-auto-evidence-policy private web search case should block")
+    if private_auto_case_rows["post_outcome_capture_as_forecast_evidence"]["caseStatus"] != "blocked_post_outcome_evidence":
+        raise AssertionError("CLI private-auto-evidence-policy post-outcome evidence case should block")
+    if private_auto_case_rows["raw_private_payload_retention"]["caseStatus"] != "blocked_raw_payload_retention":
+        raise AssertionError("CLI private-auto-evidence-policy raw payload retention case should block")
+    for name, item in private_auto_case_rows.items():
+        if item["normalChecksReadPrivateSources"] or item["normalChecksWriteState"] or item["credentialValuesStored"]:
+            raise AssertionError(f"CLI private-auto-evidence-policy case {name} must stay non-effectful")
+        if item["sanitizedDiagnosticsOnly"] is not True:
+            raise AssertionError(f"CLI private-auto-evidence-policy case {name} should keep diagnostics sanitized")
+        if item["caseStatus"].startswith("blocked_") and item["eligibleForForecastExecution"]:
+            raise AssertionError(f"CLI private-auto-evidence-policy blocked case {name} must not be forecast-eligible")
+    private_auto_case = run_cli("private-auto-evidence-policy", "--case", "web_search_private_setup")
+    private_auto_case_payload = json.loads(private_auto_case.stdout)
+    if private_auto_case_payload["sourcePolicyBound"] is not False:
+        raise AssertionError("CLI private-auto-evidence-policy web search case should remain unbound")
+
+    private_auto_boundary = run_cli("private-auto-evidence-policy", "--view", "boundary")
+    private_auto_boundary_payload = json.loads(private_auto_boundary.stdout)
+    for key in [
+        "normalChecksReadPrivateSources",
+        "normalChecksResolveSecrets",
+        "normalChecksNetworkAccess",
+        "normalChecksWriteState",
+        "arbitraryWebSearchAllowed",
+        "arbitraryPrivateApiParsingAllowed",
+        "arbitraryDatabaseParsingAllowed",
+        "rawSqlExecutionAllowed",
+        "rawPrivatePayloadRetentionAllowed",
+        "postOutcomeEvidenceAsForecastEvidenceAllowed",
+        "hostedRuntimeImplemented",
+        "qualityClaimsUpgraded",
+        "generatedRuntimeTypesEnabled",
+    ]:
+        if private_auto_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI private-auto-evidence-policy boundary {key} should stay false")
+    if any(private_auto_boundary_payload.values()):
+        raise AssertionError("CLI private-auto-evidence-policy boundary flags should all stay false")
+    private_auto_check = run_cli("private-auto-evidence-policy", "--check")
+    if "checked private auto-evidence policy" not in private_auto_check.stdout:
+        raise AssertionError("CLI private-auto-evidence-policy --check did not check generated output")
+
     transit_forecast = run_cli("transit-delay-forecast")
     transit_forecast_payload = json.loads(transit_forecast.stdout)
     if transit_forecast_payload["domain"] != "weather-transit-delays":
@@ -1788,18 +2393,56 @@ def main() -> None:
 
     internal_api = run_cli("internal-api")
     internal_api_payload = json.loads(internal_api.stdout)
-    if internal_api_payload["summary"]["operationCount"] != 13:
-        raise AssertionError("CLI internal-api should expose the stable 13-operation surface")
+    if internal_api_payload["summary"]["operationCount"] != 14:
+        raise AssertionError("CLI internal-api should expose the stable 14-operation surface")
+    if internal_api_payload["summary"]["readOnlyOperationCount"] != 4:
+        raise AssertionError("CLI internal-api should expose four read-only operations")
     if not internal_api_payload["summary"]["allEffectfulOperationsReceiptBacked"]:
         raise AssertionError("CLI internal-api should receipt-back effectful operations")
     if internal_api_payload["nonInterferenceBoundary"]["rawSqlExposed"]:
         raise AssertionError("CLI internal-api must not expose raw SQL")
+    internal_operations = {
+        item["operationName"]: item for item in internal_api_payload["operationSurface"]
+    }
+    database_status_operation = internal_operations["database_source_adapter_status"]
+    if database_status_operation["operationKind"] != "read_only":
+        raise AssertionError("CLI internal-api database source-adapter status should be read-only")
+    if database_status_operation["returnsReadModels"] != ["source_adapter_runtime_status"]:
+        raise AssertionError("CLI internal-api database source-adapter status read model drifted")
     internal_api_start = run_cli("internal-api", "--operation", "start_prediction")
     internal_api_start_payload = json.loads(internal_api_start.stdout)
     if internal_api_start_payload["operationName"] != "start_prediction":
         raise AssertionError("CLI internal-api --operation should print the requested operation")
     if "forecast.create" not in internal_api_start_payload["lifecycleOperations"]:
         raise AssertionError("CLI internal-api start_prediction should map to forecast.create")
+    internal_api_database = run_cli("internal-api", "--operation", "database_source_adapter_status")
+    internal_api_database_payload = json.loads(internal_api_database.stdout)
+    if internal_api_database_payload["operationName"] != "database_source_adapter_status":
+        raise AssertionError("CLI internal-api database source-adapter status operation drifted")
+    if internal_api_database_payload["operationKind"] != "read_only":
+        raise AssertionError("CLI internal-api database source-adapter status should be read-only")
+    if internal_api_database_payload["requiresOperationReceipt"] is not False:
+        raise AssertionError("CLI internal-api database source-adapter status should not require a receipt")
+    if internal_api_database_payload["returnsReadModels"] != ["source_adapter_runtime_status"]:
+        raise AssertionError("CLI internal-api database source-adapter status readback drifted")
+    if internal_api_database_payload["rawSqlExposed"] is not False:
+        raise AssertionError("CLI internal-api database source-adapter status must not expose raw SQL")
+    internal_api_database_call = run_cli(
+        "agent-call",
+        "--operation",
+        "internal_api",
+        "--internal-operation",
+        "database_source_adapter_status",
+    )
+    internal_api_database_call_payload = json.loads(internal_api_database_call.stdout)
+    if internal_api_database_call_payload["payload"]["callStatus"] != "read_ready":
+        raise AssertionError("CLI internal-api database source-adapter status call should be read-ready")
+    if internal_api_database_call_payload["payload"]["operationReceiptId"] is not None:
+        raise AssertionError("CLI internal-api database source-adapter status call should not return a receipt")
+    if internal_api_database_call_payload["payload"]["readModelRefs"] != ["source_adapter_runtime_status"]:
+        raise AssertionError("CLI internal-api database source-adapter status call read model drifted")
+    if internal_api_database_call_payload["payload"]["executionBoundary"]["rawSqlExposed"] is not False:
+        raise AssertionError("CLI internal-api database source-adapter status call must not expose raw SQL")
     internal_api_check = run_cli("internal-api", "--check")
     if "checked internal API" not in internal_api_check.stdout:
         raise AssertionError("CLI internal-api --check did not check generated output")
@@ -1922,6 +2565,655 @@ def main() -> None:
     workspace_registry_check = run_cli("prediction-workspace-registry", "--check")
     if "checked prediction workspace registry" not in workspace_registry_check.stdout:
         raise AssertionError("CLI prediction-workspace-registry --check did not check generated output")
+
+    background_worker = run_cli("background-worker")
+    background_worker_payload = json.loads(background_worker.stdout)
+    if background_worker_payload["runtimeStatus"] != "bounded_local_worker_defined":
+        raise AssertionError("CLI background-worker runtime status drifted")
+    if background_worker_payload["summary"]["commandCount"] != 7:
+        raise AssertionError("CLI background-worker command coverage drifted")
+    if background_worker_payload["sidecarBoundary"]["networkListenerStarted"]:
+        raise AssertionError("CLI background-worker must not start a network listener")
+    background_worker_loop = run_cli("background-worker", "--view", "loop")
+    background_worker_loop_payload = json.loads(background_worker_loop.stdout)
+    if background_worker_loop_payload["loopStatus"] != "completed_dry_run":
+        raise AssertionError("CLI background-worker loop should complete one dry-run tick")
+    if background_worker_loop_payload["tickExecutions"][0]["internalApiOperation"] != "run_tick":
+        raise AssertionError("CLI background-worker loop should call foreground-equivalent run_tick")
+    if background_worker_loop_payload["tickExecutions"][0]["internalApiCall"]["dryRun"] is not True:
+        raise AssertionError("CLI background-worker loop should keep the internal API call dry-run")
+    if background_worker_loop_payload["resourceUsage"]["withinLimits"] is not True:
+        raise AssertionError("CLI background-worker loop should stay within configured resource limits")
+    background_worker_commit = run_cli("background-worker", "--view", "commit")
+    background_worker_commit_payload = json.loads(background_worker_commit.stdout)
+    if background_worker_commit_payload["lifecycleOperationName"] != "forecast.create":
+        raise AssertionError("CLI background-worker commit should use forecast.create lifecycle operation")
+    if background_worker_commit_payload["lifecycleResult"]["operationStatus"] != "committed":
+        raise AssertionError("CLI background-worker commit should commit through the lifecycle store")
+    if background_worker_commit_payload["leaseLifecycle"]["leaseReleased"] is not True:
+        raise AssertionError("CLI background-worker commit should release its lease")
+    if background_worker_commit_payload["executionBoundary"]["persistentStateWritten"] is not False:
+        raise AssertionError("CLI background-worker commit check should not write persistent state")
+    background_worker_control = run_cli("background-worker", "--view", "control")
+    background_worker_control_payload = json.loads(background_worker_control.stdout)
+    if background_worker_control_payload["controlStateStatus"] != "lifecycle_backed_control_state_checked":
+        raise AssertionError("CLI background-worker control state status drifted")
+    if background_worker_control_payload["summary"]["lifecycleReceiptsWritten"] != 4:
+        raise AssertionError("CLI background-worker control should write four lifecycle receipts")
+    if background_worker_control_payload["summary"]["leasesReleased"] != 4:
+        raise AssertionError("CLI background-worker control should release all control leases")
+    if background_worker_control_payload["healthReadback"]["workerState"] != "stopped":
+        raise AssertionError("CLI background-worker health should read final stopped control state")
+    if background_worker_control_payload["executionBoundary"]["persistentStateWritten"] is not False:
+        raise AssertionError("CLI background-worker control check should not write persistent state")
+    background_worker_sidecar = run_cli("background-worker", "--view", "sidecar")
+    background_worker_sidecar_payload = json.loads(background_worker_sidecar.stdout)
+    if background_worker_sidecar_payload["sidecarStatus"] != "checked_local_sidecar_semantics":
+        raise AssertionError("CLI background-worker sidecar status drifted")
+    if background_worker_sidecar_payload["normalChecksStartProcess"] is not False:
+        raise AssertionError("CLI background-worker sidecar check should not start a process")
+    if background_worker_sidecar_payload["activationReadback"]["heartbeatReadback"]["heartbeatStatus"] != "healthy_idle":
+        raise AssertionError("CLI background-worker sidecar heartbeat drifted")
+    if background_worker_sidecar_payload["activationReadback"]["shutdownReadback"]["shutdownStatus"] != "clean_shutdown_readback":
+        raise AssertionError("CLI background-worker sidecar shutdown drifted")
+    if background_worker_sidecar_payload["executionBoundary"]["hiddenDaemonStarted"] is not False:
+        raise AssertionError("CLI background-worker sidecar must not start hidden daemon")
+    background_worker_check = run_cli("background-worker", "--check")
+    if "checked background worker runtime" not in background_worker_check.stdout:
+        raise AssertionError("CLI background-worker --check did not check generated output")
+
+    runtime_security = run_cli("runtime-security")
+    runtime_security_payload = json.loads(runtime_security.stdout)
+    if runtime_security_payload["securityStatus"] != "lightweight_runtime_hardening_checked":
+        raise AssertionError("CLI runtime-security status drifted")
+    if runtime_security_payload["dependencyBudget"]["runtimeDependencyCount"] != 0:
+        raise AssertionError("CLI runtime-security should keep runtime dependencies at zero")
+    if runtime_security_payload["summary"]["moduleBoundaryCount"] != 7:
+        raise AssertionError("CLI runtime-security module boundary coverage drifted")
+    if runtime_security_payload["executionBoundary"]["networkListenerStarted"] is not False:
+        raise AssertionError("CLI runtime-security should not start a network listener")
+    runtime_security_budget = run_cli("runtime-security", "--view", "budget")
+    runtime_security_budget_payload = json.loads(runtime_security_budget.stdout)
+    if runtime_security_budget_payload["coreRuntimeDependencyPolicy"] != "python_stdlib_only":
+        raise AssertionError("CLI runtime-security budget should keep stdlib-only policy")
+    if runtime_security_budget_payload["packageInstallRequiredForNormalChecks"] is not False:
+        raise AssertionError("CLI runtime-security budget should not require normal installs")
+    runtime_security_surfaces = run_cli("runtime-security", "--view", "surfaces")
+    runtime_security_surface_payload = json.loads(runtime_security_surfaces.stdout)
+    if len(runtime_security_surface_payload) != 5:
+        raise AssertionError("CLI runtime-security surface coverage drifted")
+    if any(item["credentialValuesStored"] for item in runtime_security_surface_payload):
+        raise AssertionError("CLI runtime-security surfaces must not store credential values")
+    if any(item["responseSizeLimitBytes"] > 65536 for item in runtime_security_surface_payload):
+        raise AssertionError("CLI runtime-security response limits are too large")
+    runtime_security_threats = run_cli("runtime-security", "--view", "threats")
+    runtime_security_threat_payload = json.loads(runtime_security_threats.stdout)
+    threat_names = {item["threatName"] for item in runtime_security_threat_payload}
+    if "prompt_source_injection" not in threat_names or "lease_abuse" not in threat_names:
+        raise AssertionError("CLI runtime-security threat model coverage drifted")
+    if any(item["rawSensitiveDataExposed"] for item in runtime_security_threat_payload):
+        raise AssertionError("CLI runtime-security threat notes should not expose raw sensitive data")
+    runtime_security_blocked = run_cli("runtime-security", "--view", "blocked")
+    runtime_security_blocked_payload = json.loads(runtime_security_blocked.stdout)
+    blocked_cases = {item["caseName"]: item for item in runtime_security_blocked_payload}
+    if blocked_cases["credential_value_in_record"]["rawValueEchoed"] is not False:
+        raise AssertionError("CLI runtime-security blocked credential case must not echo raw values")
+    runtime_security_boundary = run_cli("runtime-security", "--view", "boundary")
+    runtime_security_boundary_payload = json.loads(runtime_security_boundary.stdout)
+    if runtime_security_boundary_payload["hostedRuntimeRequired"] is not False:
+        raise AssertionError("CLI runtime-security should not require hosted runtime")
+    if runtime_security_boundary_payload["unboundedBackgroundLoopAllowed"] is not False:
+        raise AssertionError("CLI runtime-security should block unbounded background loops")
+    runtime_security_check = run_cli("runtime-security", "--check")
+    if "checked runtime security hardening" not in runtime_security_check.stdout:
+        raise AssertionError("CLI runtime-security --check did not check generated output")
+
+    agent_implementation_kit = run_cli("agent-implementation-kit")
+    agent_implementation_kit_payload = json.loads(agent_implementation_kit.stdout)
+    if agent_implementation_kit_payload["kitStatus"] != "agent_prediction_implementation_kit_checked":
+        raise AssertionError("CLI agent-implementation-kit status drifted")
+    if agent_implementation_kit_payload["summary"]["manualStepCount"] != 12:
+        raise AssertionError("CLI agent-implementation-kit manual step count drifted")
+    if agent_implementation_kit_payload["executionBoundary"]["questionDiscoveryCreatesForecastArtifacts"] is not False:
+        raise AssertionError("CLI agent-implementation-kit discovery must not create forecast artifacts")
+    agent_implementation_manual = run_cli("agent-implementation-kit", "--view", "manual")
+    agent_implementation_manual_payload = json.loads(agent_implementation_manual.stdout)
+    manual_steps = [item["stepKey"] for item in agent_implementation_manual_payload["steps"]]
+    if manual_steps[0] != "detect_decision_under_uncertainty" or manual_steps[-1] != "inspect_calibration":
+        raise AssertionError("CLI agent-implementation-kit manual step order drifted")
+    agent_implementation_intake = run_cli("agent-implementation-kit", "--view", "intake")
+    agent_implementation_intake_payload = json.loads(agent_implementation_intake.stdout)
+    intake_fields = {item["fieldName"] for item in agent_implementation_intake_payload["requiredFields"]}
+    if "decisionToSupport" not in intake_fields or "approvedSourceRefs" not in intake_fields:
+        raise AssertionError("CLI agent-implementation-kit intake fields drifted")
+    if agent_implementation_intake_payload["credentialValuesAccepted"] is not False:
+        raise AssertionError("CLI agent-implementation-kit intake must block credential values")
+    agent_implementation_candidates = run_cli("agent-implementation-kit", "--view", "candidates")
+    agent_implementation_candidates_payload = json.loads(agent_implementation_candidates.stdout)
+    candidate_rows = {item["candidateStatus"]: item for item in agent_implementation_candidates_payload}
+    if set(candidate_rows) != {"forecastable", "needs_clarification", "blocked", "rejected"}:
+        raise AssertionError("CLI agent-implementation-kit candidate status coverage drifted")
+    if candidate_rows["forecastable"]["routesToExistingSurfaces"] is not True:
+        raise AssertionError("CLI agent-implementation-kit forecastable candidate should route to existing surfaces")
+    agent_implementation_validation = run_cli("agent-implementation-kit", "--view", "validation")
+    agent_implementation_validation_payload = json.loads(agent_implementation_validation.stdout)
+    if any(item["createsForecastArtifacts"] for item in agent_implementation_validation_payload):
+        raise AssertionError("CLI agent-implementation-kit validation must not create forecast artifacts")
+    agent_implementation_adapters = run_cli("agent-implementation-kit", "--view", "adapters")
+    agent_implementation_adapters_payload = json.loads(agent_implementation_adapters.stdout)
+    adapter_rows = {item["adapterName"]: item for item in agent_implementation_adapters_payload}
+    if adapter_rows["future_http_queue"]["implementedStatus"] != "future_transport_only":
+        raise AssertionError("CLI agent-implementation-kit should keep HTTP/queue future-only")
+    if any(item["hiddenServiceRequired"] for item in agent_implementation_adapters_payload):
+        raise AssertionError("CLI agent-implementation-kit adapters should not require hidden services")
+    agent_implementation_templates = run_cli("agent-implementation-kit", "--view", "templates")
+    agent_implementation_templates_payload = json.loads(agent_implementation_templates.stdout)
+    if len(agent_implementation_templates_payload) != 3:
+        raise AssertionError("CLI agent-implementation-kit starter template coverage drifted")
+    if any(item["storesCredentials"] for item in agent_implementation_templates_payload):
+        raise AssertionError("CLI agent-implementation-kit templates must not store credentials")
+    agent_implementation_blocked = run_cli("agent-implementation-kit", "--view", "blocked")
+    agent_implementation_blocked_payload = json.loads(agent_implementation_blocked.stdout)
+    blocked_guidance = {item["behaviorKey"]: item for item in agent_implementation_blocked_payload}
+    if blocked_guidance["free_form_oracle"]["allowed"] is not False:
+        raise AssertionError("CLI agent-implementation-kit must block free-form oracle behavior")
+    agent_implementation_boundary = run_cli("agent-implementation-kit", "--view", "boundary")
+    agent_implementation_boundary_payload = json.loads(agent_implementation_boundary.stdout)
+    if agent_implementation_boundary_payload["credentialValuesStored"] is not False:
+        raise AssertionError("CLI agent-implementation-kit boundary must block credential storage")
+    if agent_implementation_boundary_payload["automaticMethodUpgradeAllowed"] is not False:
+        raise AssertionError("CLI agent-implementation-kit boundary must block automatic method upgrades")
+    agent_implementation_check = run_cli("agent-implementation-kit", "--check")
+    if "checked agent implementation kit" not in agent_implementation_check.stdout:
+        raise AssertionError("CLI agent-implementation-kit --check did not check generated output")
+
+    agent_integration = run_cli("agent-integrate")
+    agent_integration_payload = json.loads(agent_integration.stdout)
+    if agent_integration_payload["integrationStatus"] != "agent_integration_golden_path_checked":
+        raise AssertionError("CLI agent-integrate status drifted")
+    if agent_integration_payload["summary"]["firstForecastFastTargetMet"] is not True:
+        raise AssertionError("CLI agent-integrate should meet the fast first forecast target")
+    if agent_integration_payload["executionBoundary"]["hostedRuntimeImplemented"] is not False:
+        raise AssertionError("CLI agent-integrate must not claim hosted runtime")
+    agent_integration_candidates = run_cli("agent-integrate", "--view", "candidates")
+    agent_integration_candidate_payload = json.loads(agent_integration_candidates.stdout)
+    integration_candidates = {item["caseKey"]: item for item in agent_integration_candidate_payload}
+    if integration_candidates["helsinki_surface_transit_peak_delay"]["status"] != "forecastable":
+        raise AssertionError("CLI agent-integrate should expose forecastable Helsinki candidate")
+    if integration_candidates["vague_next_week_transit"]["status"] != "needs_clarification":
+        raise AssertionError("CLI agent-integrate should mark vague next-week transit as needs_clarification")
+    if "raw_sql_query" not in integration_candidates["raw_sql_query"]["reasonCodes"]:
+        raise AssertionError("CLI agent-integrate should expose raw SQL blocker code")
+    agent_integration_guided = run_cli("agent-integrate", "--run-guided", "--case", "accepted_adapter_output")
+    agent_integration_guided_payload = json.loads(agent_integration_guided.stdout)
+    if agent_integration_guided_payload["guidedStatus"] != "forecast_card_ready":
+        raise AssertionError("CLI agent-integrate accepted guided case should reach a forecast card")
+    if agent_integration_guided_payload["toolCallCount"] > 3:
+        raise AssertionError("CLI agent-integrate accepted guided case should stay within three calls")
+    if agent_integration_guided_payload["forecastId"] != "forecast-1102":
+        raise AssertionError("CLI agent-integrate accepted guided case should bind forecast-1102")
+    agent_integration_blocked = run_cli("agent-integrate", "--run-guided", "--case", "missing_weather_source")
+    agent_integration_blocked_payload = json.loads(agent_integration_blocked.stdout)
+    if agent_integration_blocked_payload["guidedStatus"] != "blocked":
+        raise AssertionError("CLI agent-integrate blocked guided case should stay blocked")
+    if agent_integration_blocked_payload["forecastId"] is not None:
+        raise AssertionError("CLI agent-integrate blocked guided case must not bind a forecast")
+    agent_integration_agent_call = run_cli(
+        "agent-call",
+        "--operation",
+        "agent_integration_guided_forecast",
+        "--case",
+        "accepted_adapter_output",
+    )
+    agent_integration_agent_call_payload = json.loads(agent_integration_agent_call.stdout)
+    if agent_integration_agent_call_payload["payload"]["forecastCardCommand"] != agent_integration_guided_payload["forecastCardCommand"]:
+        raise AssertionError("CLI agent-call guided integration should match agent-integrate forecast-card command")
+    agent_integration_check = run_cli("agent-integrate", "--check")
+    if "checked agent integration golden path" not in agent_integration_check.stdout:
+        raise AssertionError("CLI agent-integrate --check did not check generated output")
+
+    postgres_compatibility = run_cli("postgres-compatibility")
+    postgres_compatibility_payload = json.loads(postgres_compatibility.stdout)
+    if postgres_compatibility_payload["compatibilityStatus"] != "sqlite_to_postgres_semantics_checked":
+        raise AssertionError("CLI postgres-compatibility status drifted")
+    if postgres_compatibility_payload["summary"]["tableCount"] != 8:
+        raise AssertionError("CLI postgres-compatibility table count drifted")
+    if postgres_compatibility_payload["summary"]["scenarioCount"] != 15:
+        raise AssertionError("CLI postgres-compatibility scenario count drifted")
+    if postgres_compatibility_payload["postgresRuntimeImplemented"] is not False:
+        raise AssertionError("CLI postgres-compatibility must not claim a Postgres runtime")
+    postgres_boundary = run_cli("postgres-compatibility", "--view", "boundary")
+    postgres_boundary_payload = json.loads(postgres_boundary.stdout)
+    if postgres_boundary_payload["postgresConnectionOpened"] is not False:
+        raise AssertionError("CLI postgres-compatibility boundary must not open Postgres")
+    if postgres_boundary_payload["schemaMigrationExecuted"] is not False:
+        raise AssertionError("CLI postgres-compatibility boundary must not execute migrations")
+    postgres_scenarios = run_cli("postgres-compatibility", "--view", "scenarios")
+    postgres_scenario_payload = json.loads(postgres_scenarios.stdout)
+    if postgres_scenario_payload[1]["expectedPostgresBehavior"] != "return_existing_receipt":
+        raise AssertionError("CLI postgres-compatibility retry behavior drifted")
+    if postgres_scenario_payload[13]["migrationBoundary"] != "explicit_receipt_backed_import":
+        raise AssertionError("CLI postgres-compatibility migration boundary drifted")
+    postgres_check = run_cli("postgres-compatibility", "--check")
+    if "checked postgres compatibility" not in postgres_check.stdout:
+        raise AssertionError("CLI postgres-compatibility --check did not check generated output")
+
+    database_runtime = run_cli("database-source-adapter-runtime")
+    database_runtime_payload = json.loads(database_runtime.stdout)
+    if database_runtime_payload["runtimeStatus"] != "approved_database_source_adapter_runtime_checked":
+        raise AssertionError("CLI database-source-adapter-runtime status drifted")
+    if database_runtime_payload["summary"]["caseCount"] != 9:
+        raise AssertionError("CLI database-source-adapter-runtime case count drifted")
+    if database_runtime_payload["summary"]["approvedExecutionPathCount"] != 1:
+        raise AssertionError("CLI database-source-adapter-runtime should expose one approved execution path")
+    if database_runtime_payload["summary"]["blockedCaseCount"] != 8:
+        raise AssertionError("CLI database-source-adapter-runtime blocked count drifted")
+    if database_runtime_payload["executionBoundary"]["normalChecksConnectToDatabase"] is not False:
+        raise AssertionError("CLI database-source-adapter-runtime must not connect to databases in normal checks")
+    if database_runtime_payload["executionBoundary"]["credentialValuesStored"] is not False:
+        raise AssertionError("CLI database-source-adapter-runtime must not store credential values")
+    database_approved = run_cli("database-source-adapter-runtime", "--case", "approved_fixture")
+    database_approved_payload = json.loads(database_approved.stdout)
+    if database_approved_payload["canEnterSourceAdapterIntake"] is not True:
+        raise AssertionError("CLI database-source-adapter-runtime approved fixture should enter adapter intake")
+    if database_approved_payload["sanitizedAdapterOutput"]["provenanceSummary"]["rawRowsIncluded"] is not False:
+        raise AssertionError("CLI database-source-adapter-runtime approved fixture must not include raw rows")
+    if database_approved_payload["sanitizedAdapterOutput"]["queryBoundarySummary"]["rawSqlIncluded"] is not False:
+        raise AssertionError("CLI database-source-adapter-runtime approved fixture must not include raw SQL")
+    database_blocked = run_cli("database-source-adapter-runtime", "--view", "blocked")
+    database_blocked_payload = json.loads(database_blocked.stdout)
+    if len(database_blocked_payload) != 8:
+        raise AssertionError("CLI database-source-adapter-runtime blocked view should expose eight cases")
+    if any(item["canEnterSourceAdapterIntake"] for item in database_blocked_payload):
+        raise AssertionError("CLI database-source-adapter-runtime blocked cases must stop before adapter intake")
+    if any(item["credentialValuesStored"] for item in database_blocked_payload):
+        raise AssertionError("CLI database-source-adapter-runtime blocked cases must not store credentials")
+    database_boundary = run_cli("database-source-adapter-runtime", "--view", "boundary")
+    database_boundary_payload = json.loads(database_boundary.stdout)
+    if any(database_boundary_payload.values()):
+        raise AssertionError("CLI database-source-adapter-runtime boundary flags should all stay false")
+    database_check = run_cli("database-source-adapter-runtime", "--check")
+    if "checked database source-adapter runtime" not in database_check.stdout:
+        raise AssertionError("CLI database-source-adapter-runtime --check did not check generated output")
+
+    opp_provider = run_cli("opp-provider-adapter")
+    opp_provider_payload = json.loads(opp_provider.stdout)
+    if opp_provider_payload["providerAdapterStatus"] != "optional_opp_provider_adapter_checked":
+        raise AssertionError("CLI opp-provider-adapter status drifted")
+    if opp_provider_payload["adapterScope"] != "interop_mapping_over_ope_lifecycle_records":
+        raise AssertionError("CLI opp-provider-adapter scope drifted")
+    if opp_provider_payload["summary"]["requestMappingCount"] != 8:
+        raise AssertionError("CLI opp-provider-adapter request mapping count drifted")
+    if opp_provider_payload["protocolBoundary"]["oppReplacesOpeLifecycleRecords"] is not False:
+        raise AssertionError("CLI opp-provider-adapter must not replace OPE records")
+    if opp_provider_payload["protocolBoundary"]["httpRuntimeImplemented"] is not False:
+        raise AssertionError("CLI opp-provider-adapter must keep HTTP runtime future")
+    opp_agent_card = run_cli("opp-provider-adapter", "--view", "agent-card")
+    opp_agent_card_payload = json.loads(opp_agent_card.stdout)
+    if opp_agent_card_payload["advertisedRuntime"] != "local_cli_fixture_only":
+        raise AssertionError("CLI opp-provider-adapter Agent Card runtime drifted")
+    if opp_agent_card_payload["httpEndpointAdvertised"] is not False:
+        raise AssertionError("CLI opp-provider-adapter Agent Card must not advertise HTTP")
+    if opp_agent_card_payload["supportedPricingModes"] != ["free_local_fixture"]:
+        raise AssertionError("CLI opp-provider-adapter Agent Card pricing drifted")
+    opp_accepted = run_cli("opp-provider-adapter", "--case", "accepted_forecast_card")
+    opp_accepted_payload = json.loads(opp_accepted.stdout)
+    if opp_accepted_payload["caseStatus"] != "response_ready":
+        raise AssertionError("CLI opp-provider-adapter accepted case status drifted")
+    if opp_accepted_payload["predictionResponse"]["probability"] != opp_accepted_payload["opeForecastCard"]["probability"]:
+        raise AssertionError("CLI opp-provider-adapter response probability should come from OPE card")
+    if opp_accepted_payload["predictionResponse"]["audit"]["forecastId"] != "forecast-602":
+        raise AssertionError("CLI opp-provider-adapter accepted response forecast binding drifted")
+    if opp_accepted_payload["predictionResponse"]["audit"]["evidenceTraceId"] != "forecast-602":
+        raise AssertionError("CLI opp-provider-adapter evidence trace binding drifted")
+    if opp_accepted_payload["forecastArtifactsCreated"] is not False:
+        raise AssertionError("CLI opp-provider-adapter accepted case must not create artifacts")
+    opp_blocked = run_cli("opp-provider-adapter", "--view", "blocked")
+    opp_blocked_payload = json.loads(opp_blocked.stdout)
+    if len(opp_blocked_payload) != 5:
+        raise AssertionError("CLI opp-provider-adapter blocked view should expose five cases")
+    if any(item["forecastArtifactsCreated"] for item in opp_blocked_payload):
+        raise AssertionError("CLI opp-provider-adapter blocked cases must not create artifacts")
+    if any(item["opeRecordsMutated"] for item in opp_blocked_payload):
+        raise AssertionError("CLI opp-provider-adapter blocked cases must not mutate OPE records")
+    opp_boundary = run_cli("opp-provider-adapter", "--view", "boundary")
+    opp_boundary_payload = json.loads(opp_boundary.stdout)
+    if opp_boundary_payload["opeRecordsAuthoritative"] is not True:
+        raise AssertionError("CLI opp-provider-adapter boundary should keep OPE records authoritative")
+    for key in [
+        "httpRuntimeImplemented",
+        "sseRuntimeImplemented",
+        "paymentSettlementImplemented",
+        "aggregationRuntimeImplemented",
+        "networkListenerStarted",
+        "normalChecksUseNetwork",
+        "qualityClaimsUpgraded",
+    ]:
+        if opp_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI opp-provider-adapter boundary {key} should stay false")
+    opp_check = run_cli("opp-provider-adapter", "--check")
+    if "checked OPP provider adapter" not in opp_check.stdout:
+        raise AssertionError("CLI opp-provider-adapter --check did not check generated output")
+
+    persistent_sqlite_policy = run_cli("persistent-sqlite-policy")
+    persistent_sqlite_policy_payload = json.loads(persistent_sqlite_policy.stdout)
+    if persistent_sqlite_policy_payload["policyStatus"] != "persistent_sqlite_path_policy_checked":
+        raise AssertionError("CLI persistent-sqlite-policy status drifted")
+    if persistent_sqlite_policy_payload["decisionStatus"] != "explicit_opt_in_ready_not_default":
+        raise AssertionError("CLI persistent-sqlite-policy decision status drifted")
+    if persistent_sqlite_policy_payload["summary"]["caseCount"] != 10:
+        raise AssertionError("CLI persistent-sqlite-policy case count drifted")
+    if persistent_sqlite_policy_payload["summary"]["blockedCaseCount"] != 8:
+        raise AssertionError("CLI persistent-sqlite-policy blocked count drifted")
+    if persistent_sqlite_policy_payload["summary"]["readyCaseCount"] != 2:
+        raise AssertionError("CLI persistent-sqlite-policy ready count drifted")
+    if persistent_sqlite_policy_payload["normalChecksUseEphemeralSqlite"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy must keep normal checks ephemeral")
+    if persistent_sqlite_policy_payload["persistentSqliteDefaultEnabled"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy must not enable persistent SQLite by default")
+    if persistent_sqlite_policy_payload["executionBoundary"]["normalChecksCreatePersistentDatabase"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy must not create persistent databases in normal checks")
+    if persistent_sqlite_policy_payload["executionBoundary"]["credentialValuesStored"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy must not store credential values")
+    persistent_sqlite_approved = run_cli("persistent-sqlite-policy", "--case", "approved_workspace_path")
+    persistent_sqlite_approved_payload = json.loads(persistent_sqlite_approved.stdout)
+    if persistent_sqlite_approved_payload["caseStatus"] != "persistent_path_ready_for_explicit_write":
+        raise AssertionError("CLI persistent-sqlite-policy approved path status drifted")
+    if persistent_sqlite_approved_payload["requiresExplicitWriteFlag"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy approved path should require explicit write")
+    if persistent_sqlite_approved_payload["normalChecksCreatePersistentDatabase"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy approved path must not create DB in normal checks")
+    persistent_sqlite_blocked = run_cli("persistent-sqlite-policy", "--view", "blocked")
+    persistent_sqlite_blocked_payload = json.loads(persistent_sqlite_blocked.stdout)
+    if len(persistent_sqlite_blocked_payload) != 8:
+        raise AssertionError("CLI persistent-sqlite-policy blocked view should expose eight cases")
+    if any(item["persistentDatabaseCreated"] for item in persistent_sqlite_blocked_payload):
+        raise AssertionError("CLI persistent-sqlite-policy blocked cases must not create persistent DBs")
+    if any(item["operationReceiptsWritten"] for item in persistent_sqlite_blocked_payload):
+        raise AssertionError("CLI persistent-sqlite-policy blocked cases must not write receipts")
+    if any(item["sanitizedDiagnosticsOnly"] is not True for item in persistent_sqlite_blocked_payload):
+        raise AssertionError("CLI persistent-sqlite-policy blocked cases should keep diagnostics sanitized")
+    persistent_sqlite_migration = run_cli("persistent-sqlite-policy", "--view", "migration")
+    persistent_sqlite_migration_payload = json.loads(persistent_sqlite_migration.stdout)
+    if persistent_sqlite_migration_payload["automaticMigrationAllowed"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy must block automatic migration")
+    if persistent_sqlite_migration_payload["dryRunRequiredBeforeWrite"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy should require migration dry-run")
+    if persistent_sqlite_migration_payload["backupRequiredBeforeWrite"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy should require backup before migration")
+    if persistent_sqlite_migration_payload["historicalForecastRewriteAllowed"] is not False:
+        raise AssertionError("CLI persistent-sqlite-policy must not rewrite forecast history")
+    persistent_sqlite_backup_lock = run_cli("persistent-sqlite-policy", "--view", "backup-lock")
+    persistent_sqlite_backup_lock_payload = json.loads(persistent_sqlite_backup_lock.stdout)
+    if persistent_sqlite_backup_lock_payload["sqliteBusyTimeoutMs"] != 5000:
+        raise AssertionError("CLI persistent-sqlite-policy busy timeout drifted")
+    if persistent_sqlite_backup_lock_payload["operationLeaseAlignmentRequired"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy should require operation lease alignment")
+    if persistent_sqlite_backup_lock_payload["staleLockRecoveryRequiresReceipt"] is not True:
+        raise AssertionError("CLI persistent-sqlite-policy should require stale lock recovery receipts")
+    persistent_sqlite_boundary = run_cli("persistent-sqlite-policy", "--view", "boundary")
+    persistent_sqlite_boundary_payload = json.loads(persistent_sqlite_boundary.stdout)
+    if any(persistent_sqlite_boundary_payload.values()):
+        raise AssertionError("CLI persistent-sqlite-policy boundary flags should all stay false")
+    persistent_sqlite_check = run_cli("persistent-sqlite-policy", "--check")
+    if "checked persistent SQLite policy" not in persistent_sqlite_check.stdout:
+        raise AssertionError("CLI persistent-sqlite-policy --check did not check generated output")
+
+    lifecycle_lease_policy = run_cli("lifecycle-lease-policy")
+    lifecycle_lease_policy_payload = json.loads(lifecycle_lease_policy.stdout)
+    if lifecycle_lease_policy_payload["policyStatus"] != "lifecycle_operation_lease_policy_checked":
+        raise AssertionError("CLI lifecycle-lease-policy status drifted")
+    if (
+        lifecycle_lease_policy_payload["decisionStatus"]
+        != "strict_leases_for_race_prone_writes_idempotency_for_append_only_receipts"
+    ):
+        raise AssertionError("CLI lifecycle-lease-policy decision status drifted")
+    if lifecycle_lease_policy_payload["summary"]["operationCount"] != 14:
+        raise AssertionError("CLI lifecycle-lease-policy operation count drifted")
+    if lifecycle_lease_policy_payload["summary"]["strictLeaseCount"] != 9:
+        raise AssertionError("CLI lifecycle-lease-policy strict lease count drifted")
+    if lifecycle_lease_policy_payload["summary"]["idempotencyOnlyCount"] != 5:
+        raise AssertionError("CLI lifecycle-lease-policy idempotency-only count drifted")
+    if lifecycle_lease_policy_payload["summary"]["conflictCaseCount"] != 8:
+        raise AssertionError("CLI lifecycle-lease-policy conflict case count drifted")
+    if lifecycle_lease_policy_payload["normalChecksAcquireLeases"] is not False:
+        raise AssertionError("CLI lifecycle-lease-policy must not acquire leases in normal checks")
+    if lifecycle_lease_policy_payload["allEffectfulOperationsRequireIdempotency"] is not True:
+        raise AssertionError("CLI lifecycle-lease-policy should require idempotency for all effectful operations")
+    for key in ["normalChecksWriteState", "leasesAcquiredByReadback", "rawCrudExposed"]:
+        if lifecycle_lease_policy_payload["executionBoundary"][key] is not False:
+            raise AssertionError(f"CLI lifecycle-lease-policy boundary {key} should stay false")
+    lifecycle_lease_strict = run_cli("lifecycle-lease-policy", "--view", "strict")
+    lifecycle_lease_strict_payload = json.loads(lifecycle_lease_strict.stdout)
+    if len(lifecycle_lease_strict_payload) != 9:
+        raise AssertionError("CLI lifecycle-lease-policy strict view should expose nine operations")
+    if any(item["guardMode"] != "strict_lease" or item["leaseRequired"] is not True for item in lifecycle_lease_strict_payload):
+        raise AssertionError("CLI lifecycle-lease-policy strict operations should require leases")
+    if any(item["leaseKeyTemplate"] == "none" for item in lifecycle_lease_strict_payload):
+        raise AssertionError("CLI lifecycle-lease-policy strict operations should expose lease key templates")
+    if any(item["normalChecksAcquireLease"] for item in lifecycle_lease_strict_payload):
+        raise AssertionError("CLI lifecycle-lease-policy strict readback must not acquire leases")
+    lifecycle_lease_idempotency = run_cli("lifecycle-lease-policy", "--view", "idempotency")
+    lifecycle_lease_idempotency_payload = json.loads(lifecycle_lease_idempotency.stdout)
+    if len(lifecycle_lease_idempotency_payload) != 5:
+        raise AssertionError("CLI lifecycle-lease-policy idempotency view should expose five operations")
+    if any(item["guardMode"] != "idempotency_only" or item["leaseRequired"] for item in lifecycle_lease_idempotency_payload):
+        raise AssertionError("CLI lifecycle-lease-policy idempotency-only operations should not require leases")
+    if any(item["leaseKeyTemplate"] != "none" for item in lifecycle_lease_idempotency_payload):
+        raise AssertionError("CLI lifecycle-lease-policy idempotency-only operations should not expose lease key templates")
+    lifecycle_lease_recalculate = run_cli("lifecycle-lease-policy", "--operation", "forecast.recalculate")
+    lifecycle_lease_recalculate_payload = json.loads(lifecycle_lease_recalculate.stdout)
+    if lifecycle_lease_recalculate_payload["policyReason"] != "append_history_entries_are_idempotent_by_source_hash":
+        raise AssertionError("CLI lifecycle-lease-policy recalculation reason drifted")
+    if lifecycle_lease_recalculate_payload["blockedConflictStatus"] != "return_existing_receipt_or_block_mismatch":
+        raise AssertionError("CLI lifecycle-lease-policy recalculation conflict policy drifted")
+    lifecycle_lease_cases = run_cli("lifecycle-lease-policy", "--view", "cases")
+    lifecycle_lease_cases_payload = json.loads(lifecycle_lease_cases.stdout)
+    if len(lifecycle_lease_cases_payload) != 8:
+        raise AssertionError("CLI lifecycle-lease-policy cases view should expose eight cases")
+    if any(item["operationReceiptsWritten"] for item in lifecycle_lease_cases_payload):
+        raise AssertionError("CLI lifecycle-lease-policy cases must not write receipts")
+    if any(item["immutableRecordsWritten"] for item in lifecycle_lease_cases_payload):
+        raise AssertionError("CLI lifecycle-lease-policy cases must not write records")
+    if any(item["sanitizedDiagnosticsOnly"] is not True for item in lifecycle_lease_cases_payload):
+        raise AssertionError("CLI lifecycle-lease-policy cases should keep diagnostics sanitized")
+    lifecycle_lease_boundary = run_cli("lifecycle-lease-policy", "--view", "boundary")
+    lifecycle_lease_boundary_payload = json.loads(lifecycle_lease_boundary.stdout)
+    for key in [
+        "normalChecksWriteState",
+        "leasesAcquiredByReadback",
+        "persistentDatabaseCreated",
+        "hostedRuntimeImplemented",
+        "postgresConnectionOpened",
+        "rawCrudExposed",
+        "credentialValuesStored",
+        "physicalDeleteAllowed",
+        "forecastHistoryRewriteAllowed",
+        "qualityClaimsUpgraded",
+    ]:
+        if lifecycle_lease_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI lifecycle-lease-policy boundary {key} should stay false")
+    if any(lifecycle_lease_boundary_payload.values()):
+        raise AssertionError("CLI lifecycle-lease-policy boundary flags should all stay false")
+    lifecycle_lease_check = run_cli("lifecycle-lease-policy", "--check")
+    if "checked lifecycle lease policy" not in lifecycle_lease_check.stdout:
+        raise AssertionError("CLI lifecycle-lease-policy --check did not check generated output")
+
+    runtime_transport = run_cli("runtime-transport-readiness")
+    runtime_transport_payload = json.loads(runtime_transport.stdout)
+    if runtime_transport_payload["readinessStatus"] != "runtime_transport_readiness_checked":
+        raise AssertionError("CLI runtime-transport-readiness status drifted")
+    if runtime_transport_payload["decisionStatus"] != "local_surfaces_ready_http_queue_and_hosted_deferred":
+        raise AssertionError("CLI runtime-transport-readiness decision status drifted")
+    if runtime_transport_payload["summary"]["currentSurfaceCount"] != 4:
+        raise AssertionError("CLI runtime-transport-readiness current surface count drifted")
+    if runtime_transport_payload["summary"]["futureSurfaceCount"] != 4:
+        raise AssertionError("CLI runtime-transport-readiness future surface count drifted")
+    if runtime_transport_payload["summary"]["readinessCriteriaCount"] != 10:
+        raise AssertionError("CLI runtime-transport-readiness criteria count drifted")
+    if runtime_transport_payload["summary"]["metLocalCriteriaCount"] != 6:
+        raise AssertionError("CLI runtime-transport-readiness met local criteria count drifted")
+    if runtime_transport_payload["summary"]["blockedCaseCount"] != 7:
+        raise AssertionError("CLI runtime-transport-readiness blocked case count drifted")
+    if runtime_transport_payload["hostedRuntimeAllowedNow"] is not False:
+        raise AssertionError("CLI runtime-transport-readiness must block hosted runtime")
+    if runtime_transport_payload["localHttpAllowedNow"] is not False:
+        raise AssertionError("CLI runtime-transport-readiness must defer local HTTP")
+    if runtime_transport_payload["normalChecksOffline"] is not True:
+        raise AssertionError("CLI runtime-transport-readiness normal checks should stay offline")
+    runtime_transport_current = run_cli("runtime-transport-readiness", "--view", "current")
+    runtime_transport_current_payload = json.loads(runtime_transport_current.stdout)
+    if len(runtime_transport_current_payload) != 4:
+        raise AssertionError("CLI runtime-transport-readiness current view should expose four surfaces")
+    if any(item["startsNetworkListener"] for item in runtime_transport_current_payload):
+        raise AssertionError("CLI runtime-transport-readiness current surfaces must not start listeners")
+    if any(item["hostedRuntimeRequired"] for item in runtime_transport_current_payload):
+        raise AssertionError("CLI runtime-transport-readiness current surfaces must not require hosted runtime")
+    runtime_transport_future = run_cli("runtime-transport-readiness", "--view", "future")
+    runtime_transport_future_payload = json.loads(runtime_transport_future.stdout)
+    if len(runtime_transport_future_payload) != 4:
+        raise AssertionError("CLI runtime-transport-readiness future view should expose four surfaces")
+    if any(item["implementedNow"] or item["advertisedNow"] or item["normalChecksStartSurface"] for item in runtime_transport_future_payload):
+        raise AssertionError("CLI runtime-transport-readiness future surfaces must stay unimplemented and unadvertised")
+    runtime_transport_hosted = run_cli("runtime-transport-readiness", "--surface", "hosted_service_runtime")
+    runtime_transport_hosted_payload = json.loads(runtime_transport_hosted.stdout)
+    if runtime_transport_hosted_payload["surfaceStatus"] != "blocked_pending_readiness_gate":
+        raise AssertionError("CLI runtime-transport-readiness hosted runtime status drifted")
+    if runtime_transport_hosted_payload["implementedNow"] is not False:
+        raise AssertionError("CLI runtime-transport-readiness hosted runtime must not be implemented")
+    runtime_transport_decisions = run_cli("runtime-transport-readiness", "--view", "decisions")
+    runtime_transport_decisions_payload = json.loads(runtime_transport_decisions.stdout)
+    if runtime_transport_decisions_payload["firstEmbeddedRuntime"] != "in_process_cli_agent_call_and_local_mcp":
+        raise AssertionError("CLI runtime-transport-readiness embedded runtime decision drifted")
+    if runtime_transport_decisions_payload["localHttpDecision"] != "deferred_until_adoption_need_and_security_gate":
+        raise AssertionError("CLI runtime-transport-readiness local HTTP decision drifted")
+    if runtime_transport_decisions_payload["hostedRuntimeDecision"] != "deferred_until_pilot_security_storage_and_ops_readiness":
+        raise AssertionError("CLI runtime-transport-readiness hosted decision drifted")
+    runtime_transport_blocked = run_cli("runtime-transport-readiness", "--view", "blocked")
+    runtime_transport_blocked_payload = json.loads(runtime_transport_blocked.stdout)
+    if len(runtime_transport_blocked_payload) != 7:
+        raise AssertionError("CLI runtime-transport-readiness blocked view should expose seven cases")
+    if any(item["networkListenerStarted"] for item in runtime_transport_blocked_payload):
+        raise AssertionError("CLI runtime-transport-readiness blocked cases must not start listeners")
+    if any(item["hostedRuntimeStarted"] for item in runtime_transport_blocked_payload):
+        raise AssertionError("CLI runtime-transport-readiness blocked cases must not start hosted runtime")
+    if any(item["stateWritten"] for item in runtime_transport_blocked_payload):
+        raise AssertionError("CLI runtime-transport-readiness blocked cases must not write state")
+    if any(item["sanitizedDiagnosticsOnly"] is not True for item in runtime_transport_blocked_payload):
+        raise AssertionError("CLI runtime-transport-readiness blocked cases should keep diagnostics sanitized")
+    runtime_transport_http_case = run_cli("runtime-transport-readiness", "--case", "normal_check_http_server")
+    runtime_transport_http_case_payload = json.loads(runtime_transport_http_case.stdout)
+    if runtime_transport_http_case_payload["caseStatus"] != "blocked_normal_check_network_listener":
+        raise AssertionError("CLI runtime-transport-readiness HTTP blocked case drifted")
+    runtime_transport_boundary = run_cli("runtime-transport-readiness", "--view", "boundary")
+    runtime_transport_boundary_payload = json.loads(runtime_transport_boundary.stdout)
+    for key in [
+        "networkListenerStarted",
+        "localHttpServerImplemented",
+        "hostedServiceImplemented",
+        "queueRuntimeImplemented",
+        "oppHttpProviderImplemented",
+        "normalChecksUseNetwork",
+        "normalChecksWriteState",
+        "credentialValuesStored",
+        "paymentSettlementImplemented",
+        "productionLiveFetchEnabled",
+        "qualityClaimsUpgraded",
+    ]:
+        if runtime_transport_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI runtime-transport-readiness boundary {key} should stay false")
+    if any(runtime_transport_boundary_payload.values()):
+        raise AssertionError("CLI runtime-transport-readiness boundary flags should all stay false")
+    runtime_transport_check = run_cli("runtime-transport-readiness", "--check")
+    if "checked runtime transport readiness" not in runtime_transport_check.stdout:
+        raise AssertionError("CLI runtime-transport-readiness --check did not check generated output")
+
+    workspace_tenant = run_cli("workspace-tenant-isolation")
+    workspace_tenant_payload = json.loads(workspace_tenant.stdout)
+    if workspace_tenant_payload["isolationStatus"] != "workspace_tenant_isolation_checked":
+        raise AssertionError("CLI workspace-tenant-isolation status drifted")
+    if (
+        workspace_tenant_payload["decisionStatus"]
+        != "tenant_scoped_workspaces_with_resource_source_and_queue_isolation"
+    ):
+        raise AssertionError("CLI workspace-tenant-isolation decision status drifted")
+    if workspace_tenant_payload["summary"]["tenantWorkspaceCount"] != 2:
+        raise AssertionError("CLI workspace-tenant-isolation tenant count drifted")
+    if workspace_tenant_payload["summary"]["scopeKeyCount"] != 5:
+        raise AssertionError("CLI workspace-tenant-isolation scope key count drifted")
+    if workspace_tenant_payload["summary"]["queuePolicyCount"] != 8:
+        raise AssertionError("CLI workspace-tenant-isolation queue policy count drifted")
+    if workspace_tenant_payload["summary"]["sourcePolicyCount"] != 5:
+        raise AssertionError("CLI workspace-tenant-isolation source policy count drifted")
+    if workspace_tenant_payload["summary"]["accessCaseCount"] != 7:
+        raise AssertionError("CLI workspace-tenant-isolation access case count drifted")
+    if workspace_tenant_payload["summary"]["blockedAccessCaseCount"] != 6:
+        raise AssertionError("CLI workspace-tenant-isolation blocked case count drifted")
+    if workspace_tenant_payload["normalChecksMutateState"] is not False:
+        raise AssertionError("CLI workspace-tenant-isolation must not mutate state in normal checks")
+    if workspace_tenant_payload["hostedTenantRuntimeImplemented"] is not False:
+        raise AssertionError("CLI workspace-tenant-isolation must not implement hosted tenant runtime")
+    workspace_tenant_scope = run_cli("workspace-tenant-isolation", "--view", "scope")
+    workspace_tenant_scope_payload = json.loads(workspace_tenant_scope.stdout)
+    if [item["scopeKeyName"] for item in workspace_tenant_scope_payload] != [
+        "tenant_id",
+        "workspace_id",
+        "prediction_id",
+        "source_binding_id",
+        "operation_idempotency_namespace",
+    ]:
+        raise AssertionError("CLI workspace-tenant-isolation scope key order drifted")
+    if any(item["rawValuePublic"] for item in workspace_tenant_scope_payload):
+        raise AssertionError("CLI workspace-tenant-isolation scope keys must not expose raw values")
+    workspace_tenant_queues = run_cli("workspace-tenant-isolation", "--view", "queues")
+    workspace_tenant_queues_payload = json.loads(workspace_tenant_queues.stdout)
+    if len(workspace_tenant_queues_payload) != 8:
+        raise AssertionError("CLI workspace-tenant-isolation queue view should expose eight policies")
+    if any(item["crossTenantPeekAllowed"] for item in workspace_tenant_queues_payload):
+        raise AssertionError("CLI workspace-tenant-isolation queues must block cross-tenant peek")
+    if any(item["rawQueueCrudExposed"] for item in workspace_tenant_queues_payload):
+        raise AssertionError("CLI workspace-tenant-isolation queues must not expose raw CRUD")
+    workspace_tenant_sources = run_cli("workspace-tenant-isolation", "--view", "sources")
+    workspace_tenant_sources_payload = json.loads(workspace_tenant_sources.stdout)
+    if len(workspace_tenant_sources_payload) != 5:
+        raise AssertionError("CLI workspace-tenant-isolation source view should expose five policies")
+    if any(item["crossTenantReuseAllowed"] for item in workspace_tenant_sources_payload):
+        raise AssertionError("CLI workspace-tenant-isolation sources must block cross-tenant reuse")
+    if any(item["credentialValuesStored"] or item["rawPrivateRowsStored"] for item in workspace_tenant_sources_payload):
+        raise AssertionError("CLI workspace-tenant-isolation sources must not store credentials or raw rows")
+    workspace_tenant_case = run_cli("workspace-tenant-isolation", "--case", "cross_tenant_prediction_read")
+    workspace_tenant_case_payload = json.loads(workspace_tenant_case.stdout)
+    if workspace_tenant_case_payload["caseStatus"] != "blocked_cross_tenant_prediction_read":
+        raise AssertionError("CLI workspace-tenant-isolation blocked case status drifted")
+    if workspace_tenant_case_payload["accessAllowed"] is not False:
+        raise AssertionError("CLI workspace-tenant-isolation blocked case must not allow access")
+    workspace_tenant_tenant = run_cli("workspace-tenant-isolation", "--tenant-id", "tenant-001")
+    workspace_tenant_tenant_payload = json.loads(workspace_tenant_tenant.stdout)
+    if workspace_tenant_tenant_payload["workspaceId"] != "opeworkspace-001":
+        raise AssertionError("CLI workspace-tenant-isolation tenant workspace binding drifted")
+    if workspace_tenant_tenant_payload["rawSqlExposed"] or workspace_tenant_tenant_payload["rawPrivateRowsExposed"]:
+        raise AssertionError("CLI workspace-tenant-isolation tenant view must not expose raw storage")
+    workspace_tenant_boundary = run_cli("workspace-tenant-isolation", "--view", "boundary")
+    workspace_tenant_boundary_payload = json.loads(workspace_tenant_boundary.stdout)
+    for key in [
+        "normalChecksWriteState",
+        "hostedTenantRuntimeImplemented",
+        "crossTenantReadAllowed",
+        "crossTenantSourceReuseAllowed",
+        "crossTenantQueueScanAllowed",
+        "credentialValuesStored",
+        "rawPrivateRowsStored",
+        "networkListenerStarted",
+        "rawCrudExposed",
+        "qualityClaimsUpgraded",
+    ]:
+        if workspace_tenant_boundary_payload[key] is not False:
+            raise AssertionError(f"CLI workspace-tenant-isolation boundary {key} should stay false")
+    if any(workspace_tenant_boundary_payload.values()):
+        raise AssertionError("CLI workspace-tenant-isolation boundary flags should all stay false")
+    workspace_tenant_check = run_cli("workspace-tenant-isolation", "--check")
+    if "checked workspace tenant isolation" not in workspace_tenant_check.stdout:
+        raise AssertionError("CLI workspace-tenant-isolation --check did not check generated output")
 
     transit_corpus = run_cli("transit-forward-run-corpus")
     transit_corpus_payload = json.loads(transit_corpus.stdout)
@@ -2971,7 +4263,12 @@ def main() -> None:
         item["operation"]
         for item in agent_protocol_map_payload["operations"]
     }
-    expected_protocol_operations = success_operations | {"internal_api"}
+    expected_protocol_operations = success_operations | {
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
+        "internal_api",
+    }
     if protocol_operation_names != expected_protocol_operations:
         raise AssertionError("CLI agent-protocol-map should expose every agent operation")
     protocol_runtime = agent_protocol_map_payload["adapterContract"]["protocolRuntimeImplemented"]
@@ -3130,6 +4427,28 @@ def main() -> None:
         raise AssertionError("CLI campaign-status agent-call should expose forecast-1301")
     if campaign_status_record["claimBoundary"]["qualityClaimAllowed"] is not False:
         raise AssertionError("CLI campaign-status agent-call should keep quality claims blocked")
+
+    database_runtime_call = run_cli(
+        "agent-call",
+        "--operation",
+        "database_source_adapter_runtime_status",
+    )
+    database_runtime_call_payload = json.loads(database_runtime_call.stdout)
+    if database_runtime_call_payload["status"] != "ok":
+        raise AssertionError("CLI database source-adapter runtime agent-call should return an ok envelope")
+    database_runtime_call_record = database_runtime_call_payload["payload"]
+    if database_runtime_call_record["runtimeStatus"] != "approved_database_source_adapter_runtime_checked":
+        raise AssertionError("CLI database source-adapter runtime agent-call status drifted")
+    if database_runtime_call_payload["adapterRequest"]["inputRecordType"] != "database_source_adapter_runtime":
+        raise AssertionError("CLI database source-adapter runtime agent-call input type drifted")
+    if database_runtime_call_record["summary"]["approvedExecutionPathCount"] != 1:
+        raise AssertionError("CLI database source-adapter runtime agent-call should expose one approved path")
+    if database_runtime_call_record["executionBoundary"]["normalChecksConnectToDatabase"] is not False:
+        raise AssertionError("CLI database source-adapter runtime agent-call must not connect to databases")
+    if database_runtime_call_record["executionBoundary"]["credentialValuesStored"] is not False:
+        raise AssertionError("CLI database source-adapter runtime agent-call must not store credentials")
+    if database_runtime_call_record["executionBoundary"]["rawPrivateRowsStored"] is not False:
+        raise AssertionError("CLI database source-adapter runtime agent-call must not store raw rows")
 
     source_guidance_call = run_cli(
         "agent-call",

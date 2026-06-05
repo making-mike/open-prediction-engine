@@ -36,6 +36,9 @@ OPERATIONS = [
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "agent_integration_readiness",
+    "agent_integration_candidates",
+    "agent_integration_guided_forecast",
     "campaign_plan",
     "campaign_status",
     "campaign_health",
@@ -63,6 +66,9 @@ INPUT_RECORD_TYPES = {
     "private_setup_source_handoff": "source_intake_handoff",
     "private_setup_method_gate": "source_handoff_method_gate",
     "private_setup_forecast_execution": "setup_forecast_run",
+    "agent_integration_readiness": "agent_integration",
+    "agent_integration_candidates": "agent_integration",
+    "agent_integration_guided_forecast": "agent_integration",
     "campaign_plan": "prediction_campaign_manifest",
     "campaign_status": "prediction_campaign_explain",
     "campaign_health": "prediction_campaign_doctor",
@@ -90,6 +96,9 @@ SIDE_EFFECT_LEVELS = {
     "private_setup_source_handoff": "dry_run_generation",
     "private_setup_method_gate": "dry_run_generation",
     "private_setup_forecast_execution": "forecast_execution",
+    "agent_integration_readiness": "read_only",
+    "agent_integration_candidates": "read_only",
+    "agent_integration_guided_forecast": "read_only",
     "campaign_plan": "read_only",
     "campaign_status": "read_only",
     "campaign_health": "read_only",
@@ -117,6 +126,9 @@ USAGE_GUIDANCE = {
     "private_setup_source_handoff": "Use after source-builder guidance to inspect checked source-handoff next actions and confirmation gates.",
     "private_setup_method_gate": "Use after confirmed source-handoff guidance to inspect setup benchmark and method-decision readiness.",
     "private_setup_forecast_execution": "Use only after method-gate readiness to run checked setup forecast execution and return artifacts for allowed cases; read generated forecasts through normal read operations.",
+    "agent_integration_readiness": "Use when an agent wants to know whether OPE can be incorporated into a local app from approved files or sanitized adapter outputs without executing source reads.",
+    "agent_integration_candidates": "Use when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.",
+    "agent_integration_guided_forecast": "Use when an agent has accepted source context and wants the fastest checked path to a forecast-card read command without hidden live fetches or private-source execution.",
     "campaign_plan": "Use when an agent needs the checked repeating campaign plan and candidate run IDs without starting a runner.",
     "campaign_status": "Use when an agent needs the campaign explain readback for next forecast, next resolution, evidence threshold, and claim boundary without creating campaign artifacts.",
     "campaign_health": "Use when an agent needs campaign doctor health, queue, duplicate, and recovery guidance without executing resolvers.",
@@ -144,6 +156,9 @@ HTTP_PATHS = {
     "private_setup_source_handoff": "/agent/private-setup-source-handoff",
     "private_setup_method_gate": "/agent/private-setup-method-gate",
     "private_setup_forecast_execution": "/agent/private-setup-forecast-execution",
+    "agent_integration_readiness": "/agent/agent-integration-readiness",
+    "agent_integration_candidates": "/agent/agent-integration-candidates",
+    "agent_integration_guided_forecast": "/agent/agent-integration-guided-forecast",
     "campaign_plan": "/agent/campaign-plan",
     "campaign_status": "/agent/campaign-status",
     "campaign_health": "/agent/campaign-health",
@@ -386,6 +401,46 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
             ),
             *common,
         ]
+    if operation == "agent_integration_readiness":
+        return [
+            field(
+                "scenario",
+                False,
+                "string",
+                "agent-call --scenario",
+                "Optional checked starter scenario; currently helsinki_bus_disruption.",
+            ),
+            *common,
+        ]
+    if operation == "agent_integration_candidates":
+        return [
+            field(
+                "scenario",
+                False,
+                "string",
+                "agent-call --scenario",
+                "Optional checked starter scenario; currently helsinki_bus_disruption.",
+            ),
+            *common,
+        ]
+    if operation == "agent_integration_guided_forecast":
+        return [
+            field(
+                "scenario",
+                False,
+                "string",
+                "agent-call --scenario",
+                "Optional checked starter scenario; currently helsinki_bus_disruption.",
+            ),
+            field(
+                "guidedCase",
+                False,
+                "string",
+                "agent-call --case",
+                "Checked guided forecast case; blocked cases return blocker codes and no forecast artifacts.",
+            ),
+            *common,
+        ]
     return [
         field(
             "forecastId",
@@ -476,6 +531,25 @@ def cli_command(operation: str) -> str:
             "--private-setup-request-id privatesetuprequest-001 "
             "--forecast-execution-case confirmed_builder_draft"
         )
+    if operation == "agent_integration_readiness":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation agent_integration_readiness "
+            "--scenario helsinki_bus_disruption"
+        )
+    if operation == "agent_integration_candidates":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation agent_integration_candidates "
+            "--scenario helsinki_bus_disruption"
+        )
+    if operation == "agent_integration_guided_forecast":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation agent_integration_guided_forecast "
+            "--scenario helsinki_bus_disruption "
+            "--case accepted_adapter_output"
+        )
     if operation in {
         "campaign_plan",
         "campaign_status",
@@ -520,6 +594,9 @@ def approval_gate(operation: str) -> str:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -539,6 +616,12 @@ def approval_gate(operation: str) -> str:
         return "Method-gate adapter cases must preserve setup benchmark and method-decision gates before recommending explicit forecast execution."
     if operation == "private_setup_forecast_execution":
         return "Forecast-execution adapter calls must require method-gate permission and remain blocked for unconfirmed, insufficient, rejected, or leakage cases."
+    if operation in {
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
+    }:
+        return "Agent integration readbacks are local and approval-free, but accepted sources must already be approved files or sanitized adapter outputs."
     return "Evidence planning may return approval_required and must not perform live fetches, paid calls, or private-source access."
 
 
@@ -563,6 +646,12 @@ def credential_boundary(operation: str) -> str:
         return "Method-gate adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
     if operation == "private_setup_forecast_execution":
         return "Forecast-execution adapter arguments may include checked case IDs only, not raw private payloads, credentials, or tokens."
+    if operation in {
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
+    }:
+        return "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
     if operation in {
         "campaign_plan",
         "campaign_status",
@@ -780,6 +869,27 @@ def decision_examples() -> list[dict[str, Any]]:
             "reason": "The adapter returns a setup forecast run plus forecast artifacts only for the allowed confirmed handoff.",
             "requiredSignals": ["runStatus", "setupForecastRunId", "forecastArtifactsCreated", "forecastId"],
             "downstreamRule": "Use the returned forecastId and questionId with forecast_card, lifecycle_bundle, resolution_status, or scoring_summary; do not invent a private setup read API.",
+        },
+        {
+            "situation": "The agent wants to incorporate OPE into a local app and needs to know whether the starter source roles are ready.",
+            "preferredOperation": "agent_integration_readiness",
+            "reason": "The readiness readback returns the starter pack, source roles, local surface, and first-forecast fast target without executing source reads.",
+            "requiredSignals": ["scenario", "sourceRoles", "sourceReadiness", "executionBoundary"],
+            "downstreamRule": "Use readiness before candidate discovery; do not treat it as hosted runtime, private-source execution, or quality validation.",
+        },
+        {
+            "situation": "The agent asks what can be forecasted from app intent and approved source context.",
+            "preferredOperation": "agent_integration_candidates",
+            "reason": "The candidates readback returns forecastable, clarification, blocked, and rejected contracts with exact reason codes.",
+            "requiredSignals": ["status", "questionText", "reasonCodes", "forecastArtifactsAllowed"],
+            "downstreamRule": "Only forecastable candidates may proceed; needs_clarification, blocked, and rejected cases must not create forecast artifacts.",
+        },
+        {
+            "situation": "The agent has an accepted Helsinki starter case and needs the fastest path to a forecast card.",
+            "preferredOperation": "agent_integration_guided_forecast",
+            "reason": "The guided readback returns forecastId, questionId, forecast-card command, lifecycle-bundle command, call-count metrics, and blockers.",
+            "requiredSignals": ["guidedStatus", "toolCallCount", "forecastCardCommand", "blockerCodes"],
+            "downstreamRule": "Run only from accepted approved-source context; blocked guided cases must return no forecast IDs and no forecast-card command.",
         },
         {
             "situation": "The agent needs to know whether any forward-run forecasts are due for outcome resolution.",

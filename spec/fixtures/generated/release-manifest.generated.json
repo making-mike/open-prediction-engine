@@ -25,19 +25,25 @@
     "cli": "python3 scripts/ope.py"
   },
   "contracts": {
-    "schemaFileCount": 102,
+    "schemaFileCount": 117,
     "schemaFiles": [
       "spec/agent-adapter-protocol-map.schema.json",
       "spec/agent-envelope.schema.json",
       "spec/agent-forecast-runbook.schema.json",
+      "spec/agent-implementation-kit.schema.json",
+      "spec/agent-integration.schema.json",
       "spec/agent-pilot-validation.schema.json",
       "spec/aggregate-forecast.schema.json",
+      "spec/background-worker-runtime.schema.json",
       "spec/benchmark-run.schema.json",
       "spec/calibration-summary.schema.json",
       "spec/common.schema.json",
+      "spec/credential-reference-policy.schema.json",
+      "spec/database-source-adapter-runtime.schema.json",
       "spec/developer-adoption-surface.schema.json",
       "spec/domain-config.schema.json",
       "spec/domain-setup.schema.json",
+      "spec/domain-source-field-policy.schema.json",
       "spec/evidence-gathering-plan.schema.json",
       "spec/evidence-packet.schema.json",
       "spec/evidence-source-set.schema.json",
@@ -54,6 +60,7 @@
       "spec/helsinki-traffic-disturbance-pilot-runbook.schema.json",
       "spec/helsinki-traffic-pilot-readiness.schema.json",
       "spec/internal-api.schema.json",
+      "spec/lifecycle-lease-policy.schema.json",
       "spec/lifecycle-operation.schema.json",
       "spec/live-connector-readiness.schema.json",
       "spec/local-source-runtime.schema.json",
@@ -61,10 +68,13 @@
       "spec/method-comparison.schema.json",
       "spec/method-registry.schema.json",
       "spec/method-selection.schema.json",
+      "spec/opp-provider-adapter.schema.json",
+      "spec/persistent-sqlite-policy.schema.json",
       "spec/pilot-evidence-ledger.schema.json",
       "spec/pilot-session-packet.schema.json",
       "spec/pilot-summary-intake.schema.json",
       "spec/pipeline-run.schema.json",
+      "spec/postgres-compatibility.schema.json",
       "spec/prediction-campaign-calibration-status.schema.json",
       "spec/prediction-campaign-doctor.schema.json",
       "spec/prediction-campaign-evidence-ledger.schema.json",
@@ -80,6 +90,7 @@
       "spec/prediction-campaign-resume.schema.json",
       "spec/prediction-campaign-runner.schema.json",
       "spec/prediction-workspace-registry.schema.json",
+      "spec/private-auto-evidence-policy.schema.json",
       "spec/private-setup-adapter-chain-runbook.schema.json",
       "spec/private-setup-adapter-conformance-matrix.schema.json",
       "spec/private-setup-adapter-conformance-summary.schema.json",
@@ -103,6 +114,9 @@
       "spec/resolution-record.schema.json",
       "spec/resolution-runtime-reliability.schema.json",
       "spec/resolution-scheduler-run.schema.json",
+      "spec/retention-redaction-policy.schema.json",
+      "spec/runtime-security.schema.json",
+      "spec/runtime-transport-readiness.schema.json",
       "spec/scoring-report.schema.json",
       "spec/setup-benchmark-gate.schema.json",
       "spec/setup-forecast-run.schema.json",
@@ -128,7 +142,8 @@
       "spec/transit-forward-run-corpus.schema.json",
       "spec/transit-forward-run-resolver.schema.json",
       "spec/transit-live-evidence-promotion.schema.json",
-      "spec/transit-method-options.schema.json"
+      "spec/transit-method-options.schema.json",
+      "spec/workspace-tenant-isolation.schema.json"
     ]
   },
   "readSurfaces": [
@@ -168,7 +183,9 @@
     "supportedSourceInputs": [
       "approved_local_csv_json",
       "approved_local_folder_runtime",
+      "approved_database_adapter_runtime",
       "accepted_source_adapter_output",
+      "agent_integration_starter_pack",
       "committed_fixture_request",
       "policy_bound_promoted_fixture_source_set"
     ],
@@ -177,6 +194,7 @@
       "forecastCommand": "python3 scripts/ope.py forecast-run",
       "readbackCommands": [
         "python3 scripts/ope.py local-source-runtime",
+        "python3 scripts/ope.py agent-integrate",
         "python3 scripts/ope.py developer-adoption",
         "python3 scripts/ope.py pilot-evidence",
         "python3 scripts/ope.py pilot-session-packet",
@@ -219,6 +237,17 @@
         "python3 scripts/ope.py prediction-campaign pilot-readiness",
         "python3 scripts/ope.py prediction-campaign pilot-readiness --view commands",
         "python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watch --max-ticks 1 --output-format jsonl",
+        "python3 scripts/ope.py postgres-compatibility",
+        "python3 scripts/ope.py database-source-adapter-runtime",
+        "python3 scripts/ope.py opp-provider-adapter",
+        "python3 scripts/ope.py persistent-sqlite-policy",
+        "python3 scripts/ope.py lifecycle-lease-policy",
+        "python3 scripts/ope.py runtime-transport-readiness",
+        "python3 scripts/ope.py workspace-tenant-isolation",
+        "python3 scripts/ope.py domain-source-field-policy",
+        "python3 scripts/ope.py credential-reference-policy",
+        "python3 scripts/ope.py retention-redaction-policy",
+        "python3 scripts/ope.py private-auto-evidence-policy",
         "python3 scripts/ope.py agent-call --operation campaign_plan",
         "python3 scripts/ope.py agent-call --operation campaign_status",
         "python3 scripts/ope.py agent-call --operation campaign_health",
@@ -275,6 +304,76 @@
         "checkId": "mvp-smoke-local-source-runtime",
         "command": "python3 scripts/ope.py local-source-runtime",
         "expected": "approved local-folder runtime binds to forecast-1102 and exposes blocked examples without creating artifacts directly."
+      },
+      {
+        "checkId": "mvp-smoke-runtime-security",
+        "command": "python3 scripts/ope.py runtime-security",
+        "expected": "lightweight runtime hardening readback exposes dependency budget, module boundaries, runtime surface controls, threat notes, and blocked examples without starting hidden services."
+      },
+      {
+        "checkId": "mvp-smoke-agent-implementation-kit",
+        "command": "python3 scripts/ope.py agent-implementation-kit",
+        "expected": "agent prediction implementation kit exposes the compact manual, question-discovery intake, candidate readbacks, validation reports, adapter guidance, and starter templates without creating forecast artifacts."
+      },
+      {
+        "checkId": "mvp-smoke-agent-integration",
+        "command": "python3 scripts/ope.py agent-integrate",
+        "expected": "agent incorporation golden path exposes Helsinki starter readiness, forecastable and non-forecastable candidates, guided forecast-card command, and first-forecast-fast metrics without hosted runtime or claim upgrades."
+      },
+      {
+        "checkId": "mvp-smoke-postgres-compatibility",
+        "command": "python3 scripts/ope.py postgres-compatibility",
+        "expected": "SQLite-to-Postgres lifecycle storage semantics are checked while Postgres connections, migrations, hosted storage, and production database operations stay outside normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-database-source-adapter-runtime",
+        "command": "python3 scripts/ope.py database-source-adapter-runtime",
+        "expected": "caller-approved database adapter output is checked through one sanitized fixture path while production DB connections, credential values, raw rows, and DB-specific forecast paths remain blocked."
+      },
+      {
+        "checkId": "mvp-smoke-opp-provider-adapter",
+        "command": "python3 scripts/ope.py opp-provider-adapter",
+        "expected": "optional OPP provider adapter mappings, Agent Card, accepted response, blocked cases, and conformance plan are checked without starting HTTP, SSE, payment, aggregation, or hosted service runtimes."
+      },
+      {
+        "checkId": "mvp-smoke-persistent-sqlite-policy",
+        "command": "python3 scripts/ope.py persistent-sqlite-policy",
+        "expected": "opt-in persistent SQLite path policy is checked with caller approval, allowlisted .ope/state paths, migration backup and lock guards, and no normal persistent database creation."
+      },
+      {
+        "checkId": "mvp-smoke-lifecycle-lease-policy",
+        "command": "python3 scripts/ope.py lifecycle-lease-policy",
+        "expected": "lifecycle operation lease policy is checked with nine strict-lease operations, five idempotency-only operations, conflict cases, and no lease acquisition or state mutation in normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-runtime-transport-readiness",
+        "command": "python3 scripts/ope.py runtime-transport-readiness",
+        "expected": "runtime transport readiness is checked with local in-process, CLI, agent-call, and MCP surfaces ready while local HTTP, queue, hosted service, and OPP HTTP provider behavior remain deferred and non-networked in normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-workspace-tenant-isolation",
+        "command": "python3 scripts/ope.py workspace-tenant-isolation",
+        "expected": "tenant-scoped workspace isolation is checked for resource limits, source bindings, operation queues, credential references, blocked cross-tenant access, and non-mutating normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-domain-source-field-policy",
+        "command": "python3 scripts/ope.py domain-source-field-policy",
+        "expected": "universal domain fields, universal source-binding fields, domain-specific extension containers, source-kind credential references, and blocked raw/claim fields are classified without generating runtime types or creating artifacts."
+      },
+      {
+        "checkId": "mvp-smoke-credential-reference-policy",
+        "command": "python3 scripts/ope.py credential-reference-policy",
+        "expected": "opaque caller-owned credential references are checked with tenant/workspace/source/adapter scope, lifecycle and consumer rules, blocked raw secret cases, and no secret resolution or storage in normal checks."
+      },
+      {
+        "checkId": "mvp-smoke-retention-redaction-policy",
+        "command": "python3 scripts/ope.py retention-redaction-policy",
+        "expected": "retention and redaction policy is checked with append-only retention, archive tombstones, redaction receipts, physical-delete exception gates, and no silent or normal-check physical deletion."
+      },
+      {
+        "checkId": "mvp-smoke-private-auto-evidence-policy",
+        "command": "python3 scripts/ope.py private-auto-evidence-policy",
+        "expected": "private data:auto source-policy is checked with bound source kinds, policy gates, blocked web search/raw SQL/raw payload cases, and no private-source reads or secret resolution in normal checks."
       },
       {
         "checkId": "mvp-smoke-developer-adoption",
@@ -569,7 +668,27 @@
         "source_quality_mapping_confidence_quality_claim",
         "local_source_runtime_arbitrary_private_api",
         "local_source_runtime_credential_storage",
-        "local_source_runtime_hosted_runtime"
+        "local_source_runtime_hosted_runtime",
+        "postgres_runtime_execution",
+        "postgres_migration_execution",
+        "hosted_storage_claim",
+        "database_source_adapter_production_connection",
+        "database_source_adapter_credential_values",
+        "database_source_adapter_raw_private_rows",
+        "opp_provider_http_runtime",
+        "opp_provider_sse_streaming",
+        "opp_provider_payment_settlement",
+        "opp_provider_aggregation",
+        "persistent_sqlite_default_runtime",
+        "persistent_sqlite_normal_check_state_write",
+        "persistent_sqlite_automatic_json_migration",
+        "persistent_sqlite_unapproved_path",
+        "lifecycle_lease_policy_readback_lease_acquisition",
+        "lifecycle_lease_policy_raw_lock_control",
+        "runtime_transport_http_listener",
+        "runtime_transport_hosted_service",
+        "runtime_transport_queue_runtime",
+        "runtime_transport_opp_http_provider"
       ]
     }
   },
@@ -600,6 +719,23 @@
     "source_adapter_intake_raw_private_rows",
     "source_adapter_intake_forecast_execution",
     "generic_private_api_database_runtime",
+    "database_source_adapter_production_connection",
+    "database_source_adapter_credential_values",
+    "database_source_adapter_raw_private_rows",
+    "opp_provider_http_runtime",
+    "opp_provider_sse_streaming",
+    "opp_provider_payment_settlement",
+    "opp_provider_aggregation",
+    "persistent_sqlite_default_runtime",
+    "persistent_sqlite_normal_check_state_write",
+    "persistent_sqlite_automatic_json_migration",
+    "persistent_sqlite_unapproved_path",
+    "lifecycle_lease_policy_readback_lease_acquisition",
+    "lifecycle_lease_policy_raw_lock_control",
+    "runtime_transport_http_listener",
+    "runtime_transport_hosted_service",
+    "runtime_transport_queue_runtime",
+    "runtime_transport_opp_http_provider",
     "generic_manual_upload_runtime",
     "private_source_adapter_execution",
     "private_source_adapter_outcome_execution",
@@ -676,6 +812,20 @@
     "local_source_runtime_live_fetch",
     "local_source_runtime_hosted_runtime",
     "local_source_runtime_forecast_artifact_creation",
+    "runtime_security_independent_audit_claim",
+    "runtime_security_secret_manager",
+    "runtime_security_hosted_runtime_execution",
+    "runtime_security_live_source_execution",
+    "runtime_security_private_database_connector",
+    "agent_implementation_kit_free_form_oracle",
+    "agent_implementation_kit_question_discovery_artifact_creation",
+    "agent_implementation_kit_raw_crud_writes",
+    "agent_implementation_kit_hidden_live_fetch",
+    "agent_implementation_kit_credential_storage",
+    "agent_implementation_kit_automatic_method_upgrade",
+    "postgres_runtime_execution",
+    "postgres_migration_execution",
+    "hosted_storage_claim",
     "developer_adoption_surface_command_execution",
     "developer_adoption_surface_type_generation",
     "developer_adoption_surface_quality_claim",

@@ -43,6 +43,10 @@ EVENT_ORDER = [
     "campaign_paused",
     "campaign_resumed",
     "campaign_stopped",
+    "agent_integration_readiness",
+    "agent_integration_candidates",
+    "agent_integration_guided_forecast",
+    "agent_integration_missing_weather_block",
 ]
 
 
@@ -406,6 +410,71 @@ def build_events() -> list[dict[str, Any]]:
             binding=record_binding(record_type="prediction-campaign-calibration-status", record_id="predictioncampaigncalibrationstatus-001"),
             trace_row=trace(elapsed_ms=260, exit_code=0, response_bytes=1500, response_size_class="standard"),
         ),
+        event(
+            index=21,
+            source_case="agent_integration_readiness",
+            actor="agent",
+            interface="cli",
+            event_class="agent_integration",
+            command="python3 scripts/ope.py agent-integrate --scenario helsinki_bus_disruption --view summary",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1102",
+                question_id="question-1102",
+                record_type="agent-integration",
+                record_id="agentintegration-001",
+            ),
+            trace_row=trace(elapsed_ms=110, exit_code=0, response_bytes=5600, response_size_class="standard"),
+        ),
+        event(
+            index=22,
+            source_case="agent_integration_candidates",
+            actor="agent",
+            interface="cli",
+            event_class="agent_integration",
+            command="python3 scripts/ope.py agent-integrate --view candidates",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1102",
+                question_id="question-1102",
+                record_type="agent-integration",
+                record_id="agentintegration-001",
+            ),
+            trace_row=trace(elapsed_ms=115, exit_code=0, response_bytes=7200, response_size_class="standard"),
+        ),
+        event(
+            index=23,
+            source_case="agent_integration_guided_forecast",
+            actor="agent",
+            interface="cli",
+            event_class="agent_integration",
+            command="python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+            outcome="success",
+            binding=record_binding(
+                forecast_id="forecast-1102",
+                question_id="question-1102",
+                record_type="agent-integration",
+                record_id="guidedforecastcase-001",
+            ),
+            trace_row=trace(elapsed_ms=95, exit_code=0, response_bytes=900, response_size_class="compact"),
+        ),
+        event(
+            index=24,
+            source_case="agent_integration_missing_weather_block",
+            actor="agent",
+            interface="cli",
+            event_class="agent_integration",
+            command="python3 scripts/ope.py agent-integrate --run-guided --case missing_weather_source",
+            outcome="blocked",
+            binding=record_binding(record_type="agent-integration", record_id="guidedforecastcase-002"),
+            trace_row=trace(
+                elapsed_ms=90,
+                exit_code=0,
+                response_bytes=850,
+                response_size_class="compact",
+                sanitized_error_class="missing_source",
+            ),
+        ),
     ]
 
 
@@ -493,6 +562,14 @@ def build_metric_readbacks(aggregate: dict[str, Any]) -> list[dict[str, Any]]:
             "value": rate(aggregate["localOnlyEvents"], aggregate["totalEvents"]),
             "interpretation": "The checked trace model remains local-only and privacy-preserving.",
         },
+        {
+            "metricId": "agent_integration_first_forecast_fast",
+            "description": "Whether the Helsinki starter flow reaches a forecast-card command within the three-call target.",
+            "numerator": 1,
+            "denominator": 1,
+            "value": 1.0,
+            "interpretation": "Readiness, candidates, and guided forecast produce a forecast-card command while blocked source cases remain explicit.",
+        },
     ]
 
 
@@ -551,7 +628,7 @@ def validate_local_usage_trace(trace_model: dict[str, Any]) -> None:
     if interfaces != {"cli", "agent_call", "mcp_stdio", "checker"}:
         raise LocalUsageTraceError("local usage trace interface coverage drifted")
     classes = {item["eventClass"] for item in events}
-    required_classes = {"setup", "forecast_run", "readback", "blocked_path", "release_surface_smoke", "agent_call", "mcp_stdio", "claim_gate", "validation_pack", "campaign"}
+    required_classes = {"setup", "forecast_run", "readback", "blocked_path", "release_surface_smoke", "agent_call", "mcp_stdio", "claim_gate", "validation_pack", "campaign", "agent_integration"}
     if classes != required_classes:
         raise LocalUsageTraceError("local usage trace event class coverage drifted")
     for item in events:

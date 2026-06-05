@@ -82,6 +82,9 @@ def main() -> None:
         "private_setup_adapter_conformance_summary",
         "private_source_adapter_guidance",
         "private_source_kind_selection",
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -263,6 +266,40 @@ def main() -> None:
         "generated private setup forecasts" in operations["forecast_card"]["usageGuidance"],
         "forecast-card guidance should cover setup-generated readback",
     )
+    readiness = operations["agent_integration_readiness"]
+    require(readiness["sideEffectLevel"] == "read_only", "agent integration readiness should be read-only")
+    require(readiness["inputRecordType"] == "agent_integration", "agent integration readiness should bind integration records")
+    readiness_fields = {item["name"]: item for item in readiness["inputFields"]}
+    require(set(readiness_fields) == {"scenario", "maxBytes", "callerIntent"}, "readiness should expose only safe selector fields")
+    require(
+        "without executing source reads" in readiness["usageGuidance"],
+        "readiness guidance should preserve non-execution",
+    )
+    candidates = operations["agent_integration_candidates"]
+    require(candidates["sideEffectLevel"] == "read_only", "agent integration candidates should be read-only")
+    require(candidates["inputRecordType"] == "agent_integration", "agent integration candidates should bind integration records")
+    candidate_fields = {item["name"]: item for item in candidates["inputFields"]}
+    require(set(candidate_fields) == {"scenario", "maxBytes", "callerIntent"}, "candidates should expose only safe selector fields")
+    require(
+        "exact reason codes" in candidates["usageGuidance"],
+        "candidate guidance should name exact reason codes",
+    )
+    guided = operations["agent_integration_guided_forecast"]
+    require(guided["sideEffectLevel"] == "read_only", "agent integration guided forecast should be read-only")
+    require(guided["inputRecordType"] == "agent_integration", "guided forecast should bind integration records")
+    guided_fields = {item["name"]: item for item in guided["inputFields"]}
+    require(
+        set(guided_fields) == {"scenario", "guidedCase", "maxBytes", "callerIntent"},
+        "guided forecast should expose only scenario, guidedCase, and common safe fields",
+    )
+    require(
+        "blocked cases return blocker codes" in guided_fields["guidedCase"]["notes"],
+        "guidedCase notes should describe blocked behavior",
+    )
+    require(
+        "without hidden live fetches" in guided["usageGuidance"],
+        "guided forecast guidance should block hidden live fetches",
+    )
     resolution_jobs = operations["resolution_jobs"]
     require(
         resolution_jobs["sideEffectLevel"] == "read_only",
@@ -325,6 +362,9 @@ def main() -> None:
         "private_setup_source_handoff",
         "private_setup_method_gate",
         "private_setup_forecast_execution",
+        "agent_integration_readiness",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
         "resolution_jobs",
         "resolution_scheduler_status",
         "resolution_status",

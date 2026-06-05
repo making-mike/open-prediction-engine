@@ -1,0 +1,572 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-integration.schema.json",
+  "title": "Agent Integration Golden Path",
+  "description": "Checked local CLI/MCP readback for helping agents discover forecastable questions, validate blockers, and reach a first forecast card from approved sources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentIntegrationId",
+    "generatedAt",
+    "integrationStatus",
+    "scenario",
+    "surface",
+    "intake",
+    "starterPack",
+    "candidateQuestions",
+    "validationReports",
+    "guidedForecastCases",
+    "commands",
+    "mcpTools",
+    "efficiencyGate",
+    "summary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "agentIntegrationId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "integrationStatus": {
+      "type": "string",
+      "enum": ["agent_integration_golden_path_checked"]
+    },
+    "scenario": {
+      "type": "string",
+      "enum": ["helsinki_bus_disruption"]
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primaryTransport",
+        "cliCommand",
+        "mcpTools",
+        "hostedRuntimeImplemented",
+        "normalChecksFetchLiveData",
+        "normalChecksCreateArtifacts"
+      ],
+      "properties": {
+        "primaryTransport": {
+          "type": "string",
+          "enum": ["local_cli_mcp"]
+        },
+        "cliCommand": { "$ref": "#/$defs/boundedString" },
+        "mcpTools": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "normalChecksFetchLiveData": { "type": "boolean" },
+        "normalChecksCreateArtifacts": { "type": "boolean" }
+      }
+    },
+    "intake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intakeContractId",
+        "appIntent",
+        "decisionToSupport",
+        "requiredFields",
+        "approvedSourceContext",
+        "forbiddenInputs",
+        "normalizesToExistingSurfaces",
+        "createsForecastArtifacts"
+      ],
+      "properties": {
+        "intakeContractId": { "$ref": "common.schema.json#/$defs/id" },
+        "appIntent": { "$ref": "#/$defs/boundedString" },
+        "decisionToSupport": { "$ref": "#/$defs/boundedString" },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/intakeField" }
+        },
+        "approvedSourceContext": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "forbiddenInputs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "normalizesToExistingSurfaces": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    },
+    "starterPack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "starterPackId",
+        "domainKey",
+        "sourceRoles",
+        "sourceReadiness",
+        "requiredFields",
+        "missingFieldBlockers",
+        "resolutionBoundary"
+      ],
+      "properties": {
+        "starterPackId": { "$ref": "common.schema.json#/$defs/id" },
+        "domainKey": { "$ref": "#/$defs/boundedString" },
+        "sourceRoles": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/sourceRole" }
+        },
+        "sourceReadiness": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/sourceReadiness" }
+        },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/requiredSourceField" }
+        },
+        "missingFieldBlockers": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/blocker" }
+        },
+        "resolutionBoundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "outcomeEvidenceResolutionOnly",
+            "forecastTimeOutcomeRowsAllowed",
+            "usesApprovedFilesAndSanitizedAdaptersOnly"
+          ],
+          "properties": {
+            "outcomeEvidenceResolutionOnly": { "type": "boolean" },
+            "forecastTimeOutcomeRowsAllowed": { "type": "boolean" },
+            "usesApprovedFilesAndSanitizedAdaptersOnly": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "candidateQuestions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/candidateQuestion" }
+    },
+    "validationReports": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/validationReport" }
+    },
+    "guidedForecastCases": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/guidedForecastCase" }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "mcpTools": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/mcpTool" }
+    },
+    "efficiencyGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "efficiencyGateId",
+        "routineToolCallTarget",
+        "acceptedCaseToolCallCount",
+        "elapsedLocalReadbackSeconds",
+        "decisionsAvoided",
+        "forecastCardSuccessStatus",
+        "firstForecastFastTargetMet",
+        "blockersEncountered",
+        "blockedClaimUpgrades"
+      ],
+      "properties": {
+        "efficiencyGateId": { "$ref": "common.schema.json#/$defs/id" },
+        "routineToolCallTarget": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "acceptedCaseToolCallCount": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "elapsedLocalReadbackSeconds": { "type": "number", "minimum": 0 },
+        "decisionsAvoided": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "forecastCardSuccessStatus": { "$ref": "#/$defs/boundedString" },
+        "firstForecastFastTargetMet": { "type": "boolean" },
+        "blockersEncountered": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "blockedClaimUpgrades": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastableCandidateCount",
+        "needsClarificationCandidateCount",
+        "blockedCandidateCount",
+        "rejectedCandidateCount",
+        "guidedCaseCount",
+        "acceptedGuidedCaseCount",
+        "firstForecastFastTargetMet",
+        "forecastId",
+        "questionId",
+        "qualityClaimAllowed",
+        "hostedRuntimeImplemented"
+      ],
+      "properties": {
+        "forecastableCandidateCount": { "type": "integer", "minimum": 0 },
+        "needsClarificationCandidateCount": { "type": "integer", "minimum": 0 },
+        "blockedCandidateCount": { "type": "integer", "minimum": 0 },
+        "rejectedCandidateCount": { "type": "integer", "minimum": 0 },
+        "guidedCaseCount": { "type": "integer", "minimum": 0 },
+        "acceptedGuidedCaseCount": { "type": "integer", "minimum": 0 },
+        "firstForecastFastTargetMet": { "type": "boolean" },
+        "forecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "questionId": { "$ref": "common.schema.json#/$defs/id" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvedFilesAndSanitizedAdaptersOnly",
+        "normalChecksAreReadOnly",
+        "hostedRuntimeImplemented",
+        "arbitraryPrivateApiParsingAllowed",
+        "arbitraryDatabaseParsingAllowed",
+        "generatedRuntimeTypesEnabled",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "hiddenLiveFetchAllowed",
+        "rawSqlAllowed",
+        "credentialValuesAccepted",
+        "rawPrivateRowsExposed",
+        "privateSourceExecutionAllowed",
+        "normalChecksMutateState",
+        "normalChecksNetworkAccess",
+        "forecastArtifactsCreatedByBlockedCases",
+        "hostedRuntimeBlocked",
+        "qualityClaimUpgradeBlocked",
+        "calibrationClaimUpgradeBlocked"
+      ],
+      "properties": {
+        "approvedFilesAndSanitizedAdaptersOnly": { "type": "boolean" },
+        "normalChecksAreReadOnly": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" },
+        "arbitraryPrivateApiParsingAllowed": { "type": "boolean" },
+        "arbitraryDatabaseParsingAllowed": { "type": "boolean" },
+        "generatedRuntimeTypesEnabled": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" },
+        "hiddenLiveFetchAllowed": { "type": "boolean" },
+        "rawSqlAllowed": { "type": "boolean" },
+        "credentialValuesAccepted": { "type": "boolean" },
+        "rawPrivateRowsExposed": { "type": "boolean" },
+        "privateSourceExecutionAllowed": { "type": "boolean" },
+        "normalChecksMutateState": { "type": "boolean" },
+        "normalChecksNetworkAccess": { "type": "boolean" },
+        "forecastArtifactsCreatedByBlockedCases": { "type": "boolean" },
+        "hostedRuntimeBlocked": { "type": "boolean" },
+        "qualityClaimUpgradeBlocked": { "type": "boolean" },
+        "calibrationClaimUpgradeBlocked": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 900
+    },
+    "idOrNull": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "commandOrNull": {
+      "oneOf": [
+        { "$ref": "#/$defs/boundedString" },
+        { "type": "null" }
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["forecastable", "needs_clarification", "blocked", "rejected"]
+    },
+    "intakeField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldName",
+        "fieldType",
+        "purpose",
+        "required",
+        "credentialValueAllowed",
+        "rawPrivateRowsAllowed"
+      ],
+      "properties": {
+        "fieldName": { "$ref": "#/$defs/boundedString" },
+        "fieldType": { "$ref": "#/$defs/boundedString" },
+        "purpose": { "$ref": "#/$defs/boundedString" },
+        "required": { "type": "boolean" },
+        "credentialValueAllowed": { "type": "boolean" },
+        "rawPrivateRowsAllowed": { "type": "boolean" }
+      }
+    },
+    "sourceRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roleKey",
+        "sourceKind",
+        "purpose",
+        "required",
+        "forecastTimeAllowed",
+        "resolutionOnly",
+        "approvedInputKinds",
+        "requiredFields"
+      ],
+      "properties": {
+        "roleKey": { "$ref": "#/$defs/boundedString" },
+        "sourceKind": { "$ref": "#/$defs/boundedString" },
+        "purpose": { "$ref": "#/$defs/boundedString" },
+        "required": { "type": "boolean" },
+        "forecastTimeAllowed": { "type": "boolean" },
+        "resolutionOnly": { "type": "boolean" },
+        "approvedInputKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        }
+      }
+    },
+    "sourceReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roleKey", "readinessStatus", "missingFields", "blockerCode"],
+      "properties": {
+        "roleKey": { "$ref": "#/$defs/boundedString" },
+        "readinessStatus": { "$ref": "#/$defs/boundedString" },
+        "missingFields": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "blockerCode": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "requiredSourceField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roleKey", "fieldName", "purpose"],
+      "properties": {
+        "roleKey": { "$ref": "#/$defs/boundedString" },
+        "fieldName": { "$ref": "#/$defs/boundedString" },
+        "purpose": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blockerCode", "sourceRole", "message", "nextAction"],
+      "properties": {
+        "blockerCode": { "$ref": "#/$defs/boundedString" },
+        "sourceRole": { "$ref": "#/$defs/boundedString" },
+        "message": { "$ref": "#/$defs/boundedString" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "candidateQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "caseKey",
+        "status",
+        "questionText",
+        "outputType",
+        "serviceArea",
+        "serviceWindow",
+        "threshold",
+        "closeTimePolicy",
+        "resolveTimePolicy",
+        "sourceRoles",
+        "reasonCodes",
+        "nextAction",
+        "routesToExistingSurfaces",
+        "forecastArtifactsAllowed"
+      ],
+      "properties": {
+        "candidateId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": { "$ref": "#/$defs/boundedString" },
+        "status": { "$ref": "#/$defs/status" },
+        "questionText": { "$ref": "#/$defs/boundedString" },
+        "outputType": { "$ref": "#/$defs/boundedString" },
+        "serviceArea": { "$ref": "#/$defs/boundedString" },
+        "serviceWindow": { "$ref": "#/$defs/boundedString" },
+        "threshold": { "$ref": "#/$defs/boundedString" },
+        "closeTimePolicy": { "$ref": "#/$defs/boundedString" },
+        "resolveTimePolicy": { "$ref": "#/$defs/boundedString" },
+        "sourceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "routesToExistingSurfaces": { "type": "boolean" },
+        "forecastArtifactsAllowed": { "type": "boolean" }
+      }
+    },
+    "validationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validationReportId",
+        "candidateCaseKey",
+        "status",
+        "checks",
+        "exactReasonCodes",
+        "forecastArtifactsAllowed"
+      ],
+      "properties": {
+        "validationReportId": { "$ref": "common.schema.json#/$defs/id" },
+        "candidateCaseKey": { "$ref": "#/$defs/boundedString" },
+        "status": { "$ref": "#/$defs/status" },
+        "checks": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/validationCheck" }
+        },
+        "exactReasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "forecastArtifactsAllowed": { "type": "boolean" }
+      }
+    },
+    "validationCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkKey", "result", "reasonCode", "message"],
+      "properties": {
+        "checkKey": { "$ref": "#/$defs/boundedString" },
+        "result": { "$ref": "#/$defs/boundedString" },
+        "reasonCode": { "$ref": "#/$defs/boundedString" },
+        "message": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "guidedForecastCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guidedCaseId",
+        "caseKey",
+        "guidedStatus",
+        "toolCallCount",
+        "forecastId",
+        "questionId",
+        "forecastCardCommand",
+        "lifecycleBundleCommand",
+        "nextAction",
+        "blockerCodes",
+        "createsForecastArtifacts",
+        "qualityClaimAllowed",
+        "claimBoundary"
+      ],
+      "properties": {
+        "guidedCaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": { "$ref": "#/$defs/boundedString" },
+        "guidedStatus": { "$ref": "#/$defs/boundedString" },
+        "toolCallCount": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "forecastId": { "$ref": "#/$defs/idOrNull" },
+        "questionId": { "$ref": "#/$defs/idOrNull" },
+        "forecastCardCommand": { "$ref": "#/$defs/commandOrNull" },
+        "lifecycleBundleCommand": { "$ref": "#/$defs/commandOrNull" },
+        "nextAction": { "$ref": "#/$defs/boundedString" },
+        "blockerCodes": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/boundedString" }
+        },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "claimBoundary": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commandKey", "command", "purpose", "routineToolCall"],
+      "properties": {
+        "commandKey": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "purpose": { "$ref": "#/$defs/boundedString" },
+        "routineToolCall": { "type": "boolean" }
+      }
+    },
+    "mcpTool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["toolName", "equivalentCliCommand", "returns", "createsForecastArtifacts"],
+      "properties": {
+        "toolName": { "$ref": "#/$defs/boundedString" },
+        "equivalentCliCommand": { "$ref": "#/$defs/boundedString" },
+        "returns": { "$ref": "#/$defs/boundedString" },
+        "createsForecastArtifacts": { "type": "boolean" }
+      }
+    }
+  }
+}

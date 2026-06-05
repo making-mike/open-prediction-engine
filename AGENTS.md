@@ -63,6 +63,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/pilot-summary-intake.md`: checked sanitized pilot summary intake classifier before ledger review.
 - `spec/local-usage-trace.md`: checked local-only MVP usage trace read model and aggregate product metrics.
 - `spec/developer-adoption-surface.md`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
+- `spec/agent-integration.md`: checked local CLI/MCP golden path for agents asking what can be forecasted from approved source context.
 - `spec/expansion-readiness-gate.md`: checked post-MVP readiness gate for hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
 - `spec/repeating-prediction-setup.md`: checked local-first repeating prediction setup contract, recurrence examples, post-calibration policies, and non-execution boundary.
 - `spec/prediction-campaign-manifest.md`: checked local dry-run campaign manifest with unique run IDs, duplicate prevention, local-state path policy, and status readbacks.
@@ -74,6 +75,14 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/prediction-campaign-resume.md`: checked non-mutating campaign resume readback and recovery boundary.
 - `spec/lifecycle-operation-store.md`: checked local SQLite lifecycle operation store, storage adapter boundary, idempotency, leases, read models, and delete replacements for multi-agent execution.
 - `spec/storage-adapter.md`: checked storage adapter responsibilities for ignored JSON compatibility, local SQLite, and Postgres-compatible backends.
+- `spec/persistent-sqlite-policy.md`: checked opt-in persistent SQLite path policy, local state allowlist, migration, backup, lock, and normal-check ephemeral boundary.
+- `spec/lifecycle-lease-policy.md`: checked lifecycle operation lease policy for strict leases versus idempotency-only guards without lock acquisition in readbacks.
+- `spec/runtime-transport-readiness.md`: checked runtime transport readiness gate for current local surfaces and deferred HTTP, queue, hosted service, and OPP HTTP provider behavior.
+- `spec/workspace-tenant-isolation.md`: checked tenant-scoped workspace isolation policy for resources, source bindings, operation queues, credential references, and blocked cross-tenant access.
+- `spec/domain-source-field-policy.md`: checked policy splitting universal domain/source fields from domain-specific extensions and blocked credential/raw/claim fields.
+- `spec/credential-reference-policy.md`: checked opaque caller-owned credential reference mechanism, scope, lifecycle, consumer, and blocked-secret policy.
+- `spec/retention-redaction-policy.md`: checked retention, archive tombstone, redaction receipt, sanitized projection, and physical-delete exception policy.
+- `spec/private-auto-evidence-policy.md`: checked source-policy overlay for private `data: auto` setup source kinds and blocked private-source execution.
 - `spec/private-setup-adapter-chain-runbook.md`: checked guidance for the private setup adapter operation sequence and readback path.
 - `spec/private-setup-adapter-conformance-matrix.md`: checked private setup adapter conformance matrix over existing generated envelopes.
 - `spec/private-setup-adapter-conformance-summary.md`: compact read surface over the private setup adapter conformance matrix.
@@ -87,6 +96,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/method-registry.md`: supported method registry, benchmark binding, and method-selection boundary.
 - `spec/agent-adapter.md`: transport-neutral envelope, exit-code, capability, and transcript boundary for agent callers.
 - `spec/agent-adapter-protocol-map.md`: local MCP stdio mapping and future HTTP/queue adapter plan for the local dispatcher.
+- `spec/opp-provider-adapter.md`: optional OPP provider-adapter request/response mapping, Agent Card fixture, conformance guidance, and non-runtime boundary.
 - `spec/agent-forecast-run.md`: local fixture-safe forecast-run summary, intake matrix, and failure boundary for agents.
 - `spec/agent-forecast-runbook.md`: checked local runbook for agent forecast-run next actions and read surfaces.
 - `spec/runtime-validation.md`: local contract validation surface and supported schema subset.
@@ -122,6 +132,7 @@ For OPE, keep the reusable contract-first, security, review, commit, and decisio
 - flexible private domain setup with explicit maturity labels
 - baseline comparisons before stronger model-quality claims
 - evidence packets before trust claims
+- lifecycle lease policies as read-only guard decisions, not normal-check lock acquisition or raw lock-control APIs
 - clear separation from transport, funding, settlement, and independent audit systems
 
 ## Development Commands
@@ -201,6 +212,18 @@ python3 scripts/generate_transit_live_evidence_promotion.py --check
 python3 scripts/check_transit_live_evidence_promotion.py
 python3 scripts/generate_domain_setups.py --check
 python3 scripts/check_domain_setups.py
+python3 scripts/generate_domain_configs.py --check
+python3 scripts/check_domain_configs.py
+python3 scripts/generate_source_bindings.py --check
+python3 scripts/check_source_bindings.py
+python3 scripts/generate_domain_source_field_policy.py --check
+python3 scripts/check_domain_source_field_policy.py
+python3 scripts/generate_credential_reference_policy.py --check
+python3 scripts/check_credential_reference_policy.py
+python3 scripts/generate_retention_redaction_policy.py --check
+python3 scripts/check_retention_redaction_policy.py
+python3 scripts/generate_private_auto_evidence_policy.py --check
+python3 scripts/check_private_auto_evidence_policy.py
 python3 scripts/build_source_manifest.py --check
 python3 scripts/check_source_manifest_builder.py
 python3 scripts/generate_source_adapter_output.py --check
@@ -292,6 +315,16 @@ python3 scripts/generate_private_source_kind_selection_examples.py --check
 python3 scripts/check_private_source_kind_selection_examples.py
 python3 scripts/generate_private_source_kind_query_matrix.py --check
 python3 scripts/check_private_source_kind_query_matrix.py
+python3 scripts/generate_opp_provider_adapter.py --check
+python3 scripts/check_opp_provider_adapter.py
+python3 scripts/generate_persistent_sqlite_policy.py --check
+python3 scripts/check_persistent_sqlite_policy.py
+python3 scripts/generate_lifecycle_lease_policy.py --check
+python3 scripts/check_lifecycle_lease_policy.py
+python3 scripts/generate_runtime_transport_readiness.py --check
+python3 scripts/check_runtime_transport_readiness.py
+python3 scripts/generate_workspace_tenant_isolation.py --check
+python3 scripts/check_workspace_tenant_isolation.py
 python3 scripts/generate_recalculation_history.py --check
 python3 scripts/check_recalculation_history.py
 python3 scripts/run_auto_evidence_forecast.py
@@ -318,7 +351,7 @@ python3 scripts/check_fixtures.py
 python3 scripts/release_check.py
 ```
 
-These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-adapter outputs, source-adapter intake gates, source-quality and mapping-confidence readbacks, approved local-source runtime boundaries, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, local private setup orchestrator summaries, agent pilot validation protocol/rubric boundaries, pilot evidence intake boundaries, pilot session packet and summary-intake boundaries, local usage trace metric boundaries, developer adoption quickstart/readback boundaries, expansion readiness gating, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit corpus growth, transit live evidence promotion, the release manifest, MVP release-surface smoke checks, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
+These commands validate JSON syntax, schema-bound fixtures, the reusable contract validator, generated report drift, scoring semantics, fixture evidence loops, benchmark leakage controls, method registry bindings, transport-neutral agent envelope examples including private setup bundle, adapter-chain runbook, private source adapter guidance, source-builder, source-handoff, method-gate, forecast-execution, and generated readback surfaces, the local agent-call dispatcher, the local MCP stdio adapter scaffold and future protocol map, optional OPP provider-adapter mapping fixtures, persistent SQLite opt-in path policy fixtures, lifecycle lease policy fixtures, runtime transport readiness fixtures, workspace tenant isolation fixtures, domain/source field policy fixtures, credential-reference policy fixtures, retention/redaction policy fixtures, private auto-evidence policy fixtures, the local forecast-run summary, intake matrix, and runbook, controlled live-source fixture mode, live outcome resolution, local auto-evidence planning, connector-aware gathering, source connector boundaries, live connector readiness without network access, local source manifest building, source-adapter outputs, source-adapter intake gates, source-quality and mapping-confidence readbacks, approved local-source runtime boundaries, source-builder to source-intake handoffs, source-handoff method gates, setup benchmark gates, setup-aware method decisions, setup-aware deterministic and baseline forecast execution, explicit source-handoff forecast execution, resolution, setup runbook guidance, private setup workflows, private setup request routing, first-action dispatch, first-action runbook guidance, private setup agent bundles, local private setup orchestrator summaries, agent pilot validation protocol/rubric boundaries, pilot evidence intake boundaries, pilot session packet and summary-intake boundaries, local usage trace metric boundaries, developer adoption quickstart/readback boundaries, expansion readiness gating, private setup adapter-chain runbook guidance, and private setup adapter conformance matrices, private source adapter capability declarations, outcome matrix, intake bridge, guidance envelope, and source-kind selection examples, append-only recalculation history, forecasting and resolution, historical-only baseline forecasting, local forecast pipeline generation and resolution, resolution runtime reliability, transit corpus growth, transit live evidence promotion, the release manifest, MVP release-surface smoke checks, the CI workflow, read-only artifact, card, evidence-trace, bundle, source-set, connector-result, and track-record access, read-surface contracts, request intake, and hardening guardrails.
 
 Validate a single contract record with the local CLI:
 
@@ -364,6 +397,12 @@ python3 scripts/ope.py transit-track-record-gate
 python3 scripts/ope.py transit-method-options
 python3 scripts/ope.py transit-live-evidence-promotion
 python3 scripts/ope.py domain-setups
+python3 scripts/ope.py domain-configs
+python3 scripts/ope.py source-bindings
+python3 scripts/ope.py domain-source-field-policy
+python3 scripts/ope.py credential-reference-policy
+python3 scripts/ope.py retention-redaction-policy
+python3 scripts/ope.py private-auto-evidence-policy
 python3 scripts/ope.py source-builder
 python3 scripts/ope.py source-adapter-output
 python3 scripts/ope.py source-adapter-intake
@@ -412,6 +451,11 @@ python3 scripts/ope.py private-setup-adapter-conformance
 python3 scripts/ope.py private-setup-adapter-conformance-summary
 python3 scripts/ope.py private-source-kind-selection
 python3 scripts/ope.py private-source-kind-query-matrix
+python3 scripts/ope.py opp-provider-adapter
+python3 scripts/ope.py persistent-sqlite-policy
+python3 scripts/ope.py lifecycle-lease-policy
+python3 scripts/ope.py runtime-transport-readiness
+python3 scripts/ope.py workspace-tenant-isolation
 python3 scripts/ope.py auto-forecast
 python3 scripts/ope.py resolve-auto-evidence
 python3 scripts/ope.py historical-forecast
@@ -477,6 +521,12 @@ python3 scripts/generate_transit_baseline_track_record_gate.py --write
 python3 scripts/generate_transit_method_options.py --write
 python3 scripts/generate_transit_live_evidence_promotion.py --write
 python3 scripts/generate_domain_setups.py --write
+python3 scripts/generate_domain_configs.py --write
+python3 scripts/generate_source_bindings.py --write
+python3 scripts/generate_domain_source_field_policy.py --write
+python3 scripts/generate_credential_reference_policy.py --write
+python3 scripts/generate_retention_redaction_policy.py --write
+python3 scripts/generate_private_auto_evidence_policy.py --write
 python3 scripts/build_source_manifest.py --write
 python3 scripts/generate_source_adapter_output.py --write
 python3 scripts/generate_source_adapter_intake.py --write
@@ -595,6 +645,10 @@ Still needed before any hosted or service release:
 - Setup forecast execution may create artifacts only after source intake and setup method decisions allow it. Blocked setup outcomes must not bind forecast IDs or artifact paths.
 - Keep OPE agent-accessible. Prefer schema-bound JSON inputs and outputs, deterministic command behavior, sanitized errors, compact forecast cards, evidence traces, and lifecycle bundles that agents can inspect without hidden side effects.
 - Keep adapters thin. Adapter envelopes may expose OPE records and state summaries, but they must not redefine forecast, evidence, resolution, or scoring semantics.
+- Treat OPP provider adapter records as optional interoperability fixtures. They may map OPP-style request, response, Agent Card, and conformance surfaces to OPE records, but they must not start HTTP/SSE listeners, implement payment or aggregation, embed raw lifecycle bundles by default, mutate OPE records, or upgrade quality claims.
+- Treat persistent SQLite paths as explicit opt-in local runtime choices. Normal checks must keep using ephemeral SQLite, and approved persistent paths must stay under allowlisted workspace state roots with caller approval, backup/migration guards, lease alignment, and sanitized diagnostics.
+- Treat lifecycle lease policies as read-only guard decisions. Strict-lease operations need lock handling only in explicit effectful runtime paths; normal checks and readbacks must not acquire leases, write operation receipts, expose raw lock CRUD, or upgrade quality claims.
+- Treat runtime transport readiness as a gate, not implementation. Local HTTP, queue, hosted service, and OPP HTTP provider behavior must stay deferred until the checked gate changes; normal checks must not start listeners, hosted services, or unbounded background workers.
 - Treat `data: auto` as policy-bound evidence gathering, not unbounded internet search. Every auto-evidence path must declare source policy, allowed connectors, freshness rules, provenance, unavailable evidence, and connector registry/result bindings.
 - Define the forecast question, lifecycle state, horizon, close time, resolution criteria, resolution source, fallback sources, and output type before building model logic.
 - Build simple baseline forecasts before complex models, and compare OPE outputs against those baselines.

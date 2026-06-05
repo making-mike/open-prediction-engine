@@ -1,0 +1,338 @@
+{
+  "persistentSqlitePolicyId": "persistentsqlitepolicy-001",
+  "generatedAt": "2026-06-04T23:40:00Z",
+  "policyStatus": "persistent_sqlite_path_policy_checked",
+  "decisionStatus": "explicit_opt_in_ready_not_default",
+  "normalChecksUseEphemeralSqlite": true,
+  "persistentSqliteDefaultEnabled": false,
+  "hostedRuntimeRequired": false,
+  "pathPolicy": {
+    "pathPolicyStatus": "checked",
+    "defaultPathTemplate": ".ope/state/{workspaceId}/ope.sqlite3",
+    "allowedRelativeRoots": [
+      ".ope/state"
+    ],
+    "allowedFileExtensions": [
+      ".sqlite",
+      ".sqlite3",
+      ".db"
+    ],
+    "workspaceRootRequired": true,
+    "callerApprovalRequired": true,
+    "absolutePathRequiresApproval": true,
+    "pathTraversalBlocked": true,
+    "symlinkEscapeBlocked": true,
+    "parentDirectoryCreatedOnlyWithExplicitWrite": true,
+    "credentialValuesAccepted": false,
+    "rawSqlPathParametersAllowed": false,
+    "normalChecksUseEphemeralSqlite": true
+  },
+  "pathCases": [
+    {
+      "caseName": "ephemeral_default",
+      "caseStatus": "ephemeral_runtime_ready",
+      "requestedPath": ":memory:",
+      "callerApprovalStatus": "not_requested",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "none",
+      "nextAction": "continue_ephemeral_runtime"
+    },
+    {
+      "caseName": "approved_workspace_path",
+      "caseStatus": "persistent_path_ready_for_explicit_write",
+      "requestedPath": ".ope/state/workspace-001/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": true,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "none",
+      "nextAction": "run_with_explicit_write_local"
+    },
+    {
+      "caseName": "missing_approval",
+      "caseStatus": "blocked_missing_approval",
+      "requestedPath": ".ope/state/workspace-001/ope.sqlite3",
+      "callerApprovalStatus": "not_requested",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "approval_missing",
+      "nextAction": "ask_for_persistent_path_approval"
+    },
+    {
+      "caseName": "outside_workspace",
+      "caseStatus": "blocked_path_not_allowlisted",
+      "requestedPath": "../outside/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "path_not_allowlisted",
+      "nextAction": "choose_workspace_state_path"
+    },
+    {
+      "caseName": "symlink_escape",
+      "caseStatus": "blocked_symlink_escape",
+      "requestedPath": ".ope/state/workspace-symlink/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "symlink_escape",
+      "nextAction": "replace_with_real_workspace_path"
+    },
+    {
+      "caseName": "existing_unmigrated_json_state",
+      "caseStatus": "blocked_needs_migration_plan",
+      "requestedPath": ".ope/state/workspace-with-json/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "unmigrated_json_state",
+      "nextAction": "run_json_state_import_dry_run"
+    },
+    {
+      "caseName": "schema_version_mismatch",
+      "caseStatus": "blocked_schema_version_mismatch",
+      "requestedPath": ".ope/state/workspace-old-schema/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "schema_version_mismatch",
+      "nextAction": "run_schema_compatibility_check"
+    },
+    {
+      "caseName": "backup_missing",
+      "caseStatus": "blocked_backup_missing",
+      "requestedPath": ".ope/state/workspace-needs-backup/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "backup_missing",
+      "nextAction": "create_backup_before_migration"
+    },
+    {
+      "caseName": "lock_conflict",
+      "caseStatus": "blocked_lock_conflict",
+      "requestedPath": ".ope/state/workspace-locked/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "lock_conflict",
+      "nextAction": "wait_or_recover_stale_lock"
+    },
+    {
+      "caseName": "readonly_filesystem",
+      "caseStatus": "blocked_readonly_filesystem",
+      "requestedPath": ".ope/state/workspace-readonly/ope.sqlite3",
+      "callerApprovalStatus": "approved",
+      "readyForExplicitWrite": false,
+      "requiresExplicitWriteFlag": true,
+      "persistentDatabaseCreated": false,
+      "normalChecksCreatePersistentDatabase": false,
+      "operationReceiptsWritten": false,
+      "sanitizedDiagnosticsOnly": true,
+      "blockedReason": "readonly_filesystem",
+      "nextAction": "choose_writable_state_path"
+    }
+  ],
+  "migrationPolicy": {
+    "migrationPolicyStatus": "explicit_receipt_backed_import_only",
+    "automaticMigrationAllowed": false,
+    "migrationOperationName": "state.import_json",
+    "dryRunRequiredBeforeWrite": true,
+    "backupRequiredBeforeWrite": true,
+    "migrationReceiptRequired": true,
+    "contentHashesPreserved": true,
+    "sourceRecordHashesPreserved": true,
+    "forecastProbabilitiesPreserved": true,
+    "sourceProvenancePreserved": true,
+    "historicalForecastRewriteAllowed": false,
+    "normalChecksRunMigration": false,
+    "ignoredLiveStateReadByDefault": false
+  },
+  "backupAndLockPolicy": {
+    "backupPolicyStatus": "checked_before_effectful_persistence",
+    "backupBeforeMigrationRequired": true,
+    "backupPathTemplate": ".ope/state/{workspaceId}/backups/{timestamp}-ope.sqlite3",
+    "backupContentHashRequired": true,
+    "sqliteBusyTimeoutMs": 5000,
+    "operationLeaseAlignmentRequired": true,
+    "staleLockRecoveryRequiresReceipt": true,
+    "walModeAllowedAfterExplicitWrite": true,
+    "normalChecksEnableWalMode": false
+  },
+  "operationGuards": [
+    {
+      "operationName": "campaign.create_run",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "forecast.create",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "resolution.record",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "score.create",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "evidence.append",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "state.import_json",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "method.apply",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "method.rollback",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": true,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "record.archive",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": false,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    },
+    {
+      "operationName": "record.redact",
+      "preflightRequired": true,
+      "idempotencyKeyRequired": true,
+      "leaseRequired": false,
+      "operationReceiptRequired": true,
+      "persistentPathPolicyChecked": true,
+      "rawSqlExposedToAgents": false
+    }
+  ],
+  "readbacks": [
+    {
+      "readbackSurface": "cli",
+      "command": "python3 scripts/ope.py persistent-sqlite-policy",
+      "operationName": "persistent_sqlite_policy",
+      "mutatesState": false,
+      "createsPersistentDatabase": false
+    },
+    {
+      "readbackSurface": "lifecycle_operation_store",
+      "command": "python3 scripts/ope.py lifecycle-operation-store",
+      "operationName": "lifecycle_operation_store",
+      "mutatesState": false,
+      "createsPersistentDatabase": false
+    },
+    {
+      "readbackSurface": "runtime_security",
+      "command": "python3 scripts/ope.py runtime-security",
+      "operationName": "runtime_security",
+      "mutatesState": false,
+      "createsPersistentDatabase": false
+    }
+  ],
+  "executionBoundary": {
+    "persistentDatabaseCreatedByDefault": false,
+    "normalChecksCreatePersistentDatabase": false,
+    "normalChecksReadIgnoredLiveState": false,
+    "hostedRuntimeImplemented": false,
+    "postgresConnectionOpened": false,
+    "rawSqlExposedToAgents": false,
+    "credentialValuesStored": false,
+    "destructiveMigrationAllowed": false,
+    "physicalDeleteAllowed": false,
+    "qualityClaimsUpgraded": false
+  },
+  "summary": {
+    "caseCount": 10,
+    "blockedCaseCount": 8,
+    "readyCaseCount": 2,
+    "operationGuardCount": 10,
+    "persistentSqliteDefaultEnabled": false,
+    "normalChecksUseEphemeralSqlite": true
+  },
+  "warnings": [
+    "Persistent SQLite paths are ready only as an explicit opt-in local policy; normal checks continue using ephemeral SQLite.",
+    "Approved persistent paths must live under the workspace state root, pass symlink and traversal checks, and require caller approval.",
+    "Existing ignored JSON state must migrate through an explicit dry-run and receipt-backed state.import_json operation with backups and preserved hashes."
+  ]
+}

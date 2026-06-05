@@ -195,7 +195,9 @@
             "enum": [
               "approved_local_csv_json",
               "approved_local_folder_runtime",
+              "approved_database_adapter_runtime",
               "accepted_source_adapter_output",
+              "agent_integration_starter_pack",
               "committed_fixture_request",
               "policy_bound_promoted_fixture_source_set"
             ]
@@ -220,7 +222,7 @@
             "readbackCommands": {
               "type": "array",
               "minItems": 1,
-              "maxItems": 60,
+              "maxItems": 70,
               "items": { "$ref": "#/$defs/boundedString" }
             },
             "resolutionCommand": { "$ref": "#/$defs/boundedString" },
@@ -244,7 +246,7 @@
         "smokeChecks": {
           "type": "array",
           "minItems": 3,
-          "maxItems": 60,
+          "maxItems": 70,
           "items": { "$ref": "#/$defs/smokeCheck" }
         },
         "blockedPathExamples": {
@@ -273,7 +275,7 @@
             "nonGoalRefs": {
               "type": "array",
               "minItems": 4,
-              "maxItems": 16,
+              "maxItems": 40,
               "items": { "$ref": "#/$defs/boundedString" }
             }
           }
