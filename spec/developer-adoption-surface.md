@@ -4,6 +4,7 @@ Milestone 86 adds a checked local adoption surface for the MVP.
 
 The surface gives developers and agents a compact path from repository checkout to the first useful readbacks:
 
+- the agent implementation kit quickstart for external coding agents adding a prediction feature;
 - setup check and normal local checks;
 - approved local-folder source runtime readback;
 - forecast card and lifecycle bundle for `forecast-1102`;
@@ -15,10 +16,13 @@ Run it locally with:
 
 ```bash
 python3 scripts/ope.py developer-adoption
+python3 scripts/ope.py smoke
 python3 scripts/ope.py developer-adoption --section quickstart
+python3 scripts/ope.py agent-implementation-kit --view quickstart
 python3 scripts/ope.py developer-adoption --section scenario
 python3 scripts/ope.py developer-adoption --section integrations
 python3 scripts/ope.py developer-adoption --section release-notes
+python3 scripts/ope.py generated-types-decision --section summary
 python3 scripts/ope.py developer-adoption --check
 python3 scripts/ope.py agent-integrate --view candidates
 python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output

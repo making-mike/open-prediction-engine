@@ -1,0 +1,14 @@
+{
+  "hostFeatureIntent": "Predict disruption using evidence captured after the service window.",
+  "decisionToSupport": "Decide whether to alert operators.",
+  "approvedSourceRefs": [
+    {
+      "sourceRef": "post-outcome-weather-capture-001",
+      "sourceRole": "weather_forecast",
+      "approved": true
+    }
+  ],
+  "resolutionHints": {},
+  "responseSizeBudgetBytes": 65536,
+  "evidenceTiming": "post_outcome"
+}

@@ -23,6 +23,8 @@ The target product direction is agent-native private prediction setup: a caller 
 - `.agents/workflows/log-decision.md`: decision log workflow.
 - `.agents/workflows/protocol-development.md`: contract-first development workflow.
 - `.agents/workflows/schema-change-checklist.md`: schema and contract change checklist.
+- `AGENT_QUICKSTART.md`: compact front door for agents deciding whether to use OPE in a host prediction project.
+- `ope.capabilities.json`: checked machine-readable manifest of what OPE helps with, what it does not provide, and which extension points are supported.
 - `README.md`: human onboarding and current repository status.
 - `CONTRIBUTING.md`: local setup and contribution checks.
 - `PRODUCT.md`: compact product direction, audience, agent requirements, claim boundaries, and product metrics.
@@ -62,6 +64,7 @@ The target product direction is agent-native private prediction setup: a caller 
 - `spec/pilot-session-packet.md`: checked real pilot-session task packet, sanitization review, and ledger-ready summary boundary.
 - `spec/pilot-summary-intake.md`: checked sanitized pilot summary intake classifier before ledger review.
 - `spec/local-usage-trace.md`: checked local-only MVP usage trace read model and aggregate product metrics.
+- `spec/prediction-agent-adoption.md`: checked general adoption front door for agents building host projects that require prediction.
 - `spec/developer-adoption-surface.md`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
 - `spec/agent-integration.md`: checked local CLI/MCP golden path for agents asking what can be forecasted from approved source context.
 - `spec/expansion-readiness-gate.md`: checked post-MVP readiness gate for hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
@@ -433,6 +436,9 @@ python3 scripts/ope.py pilot-evidence
 python3 scripts/ope.py pilot-session-packet
 python3 scripts/ope.py pilot-summary-intake
 python3 scripts/ope.py local-usage-trace
+python3 scripts/ope.py explain-fit --goal "add predictions to my app"
+python3 scripts/ope.py capabilities
+python3 scripts/ope.py adoption-eval
 python3 scripts/ope.py developer-adoption
 python3 scripts/ope.py expansion-readiness
 python3 scripts/ope.py repeating-prediction-setup
@@ -633,6 +639,7 @@ Still needed before any hosted or service release:
 - Treat pilot evidence ledgers as checked sanitized intake guidance only. They must not store raw transcripts, private data, credentials, prompt logs, or participant identity; checked examples do not count as real pilot evidence or unblock expansion.
 - Treat pilot summary intake classifiers as checked examples only. They may classify sanitized summaries as ledger-ready, redaction-needed, or blocked, but they must not write ledger rows, record real sessions, store raw/private data, or unblock expansion.
 - Treat local usage traces as checked local synthetic read models only. They must not collect hosted telemetry, write runtime logs, read private data, store prompts, store transcripts, store credentials, fetch live data, or imply real usage analytics.
+- Treat prediction-agent adoption surfaces as checked fit guidance only. They may explain capabilities, non-goals, extension points, bring-your-own-model paths, and first commands, but they must not create artifacts, fetch live data, start hosted runtime, train models, store credentials, or imply frontend/product maturity.
 - Treat developer adoption surfaces as read-only onboarding guidance only. They may name quickstart, scenario, integration, and release-boundary commands, but they must not execute commands, create artifacts, fetch live data, generate runtime types, store credentials, or imply production/runtime maturity.
 - Treat expansion readiness gates as read-only decision surfaces only. They must not start hosted runtimes, execute private sources, fetch live data, create artifacts, generate runtime types, or imply quality claims.
 - Treat private setup adapter-chain runbooks as non-executing guidance. They may name adapter operations and readback order, but they must not execute calls or create source, forecast, resolution, scoring, live-fetch, or credential artifacts.

@@ -1,0 +1,13 @@
+{
+  "hostFeatureIntent": "Predict disruption from an unreviewed uploaded file.",
+  "decisionToSupport": "Decide whether to alert operators.",
+  "approvedSourceRefs": [
+    {
+      "sourceRef": "local-file-unreviewed-001",
+      "sourceRole": "weather_forecast",
+      "approved": false
+    }
+  ],
+  "resolutionHints": {},
+  "responseSizeBudgetBytes": 65536
+}

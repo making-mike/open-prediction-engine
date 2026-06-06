@@ -21,54 +21,62 @@
     {
       "stepId": "adoptionquickstart-001",
       "order": 1,
+      "title": "Start with the external-agent front door",
+      "command": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+      "expected": "The agent implementation kit returns the shortest safe sequence for adding an OPE-backed prediction feature.",
+      "timeBudgetSeconds": 20
+    },
+    {
+      "stepId": "adoptionquickstart-002",
+      "order": 2,
       "title": "Confirm Python runtime",
       "command": "python3 --version",
       "expected": "Python 3.12+ is preferred; the repository uses only the standard library.",
       "timeBudgetSeconds": 20
     },
     {
-      "stepId": "adoptionquickstart-002",
-      "order": 2,
+      "stepId": "adoptionquickstart-003",
+      "order": 3,
       "title": "Run the local check suite",
       "command": "python3 scripts/run_checks.py",
       "expected": "All schema, fixture, read-surface, agent, and release checks pass without live network access.",
       "timeBudgetSeconds": 900
     },
     {
-      "stepId": "adoptionquickstart-003",
-      "order": 3,
+      "stepId": "adoptionquickstart-004",
+      "order": 4,
       "title": "Inspect approved local-folder runtime",
       "command": "python3 scripts/ope.py local-source-runtime",
       "expected": "The approved local-folder case binds to forecast-1102 and blocked examples remain non-generating.",
       "timeBudgetSeconds": 30
     },
     {
-      "stepId": "adoptionquickstart-004",
-      "order": 4,
+      "stepId": "adoptionquickstart-005",
+      "order": 5,
       "title": "Read the first forecast card",
       "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
       "expected": "A compact forecast card is available with probability, baseline, setup binding, and claim warning.",
       "timeBudgetSeconds": 20
     },
     {
-      "stepId": "adoptionquickstart-005",
-      "order": 5,
+      "stepId": "adoptionquickstart-006",
+      "order": 6,
       "title": "Read the lifecycle bundle",
       "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
       "expected": "The bundle links question, evidence, forecast artifact, history, resolution, scoring, and setup bindings.",
       "timeBudgetSeconds": 20
     },
     {
-      "stepId": "adoptionquickstart-006",
-      "order": 6,
+      "stepId": "adoptionquickstart-007",
+      "order": 7,
       "title": "Inspect the claim boundary",
       "command": "python3 scripts/ope.py transit-track-record-gate",
       "expected": "The public transport gate remains below track-record and calibration thresholds.",
       "timeBudgetSeconds": 20
     },
     {
-      "stepId": "adoptionquickstart-007",
-      "order": 7,
+      "stepId": "adoptionquickstart-008",
+      "order": 8,
       "title": "Evaluate recurring campaign readiness",
       "command": "python3 scripts/ope.py prediction-campaign explain",
       "expected": "The campaign explain readback names the next forecast, next resolution, evidence threshold, and claim boundary before hosted scheduling work.",
@@ -253,7 +261,7 @@
     }
   ],
   "summary": {
-    "quickstartStepCount": 7,
+    "quickstartStepCount": 8,
     "scenarioStepCount": 6,
     "integrationCount": 3,
     "implementedNoteCount": 5,

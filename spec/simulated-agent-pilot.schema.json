@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/simulated-agent-pilot.schema.json",
+  "title": "Simulated Agent Pilot",
+  "description": "User-authorized simulated developer-agent sessions over the prediction-feature setup path. This is not real human pilot evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "simulatedAgentPilotId",
+    "generatedAt",
+    "simulationStatus",
+    "simulationPurpose",
+    "userProvidedPrompt",
+    "normalizedCurrentDate",
+    "normalizedTomorrowDate",
+    "sourceRecords",
+    "simulatedSessions",
+    "frictionSummary",
+    "executionBoundary",
+    "summary"
+  ],
+  "properties": {
+    "simulatedAgentPilotId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "simulationStatus": {
+      "type": "string",
+      "enum": ["checked_agent_only_simulation"]
+    },
+    "simulationPurpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 360
+    },
+    "userProvidedPrompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 600
+    },
+    "normalizedCurrentDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "normalizedTomorrowDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "sourceRecords": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionFeatureSetupId", "pilotSessionPacketId", "pilotSummaryIntakeId"],
+      "properties": {
+        "predictionFeatureSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSessionPacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSummaryIntakeId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "simulatedSessions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sessionId",
+          "promptSource",
+          "prompt",
+          "normalizedHorizonDate",
+          "targetUserNeed",
+          "expectedCase",
+          "decision",
+          "opeCommand",
+          "opeResponse",
+          "simulatedAgentReply",
+          "promptApproxTokens",
+          "responseApproxTokens",
+          "totalApproxTokens",
+          "elapsedMsEstimate",
+          "toolCallCountEstimate",
+          "frictionClasses",
+          "nextActionKey",
+          "storesRawPromptAsPilotEvidence",
+          "storesRawPrivateRows",
+          "storesCredentialValues",
+          "createsForecastArtifacts",
+          "qualityClaimAllowed"
+        ],
+        "properties": {
+          "sessionId": { "$ref": "common.schema.json#/$defs/id" },
+          "promptSource": {
+            "type": "string",
+            "enum": ["user_provided", "generated"]
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 700
+          },
+          "normalizedHorizonDate": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "targetUserNeed": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "expectedCase": {
+            "type": "string",
+            "enum": ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"]
+          },
+          "decision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "opeCommand": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "opeResponse": { "$ref": "#/$defs/predictionFeatureResponse" },
+          "simulatedAgentReply": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 900
+          },
+          "promptApproxTokens": { "type": "integer", "minimum": 1 },
+          "responseApproxTokens": { "type": "integer", "minimum": 1 },
+          "totalApproxTokens": { "type": "integer", "minimum": 2 },
+          "elapsedMsEstimate": { "type": "integer", "minimum": 1 },
+          "toolCallCountEstimate": { "type": "integer", "minimum": 1 },
+          "frictionClasses": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "enum": [
+                "claim_boundary_confusion",
+                "none",
+                "privacy_redaction_needed",
+                "readback_navigation",
+                "source_runtime_gap"
+              ]
+            }
+          },
+          "nextActionKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "storesRawPromptAsPilotEvidence": { "type": "boolean" },
+          "storesRawPrivateRows": { "type": "boolean" },
+          "storesCredentialValues": { "type": "boolean" },
+          "createsForecastArtifacts": { "type": "boolean" },
+          "qualityClaimAllowed": { "type": "boolean" }
+        }
+      }
+    },
+    "frictionSummary": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frictionClass", "simulatedSignalCount", "interpretation"],
+        "properties": {
+          "frictionClass": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "simulatedSignalCount": { "type": "integer", "minimum": 0 },
+          "interpretation": { "type": "string", "minLength": 1, "maxLength": 400 }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentOnlySimulation",
+        "realSessionsRecorded",
+        "rawTranscriptsStored",
+        "rawPromptLogsStoredAsPilotEvidence",
+        "privateDataStored",
+        "credentialValuesStored",
+        "hostProjectSecretsStored",
+        "forecastArtifactsCreated",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "hostedRuntimeUnblocked",
+        "generatedTypesUnblocked"
+      ],
+      "properties": {
+        "agentOnlySimulation": { "type": "boolean" },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "rawTranscriptsStored": { "type": "boolean" },
+        "rawPromptLogsStoredAsPilotEvidence": { "type": "boolean" },
+        "privateDataStored": { "type": "boolean" },
+        "credentialValuesStored": { "type": "boolean" },
+        "hostProjectSecretsStored": { "type": "boolean" },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" },
+        "hostedRuntimeUnblocked": { "type": "boolean" },
+        "generatedTypesUnblocked": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulatedSessionCount",
+        "userPromptSessionCount",
+        "generatedPromptSessionCount",
+        "caseCoverage",
+        "tokenCountMode",
+        "totalPromptApproxTokens",
+        "totalResponseApproxTokens",
+        "totalApproxTokens",
+        "timeMeasurementMode",
+        "totalElapsedMsEstimate",
+        "realSessionsRecorded",
+        "pilotEvidenceReady",
+        "expansionEvidenceReady",
+        "generatedTypesEvidenceReady",
+        "qualityClaimAllowed",
+        "hostedRuntimeAllowed"
+      ],
+      "properties": {
+        "simulatedSessionCount": { "type": "integer", "minimum": 0 },
+        "userPromptSessionCount": { "type": "integer", "minimum": 0 },
+        "generatedPromptSessionCount": { "type": "integer", "minimum": 0 },
+        "caseCoverage": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+        },
+        "tokenCountMode": {
+          "type": "string",
+          "enum": ["approximate_whitespace_tokens"]
+        },
+        "totalPromptApproxTokens": { "type": "integer", "minimum": 0 },
+        "totalResponseApproxTokens": { "type": "integer", "minimum": 0 },
+        "totalApproxTokens": { "type": "integer", "minimum": 0 },
+        "timeMeasurementMode": {
+          "type": "string",
+          "enum": ["deterministic_estimate"]
+        },
+        "totalElapsedMsEstimate": { "type": "integer", "minimum": 0 },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "pilotEvidenceReady": { "type": "boolean" },
+        "expansionEvidenceReady": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "predictionFeatureResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseKey",
+        "decision",
+        "reasonCodes",
+        "requiredSourceRoles",
+        "nextAction",
+        "forecastId",
+        "questionId",
+        "forecastCardCommand",
+        "lifecycleBundleCommand",
+        "createsForecastArtifacts",
+        "storesCredentialValues",
+        "storesRawPrivateRows",
+        "executesPrivateSources",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "caseKey": {
+          "type": "string",
+          "enum": ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"]
+        },
+        "decision": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        },
+        "requiredSourceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        },
+        "nextAction": { "type": "string", "minLength": 1, "maxLength": 400 },
+        "forecastId": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/id" }, { "type": "null" }]
+        },
+        "questionId": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/id" }, { "type": "null" }]
+        },
+        "forecastCardCommand": {
+          "anyOf": [
+            { "type": "string", "maxLength": 240 },
+            { "type": "null" }
+          ]
+        },
+        "lifecycleBundleCommand": {
+          "anyOf": [
+            { "type": "string", "maxLength": 240 },
+            { "type": "null" }
+          ]
+        },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "storesRawPrivateRows": { "type": "boolean" },
+        "executesPrivateSources": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    }
+  }
+}

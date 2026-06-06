@@ -54,6 +54,7 @@ The contracts are intentionally record-first:
 - `method-selection.schema.json`: method-selection explanation and quality boundary.
 - `agent-envelope.schema.json`: transport-neutral envelope for agent adapter calls.
 - `agent-adapter-protocol-map.schema.json`: checked mapping from local agent calls to MCP stdio and future protocol adapters.
+- `mcp-adoption-path.schema.json`: checked local MCP adoption transcript surface for readiness, candidates, guided forecast, forecast-card readback, blocked unsafe cases, and response-too-large.
 - `forecast-run-summary.schema.json`: compact agent-facing summary for the fixture-safe forecast run orchestrator.
 - `forecast-run-intake-matrix.schema.json`: checked agent-facing outcome matrix for forecast-run request intake.
 - `agent-forecast-runbook.schema.json`: checked agent workflow for forecast-run next actions and read surfaces.
@@ -68,7 +69,11 @@ The contracts are intentionally record-first:
 - `pilot-evidence-ledger.schema.json`: checked sanitized pilot evidence intake ledger with raw/private-data blockers and real-session threshold boundary.
 - `pilot-session-packet.schema.json`: checked real pilot-session task packet, sanitized evidence template, stop conditions, and ledger-submission boundary.
 - `pilot-summary-intake.schema.json`: checked sanitized pilot summary intake classifier before ledger review.
+- `pilot-findings.schema.json`: checked pilot findings readback over sanitized real-session evidence, friction signals, next actions, and expansion/type/runtime claim boundaries.
+- `simulated-agent-pilot.schema.json`: checked user-authorized simulated agent sessions over the prediction-feature setup path with approximate token/time counts and no real-session claim.
+- `generated-runtime-types-decision.schema.json`: checked decision record for deferring or accepting language-specific generated runtime types.
 - `local-usage-trace.schema.json`: checked local-only MVP usage and trace read model for CLI, agent-call, MCP, blocked-path, and release-surface events.
+- `prediction-agent-adoption.schema.json`: checked general adoption surface, capability manifest, fit decision, extension points, bring-your-own-model guidance, and first-five-minutes adoption evaluation for agents building host prediction projects.
 - `developer-adoption-surface.schema.json`: checked local MVP quickstart, example scenario, integration notes, release notes, and generated-types decision.
 - `expansion-readiness-gate.schema.json`: checked post-MVP readiness gate over hosted runtime, broader private sources, live evidence, stronger methods, and generated runtime types.
 - `repeating-prediction-setup.schema.json`: checked local-first repeating prediction setup contract with recurrence examples, end conditions, post-calibration policies, and non-execution boundary.
@@ -94,8 +99,12 @@ The contracts are intentionally record-first:
 - `prediction-workspace-registry.schema.json`: checked multi-prediction workspace registry readback with stable prediction, campaign, domain, source-binding, schedule, workspace read-model, configuration-lifecycle, idempotency, lease, resource-control, and isolation statuses.
 - `background-worker-runtime.schema.json`: checked bounded local worker and sidecar runtime readback with one-tick equivalence, resource limits, operation guards, blocked cases, and non-networked boundary.
 - `runtime-security.schema.json`: checked lightweight runtime hardening readback for dependency budget, module boundaries, runtime surface controls, credential handling, threat notes, blocked examples, and execution boundaries.
-- `agent-implementation-kit.schema.json`: checked agent prediction implementation kit with compact manual, question-discovery intake, candidate contract readbacks, validation reports, adapter guidance, starter templates, and blocked-behavior boundary.
+- `agent-implementation-kit.schema.json`: checked agent prediction implementation kit with quickstart front door, compact manual, question-discovery intake, candidate contract readbacks, validation reports, adapter guidance, starter templates, and blocked-behavior boundary.
 - `agent-integration.schema.json`: checked local agent incorporation golden path with Helsinki starter readiness, candidate discovery, validation reports, guided forecast-card command, MCP tools, and efficiency metrics.
+- `agent-guidance.schema.json`: checked agent guidance loop for prompt classification, clarification questions, required source roles, safe next commands, Helsinki narrowing, and agent instruction rules.
+- `prediction-feature-setup-request.schema.json`: compact host-project request contract for prediction-feature intent, decision context, approved source references, resolution hints, and response-size budget.
+- `prediction-feature-setup-response.schema.json`: compact response contract for accepted, clarification, blocked, rejected, and response-too-large prediction-feature setup outcomes.
+- `prediction-feature-setup.schema.json`: checked stable prediction-feature setup surface binding request, response examples, CLI, agent-call, MCP guidance, and non-execution boundaries.
 - `postgres-compatibility.schema.json`: checked SQLite-to-Postgres lifecycle storage semantics readback with table mappings, adapter contract, scenario matrix, assumption guards, migration boundary, and non-execution boundary.
 - `database-source-adapter-runtime.schema.json`: checked approved database source-adapter runtime readback with caller approval, credential references, query boundaries, sanitized adapter output, blocked cases, and non-execution boundary.
 - `opp-provider-adapter.schema.json`: checked optional Open Prediction Protocol provider-adapter mapping over OPE forecast cards, artifacts, evidence traces, lifecycle bundles, Agent Card fixture, conformance cases, and protocol boundary.
@@ -128,6 +137,7 @@ The contracts are intentionally record-first:
 - `agent-forecast-run.md`: local fixture-safe forecast run summary and failure boundary for agents.
 - `agent-forecast-runbook.md`: checked runbook for local agent forecast-run callers.
 - `agent-integration.md`: checked local CLI/MCP golden path for agents asking what can be forecasted from approved source context.
+- `prediction-feature-setup.md`: checked compact contract for host projects adding an OPE-backed prediction feature without creating a new execution path.
 - `ci-release-gate.md`: CI release workflow boundary and local guard.
 - `auto-evidence.md`: current `data: auto` dry-run planning surface and guardrails.
 - `source-connectors.md`: policy-bound connector registry, result-set, and guardrails.
@@ -160,10 +170,15 @@ The contracts are intentionally record-first:
 - `private-setup-agent-bundle.md`: checked private setup agent bundle boundary.
 - `private-setup-orchestrator.md`: checked local private setup orchestrator summary and non-execution boundary.
 - `agent-pilot-validation.md`: checked local MVP pilot validation protocol, feedback schema, rubric, and privacy boundary.
+- `agent-guidance.md`: checked guidance loop that helps calling agents turn messy developer prompts into safe OPE next moves.
 - `pilot-evidence-ledger.md`: checked sanitized pilot evidence intake ledger.
 - `pilot-session-packet.md`: checked real pilot-session packet and sanitization boundary.
 - `pilot-summary-intake.md`: checked sanitized pilot summary intake classifier.
+- `pilot-findings.md`: checked pilot findings readback for real-session evidence and current adoption blockers.
+- `simulated-agent-pilot.md`: checked simulated agent pilot readback for one user prompt and four generated prompts, counted separately from real pilot evidence.
+- `generated-runtime-types-decision.md`: checked generated runtime types decision and JSON fallback guidance.
 - `local-usage-trace.md`: checked local-only usage trace read model and aggregate MVP product metrics.
+- `prediction-agent-adoption.md`: checked general agent adoption front door, capability manifest, extension points, BYO-model path, and compact fit commands.
 - `developer-adoption-surface.md`: checked local MVP developer and agent adoption guide.
 - `expansion-readiness-gate.md`: checked post-MVP expansion readiness decision surface.
 - `repeating-prediction-setup.md`: checked local-first repeating prediction setup contract and recurrence policy boundary.
@@ -270,10 +285,13 @@ The private setup first-action runbook generator writes checked guidance under `
 The private setup agent bundle generator writes checked read-only guidance joins under `spec/fixtures/generated/private-setup-agent-bundles/`.
 The private setup orchestrator generator writes a checked local summary under `spec/fixtures/generated/private-setup-orchestrator/`, joining request, first-action, source-intake, method-gate, explicit forecast-execution, and normal readback outcomes without executing commands.
 The agent pilot validation generator writes a checked local protocol under `spec/fixtures/generated/agent-pilot-validation/` for 3-5 sessions, task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries.
+The agent guidance generator writes a checked guidance loop under `spec/fixtures/generated/agent-guidance/`, covering accepted, clarification, blocked, rejected, and response-too-large cases plus the Helsinki narrowing flow and instruction pack.
 The pilot evidence ledger generator writes checked sanitized intake examples under `spec/fixtures/generated/pilot-evidence/`, blocking raw transcripts and private data while keeping accepted real-session evidence at zero until actual sanitized pilots are recorded.
 The pilot session packet generator writes a checked collection kit under `spec/fixtures/generated/pilot-session-packet/`, providing task cards including repeating prediction campaign explanation, sanitization checks, a ledger-ready template, and stop conditions without running sessions or writing ledger rows.
 The pilot summary intake generator writes checked classification examples under `spec/fixtures/generated/pilot-summary-intake/`, marking sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions.
+The simulated agent pilot generator writes a checked user-authorized simulation under `spec/fixtures/generated/simulated-agent-pilot/`, covering one user prompt and four generated prompts across accepted, clarification, blocked, rejected, and response-too-large prediction-feature setup outcomes with approximate token counts and deterministic elapsed-time estimates.
 The local usage trace generator writes a checked synthetic trace under `spec/fixtures/generated/local-usage-trace/` with local MVP event rows, campaign lifecycle events, response-size and elapsed-time fields, aggregate product metrics, and privacy boundaries.
+The prediction-agent adoption generator writes a checked general adoption surface under `spec/fixtures/generated/prediction-agent-adoption/` and the root `ope.capabilities.json` manifest, exposing compact fit guidance, helps-with and does-not-provide lists, extension points, bring-your-own-model guidance, and a first-five-minutes adoption evaluation without adding runtime or quality claims.
 The developer adoption surface generator writes a checked onboarding guide under `spec/fixtures/generated/developer-adoption/` with quickstart steps, one complete local setup scenario, recurring campaign explain guidance, CLI/agent-call/MCP stdio integration notes, release notes, and a deferred generated-types decision.
 The expansion readiness generator writes a checked post-MVP decision gate under `spec/fixtures/generated/expansion-readiness/`; it keeps hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types blocked or deferred until real pilot, recurring setup, corpus, and adoption evidence justify them.
 The repeating prediction setup generator writes a checked non-executing recurrence contract under `spec/fixtures/generated/repeating-prediction-setup/`, covering fixed-count, until-date, open-ended, interval, selected weekday/window, calibration-threshold, and post-calibration restart policies before any campaign manifest or runner exists.
@@ -292,7 +310,7 @@ The prediction campaign pre-calibration generator writes a checked readback unde
 The prediction workspace registry generator writes a checked readback under `spec/fixtures/generated/prediction-workspace-registry/`, showing multiple prediction definitions with stable IDs, compact workspace read models, audit-backed configuration operation definitions, per-prediction idempotency/lease controls, resource limits, and cross-prediction isolation checks.
 The background worker runtime generator writes a checked readback under `spec/fixtures/generated/background-worker-runtime/`, defining local worker commands, workspace read-model polling, one-tick equivalence to internal API `run_tick`, a bounded dry-run loop over the shared internal API, an approved ephemeral SQLite commit path with operation receipt/idempotency/lease write and release readbacks, lifecycle-backed worker control-state writes for pause/resume/drain/shutdown plus health readback, durable local sidecar activation semantics, operation guards, cancellation/backoff policy, resource limits, blocked operation readbacks, and the non-networked sidecar boundary without starting a daemon or writing persistent state.
 The runtime security generator writes a checked hardening readback under `spec/fixtures/generated/runtime-security/`, declaring the stdlib-only runtime dependency budget, module and adapter boundaries, path/symlink/database guards, input and response byte limits, credential-reference-only policy, threat-model notes, blocked examples, and local execution boundary without starting hidden services or fetching live sources.
-The agent implementation kit generator writes a checked readback under `spec/fixtures/generated/agent-implementation-kit/`, exposing the compact prediction manual, question-discovery intake contract, forecastable/needs-clarification/blocked/rejected candidate readbacks, mechanical validation reports, first-run source paths, adapter guidance for in-process/CLI/agent-call/local MCP/future transports, starter-template descriptors, and disallowed behavior boundaries without creating forecast artifacts.
+The agent implementation kit generator writes a checked readback under `spec/fixtures/generated/agent-implementation-kit/`, exposing the quickstart front door, compact prediction manual, question-discovery intake contract, forecastable/needs-clarification/blocked/rejected candidate readbacks, mechanical validation reports, first-run source paths, adapter guidance for in-process/CLI/agent-call/local MCP/future transports, starter-template descriptors, and disallowed behavior boundaries without creating forecast artifacts. Agents should use `prediction-agent-adoption` first for general fit, then the implementation kit when they are ready to wire OPE into a host project.
 The Postgres compatibility generator writes a checked readback under `spec/fixtures/generated/postgres-compatibility/`, mapping the eight lifecycle operation-store tables, dialect-neutral adapter semantics, all fifteen lifecycle runtime scenarios, SQLite-only assumption guards, and migration/execution boundaries without connecting to Postgres or running migrations.
 The persistent SQLite policy generator writes a checked readback under `spec/fixtures/generated/persistent-sqlite-policy/`, covering caller approval, `.ope/state` allowlisting, traversal and symlink blockers, explicit JSON-state migration with backup and lock rules, and the boundary that normal checks create no persistent database.
 The lifecycle lease policy generator writes a checked readback under `spec/fixtures/generated/lifecycle-lease-policy/`, classifying fourteen lifecycle operations into nine strict-lease operations and five idempotency-only operations with conflict cases and non-mutating readback boundaries.

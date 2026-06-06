@@ -53,6 +53,80 @@ VALIDATION_CHECKS = [
 ]
 
 
+def quickstart_step(order: int, key: str, command: str, expected: str, blocked: str) -> dict[str, Any]:
+    return {
+        "order": order,
+        "stepKey": key,
+        "command": command,
+        "expected": expected,
+        "blockedAlternative": blocked,
+    }
+
+
+def quickstart_front_door() -> dict[str, Any]:
+    steps = [
+        quickstart_step(
+            1,
+            "start_here",
+            "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+            "Return the compact front-door sequence and wrapper outline for an external coding agent.",
+            "If this command fails, run the agent implementation kit checker before attempting forecast setup.",
+        ),
+        quickstart_step(
+            2,
+            "ask_what_can_be_forecasted",
+            "python3 scripts/ope.py agent-integrate --view candidates",
+            "Return forecastable, needs-clarification, blocked, and rejected candidate contracts with reason codes.",
+            "If no candidate is forecastable, follow the returned clarification or blocked-path next action.",
+        ),
+        quickstart_step(
+            3,
+            "run_guided_forecast",
+            "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+            "Return forecast and question IDs plus forecast-card and lifecycle-bundle readback commands.",
+            "If the guided case is blocked, do not invent forecast IDs; fix the source or question blocker first.",
+        ),
+        quickstart_step(
+            4,
+            "read_forecast_card",
+            "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+            "Read the compact claim-safe forecast card for host decision support.",
+            "If the card cannot be read, inspect the guided forecast output and record binding before retrying.",
+        ),
+        quickstart_step(
+            5,
+            "inspect_lifecycle_bundle",
+            "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+            "Read the lifecycle bundle when the host feature needs provenance, method, or scoring context.",
+            "If the bundle is too large for context, keep the forecast card as the compact readback.",
+        ),
+    ]
+    return {
+        "frontDoorId": "agentimplementationfrontdoor-001",
+        "frontDoorStatus": "first_external_agent_entrypoint",
+        "entryCommand": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "targetTimeToFirstCommandMinutes": 10,
+        "steps": steps,
+        "copyableWrapper": {
+            "wrapperStatus": "outline_only_uses_existing_surfaces",
+            "callSequence": [
+                "agent_implementation_quickstart",
+                "agent_integration_candidates",
+                "agent_integration_guided_forecast",
+                "forecast_card_readback",
+                "lifecycle_bundle_readback",
+            ],
+            "storesCredentialValues": False,
+            "acceptsRawPrivateRows": False,
+            "acceptsRawSql": False,
+            "opensNetworkListener": False,
+        },
+        "createsNewForecastPath": False,
+        "hostedRuntimeRequired": False,
+        "qualityClaimUpgraded": False,
+    }
+
+
 def manual_step(index: int, key: str, command: str, action: str, creates_artifacts: bool = False) -> dict[str, Any]:
     return {
         "stepId": f"predictionmanualstep-{index:03d}",
@@ -398,6 +472,7 @@ def execution_boundary() -> dict[str, bool]:
 
 
 def build_agent_implementation_kit() -> dict[str, Any]:
+    quickstart = quickstart_front_door()
     candidates = candidate_contract_readbacks()
     validation_reports = mechanical_validation_reports(candidates)
     adapters = adapter_readbacks()
@@ -407,6 +482,7 @@ def build_agent_implementation_kit() -> dict[str, Any]:
         "generatedAt": GENERATED_AT,
         "kitStatus": "agent_prediction_implementation_kit_checked",
         "kitScope": "local_agent_readback_and_templates",
+        "quickstartFrontDoor": quickstart,
         "predictionManual": prediction_manual(),
         "questionDiscoveryIntakeContract": question_discovery_intake_contract(),
         "candidateContractReadbacks": candidates,
@@ -418,6 +494,7 @@ def build_agent_implementation_kit() -> dict[str, Any]:
         "conformanceFixturePack": conformance_fixture_pack(),
         "executionBoundary": execution_boundary(),
         "summary": {
+            "quickstartStepCount": len(quickstart["steps"]),
             "manualStepCount": len(MANUAL_STEP_KEYS),
             "candidateReadbackCount": len(candidates),
             "validationReportCount": len(validation_reports),
@@ -449,6 +526,8 @@ def validate_agent_implementation_kit(record: dict[str, Any]) -> None:
 def view_payload(record: dict[str, Any], view: str) -> Any:
     if view == "full":
         return record
+    if view == "quickstart":
+        return record["quickstartFrontDoor"]
     if view == "manual":
         return record["predictionManual"]
     if view == "intake":
@@ -474,7 +553,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--check", action="store_true", help="check generated agent implementation kit fixture")
     parser.add_argument(
         "--view",
-        choices=["full", "manual", "intake", "candidates", "validation", "adapters", "templates", "blocked", "boundary"],
+        choices=["full", "quickstart", "manual", "intake", "candidates", "validation", "adapters", "templates", "blocked", "boundary"],
         default="full",
         help="emit a focused agent implementation kit view",
     )

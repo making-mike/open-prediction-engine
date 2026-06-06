@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from generate_release_manifest import build_manifest
 
@@ -21,8 +22,7 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def run_cli(*args: str) -> dict[str, object]:
-    command = [sys.executable, "scripts/ope.py", *args]
+def run_command(command: list[str]) -> dict[str, Any]:
     rendered = shlex.join(command)
     started = time.perf_counter()
     print(f"[check_mvp_release_surface] start {rendered}", file=sys.stderr, flush=True)
@@ -43,6 +43,11 @@ def run_cli(*args: str) -> dict[str, object]:
     )
     result.check_returncode()
     return json.loads(result.stdout)
+
+
+def run_cli(*args: str) -> dict[str, Any]:
+    command = [sys.executable, "scripts/ope.py", *args]
+    return run_command(command)
 
 
 def main() -> None:
@@ -86,6 +91,8 @@ def main() -> None:
 
     agent_kit = run_cli("agent-implementation-kit")
     require(agent_kit["kitStatus"] == "agent_prediction_implementation_kit_checked", "agent kit status drifted")
+    require(agent_kit["summary"]["quickstartStepCount"] == 5, "agent kit quickstart step count drifted")
+    require(agent_kit["quickstartFrontDoor"]["frontDoorStatus"] == "first_external_agent_entrypoint", "agent kit quickstart status drifted")
     require(agent_kit["summary"]["manualStepCount"] == 12, "agent kit manual step count drifted")
     require(agent_kit["summary"]["candidateReadbackCount"] == 4, "agent kit candidate readback count drifted")
     require(agent_kit["summary"]["validationReportCount"] == 4, "agent kit validation report count drifted")
@@ -116,6 +123,90 @@ def main() -> None:
     require(
         agent_integration["executionBoundary"]["hostedRuntimeImplemented"] is False,
         "agent integration must not claim hosted runtime",
+    )
+
+    agent_guidance = run_cli("agent-guide", "--section", "summary")
+    require(agent_guidance["guidanceCaseCount"] == 5, "agent guidance case count drifted")
+    require(agent_guidance["implementedMilestoneCount"] == 4, "agent guidance milestone coverage drifted")
+    require(agent_guidance["promptPlannerReady"] is True, "agent guidance should expose prompt planner")
+    require(agent_guidance["helsinkiNarrowingFlowReady"] is True, "agent guidance should expose Helsinki narrowing flow")
+    require(agent_guidance["instructionPackReady"] is True, "agent guidance should expose instruction pack")
+    require(agent_guidance["forecastArtifactsCreated"] is False, "agent guidance must not create artifacts")
+    require(agent_guidance["qualityClaimAllowed"] is False, "agent guidance must not allow quality claims")
+
+    prediction_feature_setup = run_cli("prediction-feature-setup")
+    require(
+        prediction_feature_setup["setupStatus"] == "checked_compact_contract",
+        "prediction feature setup status drifted",
+    )
+    require(
+        prediction_feature_setup["summary"]["responseExampleCount"] == 5,
+        "prediction feature setup response count drifted",
+    )
+    require(
+        prediction_feature_setup["summary"]["acceptedForecastId"] == "forecast-1102",
+        "prediction feature setup forecast binding drifted",
+    )
+    require(
+        prediction_feature_setup["createsNewForecastPath"] is False,
+        "prediction feature setup must not create a new forecast path",
+    )
+    require(
+        prediction_feature_setup["executionBoundary"]["createsForecastArtifacts"] is False,
+        "prediction feature setup must not create forecast artifacts",
+    )
+    require(
+        prediction_feature_setup["executionBoundary"]["qualityClaimAllowed"] is False,
+        "prediction feature setup must not allow quality claims",
+    )
+
+    embedded_example = run_command(
+        [
+            sys.executable,
+            "examples/embed-ope-prediction-feature/host_wrapper.py",
+            "--request",
+            "examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json",
+            "--output-format",
+            "json",
+        ]
+    )
+    require(
+        embedded_example["exampleStatus"] == "forecast_card_ready",
+        "embedded prediction feature example status drifted",
+    )
+    require(
+        embedded_example["summary"]["forecastId"] == "forecast-1102",
+        "embedded prediction feature example forecast binding drifted",
+    )
+    require(
+        embedded_example["executionBoundary"]["opensNetworkListener"] is False,
+        "embedded prediction feature example must not open a network listener",
+    )
+    require(
+        embedded_example["executionBoundary"]["storesCredentialValues"] is False,
+        "embedded prediction feature example must not store credentials",
+    )
+    require(
+        embedded_example["executionBoundary"]["qualityClaimAllowed"] is False,
+        "embedded prediction feature example must not allow quality claims",
+    )
+
+    mcp_adoption = run_cli("mcp-adoption", "--view", "summary")
+    require(
+        mcp_adoption["adoptionStatus"] == "checked_mcp_adoption_transcripts",
+        "MCP adoption path status drifted",
+    )
+    require(
+        mcp_adoption["summary"]["successStepCount"] == 4,
+        "MCP adoption path success step count drifted",
+    )
+    require(
+        mcp_adoption["summary"]["blockedTranscriptCount"] == 5,
+        "MCP adoption path blocked transcript count drifted",
+    )
+    require(
+        mcp_adoption["summary"]["acceptedForecastId"] == "forecast-1102",
+        "MCP adoption path forecast binding drifted",
     )
 
     postgres = run_cli("postgres-compatibility")
@@ -425,7 +516,7 @@ def main() -> None:
     )
 
     adoption = run_cli("developer-adoption")
-    require(adoption["summary"]["quickstartStepCount"] == 7, "developer adoption quickstart count drifted")
+    require(adoption["summary"]["quickstartStepCount"] == 8, "developer adoption quickstart count drifted")
     require(adoption["bindings"]["forecastId"] == "forecast-1102", "developer adoption forecast binding drifted")
     require(adoption["summary"]["qualityClaimAllowed"] is False, "developer adoption must keep quality claims blocked")
     require(adoption["summary"]["generatedTypesIncluded"] is False, "developer adoption should defer generated runtime types")
@@ -450,6 +541,36 @@ def main() -> None:
     require(pilot_summary["summary"]["ledgerRowsWritten"] == 0, "pilot summary intake must not write ledger rows")
     require(pilot_summary["summary"]["expansionEvidenceReady"] is False, "pilot summary intake must not unblock expansion")
     require(pilot_summary["summary"]["qualityClaimAllowed"] is False, "pilot summary intake must keep quality claims blocked")
+
+    simulated_pilot = run_cli("simulated-agent-pilot", "--section", "summary")
+    require(simulated_pilot["simulatedSessionCount"] == 5, "simulated pilot should expose five sessions")
+    require(simulated_pilot["userPromptSessionCount"] == 1, "simulated pilot should include the user prompt")
+    require(simulated_pilot["generatedPromptSessionCount"] == 4, "simulated pilot should include four generated prompts")
+    require(simulated_pilot["realSessionsRecorded"] == 0, "simulated pilot must not record real sessions")
+    require(simulated_pilot["pilotEvidenceReady"] is False, "simulated pilot must not unblock real pilot evidence")
+    require(simulated_pilot["qualityClaimAllowed"] is False, "simulated pilot must keep quality claims blocked")
+
+    pilot_findings = run_cli("pilot-findings", "--section", "summary")
+    require(pilot_findings["acceptedRealSessionCount"] == 0, "pilot findings should not fabricate real sessions")
+    require(pilot_findings["acceptedSimulatedAgentSessionCount"] == 5, "pilot findings should expose simulated sessions")
+    require(pilot_findings["agentSimulationEvidenceReady"] is True, "pilot findings should mark simulation evidence ready")
+    require(pilot_findings["pilotEvidenceReady"] is False, "pilot findings should require real sessions")
+    require(pilot_findings["generatedTypesEvidenceReady"] is False, "pilot findings should not unblock generated types")
+    require(pilot_findings["qualityClaimAllowed"] is False, "pilot findings should not allow quality claims")
+    require(pilot_findings["hostedRuntimeAllowed"] is False, "pilot findings should not allow hosted runtime")
+
+    generated_types = run_cli("generated-types-decision", "--section", "summary")
+    require(
+        generated_types["decisionStatus"] == "defer_until_adoption_evidence",
+        "generated types decision should remain deferred",
+    )
+    require(generated_types["generatedTypesIncluded"] is False, "generated types must not be included")
+    require(generated_types["selectedLanguageTargetCount"] == 0, "generated types target count drifted")
+    require(generated_types["acceptedRealSessionCount"] == 0, "generated types decision should reflect zero real sessions")
+    require(
+        generated_types["acceptedSimulatedAgentSessionCount"] == 5,
+        "generated types decision should reflect simulated sessions",
+    )
 
     expansion = run_cli("expansion-readiness")
     require(expansion["gateStatus"] == "blocked_pending_evidence", "expansion readiness should remain blocked")

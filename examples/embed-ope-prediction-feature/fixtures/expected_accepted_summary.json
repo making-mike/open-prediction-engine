@@ -1,0 +1,7 @@
+{
+  "decision": "forecast_card_ready",
+  "forecastId": "forecast-1102",
+  "questionId": "question-1102",
+  "probability": 0.645,
+  "qualityClaimAllowed": false
+}

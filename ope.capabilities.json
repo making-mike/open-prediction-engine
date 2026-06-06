@@ -1,0 +1,82 @@
+{
+  "manifestVersion": "1.0",
+  "manifestStatus": "checked",
+  "projectName": "Open Prediction Engine",
+  "tagline": "A prediction credibility layer for agents building forecast features.",
+  "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+  "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
+  "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
+  "helpsWith": [
+    {
+      "capabilityKey": "forecast_contracts",
+      "label": "Resolvable forecast contracts",
+      "whyItMatters": "Turns vague prediction ideas into future-facing questions with horizons and resolution rules."
+    },
+    {
+      "capabilityKey": "evidence_provenance",
+      "label": "Evidence provenance",
+      "whyItMatters": "Records which source roles and forecast-time evidence supported a prediction."
+    },
+    {
+      "capabilityKey": "baseline_scoring",
+      "label": "Baseline comparison",
+      "whyItMatters": "Keeps new methods honest by comparing them against simple baselines before stronger claims."
+    },
+    {
+      "capabilityKey": "resolution_and_scoring",
+      "label": "Resolution and scoring",
+      "whyItMatters": "Separates forecast-time evidence from outcome evidence and scores resolved forecasts."
+    },
+    {
+      "capabilityKey": "calibration_gates",
+      "label": "Calibration gates",
+      "whyItMatters": "Blocks calibration and quality claims until enough comparable resolved outcomes exist."
+    },
+    {
+      "capabilityKey": "agent_safe_readbacks",
+      "label": "Agent-safe readbacks",
+      "whyItMatters": "Gives agents compact commands and schema-bound records instead of free-form oracle output."
+    }
+  ],
+  "doesNotProvide": [
+    {
+      "nonGoalKey": "frontend",
+      "label": "Frontend or dashboard",
+      "replacement": "Build UI in the host app and render OPE forecast cards."
+    },
+    {
+      "nonGoalKey": "hosted_api",
+      "label": "Hosted API",
+      "replacement": "Use local CLI, in-process calls, agent-call, or local MCP until a transport is checked."
+    },
+    {
+      "nonGoalKey": "trained_model",
+      "label": "Trained model out of the box",
+      "replacement": "Bring a model and compare it through OPE method and scoring gates."
+    },
+    {
+      "nonGoalKey": "generic_web_crawler",
+      "label": "Generic web crawler",
+      "replacement": "Provide approved sources or checked adapters under source policy."
+    },
+    {
+      "nonGoalKey": "production_scheduler",
+      "label": "Production scheduler",
+      "replacement": "Use host scheduling; OPE only exposes checked local readbacks today."
+    }
+  ],
+  "extensionPointKeys": [
+    "source_adapter",
+    "forecast_method",
+    "resolver",
+    "scorer",
+    "host_app_wrapper"
+  ],
+  "boundary": {
+    "normalChecksOffline": true,
+    "defaultOutputCompact": true,
+    "qualityClaimRequiresResolvedEvidence": true,
+    "credentialsStored": false,
+    "rawPrivateRowsAccepted": false
+  }
+}

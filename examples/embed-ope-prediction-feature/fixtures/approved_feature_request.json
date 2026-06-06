@@ -1,0 +1,26 @@
+{
+  "hostFeatureIntent": "Show a dispatch-risk prediction in a logistics operations dashboard.",
+  "decisionToSupport": "Decide whether the operator should pre-alert drivers about likely disruption.",
+  "approvedSourceRefs": [
+    {
+      "sourceRef": "sourceadapteroutput-001",
+      "sourceRole": "weather_forecast",
+      "approved": true
+    },
+    {
+      "sourceRef": "sourcebinding-traffic-history-001",
+      "sourceRole": "historical_delay_baseline",
+      "approved": true
+    },
+    {
+      "sourceRef": "sourcebinding-outcome-001",
+      "sourceRole": "transit_delay_outcome",
+      "approved": true
+    }
+  ],
+  "resolutionHints": {
+    "outcomeSourceRef": "sourcebinding-outcome-001",
+    "resolutionWindow": "after_service_window"
+  },
+  "responseSizeBudgetBytes": 65536
+}

@@ -22,11 +22,12 @@ python3 -m venv .venv
 Run the normal repository checks:
 
 ```bash
+python3 scripts/ope.py smoke
 python3 scripts/run_checks.py
 python3 scripts/ope.py check
 ```
 
-`scripts/run_checks.py` runs checks in parallel by default. Use `python3 scripts/run_checks.py --workers 1` for sequential debugging, or `python3 scripts/run_checks.py --list` to inspect the command inventory.
+`python3 scripts/ope.py smoke` is the fast external-agent adoption check. It prints progress for the short path to a forecast card and should be run before the full suite when checking a fresh checkout. `scripts/run_checks.py` runs checks in parallel by default. Use `python3 scripts/run_checks.py --workers 1` for sequential debugging, or `python3 scripts/run_checks.py --list` to inspect the command inventory.
 
 Run the release-readiness wrapper:
 

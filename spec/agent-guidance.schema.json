@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/agent-guidance.schema.json",
+  "title": "Agent Guidance Loop",
+  "description": "Checked guidance for using the calling agent's intelligence to turn messy developer prompts into safe OPE next moves.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agentGuidanceId",
+    "generatedAt",
+    "guidanceStatus",
+    "implementedMilestones",
+    "sourceRecords",
+    "guidanceCases",
+    "promptPlanner",
+    "helsinkiNarrowingFlow",
+    "agentInstructionPack",
+    "executionBoundary",
+    "summary"
+  ],
+  "properties": {
+    "agentGuidanceId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "guidanceStatus": {
+      "type": "string",
+      "enum": ["checked_agent_guidance_loop"]
+    },
+    "implementedMilestones": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "type": "string", "enum": ["142", "143", "144", "145"] }
+    },
+    "sourceRecords": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predictionFeatureSetupId", "simulatedAgentPilotId", "pilotFindingsId"],
+      "properties": {
+        "predictionFeatureSetupId": { "$ref": "common.schema.json#/$defs/id" },
+        "simulatedAgentPilotId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotFindingsId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "guidanceCases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/guidanceCase" }
+    },
+    "promptPlanner": { "$ref": "#/$defs/promptPlanner" },
+    "helsinkiNarrowingFlow": { "$ref": "#/$defs/helsinkiNarrowingFlow" },
+    "agentInstructionPack": { "$ref": "#/$defs/agentInstructionPack" },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentUsesOwnIntelligence",
+        "normalChecksAreReadOnly",
+        "createsForecastArtifacts",
+        "executesSources",
+        "fetchesLiveData",
+        "storesCredentialValues",
+        "storesRawPrivateRows",
+        "acceptsRawSql",
+        "qualityClaimsUpgraded",
+        "hostedRuntimeImplemented"
+      ],
+      "properties": {
+        "agentUsesOwnIntelligence": { "type": "boolean" },
+        "normalChecksAreReadOnly": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "executesSources": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "storesRawPrivateRows": { "type": "boolean" },
+        "acceptsRawSql": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guidanceCaseCount",
+        "implementedMilestoneCount",
+        "promptPlannerReady",
+        "helsinkiNarrowingFlowReady",
+        "instructionPackReady",
+        "realSessionsRecorded",
+        "forecastArtifactsCreated",
+        "qualityClaimAllowed",
+        "hostedRuntimeImplemented"
+      ],
+      "properties": {
+        "guidanceCaseCount": { "type": "integer", "minimum": 0 },
+        "implementedMilestoneCount": { "type": "integer", "minimum": 0 },
+        "promptPlannerReady": { "type": "boolean" },
+        "helsinkiNarrowingFlowReady": { "type": "boolean" },
+        "instructionPackReady": { "type": "boolean" },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "forecastArtifactsCreated": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeImplemented": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "boundedString": { "type": "string", "minLength": 1, "maxLength": 800 },
+    "maybeEmptyString": { "type": "string", "maxLength": 240 },
+    "stringList": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "guidanceCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guidanceCaseId",
+        "caseKey",
+        "classification",
+        "agentNextMove",
+        "sourcePrompt",
+        "normalizedHorizonDate",
+        "reasonCodes",
+        "requiredSourceRoles",
+        "questionsToAsk",
+        "safeCommands",
+        "forecastId",
+        "questionId",
+        "explanation",
+        "createsForecastArtifacts",
+        "storesCredentialValues",
+        "storesRawPrivateRows",
+        "executesSources",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "guidanceCaseId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": {
+          "type": "string",
+          "enum": ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"]
+        },
+        "classification": {
+          "type": "string",
+          "enum": ["forecast_card_ready", "needs_clarification", "blocked", "rejected", "response_too_large"]
+        },
+        "agentNextMove": {
+          "type": "string",
+          "enum": [
+            "read_forecast_card",
+            "ask_user",
+            "replace_unsafe_inputs",
+            "rewrite_as_future_contract",
+            "narrow_scope_or_raise_budget"
+          ]
+        },
+        "sourcePrompt": { "$ref": "#/$defs/boundedString" },
+        "normalizedHorizonDate": { "$ref": "#/$defs/maybeEmptyString" },
+        "reasonCodes": { "$ref": "#/$defs/stringList" },
+        "requiredSourceRoles": { "$ref": "#/$defs/stringList" },
+        "questionsToAsk": { "$ref": "#/$defs/stringList" },
+        "safeCommands": { "$ref": "#/$defs/stringList" },
+        "forecastId": { "$ref": "#/$defs/maybeEmptyString" },
+        "questionId": { "$ref": "#/$defs/maybeEmptyString" },
+        "explanation": { "$ref": "#/$defs/boundedString" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "storesRawPrivateRows": { "type": "boolean" },
+        "executesSources": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "promptPlanner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plannerId", "plannerStatus", "plannerInput", "plannerOutput"],
+      "properties": {
+        "plannerId": { "$ref": "common.schema.json#/$defs/id" },
+        "plannerStatus": {
+          "type": "string",
+          "enum": ["checked_prompt_to_question_planner"]
+        },
+        "plannerInput": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rawPromptAllowed",
+            "maxPromptChars",
+            "credentialValuesAllowed",
+            "rawPrivateRowsAllowed",
+            "rawSqlAllowed"
+          ],
+          "properties": {
+            "rawPromptAllowed": { "type": "boolean" },
+            "maxPromptChars": { "type": "integer", "minimum": 1 },
+            "credentialValuesAllowed": { "type": "boolean" },
+            "rawPrivateRowsAllowed": { "type": "boolean" },
+            "rawSqlAllowed": { "type": "boolean" }
+          }
+        },
+        "plannerOutput": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["agentNextMove", "questionCount", "questionsToAsk", "requiredSourceRoles", "safeRetryCommand"],
+          "properties": {
+            "agentNextMove": { "type": "string", "enum": ["ask_user"] },
+            "questionCount": { "type": "integer", "minimum": 0 },
+            "questionsToAsk": { "$ref": "#/$defs/stringList" },
+            "requiredSourceRoles": { "$ref": "#/$defs/stringList" },
+            "safeRetryCommand": { "$ref": "#/$defs/boundedString" }
+          }
+        }
+      }
+    },
+    "helsinkiNarrowingFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flowId",
+        "flowStatus",
+        "broadPrompt",
+        "normalizedHorizonDate",
+        "broadPromptCase",
+        "narrowingQuestions",
+        "clarifiedPromptExample",
+        "readyAfterClarificationCase",
+        "safeNextCommands"
+      ],
+      "properties": {
+        "flowId": { "$ref": "common.schema.json#/$defs/id" },
+        "flowStatus": { "type": "string", "enum": ["checked_narrowing_flow"] },
+        "broadPrompt": { "$ref": "#/$defs/boundedString" },
+        "normalizedHorizonDate": { "$ref": "#/$defs/boundedString" },
+        "broadPromptCase": { "type": "string", "enum": ["needs_clarification"] },
+        "narrowingQuestions": { "$ref": "#/$defs/stringList" },
+        "clarifiedPromptExample": { "$ref": "#/$defs/boundedString" },
+        "readyAfterClarificationCase": { "type": "string", "enum": ["accepted"] },
+        "safeNextCommands": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "agentInstructionPack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packId", "packStatus", "doRules", "doNotRules", "minimumAgentLoop"],
+      "properties": {
+        "packId": { "$ref": "common.schema.json#/$defs/id" },
+        "packStatus": { "type": "string", "enum": ["checked_agent_instruction_pack"] },
+        "doRules": { "$ref": "#/$defs/stringList" },
+        "doNotRules": { "$ref": "#/$defs/stringList" },
+        "minimumAgentLoop": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stepKey", "instruction", "safeCommand"],
+            "properties": {
+              "stepKey": { "$ref": "#/$defs/boundedString" },
+              "instruction": { "$ref": "#/$defs/boundedString" },
+              "safeCommand": { "$ref": "#/$defs/maybeEmptyString" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

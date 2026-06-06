@@ -1,0 +1,202 @@
+{
+  "predictionFeatureSetupId": "predictionfeaturesetup-001",
+  "generatedAt": "2026-06-05T14:20:00Z",
+  "setupStatus": "checked_compact_contract",
+  "requestContract": {
+    "contractId": "predictionfeaturesetuprequest-001",
+    "contractStatus": "checked_compact_request_contract",
+    "requiredFields": [
+      {
+        "fieldName": "hostFeatureIntent",
+        "fieldType": "string",
+        "purpose": "Describe the host feature that needs prediction support."
+      },
+      {
+        "fieldName": "decisionToSupport",
+        "fieldType": "string",
+        "purpose": "Name the user or system decision that changes if a forecast is useful."
+      },
+      {
+        "fieldName": "approvedSourceRefs",
+        "fieldType": "array",
+        "purpose": "List approved source references, not raw rows or credentials."
+      },
+      {
+        "fieldName": "resolutionHints",
+        "fieldType": "array",
+        "purpose": "Name candidate outcome sources, windows, thresholds, or resolution rules."
+      },
+      {
+        "fieldName": "responseSizeBudgetBytes",
+        "fieldType": "integer",
+        "purpose": "Bound the response size for tool-call context."
+      }
+    ],
+    "optionalFields": [
+      "domainHint",
+      "existingSetupId",
+      "preferredSourceKind"
+    ],
+    "acceptsCredentialValues": false,
+    "acceptsRawPrivateRows": false,
+    "acceptsRawSql": false
+  },
+  "responseExamples": [
+    {
+      "caseKey": "accepted",
+      "decision": "forecast_card_ready",
+      "reasonCodes": [
+        "candidate_validated"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "nextAction": "Read the forecast card, then inspect the lifecycle bundle if provenance or method context is needed.",
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "forecastCardCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+      "lifecycleBundleCommand": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesPrivateSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "caseKey": "needs_clarification",
+      "decision": "needs_clarification",
+      "reasonCodes": [
+        "missing_threshold",
+        "ambiguous_service_window"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "nextAction": "Ask the caller for a measurable threshold and a specific future service window.",
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesPrivateSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "caseKey": "blocked",
+      "decision": "blocked",
+      "reasonCodes": [
+        "raw_credential_value",
+        "unapproved_source"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "nextAction": "Replace unsafe inputs with approved source references and credential references before retrying.",
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesPrivateSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "caseKey": "rejected",
+      "decision": "rejected",
+      "reasonCodes": [
+        "past_tense_question",
+        "unresolvable_outcome"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "nextAction": "Use historical analysis or rewrite the request as a measurable future outcome.",
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesPrivateSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "caseKey": "response_too_large",
+      "decision": "response_too_large",
+      "reasonCodes": [
+        "response_size_budget_exceeded"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "nextAction": "Retry with a larger approved byte budget or request a narrower readback view.",
+      "forecastId": null,
+      "questionId": null,
+      "forecastCardCommand": null,
+      "lifecycleBundleCommand": null,
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesPrivateSources": false,
+      "qualityClaimAllowed": false
+    }
+  ],
+  "interfaceBindings": [
+    {
+      "interface": "cli",
+      "implementedStatus": "implemented_local",
+      "command": "python3 scripts/ope.py prediction-feature-setup",
+      "boundary": "CLI returns compact checked readbacks over existing agent integration surfaces."
+    },
+    {
+      "interface": "agent_call",
+      "implementedStatus": "implemented_local",
+      "command": "python3 scripts/ope.py agent-call --operation prediction_feature_setup",
+      "boundary": "Agent-call returns one transport-neutral envelope and does not accept raw private payloads."
+    },
+    {
+      "interface": "local_mcp_guidance",
+      "implementedStatus": "guidance_only",
+      "command": "spec/agent-adapter-protocol-map.md",
+      "boundary": "MCP exposure should wrap the same compact response after the local tool is added."
+    }
+  ],
+  "executionBoundary": {
+    "createsForecastArtifacts": false,
+    "fetchesLiveData": false,
+    "storesCredentialValues": false,
+    "storesRawPrivateRows": false,
+    "acceptsRawSql": false,
+    "opensNetworkListener": false,
+    "hostedRuntime": false,
+    "qualityClaimAllowed": false
+  },
+  "summary": {
+    "responseExampleCount": 5,
+    "interfaceBindingCount": 3,
+    "acceptedForecastId": "forecast-1102",
+    "acceptedQuestionId": "question-1102"
+  },
+  "warnings": [
+    "Prediction feature setup is a compact readback over existing OPE agent integration surfaces.",
+    "Accepted responses return existing forecast-card and lifecycle-bundle commands rather than creating a new forecast path.",
+    "Credential values, raw private rows, raw SQL, hidden live fetches, hosted runtime flags, and quality claims remain blocked."
+  ],
+  "createsNewForecastPath": false,
+  "hostedRuntimeRequired": false
+}

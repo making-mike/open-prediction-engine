@@ -8,8 +8,10 @@ Milestone 80 defines the local MVP release surface as a fixture-ready, agent-rea
 
 ```bash
 python3 --version
+python3 scripts/ope.py smoke
 python3 scripts/run_checks.py
 python3 scripts/ope.py check
+python3 scripts/ope.py agent-implementation-kit --view quickstart
 python3 scripts/ope.py developer-adoption --section quickstart
 python3 scripts/ope.py agent-integrate --view candidates
 python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output

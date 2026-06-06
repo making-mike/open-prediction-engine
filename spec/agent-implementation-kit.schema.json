@@ -10,6 +10,7 @@
     "generatedAt",
     "kitStatus",
     "kitScope",
+    "quickstartFrontDoor",
     "predictionManual",
     "questionDiscoveryIntakeContract",
     "candidateContractReadbacks",
@@ -28,6 +29,7 @@
     "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
     "kitStatus": { "type": "string", "enum": ["agent_prediction_implementation_kit_checked"] },
     "kitScope": { "type": "string", "enum": ["local_agent_readback_and_templates"] },
+    "quickstartFrontDoor": { "$ref": "#/$defs/quickstartFrontDoor" },
     "predictionManual": { "$ref": "#/$defs/predictionManual" },
     "questionDiscoveryIntakeContract": { "$ref": "#/$defs/questionDiscoveryIntakeContract" },
     "candidateContractReadbacks": {
@@ -77,6 +79,92 @@
     }
   },
   "$defs": {
+    "quickstartFrontDoor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frontDoorId",
+        "frontDoorStatus",
+        "entryCommand",
+        "targetTimeToFirstCommandMinutes",
+        "steps",
+        "copyableWrapper",
+        "createsNewForecastPath",
+        "hostedRuntimeRequired",
+        "qualityClaimUpgraded"
+      ],
+      "properties": {
+        "frontDoorId": { "$ref": "common.schema.json#/$defs/id" },
+        "frontDoorStatus": { "type": "string", "enum": ["first_external_agent_entrypoint"] },
+        "entryCommand": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "targetTimeToFirstCommandMinutes": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "steps": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/quickstartStep" }
+        },
+        "copyableWrapper": { "$ref": "#/$defs/copyableWrapper" },
+        "createsNewForecastPath": { "type": "boolean" },
+        "hostedRuntimeRequired": { "type": "boolean" },
+        "qualityClaimUpgraded": { "type": "boolean" }
+      }
+    },
+    "quickstartStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "stepKey", "command", "expected", "blockedAlternative"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "stepKey": {
+          "type": "string",
+          "enum": [
+            "start_here",
+            "ask_what_can_be_forecasted",
+            "run_guided_forecast",
+            "read_forecast_card",
+            "inspect_lifecycle_bundle"
+          ]
+        },
+        "command": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "expected": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "blockedAlternative": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "copyableWrapper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wrapperStatus",
+        "callSequence",
+        "storesCredentialValues",
+        "acceptsRawPrivateRows",
+        "acceptsRawSql",
+        "opensNetworkListener"
+      ],
+      "properties": {
+        "wrapperStatus": { "type": "string", "enum": ["outline_only_uses_existing_surfaces"] },
+        "callSequence": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": [
+              "agent_implementation_quickstart",
+              "agent_integration_candidates",
+              "agent_integration_guided_forecast",
+              "forecast_card_readback",
+              "lifecycle_bundle_readback"
+            ]
+          }
+        },
+        "storesCredentialValues": { "type": "boolean" },
+        "acceptsRawPrivateRows": { "type": "boolean" },
+        "acceptsRawSql": { "type": "boolean" },
+        "opensNetworkListener": { "type": "boolean" }
+      }
+    },
     "predictionManual": {
       "type": "object",
       "additionalProperties": false,
@@ -448,14 +536,16 @@
         "candidateReadbackCount",
         "validationReportCount",
         "adapterReadbackCount",
-        "starterTemplateCount"
+        "starterTemplateCount",
+        "quickstartStepCount"
       ],
       "properties": {
         "manualStepCount": { "type": "integer", "minimum": 12, "maximum": 12 },
         "candidateReadbackCount": { "type": "integer", "minimum": 4, "maximum": 4 },
         "validationReportCount": { "type": "integer", "minimum": 4, "maximum": 4 },
         "adapterReadbackCount": { "type": "integer", "minimum": 5, "maximum": 5 },
-        "starterTemplateCount": { "type": "integer", "minimum": 3, "maximum": 3 }
+        "starterTemplateCount": { "type": "integer", "minimum": 3, "maximum": 3 },
+        "quickstartStepCount": { "type": "integer", "minimum": 5, "maximum": 5 }
       }
     }
   }

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-feature-setup-request.schema.json",
+  "title": "Prediction Feature Setup Request",
+  "description": "Compact host-project request shape for asking OPE what prediction feature can be safely set up from approved context.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hostFeatureIntent",
+    "decisionToSupport",
+    "approvedSourceRefs",
+    "resolutionHints",
+    "responseSizeBudgetBytes"
+  ],
+  "properties": {
+    "hostFeatureIntent": { "type": "string", "minLength": 12, "maxLength": 260 },
+    "decisionToSupport": { "type": "string", "minLength": 12, "maxLength": 260 },
+    "approvedSourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 4, "maxLength": 120 }
+    },
+    "resolutionHints": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": { "type": "string", "minLength": 4, "maxLength": 160 }
+    },
+    "responseSizeBudgetBytes": { "type": "integer", "minimum": 512, "maximum": 20000 }
+  }
+}

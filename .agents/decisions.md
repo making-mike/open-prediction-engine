@@ -2332,3 +2332,10 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add `agent-integrate` plus three envelope/MCP operations for local agent incorporation: readiness, candidates, and guided forecast. The first checked starter scenario is `helsinki_bus_disruption`, with source roles for weather forecast, historical delay baseline, and resolution-only transit delay outcome evidence.
 - **Why:** Agents building domain apps need OPE to answer "what can be forecasted" faster and more safely than building question validation, source-role checks, method gates, forecast-card binding, and claim boundaries themselves.
 - **Alternatives rejected:** A hosted API first, an unbounded question-synthesis agent, accepting raw private rows or raw SQL as integration inputs, letting guided blocked cases create forecast artifacts, or claiming calibration/quality improvement from a fast first forecast card.
+
+### DEC-139 — Add A General Prediction-Agent Adoption Front Door
+- **Date:** 2026-06-06
+- **Status:** accepted
+- **Choice:** Add `prediction-agent-adoption`, `explain-fit`, `capabilities`, `adoption-eval`, `AGENT_QUICKSTART.md`, and `ope.capabilities.json` as the checked general front door for agents evaluating OPE in host prediction projects.
+- **Why:** Agents were likely to misread OPE as either a full app framework or a pile of schemas; a compact fit surface makes the value and non-goals explicit before domain-specific examples.
+- **Alternatives rejected:** Adding a frontend or hosted API to improve first impressions, making `agent-integrate` the only front door, leaving capability discovery only in README prose, or advertising trained-model support before model gates and comparable evidence justify it.

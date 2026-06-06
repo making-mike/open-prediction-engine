@@ -246,7 +246,7 @@
         "smokeChecks": {
           "type": "array",
           "minItems": 3,
-          "maxItems": 70,
+          "maxItems": 80,
           "items": { "$ref": "#/$defs/smokeCheck" }
         },
         "blockedPathExamples": {

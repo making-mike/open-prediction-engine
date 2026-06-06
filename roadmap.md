@@ -1,6 +1,6 @@
 # Open Prediction Engine Roadmap
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Purpose
 
@@ -139,6 +139,9 @@ Done:
 - Pilot evidence ledger now exposes checked sanitized intake examples, raw/private-data blockers, claim-confusion signals, and zero real sessions recorded through `python3 scripts/ope.py pilot-evidence`.
 - Pilot session packet now exposes checked real-session task cards, sanitization review, ledger-ready summary shape, and stop conditions through `python3 scripts/ope.py pilot-session-packet`.
 - Pilot summary intake now classifies sanitized summary examples as ledger-ready, redaction-needed, or blocked through `python3 scripts/ope.py pilot-summary-intake`.
+- Simulated agent pilot readbacks now cover one user-provided Helsinki bus prompt plus four generated prompts across accepted, clarification, blocked, rejected, and response-too-large prediction-feature setup outcomes through `python3 scripts/ope.py simulated-agent-pilot --section summary`.
+- Pilot findings now report five simulated agent sessions and zero real sessions separately, keeping broader adoption, hosted runtime, generated types, and quality claims blocked until real sanitized sessions exist.
+- Agent guidance readbacks now tell calling agents how to classify messy prompts, ask the Helsinki bus narrowing questions, use approved source references, and stop at OPE boundaries through `python3 scripts/ope.py agent-guide --case needs_clarification`.
 - Expansion readiness now exposes a checked post-MVP gate over hosted runtime, broader private sources, live forecast evidence, stronger methods, and generated runtime types through `python3 scripts/ope.py expansion-readiness`.
 - Repeating prediction setup now exposes a checked non-executing recurrence contract with finite, until-date, open-ended, interval, weekday/window, calibration-threshold, and post-calibration restart examples through `python3 scripts/ope.py repeating-prediction-setup`.
 - Prediction campaign manifests now expose a checked dry-run campaign plan with unique campaign, cycle, run, question, forecast, resolution, and scoring IDs, duplicate keys, ignored local-state path policy, and status readbacks through `python3 scripts/ope.py prediction-campaign plan` and `python3 scripts/ope.py prediction-campaign status`.
@@ -208,15 +211,16 @@ Not started:
 
 In progress:
 
-- Post-Milestone 129 open-decision review. The numbered roadmap is checked through Milestone 129; the next work is to select the next narrow roadmap slice from the remaining post-MVP quality-gate, type-generation, and source-manifest/database-manifest open decisions without expanding hosted or live behavior prematurely.
+- Milestone 140 now has accepted agent-only simulation evidence through five checked simulated sessions. It still has zero accepted real supervised sessions; 3-5 real sanitized sessions are required before broader adoption evidence can be claimed.
 
 Next:
 
-1. Review the remaining open decisions and choose the next narrow roadmap slice with a clear local, schema-bound boundary.
-2. Decide whether the next slice should advance source-manifest/database-manifest semantics, benchmark/quality-gate semantics, generated runtime types, or public transport calibration evidence.
-3. Keep any future HTTP, OPP provider runtime, hosted service, richer private-source execution, or non-baseline method behavior behind explicit readiness gates.
-4. Keep hosted runtime, arbitrary private API/database parsing, and default network service behavior outside the normal runtime.
-5. Keep `transitmethod-100` historical-frequency baseline as the default method until comparable evidence, approvals, benchmark evidence, and method-update plans allow stronger methods.
+1. Run 3-5 supervised local pilot sessions using the checked pilot session packet.
+2. Classify sanitized summaries through `pilot-summary-intake` and review `pilot-findings`.
+3. Use `agent-guide` during the real sessions to test whether agents ask the right clarification questions instead of guessing.
+4. Keep generated runtime types deferred until real pilot evidence shows type-specific friction.
+5. Keep any future HTTP, OPP provider runtime, hosted service, richer private-source execution, or non-baseline method behavior behind explicit readiness gates.
+6. Keep `transitmethod-100` historical-frequency baseline as the default method until comparable evidence, approvals, benchmark evidence, and method-update plans allow stronger methods.
 
 MVP path:
 
@@ -237,6 +241,8 @@ MVP path:
 - Milestone 127 defines scoped opaque credential references for private API and database source bindings without storing secrets or resolving them in normal checks.
 - Milestone 128 defines retention/redaction policy for append-only records, archive tombstones, redaction receipts, sanitized projection rebuilds, and future physical-delete exception gates without implementing silent deletion or normal-check erasure.
 - Milestone 129 defines the private `data: auto` source-policy overlay for source kinds, required policy gates, manifest-only private API/database paths, and blocked web search, raw SQL, raw payload retention, private-source reads, and secret resolution in normal checks.
+- Milestones 130-134 added the first checked agent incorporation path: question discovery, Helsinki starter context, guided first forecast, local MCP integration tools, and a first-forecast efficiency gate.
+- Milestones 135-141 should convert that checked path into a copyable external-agent adoption kit: front-door quickstart, fast smoke check, stable prediction-feature contract, host wrapper example, MCP adoption transcript, real pilot evidence, and a generated-types decision.
 - Hosted services, arbitrary private API/database parsing, provider optimization, and broad source-quality work remain post-MVP unless a milestone below explicitly narrows them to a local, policy-bound boundary.
 
 ## Milestone 0: Project Baseline
@@ -4268,6 +4274,310 @@ Exit criteria:
 - Release surface reports whether the starter flow reaches a forecast-card command in no more than three routine agent tool calls.
 - Usage trace shows why a flow failed, including missing source, ambiguous question, unsafe source, leakage, or unsupported runtime categories.
 - No quality, calibration, hosted, or production-readiness claims are upgraded.
+
+## Milestone 135: Agent Implementation Kit Front Door
+
+Status: Accepted.
+
+Goal: make the agent implementation kit the canonical starting point for coding agents adding an OPE-backed prediction feature to another project.
+
+Tasks:
+
+- [x] Promote `spec/agent-implementation-kit.md` and `python3 scripts/ope.py agent-implementation-kit` as the first external-agent adoption path in README, product, and developer-adoption surfaces.
+- [x] Add a compact `quickstart` view that returns the minimum safe sequence from host feature intent to forecast-card readback.
+- [x] Add a copyable local wrapper outline that calls candidate discovery, validation, guided forecast, and forecast-card readback through existing OPE surfaces.
+- [x] Cross-link the quickstart to `agent-integrate`, `developer-adoption`, `mvp-local-runtime`, and MCP stdio docs without duplicating long runbooks.
+- [x] Preserve the boundary that this milestone does not add a new forecast path, hosted service, live-source behavior, raw credential handling, raw row handling, raw SQL, generated runtime types, or stronger quality claims.
+
+Exit criteria:
+
+- A fresh coding agent can identify the first OPE command for implementing a prediction feature without reading the full roadmap or spec index.
+- `python3 scripts/ope.py agent-implementation-kit --view quickstart` returns a compact, machine-readable path to a forecast-card command.
+- The quickstart explains blocked outcomes with reason codes and next actions instead of free-form advice.
+
+Expected outputs:
+
+- Updated `spec/agent-implementation-kit.md`
+- Updated `spec/developer-adoption-surface.md`
+- Updated `README.md` and `PRODUCT.md` references if needed
+- Updated generated agent implementation kit fixture and checker
+- `python3 scripts/ope.py agent-implementation-kit --view quickstart`
+
+## Milestone 136: Fast Agent Smoke Check
+
+Status: Accepted.
+
+Goal: give external agents a fast, visible confidence check for the adoption path before they run the full local release surface.
+
+Tasks:
+
+- [x] Add `python3 scripts/ope.py smoke` as the first short validation command for agent adoption.
+- [x] Run only the essential adoption checks: schema sanity needed for the path, developer adoption check, agent implementation kit check, agent-integrate candidates, guided accepted forecast, and forecast-card read.
+- [x] Emit progress messages before each smoke step so long-running checks are not silent.
+- [x] Return a compact JSON or text summary with pass/fail status, elapsed time, failed step, and next command.
+- [x] Keep `python3 scripts/ope.py check` as the comprehensive check and document when agents should use each command.
+- [x] Preserve the boundary that smoke writes no state, performs no live fetches, creates no forecasts beyond existing checked fixture readbacks, and upgrades no quality claims.
+
+Exit criteria:
+
+- `python3 scripts/ope.py smoke` completes quickly on a normal checkout and shows progress.
+- A failed smoke run tells an agent the exact failed step and whether to rerun `agent-implementation-kit`, `agent-integrate`, or the full check.
+- The full check remains available for release readiness.
+
+Expected outputs:
+
+- Updated `scripts/ope.py`
+- Smoke helper/checker code following existing script patterns
+- Updated `spec/mvp-local-runtime.md`
+- Updated `spec/developer-adoption-surface.md`
+- Release manifest and hardening wiring for the new smoke surface
+
+## Milestone 137: Stable Prediction Feature Contract
+
+Status: Accepted.
+
+Goal: give host projects one compact machine contract for prediction-feature setup instead of requiring agents to compose many repo-specific commands.
+
+Tasks:
+
+- [x] Define a `prediction-feature-setup-request` contract for host feature intent, allowed source references, forecast decision context, resolution hints, and response-size budget.
+- [x] Define a `prediction-feature-setup-response` contract that returns candidates, validation results, blocker codes, required source roles, next actions, and forecast-card/lifecycle-bundle commands when available.
+- [x] Bind the response to existing candidate discovery, validation, guided forecast, and readback surfaces rather than creating a separate execution path.
+- [x] Add CLI and `agent-call` operations for the compact contract.
+- [x] Add local MCP guidance for the same contract if it fits the existing stdio tool boundary.
+- [x] Preserve the boundary that the contract accepts no credential values, raw private rows, raw SQL, hidden live fetch requests, hosted runtime flags, or private-source execution instructions.
+
+Exit criteria:
+
+- An external agent can submit one prediction-feature setup request and decide whether to proceed, clarify, block, reject, or read a forecast card.
+- The response is small enough for routine agent tool context and has exact reason codes for non-accepted outcomes.
+- The contract reuses existing OPE records and does not create a new forecast artifact path.
+
+Expected outputs:
+
+- `spec/prediction-feature-setup.md`
+- `spec/prediction-feature-setup-request.schema.json`
+- `spec/prediction-feature-setup-response.schema.json`
+- Generated fixtures for accepted, needs-clarification, blocked, rejected, and response-too-large cases
+- CLI, `agent-call`, checker, release, docs, and hardening wiring
+
+## Milestone 138: Copyable Host Integration Example
+
+Status: Accepted.
+
+Goal: show another project how to embed OPE locally as a prediction feature without treating OPE as a hosted service or generic oracle.
+
+Tasks:
+
+- [x] Add `examples/embed-ope-prediction-feature/` with a minimal host wrapper.
+- [x] Include a README that explains the local sequence from host feature intent to forecast-card readback.
+- [x] Include sample approved source references and expected JSON outputs.
+- [x] Include blocked examples for raw credentials, raw private rows, raw SQL, unapproved sources, post-outcome evidence, and hosted-runtime assumptions.
+- [x] Use the stable prediction-feature setup contract when Milestone 137 is available; otherwise route through the existing `agent-integrate` and forecast-card readback commands.
+- [x] Preserve the boundary that the example stores no credentials, exposes no network listener, starts no hidden worker, and creates no production forecast-quality claim.
+
+Exit criteria:
+
+- A coding agent can copy the example into a host app and understand which OPE calls to make.
+- The example demonstrates both a successful local forecast-card path and at least one blocked unsafe path.
+- The example remains dependency-light and does not require a package install beyond the repository's current local runtime assumptions.
+
+Expected outputs:
+
+- `examples/embed-ope-prediction-feature/README.md`
+- `examples/embed-ope-prediction-feature/host_wrapper.py`
+- `examples/embed-ope-prediction-feature/fixtures/`
+- Example smoke/check command wired into local checks if feasible
+
+## Milestone 139: MCP Adoption Path Fixtures
+
+Status: Accepted.
+
+Goal: make the local MCP stdio adoption path as clear and testable as the CLI path for MCP-capable agent hosts.
+
+Tasks:
+
+- [x] Document the minimal MCP tool sequence for readiness, candidate discovery, guided forecast, and forecast-card readback.
+- [x] Add transcript fixtures for a successful forecast-card path.
+- [x] Add transcript fixtures for blocked unsafe cases, including credential value, raw SQL, private row exposure, unapproved source, and response-too-large.
+- [x] Check that MCP tool outputs match the equivalent CLI/agent-call envelope semantics for the adoption path.
+- [x] Keep MCP arguments selector-only and compact; do not accept raw source payloads, secrets, SQL, hidden live fetches, hosted runtime behavior, or private-source execution.
+
+Exit criteria:
+
+- An MCP-capable host can expose OPE adoption tools without guessing call order or accepted arguments.
+- Success and blocked transcripts are schema-bound and checked.
+- MCP readbacks remain equivalent to CLI/agent-call readbacks for the same adoption cases.
+
+Expected outputs:
+
+- Updated `spec/agent-adapter-protocol-map.md`
+- Updated `spec/agent-integration.md`
+- MCP adoption transcript fixtures
+- Updated MCP checker and release wiring
+
+## Milestone 140: Real Agent Pilot Evidence Loop
+
+Status: Partially accepted with agent-only simulation; real supervised sessions still pending.
+
+Goal: validate the adoption path with supervised real agent/developer sessions before broadening runtime or packaging claims.
+
+Tasks:
+
+- [x] Run five user-authorized simulated agent sessions using one user-provided prompt and four generated prompts.
+- [x] Count approximate prompt/response tokens and deterministic elapsed-time estimates for the simulated sessions.
+- [x] Cover accepted, needs-clarification, blocked, rejected, and response-too-large prediction-feature setup outcomes.
+- [ ] Run 3-5 real supervised local pilot sessions using the checked pilot session packet.
+- [ ] Collect sanitized real-session summaries through `pilot-summary-intake` before anything is counted as real evidence.
+- [x] Add a checked pilot findings readback that reports session count, task success, confusion points, blocked-path comprehension, forecast-card trust, and next improvement candidates.
+- [x] Keep raw transcripts, private data, credentials, and host-project secrets out of committed records.
+- [x] Update adoption metrics only with sanitized, ledger-ready summaries.
+- [x] Preserve the boundary that pilot evidence may improve adoption claims but does not upgrade forecast quality, calibration, hosted runtime, live-source production use, or method-performance claims.
+
+Exit criteria:
+
+- The repo can report how many real adoption sessions were run and what friction they exposed.
+- The repo can separately report simulated agent-session friction without counting it as real adoption evidence.
+- Sanitized pilot summaries distinguish successful completion, clarification-needed, blocked unsafe path, and abandoned setup cases.
+- The next adoption milestone is chosen from observed friction, not speculation.
+
+Expected outputs:
+
+- `spec/pilot-findings.md`
+- `spec/pilot-findings.schema.json`
+- `spec/simulated-agent-pilot.md`
+- `spec/simulated-agent-pilot.schema.json`
+- Generated simulated agent pilot fixture
+- Generated sanitized pilot findings fixture
+- CLI/checker wiring for `python3 scripts/ope.py simulated-agent-pilot`
+- CLI/checker wiring for `python3 scripts/ope.py pilot-findings`
+- Updated `spec/pilot-evidence-ledger.md` and `spec/local-usage-trace.md` as needed
+
+## Milestone 141: Generated Runtime Types Decision
+
+Status: Accepted.
+
+Goal: decide whether generated language-specific runtime types are necessary for external agent adoption, and if so start with the compact adoption contracts.
+
+Tasks:
+
+- [x] Review pilot findings, smoke failures, and adoption traces for type-related friction.
+- [x] Decide whether to generate TypeScript, Python, both, or neither for the compact adoption contracts.
+- [x] If generating types, scope the first generator to the prediction-feature setup request/response and forecast-card readback surfaces only.
+- [x] If deferring types, document the stable JSON examples and validator commands agents should use instead.
+- [x] Add a generated-types decision record with rationale, scope, blocked broader generation cases, and follow-up gates.
+- [x] Preserve the boundary that generated types do not imply hosted runtime, SDK stability for the entire spec package, production source parsing, or broader quality claims.
+
+Exit criteria:
+
+- The roadmap has a clear generated-types decision based on adoption evidence.
+- If types are accepted, the first type surface is narrow, checked, and tied to external-agent adoption.
+- If types are deferred, host agents still have stable JSON examples and validation commands.
+
+Expected outputs:
+
+- `spec/generated-runtime-types-decision.md`
+- Optional generated TypeScript/Python files for compact adoption contracts
+- Checker for generated type drift if types are accepted
+- Updated developer adoption and agent implementation kit docs
+
+## Milestone 142: Agent Guidance Contract
+
+Status: Accepted.
+
+Goal: give calling agents a compact OPE readback that classifies messy prediction-feature prompts and returns the next safe move.
+
+Tasks:
+
+- [x] Define a checked `agent-guidance` contract with accepted, needs-clarification, blocked, rejected, and response-too-large cases.
+- [x] Return `agentNextMove`, reason codes, required source roles, safe commands, and claim boundaries for each case.
+- [x] Bind guidance to the existing prediction-feature setup and simulated pilot records rather than creating a new forecast path.
+- [x] Add CLI, checker, schema, fixture, docs, release, and hardening wiring.
+- [x] Preserve the boundary that guidance readbacks do not execute sources, fetch live data, create forecast artifacts, or upgrade quality claims.
+
+Exit criteria:
+
+- A calling agent can ask OPE what to do next for each compact prediction-feature setup outcome.
+- Accepted guidance routes to existing forecast-card/lifecycle readbacks.
+- Non-accepted guidance stops at a concrete question, replacement step, rewrite, or scope/budget action.
+
+Expected outputs:
+
+- `spec/agent-guidance.md`
+- `spec/agent-guidance.schema.json`
+- Generated agent guidance fixture
+- CLI/checker wiring for `python3 scripts/ope.py agent-guide`
+
+## Milestone 143: Prompt-to-Question Planner
+
+Status: Accepted.
+
+Goal: turn a broad developer prompt into the focused clarification questions a capable calling agent should ask.
+
+Tasks:
+
+- [x] Add a prompt planner section to `agent-guidance`.
+- [x] Allow bounded raw prompt text while explicitly blocking credential values, raw private rows, and raw SQL.
+- [x] Return four Helsinki bus clarification questions covering route/stop/scope, time window, planned-work source ref, and outcome source.
+- [x] Return required source roles and a safe retry command after clarification.
+- [x] Keep the planner read-only and non-effectful.
+
+Exit criteria:
+
+- The planner tells an external agent what to ask next instead of forcing the agent to infer OPE's missing setup fields.
+- The planner distinguishes useful prompt text from unsafe source payloads.
+
+Expected outputs:
+
+- `agent-guide --section planner`
+- Checker coverage in `scripts/check_agent_guidance.py`
+
+## Milestone 144: Helsinki Bus Narrowing Flow
+
+Status: Accepted.
+
+Goal: make the user's Helsinki bus prompt a checked narrowing example from broad natural language to scoped forecast setup.
+
+Tasks:
+
+- [x] Normalize the broad prompt horizon to `2026-06-06`.
+- [x] Keep the broad prompt classified as `needs_clarification`.
+- [x] Add a clarified example that supplies route/stop/window/source refs.
+- [x] Route the clarified example toward the accepted prediction-feature setup case.
+- [x] Preserve the boundary that this is guidance only, not route-level forecast execution.
+
+Exit criteria:
+
+- Agents can see exactly why the broad Helsinki prompt is not ready.
+- Agents can see the minimum shape that would make the prompt routable.
+
+Expected outputs:
+
+- `agent-guide --section helsinki`
+- `agent-guide --case needs_clarification`
+
+## Milestone 145: Agent Instruction Pack
+
+Status: Accepted.
+
+Goal: document the minimum safe loop for external agents using OPE as a prediction-feature guide.
+
+Tasks:
+
+- [x] Add do/don't rules for classification, clarification, approved source refs, forecast-card reads, and claim boundaries.
+- [x] Add a minimum loop: classify prompt, ask or block, retry with refs, then read or stop.
+- [x] Include safe commands for each loop step where a command exists.
+- [x] Keep instructions aligned with OPE boundaries: no secrets, raw rows, raw SQL, hosted runtime claims, or quality overclaims.
+
+Exit criteria:
+
+- External agents have a compact instruction surface without reading the full spec package.
+- The instruction pack teaches agents to use their own intelligence while letting OPE provide rails.
+
+Expected outputs:
+
+- `agent-guide --section instructions`
+- README, PRODUCT, release, CLI, and hardening coverage
 
 ## Open Decisions
 

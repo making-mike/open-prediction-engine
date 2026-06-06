@@ -1,0 +1,8 @@
+{
+  "hostFeatureIntent": "Add a hosted prediction API endpoint for the app.",
+  "decisionToSupport": "Decide whether to call a remote OPE service.",
+  "approvedSourceRefs": [],
+  "resolutionHints": {},
+  "responseSizeBudgetBytes": 65536,
+  "hostedRuntimeRequired": true
+}

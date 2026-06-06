@@ -1,0 +1,79 @@
+{
+  "generatedRuntimeTypesDecisionId": "generatedtypesdecision-001",
+  "generatedAt": "2026-06-05T16:10:00Z",
+  "decisionStatus": "defer_until_adoption_evidence",
+  "selectedLanguageTargets": [],
+  "firstAcceptedScope": [],
+  "evidenceReview": {
+    "pilotFindingsId": "pilotfindings-001",
+    "acceptedRealSessionCount": 0,
+    "acceptedSimulatedAgentSessionCount": 5,
+    "minimumRealSessions": 3,
+    "agentSimulationEvidenceReady": true,
+    "typeRelatedFrictionObserved": false,
+    "smokeFailuresTypeRelated": false,
+    "adoptionTraceTypeNeedObserved": false,
+    "rationale": "Five simulated agent sessions exist, but no accepted real pilot sessions exist yet, and the checked smoke/adoption paths do not show type-specific friction. Stable JSON examples and validators remain the right default until real agent adoption evidence identifies a language-specific bottleneck."
+  },
+  "jsonFallback": {
+    "stableJsonExamples": [
+      "spec/fixtures/generated/prediction-feature-setup/ope-prediction-feature-setup.generated.json",
+      "examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json",
+      "examples/embed-ope-prediction-feature/fixtures/expected_accepted_summary.json",
+      "spec/fixtures/generated/mcp-adoption/ope-mcp-adoption-path.generated.json",
+      "spec/fixtures/generated/pilot-findings/ope-pilot-findings.generated.json"
+    ],
+    "validatorCommand": "python3 scripts/ope.py validate --input <record.json>",
+    "smokeCommand": "python3 scripts/ope.py smoke"
+  },
+  "blockedBroaderGenerationCases": [
+    {
+      "caseKey": "full_spec_sdk",
+      "blockedReason": "The full spec package is still evolving and should not be represented as a stable SDK surface."
+    },
+    {
+      "caseKey": "private_source_runtime_types",
+      "blockedReason": "Private API/database source runtimes remain planned or bounded, so generated types would overstate runtime support."
+    },
+    {
+      "caseKey": "hosted_client_sdk",
+      "blockedReason": "No hosted service or HTTP API is implemented, so client SDK types would imply an unsupported transport."
+    },
+    {
+      "caseKey": "forecast_quality_model_types",
+      "blockedReason": "Generated method or quality types would not create benchmark, track-record, or calibration evidence."
+    }
+  ],
+  "followUpGates": [
+    {
+      "gateKey": "real_pilot_type_friction",
+      "requiredEvidence": "Three to five sanitized pilot summaries show repeated schema-copying or validation friction that types would directly reduce.",
+      "ready": false
+    },
+    {
+      "gateKey": "compact_scope_confirmed",
+      "requiredEvidence": "The first generated surface is limited to prediction-feature setup request/response and forecast-card readback.",
+      "ready": false
+    },
+    {
+      "gateKey": "drift_checker_defined",
+      "requiredEvidence": "A generated-type drift checker exists for the accepted target language before files are emitted.",
+      "ready": false
+    }
+  ],
+  "executionBoundary": {
+    "hostedRuntimeImplied": false,
+    "fullSpecSdkStabilityClaimed": false,
+    "productionSourceParsingImplied": false,
+    "qualityClaimsUpgraded": false,
+    "generatedFilesWritten": false
+  },
+  "summary": {
+    "decisionStatus": "defer_until_adoption_evidence",
+    "generatedTypesIncluded": false,
+    "selectedLanguageTargetCount": 0,
+    "acceptedRealSessionCount": 0,
+    "acceptedSimulatedAgentSessionCount": 5,
+    "nextReviewTrigger": "Review after sanitized pilot findings show repeated type-related integration friction."
+  }
+}

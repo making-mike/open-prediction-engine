@@ -1,0 +1,276 @@
+{
+  "agentGuidanceId": "agentguidance-001",
+  "generatedAt": "2026-06-06T10:20:00Z",
+  "guidanceStatus": "checked_agent_guidance_loop",
+  "implementedMilestones": [
+    "142",
+    "143",
+    "144",
+    "145"
+  ],
+  "sourceRecords": {
+    "predictionFeatureSetupId": "predictionfeaturesetup-001",
+    "simulatedAgentPilotId": "simulatedagentpilot-001",
+    "pilotFindingsId": "pilotfindings-001"
+  },
+  "guidanceCases": [
+    {
+      "guidanceCaseId": "agentguidancecase-001",
+      "caseKey": "accepted",
+      "classification": "forecast_card_ready",
+      "agentNextMove": "read_forecast_card",
+      "sourcePrompt": "In our Helsinki operations dashboard, estimate whether HSL surface transit will exceed the beta delay threshold tomorrow morning. Approved source refs are weather_forecast_ref, historical_delay_baseline_ref, and outcome_adapter_ref.",
+      "normalizedHorizonDate": "2026-06-06",
+      "reasonCodes": [
+        "candidate_validated"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "questionsToAsk": [],
+      "safeCommands": [
+        "python3 scripts/ope.py prediction-feature-setup --view response --case accepted",
+        "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102"
+      ],
+      "forecastId": "forecast-1102",
+      "questionId": "question-1102",
+      "explanation": "The caller supplied enough approved source context to read the existing forecast card and lifecycle bundle.",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "guidanceCaseId": "agentguidancecase-002",
+      "caseKey": "needs_clarification",
+      "classification": "needs_clarification",
+      "agentNextMove": "ask_user",
+      "sourcePrompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
+      "normalizedHorizonDate": "2026-06-06",
+      "reasonCodes": [
+        "missing_threshold",
+        "ambiguous_service_window"
+      ],
+      "requiredSourceRoles": [
+        "planned_work",
+        "schedule",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "questionsToAsk": [
+        "Which route, stop, or bounded service area should this cover?",
+        "What time window on 2026-06-06 should count for the 2+ minute lateness threshold?",
+        "Which approved planned-work source reference can OPE use?",
+        "Which outcome source will confirm whether each scoped bus was 2+ minutes late?"
+      ],
+      "safeCommands": [
+        "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification"
+      ],
+      "forecastId": "",
+      "questionId": "",
+      "explanation": "The prompt is forecast-shaped, but the agent must narrow scope and source references before retrying.",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "guidanceCaseId": "agentguidancecase-003",
+      "caseKey": "blocked",
+      "classification": "blocked",
+      "agentNextMove": "replace_unsafe_inputs",
+      "sourcePrompt": "Predict late Helsinki buses tomorrow using this API token and these raw passenger rows from our database; you can query whatever SQL you need.",
+      "normalizedHorizonDate": "2026-06-06",
+      "reasonCodes": [
+        "raw_credential_value",
+        "unapproved_source"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "questionsToAsk": [],
+      "safeCommands": [],
+      "forecastId": "",
+      "questionId": "",
+      "explanation": "The prompt includes unsafe input handling; the agent must replace raw values with approved references.",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "guidanceCaseId": "agentguidancecase-004",
+      "caseKey": "rejected",
+      "classification": "rejected",
+      "agentNextMove": "rewrite_as_future_contract",
+      "sourcePrompt": "Which Helsinki bus operator was best last winter, and can OPE prove it from whatever public evidence exists?",
+      "normalizedHorizonDate": "not_applicable",
+      "reasonCodes": [
+        "past_tense_question",
+        "unresolvable_outcome"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "questionsToAsk": [],
+      "safeCommands": [],
+      "forecastId": "",
+      "questionId": "",
+      "explanation": "The prompt is not a measurable future forecast contract and should be rewritten before OPE routing.",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesSources": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "guidanceCaseId": "agentguidancecase-005",
+      "caseKey": "response_too_large",
+      "classification": "response_too_large",
+      "agentNextMove": "narrow_scope_or_raise_budget",
+      "sourcePrompt": "Return every Helsinki route, stop, vehicle, and departure for the next seven days with a separate lateness forecast and evidence explanation for each row inside one agent response.",
+      "normalizedHorizonDate": "2026-06-06/2026-06-12",
+      "reasonCodes": [
+        "response_size_budget_exceeded"
+      ],
+      "requiredSourceRoles": [
+        "weather_forecast",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "questionsToAsk": [],
+      "safeCommands": [
+        "python3 scripts/ope.py prediction-feature-setup --view response --case response_too_large"
+      ],
+      "forecastId": "",
+      "questionId": "",
+      "explanation": "The requested readback is too broad for compact agent context; the agent should narrow scope or raise the approved budget.",
+      "createsForecastArtifacts": false,
+      "storesCredentialValues": false,
+      "storesRawPrivateRows": false,
+      "executesSources": false,
+      "qualityClaimAllowed": false
+    }
+  ],
+  "promptPlanner": {
+    "plannerId": "agentplanner-001",
+    "plannerStatus": "checked_prompt_to_question_planner",
+    "plannerInput": {
+      "rawPromptAllowed": true,
+      "maxPromptChars": 600,
+      "credentialValuesAllowed": false,
+      "rawPrivateRowsAllowed": false,
+      "rawSqlAllowed": false
+    },
+    "plannerOutput": {
+      "agentNextMove": "ask_user",
+      "questionCount": 4,
+      "questionsToAsk": [
+        "Which route, stop, or bounded service area should this cover?",
+        "What time window on 2026-06-06 should count for the 2+ minute lateness threshold?",
+        "Which approved planned-work source reference can OPE use?",
+        "Which outcome source will confirm whether each scoped bus was 2+ minutes late?"
+      ],
+      "requiredSourceRoles": [
+        "planned_work",
+        "schedule",
+        "historical_delay_baseline",
+        "transit_delay_outcome"
+      ],
+      "safeRetryCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification"
+    }
+  },
+  "helsinkiNarrowingFlow": {
+    "flowId": "helsinkinarrowingflow-001",
+    "flowStatus": "checked_narrowing_flow",
+    "broadPrompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
+    "normalizedHorizonDate": "2026-06-06",
+    "broadPromptCase": "needs_clarification",
+    "narrowingQuestions": [
+      "Which route, stop, or bounded service area should this cover?",
+      "What time window on 2026-06-06 should count for the 2+ minute lateness threshold?",
+      "Which approved planned-work source reference can OPE use?",
+      "Which outcome source will confirm whether each scoped bus was 2+ minutes late?"
+    ],
+    "clarifiedPromptExample": "Forecast whether route 550 buses at stop HSL-1234 will be 2+ minutes late during the 2026-06-06 morning peak, using approved planned_work_ref, schedule_ref, historical_delay_baseline_ref, and transit_delay_outcome_ref.",
+    "readyAfterClarificationCase": "accepted",
+    "safeNextCommands": [
+      "python3 scripts/ope.py agent-guide --case needs_clarification",
+      "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification",
+      "python3 scripts/ope.py prediction-feature-setup --view response --case accepted"
+    ]
+  },
+  "agentInstructionPack": {
+    "packId": "agentinstructionpack-001",
+    "packStatus": "checked_agent_instruction_pack",
+    "doRules": [
+      "Classify the developer prompt before trying to forecast.",
+      "Ask focused questions when OPE returns needs_clarification.",
+      "Use approved source references rather than raw private payloads.",
+      "Read forecast cards and lifecycle bundles instead of inventing forecast summaries.",
+      "Carry OPE's claim boundaries into user-facing copy."
+    ],
+    "doNotRules": [
+      "Do not paste credential values into OPE requests.",
+      "Do not pass raw private rows or raw SQL as source context.",
+      "Do not treat post-outcome evidence as forecast-time evidence.",
+      "Do not claim hosted runtime or production quality from local fixtures.",
+      "Do not answer oversized readbacks by dumping broad matrices into agent context."
+    ],
+    "minimumAgentLoop": [
+      {
+        "stepKey": "classify_prompt",
+        "instruction": "Call the guidance surface or prediction-feature setup response before deciding what to do.",
+        "safeCommand": "python3 scripts/ope.py agent-guide --section summary"
+      },
+      {
+        "stepKey": "ask_or_block",
+        "instruction": "If the case needs clarification, ask the returned questions; if blocked, replace unsafe inputs.",
+        "safeCommand": "python3 scripts/ope.py agent-guide --case needs_clarification"
+      },
+      {
+        "stepKey": "retry_with_refs",
+        "instruction": "After the caller provides scoped answers and approved source refs, retry the compact setup path.",
+        "safeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted"
+      },
+      {
+        "stepKey": "read_or_stop",
+        "instruction": "Read the forecast card when accepted; otherwise stop at the returned boundary and next action.",
+        "safeCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102"
+      }
+    ]
+  },
+  "executionBoundary": {
+    "agentUsesOwnIntelligence": true,
+    "normalChecksAreReadOnly": true,
+    "createsForecastArtifacts": false,
+    "executesSources": false,
+    "fetchesLiveData": false,
+    "storesCredentialValues": false,
+    "storesRawPrivateRows": false,
+    "acceptsRawSql": false,
+    "qualityClaimsUpgraded": false,
+    "hostedRuntimeImplemented": false
+  },
+  "summary": {
+    "guidanceCaseCount": 5,
+    "implementedMilestoneCount": 4,
+    "promptPlannerReady": true,
+    "helsinkiNarrowingFlowReady": true,
+    "instructionPackReady": true,
+    "realSessionsRecorded": 0,
+    "forecastArtifactsCreated": false,
+    "qualityClaimAllowed": false,
+    "hostedRuntimeImplemented": false
+  }
+}

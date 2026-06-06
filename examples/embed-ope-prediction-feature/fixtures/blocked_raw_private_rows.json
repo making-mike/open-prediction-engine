@@ -1,0 +1,13 @@
+{
+  "hostFeatureIntent": "Predict customer demand risk from private order rows.",
+  "decisionToSupport": "Decide staffing level.",
+  "approvedSourceRefs": [],
+  "resolutionHints": {},
+  "responseSizeBudgetBytes": 65536,
+  "rawPrivateRows": [
+    {
+      "customer_id": "customer-001",
+      "order_total": 42.5
+    }
+  ]
+}

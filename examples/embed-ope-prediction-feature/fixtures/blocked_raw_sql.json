@@ -1,0 +1,8 @@
+{
+  "hostFeatureIntent": "Predict route disruption from a direct database query.",
+  "decisionToSupport": "Decide whether to reroute vehicles.",
+  "approvedSourceRefs": [],
+  "resolutionHints": {},
+  "responseSizeBudgetBytes": 65536,
+  "rawSql": "SELECT * FROM route_events"
+}

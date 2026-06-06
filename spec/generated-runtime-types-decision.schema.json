@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/generated-runtime-types-decision.schema.json",
+  "title": "Generated Runtime Types Decision",
+  "description": "Checked decision record for whether OPE should generate language-specific runtime types.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generatedRuntimeTypesDecisionId",
+    "generatedAt",
+    "decisionStatus",
+    "selectedLanguageTargets",
+    "firstAcceptedScope",
+    "evidenceReview",
+    "jsonFallback",
+    "blockedBroaderGenerationCases",
+    "followUpGates",
+    "executionBoundary",
+    "summary"
+  ],
+  "properties": {
+    "generatedRuntimeTypesDecisionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "decisionStatus": {
+      "type": "string",
+      "enum": ["defer_until_adoption_evidence", "accept_typescript_first", "accept_python_first", "accept_typescript_and_python"]
+    },
+    "selectedLanguageTargets": {
+      "type": "array",
+      "maxItems": 4,
+      "items": { "type": "string", "enum": ["typescript", "python"] }
+    },
+    "firstAcceptedScope": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+    },
+    "evidenceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pilotFindingsId",
+        "acceptedRealSessionCount",
+        "acceptedSimulatedAgentSessionCount",
+        "minimumRealSessions",
+        "agentSimulationEvidenceReady",
+        "typeRelatedFrictionObserved",
+        "smokeFailuresTypeRelated",
+        "adoptionTraceTypeNeedObserved",
+        "rationale"
+      ],
+      "properties": {
+        "pilotFindingsId": { "$ref": "common.schema.json#/$defs/id" },
+        "acceptedRealSessionCount": { "type": "integer", "minimum": 0 },
+        "acceptedSimulatedAgentSessionCount": { "type": "integer", "minimum": 0 },
+        "minimumRealSessions": { "type": "integer", "minimum": 1 },
+        "agentSimulationEvidenceReady": { "type": "boolean" },
+        "typeRelatedFrictionObserved": { "type": "boolean" },
+        "smokeFailuresTypeRelated": { "type": "boolean" },
+        "adoptionTraceTypeNeedObserved": { "type": "boolean" },
+        "rationale": { "type": "string", "minLength": 1, "maxLength": 600 }
+      }
+    },
+    "jsonFallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableJsonExamples", "validatorCommand", "smokeCommand"],
+      "properties": {
+        "stableJsonExamples": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 1, "maxLength": 240 }
+        },
+        "validatorCommand": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "smokeCommand": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    },
+    "blockedBroaderGenerationCases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseKey", "blockedReason"],
+        "properties": {
+          "caseKey": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "blockedReason": { "type": "string", "minLength": 1, "maxLength": 400 }
+        }
+      }
+    },
+    "followUpGates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gateKey", "requiredEvidence", "ready"],
+        "properties": {
+          "gateKey": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "requiredEvidence": { "type": "string", "minLength": 1, "maxLength": 400 },
+          "ready": { "type": "boolean" }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostedRuntimeImplied",
+        "fullSpecSdkStabilityClaimed",
+        "productionSourceParsingImplied",
+        "qualityClaimsUpgraded",
+        "generatedFilesWritten"
+      ],
+      "properties": {
+        "hostedRuntimeImplied": { "type": "boolean" },
+        "fullSpecSdkStabilityClaimed": { "type": "boolean" },
+        "productionSourceParsingImplied": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "generatedFilesWritten": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionStatus",
+        "generatedTypesIncluded",
+        "selectedLanguageTargetCount",
+        "acceptedRealSessionCount",
+        "acceptedSimulatedAgentSessionCount",
+        "nextReviewTrigger"
+      ],
+      "properties": {
+        "decisionStatus": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "generatedTypesIncluded": { "type": "boolean" },
+        "selectedLanguageTargetCount": { "type": "integer", "minimum": 0 },
+        "acceptedRealSessionCount": { "type": "integer", "minimum": 0 },
+        "acceptedSimulatedAgentSessionCount": { "type": "integer", "minimum": 0 },
+        "nextReviewTrigger": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    }
+  }
+}

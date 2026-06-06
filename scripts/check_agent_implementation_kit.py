@@ -20,6 +20,56 @@ def main() -> None:
     require(kit["kitStatus"] == "agent_prediction_implementation_kit_checked", "kit status drifted")
     require(kit["kitScope"] == "local_agent_readback_and_templates", "kit scope drifted")
 
+    quickstart = kit["quickstartFrontDoor"]
+    require(quickstart["frontDoorStatus"] == "first_external_agent_entrypoint", "quickstart status drifted")
+    require(quickstart["entryCommand"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart", "quickstart command drifted")
+    require(quickstart["targetTimeToFirstCommandMinutes"] == 10, "quickstart target time drifted")
+    require(quickstart["createsNewForecastPath"] is False, "quickstart must not create a new forecast path")
+    require(quickstart["hostedRuntimeRequired"] is False, "quickstart must not require hosted runtime")
+    require(quickstart["qualityClaimUpgraded"] is False, "quickstart must not upgrade quality claims")
+    quickstart_steps = [item["stepKey"] for item in quickstart["steps"]]
+    require(
+        quickstart_steps == [
+            "start_here",
+            "ask_what_can_be_forecasted",
+            "run_guided_forecast",
+            "read_forecast_card",
+            "inspect_lifecycle_bundle",
+        ],
+        "quickstart step order drifted",
+    )
+    require(
+        quickstart["steps"][0]["command"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "quickstart first step should point back to itself",
+    )
+    require(
+        quickstart["steps"][1]["command"] == "python3 scripts/ope.py agent-integrate --view candidates",
+        "quickstart should route candidate discovery through agent-integrate",
+    )
+    require(
+        quickstart["steps"][2]["command"] == "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+        "quickstart should route guided forecast through accepted adapter output case",
+    )
+    require("forecast-1102" in quickstart["steps"][3]["command"], "quickstart should expose forecast-card command")
+    require("forecast-bundle" in quickstart["steps"][4]["command"], "quickstart should expose lifecycle-bundle command")
+
+    wrapper = quickstart["copyableWrapper"]
+    require(wrapper["wrapperStatus"] == "outline_only_uses_existing_surfaces", "copyable wrapper status drifted")
+    require(wrapper["storesCredentialValues"] is False, "copyable wrapper must not store credential values")
+    require(wrapper["acceptsRawPrivateRows"] is False, "copyable wrapper must not accept raw private rows")
+    require(wrapper["acceptsRawSql"] is False, "copyable wrapper must not accept raw SQL")
+    require(wrapper["opensNetworkListener"] is False, "copyable wrapper must not open a network listener")
+    require(
+        wrapper["callSequence"] == [
+            "agent_implementation_quickstart",
+            "agent_integration_candidates",
+            "agent_integration_guided_forecast",
+            "forecast_card_readback",
+            "lifecycle_bundle_readback",
+        ],
+        "copyable wrapper call sequence drifted",
+    )
+
     manual_steps = {item["stepKey"]: item for item in kit["predictionManual"]["steps"]}
     expected_steps = [
         "detect_decision_under_uncertainty",
@@ -151,6 +201,7 @@ def main() -> None:
         require(boundary[key] is False, f"execution boundary {key} should stay false")
 
     summary = kit["summary"]
+    require(summary["quickstartStepCount"] == 5, "quickstart step count drifted")
     require(summary["manualStepCount"] == len(expected_steps), "manual step count drifted")
     require(summary["candidateReadbackCount"] == 4, "candidate count drifted")
     require(summary["validationReportCount"] == 4, "validation report count drifted")

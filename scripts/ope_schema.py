@@ -283,8 +283,22 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "runtime-security.schema.json"
     if name.endswith("agent-implementation-kit.generated.json"):
         return spec_root / "agent-implementation-kit.schema.json"
+    if name.endswith("prediction-agent-adoption.generated.json"):
+        return spec_root / "prediction-agent-adoption.schema.json"
     if name.endswith("agent-integration.generated.json"):
         return spec_root / "agent-integration.schema.json"
+    if name.endswith("prediction-feature-setup.generated.json"):
+        return spec_root / "prediction-feature-setup.schema.json"
+    if name.endswith("agent-guidance.generated.json"):
+        return spec_root / "agent-guidance.schema.json"
+    if name.endswith("mcp-adoption-path.generated.json"):
+        return spec_root / "mcp-adoption-path.schema.json"
+    if name.endswith("pilot-findings.generated.json"):
+        return spec_root / "pilot-findings.schema.json"
+    if name.endswith("simulated-agent-pilot.generated.json"):
+        return spec_root / "simulated-agent-pilot.schema.json"
+    if name.endswith("generated-runtime-types-decision.generated.json"):
+        return spec_root / "generated-runtime-types-decision.schema.json"
     if name.endswith("postgres-compatibility.generated.json"):
         return spec_root / "postgres-compatibility.schema.json"
     if name.endswith("database-source-adapter-runtime.generated.json"):

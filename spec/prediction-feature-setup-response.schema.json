@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-feature-setup-response.schema.json",
+  "title": "Prediction Feature Setup Response",
+  "description": "Compact host-project response shape for accepted, clarification, blocked, rejected, and response-too-large prediction setup outcomes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseKey",
+    "decision",
+    "reasonCodes",
+    "requiredSourceRoles",
+    "nextAction",
+    "forecastId",
+    "questionId",
+    "forecastCardCommand",
+    "lifecycleBundleCommand",
+    "createsForecastArtifacts",
+    "storesCredentialValues",
+    "storesRawPrivateRows",
+    "executesPrivateSources",
+    "qualityClaimAllowed"
+  ],
+  "properties": {
+    "caseKey": {
+      "type": "string",
+      "enum": ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["forecast_card_ready", "needs_clarification", "blocked", "rejected", "response_too_large"]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+    },
+    "requiredSourceRoles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+    },
+    "nextAction": { "type": "string", "minLength": 12, "maxLength": 260 },
+    "forecastId": { "oneOf": [{ "type": "string", "minLength": 3, "maxLength": 80 }, { "type": "null" }] },
+    "questionId": { "oneOf": [{ "type": "string", "minLength": 3, "maxLength": 80 }, { "type": "null" }] },
+    "forecastCardCommand": { "oneOf": [{ "type": "string", "minLength": 8, "maxLength": 220 }, { "type": "null" }] },
+    "lifecycleBundleCommand": { "oneOf": [{ "type": "string", "minLength": 8, "maxLength": 220 }, { "type": "null" }] },
+    "createsForecastArtifacts": { "type": "boolean" },
+    "storesCredentialValues": { "type": "boolean" },
+    "storesRawPrivateRows": { "type": "boolean" },
+    "executesPrivateSources": { "type": "boolean" },
+    "qualityClaimAllowed": { "type": "boolean" }
+  }
+}

@@ -23,6 +23,7 @@ SCHEMA = SPEC / "developer-adoption-surface.schema.json"
 GENERATED_AT = "2026-06-10T10:05:00Z"
 
 QUICKSTART_ORDER = [
+    "agent_implementation_quickstart",
     "setup_check",
     "normal_checks",
     "local_runtime",
@@ -120,6 +121,14 @@ def build_quickstart() -> list[dict[str, Any]]:
     rows = [
         quickstart_step(
             1,
+            "agent_implementation_quickstart",
+            "Start with the external-agent front door",
+            "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+            "The agent implementation kit returns the shortest safe sequence for adding an OPE-backed prediction feature.",
+            20,
+        ),
+        quickstart_step(
+            2,
             "setup_check",
             "Confirm Python runtime",
             "python3 --version",
@@ -127,7 +136,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             20,
         ),
         quickstart_step(
-            2,
+            3,
             "normal_checks",
             "Run the local check suite",
             "python3 scripts/run_checks.py",
@@ -135,7 +144,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             900,
         ),
         quickstart_step(
-            3,
+            4,
             "local_runtime",
             "Inspect approved local-folder runtime",
             "python3 scripts/ope.py local-source-runtime",
@@ -143,7 +152,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             30,
         ),
         quickstart_step(
-            4,
+            5,
             "forecast_card",
             "Read the first forecast card",
             "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
@@ -151,7 +160,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             20,
         ),
         quickstart_step(
-            5,
+            6,
             "lifecycle_bundle",
             "Read the lifecycle bundle",
             "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
@@ -159,7 +168,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             20,
         ),
         quickstart_step(
-            6,
+            7,
             "claim_gate",
             "Inspect the claim boundary",
             "python3 scripts/ope.py transit-track-record-gate",
@@ -167,7 +176,7 @@ def build_quickstart() -> list[dict[str, Any]]:
             20,
         ),
         quickstart_step(
-            7,
+            8,
             "recurring_campaign",
             "Evaluate recurring campaign readiness",
             "python3 scripts/ope.py prediction-campaign explain",
@@ -404,8 +413,12 @@ def validate_surface(surface: dict[str, Any]) -> None:
     quickstart = surface["quickstart"]
     if [item["order"] for item in quickstart] != list(range(1, len(quickstart) + 1)):
         raise DeveloperAdoptionSurfaceError("quickstart order drifted")
-    if [item["title"] for item in quickstart][:2] != ["Confirm Python runtime", "Run the local check suite"]:
-        raise DeveloperAdoptionSurfaceError("quickstart should begin with setup and checks")
+    if [item["title"] for item in quickstart][:3] != [
+        "Start with the external-agent front door",
+        "Confirm Python runtime",
+        "Run the local check suite",
+    ]:
+        raise DeveloperAdoptionSurfaceError("quickstart should begin with agent front door, setup, and checks")
     scenario = surface["exampleScenario"]
     phases = [item["phase"] for item in scenario["steps"]]
     if phases != SCENARIO_PHASES:

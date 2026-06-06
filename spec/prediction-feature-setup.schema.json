@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-feature-setup.schema.json",
+  "title": "Prediction Feature Setup",
+  "description": "Checked compact prediction feature setup contract over existing OPE agent integration surfaces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionFeatureSetupId",
+    "generatedAt",
+    "setupStatus",
+    "requestContract",
+    "responseExamples",
+    "interfaceBindings",
+    "executionBoundary",
+    "summary",
+    "warnings",
+    "createsNewForecastPath",
+    "hostedRuntimeRequired"
+  ],
+  "properties": {
+    "predictionFeatureSetupId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "setupStatus": { "type": "string", "enum": ["checked_compact_contract"] },
+    "requestContract": { "$ref": "#/$defs/requestContract" },
+    "responseExamples": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/responseExample" }
+    },
+    "interfaceBindings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/interfaceBinding" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 260 }
+    },
+    "createsNewForecastPath": { "type": "boolean" },
+    "hostedRuntimeRequired": { "type": "boolean" }
+  },
+  "$defs": {
+    "requestContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractId",
+        "contractStatus",
+        "requiredFields",
+        "optionalFields",
+        "acceptsCredentialValues",
+        "acceptsRawPrivateRows",
+        "acceptsRawSql"
+      ],
+      "properties": {
+        "contractId": { "$ref": "common.schema.json#/$defs/id" },
+        "contractStatus": { "type": "string", "enum": ["checked_compact_request_contract"] },
+        "requiredFields": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/requestField" }
+        },
+        "optionalFields": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 5,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "acceptsCredentialValues": { "type": "boolean" },
+        "acceptsRawPrivateRows": { "type": "boolean" },
+        "acceptsRawSql": { "type": "boolean" }
+      }
+    },
+    "requestField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fieldName", "fieldType", "purpose"],
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "enum": ["hostFeatureIntent", "decisionToSupport", "approvedSourceRefs", "resolutionHints", "responseSizeBudgetBytes"]
+        },
+        "fieldType": { "type": "string", "enum": ["string", "array", "integer"] },
+        "purpose": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "responseExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseKey",
+        "decision",
+        "reasonCodes",
+        "requiredSourceRoles",
+        "nextAction",
+        "forecastId",
+        "questionId",
+        "forecastCardCommand",
+        "lifecycleBundleCommand",
+        "createsForecastArtifacts",
+        "storesCredentialValues",
+        "storesRawPrivateRows",
+        "executesPrivateSources",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "caseKey": { "type": "string", "enum": ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"] },
+        "decision": { "type": "string", "enum": ["forecast_card_ready", "needs_clarification", "blocked", "rejected", "response_too_large"] },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "requiredSourceRoles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "nextAction": { "type": "string", "minLength": 12, "maxLength": 260 },
+        "forecastId": { "oneOf": [{ "type": "string", "minLength": 3, "maxLength": 80 }, { "type": "null" }] },
+        "questionId": { "oneOf": [{ "type": "string", "minLength": 3, "maxLength": 80 }, { "type": "null" }] },
+        "forecastCardCommand": { "oneOf": [{ "type": "string", "minLength": 8, "maxLength": 220 }, { "type": "null" }] },
+        "lifecycleBundleCommand": { "oneOf": [{ "type": "string", "minLength": 8, "maxLength": 220 }, { "type": "null" }] },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "storesRawPrivateRows": { "type": "boolean" },
+        "executesPrivateSources": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "interfaceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["interface", "implementedStatus", "command", "boundary"],
+      "properties": {
+        "interface": { "type": "string", "enum": ["cli", "agent_call", "local_mcp_guidance"] },
+        "implementedStatus": { "type": "string", "enum": ["implemented_local", "guidance_only"] },
+        "command": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "boundary": { "type": "string", "minLength": 12, "maxLength": 260 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createsForecastArtifacts",
+        "fetchesLiveData",
+        "storesCredentialValues",
+        "storesRawPrivateRows",
+        "acceptsRawSql",
+        "opensNetworkListener",
+        "hostedRuntime",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "createsForecastArtifacts": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "storesCredentialValues": { "type": "boolean" },
+        "storesRawPrivateRows": { "type": "boolean" },
+        "acceptsRawSql": { "type": "boolean" },
+        "opensNetworkListener": { "type": "boolean" },
+        "hostedRuntime": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["responseExampleCount", "interfaceBindingCount", "acceptedForecastId", "acceptedQuestionId"],
+      "properties": {
+        "responseExampleCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "interfaceBindingCount": { "type": "integer", "minimum": 3, "maximum": 3 },
+        "acceptedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "acceptedQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    }
+  }
+}

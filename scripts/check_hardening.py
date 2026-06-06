@@ -740,6 +740,118 @@ def assert_agent_integration_boundary() -> None:
             raise AssertionError("blocked agent integration cases must not expose forecast-card commands")
 
 
+def assert_prediction_feature_setup_boundary() -> None:
+    path = (
+        ROOT
+        / "spec"
+        / "fixtures"
+        / "generated"
+        / "prediction-feature-setup"
+        / "ope-prediction-feature-setup.generated.json"
+    )
+    setup = load_json(path)
+    if setup["setupStatus"] != "checked_compact_contract":
+        raise AssertionError("prediction feature setup status drifted")
+    if setup["createsNewForecastPath"] is not False:
+        raise AssertionError("prediction feature setup must not create a new forecast path")
+    if setup["hostedRuntimeRequired"] is not False:
+        raise AssertionError("prediction feature setup must not require hosted runtime")
+    request = setup["requestContract"]
+    for key in ["acceptsCredentialValues", "acceptsRawPrivateRows", "acceptsRawSql"]:
+        if request[key] is not False:
+            raise AssertionError(f"prediction feature setup request boundary {key} should stay false")
+    for response in setup["responseExamples"]:
+        for key in [
+            "createsForecastArtifacts",
+            "executesPrivateSources",
+            "storesCredentialValues",
+            "storesRawPrivateRows",
+            "qualityClaimAllowed",
+        ]:
+            if response[key] is not False:
+                raise AssertionError(f"prediction feature setup response boundary {key} should stay false")
+    for key, value in setup["executionBoundary"].items():
+        if value is not False:
+            raise AssertionError(f"prediction feature setup execution boundary {key} should stay false")
+
+
+def assert_agent_guidance_boundary() -> None:
+    path = (
+        ROOT
+        / "spec"
+        / "fixtures"
+        / "generated"
+        / "agent-guidance"
+        / "ope-agent-guidance.generated.json"
+    )
+    guidance = load_json(path)
+    if guidance["guidanceStatus"] != "checked_agent_guidance_loop":
+        raise AssertionError("agent guidance status drifted")
+    if guidance["summary"]["guidanceCaseCount"] != 5:
+        raise AssertionError("agent guidance should expose five cases")
+    if guidance["summary"]["realSessionsRecorded"] != 0:
+        raise AssertionError("agent guidance must not count real sessions")
+    if guidance["summary"]["forecastArtifactsCreated"] is not False:
+        raise AssertionError("agent guidance must not create forecast artifacts")
+    boundary = guidance["executionBoundary"]
+    for key, value in boundary.items():
+        if key in {"agentUsesOwnIntelligence", "normalChecksAreReadOnly"}:
+            if value is not True:
+                raise AssertionError(f"agent guidance boundary {key} should stay true")
+            continue
+        if value is not False:
+            raise AssertionError(f"agent guidance boundary {key} should stay false")
+    for case in guidance["guidanceCases"]:
+        for key in [
+            "createsForecastArtifacts",
+            "storesCredentialValues",
+            "storesRawPrivateRows",
+            "executesSources",
+            "qualityClaimAllowed",
+        ]:
+            if case[key] is not False:
+                raise AssertionError(f"agent guidance case {case['caseKey']} boundary {key} should stay false")
+
+
+def assert_simulated_agent_pilot_boundary() -> None:
+    path = (
+        ROOT
+        / "spec"
+        / "fixtures"
+        / "generated"
+        / "simulated-agent-pilot"
+        / "ope-simulated-agent-pilot.generated.json"
+    )
+    simulated = load_json(path)
+    if simulated["simulationStatus"] != "checked_agent_only_simulation":
+        raise AssertionError("simulated agent pilot status drifted")
+    if simulated["summary"]["simulatedSessionCount"] != 5:
+        raise AssertionError("simulated agent pilot should include five simulated sessions")
+    if simulated["summary"]["realSessionsRecorded"] != 0:
+        raise AssertionError("simulated agent pilot must not count real sessions")
+    if simulated["summary"]["pilotEvidenceReady"] is not False:
+        raise AssertionError("simulated agent pilot must not unblock real pilot evidence")
+    boundary = simulated["executionBoundary"]
+    if boundary["agentOnlySimulation"] is not True:
+        raise AssertionError("simulated agent pilot should be marked agent-only")
+    if boundary["realSessionsRecorded"] != 0:
+        raise AssertionError("simulated agent pilot boundary must keep real sessions at zero")
+    for key in [
+        "rawTranscriptsStored",
+        "rawPromptLogsStoredAsPilotEvidence",
+        "privateDataStored",
+        "credentialValuesStored",
+        "hostProjectSecretsStored",
+        "forecastArtifactsCreated",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "hostedRuntimeUnblocked",
+        "generatedTypesUnblocked",
+    ]:
+        if boundary[key] is not False:
+            raise AssertionError(f"simulated agent pilot boundary {key} should stay false")
+
+
 def main() -> None:
     assert_no_secrets()
     assert_malformed_artifact_fails()
@@ -760,6 +872,9 @@ def main() -> None:
     assert_retention_redaction_policy_boundary()
     assert_private_auto_evidence_policy_boundary()
     assert_agent_integration_boundary()
+    assert_prediction_feature_setup_boundary()
+    assert_agent_guidance_boundary()
+    assert_simulated_agent_pilot_boundary()
     print("checked hardening guardrails")
 
 

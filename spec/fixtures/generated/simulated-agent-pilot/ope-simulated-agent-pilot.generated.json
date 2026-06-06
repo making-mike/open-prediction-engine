@@ -1,0 +1,320 @@
+{
+  "simulatedAgentPilotId": "simulatedagentpilot-001",
+  "generatedAt": "2026-06-05T16:25:00Z",
+  "simulationStatus": "checked_agent_only_simulation",
+  "simulationPurpose": "Exercise the external-agent prediction-feature setup experience with one user-provided prompt and four generated prompts while preserving the boundary that this is simulated adoption evidence, not real human pilot evidence.",
+  "userProvidedPrompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
+  "normalizedCurrentDate": "2026-06-05",
+  "normalizedTomorrowDate": "2026-06-06",
+  "sourceRecords": {
+    "predictionFeatureSetupId": "predictionfeaturesetup-001",
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "pilotSummaryIntakeId": "pilotsummaryintake-001"
+  },
+  "simulatedSessions": [
+    {
+      "sessionId": "simulatedagentsession-001",
+      "promptSource": "user_provided",
+      "prompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
+      "normalizedHorizonDate": "2026-06-06",
+      "targetUserNeed": "Identify Helsinki bus trips expected to be 2+ minutes late at a stop using planned-work context.",
+      "expectedCase": "needs_clarification",
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "readback_navigation",
+        "source_runtime_gap"
+      ],
+      "nextActionKey": "ask_for_stop_route_window_and_approved_source_refs",
+      "decision": "needs_clarification",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification",
+      "opeResponse": {
+        "caseKey": "needs_clarification",
+        "decision": "needs_clarification",
+        "reasonCodes": [
+          "missing_threshold",
+          "ambiguous_service_window"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Ask the caller for a measurable threshold and a specific future service window.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I would not answer with a bus-by-bus list yet. I would normalize tomorrow to 2026-06-06, keep the 2+ minute late threshold, and ask for the exact stop or route scope plus approved planned-work source references before routing to OPE.",
+      "promptApproxTokens": 29,
+      "responseApproxTokens": 39,
+      "totalApproxTokens": 68,
+      "elapsedMsEstimate": 701,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-002",
+      "promptSource": "generated",
+      "prompt": "In our Helsinki operations dashboard, estimate whether HSL surface transit will exceed the beta delay threshold tomorrow morning. Approved source refs are weather_forecast_ref, historical_delay_baseline_ref, and outcome_adapter_ref.",
+      "normalizedHorizonDate": "2026-06-06",
+      "targetUserNeed": "Get the checked local forecast card for the existing Helsinki transit delay setup.",
+      "expectedCase": "accepted",
+      "toolCallCountEstimate": 2,
+      "frictionClasses": [
+        "none"
+      ],
+      "nextActionKey": "read_forecast_card_and_lifecycle_bundle",
+      "decision": "forecast_card_ready",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted",
+      "opeResponse": {
+        "caseKey": "accepted",
+        "decision": "forecast_card_ready",
+        "reasonCodes": [
+          "candidate_validated"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Read the forecast card, then inspect the lifecycle bundle if provenance or method context is needed.",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "forecastCardCommand": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "lifecycleBundleCommand": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I can route this through OPE's compact prediction-feature setup path and read forecast-1102/question-1102. The result is a checked forecast-card readback, not a new live execution or quality claim.",
+      "promptApproxTokens": 26,
+      "responseApproxTokens": 28,
+      "totalApproxTokens": 54,
+      "elapsedMsEstimate": 688,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-003",
+      "promptSource": "generated",
+      "prompt": "Predict late Helsinki buses tomorrow using this API token and these raw passenger rows from our database; you can query whatever SQL you need.",
+      "normalizedHorizonDate": "2026-06-06",
+      "targetUserNeed": "Attempt private-source prediction with unsafe credential, row, and SQL handling.",
+      "expectedCase": "blocked",
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "privacy_redaction_needed"
+      ],
+      "nextActionKey": "replace_raw_inputs_with_policy_bound_references",
+      "decision": "blocked",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case blocked",
+      "opeResponse": {
+        "caseKey": "blocked",
+        "decision": "blocked",
+        "reasonCodes": [
+          "raw_credential_value",
+          "unapproved_source"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Replace unsafe inputs with approved source references and credential references before retrying.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I would block this attempt because it includes unsafe source handling. The retry should replace raw tokens, private rows, or SQL with approved source references and opaque credential references.",
+      "promptApproxTokens": 24,
+      "responseApproxTokens": 29,
+      "totalApproxTokens": 53,
+      "elapsedMsEstimate": 596,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-004",
+      "promptSource": "generated",
+      "prompt": "Which Helsinki bus operator was best last winter, and can OPE prove it from whatever public evidence exists?",
+      "normalizedHorizonDate": "not_applicable",
+      "targetUserNeed": "Ask a retrospective and non-resolvable question as though it were an OPE forecast.",
+      "expectedCase": "rejected",
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "claim_boundary_confusion"
+      ],
+      "nextActionKey": "rewrite_as_future_resolvable_forecast_contract",
+      "decision": "rejected",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case rejected",
+      "opeResponse": {
+        "caseKey": "rejected",
+        "decision": "rejected",
+        "reasonCodes": [
+          "past_tense_question",
+          "unresolvable_outcome"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Use historical analysis or rewrite the request as a measurable future outcome.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I would reject this as an OPE forecast request because the outcome is not a measurable future contract. The caller should rewrite it as a resolvable future threshold, window, and outcome source.",
+      "promptApproxTokens": 18,
+      "responseApproxTokens": 32,
+      "totalApproxTokens": 50,
+      "elapsedMsEstimate": 575,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-005",
+      "promptSource": "generated",
+      "prompt": "Return every Helsinki route, stop, vehicle, and departure for the next seven days with a separate lateness forecast and evidence explanation for each row inside one agent response.",
+      "normalizedHorizonDate": "2026-06-06/2026-06-12",
+      "targetUserNeed": "Request a forecast matrix too large for the compact setup response budget.",
+      "expectedCase": "response_too_large",
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "readback_navigation"
+      ],
+      "nextActionKey": "narrow_scope_or_raise_response_budget",
+      "decision": "response_too_large",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case response_too_large",
+      "opeResponse": {
+        "caseKey": "response_too_large",
+        "decision": "response_too_large",
+        "reasonCodes": [
+          "response_size_budget_exceeded"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Retry with a larger approved byte budget or request a narrower readback view.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I would stop before dumping an oversized matrix into the agent context. The caller should request a narrower route/stop/window view or raise the approved response-size budget.",
+      "promptApproxTokens": 28,
+      "responseApproxTokens": 26,
+      "totalApproxTokens": 54,
+      "elapsedMsEstimate": 603,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    }
+  ],
+  "frictionSummary": [
+    {
+      "frictionClass": "claim_boundary_confusion",
+      "simulatedSignalCount": 1,
+      "interpretation": "One simulated prompt treated retrospective proof as an OPE forecast, so claim boundaries still need clear copy."
+    },
+    {
+      "frictionClass": "none",
+      "simulatedSignalCount": 1,
+      "interpretation": "One simulated prompt followed the accepted compact setup path and reached the checked forecast-card readback."
+    },
+    {
+      "frictionClass": "privacy_redaction_needed",
+      "simulatedSignalCount": 1,
+      "interpretation": "One simulated prompt contained unsafe private-source handling and was blocked before source execution."
+    },
+    {
+      "frictionClass": "readback_navigation",
+      "simulatedSignalCount": 2,
+      "interpretation": "Two simulated prompts needed clearer routing between compact setup, scoped readbacks, and oversized outputs."
+    },
+    {
+      "frictionClass": "source_runtime_gap",
+      "simulatedSignalCount": 1,
+      "interpretation": "The user-provided bus-by-stop request exposed a narrower source/setup requirement than the current aggregate starter path."
+    }
+  ],
+  "executionBoundary": {
+    "agentOnlySimulation": true,
+    "realSessionsRecorded": 0,
+    "rawTranscriptsStored": false,
+    "rawPromptLogsStoredAsPilotEvidence": false,
+    "privateDataStored": false,
+    "credentialValuesStored": false,
+    "hostProjectSecretsStored": false,
+    "forecastArtifactsCreated": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hostedRuntimeUnblocked": false,
+    "generatedTypesUnblocked": false
+  },
+  "summary": {
+    "simulatedSessionCount": 5,
+    "userPromptSessionCount": 1,
+    "generatedPromptSessionCount": 4,
+    "caseCoverage": [
+      "accepted",
+      "blocked",
+      "needs_clarification",
+      "rejected",
+      "response_too_large"
+    ],
+    "tokenCountMode": "approximate_whitespace_tokens",
+    "totalPromptApproxTokens": 125,
+    "totalResponseApproxTokens": 154,
+    "totalApproxTokens": 279,
+    "timeMeasurementMode": "deterministic_estimate",
+    "totalElapsedMsEstimate": 3163,
+    "realSessionsRecorded": 0,
+    "pilotEvidenceReady": false,
+    "expansionEvidenceReady": false,
+    "generatedTypesEvidenceReady": false,
+    "qualityClaimAllowed": false,
+    "hostedRuntimeAllowed": false
+  }
+}

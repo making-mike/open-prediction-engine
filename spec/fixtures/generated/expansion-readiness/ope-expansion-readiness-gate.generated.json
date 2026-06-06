@@ -29,7 +29,7 @@
     {
       "inputId": "expansionevidence-002",
       "source": "developer adoption surface",
-      "observedValue": "quickstartSteps=7; scenarioSteps=6",
+      "observedValue": "quickstartSteps=8; scenarioSteps=6",
       "threshold": "checked quickstart and full scenario",
       "status": "met",
       "implication": "Developers and agents have a local path to first forecast card and lifecycle bundle."

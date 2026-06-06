@@ -1,0 +1,100 @@
+{
+  "pilotFindingsId": "pilotfindings-001",
+  "generatedAt": "2026-06-05T15:50:00Z",
+  "findingsStatus": "agent_simulation_completed_real_sessions_needed",
+  "realSessionCount": 0,
+  "simulatedAgentSessionCount": 5,
+  "minimumRealSessions": 3,
+  "targetRealSessions": 5,
+  "sourceRecords": {
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "pilotSummaryIntakeId": "pilotsummaryintake-001",
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "simulatedAgentPilotId": "simulatedagentpilot-001"
+  },
+  "frictionSummary": [
+    {
+      "frictionClass": "claim_boundary_confusion",
+      "syntheticSignalCount": 1,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "Synthetic and simulated examples show claim-copy and retrospective-proof warnings still need real pilot validation."
+    },
+    {
+      "frictionClass": "none",
+      "syntheticSignalCount": 1,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "Accepted synthetic and simulated examples show the intended path, but they are not real-session evidence."
+    },
+    {
+      "frictionClass": "privacy_redaction_needed",
+      "syntheticSignalCount": 3,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "Synthetic and simulated examples show sanitization review is required before evidence can count."
+    },
+    {
+      "frictionClass": "readback_navigation",
+      "syntheticSignalCount": 1,
+      "simulatedAgentSignalCount": 2,
+      "realSessionSignalCount": 0,
+      "interpretation": "Synthetic and simulated examples suggest agents may need clearer card, bundle, and scoped readback routing."
+    },
+    {
+      "frictionClass": "source_runtime_gap",
+      "syntheticSignalCount": 1,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "Simulated examples identify source-runtime gaps without unblocking private-source execution."
+    }
+  ],
+  "nextActions": [
+    {
+      "actionKey": "review_simulated_agent_pilot",
+      "status": "completed_agent_only_simulation",
+      "command": "python3 scripts/ope.py simulated-agent-pilot --section summary",
+      "reason": "Five user-authorized simulated sessions now cover accepted, clarification, blocked, rejected, and response-too-large outcomes."
+    },
+    {
+      "actionKey": "run_supervised_sessions",
+      "status": "required",
+      "command": "python3 scripts/ope.py pilot-session-packet",
+      "reason": "Three to five supervised sessions are still required before adoption findings can be accepted."
+    },
+    {
+      "actionKey": "classify_sanitized_summaries",
+      "status": "required_after_session",
+      "command": "python3 scripts/ope.py pilot-summary-intake",
+      "reason": "Only sanitized summaries that pass intake review may become real pilot evidence."
+    },
+    {
+      "actionKey": "keep_expansion_blocked",
+      "status": "active_boundary",
+      "command": "python3 scripts/ope.py expansion-readiness",
+      "reason": "Zero real sessions means hosted runtime, broader private sources, generated types, and stronger methods remain blocked or deferred."
+    }
+  ],
+  "executionBoundary": {
+    "rawTranscriptsStored": false,
+    "privateDataStored": false,
+    "credentialValuesStored": false,
+    "hostProjectSecretsStored": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hostedRuntimeUnblocked": false,
+    "generatedTypesUnblocked": false
+  },
+  "summary": {
+    "acceptedRealSessionCount": 0,
+    "acceptedSimulatedAgentSessionCount": 5,
+    "minimumRealSessions": 3,
+    "targetRealSessions": 5,
+    "agentSimulationEvidenceReady": true,
+    "pilotEvidenceReady": false,
+    "expansionEvidenceReady": false,
+    "generatedTypesEvidenceReady": false,
+    "qualityClaimAllowed": false,
+    "hostedRuntimeAllowed": false
+  }
+}

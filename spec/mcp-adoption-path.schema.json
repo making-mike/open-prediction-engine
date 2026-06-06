@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/mcp-adoption-path.schema.json",
+  "title": "MCP Adoption Path",
+  "description": "Checked local MCP stdio adoption transcript surface for external agent hosts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mcpAdoptionPathId",
+    "generatedAt",
+    "adoptionStatus",
+    "mcpCommand",
+    "successTranscript",
+    "blockedTranscripts",
+    "equivalenceChecks",
+    "executionBoundary",
+    "summary"
+  ],
+  "properties": {
+    "mcpAdoptionPathId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "adoptionStatus": {
+      "type": "string",
+      "enum": ["checked_mcp_adoption_transcripts"]
+    },
+    "mcpCommand": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "successTranscript": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transcriptId", "scenario", "steps", "expectedForecastId", "expectedQuestionId"],
+      "properties": {
+        "transcriptId": { "$ref": "common.schema.json#/$defs/id" },
+        "scenario": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "steps": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/transcriptStep" }
+        },
+        "expectedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "expectedQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "blockedTranscripts": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "transcriptId",
+          "caseKey",
+          "toolName",
+          "arguments",
+          "expectedStatus",
+          "expectedExitCode",
+          "expectedBlockerCodes",
+          "forecastArtifactsCreated"
+        ],
+        "properties": {
+          "transcriptId": { "$ref": "common.schema.json#/$defs/id" },
+          "caseKey": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "toolName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "arguments": { "type": "object" },
+          "expectedStatus": { "type": "string", "enum": ["blocked", "response_too_large"] },
+          "expectedExitCode": { "type": "integer", "minimum": 0, "maximum": 5 },
+          "expectedBlockerCodes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+          },
+          "forecastArtifactsCreated": { "type": "boolean" }
+        }
+      }
+    },
+    "equivalenceChecks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["checkName", "mcpToolName", "agentCallOperation", "semanticFields"],
+        "properties": {
+          "checkName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "mcpToolName": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "agentCallOperation": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "semanticFields": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+          }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selectorOnlyArguments",
+        "acceptsCredentialValues",
+        "acceptsRawSql",
+        "acceptsRawPrivateRows",
+        "fetchesLiveData",
+        "opensNetworkListener",
+        "hostedRuntime",
+        "executesPrivateSources",
+        "createsForecastArtifacts",
+        "qualityClaimAllowed"
+      ],
+      "properties": {
+        "selectorOnlyArguments": { "type": "boolean" },
+        "acceptsCredentialValues": { "type": "boolean" },
+        "acceptsRawSql": { "type": "boolean" },
+        "acceptsRawPrivateRows": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "opensNetworkListener": { "type": "boolean" },
+        "hostedRuntime": { "type": "boolean" },
+        "executesPrivateSources": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "successStepCount",
+        "blockedTranscriptCount",
+        "equivalenceCheckCount",
+        "acceptedForecastId",
+        "acceptedQuestionId"
+      ],
+      "properties": {
+        "successStepCount": { "type": "integer", "minimum": 1 },
+        "blockedTranscriptCount": { "type": "integer", "minimum": 1 },
+        "equivalenceCheckCount": { "type": "integer", "minimum": 1 },
+        "acceptedForecastId": { "$ref": "common.schema.json#/$defs/id" },
+        "acceptedQuestionId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    }
+  },
+  "$defs": {
+    "transcriptStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "toolName", "arguments", "expectedOperation", "expectedStatus"],
+      "properties": {
+        "step": { "type": "integer", "minimum": 1 },
+        "toolName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "arguments": { "type": "object" },
+        "expectedOperation": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "expectedStatus": { "type": "string", "minLength": 1, "maxLength": 80 }
+      }
+    }
+  }
+}

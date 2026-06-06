@@ -412,6 +412,22 @@ def main() -> None:
         expected_stdout="checked pilot summary intake",
         label="pilot-summary-intake",
     )
+    simulated_agent_pilot = run_cli("simulated-agent-pilot", "--section", "summary")
+    simulated_agent_pilot_payload = json.loads(simulated_agent_pilot.stdout)
+    if simulated_agent_pilot_payload["simulatedSessionCount"] != 5:
+        raise AssertionError("CLI simulated-agent-pilot should expose five simulated sessions")
+    if simulated_agent_pilot_payload["userPromptSessionCount"] != 1:
+        raise AssertionError("CLI simulated-agent-pilot should expose one user prompt")
+    if simulated_agent_pilot_payload["realSessionsRecorded"] != 0:
+        raise AssertionError("CLI simulated-agent-pilot should not count real sessions")
+    if simulated_agent_pilot_payload["pilotEvidenceReady"] is not False:
+        raise AssertionError("CLI simulated-agent-pilot must not unblock real pilot evidence")
+    run_optional_drift_check(
+        "simulated-agent-pilot",
+        "--check",
+        expected_stdout="checked simulated agent pilot",
+        label="simulated-agent-pilot",
+    )
     local_usage_trace = run_cli("local-usage-trace")
     local_usage_trace_payload = json.loads(local_usage_trace.stdout)
     if local_usage_trace_payload["totalEvents"] != 24:
@@ -441,8 +457,8 @@ def main() -> None:
     )
     developer_adoption = run_cli("developer-adoption")
     developer_adoption_payload = json.loads(developer_adoption.stdout)
-    if developer_adoption_payload["summary"]["quickstartStepCount"] != 7:
-        raise AssertionError("CLI developer-adoption should expose seven quickstart steps")
+    if developer_adoption_payload["summary"]["quickstartStepCount"] != 8:
+        raise AssertionError("CLI developer-adoption should expose eight quickstart steps")
     if developer_adoption_payload["bindings"]["forecastId"] != "forecast-1102":
         raise AssertionError("CLI developer-adoption should bind forecast-1102")
     adoption_interfaces = {
@@ -454,8 +470,10 @@ def main() -> None:
         raise AssertionError("CLI developer-adoption should defer generated runtime types")
     developer_quickstart = run_cli("developer-adoption", "--section", "quickstart")
     developer_quickstart_payload = json.loads(developer_quickstart.stdout)
-    if developer_quickstart_payload[0]["command"] != "python3 --version":
-        raise AssertionError("CLI developer-adoption quickstart should begin with Python setup")
+    if developer_quickstart_payload[0]["command"] != "python3 scripts/ope.py agent-implementation-kit --view quickstart":
+        raise AssertionError("CLI developer-adoption quickstart should begin with agent implementation kit front door")
+    if developer_quickstart_payload[1]["command"] != "python3 --version":
+        raise AssertionError("CLI developer-adoption quickstart should include Python setup")
     if "prediction-campaign explain" not in developer_quickstart_payload[-1]["command"]:
         raise AssertionError("CLI developer-adoption quickstart should evaluate recurring campaigns")
     run_optional_drift_check(
@@ -2668,14 +2686,66 @@ def main() -> None:
     if "checked runtime security hardening" not in runtime_security_check.stdout:
         raise AssertionError("CLI runtime-security --check did not check generated output")
 
+    explain_fit = run_cli("explain-fit", "--goal", "add predictions to my app")
+    if "Use OPE for:" not in explain_fit.stdout:
+        raise AssertionError("CLI explain-fit should name OPE use cases")
+    if "Bring yourself:" not in explain_fit.stdout:
+        raise AssertionError("CLI explain-fit should name host-provided parts")
+    if len(explain_fit.stdout.splitlines()) > 12:
+        raise AssertionError("CLI explain-fit default output should remain compact")
+    explain_fit_extensions = run_cli("explain-fit", "--view", "extension-points", "--output-format", "json")
+    explain_fit_extensions_payload = json.loads(explain_fit_extensions.stdout)
+    extension_keys = {item["extensionKey"] for item in explain_fit_extensions_payload}
+    if extension_keys != {"source_adapter", "forecast_method", "resolver", "scorer", "host_app_wrapper"}:
+        raise AssertionError("CLI explain-fit extension point coverage drifted")
+    if any(item["createsHostedRuntime"] for item in explain_fit_extensions_payload):
+        raise AssertionError("CLI explain-fit extension points must not create hosted runtime")
+    explain_fit_byo = run_cli("explain-fit", "--view", "byo-model", "--output-format", "json")
+    explain_fit_byo_payload = json.loads(explain_fit_byo.stdout)
+    if explain_fit_byo_payload["modelFrameworkRequired"] is not False:
+        raise AssertionError("CLI explain-fit BYO model path should be framework-neutral")
+    if explain_fit_byo_payload["baselineComparisonRequired"] is not True:
+        raise AssertionError("CLI explain-fit BYO model path should require baseline comparison")
+    capabilities = run_cli("capabilities")
+    capabilities_payload = json.loads(capabilities.stdout)
+    capability_keys = {item["capabilityKey"] for item in capabilities_payload["helpsWith"]}
+    if "forecast_contracts" not in capability_keys or "calibration_gates" not in capability_keys:
+        raise AssertionError("CLI capabilities should expose forecast contracts and calibration gates")
+    non_goal_keys = {item["nonGoalKey"] for item in capabilities_payload["doesNotProvide"]}
+    if "frontend" not in non_goal_keys or "trained_model" not in non_goal_keys:
+        raise AssertionError("CLI capabilities should expose frontend and trained model non-goals")
+    adoption_eval = run_cli("adoption-eval", "--output-format", "json")
+    adoption_eval_payload = json.loads(adoption_eval.stdout)
+    if adoption_eval_payload["targetMinutes"] != 5:
+        raise AssertionError("CLI adoption-eval target should remain five minutes")
+    if adoption_eval_payload["passesWithoutNetwork"] is not True or adoption_eval_payload["writesState"] is not False:
+        raise AssertionError("CLI adoption-eval must remain offline and non-mutating")
+    prediction_agent_adoption_check = run_cli("explain-fit", "--check")
+    if "checked prediction agent adoption" not in prediction_agent_adoption_check.stdout:
+        raise AssertionError("CLI explain-fit --check did not check generated adoption output")
+
     agent_implementation_kit = run_cli("agent-implementation-kit")
     agent_implementation_kit_payload = json.loads(agent_implementation_kit.stdout)
     if agent_implementation_kit_payload["kitStatus"] != "agent_prediction_implementation_kit_checked":
         raise AssertionError("CLI agent-implementation-kit status drifted")
     if agent_implementation_kit_payload["summary"]["manualStepCount"] != 12:
         raise AssertionError("CLI agent-implementation-kit manual step count drifted")
+    if agent_implementation_kit_payload["summary"]["quickstartStepCount"] != 5:
+        raise AssertionError("CLI agent-implementation-kit quickstart step count drifted")
     if agent_implementation_kit_payload["executionBoundary"]["questionDiscoveryCreatesForecastArtifacts"] is not False:
         raise AssertionError("CLI agent-implementation-kit discovery must not create forecast artifacts")
+    agent_implementation_quickstart = run_cli("agent-implementation-kit", "--view", "quickstart")
+    agent_implementation_quickstart_payload = json.loads(agent_implementation_quickstart.stdout)
+    if agent_implementation_quickstart_payload["frontDoorStatus"] != "first_external_agent_entrypoint":
+        raise AssertionError("CLI agent-implementation-kit quickstart status drifted")
+    if agent_implementation_quickstart_payload["steps"][0]["stepKey"] != "start_here":
+        raise AssertionError("CLI agent-implementation-kit quickstart first step drifted")
+    if agent_implementation_quickstart_payload["steps"][1]["command"] != "python3 scripts/ope.py agent-integrate --view candidates":
+        raise AssertionError("CLI agent-implementation-kit quickstart candidate command drifted")
+    if agent_implementation_quickstart_payload["copyableWrapper"]["storesCredentialValues"] is not False:
+        raise AssertionError("CLI agent-implementation-kit quickstart wrapper must not store credentials")
+    if agent_implementation_quickstart_payload["hostedRuntimeRequired"] is not False:
+        raise AssertionError("CLI agent-implementation-kit quickstart must not require hosted runtime")
     agent_implementation_manual = run_cli("agent-implementation-kit", "--view", "manual")
     agent_implementation_manual_payload = json.loads(agent_implementation_manual.stdout)
     manual_steps = [item["stepKey"] for item in agent_implementation_manual_payload["steps"]]
@@ -2771,6 +2841,24 @@ def main() -> None:
     agent_integration_check = run_cli("agent-integrate", "--check")
     if "checked agent integration golden path" not in agent_integration_check.stdout:
         raise AssertionError("CLI agent-integrate --check did not check generated output")
+
+    agent_guidance_summary = run_cli("agent-guide", "--section", "summary")
+    agent_guidance_summary_payload = json.loads(agent_guidance_summary.stdout)
+    if agent_guidance_summary_payload["guidanceCaseCount"] != 5:
+        raise AssertionError("CLI agent-guide should expose five guidance cases")
+    if agent_guidance_summary_payload["promptPlannerReady"] is not True:
+        raise AssertionError("CLI agent-guide should expose a ready prompt planner")
+    if agent_guidance_summary_payload["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI agent-guide must not allow quality claims")
+    agent_guidance_clarify = run_cli("agent-guide", "--case", "needs_clarification")
+    agent_guidance_clarify_payload = json.loads(agent_guidance_clarify.stdout)
+    if agent_guidance_clarify_payload["agentNextMove"] != "ask_user":
+        raise AssertionError("CLI agent-guide clarification case should ask the user")
+    if len(agent_guidance_clarify_payload["questionsToAsk"]) != 4:
+        raise AssertionError("CLI agent-guide should expose four Helsinki clarification questions")
+    agent_guidance_check = run_cli("agent-guide", "--check")
+    if "checked agent guidance" not in agent_guidance_check.stdout:
+        raise AssertionError("CLI agent-guide --check did not check generated output")
 
     postgres_compatibility = run_cli("postgres-compatibility")
     postgres_compatibility_payload = json.loads(postgres_compatibility.stdout)

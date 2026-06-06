@@ -72,6 +72,7 @@ from generate_private_source_adapter_intake_bridge import build_bridge, load_gen
 from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
 from generate_database_source_adapter_runtime import build_database_source_adapter_runtime
 from generate_agent_integration import GUIDED_CASES, build_agent_integration, guided_case_payload, view_payload
+from generate_prediction_feature_setup import build_prediction_feature_setup, response_by_case
 from generate_internal_api import OPERATION_ORDER
 from internal_api_runtime import call_internal_api
 from read_ope_record import DEFAULT_MAX_BYTES, PublicError, read_record
@@ -102,6 +103,7 @@ CAPABILITY_BY_OPERATION = {
     "agent_integration_readiness": "read_only",
     "agent_integration_candidates": "read_only",
     "agent_integration_guided_forecast": "read_only",
+    "prediction_feature_setup": "read_only",
     "campaign_plan": "read_only",
     "campaign_status": "read_only",
     "campaign_health": "read_only",
@@ -132,6 +134,7 @@ INPUT_TYPE_BY_OPERATION = {
     "agent_integration_readiness": "agent_integration",
     "agent_integration_candidates": "agent_integration",
     "agent_integration_guided_forecast": "agent_integration",
+    "prediction_feature_setup": "prediction_feature_setup_response",
     "campaign_plan": "prediction_campaign_manifest",
     "campaign_status": "prediction_campaign_explain",
     "campaign_health": "prediction_campaign_doctor",
@@ -564,6 +567,28 @@ def agent_integration_guided_payload(
     return payload, agent_integration_binding(payload), agent_integration_state(record, forecast_status), warnings
 
 
+def prediction_feature_setup_payload(
+    _args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    record = build_prediction_feature_setup()
+    payload = response_by_case(record, "accepted")
+    binding = nullable_binding(questionId=payload["questionId"], forecastId=payload["forecastId"])
+    state = nullable_state(
+        decisionStatus=payload["decision"],
+        executionMode="local_cli_agent_call_readback",
+        sourceMode="approved_source_refs_only",
+        forecastStatus="forecast_card_ready",
+        resolutionStatus="resolution_only_outcome_required",
+        scoreStatus="not_created_by_setup_readback",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        "Prediction feature setup returns compact existing readback commands and does not create forecast artifacts.",
+        "Credential values, raw private rows, raw SQL, hidden live fetches, hosted runtime flags, and quality claims remain blocked.",
+    ]
+    return payload, binding, state, warnings
+
+
 def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, Any]:
     if bundle_case and bundle_case not in BAD_REQUEST_CASES:
         raise AgentCallError(
@@ -985,6 +1010,9 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "agent_integration_guided_forecast":
         payload, binding, state, warnings = agent_integration_guided_payload(args)
         return payload["guidedCaseId"], payload, binding, state, warnings
+    if args.operation == "prediction_feature_setup":
+        payload, binding, state, warnings = prediction_feature_setup_payload(args)
+        return "predictionfeaturesetup-001", payload, binding, state, warnings
     if args.operation == "campaign_plan":
         payload, binding, state, warnings = campaign_plan_adapter_payload()
         return payload["predictionCampaignManifestId"], payload, binding, state, warnings
@@ -1108,6 +1136,8 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "agentintegration-001"
     if args.operation == "agent_integration_guided_forecast":
         return "guidedforecastcase-000"
+    if args.operation == "prediction_feature_setup":
+        return "predictionfeaturesetup-001"
     if args.operation == "campaign_plan":
         return "predictioncampaignmanifest-001"
     if args.operation == "campaign_status":

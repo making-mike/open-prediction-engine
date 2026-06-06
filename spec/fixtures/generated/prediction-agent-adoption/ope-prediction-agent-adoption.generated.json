@@ -1,0 +1,256 @@
+{
+  "predictionAgentAdoptionId": "predictionagentadoption-001",
+  "generatedAt": "2026-06-06T12:00:00Z",
+  "surfaceStatus": "general_agent_adoption_ready",
+  "capabilityManifest": {
+    "manifestVersion": "1.0",
+    "manifestStatus": "checked",
+    "projectName": "Open Prediction Engine",
+    "tagline": "A prediction credibility layer for agents building forecast features.",
+    "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+    "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
+    "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
+    "helpsWith": [
+      {
+        "capabilityKey": "forecast_contracts",
+        "label": "Resolvable forecast contracts",
+        "whyItMatters": "Turns vague prediction ideas into future-facing questions with horizons and resolution rules."
+      },
+      {
+        "capabilityKey": "evidence_provenance",
+        "label": "Evidence provenance",
+        "whyItMatters": "Records which source roles and forecast-time evidence supported a prediction."
+      },
+      {
+        "capabilityKey": "baseline_scoring",
+        "label": "Baseline comparison",
+        "whyItMatters": "Keeps new methods honest by comparing them against simple baselines before stronger claims."
+      },
+      {
+        "capabilityKey": "resolution_and_scoring",
+        "label": "Resolution and scoring",
+        "whyItMatters": "Separates forecast-time evidence from outcome evidence and scores resolved forecasts."
+      },
+      {
+        "capabilityKey": "calibration_gates",
+        "label": "Calibration gates",
+        "whyItMatters": "Blocks calibration and quality claims until enough comparable resolved outcomes exist."
+      },
+      {
+        "capabilityKey": "agent_safe_readbacks",
+        "label": "Agent-safe readbacks",
+        "whyItMatters": "Gives agents compact commands and schema-bound records instead of free-form oracle output."
+      }
+    ],
+    "doesNotProvide": [
+      {
+        "nonGoalKey": "frontend",
+        "label": "Frontend or dashboard",
+        "replacement": "Build UI in the host app and render OPE forecast cards."
+      },
+      {
+        "nonGoalKey": "hosted_api",
+        "label": "Hosted API",
+        "replacement": "Use local CLI, in-process calls, agent-call, or local MCP until a transport is checked."
+      },
+      {
+        "nonGoalKey": "trained_model",
+        "label": "Trained model out of the box",
+        "replacement": "Bring a model and compare it through OPE method and scoring gates."
+      },
+      {
+        "nonGoalKey": "generic_web_crawler",
+        "label": "Generic web crawler",
+        "replacement": "Provide approved sources or checked adapters under source policy."
+      },
+      {
+        "nonGoalKey": "production_scheduler",
+        "label": "Production scheduler",
+        "replacement": "Use host scheduling; OPE only exposes checked local readbacks today."
+      }
+    ],
+    "extensionPointKeys": [
+      "source_adapter",
+      "forecast_method",
+      "resolver",
+      "scorer",
+      "host_app_wrapper"
+    ],
+    "boundary": {
+      "normalChecksOffline": true,
+      "defaultOutputCompact": true,
+      "qualityClaimRequiresResolvedEvidence": true,
+      "credentialsStored": false,
+      "rawPrivateRowsAccepted": false
+    }
+  },
+  "fitDecision": {
+    "fitStatus": "use_as_prediction_credibility_layer",
+    "useOpeFor": [
+      "contracts",
+      "evidence",
+      "baselines",
+      "resolution",
+      "scoring",
+      "calibration_gates"
+    ],
+    "bringYourOwn": [
+      "frontend",
+      "host_runtime",
+      "data_connectors",
+      "custom_models",
+      "notifications"
+    ],
+    "recommendedFirstAction": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+    "claimBoundary": "Use OPE to make predictions auditable; do not claim quality before resolved comparable evidence exists."
+  },
+  "compactEntryPoints": [
+    {
+      "entryKey": "explain_fit",
+      "command": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+      "defaultFormat": "compact_text",
+      "purpose": "Tell an agent whether OPE fits a host prediction goal and which parts the host must bring.",
+      "mutatesState": false
+    },
+    {
+      "entryKey": "capabilities",
+      "command": "python3 scripts/ope.py capabilities",
+      "defaultFormat": "json",
+      "purpose": "Emit the machine-readable capability manifest for automated tool selection.",
+      "mutatesState": false
+    },
+    {
+      "entryKey": "adoption_eval",
+      "command": "python3 scripts/ope.py adoption-eval",
+      "defaultFormat": "compact_text",
+      "purpose": "Run the first-five-minutes adoption checklist without live network access or writes.",
+      "mutatesState": false
+    },
+    {
+      "entryKey": "implementation_kit",
+      "command": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+      "defaultFormat": "json",
+      "purpose": "Return the checked quickstart sequence for agents embedding OPE in a host project.",
+      "mutatesState": false
+    }
+  ],
+  "extensionPoints": [
+    {
+      "extensionKey": "source_adapter",
+      "description": "A host or agent converts an external data source into sanitized OPE source-adapter output.",
+      "hostProvides": "Approved source refs, field mappings, and sanitized rows or manifests.",
+      "opeChecks": "Source policy, mapping confidence, leakage, freshness, and role fit.",
+      "firstReadbackCommand": "python3 scripts/ope.py source-adapter-intake",
+      "createsHostedRuntime": false
+    },
+    {
+      "extensionKey": "forecast_method",
+      "description": "A host plugs in deterministic or model-assisted forecast output for OPE comparison.",
+      "hostProvides": "Method metadata, forecast output, training cutoff, and feature provenance.",
+      "opeChecks": "Baseline comparison, benchmark binding, anti-leakage, and method eligibility.",
+      "firstReadbackCommand": "python3 scripts/ope.py setup-method",
+      "createsHostedRuntime": false
+    },
+    {
+      "extensionKey": "resolver",
+      "description": "A host supplies outcome evidence after the resolution window closes.",
+      "hostProvides": "Resolution-only source rows and outcome observation timestamps.",
+      "opeChecks": "Forecast-before-outcome boundary, declared resolution rule, and unscorable status.",
+      "firstReadbackCommand": "python3 scripts/ope.py resolution-jobs",
+      "createsHostedRuntime": false
+    },
+    {
+      "extensionKey": "scorer",
+      "description": "A host reads or extends scoring reports after outcomes are resolved.",
+      "hostProvides": "Resolved outcomes, forecast IDs, and accepted scoring rule choices.",
+      "opeChecks": "Score binding, baseline lift, exclusion reasons, and comparable sample boundaries.",
+      "firstReadbackCommand": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
+      "createsHostedRuntime": false
+    },
+    {
+      "extensionKey": "host_app_wrapper",
+      "description": "A host app wraps OPE readbacks in its own API, UI, worker, or product flow.",
+      "hostProvides": "Product UI, auth, runtime, scheduling, notifications, and user workflow.",
+      "opeChecks": "Claim boundaries, forecast-card readbacks, lifecycle bundles, and safe blocked paths.",
+      "firstReadbackCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted",
+      "createsHostedRuntime": false
+    }
+  ],
+  "bringYourOwnModel": {
+    "pathStatus": "framework_neutral_checked_guidance",
+    "modelFrameworkRequired": false,
+    "baselineComparisonRequired": true,
+    "leakageChecksRequired": true,
+    "qualityClaimBeforeEvidenceAllowed": false,
+    "steps": [
+      "Define the forecast contract and close/resolution windows before training.",
+      "Bind forecast-time features and keep outcome rows resolution-only.",
+      "Run or register a baseline before selecting the custom model.",
+      "Compare the model against the baseline on comparable resolved outcomes.",
+      "Report quality or calibration only after OPE gates show enough evidence."
+    ]
+  },
+  "adoptionEvaluation": {
+    "evaluationId": "predictionagentadoptioneval-001",
+    "targetMinutes": 5,
+    "passesWithoutNetwork": true,
+    "writesState": false,
+    "checks": [
+      {
+        "checkKey": "understand_fit",
+        "command": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+        "expected": "Agent can explain that OPE is the prediction credibility layer, not the full app stack.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "find_first_command",
+        "command": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
+        "expected": "Agent can identify the first command without reading the whole README.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "read_capabilities",
+        "command": "python3 scripts/ope.py capabilities",
+        "expected": "Agent can read machine-readable helps-with and does-not-provide lists.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "inspect_extension_points",
+        "command": "python3 scripts/ope.py explain-fit --view extension-points --output-format json",
+        "expected": "Agent can find where to plug in sources, methods, resolvers, scorers, and host wrappers.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "avoid_overclaiming",
+        "command": "python3 scripts/ope.py explain-fit --view boundary --output-format json",
+        "expected": "Agent can see hosted runtime, trained-model, frontend, and quality-claim boundaries.",
+        "blocksAdoptionIfMissing": true
+      }
+    ]
+  },
+  "executionBoundary": {
+    "readOnlySurface": true,
+    "normalChecksOffline": true,
+    "createsForecastArtifacts": false,
+    "fetchesLiveData": false,
+    "startsHostedRuntime": false,
+    "storesCredentials": false,
+    "storesPrivateRows": false,
+    "qualityClaimUpgraded": false
+  },
+  "summary": {
+    "primaryValue": "prediction_credibility_layer",
+    "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+    "compactDefaultOutput": true,
+    "extensionPointCount": 5,
+    "adoptionEvalMinutes": 5,
+    "hostedRuntimeProvided": false,
+    "trainedModelProvided": false,
+    "frontendProvided": false
+  },
+  "warnings": [
+    "This surface is an adoption guide, not a new prediction execution path.",
+    "OPE remains local and read-only by default; hosted runtime and live effects require separate checked gates.",
+    "Bring custom models and app runtime from the host project, then compare them through OPE records."
+  ]
+}

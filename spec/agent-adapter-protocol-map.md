@@ -24,6 +24,8 @@ The protocol map is checked with:
 python3 scripts/ope.py agent-protocol-map --check
 python3 scripts/check_agent_adapter_protocol_map.py
 python3 scripts/check_mcp_adapter.py
+python3 scripts/ope.py mcp-adoption --check
+python3 scripts/check_mcp_adoption_path.py
 python3 scripts/ope.py runtime-transport-readiness
 ```
 
@@ -119,6 +121,18 @@ Use `agent_integration_readiness` when an agent wants to know whether OPE can be
 Use `agent_integration_candidates` when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.
 
 Use `agent_integration_guided_forecast` when an agent has accepted starter context and needs the fastest checked path to a forecast-card read command. Blocked guided cases return no forecast IDs and no forecast-card command.
+
+The checked MCP adoption transcript is available through:
+
+```bash
+python3 scripts/ope.py mcp-adoption
+python3 scripts/ope.py mcp-adoption --view success
+python3 scripts/ope.py mcp-adoption --view blocked
+```
+
+Its success path is `ope_agent_integration_readiness` -> `ope_agent_integration_candidates` -> `ope_agent_integration_guided_forecast` -> `ope_forecast_card`. Its blocked transcripts cover raw credential values, raw SQL, private row exposure, unapproved sources, and response-too-large. These fixtures are checked against real MCP stdio output and equivalent `agent-call` envelopes.
+
+Use `prediction_feature_setup` when a host project wants one compact prediction-feature setup response before deciding whether to proceed, clarify, block, reject, or read an existing forecast card. This operation is implemented through `agent-call`; local MCP exposure is guidance-only until the stdio scaffold adds a dedicated tool that wraps the same envelope.
 
 Use `resolution_jobs` when an agent needs pending, due, waiting, resolved, or invalid forward-run resolution-job guidance without reading local state files or executing resolver commands.
 

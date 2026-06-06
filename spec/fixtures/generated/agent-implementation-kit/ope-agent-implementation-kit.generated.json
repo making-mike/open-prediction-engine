@@ -3,6 +3,66 @@
   "generatedAt": "2026-06-04T19:15:00Z",
   "kitStatus": "agent_prediction_implementation_kit_checked",
   "kitScope": "local_agent_readback_and_templates",
+  "quickstartFrontDoor": {
+    "frontDoorId": "agentimplementationfrontdoor-001",
+    "frontDoorStatus": "first_external_agent_entrypoint",
+    "entryCommand": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+    "targetTimeToFirstCommandMinutes": 10,
+    "steps": [
+      {
+        "order": 1,
+        "stepKey": "start_here",
+        "command": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "expected": "Return the compact front-door sequence and wrapper outline for an external coding agent.",
+        "blockedAlternative": "If this command fails, run the agent implementation kit checker before attempting forecast setup."
+      },
+      {
+        "order": 2,
+        "stepKey": "ask_what_can_be_forecasted",
+        "command": "python3 scripts/ope.py agent-integrate --view candidates",
+        "expected": "Return forecastable, needs-clarification, blocked, and rejected candidate contracts with reason codes.",
+        "blockedAlternative": "If no candidate is forecastable, follow the returned clarification or blocked-path next action."
+      },
+      {
+        "order": 3,
+        "stepKey": "run_guided_forecast",
+        "command": "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
+        "expected": "Return forecast and question IDs plus forecast-card and lifecycle-bundle readback commands.",
+        "blockedAlternative": "If the guided case is blocked, do not invent forecast IDs; fix the source or question blocker first."
+      },
+      {
+        "order": 4,
+        "stepKey": "read_forecast_card",
+        "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
+        "expected": "Read the compact claim-safe forecast card for host decision support.",
+        "blockedAlternative": "If the card cannot be read, inspect the guided forecast output and record binding before retrying."
+      },
+      {
+        "order": 5,
+        "stepKey": "inspect_lifecycle_bundle",
+        "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
+        "expected": "Read the lifecycle bundle when the host feature needs provenance, method, or scoring context.",
+        "blockedAlternative": "If the bundle is too large for context, keep the forecast card as the compact readback."
+      }
+    ],
+    "copyableWrapper": {
+      "wrapperStatus": "outline_only_uses_existing_surfaces",
+      "callSequence": [
+        "agent_implementation_quickstart",
+        "agent_integration_candidates",
+        "agent_integration_guided_forecast",
+        "forecast_card_readback",
+        "lifecycle_bundle_readback"
+      ],
+      "storesCredentialValues": false,
+      "acceptsRawPrivateRows": false,
+      "acceptsRawSql": false,
+      "opensNetworkListener": false
+    },
+    "createsNewForecastPath": false,
+    "hostedRuntimeRequired": false,
+    "qualityClaimUpgraded": false
+  },
   "predictionManual": {
     "manualId": "agentpredictionmanual-001",
     "manualStatus": "compact_local_manual_checked",
@@ -806,6 +866,7 @@
     "hostedRuntimeRequired": false
   },
   "summary": {
+    "quickstartStepCount": 5,
     "manualStepCount": 12,
     "candidateReadbackCount": 4,
     "validationReportCount": 4,

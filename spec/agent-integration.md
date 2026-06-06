@@ -72,8 +72,19 @@ The local MCP stdio scaffold exposes equivalent envelope-backed tools:
 - `ope_agent_integration_readiness`
 - `ope_agent_integration_candidates`
 - `ope_agent_integration_guided_forecast`
+- `ope_forecast_card` for the returned `forecastId` and `questionId`
 
 These tools accept only safe selector arguments such as scenario and guided case. They do not accept credentials, raw private rows, raw SQL, hidden live fetches, hosted runtime behavior, or private-source execution.
+
+The checked MCP adoption transcript is:
+
+```bash
+python3 scripts/ope.py mcp-adoption --view success
+python3 scripts/ope.py mcp-adoption --view blocked
+python3 scripts/check_mcp_adoption_path.py
+```
+
+The success transcript runs readiness, candidate discovery, guided forecast, and forecast-card readback for `forecast-1102`. The blocked transcripts cover raw credential value, raw SQL query, private row exposure, unapproved source, and response-too-large. The checker compares those MCP readbacks with equivalent `agent-call` envelopes.
 
 ## Claim Boundary
 

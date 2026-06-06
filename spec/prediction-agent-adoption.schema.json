@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/prediction-agent-adoption.schema.json",
+  "title": "Prediction Agent Adoption",
+  "description": "Checked general adoption surface for agents adding OPE-backed prediction features to host projects.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predictionAgentAdoptionId",
+    "generatedAt",
+    "surfaceStatus",
+    "capabilityManifest",
+    "fitDecision",
+    "compactEntryPoints",
+    "extensionPoints",
+    "bringYourOwnModel",
+    "adoptionEvaluation",
+    "executionBoundary",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "predictionAgentAdoptionId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "surfaceStatus": { "type": "string", "enum": ["general_agent_adoption_ready"] },
+    "capabilityManifest": { "$ref": "#/$defs/capabilityManifest" },
+    "fitDecision": { "$ref": "#/$defs/fitDecision" },
+    "compactEntryPoints": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/entryPoint" }
+    },
+    "extensionPoints": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/extensionPoint" }
+    },
+    "bringYourOwnModel": { "$ref": "#/$defs/bringYourOwnModel" },
+    "adoptionEvaluation": { "$ref": "#/$defs/adoptionEvaluation" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 12, "maxLength": 220 }
+    }
+  },
+  "$defs": {
+    "capabilityManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestVersion",
+        "manifestStatus",
+        "projectName",
+        "tagline",
+        "firstCommand",
+        "fitCommand",
+        "adoptionEvalCommand",
+        "helpsWith",
+        "doesNotProvide",
+        "extensionPointKeys",
+        "boundary"
+      ],
+      "properties": {
+        "manifestVersion": { "type": "string", "enum": ["1.0"] },
+        "manifestStatus": { "type": "string", "enum": ["checked"] },
+        "projectName": { "type": "string", "enum": ["Open Prediction Engine"] },
+        "tagline": { "type": "string", "minLength": 20, "maxLength": 180 },
+        "firstCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "fitCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "adoptionEvalCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "helpsWith": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/capability" }
+        },
+        "doesNotProvide": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/nonGoal" }
+        },
+        "extensionPointKeys": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["source_adapter", "forecast_method", "resolver", "scorer", "host_app_wrapper"]
+          }
+        },
+        "boundary": { "$ref": "#/$defs/manifestBoundary" }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capabilityKey", "label", "whyItMatters"],
+      "properties": {
+        "capabilityKey": {
+          "type": "string",
+          "enum": [
+            "forecast_contracts",
+            "evidence_provenance",
+            "baseline_scoring",
+            "resolution_and_scoring",
+            "calibration_gates",
+            "agent_safe_readbacks",
+            "source_policy_boundaries",
+            "method_comparison"
+          ]
+        },
+        "label": { "type": "string", "minLength": 4, "maxLength": 80 },
+        "whyItMatters": { "type": "string", "minLength": 20, "maxLength": 220 }
+      }
+    },
+    "nonGoal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nonGoalKey", "label", "replacement"],
+      "properties": {
+        "nonGoalKey": {
+          "type": "string",
+          "enum": [
+            "frontend",
+            "hosted_api",
+            "trained_model",
+            "generic_web_crawler",
+            "production_scheduler",
+            "notification_system",
+            "secret_store",
+            "payment_or_settlement"
+          ]
+        },
+        "label": { "type": "string", "minLength": 4, "maxLength": 100 },
+        "replacement": { "type": "string", "minLength": 12, "maxLength": 200 }
+      }
+    },
+    "manifestBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalChecksOffline",
+        "defaultOutputCompact",
+        "qualityClaimRequiresResolvedEvidence",
+        "credentialsStored",
+        "rawPrivateRowsAccepted"
+      ],
+      "properties": {
+        "normalChecksOffline": { "type": "boolean" },
+        "defaultOutputCompact": { "type": "boolean" },
+        "qualityClaimRequiresResolvedEvidence": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "rawPrivateRowsAccepted": { "type": "boolean" }
+      }
+    },
+    "fitDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fitStatus", "useOpeFor", "bringYourOwn", "recommendedFirstAction", "claimBoundary"],
+      "properties": {
+        "fitStatus": { "type": "string", "enum": ["use_as_prediction_credibility_layer"] },
+        "useOpeFor": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "enum": ["contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"]
+          }
+        },
+        "bringYourOwn": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["frontend", "host_runtime", "data_connectors", "custom_models", "notifications"]
+          }
+        },
+        "recommendedFirstAction": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "claimBoundary": { "type": "string", "minLength": 20, "maxLength": 220 }
+      }
+    },
+    "entryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entryKey", "command", "defaultFormat", "purpose", "mutatesState"],
+      "properties": {
+        "entryKey": {
+          "type": "string",
+          "enum": ["explain_fit", "capabilities", "adoption_eval", "agent_quickstart", "implementation_kit"]
+        },
+        "command": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "defaultFormat": { "type": "string", "enum": ["compact_text", "json"] },
+        "purpose": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "mutatesState": { "type": "boolean" }
+      }
+    },
+    "extensionPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["extensionKey", "description", "hostProvides", "opeChecks", "firstReadbackCommand", "createsHostedRuntime"],
+      "properties": {
+        "extensionKey": {
+          "type": "string",
+          "enum": ["source_adapter", "forecast_method", "resolver", "scorer", "host_app_wrapper"]
+        },
+        "description": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "hostProvides": { "type": "string", "minLength": 8, "maxLength": 200 },
+        "opeChecks": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "firstReadbackCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "createsHostedRuntime": { "type": "boolean" }
+      }
+    },
+    "bringYourOwnModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pathStatus",
+        "modelFrameworkRequired",
+        "baselineComparisonRequired",
+        "leakageChecksRequired",
+        "qualityClaimBeforeEvidenceAllowed",
+        "steps"
+      ],
+      "properties": {
+        "pathStatus": { "type": "string", "enum": ["framework_neutral_checked_guidance"] },
+        "modelFrameworkRequired": { "type": "boolean" },
+        "baselineComparisonRequired": { "type": "boolean" },
+        "leakageChecksRequired": { "type": "boolean" },
+        "qualityClaimBeforeEvidenceAllowed": { "type": "boolean" },
+        "steps": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 12, "maxLength": 180 }
+        }
+      }
+    },
+    "adoptionEvaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluationId", "targetMinutes", "passesWithoutNetwork", "writesState", "checks"],
+      "properties": {
+        "evaluationId": { "$ref": "common.schema.json#/$defs/id" },
+        "targetMinutes": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "passesWithoutNetwork": { "type": "boolean" },
+        "writesState": { "type": "boolean" },
+        "checks": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/adoptionCheck" }
+        }
+      }
+    },
+    "adoptionCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkKey", "command", "expected", "blocksAdoptionIfMissing"],
+      "properties": {
+        "checkKey": {
+          "type": "string",
+          "enum": [
+            "understand_fit",
+            "find_first_command",
+            "read_capabilities",
+            "inspect_extension_points",
+            "avoid_overclaiming",
+            "read_first_forecast_card"
+          ]
+        },
+        "command": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "expected": { "type": "string", "minLength": 20, "maxLength": 220 },
+        "blocksAdoptionIfMissing": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlySurface",
+        "normalChecksOffline",
+        "createsForecastArtifacts",
+        "fetchesLiveData",
+        "startsHostedRuntime",
+        "storesCredentials",
+        "storesPrivateRows",
+        "qualityClaimUpgraded"
+      ],
+      "properties": {
+        "readOnlySurface": { "type": "boolean" },
+        "normalChecksOffline": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPrivateRows": { "type": "boolean" },
+        "qualityClaimUpgraded": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primaryValue",
+        "firstCommand",
+        "compactDefaultOutput",
+        "extensionPointCount",
+        "adoptionEvalMinutes",
+        "hostedRuntimeProvided",
+        "trainedModelProvided",
+        "frontendProvided"
+      ],
+      "properties": {
+        "primaryValue": { "type": "string", "enum": ["prediction_credibility_layer"] },
+        "firstCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "compactDefaultOutput": { "type": "boolean" },
+        "extensionPointCount": { "type": "integer", "minimum": 5, "maximum": 5 },
+        "adoptionEvalMinutes": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "hostedRuntimeProvided": { "type": "boolean" },
+        "trainedModelProvided": { "type": "boolean" },
+        "frontendProvided": { "type": "boolean" }
+      }
+    }
+  }
+}

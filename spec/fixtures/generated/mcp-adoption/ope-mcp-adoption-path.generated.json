@@ -1,0 +1,204 @@
+{
+  "mcpAdoptionPathId": "mcpadoptionpath-001",
+  "generatedAt": "2026-06-05T15:20:00Z",
+  "adoptionStatus": "checked_mcp_adoption_transcripts",
+  "mcpCommand": "python3 scripts/ope.py mcp-stdio",
+  "successTranscript": {
+    "transcriptId": "mcpadoptionsuccess-001",
+    "scenario": "helsinki_bus_disruption",
+    "steps": [
+      {
+        "step": 1,
+        "toolName": "ope_agent_integration_readiness",
+        "arguments": {
+          "scenario": "helsinki_bus_disruption"
+        },
+        "expectedOperation": "agent_integration_readiness",
+        "expectedStatus": "ready_for_agent_incorporation"
+      },
+      {
+        "step": 2,
+        "toolName": "ope_agent_integration_candidates",
+        "arguments": {
+          "scenario": "helsinki_bus_disruption"
+        },
+        "expectedOperation": "agent_integration_candidates",
+        "expectedStatus": "candidates_available"
+      },
+      {
+        "step": 3,
+        "toolName": "ope_agent_integration_guided_forecast",
+        "arguments": {
+          "scenario": "helsinki_bus_disruption",
+          "guidedCase": "accepted_adapter_output"
+        },
+        "expectedOperation": "agent_integration_guided_forecast",
+        "expectedStatus": "forecast_card_ready"
+      },
+      {
+        "step": 4,
+        "toolName": "ope_forecast_card",
+        "arguments": {
+          "forecastId": "forecast-1102",
+          "questionId": "question-1102"
+        },
+        "expectedOperation": "forecast_card",
+        "expectedStatus": "ok"
+      }
+    ],
+    "expectedForecastId": "forecast-1102",
+    "expectedQuestionId": "question-1102"
+  },
+  "blockedTranscripts": [
+    {
+      "transcriptId": "mcpadoptionblocked-001",
+      "caseKey": "raw_credential_value",
+      "toolName": "ope_agent_integration_guided_forecast",
+      "arguments": {
+        "scenario": "helsinki_bus_disruption",
+        "guidedCase": "raw_credential_value"
+      },
+      "expectedStatus": "blocked",
+      "expectedExitCode": 0,
+      "expectedBlockerCodes": [
+        "raw_credential_value"
+      ],
+      "forecastArtifactsCreated": false
+    },
+    {
+      "transcriptId": "mcpadoptionblocked-002",
+      "caseKey": "raw_sql_query",
+      "toolName": "ope_agent_integration_guided_forecast",
+      "arguments": {
+        "scenario": "helsinki_bus_disruption",
+        "guidedCase": "raw_sql_query"
+      },
+      "expectedStatus": "blocked",
+      "expectedExitCode": 0,
+      "expectedBlockerCodes": [
+        "raw_sql_query"
+      ],
+      "forecastArtifactsCreated": false
+    },
+    {
+      "transcriptId": "mcpadoptionblocked-003",
+      "caseKey": "private_row_exposure",
+      "toolName": "ope_agent_integration_guided_forecast",
+      "arguments": {
+        "scenario": "helsinki_bus_disruption",
+        "guidedCase": "private_row_exposure"
+      },
+      "expectedStatus": "blocked",
+      "expectedExitCode": 0,
+      "expectedBlockerCodes": [
+        "private_row_exposure"
+      ],
+      "forecastArtifactsCreated": false
+    },
+    {
+      "transcriptId": "mcpadoptionblocked-004",
+      "caseKey": "unapproved_source",
+      "toolName": "ope_agent_integration_guided_forecast",
+      "arguments": {
+        "scenario": "helsinki_bus_disruption",
+        "guidedCase": "unapproved_source"
+      },
+      "expectedStatus": "blocked",
+      "expectedExitCode": 0,
+      "expectedBlockerCodes": [
+        "unapproved_source"
+      ],
+      "forecastArtifactsCreated": false
+    },
+    {
+      "transcriptId": "mcpadoptionblocked-005",
+      "caseKey": "response_too_large",
+      "toolName": "ope_agent_integration_guided_forecast",
+      "arguments": {
+        "scenario": "helsinki_bus_disruption",
+        "guidedCase": "accepted_adapter_output",
+        "maxBytes": 20
+      },
+      "expectedStatus": "response_too_large",
+      "expectedExitCode": 5,
+      "expectedBlockerCodes": [
+        "response_too_large"
+      ],
+      "forecastArtifactsCreated": false
+    }
+  ],
+  "equivalenceChecks": [
+    {
+      "checkName": "readiness_envelope",
+      "mcpToolName": "ope_agent_integration_readiness",
+      "agentCallOperation": "agent_integration_readiness",
+      "semanticFields": [
+        "operation",
+        "status",
+        "payload.readinessStatus",
+        "recordBinding"
+      ]
+    },
+    {
+      "checkName": "candidate_contracts",
+      "mcpToolName": "ope_agent_integration_candidates",
+      "agentCallOperation": "agent_integration_candidates",
+      "semanticFields": [
+        "operation",
+        "status",
+        "payload.summary",
+        "payload.candidates"
+      ]
+    },
+    {
+      "checkName": "guided_forecast_success",
+      "mcpToolName": "ope_agent_integration_guided_forecast",
+      "agentCallOperation": "agent_integration_guided_forecast",
+      "semanticFields": [
+        "operation",
+        "payload.forecastId",
+        "payload.questionId",
+        "payload.forecastCardCommand"
+      ]
+    },
+    {
+      "checkName": "blocked_guided_cases",
+      "mcpToolName": "ope_agent_integration_guided_forecast",
+      "agentCallOperation": "agent_integration_guided_forecast",
+      "semanticFields": [
+        "payload.guidedStatus",
+        "payload.blockerCodes",
+        "payload.forecastId"
+      ]
+    },
+    {
+      "checkName": "forecast_card_readback",
+      "mcpToolName": "ope_forecast_card",
+      "agentCallOperation": "forecast_card",
+      "semanticFields": [
+        "operation",
+        "recordBinding.forecastId",
+        "payload.record.forecast.probability"
+      ]
+    }
+  ],
+  "executionBoundary": {
+    "selectorOnlyArguments": true,
+    "acceptsCredentialValues": false,
+    "acceptsRawSql": false,
+    "acceptsRawPrivateRows": false,
+    "fetchesLiveData": false,
+    "opensNetworkListener": false,
+    "hostedRuntime": false,
+    "executesPrivateSources": false,
+    "createsForecastArtifacts": false,
+    "qualityClaimAllowed": false
+  },
+  "summary": {
+    "successStepCount": 4,
+    "blockedTranscriptCount": 5,
+    "equivalenceCheckCount": 5,
+    "acceptedForecastId": "forecast-1102",
+    "acceptedQuestionId": "question-1102"
+  }
+}

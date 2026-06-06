@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -315,6 +317,113 @@ def cmd_check(_args: argparse.Namespace) -> None:
 
 def cmd_release_check(_args: argparse.Namespace) -> None:
     run([sys.executable, "scripts/release_check.py"])
+
+
+def smoke_step(key: str, label: str, command: list[str]) -> dict[str, object]:
+    print(f"[smoke] start {label}", file=sys.stderr, flush=True)
+    started = time.perf_counter()
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    elapsed = round(time.perf_counter() - started, 3)
+    print(f"[smoke] done {label} exit={completed.returncode} elapsed={elapsed:.3f}s", file=sys.stderr, flush=True)
+    row: dict[str, object] = {
+        "stepKey": key,
+        "label": label,
+        "command": " ".join(command),
+        "exitCode": completed.returncode,
+        "elapsedSeconds": elapsed,
+        "status": "passed" if completed.returncode == 0 else "failed",
+    }
+    if completed.returncode != 0:
+        row["errorPreview"] = (completed.stderr or completed.stdout).strip()[:300]
+    return row | {"stdout": completed.stdout}
+
+
+def build_smoke_summary() -> dict[str, object]:
+    commands = [
+        ("schema_sanity", "schema sanity", [sys.executable, "scripts/check_json.py"]),
+        ("developer_adoption_check", "developer adoption check", [sys.executable, "scripts/ope.py", "developer-adoption", "--check"]),
+        ("agent_implementation_kit_check", "agent implementation kit check", [sys.executable, "scripts/ope.py", "agent-implementation-kit", "--check"]),
+        ("agent_integrate_candidates", "agent integration candidates", [sys.executable, "scripts/ope.py", "agent-integrate", "--view", "candidates"]),
+        (
+            "agent_integrate_guided_forecast",
+            "agent integration guided forecast",
+            [sys.executable, "scripts/ope.py", "agent-integrate", "--run-guided", "--case", "accepted_adapter_output"],
+        ),
+        (
+            "forecast_card_read",
+            "forecast card read",
+            [
+                sys.executable,
+                "scripts/ope.py",
+                "read",
+                "--record-type",
+                "forecast-card",
+                "--id",
+                "forecast-1102",
+                "--question-id",
+                "question-1102",
+            ],
+        ),
+    ]
+    started = time.perf_counter()
+    steps: list[dict[str, object]] = []
+    failed_step: str | None = None
+    for key, label, command in commands:
+        row = smoke_step(key, label, command)
+        stdout = str(row.pop("stdout"))
+        if key == "agent_integrate_guided_forecast" and row["exitCode"] == 0:
+            payload = json.loads(stdout)
+            row["forecastId"] = payload.get("forecastId")
+            row["questionId"] = payload.get("questionId")
+            row["guidedStatus"] = payload.get("guidedStatus")
+        elif key == "forecast_card_read" and row["exitCode"] == 0:
+            payload = json.loads(stdout)
+            record = payload.get("record", {})
+            row["forecastId"] = record.get("forecastId")
+            row["questionId"] = record.get("questionId")
+            row["recordStatus"] = record.get("status")
+        steps.append(row)
+        if row["exitCode"] != 0:
+            failed_step = key
+            break
+    smoke_status = "passed" if failed_step is None else "failed"
+    return {
+        "smokeId": "agentsmoke-001",
+        "smokeStatus": smoke_status,
+        "stepCount": len(steps),
+        "failedStep": failed_step,
+        "elapsedSeconds": round(time.perf_counter() - started, 3),
+        "steps": steps,
+        "writesState": False,
+        "fetchesLiveData": False,
+        "qualityClaimUpgraded": False,
+        "nextCommandOnSuccess": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "nextCommandOnFailure": "Rerun the failed command shown in steps before running the full check.",
+    }
+
+
+def cmd_smoke(args: argparse.Namespace) -> None:
+    summary = build_smoke_summary()
+    if args.check:
+        if summary["smokeStatus"] != "passed":
+            print(json.dumps(summary, indent=2), file=sys.stderr)
+            raise SystemExit(1)
+        print("checked fast agent smoke")
+        return
+    if args.output_format == "json":
+        print(json.dumps(summary, indent=2))
+        return
+    print(f"smokeStatus={summary['smokeStatus']} stepCount={summary['stepCount']} elapsedSeconds={summary['elapsedSeconds']}")
+    if summary["failedStep"]:
+        print(f"failedStep={summary['failedStep']}")
+        raise SystemExit(1)
+    print(f"next={summary['nextCommandOnSuccess']}")
 
 
 def cmd_generate_fixtures(args: argparse.Namespace) -> None:
@@ -1325,6 +1434,41 @@ def cmd_runtime_security(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_explain_fit(args: argparse.Namespace) -> None:
+    command = [
+        sys.executable,
+        "scripts/generate_prediction_agent_adoption.py",
+        "--view",
+        args.view,
+        "--goal",
+        args.goal,
+        "--output-format",
+        args.output_format,
+    ]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_capabilities(_args: argparse.Namespace) -> None:
+    run([sys.executable, "scripts/generate_prediction_agent_adoption.py", "--view", "capabilities"])
+
+
+def cmd_adoption_eval(args: argparse.Namespace) -> None:
+    run(
+        [
+            sys.executable,
+            "scripts/generate_prediction_agent_adoption.py",
+            "--view",
+            "adoption-eval",
+            "--output-format",
+            args.output_format,
+        ]
+    )
+
+
 def cmd_agent_implementation_kit(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_agent_implementation_kit.py"]
     if args.view:
@@ -1346,6 +1490,32 @@ def cmd_agent_integrate(args: argparse.Namespace) -> None:
         command.extend(["--case", args.case])
     if args.run_guided:
         command.append("--run-guided")
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_prediction_feature_setup(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_prediction_feature_setup.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.case:
+        command.extend(["--case", args.case])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_agent_guidance(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_agent_guidance.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.case:
+        command.extend(["--case", args.case])
     if args.check:
         command.append("--check")
     if args.write:
@@ -1705,6 +1875,50 @@ def cmd_agent_envelopes(args: argparse.Namespace) -> None:
 
 def cmd_agent_protocol_map(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_agent_adapter_protocol_map.py"]
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_mcp_adoption(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_mcp_adoption_path.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_findings(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_findings.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_simulated_agent_pilot(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_simulated_agent_pilot.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_generated_types_decision(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_generated_runtime_types_decision.py"]
+    if args.section:
+        command.extend(["--section", args.section])
     if args.check:
         command.append("--check")
     if args.write:
@@ -2386,6 +2600,16 @@ def build_parser() -> argparse.ArgumentParser:
     release_check = subparsers.add_parser("release-check", help="run release-readiness checks")
     release_check.set_defaults(func=cmd_release_check)
 
+    smoke = subparsers.add_parser("smoke", help="run a fast external-agent adoption smoke check")
+    smoke.add_argument(
+        "--output-format",
+        choices=["text", "json"],
+        default="text",
+        help="print a compact text or JSON smoke summary",
+    )
+    smoke.add_argument("--check", action="store_true", help="check the fast agent smoke path")
+    smoke.set_defaults(func=cmd_smoke)
+
     generate = subparsers.add_parser("generate-fixtures", help="check or refresh generated fixtures")
     generate.add_argument("--list", action="store_true", help="list fixture generator commands without running them")
     generate.add_argument("--write", action="store_true", help="refresh generated fixtures")
@@ -3014,13 +3238,64 @@ def build_parser() -> argparse.ArgumentParser:
     )
     runtime_security.set_defaults(func=cmd_runtime_security)
 
+    explain_fit = subparsers.add_parser(
+        "explain-fit",
+        help="explain whether OPE fits a host prediction goal",
+    )
+    explain_fit.add_argument(
+        "--goal",
+        default="add predictions to my app",
+        help="host prediction goal to evaluate",
+    )
+    explain_fit.add_argument(
+        "--view",
+        choices=["summary", "fit", "extension-points", "byo-model", "adoption-eval", "boundary"],
+        default="summary",
+        help="focused adoption view for JSON output",
+    )
+    explain_fit.add_argument(
+        "--output-format",
+        choices=["text", "json"],
+        default="text",
+        help="compact text by default, or JSON for machine-readable detail",
+    )
+    explain_fit.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated prediction-agent adoption drift",
+    )
+    explain_fit.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated prediction-agent adoption fixture and capability manifest",
+    )
+    explain_fit.set_defaults(func=cmd_explain_fit)
+
+    capabilities = subparsers.add_parser(
+        "capabilities",
+        help="print the checked OPE capability manifest for agents",
+    )
+    capabilities.set_defaults(func=cmd_capabilities)
+
+    adoption_eval = subparsers.add_parser(
+        "adoption-eval",
+        help="print the first-five-minutes adoption evaluation checklist",
+    )
+    adoption_eval.add_argument(
+        "--output-format",
+        choices=["text", "json"],
+        default="text",
+        help="compact text by default, or JSON for machine-readable detail",
+    )
+    adoption_eval.set_defaults(func=cmd_adoption_eval)
+
     agent_implementation_kit = subparsers.add_parser(
         "agent-implementation-kit",
         help="print checked agent prediction implementation kit and question-discovery readback",
     )
     agent_implementation_kit.add_argument(
         "--view",
-        choices=["full", "manual", "intake", "candidates", "validation", "adapters", "templates", "blocked", "boundary"],
+        choices=["full", "quickstart", "manual", "intake", "candidates", "validation", "adapters", "templates", "blocked", "boundary"],
         default="full",
         help="print a focused agent implementation kit view",
     )
@@ -3087,6 +3362,44 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated agent integration fixture",
     )
     agent_integrate.set_defaults(func=cmd_agent_integrate)
+
+    prediction_feature_setup = subparsers.add_parser(
+        "prediction-feature-setup",
+        help="print compact prediction feature setup request/response contract readbacks",
+    )
+    prediction_feature_setup.add_argument(
+        "--view",
+        choices=["full", "request", "responses", "response", "interfaces", "boundary", "summary"],
+        default="full",
+        help="print a focused prediction feature setup view",
+    )
+    prediction_feature_setup.add_argument(
+        "--case",
+        choices=["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"],
+        default="accepted",
+        help="response example case for --view response",
+    )
+    prediction_feature_setup.add_argument("--check", action="store_true", help="check generated prediction feature setup drift")
+    prediction_feature_setup.add_argument("--write", action="store_true", help="refresh generated prediction feature setup fixture")
+    prediction_feature_setup.set_defaults(func=cmd_prediction_feature_setup)
+
+    agent_guide = subparsers.add_parser(
+        "agent-guide",
+        help="print checked guidance for agents turning messy prompts into safe OPE next moves",
+    )
+    agent_guide.add_argument(
+        "--section",
+        choices=["summary", "cases", "planner", "helsinki", "instructions", "boundary"],
+        help="print one agent guidance section",
+    )
+    agent_guide.add_argument(
+        "--case",
+        choices=["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"],
+        help="print one guidance case",
+    )
+    agent_guide.add_argument("--check", action="store_true", help="check generated agent guidance drift")
+    agent_guide.add_argument("--write", action="store_true", help="refresh generated agent guidance fixture")
+    agent_guide.set_defaults(func=cmd_agent_guidance)
 
     postgres_compatibility = subparsers.add_parser(
         "postgres-compatibility",
@@ -3783,6 +4096,20 @@ def build_parser() -> argparse.ArgumentParser:
     agent_protocol_map.add_argument("--write", action="store_true", help="refresh generated protocol map")
     agent_protocol_map.set_defaults(func=cmd_agent_protocol_map)
 
+    mcp_adoption = subparsers.add_parser(
+        "mcp-adoption",
+        help="check, refresh, or print the local MCP adoption path transcripts",
+    )
+    mcp_adoption.add_argument("--check", action="store_true", help="check generated MCP adoption path drift")
+    mcp_adoption.add_argument("--write", action="store_true", help="refresh generated MCP adoption path")
+    mcp_adoption.add_argument(
+        "--view",
+        choices=["full", "success", "blocked", "boundary", "summary"],
+        default="full",
+        help="print one MCP adoption path view",
+    )
+    mcp_adoption.set_defaults(func=cmd_mcp_adoption)
+
     forecast_run = subparsers.add_parser(
         "forecast-run",
         help="check, refresh, or print the fixture-safe agent forecast run summary",
@@ -4147,6 +4474,69 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated pilot summary intake",
     )
     pilot_summary_intake.set_defaults(func=cmd_pilot_summary_intake)
+
+    pilot_findings = subparsers.add_parser(
+        "pilot-findings",
+        help="check, refresh, or print sanitized real-session pilot findings",
+    )
+    pilot_findings.add_argument(
+        "--section",
+        choices=["summary", "friction", "next-actions", "boundary"],
+        help="print one pilot findings section",
+    )
+    pilot_findings.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot findings drift",
+    )
+    pilot_findings.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot findings",
+    )
+    pilot_findings.set_defaults(func=cmd_pilot_findings)
+
+    simulated_agent_pilot = subparsers.add_parser(
+        "simulated-agent-pilot",
+        help="check, refresh, or print user-authorized simulated agent pilot sessions",
+    )
+    simulated_agent_pilot.add_argument(
+        "--section",
+        choices=["summary", "sessions", "friction", "boundary", "user-prompt"],
+        help="print one simulated agent pilot section",
+    )
+    simulated_agent_pilot.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated simulated agent pilot drift",
+    )
+    simulated_agent_pilot.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated simulated agent pilot",
+    )
+    simulated_agent_pilot.set_defaults(func=cmd_simulated_agent_pilot)
+
+    generated_types_decision = subparsers.add_parser(
+        "generated-types-decision",
+        help="check, refresh, or print the generated runtime types decision",
+    )
+    generated_types_decision.add_argument(
+        "--section",
+        choices=["summary", "evidence", "json-fallback", "blocked", "gates", "boundary"],
+        help="print one generated runtime types decision section",
+    )
+    generated_types_decision.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated runtime types decision drift",
+    )
+    generated_types_decision.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated runtime types decision",
+    )
+    generated_types_decision.set_defaults(func=cmd_generated_types_decision)
 
     local_usage_trace = subparsers.add_parser(
         "local-usage-trace",
@@ -4602,6 +4992,7 @@ def build_parser() -> argparse.ArgumentParser:
             "agent_integration_readiness",
             "agent_integration_candidates",
             "agent_integration_guided_forecast",
+            "prediction_feature_setup",
             "campaign_plan",
             "campaign_status",
             "campaign_health",
