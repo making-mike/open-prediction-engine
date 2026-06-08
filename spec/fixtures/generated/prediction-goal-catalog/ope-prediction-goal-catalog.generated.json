@@ -1,0 +1,374 @@
+{
+  "predictionGoalCatalogId": "predictiongoalcatalog-001",
+  "generatedAt": "2026-06-07T13:10:00Z",
+  "catalogStatus": "checked_domain_agnostic_goal_catalog",
+  "setupEngineBinding": {
+    "setupEngineId": "setupengine-001",
+    "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+    "examplesViewCommand": "python3 scripts/ope.py setup-engine --view examples",
+    "relationship": "Setup-engine projects this catalog into its examples view so agents see reusable goal shapes before domain-specific examples."
+  },
+  "classificationVocabulary": [
+    {
+      "classification": "forecastable",
+      "meaning": "The goal can be rewritten as a measurable future question with declared evidence and resolution roles.",
+      "firstSafeAction": "Choose the candidate contract and bind approved source references."
+    },
+    {
+      "classification": "needs_clarification",
+      "meaning": "The goal is prediction-shaped but lacks a threshold, horizon, decision, or resolution rule.",
+      "firstSafeAction": "Ask for the missing threshold, service window, decision, or outcome source."
+    },
+    {
+      "classification": "blocked",
+      "meaning": "The goal includes unsafe inputs or source handling that OPE must not accept.",
+      "firstSafeAction": "Replace raw credentials, raw rows, raw SQL, or unapproved sources with approved references."
+    },
+    {
+      "classification": "rejected",
+      "meaning": "The goal is not a future-facing resolvable forecast contract.",
+      "firstSafeAction": "Rewrite it as a future measurable outcome or use a non-forecast analysis path."
+    }
+  ],
+  "goalExamples": [
+    {
+      "goalKey": "delivery_delay_risk",
+      "goalTitle": "Delivery Delay Risk",
+      "hostGoal": "Predict whether a delivery lane will exceed a late-arrival threshold during a future dispatch window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_present",
+        "resolution_source_required"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve from the approved delivery outcome source after the dispatch window closes.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "questionId",
+        "probability",
+        "threshold",
+        "baselineMethod",
+        "claimWarning"
+      ],
+      "firstSafeHostAction": "Bind approved dispatch, historical arrival, and outcome source references before source intake.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "contracts",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "stockout_risk",
+      "goalTitle": "Inventory Stockout Risk",
+      "hostGoal": "Predict whether a product will stock out before the next replenishment window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_event",
+        "historical_outcome_needed",
+        "resolution_source_required"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve from approved inventory snapshots after the replenishment window closes.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "probability",
+        "stockoutThreshold",
+        "baselineMethod",
+        "sourceSummary"
+      ],
+      "firstSafeHostAction": "Bind approved demand, inventory, replenishment, and outcome source references.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "sources",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "sla_breach_risk",
+      "goalTitle": "SLA Breach Risk",
+      "hostGoal": "Predict whether an operational queue will breach a declared SLA threshold during a future service window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "threshold_present",
+        "baseline_needed",
+        "resolution_window_present"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve from the approved SLA outcome source after the service window closes.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "probability",
+        "serviceWindow",
+        "slaThreshold",
+        "baselineMethod",
+        "claimWarning"
+      ],
+      "firstSafeHostAction": "Bind approved queue state, historical breach, and outcome source references.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "baseline",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "demand_risk",
+      "goalTitle": "Demand Risk",
+      "hostGoal": "Predict whether future demand will be risky next month.",
+      "classification": "needs_clarification",
+      "reasonCodes": [
+        "ambiguous_outcome_definition",
+        "missing_threshold"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve only after the caller defines the demand metric, threshold, and outcome source.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "probability",
+        "demandMetric",
+        "threshold",
+        "baselineMethod",
+        "claimWarning"
+      ],
+      "firstSafeHostAction": "Ask for the demand metric, threshold, forecast horizon, and resolution source before source intake.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "contracts",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "churn_risk",
+      "goalTitle": "Churn Risk With Unsafe Payload",
+      "hostGoal": "Use this API token and raw customer table to predict which accounts will churn next quarter.",
+      "classification": "blocked",
+      "reasonCodes": [
+        "raw_credential_value",
+        "raw_private_rows",
+        "unapproved_source"
+      ],
+      "requiredSourceRoles": [],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "blocked",
+        "executionAllowed": false,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Blocked inputs cannot define a resolution source until replaced with approved references.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [],
+      "firstSafeHostAction": "",
+      "blockedReason": "Credential values and raw private rows must be replaced with opaque source and credential references.",
+      "setupEnginePreferredView": "claim-boundary",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "seaport_berth_availability",
+      "goalTitle": "Seaport Berth Availability",
+      "hostGoal": "Predict whether a berth will be unavailable during a future vessel arrival window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_present",
+        "resolution_source_required"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve from approved berth occupancy or port-call outcome records after the arrival window.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "probability",
+        "berthWindow",
+        "baselineMethod",
+        "sourceSummary",
+        "claimWarning"
+      ],
+      "firstSafeHostAction": "Bind approved arrival schedule, berth state, historical outcome, and resolution source references.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "sources",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "weather_sensitive_operations",
+      "goalTitle": "Weather-Sensitive Operations Attribution",
+      "hostGoal": "Explain whether yesterday's weather caused the operations disruption.",
+      "classification": "rejected",
+      "reasonCodes": [
+        "past_tense_question",
+        "not_future_facing"
+      ],
+      "requiredSourceRoles": [],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "blocked",
+        "executionAllowed": false,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Past attribution is not a future forecast resolution path.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [],
+      "firstSafeHostAction": "",
+      "blockedReason": "The prompt asks for past attribution, not a resolvable future forecast.",
+      "setupEnginePreferredView": "examples",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    },
+    {
+      "goalKey": "public_transit_disruption_risk",
+      "goalTitle": "Public Transit Disruption Risk",
+      "hostGoal": "Predict whether a public transit service window will exceed a delay or disruption threshold in the future.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_required",
+        "resolution_source_required"
+      ],
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineCandidate": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Use the baseline until resolved comparable outcomes justify stronger methods."
+      },
+      "resolutionSource": {
+        "sourceRole": "resolution_outcome",
+        "resolutionRule": "Resolve from an approved transit outcome source after the service window closes.",
+        "availableBeforeForecast": false
+      },
+      "forecastCardFields": [
+        "forecastId",
+        "probability",
+        "serviceWindow",
+        "delayThreshold",
+        "baselineMethod",
+        "claimWarning"
+      ],
+      "firstSafeHostAction": "Bind approved schedule, service-state, historical outcome, and resolution source references.",
+      "blockedReason": "",
+      "setupEnginePreferredView": "contracts",
+      "qualityClaimAllowed": false,
+      "createsForecastArtifacts": false,
+      "hostedRuntimeRequired": false
+    }
+  ],
+  "executionBoundary": {
+    "createsForecastArtifacts": false,
+    "hostedRuntimeRequired": false,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "fetchesLiveData": false,
+    "storesCredentialValues": false,
+    "acceptsRawPrivateRows": false,
+    "acceptsRawSql": false
+  },
+  "summary": {
+    "goalExampleCount": 8,
+    "forecastableCount": 5,
+    "needsClarificationCount": 1,
+    "blockedCount": 1,
+    "rejectedCount": 1,
+    "classificationCount": 4,
+    "helsinkiDefaultNarrative": false,
+    "qualityClaimAllowed": false
+  },
+  "warnings": [
+    "Prediction goal catalog examples teach setup shape, not domain quality.",
+    "Forecastable examples still require approved source references, resolver sources, and later scoring before claims.",
+    "Blocked and rejected examples stop before source intake, forecast execution, hosted runtime, or quality claims."
+  ],
+  "qualityClaimAllowed": false,
+  "createsForecastArtifacts": false,
+  "hostedRuntimeRequired": false
+}

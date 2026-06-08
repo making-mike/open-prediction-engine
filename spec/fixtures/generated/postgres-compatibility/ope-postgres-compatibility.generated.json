@@ -484,6 +484,26 @@
       "hostedRuntimeClaimAllowed": false
     },
     {
+      "scenarioName": "pilot-evidence-append",
+      "operationName": "evidence.append",
+      "sqliteScenarioExists": true,
+      "sqliteExecutionStatus": "committed",
+      "expectedPostgresBehavior": "commit_same_lifecycle_writes",
+      "plannedWriteTables": [
+        "evidence_ledger_rows",
+        "operation_receipts"
+      ],
+      "postgresCompatible": true,
+      "sameOperationSemantics": true,
+      "sameIdempotencySemantics": true,
+      "sameLeaseSemantics": true,
+      "sameAppendOnlySemantics": true,
+      "sameReadModelSemantics": true,
+      "migrationBoundary": "not_migration",
+      "normalChecksConnectToPostgres": false,
+      "hostedRuntimeClaimAllowed": false
+    },
+    {
       "scenarioName": "campaign-method-apply",
       "operationName": "method.apply",
       "sqliteScenarioExists": true,
@@ -642,7 +662,7 @@
   },
   "summary": {
     "tableCount": 8,
-    "scenarioCount": 15,
+    "scenarioCount": 16,
     "sqliteOnlyGuardCount": 5,
     "postgresRuntimeImplemented": false,
     "normalChecksConnectToPostgres": false

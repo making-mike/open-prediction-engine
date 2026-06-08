@@ -777,16 +777,112 @@
         "credentialsStored": false
       },
       "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-025",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "setup_comprehension",
+      "command": "python3 scripts/ope.py setup-engine --goal \"retail stockout risk within seven days\"",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "setup-engine",
+        "recordId": "setupengine-001",
+        "sourceCase": "setup_engine_stockout_comprehension"
+      },
+      "trace": {
+        "elapsedMs": 105,
+        "exitCode": 0,
+        "responseBytes": 6400,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-026",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "setup_comprehension",
+      "command": "python3 scripts/ope.py setup-engine --goal \"support SLA breach risk for open tickets\"",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "setup-engine",
+        "recordId": "setupengine-001",
+        "sourceCase": "setup_engine_sla_comprehension"
+      },
+      "trace": {
+        "elapsedMs": 105,
+        "exitCode": 0,
+        "responseBytes": 6400,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
+    },
+    {
+      "eventId": "localusageevent-027",
+      "occurredAt": "2026-06-10T06:45:00Z",
+      "actor": "agent",
+      "interface": "cli",
+      "eventClass": "setup_comprehension",
+      "command": "python3 scripts/ope.py setup-engine --goal \"seaport berth availability prediction setup\"",
+      "outcome": "success",
+      "recordBinding": {
+        "forecastId": null,
+        "questionId": null,
+        "recordType": "setup-engine",
+        "recordId": "setupengine-001",
+        "sourceCase": "setup_engine_audit_layer_confusion"
+      },
+      "trace": {
+        "elapsedMs": 105,
+        "exitCode": 0,
+        "responseBytes": 6400,
+        "responseSizeClass": "standard",
+        "sanitizedErrorClass": null
+      },
+      "privacy": {
+        "localOnly": true,
+        "liveFetch": false,
+        "rawPromptStored": false,
+        "rawTranscriptStored": false,
+        "privateRowsStored": false,
+        "credentialsStored": false
+      },
+      "deterministicFixture": true
     }
   ],
   "traceSummary": [
     {
       "interface": "cli",
-      "eventCount": 20,
-      "successCount": 17,
+      "eventCount": 23,
+      "successCount": 20,
       "blockedCount": 3,
       "sanitizedErrorCount": 3,
-      "averageElapsedMs": 242,
+      "averageElapsedMs": 224,
       "maxResponseBytes": 7200
     },
     {
@@ -818,14 +914,15 @@
     }
   ],
   "aggregateReadbacks": {
-    "totalEvents": 24,
-    "successfulEvents": 21,
+    "totalEvents": 27,
+    "successfulEvents": 24,
     "blockedEvents": 3,
     "sanitizedErrorEvents": 3,
-    "localOnlyEvents": 24,
+    "localOnlyEvents": 27,
     "forecastCompletionRate": 1.0,
     "agentReadSuccessRate": 0.6667,
-    "blockedPathFrequency": 0.125,
+    "blockedPathFrequency": 0.1111,
+    "setupEngineFirstRate": 0.8,
     "normalChecksUseLiveNetwork": false,
     "hostedTelemetryEnabled": false
   },
@@ -850,15 +947,15 @@
       "metricId": "blocked_path_frequency",
       "description": "Share of checked local events that intentionally stop before forecast or readback completion.",
       "numerator": 3,
-      "denominator": 24,
-      "value": 0.125,
+      "denominator": 27,
+      "value": 0.1111,
       "interpretation": "Blocked path frequency is a usability signal, not a runtime failure rate."
     },
     {
       "metricId": "local_only_privacy_rate",
       "description": "Share of checked trace events that stay local-only and store no private rows, credentials, prompts, or transcripts.",
-      "numerator": 24,
-      "denominator": 24,
+      "numerator": 27,
+      "denominator": 27,
       "value": 1.0,
       "interpretation": "The checked trace model remains local-only and privacy-preserving."
     },
@@ -869,6 +966,14 @@
       "denominator": 1,
       "value": 1.0,
       "interpretation": "Readiness, candidates, and guided forecast produce a forecast-card command while blocked source cases remain explicit."
+    },
+    {
+      "metricId": "setup_engine_first_rate",
+      "description": "Share of synthetic adoption-comprehension checks where setup-engine is used before custom risk-engine work.",
+      "numerator": 4,
+      "denominator": 5,
+      "value": 0.8,
+      "interpretation": "Synthetic checks meet the setup-engine-first threshold while still preserving one confusion signal for follow-up."
     }
   ],
   "executionBoundary": {

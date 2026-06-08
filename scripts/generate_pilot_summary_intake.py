@@ -21,7 +21,10 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "spec" / "fixtures" / "generated" / "pilot-summary-intake"
 OUTPUT_PATH = GENERATED / "ope-pilot-summary-intake.generated.json"
 SCHEMA = SPEC / "pilot-summary-intake.schema.json"
+INPUT_SCHEMA = SPEC / "pilot-summary-submission.schema.json"
+RESULT_SCHEMA = SPEC / "pilot-summary-intake-result.schema.json"
 GENERATED_AT = "2026-06-10T12:30:00Z"
+PILOT_SUMMARY_INPUT_FIXTURES = ROOT / "spec" / "fixtures" / "pilot-summary-intake"
 
 CASE_ORDER = [
     "accepted_local_setup_summary",
@@ -75,6 +78,181 @@ def risk_signals(
         "unredactedSourceDetailDetected": source_detail,
         "claimOverreachDetected": claim_overreach,
     }
+
+
+def empty_risk_signals() -> dict[str, bool]:
+    return risk_signals()
+
+
+def submitted_shape_from_summary(submission: dict[str, Any]) -> dict[str, bool]:
+    return submitted_shape(
+        task_refs=bool(submission.get("taskRefs")),
+        ratings=bool(submission.get("dimensionRatings")),
+        findings=bool(submission.get("sanitizedFindings")),
+        friction=bool(submission.get("frictionClasses")),
+        signals=bool(submission.get("expansionSignals")),
+        next_action=bool(submission.get("nextAction")),
+    )
+
+
+def risk_signals_from_summary(submission: dict[str, Any]) -> dict[str, bool]:
+    submitted = submission.get("riskSignals")
+    if not isinstance(submitted, dict):
+        submitted = {}
+    defaults = empty_risk_signals()
+    return {
+        key: bool(submitted.get(key, defaults[key]))
+        for key in defaults
+    }
+
+
+def missing_shape_fixes(shape: dict[str, bool]) -> list[str]:
+    fixes: list[str] = []
+    if not shape["hasTaskRefs"]:
+        fixes.append("Add at least one checked pilot task reference.")
+    if not shape["hasDimensionRatings"]:
+        fixes.append("Add at least one dimension rating with a sanitized evidence note.")
+    if not shape["hasSanitizedFindings"]:
+        fixes.append("Add at least one sanitized finding without transcript text or private details.")
+    if not shape["hasFrictionClasses"]:
+        fixes.append("Add at least one checked friction class.")
+    if not shape["hasExpansionSignals"]:
+        fixes.append("Add at least one checked expansion signal.")
+    if not shape["hasNextAction"]:
+        fixes.append("Add one next action for adoption, documentation, runtime selection, or evidence collection.")
+    return fixes
+
+
+def classification_boundary() -> dict[str, bool]:
+    return {
+        "readOnlyClassifier": True,
+        "writesPilotEvidenceLedger": False,
+        "recordsRawTranscripts": False,
+        "storesPrivateData": False,
+        "storesCredentials": False,
+        "storesPromptLogs": False,
+        "storesParticipantIdentity": False,
+        "createsForecastArtifacts": False,
+        "startsHostedRuntime": False,
+        "fetchesLiveData": False,
+        "unblocksExpansion": False,
+    }
+
+
+def classify_summary_submission(
+    submission: dict[str, Any],
+    *,
+    input_ref: str = "caller_supplied_sanitized_summary",
+) -> dict[str, Any]:
+    shape = submitted_shape_from_summary(submission)
+    risks = risk_signals_from_summary(submission)
+    fixes = missing_shape_fixes(shape)
+    evidence_class = submission.get("evidenceClass", "future_real_summary")
+    friction_classes = submission.get("frictionClasses", [])
+    if not isinstance(friction_classes, list):
+        friction_classes = []
+
+    decision = "accept_for_ledger_review"
+    review_outcome = "Summary has required fields and no unsafe signals; it is ready for moderator ledger review."
+    next_action = "Submit for moderator review before adding any real-session ledger row."
+    ledger_ready = True
+    accepted = True
+
+    if risks["rawTranscriptDetected"]:
+        decision = "block_raw_transcript"
+        ledger_ready = False
+        accepted = False
+        review_outcome = "Raw transcript signal blocks intake before repository storage."
+        fixes = [
+            "Discard transcript text.",
+            "Replace it with dimension ratings and short sanitized findings.",
+        ]
+        next_action = "Block intake and request a sanitized summary instead of transcript text."
+    elif (
+        risks["privateRowsDetected"]
+        or risks["credentialLikeTextDetected"]
+        or risks["participantIdentityDetected"]
+    ):
+        decision = "block_private_data"
+        ledger_ready = False
+        accepted = False
+        review_outcome = "Private rows, credentials, or participant identity block repository intake."
+        fixes = [
+            "Discard private details and credential-like text.",
+            "Record only sanitized task refs, ratings, findings, friction classes, and next action.",
+        ]
+        next_action = "Block intake and replace the submitted notes with a safe blocked-path summary."
+    elif risks["claimOverreachDetected"]:
+        decision = "block_claim_overreach"
+        ledger_ready = False
+        accepted = False
+        review_outcome = "Quality, calibration, hosted-runtime, or production-readiness overclaiming blocks intake."
+        fixes = [
+            "Remove quality, calibration, hosted-runtime, and production-readiness claims.",
+            "Reframe the finding as usability evidence or claim-boundary confusion.",
+        ]
+        next_action = "Block intake until the claim language is rewritten as a sanitized product signal."
+    elif risks["unredactedSourceDetailDetected"] or fixes:
+        decision = "needs_redaction"
+        ledger_ready = False
+        accepted = False
+        review_outcome = "The summary is not ledger-ready until source details or missing required fields are fixed."
+        if risks["unredactedSourceDetailDetected"]:
+            fixes = [
+                "Replace source names, table names, and private operational details with generic source-role language.",
+                "Re-run sanitization review before any ledger submission.",
+                *fixes,
+            ]
+        next_action = "Redact or complete the summary, then reclassify it."
+    elif "claim_boundary_confusion" in friction_classes:
+        decision = "accept_with_product_signal"
+        review_outcome = "Claim-boundary confusion is safe to aggregate as a product signal when the note stays sanitized."
+        next_action = "Submit as a sanitized product signal and route follow-up toward claim-copy/readback improvements."
+
+    candidate_real = ledger_ready and evidence_class == "future_real_summary"
+    result = {
+        "pilotSummaryIntakeResultId": "pilotsummaryintakeresult-001",
+        "inputRef": input_ref,
+        "inputSummaryId": submission.get("summaryId", "caller-supplied-summary"),
+        "intakeMode": "caller_supplied_sanitized_summary_file",
+        "submittedShape": shape,
+        "riskSignals": risks,
+        "intakeDecision": decision,
+        "ledgerReady": ledger_ready,
+        "acceptedForAggregation": accepted,
+        "candidateRealSessionEvidence": candidate_real,
+        "contributesRealSessionEvidence": False,
+        "reviewOutcome": review_outcome,
+        "requiredFixes": fixes,
+        "nextAction": next_action,
+        "realSessionsRecorded": 0,
+        "ledgerRowsWritten": 0,
+        "executionBoundary": classification_boundary(),
+        "warnings": [
+            "This classification is read-only and does not write pilot evidence.",
+            "Candidate real-session evidence counts only after moderator review and explicit ledger intake.",
+            "Do not submit raw transcripts, private rows, credentials, prompt logs, or participant identity.",
+        ],
+    }
+    errors = validate_record(result, RESULT_SCHEMA)
+    if errors:
+        raise PilotSummaryIntakeError(f"pilot summary intake result schema validation failed: {errors[0]}")
+    return result
+
+
+def classify_summary_file(path: Path) -> dict[str, Any]:
+    try:
+        submission = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise PilotSummaryIntakeError(f"could not read pilot summary input {path}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise PilotSummaryIntakeError(f"pilot summary input is not valid JSON: {exc}") from exc
+    if not isinstance(submission, dict):
+        raise PilotSummaryIntakeError("pilot summary input must be a JSON object")
+    errors = validate_record(submission, INPUT_SCHEMA)
+    if errors:
+        raise PilotSummaryIntakeError(f"pilot summary input schema validation failed: {errors[0]}")
+    return classify_summary_submission(submission, input_ref=path.name)
 
 
 def submission_case(
@@ -419,11 +597,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one pilot summary intake case")
     parser.add_argument("--section", choices=SECTION_NAMES, help="print one pilot summary intake section")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        help="classify one caller-supplied sanitized pilot summary JSON file without writing ledger rows",
+    )
     parser.add_argument("--check", action="store_true", help="check generated pilot summary intake drift")
     parser.add_argument("--write", action="store_true", help="refresh generated pilot summary intake")
     parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
+        if args.input:
+            sys.stdout.write(render_json(classify_summary_file(args.input)))
+            return
         if args.write or args.check or args.rebuild:
             intake = build_pilot_summary_intake()
         else:

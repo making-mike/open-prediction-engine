@@ -44,8 +44,8 @@
     },
     "scenarioCompatibilityMatrix": {
       "type": "array",
-      "minItems": 15,
-      "maxItems": 15,
+      "minItems": 16,
+      "maxItems": 16,
       "items": { "$ref": "#/$defs/scenarioCompatibility" }
     },
     "sqliteOnlyAssumptionChecks": {
@@ -92,6 +92,7 @@
         "campaign-resolution-record",
         "campaign-score-create",
         "campaign-evidence-append",
+        "pilot-evidence-append",
         "campaign-method-apply",
         "campaign-method-rollback",
         "json-state-import",
@@ -328,7 +329,7 @@
       ],
       "properties": {
         "tableCount": { "type": "integer", "minimum": 8, "maximum": 8 },
-        "scenarioCount": { "type": "integer", "minimum": 15, "maximum": 15 },
+        "scenarioCount": { "type": "integer", "minimum": 16, "maximum": 16 },
         "sqliteOnlyGuardCount": { "type": "integer", "minimum": 5, "maximum": 5 },
         "postgresRuntimeImplemented": { "type": "boolean" },
         "normalChecksConnectToPostgres": { "type": "boolean" }

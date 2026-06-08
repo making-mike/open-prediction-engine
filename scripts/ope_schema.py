@@ -285,6 +285,10 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "agent-implementation-kit.schema.json"
     if name.endswith("prediction-agent-adoption.generated.json"):
         return spec_root / "prediction-agent-adoption.schema.json"
+    if name.endswith("prediction-goal-catalog.generated.json"):
+        return spec_root / "prediction-goal-catalog.schema.json"
+    if name.endswith("setup-engine.generated.json"):
+        return spec_root / "setup-engine.schema.json"
     if name.endswith("agent-integration.generated.json"):
         return spec_root / "agent-integration.schema.json"
     if name.endswith("prediction-feature-setup.generated.json"):
@@ -295,6 +299,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "mcp-adoption-path.schema.json"
     if name.endswith("pilot-findings.generated.json"):
         return spec_root / "pilot-findings.schema.json"
+    if name.endswith("pilot-supervision-status.generated.json"):
+        return spec_root / "pilot-supervision-status.schema.json"
     if name.endswith("simulated-agent-pilot.generated.json"):
         return spec_root / "simulated-agent-pilot.schema.json"
     if name.endswith("generated-runtime-types-decision.generated.json"):
@@ -459,6 +465,10 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "pilot-session-packet.schema.json"
     if name.endswith("-pilot-summary-intake.generated.json"):
         return spec_root / "pilot-summary-intake.schema.json"
+    if name.endswith("-pilot-summary-template.generated.json"):
+        return spec_root / "pilot-summary-template.schema.json"
+    if "pilot-summary-intake" in parts and name.endswith("-summary.json"):
+        return spec_root / "pilot-summary-submission.schema.json"
     if name.endswith("-local-usage-trace.generated.json"):
         return spec_root / "local-usage-trace.schema.json"
     if "-private-setup-first-action-" in name and name.endswith(".generated.json"):

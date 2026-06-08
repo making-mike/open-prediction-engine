@@ -157,6 +157,8 @@ The pilot session packet generator emits a checked collection kit under `generat
 
 The pilot summary intake generator emits checked classifier examples under `generated/pilot-summary-intake/`, covering ledger-ready summaries, redaction-needed source details, blocked raw transcripts, blocked private rows, and blocked quality overclaims without writing ledger rows.
 
+The pilot summary template generator emits a checked draft helper under `generated/pilot-summary-template/`, covering a schema-valid but non-ledger-ready draft submission, field guidance, sanitization checklist, and local classify/explicit-append command sequence without writing evidence.
+
 The local usage trace generator emits a checked synthetic trace under `generated/local-usage-trace/`, covering local MVP CLI, agent-call, MCP, blocked-path, release-smoke, and pilot-validation event rows without collecting hosted telemetry.
 
 The developer adoption surface generator emits a checked onboarding guide under `generated/developer-adoption/`, covering quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and deferred generated runtime types.

@@ -56,19 +56,22 @@
     },
     "simulatedSessions": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 8,
+      "maxItems": 8,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "sessionId",
           "promptSource",
+          "domainContext",
           "prompt",
           "normalizedHorizonDate",
           "targetUserNeed",
           "expectedCase",
           "decision",
+          "setupEngineCommand",
+          "setupComprehension",
           "opeCommand",
           "opeResponse",
           "simulatedAgentReply",
@@ -90,6 +93,15 @@
           "promptSource": {
             "type": "string",
             "enum": ["user_provided", "generated"]
+          },
+          "domainContext": {
+            "type": "string",
+            "enum": [
+              "helsinki_transit",
+              "retail_stockout",
+              "sla_breach",
+              "seaport_berth_availability"
+            ]
           },
           "prompt": {
             "type": "string",
@@ -120,6 +132,58 @@
             "minLength": 1,
             "maxLength": 240
           },
+          "setupEngineCommand": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "setupComprehension": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "usesSetupEngineBeforeCustomEngine",
+              "customRiskEngineProposedBeforeOpe",
+              "auditLayerOnlyDescription",
+              "confusionSignal",
+              "opeSupplies",
+              "hostSupplies"
+            ],
+            "properties": {
+              "usesSetupEngineBeforeCustomEngine": { "type": "boolean" },
+              "customRiskEngineProposedBeforeOpe": { "type": "boolean" },
+              "auditLayerOnlyDescription": { "type": "boolean" },
+              "confusionSignal": {
+                "type": "string",
+                "enum": ["none", "parallel_risk_engine_first", "audit_layer_only"]
+              },
+              "opeSupplies": {
+                "type": "array",
+                "minItems": 7,
+                "maxItems": 7,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "contract",
+                    "evidence_roles",
+                    "baseline",
+                    "forecast_card_shape",
+                    "resolver",
+                    "scorer",
+                    "calibration_gate"
+                  ]
+                }
+              },
+              "hostSupplies": {
+                "type": "array",
+                "minItems": 5,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "enum": ["ui", "sources", "runtime", "notifications", "optional_custom_methods"]
+                }
+              }
+            }
+          },
           "opeResponse": { "$ref": "#/$defs/predictionFeatureResponse" },
           "simulatedAgentReply": {
             "type": "string",
@@ -142,7 +206,9 @@
                 "none",
                 "privacy_redaction_needed",
                 "readback_navigation",
-                "source_runtime_gap"
+                "source_runtime_gap",
+                "parallel_risk_engine_confusion",
+                "audit_layer_only_confusion"
               ]
             }
           },
@@ -213,7 +279,13 @@
         "simulatedSessionCount",
         "userPromptSessionCount",
         "generatedPromptSessionCount",
+        "nonHelsinkiSessionCount",
         "caseCoverage",
+        "setupEngineFirstCount",
+        "setupEngineFirstRate",
+        "parallelRiskEngineProposalCount",
+        "auditLayerConfusionCount",
+        "engineSetupComprehensionReady",
         "tokenCountMode",
         "totalPromptApproxTokens",
         "totalResponseApproxTokens",
@@ -231,12 +303,18 @@
         "simulatedSessionCount": { "type": "integer", "minimum": 0 },
         "userPromptSessionCount": { "type": "integer", "minimum": 0 },
         "generatedPromptSessionCount": { "type": "integer", "minimum": 0 },
+        "nonHelsinkiSessionCount": { "type": "integer", "minimum": 0 },
         "caseCoverage": {
           "type": "array",
           "minItems": 1,
           "maxItems": 5,
           "items": { "type": "string", "minLength": 1, "maxLength": 80 }
         },
+        "setupEngineFirstCount": { "type": "integer", "minimum": 0 },
+        "setupEngineFirstRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "parallelRiskEngineProposalCount": { "type": "integer", "minimum": 0 },
+        "auditLayerConfusionCount": { "type": "integer", "minimum": 0 },
+        "engineSetupComprehensionReady": { "type": "boolean" },
         "tokenCountMode": {
           "type": "string",
           "enum": ["approximate_whitespace_tokens"]

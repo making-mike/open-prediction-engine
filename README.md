@@ -19,12 +19,17 @@ The project is not a universal prediction oracle and does not expose a network A
 If you are a coding agent evaluating OPE for any project that needs prediction, start here:
 
 ```bash
+python3 scripts/ope.py setup-engine --goal "<host prediction goal>"
+python3 scripts/ope.py prediction-goal-catalog --view summary
+python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
 python3 scripts/ope.py explain-fit --goal "add predictions to my app"
 python3 scripts/ope.py capabilities
 python3 scripts/ope.py adoption-eval
 ```
 
-OPE should be used as the prediction credibility layer: forecast contracts, evidence provenance, baselines, resolution, scoring, and calibration gates. Bring the frontend, host runtime, data connectors, custom models, and notifications from the host project.
+OPE should be used as the shortcut for setting up the first reliable prediction engine in a host app: forecast contracts, source roles, evidence provenance, baselines, forecast-card shape, resolution, scoring, and calibration gates. Bring the frontend, host runtime, data connectors, custom models, and notifications from the host project.
+
+`setup-engine` is the checked canonical shortcut. `prediction-goal-catalog` shows generic non-Helsinki setup examples. The embedded host wrapper shows how to render `setupEnginePlan` before forecast-card reads. The checked `explain-fit`, `capabilities`, `adoption-eval`, `agent-implementation-kit`, and `prediction-feature-setup` surfaces remain compatible follow-ups.
 
 See `AGENT_QUICKSTART.md` and `ope.capabilities.json` for the compact human and machine-readable adoption surfaces.
 
@@ -113,17 +118,21 @@ The repository currently contains:
 - a checked private setup agent bundle that joins request, first-action, and runbook guidance into one read-only response
 - a checked local private setup orchestrator summary that joins request, first-action, source intake, method gate, explicit forecast execution, and normal readback outcomes without executing commands
 - a checked agent pilot validation pack with a 3-5 session protocol, local MVP task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries
-- a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, and zero real sessions counted so far
+- a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, dry-run ignored-local append plans, explicit receipt-backed `.ope/live` local writes, and zero checked real sessions counted so far
 - a checked pilot session packet with task cards, moderator and participant checklists, sanitized evidence template, sanitization review, and stop conditions for real local MVP pilot sessions
 - a checked pilot summary intake classifier that marks sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions
-- a checked simulated agent pilot readback through `simulated-agent-pilot` with one user-provided prompt, four generated prompts, five prediction-feature setup outcomes, approximate token counts, deterministic elapsed-time estimates, and zero real sessions counted
-- a checked pilot findings readback through `pilot-findings` that currently reports five simulated agent sessions, zero accepted real sessions, and keeps expansion, generated types, hosted runtime, and quality claims blocked
+- a checked pilot summary template through `pilot-summary-template` with a schema-valid draft that is intentionally not ledger-ready unchanged, field guidance, sanitization checklist, and local classify/append command loop
+- a checked simulated agent pilot readback through `simulated-agent-pilot` with one user-provided prompt, seven generated prompts, five prediction-feature setup outcomes, three non-Helsinki setup-comprehension prompts, approximate token counts, deterministic elapsed-time estimates, and zero real sessions counted
+- a checked pilot findings readback through `pilot-findings` that currently reports eight simulated agent sessions, three non-Helsinki setup-comprehension prompts, zero accepted checked real sessions, and can explicitly include ignored local pilot evidence with `--from-local-ledger` while keeping expansion, generated types, hosted runtime, and quality claims blocked
+- a checked pilot supervision status readback through `pilot-supervision-status` that recommends the next setup-comprehension task, reports remaining real-session thresholds, and shows the classify, explicit local append, findings, and status-review command loop without writing local evidence itself
 - a checked generated runtime types decision through `generated-types-decision` that defers TypeScript/Python generation and points agents to stable JSON examples plus local validators
 - a checked local usage trace read model with synthetic local MVP event rows, agent integration starter rows, campaign lifecycle events, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
-- a checked general prediction-agent adoption surface through `explain-fit`, `capabilities`, `adoption-eval`, `AGENT_QUICKSTART.md`, and `ope.capabilities.json`, making OPE legible as a prediction credibility layer rather than a frontend, hosted API, generic crawler, scheduler, or trained-model package
+- a checked general prediction-agent adoption surface through `setup-engine`, `explain-fit`, `capabilities`, `adoption-eval`, `AGENT_QUICKSTART.md`, and `ope.capabilities.json`, making OPE legible as a prediction engine setup shortcut with built-in credibility gates rather than a frontend, hosted API, generic crawler, scheduler, or trained-model package
+- a checked setup-engine front door through `setup-engine`, `agent-call --operation setup_engine`, and local MCP tool `ope_setup_engine` that turns any host prediction goal into candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, examples, and claim boundaries before forecast artifacts exist
+- a checked prediction-goal catalog through `prediction-goal-catalog` and `setup-engine --view examples` that shows delivery delay, stockout, SLA breach, demand, churn, seaport berth, weather-sensitive operations, and public transit setup shapes without making domain-quality claims
 - a checked developer adoption surface with a quickstart, one complete local source setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision
 - a checked agent incorporation golden path through `agent-integrate` that lets agents ask what can be forecasted, validates candidate questions with exact reason codes, exposes a Helsinki bus/tram disruption starter pack, returns a guided `forecast-1102` forecast-card command within three routine calls, and keeps hosted runtime, private-source execution, and quality/calibration claims blocked
-- a checked agent guidance loop through `agent-guide` that tells calling agents how to classify messy prompts, ask clarification questions, narrow the Helsinki bus request, use approved source refs, and stop at OPE claim boundaries
+- a checked agent guidance loop through `agent-guide` that tells calling agents how to classify messy prompts, ask domain-agnostic setup questions, keep Helsinki as one example, use approved source refs, and stop at OPE claim boundaries
 - a checked agent implementation quickstart through `agent-implementation-kit --view quickstart` that gives external coding agents the first safe command sequence for adding an OPE-backed prediction feature without creating a new forecast path or hosted runtime
 - a checked stable prediction-feature setup contract through `prediction-feature-setup` and `agent-call --operation prediction_feature_setup` that lets host projects submit one compact feature intent and receive accepted, clarification, blocked, rejected, or response-too-large guidance without source execution or artifact creation
 - a copyable embedded host example under `examples/embed-ope-prediction-feature/` that wraps the stable setup contract, reads `forecast-1102`, and demonstrates blocked raw credential, raw private row, raw SQL, unapproved source, post-outcome evidence, and hosted-runtime paths
@@ -195,7 +204,7 @@ Current checked transit surfaces are grouped here so new work can be added as a 
 - Campaign manifest and runner: `prediction-campaign plan`, `status`, and `start` expose unique dry-run campaign/cycle/run/question/forecast/resolution/scoring IDs, duplicate keys, bounded default previews, explicit 100-run Helsinki pilot materialization with `--full-materialization`, normalized flag/setup-JSON campaign input, forecast schedule rows, bounded foreground ticks, runner-clock `--now`, missed-run policy, JSONL output expectations, and guarded `--write-local` creation for the next due run.
 - Campaign forecast lifecycle: `prediction-campaign forecast-create`, `forecast-artifact`, and `forecast-write` bind the ready runner decision to planned IDs, materialize unresolved `forecast-1301` as a baseline-only checked fixture, and copy lifecycle records plus minimal campaign/run state idempotently only when `--write-local` is explicit.
 - Campaign recovery and evidence: `prediction-campaign resolve`, `doctor`, `resume`, `append-ready`, `append`, `calibration-status`, `method-update-gate`, `method-update-plan`, `apply-method-update`, `rollback-method-update`, `explain`, `pilot-runbook`, and `pilot-readiness` expose due-resolution attempts, guarded local resolution/scoring writes from outcome-only transit rows, missing-outcome exclusions, health queues, interrupted-state recovery, append-readiness, provenance-rich local ledger rows, local-ledger calibration readbacks with reliability buckets and caveats, method-update readiness, approval/rollback plan shape, explicit local method-binding apply/rollback, pilot-task guidance, a 3-run smoke path, operator status, launch readiness, success/abort criteria, sanitized error envelopes, and claim boundaries without changing methods or calibration claims during normal checks.
-- Lifecycle operation storage: `lifecycle-operation-store` checks the local SQLite operation store for multi-agent execution, including Postgres-compatible schema notes, operation receipts, idempotency keys, leases, read models, immutable forecast records, the explicit ignored `.ope/live` JSON compatibility adapter, archive/redaction replacements for generic delete, write-local command coverage, file/database duplicate-prevention checks, and scenario readbacks for create, retry, lease-conflict, campaign operation bridges, pre-calibration binding, JSON state import, and recovery.
+- Lifecycle operation storage: `lifecycle-operation-store` checks the local SQLite operation store for multi-agent execution, including Postgres-compatible schema notes, operation receipts, idempotency keys, leases, read models, immutable forecast records, the explicit ignored `.ope/live` JSON compatibility adapter, archive/redaction replacements for generic delete, write-local command coverage, file/database duplicate-prevention checks, and scenario readbacks for create, retry, lease-conflict, campaign operation bridges, pilot evidence append, pre-calibration binding, JSON state import, and recovery.
 - Embedded internal API: `internal-api` defines the stable host/agent operation surface for create, update, start, pause, resume, tick, resolve, append, read, archive, and redact calls without exposing raw files, raw SQL, hidden schedulers, or transport-specific behavior. Its in-process runtime, CLI `--call`, and `agent-call --operation internal_api` wrappers share one internal function; HTTP, queue, and hosted service remain future transports over that same function.
 - Workspace registry: `prediction-workspace-registry` exposes stable prediction, campaign, domain, source-binding, and schedule IDs for multiple predictions, with owner/caller metadata, lifecycle operation summaries, workspace read models for active, due, blocked, failed, source-health, calibration, and track-record status, audit-backed create/update/archive/redact configuration operation definitions, per-prediction idempotency namespaces and leases, workspace resource limits and execution budgets, and cross-prediction isolation checks.
 - Workspace tenant isolation: `workspace-tenant-isolation` checks tenant-scoped workspace bindings, resource controls, operation queues, source-binding reuse blockers, credential-reference ownership, blocked cross-tenant access cases, and non-mutating readback boundaries before any hosted tenant runtime exists.
@@ -260,6 +269,7 @@ python3 scripts/ope.py prediction-campaign start --plan-count 3 --count 3 --watc
 python3 scripts/ope.py lifecycle-operation-store
 python3 scripts/ope.py lifecycle-operation-store --scenario method-rollback
 python3 scripts/ope.py lifecycle-operation-store --scenario pre-calibration-bind
+python3 scripts/ope.py lifecycle-operation-store --scenario pilot-evidence-append
 python3 scripts/ope.py lifecycle-operation-store --scenario json-state-import
 python3 scripts/ope.py internal-api
 python3 scripts/ope.py internal-api --operation start_prediction
@@ -861,10 +871,19 @@ python3 scripts/ope.py private-setup-bundle --request-id privatesetuprequest-001
 python3 scripts/ope.py private-setup-orchestrator
 python3 scripts/ope.py agent-pilot-validation
 python3 scripts/ope.py pilot-evidence
+python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
 python3 scripts/ope.py pilot-session-packet
 python3 scripts/ope.py pilot-summary-intake
+python3 scripts/ope.py pilot-summary-template --section draft
+python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
+python3 scripts/ope.py pilot-findings --from-local-ledger --section summary
+python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary
 python3 scripts/ope.py simulated-agent-pilot --section summary
 python3 scripts/ope.py local-usage-trace
+python3 scripts/ope.py setup-engine --goal "add predictions to my app"
+python3 scripts/ope.py prediction-goal-catalog --view summary
+python3 scripts/ope.py setup-engine --view examples
+python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
 python3 scripts/ope.py explain-fit --goal "add predictions to my app"
 python3 scripts/ope.py capabilities
 python3 scripts/ope.py adoption-eval
@@ -872,6 +891,7 @@ python3 scripts/ope.py developer-adoption
 python3 scripts/ope.py agent-implementation-kit --view quickstart
 python3 scripts/ope.py smoke
 python3 scripts/ope.py agent-guide --section summary
+python3 scripts/ope.py agent-guide --section generic
 python3 scripts/ope.py agent-guide --case needs_clarification
 python3 scripts/ope.py prediction-feature-setup
 python3 scripts/ope.py prediction-feature-setup --view response --case accepted
@@ -1015,6 +1035,11 @@ python3 scripts/check_mvp_release_surface.py
 python3 scripts/check_agent_pilot_validation.py
 python3 scripts/check_pilot_session_packet.py
 python3 scripts/check_pilot_summary_intake.py
+python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
+python3 scripts/ope.py pilot-summary-template --section commands
+python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
+python3 scripts/ope.py pilot-findings --from-local-ledger --section summary
+python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section commands
 python3 scripts/ope.py developer-adoption --section quickstart
 python3 scripts/ope.py expansion-readiness --section options
 python3 scripts/ope.py repeating-prediction-setup --section summary

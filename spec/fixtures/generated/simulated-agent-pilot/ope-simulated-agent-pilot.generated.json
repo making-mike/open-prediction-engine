@@ -2,7 +2,7 @@
   "simulatedAgentPilotId": "simulatedagentpilot-001",
   "generatedAt": "2026-06-05T16:25:00Z",
   "simulationStatus": "checked_agent_only_simulation",
-  "simulationPurpose": "Exercise the external-agent prediction-feature setup experience with one user-provided prompt and four generated prompts while preserving the boundary that this is simulated adoption evidence, not real human pilot evidence.",
+  "simulationPurpose": "Exercise the external-agent prediction-feature setup and setup-engine comprehension experience with one user-provided prompt and seven generated prompts while preserving the boundary that this is simulated adoption evidence, not real human pilot evidence.",
   "userProvidedPrompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
   "normalizedCurrentDate": "2026-06-05",
   "normalizedTomorrowDate": "2026-06-06",
@@ -15,10 +15,33 @@
     {
       "sessionId": "simulatedagentsession-001",
       "promptSource": "user_provided",
+      "domainContext": "helsinki_transit",
       "prompt": "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. We can provide data about planned work.",
       "normalizedHorizonDate": "2026-06-06",
       "targetUserNeed": "Identify Helsinki bus trips expected to be 2+ minutes late at a stop using planned-work context.",
       "expectedCase": "needs_clarification",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
       "toolCallCountEstimate": 1,
       "frictionClasses": [
         "readback_navigation",
@@ -26,6 +49,7 @@
       ],
       "nextActionKey": "ask_for_stop_route_window_and_approved_source_refs",
       "decision": "needs_clarification",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"Helsinki stop-level bus lateness risk tomorrow\"",
       "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification",
       "opeResponse": {
         "caseKey": "needs_clarification",
@@ -64,16 +88,40 @@
     {
       "sessionId": "simulatedagentsession-002",
       "promptSource": "generated",
+      "domainContext": "helsinki_transit",
       "prompt": "In our Helsinki operations dashboard, estimate whether HSL surface transit will exceed the beta delay threshold tomorrow morning. Approved source refs are weather_forecast_ref, historical_delay_baseline_ref, and outcome_adapter_ref.",
       "normalizedHorizonDate": "2026-06-06",
       "targetUserNeed": "Get the checked local forecast card for the existing Helsinki transit delay setup.",
       "expectedCase": "accepted",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
       "toolCallCountEstimate": 2,
       "frictionClasses": [
         "none"
       ],
       "nextActionKey": "read_forecast_card_and_lifecycle_bundle",
       "decision": "forecast_card_ready",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"Helsinki surface transit delay threshold risk\"",
       "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted",
       "opeResponse": {
         "caseKey": "accepted",
@@ -111,16 +159,40 @@
     {
       "sessionId": "simulatedagentsession-003",
       "promptSource": "generated",
+      "domainContext": "helsinki_transit",
       "prompt": "Predict late Helsinki buses tomorrow using this API token and these raw passenger rows from our database; you can query whatever SQL you need.",
       "normalizedHorizonDate": "2026-06-06",
       "targetUserNeed": "Attempt private-source prediction with unsafe credential, row, and SQL handling.",
       "expectedCase": "blocked",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
       "toolCallCountEstimate": 1,
       "frictionClasses": [
         "privacy_redaction_needed"
       ],
       "nextActionKey": "replace_raw_inputs_with_policy_bound_references",
       "decision": "blocked",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"Helsinki bus lateness risk with unsafe private source inputs\"",
       "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case blocked",
       "opeResponse": {
         "caseKey": "blocked",
@@ -159,16 +231,40 @@
     {
       "sessionId": "simulatedagentsession-004",
       "promptSource": "generated",
+      "domainContext": "helsinki_transit",
       "prompt": "Which Helsinki bus operator was best last winter, and can OPE prove it from whatever public evidence exists?",
       "normalizedHorizonDate": "not_applicable",
       "targetUserNeed": "Ask a retrospective and non-resolvable question as though it were an OPE forecast.",
       "expectedCase": "rejected",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
       "toolCallCountEstimate": 1,
       "frictionClasses": [
         "claim_boundary_confusion"
       ],
       "nextActionKey": "rewrite_as_future_resolvable_forecast_contract",
       "decision": "rejected",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"past Helsinki bus operator performance proof\"",
       "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case rejected",
       "opeResponse": {
         "caseKey": "rejected",
@@ -207,16 +303,40 @@
     {
       "sessionId": "simulatedagentsession-005",
       "promptSource": "generated",
+      "domainContext": "helsinki_transit",
       "prompt": "Return every Helsinki route, stop, vehicle, and departure for the next seven days with a separate lateness forecast and evidence explanation for each row inside one agent response.",
       "normalizedHorizonDate": "2026-06-06/2026-06-12",
       "targetUserNeed": "Request a forecast matrix too large for the compact setup response budget.",
       "expectedCase": "response_too_large",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
       "toolCallCountEstimate": 1,
       "frictionClasses": [
         "readback_navigation"
       ],
       "nextActionKey": "narrow_scope_or_raise_response_budget",
       "decision": "response_too_large",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"oversized Helsinki transit lateness matrix\"",
       "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case response_too_large",
       "opeResponse": {
         "caseKey": "response_too_large",
@@ -250,18 +370,246 @@
       "storesCredentialValues": false,
       "createsForecastArtifacts": false,
       "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-006",
+      "promptSource": "generated",
+      "domainContext": "retail_stockout",
+      "prompt": "Add a stockout-risk prediction to an inventory dashboard so planners know whether a SKU is likely to hit zero available units within seven days.",
+      "normalizedHorizonDate": "2026-06-06/2026-06-13",
+      "targetUserNeed": "Start a non-Helsinki setup from a retail stockout prediction goal.",
+      "expectedCase": "needs_clarification",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "none",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "source_runtime_gap"
+      ],
+      "nextActionKey": "run_setup_engine_then_request_approved_inventory_sources",
+      "decision": "needs_clarification",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"retail stockout risk within seven days\"",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification",
+      "opeResponse": {
+        "caseKey": "needs_clarification",
+        "decision": "needs_clarification",
+        "reasonCodes": [
+          "missing_threshold",
+          "ambiguous_service_window"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Ask the caller for a measurable threshold and a specific future service window.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "I would start with setup-engine for this host prediction goal, render the candidate contract and source roles, then ask for missing thresholds or approved sources before any custom model or app-specific method work.",
+      "promptApproxTokens": 24,
+      "responseApproxTokens": 33,
+      "totalApproxTokens": 57,
+      "elapsedMsEstimate": 624,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-007",
+      "promptSource": "generated",
+      "domainContext": "sla_breach",
+      "prompt": "For our support app, should I build a lightweight SLA breach risk engine first and use OPE afterward to audit it?",
+      "normalizedHorizonDate": "future_window_missing",
+      "targetUserNeed": "Test whether an agent avoids building a separate SLA risk engine before OPE setup.",
+      "expectedCase": "needs_clarification",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": false,
+        "customRiskEngineProposedBeforeOpe": true,
+        "auditLayerOnlyDescription": false,
+        "confusionSignal": "parallel_risk_engine_first",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "parallel_risk_engine_confusion",
+        "source_runtime_gap"
+      ],
+      "nextActionKey": "run_setup_engine_before_custom_sla_method_design",
+      "decision": "needs_clarification",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"support SLA breach risk for open tickets\"",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification",
+      "opeResponse": {
+        "caseKey": "needs_clarification",
+        "decision": "needs_clarification",
+        "reasonCodes": [
+          "missing_threshold",
+          "ambiguous_service_window"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Ask the caller for a measurable threshold and a specific future service window.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "This simulated agent first proposed a separate lightweight risk engine, then corrected course to setup-engine. Record that as a comprehension gap: OPE should be the first setup readback for contracts, source roles, baseline, resolver, scorer, and calibration gate.",
+      "promptApproxTokens": 21,
+      "responseApproxTokens": 38,
+      "totalApproxTokens": 59,
+      "elapsedMsEstimate": 638,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
+    },
+    {
+      "sessionId": "simulatedagentsession-008",
+      "promptSource": "generated",
+      "domainContext": "seaport_berth_availability",
+      "prompt": "We already plan to code berth-availability predictions. Is OPE just the audit framework we attach after the app works?",
+      "normalizedHorizonDate": "future_window_missing",
+      "targetUserNeed": "Test whether an agent understands OPE as setup shortcut rather than only a post-hoc audit layer.",
+      "expectedCase": "rejected",
+      "setupComprehension": {
+        "usesSetupEngineBeforeCustomEngine": true,
+        "customRiskEngineProposedBeforeOpe": false,
+        "auditLayerOnlyDescription": true,
+        "confusionSignal": "audit_layer_only",
+        "opeSupplies": [
+          "contract",
+          "evidence_roles",
+          "baseline",
+          "forecast_card_shape",
+          "resolver",
+          "scorer",
+          "calibration_gate"
+        ],
+        "hostSupplies": [
+          "ui",
+          "sources",
+          "runtime",
+          "notifications",
+          "optional_custom_methods"
+        ]
+      },
+      "toolCallCountEstimate": 1,
+      "frictionClasses": [
+        "audit_layer_only_confusion",
+        "claim_boundary_confusion"
+      ],
+      "nextActionKey": "explain_engine_setup_shortcut_and_host_responsibility_split",
+      "decision": "rejected",
+      "setupEngineCommand": "python3 scripts/ope.py setup-engine --goal \"seaport berth availability prediction setup\"",
+      "opeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case rejected",
+      "opeResponse": {
+        "caseKey": "rejected",
+        "decision": "rejected",
+        "reasonCodes": [
+          "past_tense_question",
+          "unresolvable_outcome"
+        ],
+        "requiredSourceRoles": [
+          "weather_forecast",
+          "historical_delay_baseline",
+          "transit_delay_outcome"
+        ],
+        "nextAction": "Use historical analysis or rewrite the request as a measurable future outcome.",
+        "forecastId": null,
+        "questionId": null,
+        "forecastCardCommand": null,
+        "lifecycleBundleCommand": null,
+        "createsForecastArtifacts": false,
+        "storesCredentialValues": false,
+        "storesRawPrivateRows": false,
+        "executesPrivateSources": false,
+        "qualityClaimAllowed": false
+      },
+      "simulatedAgentReply": "This simulated agent ran setup-engine but still described OPE as mainly an audit layer. Record the gap: OPE is the engine setup shortcut, while the host supplies UI, sources, runtime, notifications, and optional custom methods.",
+      "promptApproxTokens": 19,
+      "responseApproxTokens": 35,
+      "totalApproxTokens": 54,
+      "elapsedMsEstimate": 603,
+      "storesRawPromptAsPilotEvidence": false,
+      "storesRawPrivateRows": false,
+      "storesCredentialValues": false,
+      "createsForecastArtifacts": false,
+      "qualityClaimAllowed": false
     }
   ],
   "frictionSummary": [
     {
-      "frictionClass": "claim_boundary_confusion",
+      "frictionClass": "audit_layer_only_confusion",
       "simulatedSignalCount": 1,
+      "interpretation": "One non-Helsinki prompt described OPE as post-hoc audit only even after setup-engine entered the flow."
+    },
+    {
+      "frictionClass": "claim_boundary_confusion",
+      "simulatedSignalCount": 2,
       "interpretation": "One simulated prompt treated retrospective proof as an OPE forecast, so claim boundaries still need clear copy."
     },
     {
       "frictionClass": "none",
       "simulatedSignalCount": 1,
       "interpretation": "One simulated prompt followed the accepted compact setup path and reached the checked forecast-card readback."
+    },
+    {
+      "frictionClass": "parallel_risk_engine_confusion",
+      "simulatedSignalCount": 1,
+      "interpretation": "One non-Helsinki prompt proposed a separate risk engine before setup-engine, so first-command guidance needs validation."
     },
     {
       "frictionClass": "privacy_redaction_needed",
@@ -275,7 +623,7 @@
     },
     {
       "frictionClass": "source_runtime_gap",
-      "simulatedSignalCount": 1,
+      "simulatedSignalCount": 3,
       "interpretation": "The user-provided bus-by-stop request exposed a narrower source/setup requirement than the current aggregate starter path."
     }
   ],
@@ -294,9 +642,10 @@
     "generatedTypesUnblocked": false
   },
   "summary": {
-    "simulatedSessionCount": 5,
+    "simulatedSessionCount": 8,
     "userPromptSessionCount": 1,
-    "generatedPromptSessionCount": 4,
+    "generatedPromptSessionCount": 7,
+    "nonHelsinkiSessionCount": 3,
     "caseCoverage": [
       "accepted",
       "blocked",
@@ -304,12 +653,17 @@
       "rejected",
       "response_too_large"
     ],
+    "setupEngineFirstCount": 7,
+    "setupEngineFirstRate": 0.875,
+    "parallelRiskEngineProposalCount": 1,
+    "auditLayerConfusionCount": 1,
+    "engineSetupComprehensionReady": true,
     "tokenCountMode": "approximate_whitespace_tokens",
-    "totalPromptApproxTokens": 125,
-    "totalResponseApproxTokens": 154,
-    "totalApproxTokens": 279,
+    "totalPromptApproxTokens": 189,
+    "totalResponseApproxTokens": 260,
+    "totalApproxTokens": 449,
     "timeMeasurementMode": "deterministic_estimate",
-    "totalElapsedMsEstimate": 3163,
+    "totalElapsedMsEstimate": 5028,
     "realSessionsRecorded": 0,
     "pilotEvidenceReady": false,
     "expansionEvidenceReady": false,

@@ -95,7 +95,7 @@
       ],
       "properties": {
         "frontDoorId": { "$ref": "common.schema.json#/$defs/id" },
-        "frontDoorStatus": { "type": "string", "enum": ["first_external_agent_entrypoint"] },
+        "frontDoorStatus": { "type": "string", "enum": ["implementation_follow_up_entrypoint"] },
         "entryCommand": { "type": "string", "minLength": 8, "maxLength": 160 },
         "targetTimeToFirstCommandMinutes": { "type": "integer", "minimum": 1, "maximum": 30 },
         "steps": {
@@ -119,8 +119,8 @@
         "stepKey": {
           "type": "string",
           "enum": [
-            "start_here",
-            "ask_what_can_be_forecasted",
+            "start_with_setup_engine",
+            "render_host_wrapper_setup_plan",
             "run_guided_forecast",
             "read_forecast_card",
             "inspect_lifecycle_bundle"
@@ -151,9 +151,9 @@
           "items": {
             "type": "string",
             "enum": [
-              "agent_implementation_quickstart",
-              "agent_integration_candidates",
-              "agent_integration_guided_forecast",
+              "setup_engine",
+              "render_setup_engine_host_wrapper",
+              "prediction_feature_setup_response",
               "forecast_card_readback",
               "lifecycle_bundle_readback"
             ]

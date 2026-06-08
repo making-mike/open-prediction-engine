@@ -25,15 +25,21 @@ def main() -> None:
     require(surface["bindings"]["forecastBundleId"] == "forecastbundle-forecast-1102", "adoption bundle binding drifted")
     require([item["order"] for item in quickstart] == [1, 2, 3, 4, 5, 6, 7, 8], "quickstart order drifted")
     require(
-        quickstart[0]["command"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart",
-        "quickstart should start with the agent implementation kit front door",
+        quickstart[0]["command"] == "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+        "quickstart should start with the setup-engine front door",
     )
-    require(quickstart[1]["command"] == "python3 --version", "quickstart should include Python setup")
-    require(quickstart[2]["command"] == "python3 scripts/run_checks.py", "quickstart should include canonical checks")
-    require("local-source-runtime" in quickstart[3]["command"], "quickstart should expose local source runtime")
+    require("host_wrapper.py" in quickstart[1]["command"], "quickstart should render the setup-first host wrapper")
+    require(quickstart[2]["command"] == "python3 --version", "quickstart should include Python setup")
+    require(quickstart[3]["command"] == "python3 scripts/run_checks.py", "quickstart should include canonical checks")
     require("prediction-campaign explain" in quickstart[-1]["command"], "quickstart should evaluate recurring campaigns")
 
     require([item["phase"] for item in scenario["steps"]] == SCENARIO_PHASES, "scenario phase order drifted")
+    require(scenario["steps"][0]["phase"] == "setup_plan_render", "scenario should render setup plan first")
+    require("host_wrapper.py" in scenario["steps"][0]["command"], "scenario should start with host wrapper")
+    require(
+        scenario["steps"][0]["expectedStatus"] == "setup_plan_and_forecast_card_ready",
+        "scenario host wrapper status drifted",
+    )
     require(scenario["expectedFinalState"]["forecastCardAvailable"] is True, "scenario should reach forecast card")
     require(scenario["expectedFinalState"]["lifecycleBundleAvailable"] is True, "scenario should reach lifecycle bundle")
     require(scenario["expectedFinalState"]["scoreStatus"] == "scored", "scenario should include scoring readback")
@@ -62,7 +68,7 @@ def main() -> None:
     require(decision["generatedTypesIncluded"] is False, "generated runtime types should not be included yet")
 
     require(summary["quickstartStepCount"] == 8, "quickstart count drifted")
-    require(summary["scenarioStepCount"] == 6, "scenario count drifted")
+    require(summary["scenarioStepCount"] == 7, "scenario count drifted")
     require(summary["integrationCount"] == 3, "integration count drifted")
     require(summary["qualityClaimAllowed"] is False, "summary must block quality claims")
     require(summary["generatedTypesIncluded"] is False, "summary must defer generated types")

@@ -35,7 +35,7 @@ def main() -> None:
     require(record["firstAcceptedScope"] == [], "accepted type scope should remain empty")
     require(record["evidenceReview"]["acceptedRealSessionCount"] == 0, "decision must reflect zero real sessions")
     require(
-        record["evidenceReview"]["acceptedSimulatedAgentSessionCount"] == 5,
+        record["evidenceReview"]["acceptedSimulatedAgentSessionCount"] == 8,
         "decision should reflect simulated sessions",
     )
     require(
@@ -75,7 +75,7 @@ def main() -> None:
     payload = json.loads(cli.stdout)
     require(payload["decisionStatus"] == "defer_until_adoption_evidence", "CLI decision status drifted")
     require(payload["generatedTypesIncluded"] is False, "CLI should not include generated types")
-    require(payload["acceptedSimulatedAgentSessionCount"] == 5, "CLI simulated session count drifted")
+    require(payload["acceptedSimulatedAgentSessionCount"] == 8, "CLI simulated session count drifted")
 
     print("checked generated runtime types decision")
 

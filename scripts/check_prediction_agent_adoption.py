@@ -43,8 +43,8 @@ def main() -> None:
     require(not errors, f"prediction agent adoption schema errors: {errors[:3]}")
 
     summary = adoption["summary"]
-    require(summary["primaryValue"] == "prediction_credibility_layer", "primary value should be credibility layer")
-    require(summary["firstCommand"] == "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"", "first command drifted")
+    require(summary["primaryValue"] == "engine_setup_shortcut", "primary value should be engine setup shortcut")
+    require(summary["firstCommand"] == "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"", "first command drifted")
     require(summary["compactDefaultOutput"] is True, "agent-facing default output should be compact")
     require(summary["hostedRuntimeProvided"] is False, "adoption surface must not claim hosted runtime")
     require(summary["trainedModelProvided"] is False, "adoption surface must not claim trained model")
@@ -53,6 +53,7 @@ def main() -> None:
     helps = {item["capabilityKey"] for item in adoption["capabilityManifest"]["helpsWith"]}
     for key in [
         "forecast_contracts",
+        "engine_setup_shortcut",
         "evidence_provenance",
         "baseline_scoring",
         "resolution_and_scoring",
@@ -77,16 +78,35 @@ def main() -> None:
     require(byo["qualityClaimBeforeEvidenceAllowed"] is False, "BYO model must block premature quality claims")
 
     fit = adoption["fitDecision"]
-    require(fit["useOpeFor"] == ["contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"], "fit use list drifted")
+    require(
+        fit["useOpeFor"] == ["engine_setup", "contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"],
+        "fit use list drifted",
+    )
     require(fit["bringYourOwn"] == ["frontend", "host_runtime", "data_connectors", "custom_models", "notifications"], "fit BYO list drifted")
     require(fit["recommendedFirstAction"] == summary["firstCommand"], "fit first action drifted")
+
+    entry_points = {item["entryKey"]: item for item in adoption["compactEntryPoints"]}
+    require("prediction_goal_catalog" in entry_points, "compact entry points should include prediction goal catalog")
+    require(
+        entry_points["prediction_goal_catalog"]["command"] == "python3 scripts/ope.py prediction-goal-catalog --view summary",
+        "prediction goal catalog entry command drifted",
+    )
+    require(entry_points["prediction_goal_catalog"]["mutatesState"] is False, "prediction goal catalog entry must be read-only")
 
     eval_surface = adoption["adoptionEvaluation"]
     require(eval_surface["targetMinutes"] == 5, "adoption eval should target first five minutes")
     require(eval_surface["passesWithoutNetwork"] is True, "adoption eval should be offline")
     require(eval_surface["writesState"] is False, "adoption eval should be non-mutating")
     eval_checks = {item["checkKey"] for item in eval_surface["checks"]}
-    for key in ["understand_fit", "find_first_command", "read_capabilities", "inspect_extension_points", "avoid_overclaiming"]:
+    for key in [
+        "understand_fit",
+        "find_first_command",
+        "read_capabilities",
+        "inspect_extension_points",
+        "avoid_overclaiming",
+        "setup_engine_before_parallel_risk_engine",
+        "avoid_audit_layer_only_framing",
+    ]:
         require(key in eval_checks, f"adoption eval missing {key}")
 
     require(CAPABILITIES.exists(), "root ope.capabilities.json is missing")
@@ -100,6 +120,8 @@ def main() -> None:
         "Do not use OPE when",
         "Bring your own model",
         "Extension points",
+        "python3 scripts/ope.py setup-engine",
+        "python3 scripts/ope.py prediction-goal-catalog",
         "python3 scripts/ope.py explain-fit",
     ]:
         require(phrase in quickstart_text, f"AGENT_QUICKSTART.md missing {phrase!r}")

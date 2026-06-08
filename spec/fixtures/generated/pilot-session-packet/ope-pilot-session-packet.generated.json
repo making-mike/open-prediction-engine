@@ -250,6 +250,45 @@
       "moderatorPrompt": "Inspect the public transport baseline track-record gate. Decide whether OPE may claim calibration or broad method quality yet."
     },
     {
+      "taskId": "agentpilottask-006",
+      "scenarioKey": "engine_setup_shortcut_comprehension",
+      "title": "Domain-agnostic setup-engine shortcut comprehension",
+      "command": "python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+      "expectedOutcomeClass": "setup_engine_shortcut_readback",
+      "measures": [
+        "task_completion",
+        "engine_setup_shortcut_comprehension",
+        "ope_host_responsibility_split",
+        "parallel_risk_engine_avoidance",
+        "claim_boundary_comprehension"
+      ],
+      "captureFields": [
+        "task_refs",
+        "dimension_scores",
+        "sanitized_findings",
+        "friction_classes",
+        "expansion_signals",
+        "next_action"
+      ],
+      "ledgerMapping": {
+        "frictionClassOptions": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "parallel_risk_engine_confusion",
+          "audit_layer_only_confusion"
+        ],
+        "expansionSignalOptions": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "tighten_claim_copy"
+        ],
+        "claimBoundaryRequired": true
+      },
+      "moderatorPrompt": "Start from a non-Helsinki host app prediction goal. Explain whether OPE should be used before building a separate lightweight risk engine, and name what OPE supplies versus what the host app supplies."
+    },
+    {
       "taskId": "pilotsessiontask-006",
       "scenarioKey": "repeating_prediction_campaign",
       "title": "Explain a repeating prediction campaign",
@@ -367,7 +406,7 @@
     "Stop any expansion interpretation that treats pilot usability evidence as forecast-quality or calibration evidence."
   ],
   "collectionSummary": {
-    "taskCardCount": 6,
+    "taskCardCount": 7,
     "minimumRealSessions": 3,
     "targetRealSessions": 5,
     "realSessionsRecorded": 0,

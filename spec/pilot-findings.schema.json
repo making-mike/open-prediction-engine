@@ -104,6 +104,14 @@
       "required": [
         "acceptedRealSessionCount",
         "acceptedSimulatedAgentSessionCount",
+        "nonHelsinkiSimulatedSessionCount",
+        "setupEngineFirstRate",
+        "parallelRiskEngineProposalCount",
+        "auditLayerConfusionCount",
+        "localPilotEvidenceMode",
+        "localPilotEvidenceStatus",
+        "localLedgerPath",
+        "localLedgerRowCount",
         "minimumRealSessions",
         "targetRealSessions",
         "agentSimulationEvidenceReady",
@@ -116,6 +124,20 @@
       "properties": {
         "acceptedRealSessionCount": { "type": "integer", "minimum": 0 },
         "acceptedSimulatedAgentSessionCount": { "type": "integer", "minimum": 0 },
+        "nonHelsinkiSimulatedSessionCount": { "type": "integer", "minimum": 0 },
+        "setupEngineFirstRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "parallelRiskEngineProposalCount": { "type": "integer", "minimum": 0 },
+        "auditLayerConfusionCount": { "type": "integer", "minimum": 0 },
+        "localPilotEvidenceMode": {
+          "type": "string",
+          "enum": ["not_requested", "ignored_local_ledger"]
+        },
+        "localPilotEvidenceStatus": {
+          "type": "string",
+          "enum": ["not_requested", "missing", "readable"]
+        },
+        "localLedgerPath": { "type": "string", "minLength": 1, "maxLength": 620 },
+        "localLedgerRowCount": { "type": "integer", "minimum": 0 },
         "minimumRealSessions": { "type": "integer", "minimum": 1 },
         "targetRealSessions": { "type": "integer", "minimum": 1 },
         "agentSimulationEvidenceReady": { "type": "boolean" },

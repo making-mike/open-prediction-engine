@@ -222,7 +222,7 @@
             "readbackCommands": {
               "type": "array",
               "minItems": 1,
-              "maxItems": 70,
+              "maxItems": 80,
               "items": { "$ref": "#/$defs/boundedString" }
             },
             "resolutionCommand": { "$ref": "#/$defs/boundedString" },

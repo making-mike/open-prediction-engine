@@ -27,6 +27,7 @@ CASE_ORDER = [
     "unsafe_source_block",
     "forecast_run_readback",
     "claim_gate_readback",
+    "engine_setup_shortcut_comprehension",
 ]
 
 REQUIRED_DIMENSIONS = [
@@ -39,6 +40,9 @@ REQUIRED_DIMENSIONS = [
     "trust_for_agent_decision_support",
     "setup_friction",
     "runtime_gap_classification",
+    "engine_setup_shortcut_comprehension",
+    "ope_host_responsibility_split",
+    "parallel_risk_engine_avoidance",
 ]
 
 
@@ -237,6 +241,40 @@ def build_task_scenarios() -> list[dict[str, Any]]:
                 "Participant names more comparable resolved outcomes as the evidence needed.",
             ],
         ),
+        task(
+            index=6,
+            scenario_key="engine_setup_shortcut_comprehension",
+            title="Domain-agnostic setup-engine shortcut comprehension",
+            command='python3 scripts/ope.py setup-engine --goal "add stockout-risk prediction to an inventory app"',
+            prompt=(
+                "Start from a non-Helsinki host app prediction goal. Explain whether OPE should be used before building "
+                "a separate lightweight risk engine, and name what OPE supplies versus what the host app supplies."
+            ),
+            outcome_class="setup_engine_shortcut_readback",
+            readback=expected_readback(
+                status_path="engineSetupStatus",
+                expected_status="checked_readback",
+                forecast_id=None,
+                question_id=None,
+                next_action="choose_forecastable_contract_and_bind_approved_sources",
+                quality_claim_allowed=False,
+                forecast_artifacts_created=False,
+            ),
+            measures=[
+                "task_completion",
+                "engine_setup_shortcut_comprehension",
+                "ope_host_responsibility_split",
+                "parallel_risk_engine_avoidance",
+                "claim_boundary_comprehension",
+            ],
+            criteria=[
+                "Participant runs setup-engine or an equivalent OPE setup readback before proposing a custom risk engine.",
+                "Participant states OPE supplies the contract, evidence roles, baseline, forecast-card shape, resolver, scorer, and calibration gate.",
+                "Participant states the host supplies UI, approved sources, app runtime, notifications, and optional custom methods.",
+                "Participant does not describe OPE only as an audit framework, reference repo, or post-hoc credibility layer.",
+                "Participant keeps adoption evidence separate from forecast-quality evidence.",
+            ],
+        ),
     ]
 
 
@@ -251,6 +289,9 @@ def build_feedback_schema() -> dict[str, Any]:
         "trust_for_agent_decision_support": ("Would the participant trust this output enough for supervised agent decision support?", "rating_1_to_5"),
         "setup_friction": ("How much friction did the participant encounter while moving from setup to readback?", "rating_1_to_5"),
         "runtime_gap_classification": ("Was the issue a usability gap, a missing runtime feature, a data gap, or no issue?", "short_text"),
+        "engine_setup_shortcut_comprehension": ("Can the participant explain setup-engine as the first OPE readback before custom risk-engine work?", "rating_1_to_5"),
+        "ope_host_responsibility_split": ("Can the participant separate OPE-owned contracts, evidence roles, baselines, resolvers, scorers, and calibration gates from host-owned UI, sources, runtime, and optional methods?", "rating_1_to_5"),
+        "parallel_risk_engine_avoidance": ("Does the participant avoid proposing an untracked parallel risk engine before OPE setup readbacks?", "rating_1_to_5"),
     }
     return {
         "feedbackSchemaId": "agentpilotfeedback-001",
@@ -350,6 +391,22 @@ def build_rubric() -> list[dict[str, Any]]:
             "failureSignals": [
                 "Turns local fixture success into a production or quality claim.",
                 "Treats live connector availability as live calibration.",
+            ],
+        },
+        {
+            "rubricId": "agentpilotrubric-006",
+            "surface": "engine_setup_shortcut",
+            "passingScore": 4,
+            "taskRefs": ["agentpilottask-006"],
+            "passingSignals": [
+                "Runs setup-engine before proposing a custom risk engine.",
+                "Names OPE-owned contract, evidence-role, baseline, forecast-card, resolver, scorer, and calibration-gate responsibilities.",
+                "Names host-owned UI, source, runtime, notification, and optional custom-method responsibilities.",
+                "Does not describe OPE as audit-only or post-hoc credibility layer.",
+            ],
+            "failureSignals": [
+                "Builds a separate lightweight risk engine first and treats OPE as optional audit.",
+                "Cannot distinguish adoption evidence from forecast-quality evidence.",
             ],
         },
     ]
@@ -475,6 +532,8 @@ def build_agent_pilot_validation() -> dict[str, Any]:
             "minimumTaskCompletionRate": 0.8,
             "minimumMedianTrustScore": 4,
             "minimumClaimBoundaryMedianScore": 4,
+            "minimumSetupEngineFirstRate": 0.8,
+            "maximumAuditLayerConfusionRate": 0.2,
             "usabilityGapReviewThreshold": 3,
         },
         "decisionRules": [
@@ -501,6 +560,12 @@ def build_agent_pilot_validation() -> dict[str, Any]:
                 "signal": "Any participant reads scored fixture output as calibration, production readiness, or broad quality proof.",
                 "decision": "pause_quality_claims",
                 "nextAction": "Tighten claim-boundary copy and gates before publishing stronger MVP messaging.",
+            },
+            {
+                "decisionRuleId": "agentpilotdecision-005",
+                "signal": "Participants build an ad hoc risk engine before setup-engine or describe OPE as audit-only.",
+                "decision": "fix_comprehension_gap",
+                "nextAction": "Improve setup-engine first-command guidance and host-wrapper examples before expanding adoption claims.",
             },
         ],
         "executionBoundary": {
@@ -558,7 +623,7 @@ def validate_agent_pilot_validation(pack: dict[str, Any]) -> None:
         if summary["privateDataStored"] is not False:
             raise AgentPilotValidationError("private data must not be stored")
     rubric_surfaces = {item["surface"] for item in pack["comprehensionRubric"]}
-    if rubric_surfaces != {"forecast_card", "lifecycle_bundle", "source_intake", "blocked_path", "claim_boundary"}:
+    if rubric_surfaces != {"forecast_card", "lifecycle_bundle", "source_intake", "blocked_path", "claim_boundary", "engine_setup_shortcut"}:
         raise AgentPilotValidationError("pilot rubric surface coverage drifted")
 
 

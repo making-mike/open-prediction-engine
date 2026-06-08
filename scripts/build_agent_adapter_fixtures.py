@@ -25,6 +25,7 @@ from generate_prediction_campaign_doctor import build_prediction_campaign_doctor
 from generate_prediction_campaign_evidence_ledger import build_prediction_campaign_evidence_ledger
 from generate_prediction_campaign_explain import build_prediction_campaign_explain
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
+from generate_setup_engine import build_setup_engine, view_payload as setup_engine_view_payload
 from generate_source_intake_handoff import CASE_ORDER as SOURCE_HANDOFF_CASES
 from generate_source_intake_handoff import SourceIntakeHandoffError
 from generate_source_intake_handoff import build_handoff as build_source_handoff
@@ -166,6 +167,7 @@ OUTPUT_FILES = {
     "private_setup_lifecycle_bundle_readback": "ope-agent-private-setup-lifecycle-bundle-readback-envelope.generated.json",
     "private_setup_resolution_status_readback": "ope-agent-private-setup-resolution-status-readback-envelope.generated.json",
     "private_setup_scoring_summary_readback": "ope-agent-private-setup-scoring-summary-readback-envelope.generated.json",
+    "setup_engine": "ope-agent-setup-engine-envelope.generated.json",
     "campaign_plan": "ope-agent-campaign-plan-envelope.generated.json",
     "campaign_status": "ope-agent-campaign-status-envelope.generated.json",
     "campaign_health": "ope-agent-campaign-health-envelope.generated.json",
@@ -453,6 +455,37 @@ def validate_payload_binding(item: dict[str, Any]) -> None:
         expect_equal("scoring summary question binding", payload["questionId"], binding["questionId"])
         expect_equal("scoring summary record binding", payload["scoringReportId"], binding["scoringReportId"])
         expect_equal("scoring summary state", payload["scoreStatus"], item["state"]["scoreStatus"])
+        return
+
+    if operation == "setup_engine":
+        setup = payload
+        expect_equal("setup engine input ref", setup["setupEngineId"], request["inputRef"])
+        expect_equal("setup engine state", setup["engineSetupStatus"], item["state"]["planStatus"])
+        if item["state"]["forecastStatus"] != "not_created_by_setup_engine":
+            raise AgentAdapterError("setup-engine envelope must not create forecast artifacts")
+        if setup["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+            raise AgentAdapterError("setup-engine host wrapper should render before forecast artifacts")
+        if "candidateForecastContracts" in setup:
+            if setup["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
+                raise AgentAdapterError("setup-engine should expose a forecastable first candidate")
+            if setup["candidateForecastContracts"][0]["baselineMethod"]["methodId"] != "historical_frequency_baseline":
+                raise AgentAdapterError("setup-engine should start from the historical baseline")
+        else:
+            if setup.get("forecastableCandidateCount") != 1:
+                raise AgentAdapterError("setup-engine focused view should preserve forecastable candidate count")
+        boundary = setup["claimBoundary"]
+        for key in [
+            "qualityClaimAllowed",
+            "calibrationClaimAllowed",
+            "hostedRuntimeProvided",
+            "trainedModelProvided",
+            "executesLiveFetch",
+            "acceptsRawSql",
+            "acceptsCredentialValues",
+            "acceptsRawPrivateRows",
+        ]:
+            if boundary[key] is not False:
+                raise AgentAdapterError(f"setup-engine claim boundary should keep {key} false")
         return
 
     if operation == "resolution_jobs":
@@ -1531,6 +1564,45 @@ def build_scoring_summary_envelope(
         state=state_from_card(card),
         warnings=[
             "A single scored fixture outcome is not enough for a live calibration or quality claim.",
+        ],
+    )
+
+
+def state_from_setup_engine(record: dict[str, Any]) -> dict[str, str | None]:
+    return nullable_state(
+        decisionStatus="setup_engine_readback",
+        approvalStatus="not_required",
+        dataMode="source_refs_only",
+        planStatus=record["engineSetupStatus"],
+        executionMode="local_cli_agent_call_readback",
+        sourceMode="domain_agnostic",
+        forecastStatus="not_created_by_setup_engine",
+        resolutionStatus="not_started",
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+
+
+def setup_engine_adapter_payload(goal: str = "add predictions to my app", view: str = "full") -> dict[str, Any]:
+    record = build_setup_engine(goal)
+    return setup_engine_view_payload(record, view)
+
+
+def build_setup_engine_envelope() -> dict[str, Any]:
+    record = build_setup_engine()
+    return envelope(
+        "agentenvelope-057",
+        "setup_engine",
+        "read_only",
+        "setup_engine",
+        record["setupEngineId"],
+        record,
+        caller_intent="Read a checked domain-agnostic prediction setup plan before building a host risk engine.",
+        record_binding=nullable_binding(),
+        state=state_from_setup_engine(record),
+        warnings=[
+            *record["warnings"],
+            "Setup-engine adapter readback does not create forecast artifacts or hosted runtime.",
         ],
     )
 
@@ -2782,6 +2854,7 @@ def build_envelopes() -> dict[str, dict[str, Any]]:
         OUTPUT_FILES["campaign_health"]: build_campaign_health_envelope(),
         OUTPUT_FILES["campaign_append_readiness"]: build_campaign_append_readiness_envelope(),
         OUTPUT_FILES["campaign_calibration_status"]: build_campaign_calibration_status_envelope(),
+        OUTPUT_FILES["setup_engine"]: build_setup_engine_envelope(),
         OUTPUT_FILES["resolution_jobs"]: build_resolution_jobs_envelope(),
         OUTPUT_FILES["resolution_scheduler_status"]: build_resolution_scheduler_status_envelope(),
         OUTPUT_FILES["private_setup_bundle"]: build_private_setup_bundle_envelope(),

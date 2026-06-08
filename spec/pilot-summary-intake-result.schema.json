@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-summary-intake-result.schema.json",
+  "title": "Pilot Summary Intake Result",
+  "description": "Read-only classification result for a caller-supplied sanitized pilot-session summary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotSummaryIntakeResultId",
+    "inputRef",
+    "inputSummaryId",
+    "intakeMode",
+    "submittedShape",
+    "riskSignals",
+    "intakeDecision",
+    "ledgerReady",
+    "acceptedForAggregation",
+    "candidateRealSessionEvidence",
+    "contributesRealSessionEvidence",
+    "reviewOutcome",
+    "requiredFixes",
+    "nextAction",
+    "realSessionsRecorded",
+    "ledgerRowsWritten",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "pilotSummaryIntakeResultId": { "$ref": "common.schema.json#/$defs/id" },
+    "inputRef": { "$ref": "#/$defs/boundedString" },
+    "inputSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "intakeMode": {
+      "type": "string",
+      "enum": ["caller_supplied_sanitized_summary_file"]
+    },
+    "submittedShape": { "$ref": "pilot-summary-intake.schema.json#/$defs/submittedShape" },
+    "riskSignals": { "$ref": "pilot-summary-intake.schema.json#/$defs/riskSignals" },
+    "intakeDecision": {
+      "type": "string",
+      "enum": [
+        "accept_for_ledger_review",
+        "accept_with_product_signal",
+        "needs_redaction",
+        "block_raw_transcript",
+        "block_private_data",
+        "block_claim_overreach"
+      ]
+    },
+    "ledgerReady": { "type": "boolean" },
+    "acceptedForAggregation": { "type": "boolean" },
+    "candidateRealSessionEvidence": { "type": "boolean" },
+    "contributesRealSessionEvidence": { "type": "boolean" },
+    "reviewOutcome": { "$ref": "#/$defs/boundedString" },
+    "requiredFixes": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "nextAction": { "$ref": "#/$defs/boundedString" },
+    "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+    "ledgerRowsWritten": { "type": "integer", "minimum": 0 },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyClassifier",
+        "writesPilotEvidenceLedger",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion"
+      ],
+      "properties": {
+        "readOnlyClassifier": { "type": "boolean" },
+        "writesPilotEvidenceLedger": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    }
+  }
+}

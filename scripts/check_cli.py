@@ -12,7 +12,9 @@ import tempfile
 import time
 from pathlib import Path
 
+from check_lifecycle_operation_store import REQUIRED_COMPATIBILITY_CLASSES, REQUIRED_WRITE_LOCAL_COMMANDS
 from check_live_capture_workspace import fixture_integration_result
+from generate_lifecycle_operation_store import SCENARIO_NAMES
 from generate_live_connector_readiness import build_readiness
 from live_capture_workspace import build_live_result_set, save_live_result_set
 
@@ -318,8 +320,8 @@ def main() -> None:
     )
     agent_pilot_validation = run_cli("agent-pilot-validation")
     agent_pilot_validation_payload = json.loads(agent_pilot_validation.stdout)
-    if agent_pilot_validation_payload["taskCount"] != 5:
-        raise AssertionError("CLI agent-pilot-validation should expose five task scenarios")
+    if agent_pilot_validation_payload["taskCount"] != 6:
+        raise AssertionError("CLI agent-pilot-validation should expose six task scenarios")
     pilot_scenarios = {
         item["scenarioKey"]: item for item in agent_pilot_validation_payload["taskScenarios"]
     }
@@ -329,6 +331,8 @@ def main() -> None:
         raise AssertionError("CLI agent-pilot-validation accepted-adapter scenario drifted")
     if pilot_scenarios["unsafe_source_block"]["expectedOutcomeClass"] != "blocked_unsafe":
         raise AssertionError("CLI agent-pilot-validation unsafe-source scenario drifted")
+    if pilot_scenarios["engine_setup_shortcut_comprehension"]["expectedOutcomeClass"] != "setup_engine_shortcut_readback":
+        raise AssertionError("CLI agent-pilot-validation setup-comprehension scenario drifted")
     run_optional_drift_check(
         "agent-pilot-validation",
         "--check",
@@ -354,6 +358,32 @@ def main() -> None:
     pilot_evidence_summary_payload = json.loads(pilot_evidence_summary.stdout)
     if pilot_evidence_summary_payload["expansionEvidenceReady"] is not False:
         raise AssertionError("CLI pilot-evidence summary should not unblock expansion")
+    pilot_evidence_append_plan = run_cli(
+        "pilot-evidence",
+        "--input-summary",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+    )
+    pilot_evidence_append_payload = json.loads(pilot_evidence_append_plan.stdout)
+    if pilot_evidence_append_payload["appendDecision"] != "ready_for_local_write":
+        raise AssertionError("CLI pilot-evidence append plan should be ready for explicit local write")
+    if pilot_evidence_append_payload["writeLocalRequired"] is not True:
+        raise AssertionError("CLI pilot-evidence append plan should require local write")
+    if pilot_evidence_append_payload["writeLocalRequested"] is not False:
+        raise AssertionError("CLI pilot-evidence append plan should be dry-run by default")
+    if pilot_evidence_append_payload["ledgerRowsWritten"] != 0:
+        raise AssertionError("CLI pilot-evidence append plan must not write rows by default")
+    if pilot_evidence_append_payload["realSessionsRecorded"] != 0:
+        raise AssertionError("CLI pilot-evidence append plan must not record sessions by default")
+    pilot_evidence_blocked_append = run_cli(
+        "pilot-evidence",
+        "--input-summary",
+        "spec/fixtures/pilot-summary-intake/blocked-raw-transcript-summary.json",
+    )
+    pilot_evidence_blocked_payload = json.loads(pilot_evidence_blocked_append.stdout)
+    if pilot_evidence_blocked_payload["appendDecision"] != "blocked_by_intake":
+        raise AssertionError("CLI pilot-evidence append plan should block unsafe summaries")
+    if pilot_evidence_blocked_payload["candidateRow"] is not None:
+        raise AssertionError("CLI pilot-evidence blocked append plan must not expose a candidate row")
     run_optional_drift_check(
         "pilot-evidence",
         "--check",
@@ -362,8 +392,8 @@ def main() -> None:
     )
     pilot_session_packet = run_cli("pilot-session-packet")
     pilot_session_packet_payload = json.loads(pilot_session_packet.stdout)
-    if pilot_session_packet_payload["collectionSummary"]["taskCardCount"] != 6:
-        raise AssertionError("CLI pilot-session-packet should expose six task cards")
+    if pilot_session_packet_payload["collectionSummary"]["taskCardCount"] != 7:
+        raise AssertionError("CLI pilot-session-packet should expose seven task cards")
     if pilot_session_packet_payload["collectionSummary"]["realSessionsRecorded"] != 0:
         raise AssertionError("CLI pilot-session-packet should not record real sessions")
     if pilot_session_packet_payload["collectionSummary"]["expansionEvidenceReady"] is not False:
@@ -375,6 +405,14 @@ def main() -> None:
         raise AssertionError("CLI pilot-session-packet should require claim-boundary capture for claim gate")
     if pilot_session_tasks["repeating_prediction_campaign"]["claimBoundaryRequired"] is not True:
         raise AssertionError("CLI pilot-session-packet should require claim-boundary capture for repeating campaign")
+    if pilot_session_tasks["engine_setup_shortcut_comprehension"]["claimBoundaryRequired"] is not True:
+        raise AssertionError("CLI pilot-session-packet should require claim-boundary capture for setup comprehension")
+    pilot_session_setup_task = run_cli("pilot-session-packet", "--task", "engine_setup_shortcut_comprehension")
+    pilot_session_setup_task_payload = json.loads(pilot_session_setup_task.stdout)
+    if pilot_session_setup_task_payload["taskId"] != "agentpilottask-006":
+        raise AssertionError("CLI pilot-session-packet setup task id drifted")
+    if pilot_session_setup_task_payload["scenarioKey"] != "engine_setup_shortcut_comprehension":
+        raise AssertionError("CLI pilot-session-packet setup task selector drifted")
     pilot_session_template = run_cli("pilot-session-packet", "--section", "template")
     pilot_session_template_payload = json.loads(pilot_session_template.stdout)
     if not pilot_session_template_payload["ledgerSubmissionShape"]["canSubmitToPilotEvidence"]:
@@ -402,6 +440,30 @@ def main() -> None:
         raise AssertionError("CLI pilot-summary-intake should block raw transcripts")
     if pilot_summary_cases["blocked_quality_claim"]["intakeDecision"] != "block_claim_overreach":
         raise AssertionError("CLI pilot-summary-intake should block quality overclaims")
+    pilot_summary_input = run_cli(
+        "pilot-summary-intake",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+    )
+    pilot_summary_input_payload = json.loads(pilot_summary_input.stdout)
+    if pilot_summary_input_payload["intakeDecision"] != "accept_for_ledger_review":
+        raise AssertionError("CLI pilot-summary-intake input should classify accepted summaries")
+    if pilot_summary_input_payload["candidateRealSessionEvidence"] is not True:
+        raise AssertionError("CLI pilot-summary-intake input should mark accepted summaries as candidate evidence")
+    if pilot_summary_input_payload["contributesRealSessionEvidence"] is not False:
+        raise AssertionError("CLI pilot-summary-intake input must not count real evidence")
+    if pilot_summary_input_payload["ledgerRowsWritten"] != 0:
+        raise AssertionError("CLI pilot-summary-intake input must not write ledger rows")
+    pilot_summary_blocked_input = run_cli(
+        "pilot-summary-intake",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/blocked-raw-transcript-summary.json",
+    )
+    pilot_summary_blocked_payload = json.loads(pilot_summary_blocked_input.stdout)
+    if pilot_summary_blocked_payload["intakeDecision"] != "block_raw_transcript":
+        raise AssertionError("CLI pilot-summary-intake input should block raw transcript summaries")
+    if pilot_summary_blocked_payload["candidateRealSessionEvidence"] is not False:
+        raise AssertionError("CLI pilot-summary-intake blocked input must not be candidate evidence")
     pilot_summary_rules = run_cli("pilot-summary-intake", "--section", "rules")
     pilot_summary_rules_payload = json.loads(pilot_summary_rules.stdout)
     if pilot_summary_rules_payload[0]["decision"] != "Accept for ledger review.":
@@ -412,12 +474,44 @@ def main() -> None:
         expected_stdout="checked pilot summary intake",
         label="pilot-summary-intake",
     )
+    pilot_summary_template = run_cli("pilot-summary-template", "--section", "summary")
+    pilot_summary_template_payload = json.loads(pilot_summary_template.stdout)
+    if pilot_summary_template_payload["templateStatus"] != "ready_for_operator_fill":
+        raise AssertionError("CLI pilot-summary-template summary status drifted")
+    if pilot_summary_template_payload["recommendedScenarioKey"] != "engine_setup_shortcut_comprehension":
+        raise AssertionError("CLI pilot-summary-template should default to setup comprehension")
+    if pilot_summary_template_payload["draftLedgerReady"] is not False:
+        raise AssertionError("CLI pilot-summary-template draft must not be ledger-ready unchanged")
+    if pilot_summary_template_payload["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI pilot-summary-template must keep quality claims blocked")
+    pilot_summary_template_draft = run_cli("pilot-summary-template", "--section", "draft")
+    pilot_summary_template_draft_payload = json.loads(pilot_summary_template_draft.stdout)
+    if pilot_summary_template_draft_payload["dimensionRatings"] != []:
+        raise AssertionError("CLI pilot-summary-template draft should require operator-entered ratings")
+    if pilot_summary_template_draft_payload["riskSignals"]["unredactedSourceDetailDetected"] is not True:
+        raise AssertionError("CLI pilot-summary-template draft should classify as needs-redaction unchanged")
+    pilot_summary_template_commands = run_cli("pilot-summary-template", "--section", "commands")
+    pilot_summary_template_commands_payload = json.loads(pilot_summary_template_commands.stdout)
+    if pilot_summary_template_commands_payload[0]["command"] != "python3 scripts/ope.py pilot-summary-template --section draft":
+        raise AssertionError("CLI pilot-summary-template should expose the draft print command first")
+    if pilot_summary_template_commands_payload[2]["mutatesLocalState"] is not True:
+        raise AssertionError("CLI pilot-summary-template should mark explicit local append as the only mutation")
+    run_optional_drift_check(
+        "pilot-summary-template",
+        "--check",
+        expected_stdout="checked pilot summary template",
+        label="pilot-summary-template",
+    )
     simulated_agent_pilot = run_cli("simulated-agent-pilot", "--section", "summary")
     simulated_agent_pilot_payload = json.loads(simulated_agent_pilot.stdout)
-    if simulated_agent_pilot_payload["simulatedSessionCount"] != 5:
-        raise AssertionError("CLI simulated-agent-pilot should expose five simulated sessions")
+    if simulated_agent_pilot_payload["simulatedSessionCount"] != 8:
+        raise AssertionError("CLI simulated-agent-pilot should expose eight simulated sessions")
     if simulated_agent_pilot_payload["userPromptSessionCount"] != 1:
         raise AssertionError("CLI simulated-agent-pilot should expose one user prompt")
+    if simulated_agent_pilot_payload["nonHelsinkiSessionCount"] != 3:
+        raise AssertionError("CLI simulated-agent-pilot should expose three non-Helsinki sessions")
+    if simulated_agent_pilot_payload["engineSetupComprehensionReady"] is not True:
+        raise AssertionError("CLI simulated-agent-pilot should expose setup comprehension readiness")
     if simulated_agent_pilot_payload["realSessionsRecorded"] != 0:
         raise AssertionError("CLI simulated-agent-pilot should not count real sessions")
     if simulated_agent_pilot_payload["pilotEvidenceReady"] is not False:
@@ -428,10 +522,43 @@ def main() -> None:
         expected_stdout="checked simulated agent pilot",
         label="simulated-agent-pilot",
     )
+    pilot_supervision_status = run_cli("pilot-supervision-status")
+    pilot_supervision_status_payload = json.loads(pilot_supervision_status.stdout)
+    if pilot_supervision_status_payload["status"] != "real_sessions_needed":
+        raise AssertionError("CLI pilot-supervision-status should require real sessions")
+    if pilot_supervision_status_payload["localEvidenceMode"] != "not_requested":
+        raise AssertionError("CLI pilot-supervision-status should not inspect local evidence by default")
+    if pilot_supervision_status_payload["realSessionProgress"]["remainingMinimumSessions"] != 3:
+        raise AssertionError("CLI pilot-supervision-status should expose three remaining minimum sessions")
+    if (
+        pilot_supervision_status_payload["recommendedNextTask"]["scenarioKey"]
+        != "engine_setup_shortcut_comprehension"
+    ):
+        raise AssertionError("CLI pilot-supervision-status recommended task drifted")
+    if pilot_supervision_status_payload["executionBoundary"]["qualityClaimsUpgraded"] is not False:
+        raise AssertionError("CLI pilot-supervision-status must not upgrade quality claims")
+    pilot_supervision_summary = run_cli("pilot-supervision-status", "--section", "summary")
+    pilot_supervision_summary_payload = json.loads(pilot_supervision_summary.stdout)
+    if pilot_supervision_summary_payload["remainingMinimumSessions"] != 3:
+        raise AssertionError("CLI pilot-supervision-status summary should expose remaining sessions")
+    if pilot_supervision_summary_payload["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI pilot-supervision-status summary must keep quality claims blocked")
+    pilot_supervision_commands = run_cli("pilot-supervision-status", "--section", "commands")
+    pilot_supervision_commands_payload = json.loads(pilot_supervision_commands.stdout)
+    if pilot_supervision_commands_payload[0]["command"] != "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension":
+        raise AssertionError("CLI pilot-supervision-status command sequence should open the setup task first")
+    if pilot_supervision_commands_payload[3]["mutatesLocalState"] is not True:
+        raise AssertionError("CLI pilot-supervision-status should mark local evidence append as the only local mutation")
+    run_optional_drift_check(
+        "pilot-supervision-status",
+        "--check",
+        expected_stdout="checked pilot supervision status",
+        label="pilot-supervision-status",
+    )
     local_usage_trace = run_cli("local-usage-trace")
     local_usage_trace_payload = json.loads(local_usage_trace.stdout)
-    if local_usage_trace_payload["totalEvents"] != 24:
-        raise AssertionError("CLI local-usage-trace should expose twenty-four events")
+    if local_usage_trace_payload["totalEvents"] != 27:
+        raise AssertionError("CLI local-usage-trace should expose twenty-seven events")
     if local_usage_trace_payload["forecastCompletionRate"] != 1.0:
         raise AssertionError("CLI local-usage-trace forecast completion rate drifted")
     if local_usage_trace_payload["hostedTelemetryEnabled"] is not False:
@@ -443,6 +570,8 @@ def main() -> None:
         raise AssertionError("CLI local-usage-trace should include unsafe blocked path")
     if usage_events["response_too_large_readback"]["sanitizedErrorClass"] != "response_too_large":
         raise AssertionError("CLI local-usage-trace should expose sanitized oversized readback")
+    if usage_events["setup_engine_stockout_comprehension"]["eventClass"] != "setup_comprehension":
+        raise AssertionError("CLI local-usage-trace should include setup comprehension events")
     if usage_events["campaign_calibration_threshold_met"]["eventClass"] != "campaign":
         raise AssertionError("CLI local-usage-trace should expose campaign lifecycle events")
     if usage_events["agent_integration_guided_forecast"]["forecastId"] != "forecast-1102":
@@ -470,9 +599,11 @@ def main() -> None:
         raise AssertionError("CLI developer-adoption should defer generated runtime types")
     developer_quickstart = run_cli("developer-adoption", "--section", "quickstart")
     developer_quickstart_payload = json.loads(developer_quickstart.stdout)
-    if developer_quickstart_payload[0]["command"] != "python3 scripts/ope.py agent-implementation-kit --view quickstart":
-        raise AssertionError("CLI developer-adoption quickstart should begin with agent implementation kit front door")
-    if developer_quickstart_payload[1]["command"] != "python3 --version":
+    if developer_quickstart_payload[0]["command"] != "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"":
+        raise AssertionError("CLI developer-adoption quickstart should begin with setup-engine front door")
+    if "host_wrapper.py" not in developer_quickstart_payload[1]["command"]:
+        raise AssertionError("CLI developer-adoption quickstart should render setup-first host wrapper")
+    if developer_quickstart_payload[2]["command"] != "python3 --version":
         raise AssertionError("CLI developer-adoption quickstart should include Python setup")
     if "prediction-campaign explain" not in developer_quickstart_payload[-1]["command"]:
         raise AssertionError("CLI developer-adoption quickstart should evaluate recurring campaigns")
@@ -2325,16 +2456,16 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store should keep Postgres as the production design target")
     if not lifecycle_store_payload["summary"]["sqliteRuntimeChecked"]:
         raise AssertionError("CLI lifecycle-operation-store should expose a checked SQLite runtime")
-    if lifecycle_store_payload["summary"]["runtimeScenarioCount"] != 15:
-        raise AssertionError("CLI lifecycle-operation-store should expose the fifteen required runtime scenarios")
-    if lifecycle_store_payload["summary"]["writeLocalOperationCoverageCount"] != 8:
-        raise AssertionError("CLI lifecycle-operation-store should cover the eight current write-local command paths")
+    if lifecycle_store_payload["summary"]["runtimeScenarioCount"] != len(SCENARIO_NAMES):
+        raise AssertionError("CLI lifecycle-operation-store should expose the required runtime scenarios")
+    if lifecycle_store_payload["summary"]["writeLocalOperationCoverageCount"] != len(REQUIRED_WRITE_LOCAL_COMMANDS):
+        raise AssertionError("CLI lifecycle-operation-store should cover the current write-local command paths")
     if not lifecycle_store_payload["summary"]["allWriteLocalPathsReceiptBacked"]:
         raise AssertionError("CLI lifecycle-operation-store should receipt-back all write-local command paths")
     if not lifecycle_store_payload["summary"]["allWriteLocalPathsReadModelBacked"]:
         raise AssertionError("CLI lifecycle-operation-store should read-model-back all write-local command paths")
-    if lifecycle_store_payload["summary"]["fileDatabaseCompatibilityCheckCount"] != 7:
-        raise AssertionError("CLI lifecycle-operation-store should expose seven file/database compatibility checks")
+    if lifecycle_store_payload["summary"]["fileDatabaseCompatibilityCheckCount"] != len(REQUIRED_COMPATIBILITY_CLASSES):
+        raise AssertionError("CLI lifecycle-operation-store should expose file/database compatibility checks")
     if not lifecycle_store_payload["summary"]["fileDatabaseCompatibilityChecked"]:
         raise AssertionError("CLI lifecycle-operation-store should check file/database compatibility")
     lifecycle_boundary = lifecycle_store_payload["executionBoundary"]
@@ -2354,7 +2485,7 @@ def main() -> None:
     if not lifecycle_compat["migrationReceiptRequired"] or not lifecycle_compat["contentHashCheckRequired"]:
         raise AssertionError("CLI lifecycle-operation-store compatibility adapter should require receipts and content hashes")
     lifecycle_read_models = {item["readModelName"] for item in lifecycle_store_payload["readModels"]}
-    if "next_due_forecast" not in lifecycle_read_models or "recovery_actions" not in lifecycle_read_models:
+    if {"next_due_forecast", "recovery_actions", "pilot_findings"} - lifecycle_read_models:
         raise AssertionError("CLI lifecycle-operation-store should expose agent read models")
     lifecycle_scenarios = {item["scenarioName"]: item for item in lifecycle_store_payload["runtimeScenarios"]}
     if lifecycle_scenarios["retry-idempotent"]["duplicateRecordsCreated"] != 0:
@@ -2371,6 +2502,14 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store campaign bridge hashes should match source payloads")
     if lifecycle_scenarios["campaign-evidence-append"]["preflight"]["plannedWrites"][1]["recordType"] != "evidence_ledger_row":
         raise AssertionError("CLI lifecycle-operation-store campaign append bridge should write evidence ledger rows")
+    if lifecycle_scenarios["pilot-evidence-append"]["preflight"]["plannedWrites"][1]["recordType"] != "pilot_evidence_ledger_row":
+        raise AssertionError("CLI lifecycle-operation-store pilot append bridge should write pilot evidence ledger rows")
+    if "pilot_findings" not in lifecycle_scenarios["pilot-evidence-append"]["readModelEffects"]:
+        raise AssertionError("CLI lifecycle-operation-store pilot append bridge should update pilot findings")
+    if "calibration_status" in lifecycle_scenarios["pilot-evidence-append"]["readModelEffects"]:
+        raise AssertionError("CLI lifecycle-operation-store pilot append bridge must not update calibration status")
+    if "track_record_progress" in lifecycle_scenarios["pilot-evidence-append"]["readModelEffects"]:
+        raise AssertionError("CLI lifecycle-operation-store pilot append bridge must not update track-record progress")
     if "append_readiness" not in lifecycle_scenarios["campaign-score-create"]["readModelEffects"]:
         raise AssertionError("CLI lifecycle-operation-store scoring bridge should update append readiness")
     if "calibration_status" not in lifecycle_scenarios["campaign-evidence-append"]["readModelEffects"]:
@@ -2382,10 +2521,12 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store should map resolver write-local commands to lifecycle operations")
     if "prediction-campaign start --pre-calibrate --write-local" not in lifecycle_write_local_commands:
         raise AssertionError("CLI lifecycle-operation-store should map pre-calibrated starts to lifecycle operations")
+    if "pilot-evidence --input-summary --write-local" not in lifecycle_write_local_commands:
+        raise AssertionError("CLI lifecycle-operation-store should map pilot evidence writes to lifecycle operations")
     lifecycle_compatibility_classes = {
         item["recordClass"] for item in lifecycle_store_payload["fileDatabaseCompatibilityChecks"]
     }
-    if {"forecast_lifecycle_records", "resolution_records", "scoring_reports", "evidence_ledger_rows"} - lifecycle_compatibility_classes:
+    if {"forecast_lifecycle_records", "resolution_records", "scoring_reports", "evidence_ledger_rows", "pilot_evidence_ledger_rows"} - lifecycle_compatibility_classes:
         raise AssertionError("CLI lifecycle-operation-store should check file/database compatibility for campaign records")
     if any(item["databaseDuplicateRecordsCreated"] for item in lifecycle_store_payload["fileDatabaseCompatibilityChecks"]):
         raise AssertionError("CLI lifecycle-operation-store compatibility checks should prevent duplicate database records")
@@ -2402,6 +2543,12 @@ def main() -> None:
         raise AssertionError("CLI lifecycle-operation-store --scenario should print the requested scenario")
     if lifecycle_scenario_payload["preflight"]["plannedWrites"][1]["writeMode"] != "prospective_binding":
         raise AssertionError("CLI lifecycle-operation-store method rollback should be prospective")
+    pilot_lifecycle_scenario = run_cli("lifecycle-operation-store", "--scenario", "pilot-evidence-append")
+    pilot_lifecycle_payload = json.loads(pilot_lifecycle_scenario.stdout)
+    if pilot_lifecycle_payload["scenarioName"] != "pilot-evidence-append":
+        raise AssertionError("CLI lifecycle-operation-store --scenario should print the requested pilot scenario")
+    if pilot_lifecycle_payload["preflight"]["plannedWrites"][1]["recordType"] != "pilot_evidence_ledger_row":
+        raise AssertionError("CLI lifecycle-operation-store pilot scenario should plan a pilot evidence ledger row")
     run_optional_drift_check(
         "lifecycle-operation-store",
         "--check",
@@ -2724,6 +2871,60 @@ def main() -> None:
     if "checked prediction agent adoption" not in prediction_agent_adoption_check.stdout:
         raise AssertionError("CLI explain-fit --check did not check generated adoption output")
 
+    prediction_goal_catalog = run_cli("prediction-goal-catalog")
+    prediction_goal_catalog_payload = json.loads(prediction_goal_catalog.stdout)
+    if prediction_goal_catalog_payload["catalogStatus"] != "checked_domain_agnostic_goal_catalog":
+        raise AssertionError("CLI prediction-goal-catalog status drifted")
+    if prediction_goal_catalog_payload["summary"]["goalExampleCount"] != 8:
+        raise AssertionError("CLI prediction-goal-catalog should expose eight examples")
+    if prediction_goal_catalog_payload["summary"]["classificationCount"] != 4:
+        raise AssertionError("CLI prediction-goal-catalog classification coverage drifted")
+    if prediction_goal_catalog_payload["summary"]["helsinkiDefaultNarrative"] is not False:
+        raise AssertionError("CLI prediction-goal-catalog must not default to Helsinki")
+    if prediction_goal_catalog_payload["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI prediction-goal-catalog must block quality claims")
+    stockout_catalog = run_cli("prediction-goal-catalog", "--goal", "stockout_risk")
+    stockout_catalog_payload = json.loads(stockout_catalog.stdout)
+    if stockout_catalog_payload["classification"] != "forecastable":
+        raise AssertionError("CLI prediction-goal-catalog stockout goal should be forecastable")
+    catalog_summary = run_cli("prediction-goal-catalog", "--view", "summary")
+    catalog_summary_payload = json.loads(catalog_summary.stdout)
+    if catalog_summary_payload["view"] != "summary":
+        raise AssertionError("CLI prediction-goal-catalog summary view drifted")
+    prediction_goal_catalog_check = run_cli("prediction-goal-catalog", "--check")
+    if "checked prediction goal catalog" not in prediction_goal_catalog_check.stdout:
+        raise AssertionError("CLI prediction-goal-catalog --check did not check generated output")
+
+    setup_engine = run_cli("setup-engine", "--goal", "add predictions to my app")
+    setup_engine_payload = json.loads(setup_engine.stdout)
+    if setup_engine_payload["engineSetupStatus"] != "checked_readback":
+        raise AssertionError("CLI setup-engine status drifted")
+    if setup_engine_payload["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
+        raise AssertionError("CLI setup-engine should expose a forecastable first candidate")
+    if setup_engine_payload["candidateForecastContracts"][0]["baselineMethod"]["methodId"] != "historical_frequency_baseline":
+        raise AssertionError("CLI setup-engine should start from the historical baseline")
+    if setup_engine_payload["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("CLI setup-engine host wrapper should render before forecast artifacts")
+    if setup_engine_payload["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI setup-engine must keep quality claims blocked")
+    setup_engine_sources = run_cli("setup-engine", "--goal", "add predictions to my app", "--view", "sources")
+    setup_engine_sources_payload = json.loads(setup_engine_sources.stdout)
+    if setup_engine_sources_payload["view"] != "sources":
+        raise AssertionError("CLI setup-engine sources view drifted")
+    setup_role_names = {item["roleName"] for item in setup_engine_sources_payload["requiredSourceRoles"]}
+    if {"forecast_time_signal", "historical_outcome", "resolution_outcome"} - setup_role_names:
+        raise AssertionError("CLI setup-engine sources should expose domain-agnostic source roles")
+    setup_engine_examples = run_cli("setup-engine", "--goal", "add predictions to my app", "--view", "examples")
+    setup_engine_examples_payload = json.loads(setup_engine_examples.stdout)
+    if setup_engine_examples_payload["catalogBinding"]["predictionGoalCatalogId"] != "predictiongoalcatalog-001":
+        raise AssertionError("CLI setup-engine examples should bind prediction goal catalog")
+    setup_example_keys = {item["goalKey"] for item in setup_engine_examples_payload["exampleGoals"]}
+    if "public_transit_disruption_risk" not in setup_example_keys or "stockout_risk" not in setup_example_keys:
+        raise AssertionError("CLI setup-engine examples should expose generic catalog examples")
+    setup_engine_check = run_cli("setup-engine", "--check")
+    if "checked setup engine" not in setup_engine_check.stdout:
+        raise AssertionError("CLI setup-engine --check did not check generated output")
+
     agent_implementation_kit = run_cli("agent-implementation-kit")
     agent_implementation_kit_payload = json.loads(agent_implementation_kit.stdout)
     if agent_implementation_kit_payload["kitStatus"] != "agent_prediction_implementation_kit_checked":
@@ -2736,12 +2937,18 @@ def main() -> None:
         raise AssertionError("CLI agent-implementation-kit discovery must not create forecast artifacts")
     agent_implementation_quickstart = run_cli("agent-implementation-kit", "--view", "quickstart")
     agent_implementation_quickstart_payload = json.loads(agent_implementation_quickstart.stdout)
-    if agent_implementation_quickstart_payload["frontDoorStatus"] != "first_external_agent_entrypoint":
+    if agent_implementation_quickstart_payload["frontDoorStatus"] != "implementation_follow_up_entrypoint":
         raise AssertionError("CLI agent-implementation-kit quickstart status drifted")
-    if agent_implementation_quickstart_payload["steps"][0]["stepKey"] != "start_here":
+    if agent_implementation_quickstart_payload["steps"][0]["stepKey"] != "start_with_setup_engine":
         raise AssertionError("CLI agent-implementation-kit quickstart first step drifted")
-    if agent_implementation_quickstart_payload["steps"][1]["command"] != "python3 scripts/ope.py agent-integrate --view candidates":
-        raise AssertionError("CLI agent-implementation-kit quickstart candidate command drifted")
+    if agent_implementation_quickstart_payload["steps"][1]["stepKey"] != "render_host_wrapper_setup_plan":
+        raise AssertionError("CLI agent-implementation-kit quickstart setup-plan step drifted")
+    step_two_command = agent_implementation_quickstart_payload["steps"][1]["command"]
+    if "examples/embed-ope-prediction-feature/host_wrapper.py" not in step_two_command:
+        raise AssertionError("CLI agent-implementation-kit quickstart should render the host wrapper setup plan")
+    wrapper_call_sequence = agent_implementation_quickstart_payload["copyableWrapper"]["callSequence"]
+    if wrapper_call_sequence[:2] != ["setup_engine", "render_setup_engine_host_wrapper"]:
+        raise AssertionError("CLI agent-implementation-kit wrapper sequence should render setup engine before forecasts")
     if agent_implementation_quickstart_payload["copyableWrapper"]["storesCredentialValues"] is not False:
         raise AssertionError("CLI agent-implementation-kit quickstart wrapper must not store credentials")
     if agent_implementation_quickstart_payload["hostedRuntimeRequired"] is not False:
@@ -2848,8 +3055,18 @@ def main() -> None:
         raise AssertionError("CLI agent-guide should expose five guidance cases")
     if agent_guidance_summary_payload["promptPlannerReady"] is not True:
         raise AssertionError("CLI agent-guide should expose a ready prompt planner")
+    if agent_guidance_summary_payload["domainAgnosticFlowReady"] is not True:
+        raise AssertionError("CLI agent-guide should expose domain-agnostic setup flow")
     if agent_guidance_summary_payload["qualityClaimAllowed"] is not False:
         raise AssertionError("CLI agent-guide must not allow quality claims")
+    agent_guidance_generic = run_cli("agent-guide", "--section", "generic")
+    agent_guidance_generic_payload = json.loads(agent_guidance_generic.stdout)
+    if agent_guidance_generic_payload["flowStatus"] != "checked_domain_agnostic_setup_flow":
+        raise AssertionError("CLI agent-guide generic flow status drifted")
+    if 'python3 scripts/ope.py setup-engine --goal "<host prediction goal>"' not in agent_guidance_generic_payload["safeNextCommands"]:
+        raise AssertionError("CLI agent-guide generic flow should route through setup-engine")
+    if agent_guidance_generic_payload["keepsHelsinkiAsExample"] is not True:
+        raise AssertionError("CLI agent-guide generic flow should keep Helsinki as one example")
     agent_guidance_clarify = run_cli("agent-guide", "--case", "needs_clarification")
     agent_guidance_clarify_payload = json.loads(agent_guidance_clarify.stdout)
     if agent_guidance_clarify_payload["agentNextMove"] != "ask_user":
@@ -2866,7 +3083,7 @@ def main() -> None:
         raise AssertionError("CLI postgres-compatibility status drifted")
     if postgres_compatibility_payload["summary"]["tableCount"] != 8:
         raise AssertionError("CLI postgres-compatibility table count drifted")
-    if postgres_compatibility_payload["summary"]["scenarioCount"] != 15:
+    if postgres_compatibility_payload["summary"]["scenarioCount"] != len(SCENARIO_NAMES):
         raise AssertionError("CLI postgres-compatibility scenario count drifted")
     if postgres_compatibility_payload["postgresRuntimeImplemented"] is not False:
         raise AssertionError("CLI postgres-compatibility must not claim a Postgres runtime")
@@ -2880,8 +3097,11 @@ def main() -> None:
     postgres_scenario_payload = json.loads(postgres_scenarios.stdout)
     if postgres_scenario_payload[1]["expectedPostgresBehavior"] != "return_existing_receipt":
         raise AssertionError("CLI postgres-compatibility retry behavior drifted")
-    if postgres_scenario_payload[13]["migrationBoundary"] != "explicit_receipt_backed_import":
+    postgres_scenario_by_name = {item["scenarioName"]: item for item in postgres_scenario_payload}
+    if postgres_scenario_by_name["json-state-import"]["migrationBoundary"] != "explicit_receipt_backed_import":
         raise AssertionError("CLI postgres-compatibility migration boundary drifted")
+    if postgres_scenario_by_name["pilot-evidence-append"]["operationName"] != "evidence.append":
+        raise AssertionError("CLI postgres-compatibility should include pilot evidence append")
     postgres_check = run_cli("postgres-compatibility", "--check")
     if "checked postgres compatibility" not in postgres_check.stdout:
         raise AssertionError("CLI postgres-compatibility --check did not check generated output")
@@ -4287,8 +4507,8 @@ def main() -> None:
 
     agent_envelopes = run_cli("agent-envelopes")
     agent_envelopes_payload = json.loads(agent_envelopes.stdout)
-    if agent_envelopes_payload["count"] != 56:
-        raise AssertionError("CLI agent-envelopes should return forty-nine success envelopes and seven error envelopes")
+    if agent_envelopes_payload["count"] != 57:
+        raise AssertionError("CLI agent-envelopes should return fifty success envelopes and seven error envelopes")
     success_operations = {
         item["operation"]
         for item in agent_envelopes_payload["envelopes"]
@@ -4307,6 +4527,7 @@ def main() -> None:
         or "private_setup_source_handoff" not in success_operations
         or "private_setup_method_gate" not in success_operations
         or "private_setup_forecast_execution" not in success_operations
+        or "setup_engine" not in success_operations
         or "resolution_jobs" not in success_operations
         or "resolution_scheduler_status" not in success_operations
         or "campaign_plan" not in success_operations
@@ -4382,6 +4603,14 @@ def main() -> None:
         raise AssertionError("CLI agent-protocol-map should expose the conformance summary input type")
     if conformance_summary_operation["sideEffectLevel"] != "read_only":
         raise AssertionError("CLI agent-protocol-map should keep conformance summary read-only")
+    setup_engine_operation = protocol_operations["setup_engine"]
+    if setup_engine_operation["inputRecordType"] != "setup_engine":
+        raise AssertionError("CLI agent-protocol-map should expose setup-engine input type")
+    if setup_engine_operation["sideEffectLevel"] != "read_only":
+        raise AssertionError("CLI agent-protocol-map should keep setup-engine read-only")
+    setup_engine_fields = {item["name"] for item in setup_engine_operation["inputFields"]}
+    if {"goal", "view"} - setup_engine_fields:
+        raise AssertionError("CLI agent-protocol-map should expose setup-engine goal and view arguments")
     if protocol_operations["resolution_jobs"]["inputRecordType"] != "resolution_job_registry":
         raise AssertionError("CLI agent-protocol-map should expose resolution job registry readbacks")
     if protocol_operations["resolution_scheduler_status"]["inputRecordType"] != "resolution_scheduler_status":
@@ -4420,6 +4649,25 @@ def main() -> None:
     trace_call_payload = json.loads(trace_call.stdout)
     if trace_call_payload["payload"]["record"]["recordBinding"]["evidenceSourceSetId"] != "evidencesourceset-019":
         raise AssertionError("CLI evidence-trace agent-call should bind the source set")
+
+    setup_engine_call = run_cli(
+        "agent-call",
+        "--operation",
+        "setup_engine",
+        "--goal",
+        "add predictions to my app",
+        "--view",
+        "summary",
+    )
+    setup_engine_call_payload = json.loads(setup_engine_call.stdout)
+    if setup_engine_call_payload["status"] != "ok":
+        raise AssertionError("CLI setup-engine agent-call should return an ok envelope")
+    if setup_engine_call_payload["payload"]["view"] != "summary":
+        raise AssertionError("CLI setup-engine agent-call should preserve requested view")
+    if setup_engine_call_payload["payload"]["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("CLI setup-engine agent-call should render setup before forecast artifacts")
+    if setup_engine_call_payload["state"]["forecastStatus"] != "not_created_by_setup_engine":
+        raise AssertionError("CLI setup-engine agent-call must not create forecasts")
 
     private_setup_call = run_cli(
         "agent-call",

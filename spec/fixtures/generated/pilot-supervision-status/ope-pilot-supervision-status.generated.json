@@ -1,0 +1,153 @@
+{
+  "pilotSupervisionStatusId": "pilotsupervisionstatus-001",
+  "generatedAt": "2026-06-10T12:30:00Z",
+  "status": "real_sessions_needed",
+  "localEvidenceMode": "not_requested",
+  "localEvidenceStatus": "not_requested",
+  "localLedgerPath": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+  "sourceRecords": {
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "pilotSummaryIntakeId": "pilotsummaryintake-001",
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "simulatedAgentPilotId": "simulatedagentpilot-001"
+  },
+  "realSessionProgress": {
+    "acceptedRealSessionCount": 0,
+    "minimumRealSessions": 3,
+    "targetRealSessions": 5,
+    "remainingMinimumSessions": 3,
+    "remainingTargetSessions": 5,
+    "minimumMet": false,
+    "targetMet": false
+  },
+  "recommendedNextTask": {
+    "taskId": "agentpilottask-006",
+    "scenarioKey": "engine_setup_shortcut_comprehension",
+    "title": "Domain-agnostic setup-engine shortcut comprehension",
+    "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+    "taskCommand": "python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+    "expectedOutcomeClass": "setup_engine_shortcut_readback",
+    "measures": [
+      "task_completion",
+      "engine_setup_shortcut_comprehension",
+      "ope_host_responsibility_split",
+      "parallel_risk_engine_avoidance",
+      "claim_boundary_comprehension"
+    ],
+    "claimBoundaryRequired": true,
+    "reason": "Real sessions should verify that agents treat OPE as the first setup engine before proposing a custom lightweight risk engine or audit-only layer."
+  },
+  "commandSequence": [
+    {
+      "stepKey": "open_task_packet",
+      "order": 1,
+      "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+      "expectedOperatorAction": "Open the checked setup-comprehension task card before the supervised session starts.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "use_agent_guide",
+      "order": 2,
+      "command": "python3 scripts/ope.py agent-guide --section generic",
+      "expectedOperatorAction": "Keep the generic agent guidance loop visible before narrowing to an example domain.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "classify_summary",
+      "order": 3,
+      "command": "python3 scripts/ope.py pilot-summary-intake --input <summary.json>",
+      "expectedOperatorAction": "Classify a moderator-approved sanitized summary without writing any evidence row.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "append_local_evidence",
+      "order": 4,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary <summary.json> --write-local",
+      "expectedOperatorAction": "Append only accepted sanitized summaries to the ignored local ledger after explicit approval.",
+      "mutatesLocalState": true
+    },
+    {
+      "stepKey": "review_findings",
+      "order": 5,
+      "command": "python3 scripts/ope.py pilot-findings --from-local-ledger --section summary",
+      "expectedOperatorAction": "Review adoption findings with ignored local evidence included.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "review_status",
+      "order": 6,
+      "command": "python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary",
+      "expectedOperatorAction": "Confirm remaining real-session count and blocked expansion boundaries.",
+      "mutatesLocalState": false
+    }
+  ],
+  "evidenceLoopChecks": [
+    {
+      "checkKey": "sanitized_summary_required",
+      "required": true,
+      "command": "python3 scripts/ope.py pilot-summary-intake --input <summary.json>",
+      "acceptance": "The intake decision is accept_for_ledger_review or accept_with_product_signal before append."
+    },
+    {
+      "checkKey": "local_write_explicit",
+      "required": true,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary <summary.json> --write-local",
+      "acceptance": "The operator explicitly requested --write-local after moderator sanitization review."
+    },
+    {
+      "checkKey": "local_ledger_review",
+      "required": true,
+      "command": "python3 scripts/ope.py pilot-findings --from-local-ledger --section summary",
+      "acceptance": "Accepted real-session count updates only from ignored local ledger rows."
+    },
+    {
+      "checkKey": "no_quality_upgrade",
+      "required": true,
+      "command": "python3 scripts/ope.py expansion-readiness",
+      "acceptance": "Hosted runtime, generated types, stronger methods, calibration, and quality claims remain blocked."
+    }
+  ],
+  "executionBoundary": {
+    "readOnlyStatus": true,
+    "usesCheckedPilotPacket": true,
+    "writesCheckedFixtures": false,
+    "writesIgnoredLocalLedger": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "unblocksExpansion": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hostedRuntimeUnblocked": false,
+    "generatedTypesUnblocked": false
+  },
+  "warnings": [
+    "This status readback does not run pilot sessions or write local evidence.",
+    "Use --from-local-ledger only when intentionally inspecting ignored local pilot evidence.",
+    "Do not commit .ope/live pilot evidence; store only sanitized summaries after moderator approval.",
+    "Pilot evidence can guide adoption fixes, but it does not upgrade forecast quality, calibration, hosted runtime, or generated-type claims."
+  ],
+  "summary": {
+    "status": "real_sessions_needed",
+    "localEvidenceMode": "not_requested",
+    "localEvidenceStatus": "not_requested",
+    "localLedgerPath": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+    "acceptedRealSessionCount": 0,
+    "minimumRealSessions": 3,
+    "targetRealSessions": 5,
+    "remainingMinimumSessions": 3,
+    "remainingTargetSessions": 5,
+    "minimumMet": false,
+    "targetMet": false,
+    "recommendedScenarioKey": "engine_setup_shortcut_comprehension",
+    "recommendedCommand": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+    "pilotEvidenceReady": false,
+    "expansionEvidenceReady": false,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "hostedRuntimeAllowed": false,
+    "generatedTypesEvidenceReady": false
+  }
+}

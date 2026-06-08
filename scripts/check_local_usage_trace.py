@@ -17,13 +17,14 @@ def main() -> None:
     aggregate = trace_model["aggregateReadbacks"]
 
     require([item["recordBinding"]["sourceCase"] for item in events] == EVENT_ORDER, "usage events should stay in checked order")
-    require(aggregate["totalEvents"] == 24, "usage trace should expose twenty-four checked events")
-    require(aggregate["successfulEvents"] == 21, "usage trace success count drifted")
+    require(aggregate["totalEvents"] == 27, "usage trace should expose twenty-seven checked events")
+    require(aggregate["successfulEvents"] == 24, "usage trace success count drifted")
     require(aggregate["blockedEvents"] == 3, "usage trace blocked count drifted")
     require(aggregate["sanitizedErrorEvents"] == 3, "usage trace sanitized error count drifted")
     require(aggregate["forecastCompletionRate"] == 1.0, "forecast completion rate drifted")
     require(aggregate["agentReadSuccessRate"] == 0.6667, "agent read success rate drifted")
-    require(aggregate["blockedPathFrequency"] == 0.125, "blocked path frequency drifted")
+    require(aggregate["blockedPathFrequency"] == 0.1111, "blocked path frequency drifted")
+    require(aggregate["setupEngineFirstRate"] == 0.8, "setup-engine-first rate drifted")
     require(aggregate["hostedTelemetryEnabled"] is False, "hosted telemetry must remain disabled")
     require(aggregate["normalChecksUseLiveNetwork"] is False, "normal checks should stay offline")
 
@@ -33,9 +34,10 @@ def main() -> None:
     metrics = {row["metricId"]: row for row in trace_model["productMetricReadbacks"]}
     require(metrics["agent_forecast_completion_rate"]["value"] == 1.0, "forecast completion metric drifted")
     require(metrics["agent_read_success_rate"]["value"] == 0.6667, "read success metric drifted")
-    require(metrics["blocked_path_frequency"]["value"] == 0.125, "blocked path metric drifted")
+    require(metrics["blocked_path_frequency"]["value"] == 0.1111, "blocked path metric drifted")
     require(metrics["local_only_privacy_rate"]["value"] == 1.0, "privacy metric drifted")
     require(metrics["agent_integration_first_forecast_fast"]["value"] == 1.0, "agent integration fast forecast metric drifted")
+    require(metrics["setup_engine_first_rate"]["value"] == 0.8, "setup-engine-first metric drifted")
 
     blocked = [item for item in events if item["outcome"] == "blocked"]
     require({item["trace"]["sanitizedErrorClass"] for item in blocked} == {"blocked_unsafe", "response_too_large", "missing_source"}, "blocked events should have sanitized classes")
@@ -56,6 +58,17 @@ def main() -> None:
             "campaign_stopped",
         ],
         "campaign usage event order drifted",
+    )
+    comprehension_events = [item for item in events if item["eventClass"] == "setup_comprehension"]
+    require(len(comprehension_events) == 3, "usage trace should include three setup-comprehension events")
+    require(
+        [item["recordBinding"]["sourceCase"] for item in comprehension_events]
+        == [
+            "setup_engine_stockout_comprehension",
+            "setup_engine_sla_comprehension",
+            "setup_engine_audit_layer_confusion",
+        ],
+        "setup-comprehension usage event order drifted",
     )
     for item in events:
         privacy = item["privacy"]

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 from ope_fixtures import render_json
@@ -374,11 +375,12 @@ def planned_writes(request: dict[str, Any]) -> list[dict[str, str]]:
             },
         ]
     if operation_name == "evidence.append":
+        record_type = request.get("evidenceLedgerRecordType", "evidence_ledger_row")
         return [
             receipt_write,
             {
                 "tableName": "evidence_ledger_rows",
-                "recordType": "evidence_ledger_row",
+                "recordType": record_type,
                 "recordId": request["targetRecordId"],
                 "writeMode": "append_only",
             },
@@ -921,6 +923,7 @@ def schema_file_for_record_type(record_type: str) -> str:
         "pre_calibration_binding": "spec/prediction-campaign-pre-calibration.schema.json",
         "method_update_audit": "spec/prediction-campaign-method-update-action.schema.json",
         "evidence_ledger_row": "spec/prediction-campaign-evidence-ledger.schema.json",
+        "pilot_evidence_ledger_row": "spec/pilot-evidence-local-append.schema.json",
         "run_state_projection": "spec/lifecycle-operation.schema.json",
         "campaign_state_projection": "spec/lifecycle-operation.schema.json",
         "method_binding_state": "spec/lifecycle-operation.schema.json",
@@ -1073,6 +1076,23 @@ def update_read_models(
             now=now,
         )
     if request["operationName"] == "evidence.append" and operation_status == "committed":
+        evidence_kind = request.get("payload", {}).get("evidenceKind")
+        if evidence_kind == "pilot_session_summary":
+            put_read_model(
+                conn,
+                "pilot_findings",
+                request["targetRecordId"],
+                {
+                    "pilotEvidenceRowId": request["targetRecordId"],
+                    "sourceSummaryId": request["payload"].get("sourceSummaryId", ""),
+                    "operationReceiptId": receipt_id,
+                    "acceptedRealSessionEvidence": True,
+                    "qualityClaimAllowed": False,
+                    "calibrationClaimAllowed": False,
+                },
+                now=now,
+            )
+            return
         put_read_model(
             conn,
             "append_readiness",
@@ -1375,6 +1395,14 @@ def read_model_effects_for_result(result: dict[str, Any]) -> list[str]:
     if operation_name == "score.create" and status == "committed":
         effects.append("append_readiness")
     if operation_name == "evidence.append" and status == "committed":
+        record_types = {
+            write["recordType"]
+            for write in result["preflight"]["plannedWrites"]
+            if write["tableName"] != "operation_receipts"
+        }
+        if "pilot_evidence_ledger_row" in record_types:
+            effects.append("pilot_findings")
+            return list(dict.fromkeys(effects))
         effects.extend(["append_readiness", "calibration_status", "track_record_progress"])
     return list(dict.fromkeys(effects))
 
@@ -1508,6 +1536,39 @@ def campaign_evidence_append_request() -> dict[str, Any]:
         "qualityClaimAllowed": False,
     }
     return attach_record_payloads(request, [("evidence_ledger_row", row["rowId"], row)])
+
+
+def pilot_evidence_append_request() -> dict[str, Any]:
+    from generate_pilot_evidence_ledger import build_local_pilot_evidence_append_plan
+
+    plan = build_local_pilot_evidence_append_plan(
+        Path("spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json")
+    )
+    row = plan["candidateRow"]
+    if not isinstance(row, dict):
+        raise LifecycleOperationRuntimeError("pilot evidence append scenario requires an accepted candidate row")
+    request = base_request(
+        operation_name="evidence.append",
+        receipt_id="operationreceipt-3351",
+        target_record_id=row["caseId"],
+        run_id="pilotsessionrun-001",
+        forecast_id="pilotadoption-001",
+        idempotency_key=f"pilot-evidence:{row['sourceSummaryId']}",
+        source_hash=source_hash_for_hashes(rendered_content_hash(row)),
+    )
+    request["campaignId"] = "pilotevidence-001"
+    request["leaseResourceId"] = "pilotevidence-001:pilot-evidence-ledger"
+    request["evidenceLedgerRecordType"] = "pilot_evidence_ledger_row"
+    request["payload"] = {
+        "evidenceKind": "pilot_session_summary",
+        "pilotEvidenceAppendPlanId": plan["pilotEvidenceAppendPlanId"],
+        "sourceSummaryId": row["sourceSummaryId"],
+        "caseId": row["caseId"],
+        "appendOnly": True,
+        "qualityClaimAllowed": False,
+        "calibrationClaimAllowed": False,
+    }
+    return attach_record_payloads(request, [("pilot_evidence_ledger_row", row["caseId"], row)])
 
 
 def campaign_method_operation_request(operation: str) -> dict[str, Any]:
@@ -1782,6 +1843,14 @@ def file_database_compatibility_checks() -> list[dict[str, Any]]:
             request=campaign_method_operation_request("rollback"),
             file_mode_repeat_status="local_rollback_already_present",
         ),
+        database_idempotency_replay_check(
+            check_id="compatibilitycheck-008",
+            record_class="pilot_evidence_ledger_rows",
+            command_path="pilot-evidence --input-summary --write-local",
+            scenario_name="pilot-evidence-append",
+            request=pilot_evidence_append_request(),
+            file_mode_repeat_status="local_pilot_evidence_already_recorded",
+        ),
     ]
 
 
@@ -1928,16 +1997,20 @@ def run_runtime_scenarios() -> list[dict[str, Any]]:
     scenarios.append(scenario_summary("lifecyclescenario-011", "campaign-evidence-append", campaign_append_result))
 
     conn = open_sqlite()
+    pilot_append_result = execute_operation(conn, pilot_evidence_append_request())
+    scenarios.append(scenario_summary("lifecyclescenario-012", "pilot-evidence-append", pilot_append_result))
+
+    conn = open_sqlite()
     campaign_apply_result = execute_operation(conn, campaign_method_operation_request("apply"))
-    scenarios.append(scenario_summary("lifecyclescenario-012", "campaign-method-apply", campaign_apply_result))
+    scenarios.append(scenario_summary("lifecyclescenario-013", "campaign-method-apply", campaign_apply_result))
 
     conn = open_sqlite()
     campaign_rollback_result = execute_operation(conn, campaign_method_operation_request("rollback"))
-    scenarios.append(scenario_summary("lifecyclescenario-013", "campaign-method-rollback", campaign_rollback_result))
+    scenarios.append(scenario_summary("lifecyclescenario-014", "campaign-method-rollback", campaign_rollback_result))
 
     conn = open_sqlite()
     json_import_result = execute_operation(conn, json_state_import_request())
-    scenarios.append(scenario_summary("lifecyclescenario-014", "json-state-import", json_import_result))
+    scenarios.append(scenario_summary("lifecyclescenario-015", "json-state-import", json_import_result))
 
     conn = open_sqlite()
     recovery_request = base_request(
@@ -1951,6 +2024,6 @@ def run_runtime_scenarios() -> list[dict[str, Any]]:
         recovery_path="record_resolution_then_retry_score_create_with_same_idempotency_key",
     )
     recovery_result = execute_operation(conn, recovery_request)
-    scenarios.append(scenario_summary("lifecyclescenario-015", "recovery", recovery_result))
+    scenarios.append(scenario_summary("lifecyclescenario-016", "recovery", recovery_result))
 
     return scenarios

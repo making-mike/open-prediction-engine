@@ -101,6 +101,8 @@ def task_card(task: dict[str, Any]) -> dict[str, Any]:
         friction_options.append("source_runtime_gap")
     if "runtime_gap_classification" in task["measures"]:
         friction_options.append("schema_integration_friction")
+    if "engine_setup_shortcut_comprehension" in task["measures"]:
+        friction_options.extend(["parallel_risk_engine_confusion", "audit_layer_only_confusion"])
     expansion_options = ["keep_local_mvp", "run_more_pilots", "improve_docs"]
     if "runtime_gap_classification" in task["measures"]:
         expansion_options.append("consider_next_source_runtime")
@@ -301,6 +303,7 @@ def validate_packet(packet: dict[str, Any]) -> None:
         "unsafe_source_block",
         "forecast_run_readback",
         "claim_gate_readback",
+        "engine_setup_shortcut_comprehension",
         "repeating_prediction_campaign",
     ]
     if [item["scenarioKey"] for item in task_cards] != expected_order:
@@ -392,6 +395,7 @@ def main() -> None:
             "unsafe_source_block",
             "forecast_run_readback",
             "claim_gate_readback",
+            "engine_setup_shortcut_comprehension",
             "repeating_prediction_campaign",
         ],
         help="print one pilot session task card",

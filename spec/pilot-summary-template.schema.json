@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-summary-template.schema.json",
+  "title": "Pilot Summary Template",
+  "description": "Read-only sanitized pilot summary draft template for supervised pilot operators. The included draft is valid input shape but intentionally not ledger-ready until an operator fills ratings and clears sanitization risks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotSummaryTemplateId",
+    "generatedAt",
+    "templateStatus",
+    "bindings",
+    "recommendedTask",
+    "draftSubmission",
+    "fieldGuidance",
+    "sanitizationChecklist",
+    "commandSequence",
+    "templateSafety",
+    "executionBoundary",
+    "warnings",
+    "summary"
+  ],
+  "properties": {
+    "pilotSummaryTemplateId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "templateStatus": {
+      "type": "string",
+      "enum": ["ready_for_operator_fill"]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pilotSessionPacketId",
+        "pilotSessionReviewId",
+        "pilotSummaryIntakeId",
+        "pilotEvidenceLedgerId",
+        "pilotSupervisionStatusId",
+        "pilotSummarySubmissionSchema"
+      ],
+      "properties": {
+        "pilotSessionPacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSessionReviewId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSummaryIntakeId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotEvidenceLedgerId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSupervisionStatusId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSummarySubmissionSchema": { "type": "string", "const": "spec/pilot-summary-submission.schema.json" }
+      }
+    },
+    "recommendedTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId", "scenarioKey", "title", "taskCommand", "expectedOutcomeClass", "measures"],
+      "properties": {
+        "taskId": { "$ref": "common.schema.json#/$defs/id" },
+        "scenarioKey": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 220 },
+        "taskCommand": { "type": "string", "minLength": 1, "maxLength": 260 },
+        "expectedOutcomeClass": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "measures": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        }
+      }
+    },
+    "draftSubmission": { "$ref": "pilot-summary-submission.schema.json" },
+    "fieldGuidance": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/fieldGuidance" }
+    },
+    "sanitizationChecklist": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/checklistItem" }
+    },
+    "commandSequence": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/commandStep" }
+    },
+    "templateSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "draftClassifiesAs",
+        "draftLedgerReady",
+        "draftContributesRealSessionEvidence",
+        "draftWritesLedgerRows",
+        "unchangedDraftAppendAllowed"
+      ],
+      "properties": {
+        "draftClassifiesAs": {
+          "type": "string",
+          "enum": ["needs_redaction"]
+        },
+        "draftLedgerReady": { "type": "boolean" },
+        "draftContributesRealSessionEvidence": { "type": "boolean" },
+        "draftWritesLedgerRows": { "type": "boolean" },
+        "unchangedDraftAppendAllowed": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyTemplate",
+        "writesCheckedFixtures",
+        "writesIgnoredLocalLedger",
+        "runsPilotSessions",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "hostedRuntimeUnblocked",
+        "generatedTypesUnblocked"
+      ],
+      "properties": {
+        "readOnlyTemplate": { "type": "boolean" },
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLocalLedger": { "type": "boolean" },
+        "runsPilotSessions": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" },
+        "hostedRuntimeUnblocked": { "type": "boolean" },
+        "generatedTypesUnblocked": { "type": "boolean" }
+      }
+    },
+    "warnings": { "$ref": "#/$defs/boundedStringList" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "templateStatus",
+        "recommendedScenarioKey",
+        "recommendedTaskId",
+        "draftSummaryId",
+        "draftClassifiesAs",
+        "draftLedgerReady",
+        "draftContributesRealSessionEvidence",
+        "realSessionsRecorded",
+        "ledgerRowsWritten",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesEvidenceReady",
+        "expansionEvidenceReady"
+      ],
+      "properties": {
+        "templateStatus": { "type": "string", "enum": ["ready_for_operator_fill"] },
+        "recommendedScenarioKey": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "recommendedTaskId": { "$ref": "common.schema.json#/$defs/id" },
+        "draftSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+        "draftClassifiesAs": { "type": "string", "enum": ["needs_redaction"] },
+        "draftLedgerReady": { "type": "boolean" },
+        "draftContributesRealSessionEvidence": { "type": "boolean" },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "ledgerRowsWritten": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" },
+        "expansionEvidenceReady": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "boundedString": { "type": "string", "minLength": 1, "maxLength": 620 },
+    "boundedStringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "fieldGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fieldName", "required", "allowedValues", "operatorInstruction"],
+      "properties": {
+        "fieldName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "required": { "type": "boolean" },
+        "allowedValues": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        },
+        "operatorInstruction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "checklistItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "required", "check"],
+      "properties": {
+        "checkId": { "$ref": "common.schema.json#/$defs/id" },
+        "required": { "type": "boolean" },
+        "check": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepKey", "order", "command", "expectedOperatorAction", "mutatesLocalState"],
+      "properties": {
+        "stepKey": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "order": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "command": { "type": "string", "minLength": 1, "maxLength": 260 },
+        "expectedOperatorAction": { "$ref": "#/$defs/boundedString" },
+        "mutatesLocalState": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from generate_pilot_evidence_ledger import LOCAL_PILOT_LEDGER, build_local_pilot_evidence_readback
 from ope_schema import SPEC, validate_record
 from ope_fixtures import render_json
 
@@ -62,7 +63,11 @@ def upstream_records() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], 
     return ledger, summary_intake, packet, simulated
 
 
-def friction_summary(ledger: dict[str, Any], simulated: dict[str, Any]) -> list[dict[str, Any]]:
+def friction_summary(
+    ledger: dict[str, Any],
+    simulated: dict[str, Any],
+    local_rows: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     counter: Counter[str] = Counter()
     for row in ledger["caseRows"]:
         for friction_class in row["frictionClasses"]:
@@ -71,22 +76,34 @@ def friction_summary(ledger: dict[str, Any], simulated: dict[str, Any]) -> list[
     for session in simulated["simulatedSessions"]:
         for friction_class in session["frictionClasses"]:
             simulated_counter[friction_class] += 1
+    real_counter: Counter[str] = Counter()
+    for row in local_rows or []:
+        if not row["contributesRealSessionEvidence"]:
+            continue
+        for friction_class in row["frictionClasses"]:
+            real_counter[friction_class] += 1
     interpretations = {
         "claim_boundary_confusion": "Synthetic and simulated examples show claim-copy and retrospective-proof warnings still need real pilot validation.",
         "privacy_redaction_needed": "Synthetic and simulated examples show sanitization review is required before evidence can count.",
         "readback_navigation": "Synthetic and simulated examples suggest agents may need clearer card, bundle, and scoped readback routing.",
         "source_runtime_gap": "Simulated examples identify source-runtime gaps without unblocking private-source execution.",
         "none": "Accepted synthetic and simulated examples show the intended path, but they are not real-session evidence.",
+        "parallel_risk_engine_confusion": "A simulated non-Helsinki prompt proposed a separate risk engine before OPE setup, so first-command comprehension needs real-session validation.",
+        "audit_layer_only_confusion": "A simulated non-Helsinki prompt described OPE as post-hoc audit only, so setup-shortcut positioning needs real-session validation.",
     }
     return [
         {
             "frictionClass": key,
             "syntheticSignalCount": counter[key],
             "simulatedAgentSignalCount": simulated_counter[key],
-            "realSessionSignalCount": 0,
-            "interpretation": interpretations.get(key, "Non-real signal; wait for real sanitized sessions."),
+            "realSessionSignalCount": real_counter[key],
+            "interpretation": (
+                "Accepted ignored-local pilot evidence has observed this friction; review it as adoption evidence only."
+                if real_counter[key]
+                else interpretations.get(key, "Non-real signal; wait for real sanitized sessions.")
+            ),
         }
-        for key in sorted(set(counter) | set(simulated_counter))
+        for key in sorted(set(counter) | set(simulated_counter) | set(real_counter))
     ]
 
 
@@ -103,6 +120,12 @@ def next_actions() -> list[dict[str, str]]:
             "status": "required",
             "command": "python3 scripts/ope.py pilot-session-packet",
             "reason": "Three to five supervised sessions are still required before adoption findings can be accepted.",
+        },
+        {
+            "actionKey": "measure_engine_setup_comprehension",
+            "status": "required_in_next_sessions",
+            "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+            "reason": "Real sessions should check whether agents run setup-engine before inventing a parallel risk engine.",
         },
         {
             "actionKey": "classify_sanitized_summaries",
@@ -132,11 +155,30 @@ def execution_boundary() -> dict[str, bool]:
     }
 
 
-def build_pilot_findings() -> dict[str, Any]:
+def build_pilot_findings(
+    *,
+    from_local_ledger: bool = False,
+    local_ledger_path: Path | None = None,
+) -> dict[str, Any]:
     ledger, summary_intake, packet, simulated = upstream_records()
     ledger_summary = ledger["summary"]
     simulated_summary = simulated["summary"]
-    real_count = ledger_summary["acceptedRealSessionCount"]
+    if from_local_ledger:
+        local_readback = build_local_pilot_evidence_readback(local_ledger_path=local_ledger_path)
+        local_summary = local_readback["summary"]
+        local_rows = local_readback["caseRows"]
+        local_mode = "ignored_local_ledger"
+        local_status = local_readback["localLedgerStatus"]
+        local_path = local_readback["localLedgerPath"]
+        local_row_count = local_summary["totalLocalRowCount"]
+        real_count = local_summary["acceptedRealSessionCount"]
+    else:
+        local_rows = []
+        local_mode = "not_requested"
+        local_status = "not_requested"
+        local_path = str(LOCAL_PILOT_LEDGER.relative_to(ROOT))
+        local_row_count = 0
+        real_count = ledger_summary["acceptedRealSessionCount"]
     simulated_count = simulated_summary["simulatedSessionCount"]
     minimum = ledger_summary["minimumRealSessions"]
     target = ledger_summary["targetRealSessions"]
@@ -159,12 +201,20 @@ def build_pilot_findings() -> dict[str, Any]:
             "pilotSessionPacketId": packet["pilotSessionPacketId"],
             "simulatedAgentPilotId": simulated["simulatedAgentPilotId"],
         },
-        "frictionSummary": friction_summary(ledger, simulated),
+        "frictionSummary": friction_summary(ledger, simulated, local_rows),
         "nextActions": next_actions(),
         "executionBoundary": execution_boundary(),
         "summary": {
             "acceptedRealSessionCount": real_count,
             "acceptedSimulatedAgentSessionCount": simulated_count,
+            "nonHelsinkiSimulatedSessionCount": simulated_summary["nonHelsinkiSessionCount"],
+            "setupEngineFirstRate": simulated_summary["setupEngineFirstRate"],
+            "parallelRiskEngineProposalCount": simulated_summary["parallelRiskEngineProposalCount"],
+            "auditLayerConfusionCount": simulated_summary["auditLayerConfusionCount"],
+            "localPilotEvidenceMode": local_mode,
+            "localPilotEvidenceStatus": local_status,
+            "localLedgerPath": local_path,
+            "localLedgerRowCount": local_row_count,
             "minimumRealSessions": minimum,
             "targetRealSessions": target,
             "agentSimulationEvidenceReady": simulation_ready,
@@ -192,9 +242,14 @@ def main() -> None:
         choices=["summary", "friction", "next-actions", "boundary"],
         help="print one pilot findings section",
     )
+    parser.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="include ignored local pilot evidence rows from .ope/live",
+    )
     args = parser.parse_args()
 
-    record = build_pilot_findings()
+    record = build_pilot_findings(from_local_ledger=args.from_local_ledger)
     validate_pilot_findings(record)
     rendered = render_json(record)
 

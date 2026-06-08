@@ -33,6 +33,7 @@ REQUIRED_SUCCESS_OPERATIONS = {
     "private_setup_source_handoff",
     "private_setup_method_gate",
     "private_setup_forecast_execution",
+    "setup_engine",
     "campaign_plan",
     "campaign_status",
     "campaign_health",
@@ -66,8 +67,8 @@ def main() -> None:
     envelopes = build_envelopes()
     if set(envelopes) != set(OUTPUT_FILES.values()):
         raise AssertionError("agent adapter should emit the expected fixed envelope filenames")
-    if len(envelopes) != 56:
-        raise AssertionError("agent adapter should emit forty-nine success envelopes and seven error envelopes")
+    if len(envelopes) != 57:
+        raise AssertionError("agent adapter should emit fifty success envelopes and seven error envelopes")
     cache_info = source_handoff_forecast_outputs_cache_info()
     if cache_info.misses != 1 or cache_info.hits < len(FORECAST_EXECUTION_ENVELOPE_CASES) - 1:
         raise AssertionError("agent adapter should reuse source-handoff forecast outputs across execution cases")
@@ -76,8 +77,8 @@ def main() -> None:
     error = [item for item in envelopes.values() if item["status"] == "error"]
     if {item["operation"] for item in success} != REQUIRED_SUCCESS_OPERATIONS:
         raise AssertionError("agent adapter success envelopes should cover every required operation")
-    if len(success) != 49:
-        raise AssertionError("agent adapter should include exactly forty-nine success examples")
+    if len(success) != 50:
+        raise AssertionError("agent adapter should include exactly fifty success examples")
     if len(error) != 7:
         raise AssertionError("agent adapter should include exactly seven sanitized error examples")
     if any(item["exitCode"] != 0 for item in success):
@@ -209,6 +210,19 @@ def main() -> None:
         raise AssertionError("scoring-summary envelope should preserve positive baseline lift")
     if scoring["recordBinding"]["scoringReportId"] != "scoring-601":
         raise AssertionError("scoring-summary envelope should preserve scoring binding")
+
+    setup_engine = success_envelope("setup_engine")
+    setup_payload = setup_engine["payload"]
+    if setup_payload["setupEngineId"] != "setupengine-001":
+        raise AssertionError("setup-engine envelope should return the checked setup-engine record")
+    if setup_payload["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
+        raise AssertionError("setup-engine envelope should expose a forecastable first candidate")
+    if setup_payload["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("setup-engine envelope should render before forecast artifacts")
+    if setup_payload["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("setup-engine envelope must keep quality claims blocked")
+    if setup_engine["state"]["forecastStatus"] != "not_created_by_setup_engine":
+        raise AssertionError("setup-engine envelope must not create forecasts")
 
     resolution_jobs = success_envelope("resolution_jobs")
     resolution_jobs_payload = resolution_jobs["payload"]

@@ -39,6 +39,7 @@ OPERATIONS = [
     "agent_integration_readiness",
     "agent_integration_candidates",
     "agent_integration_guided_forecast",
+    "setup_engine",
     "campaign_plan",
     "campaign_status",
     "campaign_health",
@@ -69,6 +70,7 @@ INPUT_RECORD_TYPES = {
     "agent_integration_readiness": "agent_integration",
     "agent_integration_candidates": "agent_integration",
     "agent_integration_guided_forecast": "agent_integration",
+    "setup_engine": "setup_engine",
     "campaign_plan": "prediction_campaign_manifest",
     "campaign_status": "prediction_campaign_explain",
     "campaign_health": "prediction_campaign_doctor",
@@ -99,6 +101,7 @@ SIDE_EFFECT_LEVELS = {
     "agent_integration_readiness": "read_only",
     "agent_integration_candidates": "read_only",
     "agent_integration_guided_forecast": "read_only",
+    "setup_engine": "read_only",
     "campaign_plan": "read_only",
     "campaign_status": "read_only",
     "campaign_health": "read_only",
@@ -129,6 +132,7 @@ USAGE_GUIDANCE = {
     "agent_integration_readiness": "Use when an agent wants to know whether OPE can be incorporated into a local app from approved files or sanitized adapter outputs without executing source reads.",
     "agent_integration_candidates": "Use when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.",
     "agent_integration_guided_forecast": "Use when an agent has accepted source context and wants the fastest checked path to a forecast-card read command without hidden live fetches or private-source execution.",
+    "setup_engine": "Use first when an agent has a host prediction goal and needs candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before building a host risk engine.",
     "campaign_plan": "Use when an agent needs the checked repeating campaign plan and candidate run IDs without starting a runner.",
     "campaign_status": "Use when an agent needs the campaign explain readback for next forecast, next resolution, evidence threshold, and claim boundary without creating campaign artifacts.",
     "campaign_health": "Use when an agent needs campaign doctor health, queue, duplicate, and recovery guidance without executing resolvers.",
@@ -159,6 +163,7 @@ HTTP_PATHS = {
     "agent_integration_readiness": "/agent/agent-integration-readiness",
     "agent_integration_candidates": "/agent/agent-integration-candidates",
     "agent_integration_guided_forecast": "/agent/agent-integration-guided-forecast",
+    "setup_engine": "/agent/setup-engine",
     "campaign_plan": "/agent/campaign-plan",
     "campaign_status": "/agent/campaign-status",
     "campaign_health": "/agent/campaign-health",
@@ -441,6 +446,24 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
             ),
             *common,
         ]
+    if operation == "setup_engine":
+        return [
+            field(
+                "goal",
+                False,
+                "string",
+                "agent-call --goal",
+                "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal.",
+            ),
+            field(
+                "view",
+                False,
+                "string",
+                "agent-call --view",
+                "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples.",
+            ),
+            *common,
+        ]
     return [
         field(
             "forecastId",
@@ -550,6 +573,12 @@ def cli_command(operation: str) -> str:
             "--scenario helsinki_bus_disruption "
             "--case accepted_adapter_output"
         )
+    if operation == "setup_engine":
+        return (
+            "python3 scripts/ope.py agent-call "
+            "--operation setup_engine "
+            "--goal \"add predictions to my app\""
+        )
     if operation in {
         "campaign_plan",
         "campaign_status",
@@ -597,6 +626,7 @@ def approval_gate(operation: str) -> str:
         "agent_integration_readiness",
         "agent_integration_candidates",
         "agent_integration_guided_forecast",
+        "setup_engine",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -652,6 +682,8 @@ def credential_boundary(operation: str) -> str:
         "agent_integration_guided_forecast",
     }:
         return "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
+    if operation == "setup_engine":
+        return "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
     if operation in {
         "campaign_plan",
         "campaign_status",

@@ -67,8 +67,8 @@
     },
     "operations": {
       "type": "array",
-      "minItems": 27,
-      "maxItems": 27,
+      "minItems": 28,
+      "maxItems": 28,
       "items": { "$ref": "#/$defs/operationMap" }
     },
     "exitCodeMapping": {
@@ -121,6 +121,7 @@
         "agent_integration_readiness",
         "agent_integration_candidates",
         "agent_integration_guided_forecast",
+        "setup_engine",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -151,6 +152,7 @@
         "source_handoff_method_gate",
         "setup_forecast_run",
         "agent_integration",
+        "setup_engine",
         "prediction_campaign_manifest",
         "prediction_campaign_explain",
         "prediction_campaign_doctor",

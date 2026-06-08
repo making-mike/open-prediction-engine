@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Iterable
@@ -775,6 +777,97 @@ def assert_prediction_feature_setup_boundary() -> None:
             raise AssertionError(f"prediction feature setup execution boundary {key} should stay false")
 
 
+def assert_setup_engine_boundary() -> None:
+    path = (
+        ROOT
+        / "spec"
+        / "fixtures"
+        / "generated"
+        / "setup-engine"
+        / "ope-setup-engine.generated.json"
+    )
+    setup = load_json(path)
+    if setup["engineSetupStatus"] != "checked_readback":
+        raise AssertionError("setup-engine status drifted")
+    if setup["createsForecastArtifacts"] is not False:
+        raise AssertionError("setup-engine must not create forecast artifacts")
+    if setup["hostedRuntimeRequired"] is not False:
+        raise AssertionError("setup-engine must not require hosted runtime")
+    if setup["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("setup-engine host wrapper should render before forecast artifacts")
+    for role in setup["requiredSourceRoles"]:
+        for key in ["acceptsCredentialValues", "acceptsRawPrivateRows", "acceptsRawSql"]:
+            if role[key] is not False:
+                raise AssertionError(f"setup-engine source role {role['roleName']} boundary {key} should stay false")
+    for key in [
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "hostedRuntimeProvided",
+        "trainedModelProvided",
+        "executesLiveFetch",
+        "acceptsRawSql",
+        "acceptsCredentialValues",
+        "acceptsRawPrivateRows",
+    ]:
+        if setup["claimBoundary"][key] is not False:
+            raise AssertionError(f"setup-engine claim boundary {key} should stay false")
+
+
+def assert_prediction_goal_catalog_boundary() -> None:
+    path = (
+        ROOT
+        / "spec"
+        / "fixtures"
+        / "generated"
+        / "prediction-goal-catalog"
+        / "ope-prediction-goal-catalog.generated.json"
+    )
+    catalog = load_json(path)
+    if catalog["catalogStatus"] != "checked_domain_agnostic_goal_catalog":
+        raise AssertionError("prediction goal catalog status drifted")
+    for key in ["qualityClaimAllowed", "createsForecastArtifacts", "hostedRuntimeRequired"]:
+        if catalog[key] is not False:
+            raise AssertionError(f"prediction goal catalog top-level boundary {key} should stay false")
+    for key, value in catalog["executionBoundary"].items():
+        if value is not False:
+            raise AssertionError(f"prediction goal catalog execution boundary {key} should stay false")
+    for example in catalog["goalExamples"]:
+        for key in ["qualityClaimAllowed", "createsForecastArtifacts", "hostedRuntimeRequired"]:
+            if example[key] is not False:
+                raise AssertionError(f"prediction goal catalog example {example['goalKey']} boundary {key} should stay false")
+        if example["classification"] in {"blocked", "rejected"} and not example["blockedReason"]:
+            raise AssertionError(f"prediction goal catalog example {example['goalKey']} should explain blocked/rejected handling")
+
+
+def assert_embedded_host_wrapper_boundary() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "examples/embed-ope-prediction-feature/host_wrapper.py",
+            "--request",
+            "examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json",
+            "--output-format",
+            "json",
+        ],
+        cwd=ROOT,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        raise AssertionError(f"embedded host wrapper failed: {result.stderr or result.stdout}")
+    payload = json.loads(result.stdout)
+    if payload["exampleStatus"] != "setup_plan_and_forecast_card_ready":
+        raise AssertionError("embedded host wrapper should render setup plan before forecast card")
+    if not payload["opeCallSequence"][0].startswith("python3 scripts/ope.py setup-engine"):
+        raise AssertionError("embedded host wrapper must call setup-engine first")
+    if payload["setupEnginePlan"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("embedded host wrapper setup plan should render before forecast artifacts")
+    for key, value in payload["executionBoundary"].items():
+        if value is not False:
+            raise AssertionError(f"embedded host wrapper execution boundary {key} should stay false")
+
+
 def assert_agent_guidance_boundary() -> None:
     path = (
         ROOT
@@ -825,8 +918,12 @@ def assert_simulated_agent_pilot_boundary() -> None:
     simulated = load_json(path)
     if simulated["simulationStatus"] != "checked_agent_only_simulation":
         raise AssertionError("simulated agent pilot status drifted")
-    if simulated["summary"]["simulatedSessionCount"] != 5:
-        raise AssertionError("simulated agent pilot should include five simulated sessions")
+    if simulated["summary"]["simulatedSessionCount"] != 8:
+        raise AssertionError("simulated agent pilot should include eight simulated sessions")
+    if simulated["summary"]["nonHelsinkiSessionCount"] != 3:
+        raise AssertionError("simulated agent pilot should include three non-Helsinki sessions")
+    if simulated["summary"]["engineSetupComprehensionReady"] is not True:
+        raise AssertionError("simulated agent pilot should expose setup comprehension readiness")
     if simulated["summary"]["realSessionsRecorded"] != 0:
         raise AssertionError("simulated agent pilot must not count real sessions")
     if simulated["summary"]["pilotEvidenceReady"] is not False:
@@ -873,6 +970,9 @@ def main() -> None:
     assert_private_auto_evidence_policy_boundary()
     assert_agent_integration_boundary()
     assert_prediction_feature_setup_boundary()
+    assert_setup_engine_boundary()
+    assert_prediction_goal_catalog_boundary()
+    assert_embedded_host_wrapper_boundary()
     assert_agent_guidance_boundary()
     assert_simulated_agent_pilot_boundary()
     print("checked hardening guardrails")

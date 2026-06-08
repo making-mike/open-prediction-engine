@@ -19,9 +19,22 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "spec" / "fixtures" / "generated" / "agent-guidance"
 OUTPUT_PATH = GENERATED / "ope-agent-guidance.generated.json"
 SCHEMA = SPEC / "agent-guidance.schema.json"
-GENERATED_AT = "2026-06-06T10:20:00Z"
-IMPLEMENTED_MILESTONES = ["142", "143", "144", "145"]
+GENERATED_AT = "2026-06-07T14:40:00Z"
+IMPLEMENTED_MILESTONES = ["142", "143", "144", "145", "156"]
 CASE_KEYS = ["accepted", "needs_clarification", "blocked", "rejected", "response_too_large"]
+GENERIC_SETUP_QUESTIONS = [
+    "What decision will this prediction support in the host app?",
+    "What exact future outcome, threshold, entity scope, and horizon should resolve the forecast?",
+    "Which approved source references can provide forecast-time evidence?",
+    "Which approved historical source can define the baseline before stronger methods are considered?",
+    "Which resolution source will confirm the outcome after the forecast window closes?",
+]
+GENERIC_SOURCE_ROLES = [
+    "forecast_time_evidence",
+    "historical_baseline",
+    "entity_scope",
+    "resolution_outcome",
+]
 USER_PROMPT = (
     "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. "
     "We can provide data about planned work."
@@ -138,11 +151,51 @@ def build_prompt_planner() -> dict[str, Any]:
         },
         "plannerOutput": {
             "agentNextMove": "ask_user",
-            "questionCount": len(HELSINKI_QUESTIONS),
-            "questionsToAsk": HELSINKI_QUESTIONS,
-            "requiredSourceRoles": HELSINKI_SOURCE_ROLES,
-            "safeRetryCommand": command_for_case("needs_clarification"),
+            "questionCount": len(GENERIC_SETUP_QUESTIONS),
+            "questionsToAsk": GENERIC_SETUP_QUESTIONS,
+            "requiredSourceRoles": GENERIC_SOURCE_ROLES,
+            "safeRetryCommand": 'python3 scripts/ope.py setup-engine --goal "<host prediction goal>"',
         },
+    }
+
+
+def build_domain_agnostic_setup_flow() -> dict[str, Any]:
+    return {
+        "flowId": "domainagnosticsetupflow-001",
+        "flowStatus": "checked_domain_agnostic_setup_flow",
+        "goalPattern": "Any host-app prediction feature with a measurable future outcome and approved source references.",
+        "agentNextMove": "ask_user",
+        "clarificationQuestions": GENERIC_SETUP_QUESTIONS,
+        "requiredSetupFacts": [
+            "decision_context",
+            "outcome_definition",
+            "forecast_horizon",
+            "entity_scope",
+            "forecast_time_source_refs",
+            "baseline_source_ref",
+            "resolution_source_ref",
+        ],
+        "safeNextCommands": [
+            'python3 scripts/ope.py setup-engine --goal "<host prediction goal>"',
+            "python3 scripts/ope.py prediction-goal-catalog --view examples",
+            "python3 scripts/ope.py agent-guide --section instructions",
+        ],
+        "opeOwnedResponsibilities": [
+            "forecast_contracts",
+            "source_roles",
+            "baseline_policy",
+            "forecast_cards",
+            "resolver_and_scorer_boundaries",
+            "calibration_gates",
+        ],
+        "hostOwnedResponsibilities": [
+            "ui",
+            "approved_source_connections",
+            "runtime_invocation",
+            "notifications",
+            "optional_method_extensions",
+        ],
+        "keepsHelsinkiAsExample": True,
     }
 
 
@@ -174,6 +227,7 @@ def build_instruction_pack() -> dict[str, Any]:
         "packStatus": "checked_agent_instruction_pack",
         "doRules": [
             "Classify the developer prompt before trying to forecast.",
+            "Use setup-engine first for arbitrary host prediction goals.",
             "Ask focused questions when OPE returns needs_clarification.",
             "Use approved source references rather than raw private payloads.",
             "Read forecast cards and lifecycle bundles instead of inventing forecast summaries.",
@@ -189,18 +243,18 @@ def build_instruction_pack() -> dict[str, Any]:
         "minimumAgentLoop": [
             {
                 "stepKey": "classify_prompt",
-                "instruction": "Call the guidance surface or prediction-feature setup response before deciding what to do.",
+                "instruction": "Call the guidance surface or setup-engine before deciding what to build.",
                 "safeCommand": "python3 scripts/ope.py agent-guide --section summary",
             },
             {
                 "stepKey": "ask_or_block",
-                "instruction": "If the case needs clarification, ask the returned questions; if blocked, replace unsafe inputs.",
-                "safeCommand": "python3 scripts/ope.py agent-guide --case needs_clarification",
+                "instruction": "If the goal needs clarification, ask the generic setup questions; if blocked, replace unsafe inputs.",
+                "safeCommand": "python3 scripts/ope.py agent-guide --section generic",
             },
             {
                 "stepKey": "retry_with_refs",
-                "instruction": "After the caller provides scoped answers and approved source refs, retry the compact setup path.",
-                "safeCommand": command_for_case("accepted"),
+                "instruction": "After the caller provides scoped answers and approved source refs, run setup-engine for that host goal.",
+                "safeCommand": 'python3 scripts/ope.py setup-engine --goal "<host prediction goal>"',
             },
             {
                 "stepKey": "read_or_stop",
@@ -243,6 +297,7 @@ def build_agent_guidance() -> dict[str, Any]:
         },
         "guidanceCases": guidance_cases,
         "promptPlanner": build_prompt_planner(),
+        "domainAgnosticSetupFlow": build_domain_agnostic_setup_flow(),
         "helsinkiNarrowingFlow": build_helsinki_narrowing_flow(),
         "agentInstructionPack": build_instruction_pack(),
         "executionBoundary": execution_boundary(),
@@ -250,6 +305,7 @@ def build_agent_guidance() -> dict[str, Any]:
             "guidanceCaseCount": len(guidance_cases),
             "implementedMilestoneCount": len(IMPLEMENTED_MILESTONES),
             "promptPlannerReady": True,
+            "domainAgnosticFlowReady": True,
             "helsinkiNarrowingFlowReady": True,
             "instructionPackReady": True,
             "realSessionsRecorded": 0,
@@ -282,6 +338,8 @@ def view_payload(record: dict[str, Any], section: str | None, case_key: str) -> 
         return record["guidanceCases"]
     if section == "planner":
         return record["promptPlanner"]
+    if section == "generic":
+        return record["domainAgnosticSetupFlow"]
     if section == "helsinki":
         return record["helsinkiNarrowingFlow"]
     if section == "instructions":
@@ -297,7 +355,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--check", action="store_true", help="check generated agent guidance fixture")
     parser.add_argument(
         "--section",
-        choices=["summary", "cases", "planner", "helsinki", "instructions", "boundary"],
+        choices=["summary", "cases", "planner", "generic", "helsinki", "instructions", "boundary"],
         help="print one agent guidance section",
     )
     parser.add_argument("--case", choices=CASE_KEYS, help="print one guidance case")

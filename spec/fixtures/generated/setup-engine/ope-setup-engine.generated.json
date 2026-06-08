@@ -1,0 +1,364 @@
+{
+  "setupEngineId": "setupengine-001",
+  "generatedAt": "2026-06-07T12:00:00Z",
+  "goal": "add predictions to my app",
+  "engineSetupStatus": "checked_readback",
+  "recommendedFirstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+  "candidateForecastContracts": [
+    {
+      "contractId": "setupcontract-001",
+      "contractStatus": "forecastable",
+      "title": "Threshold event risk",
+      "questionTemplate": "Will the named future operating window exceed the declared threshold before the resolution deadline?",
+      "decisionToSupport": "Prioritize, warn, defer, or allocate capacity based on a measurable future event.",
+      "horizon": "future window supplied by the host app",
+      "resolutionRule": "Resolve from an approved outcome source after the close time using the declared threshold.",
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineMethod": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Start with a baseline until resolved outcomes justify stronger methods."
+      },
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_present",
+        "resolution_source_required"
+      ],
+      "nextAction": "Collect approved source references and run source intake before any forecast execution."
+    },
+    {
+      "contractId": "setupcontract-002",
+      "contractStatus": "needs_clarification",
+      "title": "Ambiguous threshold forecast",
+      "questionTemplate": "Will the future event be bad enough to change the host decision?",
+      "decisionToSupport": "Support a host action only after the caller defines what bad enough means.",
+      "horizon": "future window is present but threshold is missing",
+      "resolutionRule": "Resolution cannot be scored until the measurable threshold is supplied.",
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineMethod": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "historical_baseline",
+        "executionAllowed": true,
+        "qualityClaimAllowed": false,
+        "notes": "Start with a baseline until resolved outcomes justify stronger methods."
+      },
+      "reasonCodes": [
+        "missing_threshold",
+        "ambiguous_outcome_definition"
+      ],
+      "nextAction": "Ask for a numeric threshold, categorical threshold, or explicit yes/no outcome rule."
+    },
+    {
+      "contractId": "setupcontract-003",
+      "contractStatus": "blocked",
+      "title": "Unsafe private source setup",
+      "questionTemplate": "Will records from a private source predict a future host outcome?",
+      "decisionToSupport": "Stop setup until private inputs are replaced with approved references.",
+      "horizon": "future window cannot be evaluated from unsafe inputs",
+      "resolutionRule": "Blocked inputs cannot enter source intake or resolution setup.",
+      "requiredSourceRoles": [
+        "forecast_time_signal",
+        "historical_outcome",
+        "resolution_outcome"
+      ],
+      "baselineMethod": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "blocked",
+        "executionAllowed": false,
+        "qualityClaimAllowed": false,
+        "notes": "Start with a baseline until resolved outcomes justify stronger methods."
+      },
+      "reasonCodes": [
+        "raw_credential_value",
+        "raw_private_rows",
+        "unapproved_source"
+      ],
+      "nextAction": "Replace raw payloads with source references, credential references, and caller approval records."
+    },
+    {
+      "contractId": "setupcontract-004",
+      "contractStatus": "rejected",
+      "title": "Past outcome analysis",
+      "questionTemplate": "Did the event happen yesterday?",
+      "decisionToSupport": "Historical analysis may be useful, but it is not a future forecast contract.",
+      "horizon": "past event",
+      "resolutionRule": "Past-tense questions are not forecastable by the setup-engine path.",
+      "requiredSourceRoles": [
+        "resolution_outcome"
+      ],
+      "baselineMethod": {
+        "methodId": "historical_frequency_baseline",
+        "methodClass": "blocked",
+        "executionAllowed": false,
+        "qualityClaimAllowed": false,
+        "notes": "Start with a baseline until resolved outcomes justify stronger methods."
+      },
+      "reasonCodes": [
+        "past_tense_question",
+        "not_future_facing"
+      ],
+      "nextAction": "Rewrite the request as a future-facing measurable question or use a non-forecast analysis path."
+    }
+  ],
+  "requiredSourceRoles": [
+    {
+      "roleName": "forecast_time_signal",
+      "purpose": "Evidence known before close time that can support a forecast.",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "auto_evidence_connector",
+        "manual_mapping"
+      ],
+      "requiredForForecast": true,
+      "requiredForResolution": false,
+      "acceptsCredentialValues": false,
+      "acceptsRawPrivateRows": false,
+      "acceptsRawSql": false,
+      "nextAction": "Bind approved forecast-time evidence through source intake or adapter output."
+    },
+    {
+      "roleName": "historical_outcome",
+      "purpose": "Past comparable outcomes used for the baseline and benchmark gate.",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "manual_mapping"
+      ],
+      "requiredForForecast": true,
+      "requiredForResolution": false,
+      "acceptsCredentialValues": false,
+      "acceptsRawPrivateRows": false,
+      "acceptsRawSql": false,
+      "nextAction": "Provide comparable historical examples before selecting stronger methods."
+    },
+    {
+      "roleName": "resolution_outcome",
+      "purpose": "Outcome evidence collected after close time to resolve and score forecasts.",
+      "acceptedSourceKinds": [
+        "local_file",
+        "source_adapter_output",
+        "auto_evidence_connector",
+        "manual_mapping"
+      ],
+      "requiredForForecast": false,
+      "requiredForResolution": true,
+      "acceptsCredentialValues": false,
+      "acceptsRawPrivateRows": false,
+      "acceptsRawSql": false,
+      "nextAction": "Declare the resolver source and scoring rule before creating forecasts."
+    },
+    {
+      "roleName": "source_policy",
+      "purpose": "Policy metadata that records approval, retention, tenant scope, and blocked source kinds.",
+      "acceptedSourceKinds": [
+        "source_manifest",
+        "source_binding",
+        "credential_reference"
+      ],
+      "requiredForForecast": true,
+      "requiredForResolution": true,
+      "acceptsCredentialValues": false,
+      "acceptsRawPrivateRows": false,
+      "acceptsRawSql": false,
+      "nextAction": "Record source policy before source intake, forecast execution, or resolution."
+    }
+  ],
+  "baselineGuidance": {
+    "defaultMethodId": "historical_frequency_baseline",
+    "defaultMethodClass": "historical_baseline",
+    "strongerMethodsAllowedAfter": [
+      "accepted_source_intake",
+      "setup_benchmark_gate_passed",
+      "leakage_controls_checked",
+      "resolved_outcome_sample_threshold_met"
+    ],
+    "benchmarkGateRequired": true,
+    "calibrationGateRequired": true,
+    "notes": "The setup-engine path ranks contracts and source roles; it does not claim model lift before scored outcomes exist."
+  },
+  "hostWrapper": {
+    "wrapperStatus": "ready_for_host_render",
+    "renderBeforeForecastArtifacts": true,
+    "renderSections": [
+      "candidateForecastContracts",
+      "requiredSourceRoles",
+      "baselineGuidance",
+      "claimBoundary",
+      "followUpSurfaces"
+    ],
+    "recommendedDataShape": "Render this setup-engine JSON directly as the host prediction setup plan before forecast cards exist.",
+    "blockedHostResponsibilities": [
+      "do_not_invent_parallel_risk_engine_before_setup_readback",
+      "do_not_claim_prediction_quality_before_resolution_scoring",
+      "do_not_submit_credentials_raw_rows_or_raw_sql",
+      "do_not_treat_setup_engine_as_hosted_runtime"
+    ],
+    "nextAction": "Choose one forecastable contract, bind approved sources, then use source intake and method gates."
+  },
+  "claimBoundary": {
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "hostedRuntimeProvided": false,
+    "trainedModelProvided": false,
+    "executesLiveFetch": false,
+    "acceptsRawSql": false,
+    "acceptsCredentialValues": false,
+    "acceptsRawPrivateRows": false,
+    "minimumResolvedOutcomesForQualityClaim": 30,
+    "notes": "Setup-engine output is a planning and contract readback; quality claims require resolved comparable outcomes."
+  },
+  "exampleGoals": [
+    {
+      "goalKey": "delivery_delay_risk",
+      "goal": "Predict whether a delivery lane will exceed a late-arrival threshold during a future dispatch window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_present",
+        "resolution_source_required"
+      ],
+      "preferredView": "contracts"
+    },
+    {
+      "goalKey": "stockout_risk",
+      "goal": "Predict whether a product will stock out before the next replenishment window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_event",
+        "historical_outcome_needed",
+        "resolution_source_required"
+      ],
+      "preferredView": "sources"
+    },
+    {
+      "goalKey": "sla_breach_risk",
+      "goal": "Predict whether an operational queue will breach a declared SLA threshold during a future service window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "threshold_present",
+        "baseline_needed",
+        "resolution_window_present"
+      ],
+      "preferredView": "baseline"
+    },
+    {
+      "goalKey": "demand_risk",
+      "goal": "Predict whether future demand will be risky next month.",
+      "classification": "needs_clarification",
+      "reasonCodes": [
+        "ambiguous_outcome_definition",
+        "missing_threshold"
+      ],
+      "preferredView": "contracts"
+    },
+    {
+      "goalKey": "churn_risk",
+      "goal": "Use this API token and raw customer table to predict which accounts will churn next quarter.",
+      "classification": "blocked",
+      "reasonCodes": [
+        "raw_credential_value",
+        "raw_private_rows",
+        "unapproved_source"
+      ],
+      "preferredView": "claim-boundary"
+    },
+    {
+      "goalKey": "seaport_berth_availability",
+      "goal": "Predict whether a berth will be unavailable during a future vessel arrival window.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_present",
+        "resolution_source_required"
+      ],
+      "preferredView": "sources"
+    },
+    {
+      "goalKey": "weather_sensitive_operations",
+      "goal": "Explain whether yesterday's weather caused the operations disruption.",
+      "classification": "rejected",
+      "reasonCodes": [
+        "past_tense_question",
+        "not_future_facing"
+      ],
+      "preferredView": "examples"
+    },
+    {
+      "goalKey": "public_transit_disruption_risk",
+      "goal": "Predict whether a public transit service window will exceed a delay or disruption threshold in the future.",
+      "classification": "forecastable",
+      "reasonCodes": [
+        "future_window_present",
+        "threshold_required",
+        "resolution_source_required"
+      ],
+      "preferredView": "contracts"
+    }
+  ],
+  "interfaceBindings": [
+    {
+      "interface": "cli",
+      "implementedStatus": "implemented_local",
+      "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+      "boundary": "CLI returns a checked setup plan and does not create forecast artifacts."
+    },
+    {
+      "interface": "agent_call",
+      "implementedStatus": "implemented_local",
+      "command": "python3 scripts/ope.py agent-call --operation setup_engine",
+      "boundary": "Agent-call wraps the same setup plan in one transport-neutral envelope."
+    },
+    {
+      "interface": "local_mcp",
+      "implementedStatus": "implemented_local",
+      "command": "python3 scripts/ope.py mcp-stdio",
+      "toolName": "ope_setup_engine",
+      "boundary": "MCP exposes goal and view arguments only; it rejects hidden raw payload fields."
+    }
+  ],
+  "followUpSurfaces": [
+    {
+      "surface": "explain-fit",
+      "command": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+      "relationship": "Use for a short fit verdict after reading setup-engine summary."
+    },
+    {
+      "surface": "capabilities",
+      "command": "python3 scripts/ope.py capabilities",
+      "relationship": "Use for machine-readable helps-with and does-not-provide boundaries."
+    },
+    {
+      "surface": "agent-implementation-kit",
+      "command": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+      "relationship": "Use after choosing to wire OPE into a host project."
+    },
+    {
+      "surface": "prediction-feature-setup",
+      "command": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted",
+      "relationship": "Use when a host feature needs compact accepted/blocked response examples."
+    },
+    {
+      "surface": "source-builder",
+      "command": "python3 scripts/ope.py source-builder --check",
+      "relationship": "Use only after approved source references or caller-approved local files exist."
+    }
+  ],
+  "warnings": [
+    "Setup-engine is the preferred first readback for agents adding prediction to a host project.",
+    "It returns contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before forecast artifacts exist.",
+    "It does not execute source reads, store credentials, accept raw private rows, create hosted runtime, or claim model quality."
+  ],
+  "createsForecastArtifacts": false,
+  "hostedRuntimeRequired": false
+}

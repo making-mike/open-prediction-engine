@@ -7,13 +7,13 @@
   "evidenceReview": {
     "pilotFindingsId": "pilotfindings-001",
     "acceptedRealSessionCount": 0,
-    "acceptedSimulatedAgentSessionCount": 5,
+    "acceptedSimulatedAgentSessionCount": 8,
     "minimumRealSessions": 3,
     "agentSimulationEvidenceReady": true,
     "typeRelatedFrictionObserved": false,
     "smokeFailuresTypeRelated": false,
     "adoptionTraceTypeNeedObserved": false,
-    "rationale": "Five simulated agent sessions exist, but no accepted real pilot sessions exist yet, and the checked smoke/adoption paths do not show type-specific friction. Stable JSON examples and validators remain the right default until real agent adoption evidence identifies a language-specific bottleneck."
+    "rationale": "Eight simulated agent sessions exist, including three non-Helsinki setup-comprehension prompts, but no accepted real pilot sessions exist yet, and the checked smoke/adoption paths do not show type-specific friction. Stable JSON examples and validators remain the right default until real agent adoption evidence identifies a language-specific bottleneck."
   },
   "jsonFallback": {
     "stableJsonExamples": [
@@ -73,7 +73,7 @@
     "generatedTypesIncluded": false,
     "selectedLanguageTargetCount": 0,
     "acceptedRealSessionCount": 0,
-    "acceptedSimulatedAgentSessionCount": 5,
+    "acceptedSimulatedAgentSessionCount": 8,
     "nextReviewTrigger": "Review after sanitized pilot findings show repeated type-related integration friction."
   }
 }

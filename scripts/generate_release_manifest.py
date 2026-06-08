@@ -76,9 +76,13 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py agent-integrate",
                 "python3 scripts/ope.py developer-adoption",
                 "python3 scripts/ope.py pilot-evidence",
+                "python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+                "python3 scripts/ope.py lifecycle-operation-store --scenario pilot-evidence-append",
                 "python3 scripts/ope.py pilot-session-packet",
                 "python3 scripts/ope.py pilot-summary-intake",
+                "python3 scripts/ope.py pilot-summary-template --section summary",
                 "python3 scripts/ope.py pilot-findings --section summary",
+                "python3 scripts/ope.py pilot-supervision-status --section summary",
                 "python3 scripts/ope.py generated-types-decision --section summary",
                 "python3 scripts/ope.py expansion-readiness",
                 "python3 scripts/ope.py repeating-prediction-setup",
@@ -193,7 +197,7 @@ def mvp_local_runtime() -> dict[str, Any]:
             {
                 "checkId": "mvp-smoke-fast-agent-adoption",
                 "command": "python3 scripts/ope.py smoke",
-                "expected": "fast external-agent smoke runs schema sanity, developer-adoption, agent implementation kit, agent integration candidates, guided forecast, and forecast-card readback with progress output and no state writes.",
+                "expected": "fast external-agent smoke runs schema sanity, setup-engine, prediction goal catalog, developer-adoption, agent implementation kit, agent integration candidates, guided forecast, and forecast-card readback with progress output and no state writes.",
             },
             {
                 "checkId": "mvp-smoke-agent-integration",
@@ -201,9 +205,19 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "expected": "agent incorporation golden path exposes Helsinki starter readiness, forecastable and non-forecastable candidates, guided forecast-card command, and first-forecast-fast metrics without hosted runtime or claim upgrades.",
             },
             {
+                "checkId": "mvp-smoke-setup-engine",
+                "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+                "expected": "setup-engine returns domain-agnostic candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries without creating forecast artifacts or hosted runtime.",
+            },
+            {
+                "checkId": "mvp-smoke-prediction-goal-catalog",
+                "command": "python3 scripts/ope.py prediction-goal-catalog",
+                "expected": "prediction goal catalog returns generic forecastable, needs-clarification, blocked, and rejected host goals across domains without forecast artifacts, hosted runtime, or quality claims.",
+            },
+            {
                 "checkId": "mvp-smoke-agent-guidance",
                 "command": "python3 scripts/ope.py agent-guide --section summary",
-                "expected": "agent guidance loop exposes prompt classification, next moves, Helsinki narrowing questions, and an instruction pack without source execution, artifact creation, hosted runtime, or quality claim upgrades.",
+                "expected": "agent guidance loop exposes prompt classification, next moves, domain-agnostic setup questions, the Helsinki narrowing example, and an instruction pack without source execution, artifact creation, hosted runtime, or quality claim upgrades.",
             },
             {
                 "checkId": "mvp-smoke-prediction-feature-setup",
@@ -213,7 +227,7 @@ def mvp_local_runtime() -> dict[str, Any]:
             {
                 "checkId": "mvp-smoke-embedded-prediction-feature-example",
                 "command": "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
-                "expected": "copyable host wrapper calls the stable prediction-feature setup contract, reads forecast-1102, and keeps hosted runtime, credentials, raw rows, raw SQL, hidden workers, and quality claims blocked.",
+                "expected": "copyable host wrapper calls setup-engine first, renders setupEnginePlan, then reads forecast-1102 only after accepted setup while keeping hosted runtime, credentials, raw rows, raw SQL, hidden workers, custom risk engines, and quality claims blocked.",
             },
             {
                 "checkId": "mvp-smoke-mcp-adoption-path",
@@ -286,6 +300,16 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "expected": "sanitized pilot evidence intake examples are available while real session count remains zero.",
             },
             {
+                "checkId": "mvp-smoke-pilot-evidence-local-append-plan",
+                "command": "python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+                "expected": "caller-supplied sanitized pilot summaries produce a dry-run ignored-local ledger append plan without writing rows or counting real sessions.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-evidence-lifecycle",
+                "command": "python3 scripts/ope.py lifecycle-operation-store --scenario pilot-evidence-append",
+                "expected": "pilot evidence local writes are checked as receipt-backed evidence.append operations that update pilot findings without calibration or track-record read-model effects.",
+            },
+            {
                 "checkId": "mvp-smoke-pilot-session-packet",
                 "command": "python3 scripts/ope.py pilot-session-packet",
                 "expected": "real pilot-session task cards, sanitization checks, and ledger-ready template are available without recording real sessions.",
@@ -296,14 +320,29 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "expected": "sanitized summary intake examples classify ledger-ready, redaction-needed, and blocked cases without writing ledger rows.",
             },
             {
+                "checkId": "mvp-smoke-pilot-summary-input-classifier",
+                "command": "python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+                "expected": "caller-supplied sanitized summary files can be classified as candidate real-session evidence without writing ledger rows or counting real sessions.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-summary-template",
+                "command": "python3 scripts/ope.py pilot-summary-template --section summary",
+                "expected": "pilot summary template exposes a schema-valid draft that is intentionally not ledger-ready unchanged, plus the local classify and explicit append workflow without writing evidence.",
+            },
+            {
                 "checkId": "mvp-smoke-simulated-agent-pilot",
                 "command": "python3 scripts/ope.py simulated-agent-pilot --section summary",
-                "expected": "user-authorized simulated agent pilot covers five prediction-feature setup prompts with approximate token/time counts while recording zero real sessions.",
+                "expected": "user-authorized simulated agent pilot covers eight prompts, including three non-Helsinki setup-comprehension prompts, with approximate token/time counts while recording zero real sessions.",
             },
             {
                 "checkId": "mvp-smoke-pilot-findings",
                 "command": "python3 scripts/ope.py pilot-findings --section summary",
-                "expected": "pilot findings readback reports five simulated agent sessions, zero accepted real sessions, real-session evidence still needed, and no expansion, generated-types, quality, or hosted-runtime claim unlocked.",
+                "expected": "pilot findings readback reports eight simulated agent sessions, three non-Helsinki setup-comprehension prompts, zero accepted real sessions, real-session evidence still needed, and no expansion, generated-types, quality, or hosted-runtime claim unlocked.",
+            },
+            {
+                "checkId": "mvp-smoke-pilot-supervision-status",
+                "command": "python3 scripts/ope.py pilot-supervision-status --section summary",
+                "expected": "pilot operator status reports the setup-comprehension task, remaining real-session counts, explicit local-ledger loop, and blocked quality, calibration, hosted-runtime, generated-types, and expansion claims.",
             },
             {
                 "checkId": "mvp-smoke-generated-types-decision",

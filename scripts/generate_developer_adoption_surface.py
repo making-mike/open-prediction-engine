@@ -23,10 +23,10 @@ SCHEMA = SPEC / "developer-adoption-surface.schema.json"
 GENERATED_AT = "2026-06-10T10:05:00Z"
 
 QUICKSTART_ORDER = [
-    "agent_implementation_quickstart",
+    "setup_engine_front_door",
+    "host_wrapper_setup_plan",
     "setup_check",
     "normal_checks",
-    "local_runtime",
     "forecast_card",
     "lifecycle_bundle",
     "claim_gate",
@@ -34,6 +34,7 @@ QUICKSTART_ORDER = [
 ]
 
 SCENARIO_PHASES = [
+    "setup_plan_render",
     "source_setup",
     "runtime_gate",
     "forecast_readback",
@@ -121,14 +122,22 @@ def build_quickstart() -> list[dict[str, Any]]:
     rows = [
         quickstart_step(
             1,
-            "agent_implementation_quickstart",
-            "Start with the external-agent front door",
-            "python3 scripts/ope.py agent-implementation-kit --view quickstart",
-            "The agent implementation kit returns the shortest safe sequence for adding an OPE-backed prediction feature.",
+            "setup_engine_front_door",
+            "Start with the setup-engine front door",
+            "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+            "Setup-engine returns candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before forecast artifacts exist.",
             20,
         ),
         quickstart_step(
             2,
+            "host_wrapper_setup_plan",
+            "Render setup-first host wrapper",
+            "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
+            "The wrapper calls setup-engine first, renders setupEnginePlan, then reads the checked forecast card only after accepted setup.",
+            30,
+        ),
+        quickstart_step(
+            3,
             "setup_check",
             "Confirm Python runtime",
             "python3 --version",
@@ -136,20 +145,12 @@ def build_quickstart() -> list[dict[str, Any]]:
             20,
         ),
         quickstart_step(
-            3,
+            4,
             "normal_checks",
             "Run the local check suite",
             "python3 scripts/run_checks.py",
             "All schema, fixture, read-surface, agent, and release checks pass without live network access.",
             900,
-        ),
-        quickstart_step(
-            4,
-            "local_runtime",
-            "Inspect approved local-folder runtime",
-            "python3 scripts/ope.py local-source-runtime",
-            "The approved local-folder case binds to forecast-1102 and blocked examples remain non-generating.",
-            30,
         ),
         quickstart_step(
             5,
@@ -191,10 +192,19 @@ def build_scenario() -> dict[str, Any]:
     return {
         "scenarioId": "adoptionscenario-100",
         "title": "Approved Local Source To Forecast Readback",
-        "goal": "Reach a valid forecast card and lifecycle bundle from the checked local MVP while preserving source, method, resolution, scoring, and claim boundaries.",
+        "goal": "Render the setup-engine host plan, then reach a valid forecast card and lifecycle bundle from the checked local MVP while preserving source, method, resolution, scoring, and claim boundaries.",
         "steps": [
             scenario_step(
                 1,
+                "setup_plan_render",
+                "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
+                "setup_plan_and_forecast_card_ready",
+                "forecast-1102",
+                "question-1102",
+                False,
+            ),
+            scenario_step(
+                2,
                 "source_setup",
                 "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
                 "completed_forecast_readback",
@@ -203,7 +213,7 @@ def build_scenario() -> dict[str, Any]:
                 False,
             ),
             scenario_step(
-                2,
+                3,
                 "runtime_gate",
                 "python3 scripts/ope.py local-source-runtime --case approved_local_folder",
                 "forecast_card_ready",
@@ -212,7 +222,7 @@ def build_scenario() -> dict[str, Any]:
                 False,
             ),
             scenario_step(
-                3,
+                4,
                 "forecast_readback",
                 "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
                 "available",
@@ -221,7 +231,7 @@ def build_scenario() -> dict[str, Any]:
                 False,
             ),
             scenario_step(
-                4,
+                5,
                 "lifecycle_bundle",
                 "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
                 "available",
@@ -230,7 +240,7 @@ def build_scenario() -> dict[str, Any]:
                 False,
             ),
             scenario_step(
-                5,
+                6,
                 "resolution_scoring",
                 "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
                 "ok",
@@ -239,7 +249,7 @@ def build_scenario() -> dict[str, Any]:
                 False,
             ),
             scenario_step(
-                6,
+                7,
                 "claim_review",
                 "python3 scripts/ope.py transit-track-record-gate",
                 "not_enough_resolved_comparable_outcomes",
@@ -327,11 +337,12 @@ def build_success_checks() -> list[dict[str, Any]]:
     return [
         success_check(1, "python3 scripts/ope.py developer-adoption --check", "developer adoption surface fixture is current"),
         success_check(2, "python3 scripts/ope.py local-source-runtime --check", "approved local-folder runtime fixture is current"),
-        success_check(3, "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102", "forecast card readback succeeds"),
-        success_check(4, "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102", "lifecycle bundle readback succeeds"),
-        success_check(5, "python3 scripts/check_mvp_release_surface.py", "local MVP smoke check passes"),
-        success_check(6, "python3 scripts/ope.py prediction-campaign explain --view summary", "recurring prediction campaign readback explains local status"),
-        success_check(7, "python3 scripts/run_checks.py", "canonical dependency-free check suite passes"),
+        success_check(3, "python3 scripts/check_embed_prediction_feature_example.py", "setup-first embedded host wrapper example passes"),
+        success_check(4, "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102", "forecast card readback succeeds"),
+        success_check(5, "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102", "lifecycle bundle readback succeeds"),
+        success_check(6, "python3 scripts/check_mvp_release_surface.py", "local MVP smoke check passes"),
+        success_check(7, "python3 scripts/ope.py prediction-campaign explain --view summary", "recurring prediction campaign readback explains local status"),
+        success_check(8, "python3 scripts/run_checks.py", "canonical dependency-free check suite passes"),
     ]
 
 
@@ -414,11 +425,11 @@ def validate_surface(surface: dict[str, Any]) -> None:
     if [item["order"] for item in quickstart] != list(range(1, len(quickstart) + 1)):
         raise DeveloperAdoptionSurfaceError("quickstart order drifted")
     if [item["title"] for item in quickstart][:3] != [
-        "Start with the external-agent front door",
+        "Start with the setup-engine front door",
+        "Render setup-first host wrapper",
         "Confirm Python runtime",
-        "Run the local check suite",
     ]:
-        raise DeveloperAdoptionSurfaceError("quickstart should begin with agent front door, setup, and checks")
+        raise DeveloperAdoptionSurfaceError("quickstart should begin with setup-engine front door, host wrapper, and setup")
     scenario = surface["exampleScenario"]
     phases = [item["phase"] for item in scenario["steps"]]
     if phases != SCENARIO_PHASES:
@@ -445,7 +456,7 @@ def validate_surface(surface: dict[str, Any]) -> None:
         elif value is not False:
             raise DeveloperAdoptionSurfaceError(f"execution boundary {key} should be false")
     summary = surface["summary"]
-    if summary["quickstartStepCount"] < 5 or summary["scenarioStepCount"] != 6:
+    if summary["quickstartStepCount"] < 5 or summary["scenarioStepCount"] != 7:
         raise DeveloperAdoptionSurfaceError("developer adoption summary counts drifted")
     if summary["qualityClaimAllowed"] or summary["generatedTypesIncluded"]:
         raise DeveloperAdoptionSurfaceError("developer adoption summary must keep claims and generated types blocked")

@@ -40,6 +40,8 @@ def main() -> None:
     require(pack["successMetrics"]["minimumTaskCompletionRate"] == 0.8, "task completion threshold drifted")
     require(pack["successMetrics"]["minimumMedianTrustScore"] == 4, "trust threshold drifted")
     require(pack["successMetrics"]["minimumClaimBoundaryMedianScore"] == 4, "claim-boundary threshold drifted")
+    require(pack["successMetrics"]["minimumSetupEngineFirstRate"] == 0.8, "setup-engine-first threshold drifted")
+    require(pack["successMetrics"]["maximumAuditLayerConfusionRate"] == 0.2, "audit-layer confusion threshold drifted")
 
     protocol_boundary = pack["pilotProtocol"]["privacyBoundary"]
     for key in ("storesRawTranscripts", "storesPrivateData", "storesCredentials", "storesPromptLogs"):
@@ -60,7 +62,30 @@ def main() -> None:
             require(dimension in dimension_ids, f"task measure {dimension} missing from feedback schema")
 
     surfaces = {item["surface"] for item in pack["comprehensionRubric"]}
-    require(surfaces == {"forecast_card", "lifecycle_bundle", "source_intake", "blocked_path", "claim_boundary"}, "rubric coverage drifted")
+    require(
+        surfaces
+        == {
+            "forecast_card",
+            "lifecycle_bundle",
+            "source_intake",
+            "blocked_path",
+            "claim_boundary",
+            "engine_setup_shortcut",
+        },
+        "rubric coverage drifted",
+    )
+    require("engine_setup_shortcut_comprehension" in dimension_ids, "feedback schema should measure setup-engine shortcut comprehension")
+    require("ope_host_responsibility_split" in dimension_ids, "feedback schema should measure OPE/host responsibility split")
+    require("parallel_risk_engine_avoidance" in dimension_ids, "feedback schema should measure avoidance of parallel risk engines")
+
+    setup_task = scenarios["engine_setup_shortcut_comprehension"]
+    require(setup_task["command"].startswith("python3 scripts/ope.py setup-engine"), "setup comprehension task should start with setup-engine")
+    require(setup_task["expectedOutcomeClass"] == "setup_engine_shortcut_readback", "setup comprehension task outcome drifted")
+    for phrase in ["contract", "evidence roles", "baseline", "forecast-card", "resolver", "scorer", "calibration gate"]:
+        require(
+            any(phrase in criterion for criterion in setup_task["successCriteria"]),
+            f"setup comprehension success criteria should include {phrase}",
+        )
 
     for summary in pack["examplePilotSummaries"]:
         require(summary["isSyntheticExample"] is True, "example summaries should remain synthetic")

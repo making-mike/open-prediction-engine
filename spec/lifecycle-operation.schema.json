@@ -89,8 +89,8 @@
     "agentPreflightSurface": { "$ref": "#/$defs/agentPreflightSurface" },
     "runtimeScenarios": {
       "type": "array",
-      "minItems": 15,
-      "maxItems": 15,
+      "minItems": 16,
+      "maxItems": 16,
       "items": { "$ref": "#/$defs/runtimeScenario" }
     },
     "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
@@ -292,6 +292,7 @@
             "pre_calibration_binding",
             "method_update_audit",
             "evidence_ledger_row",
+            "pilot_evidence_ledger_row",
             "json_state_migration_receipt",
             "operation_receipt",
             "archive_tombstone",
@@ -405,6 +406,7 @@
             "append_readiness",
             "calibration_status",
             "track_record_progress",
+            "pilot_findings",
             "failed_operations",
             "recovery_actions"
           ]
@@ -523,7 +525,7 @@
         },
         "sourceRoot": {
           "type": "string",
-          "enum": [".ope/live/prediction-campaigns"]
+          "enum": [".ope/live"]
         },
         "readCompatibilityAllowed": { "type": "boolean" },
         "writeCompatibilityAllowed": { "type": "boolean" },
@@ -575,7 +577,8 @@
             "run_state",
             "evidence_ledger",
             "method_binding",
-            "operation_audit"
+            "operation_audit",
+            "pilot_evidence_ledger"
           ]
         },
         "sourcePathPattern": {
@@ -647,7 +650,8 @@
             "prediction-campaign append --write-local",
             "prediction-campaign pre-calibration --write-local",
             "prediction-campaign apply-method-update --write-local",
-            "prediction-campaign rollback-method-update --write-local"
+            "prediction-campaign rollback-method-update --write-local",
+            "pilot-evidence --input-summary --write-local"
           ]
         },
         "lifecycleOperations": {
@@ -679,6 +683,7 @@
               "campaign-resolution-record",
               "campaign-score-create",
               "campaign-evidence-append",
+              "pilot-evidence-append",
               "campaign-method-apply",
               "campaign-method-rollback"
             ]
@@ -698,7 +703,8 @@
               "unresolved_forecasts",
               "append_readiness",
               "calibration_status",
-              "track_record_progress"
+              "track_record_progress",
+              "pilot_findings"
             ]
           }
         },
@@ -762,6 +768,7 @@
             "campaign-resolution-record",
             "campaign-score-create",
             "campaign-evidence-append",
+            "pilot-evidence-append",
             "campaign-method-apply",
             "campaign-method-rollback",
             "json-state-import",
@@ -853,6 +860,7 @@
               "append_readiness",
               "calibration_status",
               "track_record_progress",
+              "pilot_findings",
               "failed_operations",
               "recovery_actions"
             ]
@@ -904,7 +912,8 @@
             "evidence_ledger_rows",
             "pre_calibration_method_binding",
             "method_apply_binding",
-            "method_rollback_binding"
+            "method_rollback_binding",
+            "pilot_evidence_ledger_rows"
           ]
         },
         "commandPath": {
@@ -915,7 +924,8 @@
             "prediction-campaign append --write-local",
             "prediction-campaign pre-calibration --write-local",
             "prediction-campaign apply-method-update --write-local",
-            "prediction-campaign rollback-method-update --write-local"
+            "prediction-campaign rollback-method-update --write-local",
+            "pilot-evidence --input-summary --write-local"
           ]
         },
         "scenarioName": {
@@ -926,6 +936,7 @@
             "campaign-resolution-record",
             "campaign-score-create",
             "campaign-evidence-append",
+            "pilot-evidence-append",
             "campaign-method-apply",
             "campaign-method-rollback"
           ]
@@ -950,7 +961,8 @@
             "local_append_already_present",
             "local_pre_calibration_already_present",
             "local_apply_already_present",
-            "local_rollback_already_present"
+            "local_rollback_already_present",
+            "local_pilot_evidence_already_recorded"
           ]
         },
         "fileModeDuplicatePrevented": { "type": "boolean" },
@@ -1011,6 +1023,7 @@
             "resolution_record",
             "scoring_report",
             "evidence_ledger_row",
+            "pilot_evidence_ledger_row",
             "pre_calibration_binding",
             "method_update_audit",
             "method_binding_state",
@@ -1072,6 +1085,7 @@
             "resolution_record",
             "scoring_report",
             "evidence_ledger_row",
+            "pilot_evidence_ledger_row",
             "pre_calibration_binding",
             "method_update_audit",
             "method_binding_state",

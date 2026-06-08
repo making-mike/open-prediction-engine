@@ -85,8 +85,8 @@
     },
     "taskCards": {
       "type": "array",
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 7,
+      "maxItems": 7,
       "items": { "$ref": "#/$defs/taskCard" }
     },
     "evidenceTemplate": {
@@ -261,6 +261,7 @@
             "unsafe_source_block",
             "forecast_run_readback",
             "claim_gate_readback",
+            "engine_setup_shortcut_comprehension",
             "repeating_prediction_campaign"
           ]
         },
@@ -291,7 +292,9 @@
                   "claim_boundary_confusion",
                   "source_runtime_gap",
                   "schema_integration_friction",
-                  "privacy_redaction_needed"
+                  "privacy_redaction_needed",
+                  "parallel_risk_engine_confusion",
+                  "audit_layer_only_confusion"
                 ]
               }
             },
@@ -328,7 +331,10 @@
         "claim_boundary_comprehension",
         "trust_for_agent_decision_support",
         "setup_friction",
-        "runtime_gap_classification"
+        "runtime_gap_classification",
+        "engine_setup_shortcut_comprehension",
+        "ope_host_responsibility_split",
+        "parallel_risk_engine_avoidance"
       ]
     },
     "reviewCheck": {

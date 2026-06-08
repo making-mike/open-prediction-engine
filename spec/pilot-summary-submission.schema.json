@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-summary-submission.schema.json",
+  "title": "Pilot Summary Submission",
+  "description": "Caller-supplied sanitized pilot-session summary input for read-only pilot-summary intake classification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summaryId",
+    "evidenceClass",
+    "taskRefs",
+    "dimensionRatings",
+    "sanitizedFindings",
+    "frictionClasses",
+    "expansionSignals",
+    "nextAction",
+    "riskSignals"
+  ],
+  "properties": {
+    "summaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "evidenceClass": {
+      "type": "string",
+      "enum": ["future_real_summary"]
+    },
+    "taskRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "dimensionRatings": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 9,
+      "items": { "$ref": "#/$defs/dimensionRating" }
+    },
+    "sanitizedFindings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "frictionClasses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "string",
+        "enum": [
+          "none",
+          "readback_navigation",
+          "claim_boundary_confusion",
+          "source_runtime_gap",
+          "schema_integration_friction",
+          "privacy_redaction_needed",
+          "parallel_risk_engine_confusion",
+          "audit_layer_only_confusion"
+        ]
+      }
+    },
+    "expansionSignals": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "string",
+        "enum": [
+          "keep_local_mvp",
+          "run_more_pilots",
+          "improve_docs",
+          "consider_next_source_runtime",
+          "tighten_claim_copy"
+        ]
+      }
+    },
+    "nextAction": { "$ref": "#/$defs/boundedString" },
+    "riskSignals": { "$ref": "#/$defs/riskSignals" }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    },
+    "dimensionRating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensionId", "score", "evidenceNote"],
+      "properties": {
+        "dimensionId": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 96,
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "evidenceNote": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "riskSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptDetected",
+        "privateRowsDetected",
+        "credentialLikeTextDetected",
+        "participantIdentityDetected",
+        "unredactedSourceDetailDetected",
+        "claimOverreachDetected"
+      ],
+      "properties": {
+        "rawTranscriptDetected": { "type": "boolean" },
+        "privateRowsDetected": { "type": "boolean" },
+        "credentialLikeTextDetected": { "type": "boolean" },
+        "participantIdentityDetected": { "type": "boolean" },
+        "unredactedSourceDetailDetected": { "type": "boolean" },
+        "claimOverreachDetected": { "type": "boolean" }
+      }
+    }
+  }
+}

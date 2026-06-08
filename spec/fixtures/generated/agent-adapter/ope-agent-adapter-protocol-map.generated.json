@@ -2665,6 +2665,173 @@
       ]
     },
     {
+      "operation": "setup_engine",
+      "inputRecordType": "setup_engine",
+      "sideEffectLevel": "read_only",
+      "requiresApproval": false,
+      "inputFields": [
+        {
+          "name": "goal",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --goal",
+          "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
+        },
+        {
+          "name": "view",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --view",
+          "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+        },
+        {
+          "name": "maxBytes",
+          "required": false,
+          "type": "integer",
+          "source": "agent-call --max-bytes",
+          "notes": "Caps response size; adapters must return response_too_large when exceeded."
+        },
+        {
+          "name": "callerIntent",
+          "required": false,
+          "type": "string",
+          "source": "agent-call --caller-intent",
+          "notes": "Short safe caller intent for audit context, not hidden prompt text."
+        }
+      ],
+      "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
+      "localCli": {
+        "implemented": true,
+        "command": "python3 scripts/ope.py agent-call --operation setup_engine --goal \"add predictions to my app\"",
+        "exitCodeSource": "agentEnvelope.exitCode"
+      },
+      "mcp": {
+        "implemented": true,
+        "toolName": "ope_setup_engine",
+        "argumentFields": [
+          {
+            "name": "goal",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --goal",
+            "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
+          },
+          {
+            "name": "view",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --view",
+            "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "returns": "spec/agent-envelope.schema.json",
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+      },
+      "http": {
+        "implemented": false,
+        "method": "POST",
+        "path": "/agent/setup-engine",
+        "argumentFields": [
+          {
+            "name": "goal",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --goal",
+            "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
+          },
+          {
+            "name": "view",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --view",
+            "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+          },
+          {
+            "name": "maxBytes",
+            "required": false,
+            "type": "integer",
+            "source": "agent-call --max-bytes",
+            "notes": "Caps response size; adapters must return response_too_large when exceeded."
+          },
+          {
+            "name": "callerIntent",
+            "required": false,
+            "type": "string",
+            "source": "agent-call --caller-intent",
+            "notes": "Short safe caller intent for audit context, not hidden prompt text."
+          }
+        ],
+        "statusMapping": [
+          {
+            "httpStatus": 200,
+            "envelopeExitCode": 0,
+            "meaning": "Successful envelope."
+          },
+          {
+            "httpStatus": 500,
+            "envelopeExitCode": 1,
+            "meaning": "Internal adapter failure."
+          },
+          {
+            "httpStatus": 400,
+            "envelopeExitCode": 2,
+            "meaning": "Bad or invalid caller input."
+          },
+          {
+            "httpStatus": 403,
+            "envelopeExitCode": 3,
+            "meaning": "Policy or approval gate blocks execution."
+          },
+          {
+            "httpStatus": 404,
+            "envelopeExitCode": 4,
+            "meaning": "Missing, denied, conflicting, or mismatched record."
+          },
+          {
+            "httpStatus": 429,
+            "envelopeExitCode": 5,
+            "meaning": "Local size, quota, or rate limit exceeded."
+          }
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+      },
+      "queue": {
+        "implemented": false,
+        "requestMessageType": "ope.setup_engine.requested",
+        "resultMessageType": "ope.agent_envelope.ready",
+        "correlationKeys": [
+          "operation",
+          "requestId",
+          "questionId",
+          "forecastId",
+          "agentEnvelopeId"
+        ],
+        "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+      },
+      "usageGuidance": "Use first when an agent has a host prediction goal and needs candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before building a host risk engine.",
+      "warnings": [
+        "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
+        "HTTP and queue mappings are not implemented runtimes."
+      ]
+    },
+    {
       "operation": "campaign_plan",
       "inputRecordType": "prediction_campaign_manifest",
       "sideEffectLevel": "read_only",

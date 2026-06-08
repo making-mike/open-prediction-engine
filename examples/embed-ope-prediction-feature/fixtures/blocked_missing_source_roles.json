@@ -1,0 +1,21 @@
+{
+  "hostFeatureIntent": "Show a dispatch-risk prediction in a logistics operations dashboard.",
+  "decisionToSupport": "Decide whether the operator should pre-alert drivers about likely disruption.",
+  "approvedSourceRefs": [
+    {
+      "sourceRef": "sourceadapteroutput-001",
+      "sourceRole": "weather_forecast",
+      "approved": true
+    }
+  ],
+  "resolutionHints": {
+    "outcomeSourceRef": "sourcebinding-outcome-001",
+    "resolutionWindow": "after_service_window"
+  },
+  "outcomeDefinition": {
+    "metric": "delay_minutes",
+    "threshold": "exceeds declared disruption threshold",
+    "window": "future operating window"
+  },
+  "responseSizeBudgetBytes": 65536
+}

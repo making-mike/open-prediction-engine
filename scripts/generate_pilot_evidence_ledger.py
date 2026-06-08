@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +23,11 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "spec" / "fixtures" / "generated" / "pilot-evidence"
 OUTPUT_PATH = GENERATED / "ope-pilot-evidence-ledger.generated.json"
 SCHEMA = SPEC / "pilot-evidence-ledger.schema.json"
+LOCAL_APPEND_SCHEMA = SPEC / "pilot-evidence-local-append.schema.json"
+LOCAL_READBACK_SCHEMA = SPEC / "pilot-evidence-local-readback.schema.json"
 GENERATED_AT = "2026-06-10T11:30:00Z"
+LOCAL_PILOT_LEDGER = ROOT / ".ope" / "live" / "pilot-evidence" / "pilot-evidence-ledger.json"
+LOCAL_PILOT_LEDGER_RELATIVE = ".ope/live/pilot-evidence/pilot-evidence-ledger.json"
 
 CASE_ORDER = [
     "accepted_sanitized_summary",
@@ -469,6 +476,360 @@ def load_generated_ledger() -> dict[str, Any] | None:
     return ledger
 
 
+def utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def local_ledger_path_label(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def local_case_id(summary_id: str) -> str:
+    match = re.search(r"-(\d+)$", summary_id)
+    if match:
+        return f"pilotevidencelocal-{int(match.group(1)):03d}"
+    return "pilotevidencelocal-999"
+
+
+def append_execution_boundary(*, writes_local: bool = False) -> dict[str, bool]:
+    return {
+        "writesCheckedFixtures": False,
+        "writesIgnoredLocalLedger": writes_local,
+        "recordsRawTranscripts": False,
+        "storesPrivateData": False,
+        "storesCredentials": False,
+        "storesPromptLogs": False,
+        "storesParticipantIdentity": False,
+        "createsForecastArtifacts": False,
+        "startsHostedRuntime": False,
+        "fetchesLiveData": False,
+        "unblocksExpansion": False,
+        "qualityClaimsUpgraded": False,
+        "calibrationClaimsUpgraded": False,
+    }
+
+
+def local_readback_boundary() -> dict[str, bool]:
+    return {
+        "readOnlyReadback": True,
+        "readsIgnoredLocalLedger": True,
+        "writesCheckedFixtures": False,
+        "writesIgnoredLocalLedger": False,
+        "recordsRawTranscripts": False,
+        "storesPrivateData": False,
+        "storesCredentials": False,
+        "storesPromptLogs": False,
+        "storesParticipantIdentity": False,
+        "createsForecastArtifacts": False,
+        "startsHostedRuntime": False,
+        "fetchesLiveData": False,
+        "unblocksExpansion": False,
+        "qualityClaimsUpgraded": False,
+        "calibrationClaimsUpgraded": False,
+    }
+
+
+def load_summary_submission(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+    from generate_pilot_summary_intake import INPUT_SCHEMA, PilotSummaryIntakeError, classify_summary_file
+
+    try:
+        result = classify_summary_file(path)
+    except PilotSummaryIntakeError as exc:
+        raise PilotEvidenceLedgerError(str(exc)) from exc
+    try:
+        submission = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise PilotEvidenceLedgerError(f"could not read pilot summary input {path}: {exc}") from exc
+    if not isinstance(submission, dict):
+        raise PilotEvidenceLedgerError("pilot summary input must be a JSON object")
+    errors = validate_record(submission, INPUT_SCHEMA)
+    if errors:
+        raise PilotEvidenceLedgerError(f"pilot summary input schema validation failed: {errors[0]}")
+    return submission, result
+
+
+def candidate_row_from_summary(
+    submission: dict[str, Any],
+    intake_result: dict[str, Any],
+    *,
+    input_ref: str,
+) -> dict[str, Any]:
+    risks = intake_result["riskSignals"]
+    friction_classes = submission["frictionClasses"]
+    intake_status = (
+        "accepted_with_product_signal"
+        if intake_result["intakeDecision"] == "accept_with_product_signal"
+        else "accepted_for_aggregation"
+    )
+    return {
+        "caseId": local_case_id(submission["summaryId"]),
+        "caseKey": "local_real_session_summary",
+        "sourceSummaryId": submission["summaryId"],
+        "inputRef": input_ref,
+        "evidenceClass": "future_real_summary",
+        "taskRefs": submission["taskRefs"],
+        "intakeStatus": intake_status,
+        "acceptedForAggregation": True,
+        "contributesRealSessionEvidence": True,
+        "inputSignals": {
+            "rawTranscriptSubmitted": risks["rawTranscriptDetected"],
+            "privateDataSubmitted": risks["privateRowsDetected"],
+            "credentialLikeTextSubmitted": risks["credentialLikeTextDetected"],
+            "claimConfusionObserved": "claim_boundary_confusion" in friction_classes,
+            "runtimeGapObserved": "source_runtime_gap" in friction_classes,
+        },
+        "privacyChecks": privacy_checks(notes_redacted=True),
+        "dimensionRatings": submission["dimensionRatings"],
+        "sanitizedFindings": submission["sanitizedFindings"],
+        "frictionClasses": friction_classes,
+        "expansionSignals": submission["expansionSignals"],
+        "nextAction": submission["nextAction"],
+    }
+
+
+def validate_local_case_row(row: dict[str, Any]) -> None:
+    append_plan = {
+        "pilotEvidenceAppendPlanId": "pilotevidenceappendplan-001",
+        "generatedAt": GENERATED_AT,
+        "appendMode": "local_pilot_summary_append_plan",
+        "inputRef": row["inputRef"],
+        "inputSummaryId": row["sourceSummaryId"],
+        "intakeDecision": row["intakeStatus"],
+        "appendDecision": "ready_for_local_write",
+        "localLedgerPath": LOCAL_PILOT_LEDGER_RELATIVE,
+        "writeLocalRequired": True,
+        "writeLocalRequested": False,
+        "candidateRealSessionEvidence": True,
+        "contributesRealSessionEvidence": False,
+        "ledgerRowsWritten": 0,
+        "realSessionsRecorded": 0,
+        "candidateRow": row,
+        "executionBoundary": append_execution_boundary(),
+        "warnings": [
+            "Validation wrapper for one local pilot evidence row.",
+            "This wrapper is not written as a checked fixture.",
+        ],
+    }
+    errors = validate_record(append_plan, LOCAL_APPEND_SCHEMA)
+    if errors:
+        raise PilotEvidenceLedgerError(f"local pilot evidence row validation failed: {errors[0]}")
+    privacy = row["privacyChecks"]
+    for key in ("rawTranscriptStored", "privateDataStored", "credentialsStored", "promptLogStored", "participantIdentityStored"):
+        if privacy[key] is not False:
+            raise PilotEvidenceLedgerError(f"local row privacy field {key} must remain false")
+    signals = row["inputSignals"]
+    if signals["rawTranscriptSubmitted"] or signals["privateDataSubmitted"] or signals["credentialLikeTextSubmitted"]:
+        raise PilotEvidenceLedgerError("local evidence rows cannot preserve unsafe input signals")
+    if row["acceptedForAggregation"] is not True or row["contributesRealSessionEvidence"] is not True:
+        raise PilotEvidenceLedgerError("local evidence rows must be accepted real-session rows")
+
+
+def load_local_pilot_rows(local_ledger_path: Path | None = None) -> tuple[str, list[dict[str, Any]]]:
+    path = local_ledger_path or LOCAL_PILOT_LEDGER
+    if not path.exists():
+        return "missing", []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise PilotEvidenceLedgerError(f"could not read local pilot evidence ledger {path}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise PilotEvidenceLedgerError(f"local pilot evidence ledger is not valid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise PilotEvidenceLedgerError("local pilot evidence ledger must be a JSON object")
+    rows = payload.get("caseRows")
+    if not isinstance(rows, list):
+        raise PilotEvidenceLedgerError("local pilot evidence ledger must contain caseRows")
+    for row in rows:
+        if not isinstance(row, dict):
+            raise PilotEvidenceLedgerError("local pilot evidence row must be a JSON object")
+        validate_local_case_row(row)
+    return "readable", rows
+
+
+def aggregate_local_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    pilot = build_agent_pilot_validation()
+    accepted_real = sum(
+        1
+        for row in rows
+        if row["acceptedForAggregation"] and row["contributesRealSessionEvidence"]
+    )
+    claim_issues = sum(1 for row in rows if "claim_boundary_confusion" in row["frictionClasses"])
+    minimum = pilot["pilotProtocol"]["minimumSessions"]
+    target = pilot["pilotProtocol"]["targetSessions"]
+    return {
+        "totalLocalRowCount": len(rows),
+        "acceptedRealSessionCount": accepted_real,
+        "claimBoundaryIssueCount": claim_issues,
+        "minimumRealSessions": minimum,
+        "targetRealSessions": target,
+        "pilotEvidenceReady": accepted_real >= minimum,
+        "expansionEvidenceReady": False,
+        "qualityClaimAllowed": False,
+        "hostedRuntimeAllowed": False,
+        "generatedTypesEvidenceReady": False,
+    }
+
+
+def local_friction_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counter: Counter[str] = Counter()
+    for row in rows:
+        if not row["contributesRealSessionEvidence"]:
+            continue
+        for friction_class in row["frictionClasses"]:
+            counter[friction_class] += 1
+    return [
+        {
+            "frictionClass": key,
+            "realSessionSignalCount": counter[key],
+        }
+        for key in sorted(counter)
+    ]
+
+
+def local_ledger_document(
+    rows: list[dict[str, Any]],
+    *,
+    local_ledger_path: Path,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "localPilotEvidenceLedgerId": "pilotevidencelocalledger-001",
+        "generatedAt": generated_at or utc_now(),
+        "ledgerMode": "ignored_local_pilot_evidence_ledger",
+        "localLedgerPath": local_ledger_path_label(local_ledger_path),
+        "caseRows": rows,
+        "summary": aggregate_local_rows(rows),
+        "warnings": [
+            "This ignored local ledger can contain real supervised session summaries after moderator approval.",
+            "Do not commit this file; .ope/live/ is ignored by git.",
+            "Rows remain product/adoption evidence, not forecast-quality or calibration evidence.",
+        ],
+    }
+
+
+def write_local_pilot_rows(rows: list[dict[str, Any]], *, local_ledger_path: Path) -> None:
+    local_ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = local_ledger_document(rows, local_ledger_path=local_ledger_path)
+    local_ledger_path.write_text(render_json(payload), encoding="utf-8")
+
+
+def validate_append_plan(plan: dict[str, Any]) -> None:
+    errors = validate_record(plan, LOCAL_APPEND_SCHEMA)
+    if errors:
+        raise PilotEvidenceLedgerError(f"pilot evidence append plan schema validation failed: {errors[0]}")
+    boundary = plan["executionBoundary"]
+    if boundary["writesCheckedFixtures"] is not False:
+        raise PilotEvidenceLedgerError("append plan must not write checked fixtures")
+    for key in (
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+    ):
+        if boundary[key] is not False:
+            raise PilotEvidenceLedgerError(f"append plan boundary {key} should be false")
+
+
+def build_local_pilot_evidence_append_plan(
+    input_summary: Path,
+    *,
+    write_local: bool = False,
+    local_ledger_path: Path | None = None,
+) -> dict[str, Any]:
+    path = Path(input_summary)
+    local_path = local_ledger_path or LOCAL_PILOT_LEDGER
+    submission, intake_result = load_summary_submission(path)
+    input_ref = path.name
+    candidate: dict[str, Any] | None = None
+    append_decision = "blocked_by_intake"
+    ledger_rows_written = 0
+    real_sessions_recorded = 0
+    contributes_real_session = False
+
+    if intake_result["ledgerReady"] and intake_result["candidateRealSessionEvidence"]:
+        candidate = candidate_row_from_summary(submission, intake_result, input_ref=input_ref)
+        validate_local_case_row(candidate)
+        append_decision = "ready_for_local_write"
+
+    if write_local and candidate is not None:
+        _, existing_rows = load_local_pilot_rows(local_path)
+        if any(row["sourceSummaryId"] == candidate["sourceSummaryId"] for row in existing_rows):
+            append_decision = "already_recorded"
+            rows = existing_rows
+        else:
+            append_decision = "written_to_local_ledger"
+            rows = [*existing_rows, candidate]
+            write_local_pilot_rows(rows, local_ledger_path=local_path)
+            ledger_rows_written = 1
+        real_sessions_recorded = aggregate_local_rows(rows)["acceptedRealSessionCount"]
+        contributes_real_session = True
+
+    plan = {
+        "pilotEvidenceAppendPlanId": "pilotevidenceappendplan-001",
+        "generatedAt": utc_now() if write_local else GENERATED_AT,
+        "appendMode": "local_pilot_summary_append_plan",
+        "inputRef": input_ref,
+        "inputSummaryId": intake_result["inputSummaryId"],
+        "intakeDecision": intake_result["intakeDecision"],
+        "appendDecision": append_decision,
+        "localLedgerPath": local_ledger_path_label(local_path),
+        "writeLocalRequired": candidate is not None,
+        "writeLocalRequested": write_local,
+        "candidateRealSessionEvidence": candidate is not None,
+        "contributesRealSessionEvidence": contributes_real_session,
+        "ledgerRowsWritten": ledger_rows_written,
+        "realSessionsRecorded": real_sessions_recorded,
+        "candidateRow": candidate,
+        "executionBoundary": append_execution_boundary(writes_local=write_local and ledger_rows_written == 1),
+        "warnings": [
+            "Dry-run append plans do not write pilot evidence or count real sessions.",
+            "Use --write-local only after moderator review confirms the summary is sanitized.",
+            "Local pilot evidence is stored under .ope/live/ and must not be committed.",
+            "Local pilot evidence informs adoption findings only; it does not upgrade forecast quality or calibration claims.",
+        ],
+    }
+    validate_append_plan(plan)
+    return plan
+
+
+def build_local_pilot_evidence_readback(
+    *,
+    local_ledger_path: Path | None = None,
+) -> dict[str, Any]:
+    local_path = local_ledger_path or LOCAL_PILOT_LEDGER
+    status, rows = load_local_pilot_rows(local_path)
+    readback = {
+        "pilotEvidenceLocalReadbackId": "pilotevidencelocalreadback-001",
+        "generatedAt": GENERATED_AT,
+        "readMode": "ignored_local_pilot_evidence_ledger",
+        "localLedgerPath": local_ledger_path_label(local_path),
+        "localLedgerStatus": status,
+        "caseRows": rows,
+        "summary": aggregate_local_rows(rows),
+        "frictionSummary": local_friction_summary(rows),
+        "executionBoundary": local_readback_boundary(),
+        "warnings": [
+            "This readback inspects ignored local pilot evidence only when explicitly requested.",
+            "Missing local evidence keeps real-session counts at zero.",
+            "Accepted local sessions do not upgrade quality, calibration, hosted runtime, or generated-type claims.",
+        ],
+    }
+    errors = validate_record(readback, LOCAL_READBACK_SCHEMA)
+    if errors:
+        raise PilotEvidenceLedgerError(f"pilot evidence local readback schema validation failed: {errors[0]}")
+    return readback
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_ORDER, help="print one pilot evidence case")
@@ -477,11 +838,48 @@ def main() -> None:
         choices=["policy", "cases", "summary", "next-actions", "boundary"],
         help="print one pilot evidence ledger section",
     )
+    parser.add_argument(
+        "--input-summary",
+        help="classify one sanitized pilot summary and print a local ledger append plan",
+    )
+    parser.add_argument(
+        "--write-local",
+        action="store_true",
+        help="append an accepted sanitized summary to the ignored local pilot evidence ledger",
+    )
+    parser.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="read ignored local pilot evidence instead of the checked synthetic ledger",
+    )
     parser.add_argument("--check", action="store_true", help="check generated pilot evidence ledger drift")
     parser.add_argument("--write", action="store_true", help="refresh generated pilot evidence ledger")
     parser.add_argument("--rebuild", action="store_true", help="rebuild before printing instead of loading the checked fixture")
     args = parser.parse_args()
     try:
+        if args.input_summary:
+            if args.case or args.section or args.check or args.write or args.rebuild or args.from_local_ledger:
+                raise PilotEvidenceLedgerError("--input-summary can only be combined with --write-local")
+            sys.stdout.write(render_json(build_local_pilot_evidence_append_plan(Path(args.input_summary), write_local=args.write_local)))
+            return
+        if args.write_local:
+            raise PilotEvidenceLedgerError("--write-local requires --input-summary")
+        if args.from_local_ledger:
+            readback = build_local_pilot_evidence_readback()
+            if args.case or args.check or args.write or args.rebuild:
+                raise PilotEvidenceLedgerError("--from-local-ledger can only be combined with --section")
+            if args.section == "summary":
+                payload: Any = readback["summary"]
+            elif args.section == "cases":
+                payload = readback["caseRows"]
+            elif args.section == "boundary":
+                payload = readback["executionBoundary"]
+            elif args.section:
+                raise PilotEvidenceLedgerError(f"--from-local-ledger does not expose section {args.section}")
+            else:
+                payload = readback
+            sys.stdout.write(render_json(payload))
+            return
         if args.write or args.check or args.rebuild:
             ledger = build_pilot_evidence_ledger()
         else:

@@ -2,11 +2,16 @@
   "manifestVersion": "1.0",
   "manifestStatus": "checked",
   "projectName": "Open Prediction Engine",
-  "tagline": "A prediction credibility layer for agents building forecast features.",
-  "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+  "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
+  "firstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
   "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
   "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
   "helpsWith": [
+    {
+      "capabilityKey": "engine_setup_shortcut",
+      "label": "Prediction engine setup shortcut",
+      "whyItMatters": "Guides agents from a host prediction goal to contracts, source roles, baselines, forecast cards, resolvers, scorers, and calibration gates."
+    },
     {
       "capabilityKey": "forecast_contracts",
       "label": "Resolvable forecast contracts",

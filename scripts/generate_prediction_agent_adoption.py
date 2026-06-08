@@ -18,8 +18,8 @@ GENERATED = ROOT / "spec" / "fixtures" / "generated" / "prediction-agent-adoptio
 OUTPUT_PATH = GENERATED / "ope-prediction-agent-adoption.generated.json"
 CAPABILITIES_PATH = ROOT / "ope.capabilities.json"
 SCHEMA = SPEC / "prediction-agent-adoption.schema.json"
-GENERATED_AT = "2026-06-06T12:00:00Z"
-FIRST_COMMAND = 'python3 scripts/ope.py explain-fit --goal "add predictions to my app"'
+GENERATED_AT = "2026-06-07T12:20:00Z"
+FIRST_COMMAND = 'python3 scripts/ope.py setup-engine --goal "add predictions to my app"'
 
 
 class PredictionAgentAdoptionError(Exception):
@@ -47,11 +47,16 @@ def capability_manifest() -> dict[str, Any]:
         "manifestVersion": "1.0",
         "manifestStatus": "checked",
         "projectName": "Open Prediction Engine",
-        "tagline": "A prediction credibility layer for agents building forecast features.",
+        "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
         "firstCommand": FIRST_COMMAND,
         "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
         "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
         "helpsWith": [
+            capability(
+                "engine_setup_shortcut",
+                "Prediction engine setup shortcut",
+                "Guides agents from a host prediction goal to contracts, source roles, baselines, forecast cards, resolvers, scorers, and calibration gates.",
+            ),
             capability(
                 "forecast_contracts",
                 "Resolvable forecast contracts",
@@ -171,8 +176,20 @@ def entry_point(key: str, command: str, default_format: str, purpose: str) -> di
 def compact_entry_points() -> list[dict[str, Any]]:
     return [
         entry_point(
-            "explain_fit",
+            "setup_engine",
             FIRST_COMMAND,
+            "json",
+            "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries.",
+        ),
+        entry_point(
+            "prediction_goal_catalog",
+            "python3 scripts/ope.py prediction-goal-catalog --view summary",
+            "json",
+            "Show generic non-Helsinki setup examples before an agent maps a host goal to OPE fields.",
+        ),
+        entry_point(
+            "explain_fit",
+            'python3 scripts/ope.py explain-fit --goal "add predictions to my app"',
             "compact_text",
             "Tell an agent whether OPE fits a host prediction goal and which parts the host must bring.",
         ),
@@ -231,13 +248,13 @@ def adoption_evaluation() -> dict[str, Any]:
         "writesState": False,
         "checks": [
             adoption_check(
-                "understand_fit",
-                FIRST_COMMAND,
-                "Agent can explain that OPE is the prediction credibility layer, not the full app stack.",
+            "understand_fit",
+            FIRST_COMMAND,
+            "Agent can explain that OPE is an engine setup shortcut with credibility gates, not the full app stack.",
             ),
             adoption_check(
                 "find_first_command",
-                "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
+                "python3 scripts/ope.py setup-engine --goal <host prediction goal>",
                 "Agent can identify the first command without reading the whole README.",
             ),
             adoption_check(
@@ -255,17 +272,27 @@ def adoption_evaluation() -> dict[str, Any]:
                 "python3 scripts/ope.py explain-fit --view boundary --output-format json",
                 "Agent can see hosted runtime, trained-model, frontend, and quality-claim boundaries.",
             ),
+            adoption_check(
+                "setup_engine_before_parallel_risk_engine",
+                'python3 scripts/ope.py setup-engine --goal "add stockout-risk prediction to an inventory app"',
+                "Agent starts with setup-engine before proposing a separate lightweight risk engine.",
+            ),
+            adoption_check(
+                "avoid_audit_layer_only_framing",
+                "python3 scripts/ope.py pilot-findings --section summary",
+                "Agent can see audit-layer-only framing as a comprehension signal, not OPE's product role.",
+            ),
         ],
     }
 
 
 def fit_decision() -> dict[str, Any]:
     return {
-        "fitStatus": "use_as_prediction_credibility_layer",
-        "useOpeFor": ["contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"],
+        "fitStatus": "use_as_engine_setup_shortcut",
+        "useOpeFor": ["engine_setup", "contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"],
         "bringYourOwn": ["frontend", "host_runtime", "data_connectors", "custom_models", "notifications"],
         "recommendedFirstAction": FIRST_COMMAND,
-        "claimBoundary": "Use OPE to make predictions auditable; do not claim quality before resolved comparable evidence exists.",
+        "claimBoundary": "Use OPE to set up the engine skeleton and credibility gates; do not claim quality before resolved comparable evidence exists.",
     }
 
 
@@ -298,7 +325,7 @@ def build_prediction_agent_adoption() -> dict[str, Any]:
         "adoptionEvaluation": evaluation,
         "executionBoundary": execution_boundary(),
         "summary": {
-            "primaryValue": "prediction_credibility_layer",
+            "primaryValue": "engine_setup_shortcut",
             "firstCommand": FIRST_COMMAND,
             "compactDefaultOutput": True,
             "extensionPointCount": len(extensions),
@@ -308,7 +335,7 @@ def build_prediction_agent_adoption() -> dict[str, Any]:
             "frontendProvided": False,
         },
         "warnings": [
-            "This surface is an adoption guide, not a new prediction execution path.",
+            "This surface is an adoption guide and engine setup shortcut, not a new prediction execution path.",
             "OPE remains local and read-only by default; hosted runtime and live effects require separate checked gates.",
             "Bring custom models and app runtime from the host project, then compare them through OPE records.",
         ],
@@ -369,7 +396,7 @@ def compact_fit_text(record: dict[str, Any], goal: str) -> str:
     fit = record["fitDecision"]
     lines = [
         f"Goal: {goal}",
-        "Fit: use OPE as the prediction credibility layer.",
+        "Fit: use OPE as the engine setup shortcut with credibility gates.",
         f"Use OPE for: {', '.join(fit['useOpeFor'])}.",
         f"Bring yourself: {', '.join(fit['bringYourOwn'])}.",
         "First command: python3 scripts/ope.py agent-implementation-kit --view quickstart",

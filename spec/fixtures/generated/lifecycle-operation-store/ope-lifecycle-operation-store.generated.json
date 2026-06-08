@@ -506,6 +506,15 @@
       "provenanceRequired": true
     },
     {
+      "recordType": "pilot_evidence_ledger_row",
+      "schemaFile": "spec/pilot-evidence-local-append.schema.json",
+      "storageTable": "evidence_ledger_rows",
+      "mutableAfterWrite": false,
+      "writeMode": "append_only",
+      "hashRequired": true,
+      "provenanceRequired": true
+    },
+    {
       "recordType": "json_state_migration_receipt",
       "schemaFile": "spec/lifecycle-operation.schema.json",
       "storageTable": "operation_audit_records",
@@ -658,6 +667,17 @@
       "stalenessPolicy": "transactional_projection"
     },
     {
+      "readModelName": "pilot_findings",
+      "purpose": "Report accepted ignored-local pilot evidence rows and adoption friction without quality or calibration claims.",
+      "sourceTables": [
+        "evidence_ledger_rows",
+        "operation_receipts"
+      ],
+      "agentQuestion": "How many accepted supervised pilot sessions are locally recorded?",
+      "readOnly": true,
+      "stalenessPolicy": "transactional_projection"
+    },
+    {
       "readModelName": "failed_operations",
       "purpose": "Expose failed or blocked operation receipts with sanitized recovery categories.",
       "sourceTables": [
@@ -707,7 +727,7 @@
   "jsonCompatibilityAdapter": {
     "adapterName": "ignored_json_live_state",
     "adapterStatus": "current_compatibility_adapter",
-    "sourceRoot": ".ope/live/prediction-campaigns",
+    "sourceRoot": ".ope/live",
     "readCompatibilityAllowed": true,
     "writeCompatibilityAllowed": true,
     "normalChecksWriteLiveState": false,
@@ -768,12 +788,20 @@
         "contentHashPreserved": true,
         "migrationReceiptRequired": true,
         "rawCrudExposed": false
+      },
+      {
+        "stateClass": "pilot_evidence_ledger",
+        "sourcePathPattern": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+        "migrationTargetTable": "evidence_ledger_rows",
+        "contentHashPreserved": true,
+        "migrationReceiptRequired": true,
+        "rawCrudExposed": false
       }
     ],
     "knownLimitations": [
       "Ignored JSON compatibility is weak for concurrent agents until imported through lifecycle receipts.",
       "Compatibility writes remain explicit local actions and are never performed by normal checks.",
-      "Migration must preserve source content hashes before SQLite becomes authoritative for existing state."
+      "Migration must preserve source content hashes before SQLite becomes authoritative for existing campaign or pilot state."
     ]
   },
   "writeLocalOperationCoverage": [
@@ -975,6 +1003,28 @@
       "normalChecksWriteLiveState": false,
       "compatibilityJsonWriteAllowed": true,
       "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
+    },
+    {
+      "coverageId": "writelocalcoverage-009",
+      "commandPath": "pilot-evidence --input-summary --write-local",
+      "lifecycleOperations": [
+        "evidence.append"
+      ],
+      "scenarioNames": [
+        "pilot-evidence-append"
+      ],
+      "requiredOperationReceiptCount": 1,
+      "requiredReadModels": [
+        "pilot_findings"
+      ],
+      "allReceiptsChecked": true,
+      "allReadModelsChecked": true,
+      "idempotencyRequired": true,
+      "leaseRequired": true,
+      "rawCrudExposed": false,
+      "normalChecksWriteLiveState": false,
+      "compatibilityJsonWriteAllowed": true,
+      "notes": "Compatibility file writes remain explicit; the checked SQLite scenarios define the operation receipts and read-model effects agents should use."
     }
   ],
   "fileDatabaseCompatibilityChecks": [
@@ -1099,6 +1149,25 @@
       "scenarioName": "campaign-method-rollback",
       "lifecycleOperation": "method.rollback",
       "fileModeRepeatStatus": "local_rollback_already_present",
+      "fileModeDuplicatePrevented": true,
+      "databaseFirstExecutionStatus": "committed",
+      "databaseReplayExecutionStatus": "idempotent_replay",
+      "databaseReplayIdempotencyStatus": "return_existing_receipt",
+      "databaseReplayOperationReceiptsWritten": 0,
+      "databaseDuplicateRecordsCreated": 0,
+      "contentHashComparisonRequired": true,
+      "historyRewriteCount": 0,
+      "physicalDeletes": 0,
+      "rawCrudExposed": false,
+      "compatible": true
+    },
+    {
+      "compatibilityCheckId": "compatibilitycheck-008",
+      "recordClass": "pilot_evidence_ledger_rows",
+      "commandPath": "pilot-evidence --input-summary --write-local",
+      "scenarioName": "pilot-evidence-append",
+      "lifecycleOperation": "evidence.append",
+      "fileModeRepeatStatus": "local_pilot_evidence_already_recorded",
       "fileModeDuplicatePrevented": true,
       "databaseFirstExecutionStatus": "committed",
       "databaseReplayExecutionStatus": "idempotent_replay",
@@ -2287,6 +2356,98 @@
     },
     {
       "scenarioId": "lifecyclescenario-012",
+      "scenarioName": "pilot-evidence-append",
+      "operationName": "evidence.append",
+      "sqliteRuntimeExercised": true,
+      "setupOperationCount": 0,
+      "preflightStatus": "preflight_pass",
+      "executionStatus": "committed",
+      "idempotencyStatus": "new_key_available",
+      "leaseStatus": "available",
+      "operationReceiptId": "operationreceipt-3351",
+      "plannedWriteCount": 2,
+      "operationReceiptsWritten": 1,
+      "immutableRecordsInserted": 1,
+      "auditRecordsInserted": 0,
+      "duplicateRecordsCreated": 0,
+      "physicalDeletes": 0,
+      "historyRewriteCount": 0,
+      "rawCrudExposed": false,
+      "forecastArtifactMutable": false,
+      "payloadHashBindings": [
+        {
+          "recordType": "pilot_evidence_ledger_row",
+          "recordId": "pilotevidencelocal-001",
+          "sourceContentHash": "7957159184760b8608adbc35582815dba76fe24a2ccd2f2960e6bea105c1a79e",
+          "sqliteContentHash": "7957159184760b8608adbc35582815dba76fe24a2ccd2f2960e6bea105c1a79e",
+          "matchesSourceHash": true
+        }
+      ],
+      "migrationImportSummary": null,
+      "readModelEffects": [
+        "campaign_status",
+        "pilot_findings"
+      ],
+      "recoveryPath": "retry_with_same_idempotency_key_or_inspect_receipt",
+      "preflight": {
+        "plannedWrites": [
+          {
+            "tableName": "operation_receipts",
+            "recordType": "operation_receipt",
+            "recordId": "operationreceipt-3351",
+            "writeMode": "append_only"
+          },
+          {
+            "tableName": "evidence_ledger_rows",
+            "recordType": "pilot_evidence_ledger_row",
+            "recordId": "pilotevidencelocal-001",
+            "writeMode": "append_only"
+          }
+        ],
+        "blockingGuards": [
+          {
+            "guardId": "lifecycleguard-001",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Operation is represented as a lifecycle operation, not raw CRUD."
+          },
+          {
+            "guardId": "lifecycleguard-002",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Forecast artifacts and histories are append-only or insert-once."
+          },
+          {
+            "guardId": "lifecycleguard-003",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Idempotency key is present and bound to source record hash."
+          },
+          {
+            "guardId": "lifecycleguard-005",
+            "guardStatus": "pass",
+            "blocksOperation": false,
+            "message": "Lease is available or already owned by this caller."
+          }
+        ],
+        "idempotencyKey": "pilot-evidence:pilotsummaryinput-001",
+        "leasePlan": {
+          "requiresLease": true,
+          "leaseKey": "evidence.append:pilotevidence-001:pilot-evidence-ledger",
+          "ownerId": "agent-alpha",
+          "expiresAt": "2026-06-03T00:32:00Z"
+        },
+        "claimBoundary": {
+          "createsQualityClaim": false,
+          "allowsPostOutcomeRewrite": false,
+          "allowsSilentDelete": false,
+          "allowsRawCrud": false
+        }
+      },
+      "message": "Operation committed through SQLite adapter."
+    },
+    {
+      "scenarioId": "lifecyclescenario-013",
       "scenarioName": "campaign-method-apply",
       "operationName": "method.apply",
       "sqliteRuntimeExercised": true,
@@ -2379,7 +2540,7 @@
       "message": "Operation committed through SQLite adapter."
     },
     {
-      "scenarioId": "lifecyclescenario-013",
+      "scenarioId": "lifecyclescenario-014",
       "scenarioName": "campaign-method-rollback",
       "operationName": "method.rollback",
       "sqliteRuntimeExercised": true,
@@ -2472,7 +2633,7 @@
       "message": "Operation committed through SQLite adapter."
     },
     {
-      "scenarioId": "lifecyclescenario-014",
+      "scenarioId": "lifecyclescenario-015",
       "scenarioName": "json-state-import",
       "operationName": "state.import_json",
       "sqliteRuntimeExercised": true,
@@ -2657,7 +2818,7 @@
       "message": "Operation committed through SQLite adapter."
     },
     {
-      "scenarioId": "lifecyclescenario-015",
+      "scenarioId": "lifecyclescenario-016",
       "scenarioName": "recovery",
       "operationName": "score.create",
       "sqliteRuntimeExercised": true,
@@ -2779,14 +2940,14 @@
     "firstBackend": "local_sqlite",
     "productionDesignBackend": "postgres_design",
     "operationCount": 14,
-    "readModelCount": 9,
-    "immutableRecordClassCount": 14,
+    "readModelCount": 10,
+    "immutableRecordClassCount": 15,
     "sqliteTableCount": 8,
-    "runtimeScenarioCount": 15,
-    "writeLocalOperationCoverageCount": 8,
+    "runtimeScenarioCount": 16,
+    "writeLocalOperationCoverageCount": 9,
     "allWriteLocalPathsReceiptBacked": true,
     "allWriteLocalPathsReadModelBacked": true,
-    "fileDatabaseCompatibilityCheckCount": 7,
+    "fileDatabaseCompatibilityCheckCount": 8,
     "fileDatabaseCompatibilityChecked": true,
     "deleteReplacedByLifecycleOperations": true,
     "agentImplementationReady": true,

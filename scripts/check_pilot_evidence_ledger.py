@@ -3,7 +3,20 @@
 
 from __future__ import annotations
 
-from generate_pilot_evidence_ledger import CASE_ORDER, build_pilot_evidence_ledger
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from generate_pilot_evidence_ledger import (
+    CASE_ORDER,
+    build_local_pilot_evidence_append_plan,
+    build_local_pilot_evidence_readback,
+    build_pilot_evidence_ledger,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+ACCEPTED_SUMMARY = ROOT / "spec" / "fixtures" / "pilot-summary-intake" / "accepted-setup-engine-summary.json"
+BLOCKED_SUMMARY = ROOT / "spec" / "fixtures" / "pilot-summary-intake" / "blocked-raw-transcript-summary.json"
 
 
 def require(condition: bool, message: str) -> None:
@@ -59,6 +72,50 @@ def main() -> None:
         if key in {"readOnlyLedger", "usesSyntheticCheckedExamplesOnly", "declaresFutureRealSummaryIntake"}:
             continue
         require(value is False, f"execution boundary {key} should remain false")
+
+    accepted_plan = build_local_pilot_evidence_append_plan(ACCEPTED_SUMMARY)
+    require(accepted_plan["appendDecision"] == "ready_for_local_write", "accepted summary should produce local write plan")
+    require(accepted_plan["inputSummaryId"] == "pilotsummaryinput-001", "accepted append plan summary id drifted")
+    require(accepted_plan["writeLocalRequired"] is True, "accepted append plan should require explicit local write")
+    require(accepted_plan["writeLocalRequested"] is False, "accepted append plan should be dry-run by default")
+    require(accepted_plan["candidateRealSessionEvidence"] is True, "accepted append plan should identify candidate evidence")
+    require(accepted_plan["contributesRealSessionEvidence"] is False, "dry-run append plan must not count evidence")
+    require(accepted_plan["ledgerRowsWritten"] == 0, "dry-run append plan must not write rows")
+    require(accepted_plan["realSessionsRecorded"] == 0, "dry-run append plan must not record sessions")
+    require(accepted_plan["candidateRow"]["contributesRealSessionEvidence"] is True, "candidate row should be a real-session row if written")
+    require(accepted_plan["candidateRow"]["sourceSummaryId"] == "pilotsummaryinput-001", "candidate row summary id drifted")
+    require("parallel_risk_engine_confusion" not in accepted_plan["candidateRow"]["frictionClasses"], "fixture friction class drifted")
+
+    blocked_plan = build_local_pilot_evidence_append_plan(BLOCKED_SUMMARY)
+    require(blocked_plan["appendDecision"] == "blocked_by_intake", "blocked summary should not produce a local write plan")
+    require(blocked_plan["candidateRealSessionEvidence"] is False, "blocked append plan should not mark candidate evidence")
+    require(blocked_plan["candidateRow"] is None, "blocked append plan should not expose a candidate row")
+    require(blocked_plan["ledgerRowsWritten"] == 0, "blocked append plan must not write rows")
+    require(blocked_plan["realSessionsRecorded"] == 0, "blocked append plan must not record sessions")
+
+    with TemporaryDirectory() as tmp:
+        local_ledger = Path(tmp) / "pilot-evidence-ledger.json"
+        first_write = build_local_pilot_evidence_append_plan(
+            ACCEPTED_SUMMARY,
+            write_local=True,
+            local_ledger_path=local_ledger,
+        )
+        second_write = build_local_pilot_evidence_append_plan(
+            ACCEPTED_SUMMARY,
+            write_local=True,
+            local_ledger_path=local_ledger,
+        )
+        local_readback = build_local_pilot_evidence_readback(local_ledger_path=local_ledger)
+        require(first_write["appendDecision"] == "written_to_local_ledger", "first local write should append")
+        require(first_write["ledgerRowsWritten"] == 1, "first local write should write one row")
+        require(first_write["realSessionsRecorded"] == 1, "first local write should record one session")
+        require(second_write["appendDecision"] == "already_recorded", "duplicate local write should be idempotent")
+        require(second_write["ledgerRowsWritten"] == 0, "duplicate local write should not append")
+        require(second_write["realSessionsRecorded"] == 1, "duplicate local write should preserve one session")
+        require(local_readback["localLedgerStatus"] == "readable", "local readback should read temp ledger")
+        require(local_readback["summary"]["acceptedRealSessionCount"] == 1, "local readback should count one accepted session")
+        require(local_readback["summary"]["pilotEvidenceReady"] is False, "one local session should not satisfy pilot minimum")
+        require(local_readback["summary"]["qualityClaimAllowed"] is False, "local readback must not allow quality claims")
 
     print("checked pilot evidence ledger")
 

@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-evidence-local-readback.schema.json",
+  "title": "Pilot Evidence Local Readback",
+  "description": "Read-only aggregate over ignored local pilot evidence rows collected from moderator-approved sanitized summaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotEvidenceLocalReadbackId",
+    "generatedAt",
+    "readMode",
+    "localLedgerPath",
+    "localLedgerStatus",
+    "caseRows",
+    "summary",
+    "frictionSummary",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "pilotEvidenceLocalReadbackId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "readMode": {
+      "type": "string",
+      "enum": ["ignored_local_pilot_evidence_ledger"]
+    },
+    "localLedgerPath": { "$ref": "#/$defs/boundedString" },
+    "localLedgerStatus": {
+      "type": "string",
+      "enum": ["missing", "readable"]
+    },
+    "caseRows": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 50,
+      "items": { "$ref": "pilot-evidence-local-append.schema.json#/$defs/localCaseRow" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalLocalRowCount",
+        "acceptedRealSessionCount",
+        "claimBoundaryIssueCount",
+        "minimumRealSessions",
+        "targetRealSessions",
+        "pilotEvidenceReady",
+        "expansionEvidenceReady",
+        "qualityClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesEvidenceReady"
+      ],
+      "properties": {
+        "totalLocalRowCount": { "type": "integer", "minimum": 0 },
+        "acceptedRealSessionCount": { "type": "integer", "minimum": 0 },
+        "claimBoundaryIssueCount": { "type": "integer", "minimum": 0 },
+        "minimumRealSessions": { "type": "integer", "minimum": 1 },
+        "targetRealSessions": { "type": "integer", "minimum": 1 },
+        "pilotEvidenceReady": { "type": "boolean" },
+        "expansionEvidenceReady": { "type": "boolean" },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" }
+      }
+    },
+    "frictionSummary": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frictionClass", "realSessionSignalCount"],
+        "properties": {
+          "frictionClass": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "realSessionSignalCount": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyReadback",
+        "readsIgnoredLocalLedger",
+        "writesCheckedFixtures",
+        "writesIgnoredLocalLedger",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded"
+      ],
+      "properties": {
+        "readOnlyReadback": { "type": "boolean" },
+        "readsIgnoredLocalLedger": { "type": "boolean" },
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLocalLedger": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    }
+  }
+}

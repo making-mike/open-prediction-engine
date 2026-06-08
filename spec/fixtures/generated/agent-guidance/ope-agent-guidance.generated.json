@@ -1,12 +1,13 @@
 {
   "agentGuidanceId": "agentguidance-001",
-  "generatedAt": "2026-06-06T10:20:00Z",
+  "generatedAt": "2026-06-07T14:40:00Z",
   "guidanceStatus": "checked_agent_guidance_loop",
   "implementedMilestones": [
     "142",
     "143",
     "144",
-    "145"
+    "145",
+    "156"
   ],
   "sourceRecords": {
     "predictionFeatureSetupId": "predictionfeaturesetup-001",
@@ -174,21 +175,65 @@
     },
     "plannerOutput": {
       "agentNextMove": "ask_user",
-      "questionCount": 4,
+      "questionCount": 5,
       "questionsToAsk": [
-        "Which route, stop, or bounded service area should this cover?",
-        "What time window on 2026-06-06 should count for the 2+ minute lateness threshold?",
-        "Which approved planned-work source reference can OPE use?",
-        "Which outcome source will confirm whether each scoped bus was 2+ minutes late?"
+        "What decision will this prediction support in the host app?",
+        "What exact future outcome, threshold, entity scope, and horizon should resolve the forecast?",
+        "Which approved source references can provide forecast-time evidence?",
+        "Which approved historical source can define the baseline before stronger methods are considered?",
+        "Which resolution source will confirm the outcome after the forecast window closes?"
       ],
       "requiredSourceRoles": [
-        "planned_work",
-        "schedule",
-        "historical_delay_baseline",
-        "transit_delay_outcome"
+        "forecast_time_evidence",
+        "historical_baseline",
+        "entity_scope",
+        "resolution_outcome"
       ],
-      "safeRetryCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case needs_clarification"
+      "safeRetryCommand": "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\""
     }
+  },
+  "domainAgnosticSetupFlow": {
+    "flowId": "domainagnosticsetupflow-001",
+    "flowStatus": "checked_domain_agnostic_setup_flow",
+    "goalPattern": "Any host-app prediction feature with a measurable future outcome and approved source references.",
+    "agentNextMove": "ask_user",
+    "clarificationQuestions": [
+      "What decision will this prediction support in the host app?",
+      "What exact future outcome, threshold, entity scope, and horizon should resolve the forecast?",
+      "Which approved source references can provide forecast-time evidence?",
+      "Which approved historical source can define the baseline before stronger methods are considered?",
+      "Which resolution source will confirm the outcome after the forecast window closes?"
+    ],
+    "requiredSetupFacts": [
+      "decision_context",
+      "outcome_definition",
+      "forecast_horizon",
+      "entity_scope",
+      "forecast_time_source_refs",
+      "baseline_source_ref",
+      "resolution_source_ref"
+    ],
+    "safeNextCommands": [
+      "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\"",
+      "python3 scripts/ope.py prediction-goal-catalog --view examples",
+      "python3 scripts/ope.py agent-guide --section instructions"
+    ],
+    "opeOwnedResponsibilities": [
+      "forecast_contracts",
+      "source_roles",
+      "baseline_policy",
+      "forecast_cards",
+      "resolver_and_scorer_boundaries",
+      "calibration_gates"
+    ],
+    "hostOwnedResponsibilities": [
+      "ui",
+      "approved_source_connections",
+      "runtime_invocation",
+      "notifications",
+      "optional_method_extensions"
+    ],
+    "keepsHelsinkiAsExample": true
   },
   "helsinkiNarrowingFlow": {
     "flowId": "helsinkinarrowingflow-001",
@@ -215,6 +260,7 @@
     "packStatus": "checked_agent_instruction_pack",
     "doRules": [
       "Classify the developer prompt before trying to forecast.",
+      "Use setup-engine first for arbitrary host prediction goals.",
       "Ask focused questions when OPE returns needs_clarification.",
       "Use approved source references rather than raw private payloads.",
       "Read forecast cards and lifecycle bundles instead of inventing forecast summaries.",
@@ -230,18 +276,18 @@
     "minimumAgentLoop": [
       {
         "stepKey": "classify_prompt",
-        "instruction": "Call the guidance surface or prediction-feature setup response before deciding what to do.",
+        "instruction": "Call the guidance surface or setup-engine before deciding what to build.",
         "safeCommand": "python3 scripts/ope.py agent-guide --section summary"
       },
       {
         "stepKey": "ask_or_block",
-        "instruction": "If the case needs clarification, ask the returned questions; if blocked, replace unsafe inputs.",
-        "safeCommand": "python3 scripts/ope.py agent-guide --case needs_clarification"
+        "instruction": "If the goal needs clarification, ask the generic setup questions; if blocked, replace unsafe inputs.",
+        "safeCommand": "python3 scripts/ope.py agent-guide --section generic"
       },
       {
         "stepKey": "retry_with_refs",
-        "instruction": "After the caller provides scoped answers and approved source refs, retry the compact setup path.",
-        "safeCommand": "python3 scripts/ope.py prediction-feature-setup --view response --case accepted"
+        "instruction": "After the caller provides scoped answers and approved source refs, run setup-engine for that host goal.",
+        "safeCommand": "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\""
       },
       {
         "stepKey": "read_or_stop",
@@ -264,8 +310,9 @@
   },
   "summary": {
     "guidanceCaseCount": 5,
-    "implementedMilestoneCount": 4,
+    "implementedMilestoneCount": 5,
     "promptPlannerReady": true,
+    "domainAgnosticFlowReady": true,
     "helsinkiNarrowingFlowReady": true,
     "instructionPackReady": true,
     "realSessionsRecorded": 0,

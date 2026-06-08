@@ -31,6 +31,7 @@ REQUIRED_READ_MODELS = {
     "append_readiness",
     "calibration_status",
     "track_record_progress",
+    "pilot_findings",
     "failed_operations",
     "recovery_actions",
 }
@@ -47,6 +48,7 @@ REQUIRED_SCENARIOS = [
     "campaign-resolution-record",
     "campaign-score-create",
     "campaign-evidence-append",
+    "pilot-evidence-append",
     "campaign-method-apply",
     "campaign-method-rollback",
     "json-state-import",
@@ -73,6 +75,7 @@ REQUIRED_WRITE_LOCAL_COMMANDS = {
     "prediction-campaign pre-calibration --write-local",
     "prediction-campaign apply-method-update --write-local",
     "prediction-campaign rollback-method-update --write-local",
+    "pilot-evidence --input-summary --write-local",
 }
 
 REQUIRED_COMPATIBILITY_CLASSES = {
@@ -83,6 +86,7 @@ REQUIRED_COMPATIBILITY_CLASSES = {
     "pre_calibration_method_binding",
     "method_apply_binding",
     "method_rollback_binding",
+    "pilot_evidence_ledger_rows",
 }
 
 
@@ -192,7 +196,7 @@ def main() -> None:
     compat = store["jsonCompatibilityAdapter"]
     require(compat["adapterName"] == "ignored_json_live_state", "JSON compatibility adapter name drifted")
     require(compat["adapterStatus"] == "current_compatibility_adapter", "JSON compatibility adapter status drifted")
-    require(compat["sourceRoot"] == ".ope/live/prediction-campaigns", "JSON compatibility source root drifted")
+    require(compat["sourceRoot"] == ".ope/live", "JSON compatibility source root drifted")
     require(compat["readCompatibilityAllowed"] is True, "ignored JSON reads should remain compatibility-allowed")
     require(compat["writeCompatibilityAllowed"] is True, "ignored JSON writes should remain compatibility-allowed during migration")
     require(compat["normalChecksWriteLiveState"] is False, "normal checks must not write ignored JSON state")
@@ -207,7 +211,7 @@ def main() -> None:
     require(compat["rawCrudExposed"] is False, "compatibility adapter must not expose raw CRUD")
     compat_classes = {item["stateClass"]: item for item in compat["stateClasses"]}
     require(
-        set(compat_classes) == {"forecast_lifecycle_records", "campaign_state", "run_state", "evidence_ledger", "method_binding", "operation_audit"},
+        set(compat_classes) == {"forecast_lifecycle_records", "campaign_state", "run_state", "evidence_ledger", "method_binding", "operation_audit", "pilot_evidence_ledger"},
         "JSON compatibility adapter should cover current ignored live state classes",
     )
     for item in compat_classes.values():
@@ -282,6 +286,11 @@ def main() -> None:
     require("append_readiness" in scenarios["campaign-evidence-append"]["readModelEffects"], "campaign append bridge should update append readiness")
     require("calibration_status" in scenarios["campaign-evidence-append"]["readModelEffects"], "campaign append bridge should update calibration status")
     require("track_record_progress" in scenarios["campaign-evidence-append"]["readModelEffects"], "campaign append bridge should update track-record progress")
+    require(scenarios["pilot-evidence-append"]["operationName"] == "evidence.append", "pilot evidence append operation drifted")
+    require(scenarios["pilot-evidence-append"]["preflight"]["plannedWrites"][1]["recordType"] == "pilot_evidence_ledger_row", "pilot evidence append should write pilot ledger rows")
+    require("pilot_findings" in scenarios["pilot-evidence-append"]["readModelEffects"], "pilot evidence append should update pilot findings")
+    require("calibration_status" not in scenarios["pilot-evidence-append"]["readModelEffects"], "pilot evidence append must not update calibration status")
+    require("track_record_progress" not in scenarios["pilot-evidence-append"]["readModelEffects"], "pilot evidence append must not update track-record progress")
     require(scenarios["campaign-method-apply"]["operationName"] == "method.apply", "campaign method apply bridge operation drifted")
     require(scenarios["campaign-method-rollback"]["operationName"] == "method.rollback", "campaign method rollback bridge operation drifted")
     require(scenarios["json-state-import"]["operationName"] == "state.import_json", "JSON state import operation drifted")

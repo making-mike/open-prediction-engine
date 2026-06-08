@@ -24,7 +24,7 @@ def main() -> None:
     require(packet["bindings"]["developerAdoptionSurfaceId"] == "developeradoptionsurface-001", "developer adoption binding drifted")
     require(packet["bindings"]["predictionCampaignExplainId"] == "predictioncampaignexplain-001", "campaign explain binding drifted")
 
-    require(summary["taskCardCount"] == 6, "pilot session packet should expose six task cards")
+    require(summary["taskCardCount"] == 7, "pilot session packet should expose seven task cards")
     require(summary["minimumRealSessions"] == 3, "minimum real session count drifted")
     require(summary["targetRealSessions"] == 5, "target real session count drifted")
     require(summary["realSessionsRecorded"] == 0, "packet must not record real sessions")
@@ -40,6 +40,7 @@ def main() -> None:
         "unsafe_source_block",
         "forecast_run_readback",
         "claim_gate_readback",
+        "engine_setup_shortcut_comprehension",
         "repeating_prediction_campaign",
     }, "task card coverage drifted")
     require(tasks["unsafe_source_block"]["expectedOutcomeClass"] == "blocked_unsafe", "unsafe source task should stay blocked")
@@ -47,6 +48,14 @@ def main() -> None:
     require(tasks["claim_gate_readback"]["ledgerMapping"]["claimBoundaryRequired"] is True, "claim gate should require claim-boundary capture")
     require(tasks["repeating_prediction_campaign"]["command"] == "python3 scripts/ope.py prediction-campaign explain", "campaign task command drifted")
     require(tasks["repeating_prediction_campaign"]["ledgerMapping"]["claimBoundaryRequired"] is True, "campaign task should require claim-boundary capture")
+    require(
+        tasks["engine_setup_shortcut_comprehension"]["command"].startswith("python3 scripts/ope.py setup-engine"),
+        "setup comprehension task should use setup-engine",
+    )
+    require(
+        "engine_setup_shortcut_comprehension" in tasks["engine_setup_shortcut_comprehension"]["measures"],
+        "setup comprehension task should measure engine setup shortcut comprehension",
+    )
 
     template = packet["evidenceTemplate"]
     require(template["ledgerSubmissionShape"]["canSubmitToPilotEvidence"] is True, "template should be ledger-submission shaped")

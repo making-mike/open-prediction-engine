@@ -2339,3 +2339,80 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Add `prediction-agent-adoption`, `explain-fit`, `capabilities`, `adoption-eval`, `AGENT_QUICKSTART.md`, and `ope.capabilities.json` as the checked general front door for agents evaluating OPE in host prediction projects.
 - **Why:** Agents were likely to misread OPE as either a full app framework or a pile of schemas; a compact fit surface makes the value and non-goals explicit before domain-specific examples.
 - **Alternatives rejected:** Adding a frontend or hosted API to improve first impressions, making `agent-integrate` the only front door, leaving capability discovery only in README prose, or advertising trained-model support before model gates and comparable evidence justify it.
+
+### DEC-140 — Frame Adoption As Engine Setup Shortcut
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Reframe the checked prediction-agent adoption surface around OPE as a domain-agnostic prediction engine setup shortcut with credibility gates built in, while keeping `setup-engine` as a planned readback until its CLI and adapter surfaces are checked.
+- **Why:** External agents were interpreting OPE as a post-hoc audit/reference layer and building ad hoc risk engines first; the front door should make the reusable setup loop explicit without claiming hosted runtime, trained models, or forecast quality.
+- **Alternatives rejected:** Keeping "prediction credibility layer" as the primary value, making Helsinki/transit the default adoption story, documenting `setup-engine` as implemented before checks exist, or adding hosted/API behavior to improve adoption perception.
+
+### DEC-141 — Make Setup-Engine The Canonical Read-Only Setup Front Door
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add `setup-engine` as the checked domain-agnostic first command, with matching CLI, `agent-call`, local MCP, schema, fixture, and adapter-envelope readbacks.
+- **Why:** Agents need one concrete first readback for any host prediction goal that returns candidate forecast contracts, required source roles, baseline guidance, host-wrapper shape, examples, and claim boundaries before they invent a parallel lightweight risk engine.
+- **Alternatives rejected:** Keeping `setup-engine` planned while relying on `explain-fit`, making Helsinki transit the default setup path, letting setup-engine accept raw private payloads or credentials, creating forecast artifacts from the setup readback, or treating setup-engine as a hosted runtime.
+
+### DEC-142 — Add Catalog-Backed Generic Prediction Goal Examples
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add a schema-bound `prediction-goal-catalog` readback with eight compact host-goal examples and project the same catalog through the setup-engine examples view.
+- **Why:** Agents need to see the reusable OPE setup shape across domains before they encounter any Helsinki-specific guidance; otherwise they may treat OPE as a niche reference repo or post-hoc audit layer and build an untracked risk engine first.
+- **Alternatives rejected:** Keeping examples only in prose, making Helsinki transit the default example path, claiming calibrated quality from example domains, creating forecast artifacts from the catalog, or adding hosted/runtime behavior to make the examples feel complete.
+
+### DEC-143 — Render Setup-Engine Before Host Forecast Cards
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Update the embedded host wrapper to call `setup-engine` first, render a compact `setupEnginePlan`, and read forecast cards only after host inputs satisfy the setup plan.
+- **Why:** Agents copying the wrapper need a concrete boundary between the host app and OPE: the host renders setup status, candidate contracts, source roles, baseline guidance, forecast-card preview, required inputs, and warnings, while OPE owns forecast contracts, scoring, calibration, and method gates.
+- **Alternatives rejected:** Keeping `prediction-feature-setup` as the first wrapper call, putting scoring or calibration semantics in the host wrapper, adding a separate setup-wrapper example directory before the existing example became too large, allowing setup blockers to read forecast cards, or recommending an untracked route-risk engine for custom host logic.
+
+### DEC-144 — Measure Setup-Engine Comprehension Before Broader Adoption Claims
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add a checked engine setup adoption comprehension gate across simulated-agent-pilot, agent-pilot-validation, pilot-session-packet, pilot-findings, local-usage-trace, and adoption-eval.
+- **Why:** Agents may still run OPE after they first invent a separate lightweight risk engine, or describe OPE as only a reference/audit layer. OPE needs explicit adoption evidence that agents understand setup-engine as the first prediction-engine setup readback, across non-Helsinki host goals, before broader adoption claims or generated-type/runtime expansion.
+- **Alternatives rejected:** Treating the host wrapper example as enough evidence, using only Helsinki transit prompts, counting simulated prompts as real pilot evidence, upgrading forecast quality claims from comprehension evidence, or adding hosted/runtime behavior to make the setup shortcut more convincing.
+
+### DEC-145 — Classify Sanitized Pilot Summary Files Before Ledger Review
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add schema-bound caller-supplied pilot summary submissions and read-only `pilot-summary-intake --input <summary.json>` classification results before any manual pilot evidence ledger review.
+- **Why:** Milestone 140 still needs real supervised pilot summaries, and example-only intake does not give moderators a checked command for classifying actual sanitized files. The file classifier makes accepted, redaction-needed, and blocked decisions explicit while keeping ledger writes and real-session counts manual.
+- **Alternatives rejected:** Counting classified files as real evidence automatically, storing raw transcripts for later cleanup, scanning free-form transcript text in OPE, writing ledger rows from normal checks, or using the existing example cases as a substitute for caller-supplied sanitized summary classification.
+
+### DEC-146 — Store Real Pilot Evidence Only In Explicit Ignored Local Ledgers
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add schema-bound `pilot-evidence --input-summary <summary.json>` dry-run append plans, explicit `--write-local` appends to `.ope/live/pilot-evidence/pilot-evidence-ledger.json`, and opt-in `--from-local-ledger` readbacks for pilot evidence and pilot findings.
+- **Why:** The roadmap needs real supervised pilot evidence, but checked fixtures must keep zero real sessions and normal checks must remain non-mutating. Moderators need a concrete, idempotent path from approved sanitized summaries to local evidence without committing private or session-specific rows.
+- **Alternatives rejected:** Committing real pilot evidence rows to generated fixtures, letting `pilot-summary-intake --input` write ledger rows automatically, reading ignored local state during normal checks, allowing arbitrary ledger paths through the CLI, or letting local adoption evidence upgrade forecast quality, calibration, hosted-runtime, generated-type, or expansion claims.
+
+### DEC-147 — Receipt-Back Pilot Evidence Local Writes
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add `pilot-evidence --input-summary --write-local` to lifecycle operation store coverage as an `evidence.append` operation that writes a `pilot_evidence_ledger_row`, updates `pilot_findings`, and participates in idempotent file/database replay checks.
+- **Why:** Agents should see every explicit local mutation path through the same operation receipt, lease, idempotency, planned-write, and read-model surface. Without this, the pilot evidence runtime looked separate from the prediction engine runtime and weakened the “use OPE first” shortcut.
+- **Alternatives rejected:** Leaving pilot evidence as a file-only side path, updating calibration or track-record read models from pilot evidence, adding a new operation name for adoption evidence, reading ignored local pilot state in normal checks, or treating pilot evidence as forecast-quality evidence.
+
+### DEC-148 — Add A Supervised Pilot Operator Status Readback
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add `pilot-supervision-status` as a schema-bound, read-only operator status that joins the checked pilot session packet, pilot findings, ignored-local evidence mode, remaining real-session thresholds, recommended setup-comprehension task, and safe command loop for classifying and explicitly appending sanitized local pilot evidence.
+- **Why:** The roadmap now needs real supervised sessions, but agents need a single next-action readback that does not fabricate evidence, does not hide the `--write-local` boundary, and keeps OPE positioned as the first setup-engine shortcut before custom risk engines.
+- **Alternatives rejected:** Adding real-session rows to checked fixtures, making `pilot-findings` responsible for operator sequencing, automatically appending accepted summaries after intake classification, reading `.ope/live` by default in normal checks, or using pilot adoption evidence to upgrade forecast quality, calibration, hosted-runtime, generated-type, or expansion claims.
+
+### DEC-149 — Make Pilot Summary Drafts Non-Ledger-Ready By Default
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Add `pilot-summary-template` as a schema-bound, read-only draft surface whose included `draftSubmission` is valid input shape but intentionally classifies as `needs_redaction` until an operator fills real sanitized ratings and clears risk signals.
+- **Why:** Operators need a copyable summary shape for real sessions, but placeholder drafts must not become accepted real evidence or local ledger rows by accident. The template should reduce session-capture friction while preserving explicit moderator review and `--write-local` as the only mutation path.
+- **Alternatives rejected:** Providing only prose instructions, committing blank real-session fixture rows, generating an already ledger-ready placeholder summary, writing drafts to `.ope/live`, letting the template command append evidence, or treating a filled summary as forecast-quality, calibration, hosted-runtime, generated-type, or expansion evidence.
+
+### DEC-150 — Make Agent Guidance Generic Before Real Adoption Sessions
+- **Date:** 2026-06-07
+- **Status:** accepted
+- **Choice:** Extend `agent-guide` with a domain-agnostic setup flow and default prompt planner questions for arbitrary host prediction goals, while keeping the Helsinki bus clarification path as one worked example.
+- **Why:** Real setup-comprehension sessions should test whether agents ask reusable OPE setup questions before inventing an app-specific risk engine. If the guide defaults to Helsinki-only narrowing, it reinforces the same domain-specific misunderstanding the roadmap is trying to remove.
+- **Alternatives rejected:** Leaving `agent-guide` Helsinki-first, adding separate per-domain guide commands, replacing setup-engine with free-form prompt planning, treating generic guidance as real pilot evidence, or letting guidance create forecast artifacts, execute sources, store private data, or upgrade quality/calibration/runtime claims.

@@ -53,15 +53,15 @@
     "pilotProtocol": { "$ref": "#/$defs/pilotProtocol" },
     "taskScenarios": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "items": { "$ref": "#/$defs/taskScenario" }
     },
     "feedbackSchema": { "$ref": "#/$defs/feedbackSchema" },
     "comprehensionRubric": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "items": { "$ref": "#/$defs/rubricItem" }
     },
     "examplePilotSummaries": {
@@ -116,7 +116,8 @@
         "accepted_adapter_output_ready",
         "unsafe_source_block",
         "forecast_run_readback",
-        "claim_gate_readback"
+        "claim_gate_readback",
+        "engine_setup_shortcut_comprehension"
       ]
     },
     "metricDimension": {
@@ -130,7 +131,10 @@
         "claim_boundary_comprehension",
         "trust_for_agent_decision_support",
         "setup_friction",
-        "runtime_gap_classification"
+        "runtime_gap_classification",
+        "engine_setup_shortcut_comprehension",
+        "ope_host_responsibility_split",
+        "parallel_risk_engine_avoidance"
       ]
     },
     "pilotProtocol": {
@@ -233,7 +237,8 @@
             "ready_for_forecast_execution",
             "blocked_unsafe",
             "completed_forecast_run",
-            "claim_gate_readback"
+            "claim_gate_readback",
+            "setup_engine_shortcut_readback"
           ]
         },
         "expectedReadback": {
@@ -267,7 +272,7 @@
         "successCriteria": {
           "type": "array",
           "minItems": 2,
-          "maxItems": 6,
+          "maxItems": 8,
           "items": { "$ref": "#/$defs/boundedString" }
         }
       }
@@ -303,8 +308,8 @@
         },
         "dimensions": {
           "type": "array",
-          "minItems": 9,
-          "maxItems": 9,
+          "minItems": 12,
+          "maxItems": 12,
           "items": { "$ref": "#/$defs/feedbackDimension" }
         }
       }
@@ -343,7 +348,8 @@
             "lifecycle_bundle",
             "source_intake",
             "blocked_path",
-            "claim_boundary"
+            "claim_boundary",
+            "engine_setup_shortcut"
           ]
         },
         "passingScore": {
@@ -437,6 +443,8 @@
         "minimumTaskCompletionRate",
         "minimumMedianTrustScore",
         "minimumClaimBoundaryMedianScore",
+        "minimumSetupEngineFirstRate",
+        "maximumAuditLayerConfusionRate",
         "usabilityGapReviewThreshold"
       ],
       "properties": {
@@ -464,6 +472,16 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 5
+        },
+        "minimumSetupEngineFirstRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximumAuditLayerConfusionRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         },
         "usabilityGapReviewThreshold": {
           "type": "integer",

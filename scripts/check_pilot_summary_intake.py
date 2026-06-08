@@ -3,7 +3,12 @@
 
 from __future__ import annotations
 
-from generate_pilot_summary_intake import CASE_ORDER, build_pilot_summary_intake
+from generate_pilot_summary_intake import (
+    CASE_ORDER,
+    PILOT_SUMMARY_INPUT_FIXTURES,
+    build_pilot_summary_intake,
+    classify_summary_file,
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -57,6 +62,39 @@ def main() -> None:
         if key in {"readOnlyClassifier", "usesCheckedExamplesOnly"}:
             continue
         require(value is False, f"execution boundary {key} should remain false")
+
+    accepted_input = classify_summary_file(
+        PILOT_SUMMARY_INPUT_FIXTURES / "accepted-setup-engine-summary.json"
+    )
+    blocked_input = classify_summary_file(
+        PILOT_SUMMARY_INPUT_FIXTURES / "blocked-raw-transcript-summary.json"
+    )
+
+    require(
+        accepted_input["intakeDecision"] == "accept_for_ledger_review",
+        "accepted sanitized input should be accepted for ledger review",
+    )
+    require(accepted_input["ledgerReady"] is True, "accepted sanitized input should be ledger-ready")
+    require(
+        accepted_input["candidateRealSessionEvidence"] is True,
+        "accepted sanitized input should be marked as candidate real-session evidence",
+    )
+    require(
+        accepted_input["contributesRealSessionEvidence"] is False,
+        "input classification should not count real evidence before ledger review",
+    )
+    require(accepted_input["ledgerRowsWritten"] == 0, "input classification must not write ledger rows")
+
+    require(
+        blocked_input["intakeDecision"] == "block_raw_transcript",
+        "raw transcript input should be blocked",
+    )
+    require(blocked_input["ledgerReady"] is False, "blocked input should not be ledger-ready")
+    require(
+        blocked_input["candidateRealSessionEvidence"] is False,
+        "blocked input should not be candidate real-session evidence",
+    )
+    require(blocked_input["ledgerRowsWritten"] == 0, "blocked input classification must not write ledger rows")
 
     print("checked pilot summary intake")
 

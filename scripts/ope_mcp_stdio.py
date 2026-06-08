@@ -18,6 +18,7 @@ from agent_adapter_dispatcher import (
     output_envelope,
 )
 from generate_agent_adapter_protocol_map import OPERATIONS, build_protocol_map, mcp_tool_name
+from generate_setup_engine import DEFAULT_GOAL, SETUP_ENGINE_VIEWS
 from read_ope_record import DEFAULT_MAX_BYTES
 from run_agent_forecast import build_summary as build_forecast_run_summary
 
@@ -287,6 +288,14 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
     scenario = arguments.get("scenario", "helsinki_bus_disruption")
     if not isinstance(scenario, str):
         raise McpProtocolError(JSONRPC_INVALID_PARAMS, "scenario must be a string.")
+    goal = arguments.get("goal", DEFAULT_GOAL)
+    if not isinstance(goal, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "goal must be a string.")
+    setup_engine_view = arguments.get("view", "full")
+    if not isinstance(setup_engine_view, str):
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "view must be a string.")
+    if setup_engine_view not in SETUP_ENGINE_VIEWS:
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "view must be a supported setup-engine view.")
     guided_case = arguments.get("guidedCase", "accepted_adapter_output")
     if not isinstance(guided_case, str):
         raise McpProtocolError(JSONRPC_INVALID_PARAMS, "guidedCase must be a string.")
@@ -322,6 +331,8 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
         method_gate_case=method_gate_case,
         forecast_execution_case=forecast_execution_case,
         scenario=scenario,
+        goal=goal,
+        setup_engine_view=setup_engine_view,
         guided_case=guided_case,
         internal_operation=internal_operation,
         prediction_id=prediction_id,

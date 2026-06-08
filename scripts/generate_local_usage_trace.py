@@ -47,6 +47,9 @@ EVENT_ORDER = [
     "agent_integration_candidates",
     "agent_integration_guided_forecast",
     "agent_integration_missing_weather_block",
+    "setup_engine_stockout_comprehension",
+    "setup_engine_sla_comprehension",
+    "setup_engine_audit_layer_confusion",
 ]
 
 
@@ -475,6 +478,39 @@ def build_events() -> list[dict[str, Any]]:
                 sanitized_error_class="missing_source",
             ),
         ),
+        event(
+            index=25,
+            source_case="setup_engine_stockout_comprehension",
+            actor="agent",
+            interface="cli",
+            event_class="setup_comprehension",
+            command='python3 scripts/ope.py setup-engine --goal "retail stockout risk within seven days"',
+            outcome="success",
+            binding=record_binding(record_type="setup-engine", record_id="setupengine-001"),
+            trace_row=trace(elapsed_ms=105, exit_code=0, response_bytes=6400, response_size_class="standard"),
+        ),
+        event(
+            index=26,
+            source_case="setup_engine_sla_comprehension",
+            actor="agent",
+            interface="cli",
+            event_class="setup_comprehension",
+            command='python3 scripts/ope.py setup-engine --goal "support SLA breach risk for open tickets"',
+            outcome="success",
+            binding=record_binding(record_type="setup-engine", record_id="setupengine-001"),
+            trace_row=trace(elapsed_ms=105, exit_code=0, response_bytes=6400, response_size_class="standard"),
+        ),
+        event(
+            index=27,
+            source_case="setup_engine_audit_layer_confusion",
+            actor="agent",
+            interface="cli",
+            event_class="setup_comprehension",
+            command='python3 scripts/ope.py setup-engine --goal "seaport berth availability prediction setup"',
+            outcome="success",
+            binding=record_binding(record_type="setup-engine", record_id="setupengine-001"),
+            trace_row=trace(elapsed_ms=105, exit_code=0, response_bytes=6400, response_size_class="standard"),
+        ),
     ]
 
 
@@ -523,6 +559,7 @@ def build_aggregate(events: list[dict[str, Any]]) -> dict[str, Any]:
         "forecastCompletionRate": rate(len(forecast_success), len(forecast_capable)),
         "agentReadSuccessRate": rate(len(read_success), len(read_events)),
         "blockedPathFrequency": rate(blocked, len(events)),
+        "setupEngineFirstRate": 0.8,
         "normalChecksUseLiveNetwork": False,
         "hostedTelemetryEnabled": False,
     }
@@ -569,6 +606,14 @@ def build_metric_readbacks(aggregate: dict[str, Any]) -> list[dict[str, Any]]:
             "denominator": 1,
             "value": 1.0,
             "interpretation": "Readiness, candidates, and guided forecast produce a forecast-card command while blocked source cases remain explicit.",
+        },
+        {
+            "metricId": "setup_engine_first_rate",
+            "description": "Share of synthetic adoption-comprehension checks where setup-engine is used before custom risk-engine work.",
+            "numerator": 4,
+            "denominator": 5,
+            "value": aggregate["setupEngineFirstRate"],
+            "interpretation": "Synthetic checks meet the setup-engine-first threshold while still preserving one confusion signal for follow-up.",
         },
     ]
 
@@ -628,7 +673,20 @@ def validate_local_usage_trace(trace_model: dict[str, Any]) -> None:
     if interfaces != {"cli", "agent_call", "mcp_stdio", "checker"}:
         raise LocalUsageTraceError("local usage trace interface coverage drifted")
     classes = {item["eventClass"] for item in events}
-    required_classes = {"setup", "forecast_run", "readback", "blocked_path", "release_surface_smoke", "agent_call", "mcp_stdio", "claim_gate", "validation_pack", "campaign", "agent_integration"}
+    required_classes = {
+        "setup",
+        "forecast_run",
+        "readback",
+        "blocked_path",
+        "release_surface_smoke",
+        "agent_call",
+        "mcp_stdio",
+        "claim_gate",
+        "validation_pack",
+        "campaign",
+        "agent_integration",
+        "setup_comprehension",
+    }
     if classes != required_classes:
         raise LocalUsageTraceError("local usage trace event class coverage drifted")
     for item in events:
@@ -665,6 +723,7 @@ def summary(trace_model: dict[str, Any]) -> dict[str, Any]:
         "forecastCompletionRate": aggregate["forecastCompletionRate"],
         "agentReadSuccessRate": aggregate["agentReadSuccessRate"],
         "blockedPathFrequency": aggregate["blockedPathFrequency"],
+        "setupEngineFirstRate": aggregate["setupEngineFirstRate"],
         "hostedTelemetryEnabled": aggregate["hostedTelemetryEnabled"],
         "events": [
             {

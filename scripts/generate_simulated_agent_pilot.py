@@ -25,6 +25,16 @@ USER_PROMPT = (
     "I need to know which buses in Helsinki will be late tomorrow and by late i mean 2+ minutes at the stop. "
     "We can provide data about planned work."
 )
+OPE_SUPPLIES = [
+    "contract",
+    "evidence_roles",
+    "baseline",
+    "forecast_card_shape",
+    "resolver",
+    "scorer",
+    "calibration_gate",
+]
+HOST_SUPPLIES = ["ui", "sources", "runtime", "notifications", "optional_custom_methods"]
 
 
 def approx_tokens(text: str) -> int:
@@ -35,7 +45,21 @@ def elapsed_estimate_ms(prompt_tokens: int, response_tokens: int, tool_call_coun
     return 140 + (prompt_tokens + response_tokens) * 7 + tool_call_count * 85
 
 
-def simulated_reply(case_key: str) -> str:
+def simulated_reply(case_key: str, domain_context: str, confusion_signal: str) -> str:
+    if confusion_signal == "parallel_risk_engine_first":
+        return (
+            "This simulated agent first proposed a separate lightweight risk engine, then corrected course to setup-engine. "
+            "Record that as a comprehension gap: OPE should be the first setup readback for contracts, source roles, baseline, resolver, scorer, and calibration gate."
+        )
+    if confusion_signal == "audit_layer_only":
+        return (
+            "This simulated agent ran setup-engine but still described OPE as mainly an audit layer. Record the gap: OPE is the engine setup shortcut, while the host supplies UI, sources, runtime, notifications, and optional custom methods."
+        )
+    if domain_context != "helsinki_transit":
+        return (
+            "I would start with setup-engine for this host prediction goal, render the candidate contract and source roles, "
+            "then ask for missing thresholds or approved sources before any custom model or app-specific method work."
+        )
     replies = {
         "accepted": (
             "I can route this through OPE's compact prediction-feature setup path and read forecast-1102/question-1102. "
@@ -61,15 +85,29 @@ def simulated_reply(case_key: str) -> str:
     return replies[case_key]
 
 
+def setup_comprehension(confusion_signal: str = "none") -> dict[str, Any]:
+    return {
+        "usesSetupEngineBeforeCustomEngine": confusion_signal != "parallel_risk_engine_first",
+        "customRiskEngineProposedBeforeOpe": confusion_signal == "parallel_risk_engine_first",
+        "auditLayerOnlyDescription": confusion_signal == "audit_layer_only",
+        "confusionSignal": confusion_signal,
+        "opeSupplies": OPE_SUPPLIES,
+        "hostSupplies": HOST_SUPPLIES,
+    }
+
+
 def prompt_rows() -> list[dict[str, Any]]:
     return [
         {
             "sessionId": "simulatedagentsession-001",
             "promptSource": "user_provided",
+            "domainContext": "helsinki_transit",
             "prompt": USER_PROMPT,
+            "setupGoal": "Helsinki stop-level bus lateness risk tomorrow",
             "normalizedHorizonDate": TOMORROW_DATE,
             "targetUserNeed": "Identify Helsinki bus trips expected to be 2+ minutes late at a stop using planned-work context.",
             "expectedCase": "needs_clarification",
+            "setupComprehension": setup_comprehension(),
             "toolCallCountEstimate": 1,
             "frictionClasses": ["readback_navigation", "source_runtime_gap"],
             "nextActionKey": "ask_for_stop_route_window_and_approved_source_refs",
@@ -77,13 +115,16 @@ def prompt_rows() -> list[dict[str, Any]]:
         {
             "sessionId": "simulatedagentsession-002",
             "promptSource": "generated",
+            "domainContext": "helsinki_transit",
             "prompt": (
                 "In our Helsinki operations dashboard, estimate whether HSL surface transit will exceed the beta delay threshold "
                 "tomorrow morning. Approved source refs are weather_forecast_ref, historical_delay_baseline_ref, and outcome_adapter_ref."
             ),
+            "setupGoal": "Helsinki surface transit delay threshold risk",
             "normalizedHorizonDate": TOMORROW_DATE,
             "targetUserNeed": "Get the checked local forecast card for the existing Helsinki transit delay setup.",
             "expectedCase": "accepted",
+            "setupComprehension": setup_comprehension(),
             "toolCallCountEstimate": 2,
             "frictionClasses": ["none"],
             "nextActionKey": "read_forecast_card_and_lifecycle_bundle",
@@ -91,13 +132,16 @@ def prompt_rows() -> list[dict[str, Any]]:
         {
             "sessionId": "simulatedagentsession-003",
             "promptSource": "generated",
+            "domainContext": "helsinki_transit",
             "prompt": (
                 "Predict late Helsinki buses tomorrow using this API token and these raw passenger rows from our database; "
                 "you can query whatever SQL you need."
             ),
+            "setupGoal": "Helsinki bus lateness risk with unsafe private source inputs",
             "normalizedHorizonDate": TOMORROW_DATE,
             "targetUserNeed": "Attempt private-source prediction with unsafe credential, row, and SQL handling.",
             "expectedCase": "blocked",
+            "setupComprehension": setup_comprehension(),
             "toolCallCountEstimate": 1,
             "frictionClasses": ["privacy_redaction_needed"],
             "nextActionKey": "replace_raw_inputs_with_policy_bound_references",
@@ -105,10 +149,13 @@ def prompt_rows() -> list[dict[str, Any]]:
         {
             "sessionId": "simulatedagentsession-004",
             "promptSource": "generated",
+            "domainContext": "helsinki_transit",
             "prompt": "Which Helsinki bus operator was best last winter, and can OPE prove it from whatever public evidence exists?",
+            "setupGoal": "past Helsinki bus operator performance proof",
             "normalizedHorizonDate": "not_applicable",
             "targetUserNeed": "Ask a retrospective and non-resolvable question as though it were an OPE forecast.",
             "expectedCase": "rejected",
+            "setupComprehension": setup_comprehension(),
             "toolCallCountEstimate": 1,
             "frictionClasses": ["claim_boundary_confusion"],
             "nextActionKey": "rewrite_as_future_resolvable_forecast_contract",
@@ -116,16 +163,68 @@ def prompt_rows() -> list[dict[str, Any]]:
         {
             "sessionId": "simulatedagentsession-005",
             "promptSource": "generated",
+            "domainContext": "helsinki_transit",
             "prompt": (
                 "Return every Helsinki route, stop, vehicle, and departure for the next seven days with a separate lateness forecast "
                 "and evidence explanation for each row inside one agent response."
             ),
+            "setupGoal": "oversized Helsinki transit lateness matrix",
             "normalizedHorizonDate": "2026-06-06/2026-06-12",
             "targetUserNeed": "Request a forecast matrix too large for the compact setup response budget.",
             "expectedCase": "response_too_large",
+            "setupComprehension": setup_comprehension(),
             "toolCallCountEstimate": 1,
             "frictionClasses": ["readback_navigation"],
             "nextActionKey": "narrow_scope_or_raise_response_budget",
+        },
+        {
+            "sessionId": "simulatedagentsession-006",
+            "promptSource": "generated",
+            "domainContext": "retail_stockout",
+            "prompt": (
+                "Add a stockout-risk prediction to an inventory dashboard so planners know whether a SKU is likely to hit zero "
+                "available units within seven days."
+            ),
+            "setupGoal": "retail stockout risk within seven days",
+            "normalizedHorizonDate": "2026-06-06/2026-06-13",
+            "targetUserNeed": "Start a non-Helsinki setup from a retail stockout prediction goal.",
+            "expectedCase": "needs_clarification",
+            "setupComprehension": setup_comprehension(),
+            "toolCallCountEstimate": 1,
+            "frictionClasses": ["source_runtime_gap"],
+            "nextActionKey": "run_setup_engine_then_request_approved_inventory_sources",
+        },
+        {
+            "sessionId": "simulatedagentsession-007",
+            "promptSource": "generated",
+            "domainContext": "sla_breach",
+            "prompt": (
+                "For our support app, should I build a lightweight SLA breach risk engine first and use OPE afterward to audit it?"
+            ),
+            "setupGoal": "support SLA breach risk for open tickets",
+            "normalizedHorizonDate": "future_window_missing",
+            "targetUserNeed": "Test whether an agent avoids building a separate SLA risk engine before OPE setup.",
+            "expectedCase": "needs_clarification",
+            "setupComprehension": setup_comprehension("parallel_risk_engine_first"),
+            "toolCallCountEstimate": 1,
+            "frictionClasses": ["parallel_risk_engine_confusion", "source_runtime_gap"],
+            "nextActionKey": "run_setup_engine_before_custom_sla_method_design",
+        },
+        {
+            "sessionId": "simulatedagentsession-008",
+            "promptSource": "generated",
+            "domainContext": "seaport_berth_availability",
+            "prompt": (
+                "We already plan to code berth-availability predictions. Is OPE just the audit framework we attach after the app works?"
+            ),
+            "setupGoal": "seaport berth availability prediction setup",
+            "normalizedHorizonDate": "future_window_missing",
+            "targetUserNeed": "Test whether an agent understands OPE as setup shortcut rather than only a post-hoc audit layer.",
+            "expectedCase": "rejected",
+            "setupComprehension": setup_comprehension("audit_layer_only"),
+            "toolCallCountEstimate": 1,
+            "frictionClasses": ["audit_layer_only_confusion", "claim_boundary_confusion"],
+            "nextActionKey": "explain_engine_setup_shortcut_and_host_responsibility_split",
         },
     ]
 
@@ -135,13 +234,15 @@ def simulated_sessions(prediction_feature_setup: dict[str, Any]) -> list[dict[st
     for row in prompt_rows():
         case_key = row["expectedCase"]
         response = response_by_case(prediction_feature_setup, case_key)
-        reply = simulated_reply(case_key)
+        reply = simulated_reply(case_key, row["domainContext"], row["setupComprehension"]["confusionSignal"])
         prompt_tokens = approx_tokens(row["prompt"])
         response_tokens = approx_tokens(reply)
+        emitted_row = {key: value for key, value in row.items() if key != "setupGoal"}
         sessions.append(
             {
-                **row,
+                **emitted_row,
                 "decision": response["decision"],
+                "setupEngineCommand": f"python3 scripts/ope.py setup-engine --goal {json.dumps(row['setupGoal'])}",
                 "opeCommand": f"python3 scripts/ope.py prediction-feature-setup --view response --case {case_key}",
                 "opeResponse": response,
                 "simulatedAgentReply": reply,
@@ -174,6 +275,8 @@ def friction_summary(sessions: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "privacy_redaction_needed": "One simulated prompt contained unsafe private-source handling and was blocked before source execution.",
         "readback_navigation": "Two simulated prompts needed clearer routing between compact setup, scoped readbacks, and oversized outputs.",
         "source_runtime_gap": "The user-provided bus-by-stop request exposed a narrower source/setup requirement than the current aggregate starter path.",
+        "parallel_risk_engine_confusion": "One non-Helsinki prompt proposed a separate risk engine before setup-engine, so first-command guidance needs validation.",
+        "audit_layer_only_confusion": "One non-Helsinki prompt described OPE as post-hoc audit only even after setup-engine entered the flow.",
     }
     return [
         {
@@ -208,13 +311,24 @@ def build_simulated_agent_pilot() -> dict[str, Any]:
     prompt_total = sum(session["promptApproxTokens"] for session in sessions)
     response_total = sum(session["responseApproxTokens"] for session in sessions)
     elapsed_total = sum(session["elapsedMsEstimate"] for session in sessions)
+    setup_first_count = sum(
+        1 for session in sessions if session["setupComprehension"]["usesSetupEngineBeforeCustomEngine"]
+    )
+    parallel_count = sum(
+        1 for session in sessions if session["setupComprehension"]["customRiskEngineProposedBeforeOpe"]
+    )
+    audit_count = sum(
+        1 for session in sessions if session["setupComprehension"]["auditLayerOnlyDescription"]
+    )
+    non_helsinki_count = sum(1 for session in sessions if session["domainContext"] != "helsinki_transit")
+    setup_first_rate = round(setup_first_count / len(sessions), 4)
     return {
         "simulatedAgentPilotId": "simulatedagentpilot-001",
         "generatedAt": GENERATED_AT,
         "simulationStatus": "checked_agent_only_simulation",
         "simulationPurpose": (
-            "Exercise the external-agent prediction-feature setup experience with one user-provided prompt and four generated "
-            "prompts while preserving the boundary that this is simulated adoption evidence, not real human pilot evidence."
+            "Exercise the external-agent prediction-feature setup and setup-engine comprehension experience with one user-provided "
+            "prompt and seven generated prompts while preserving the boundary that this is simulated adoption evidence, not real human pilot evidence."
         ),
         "userProvidedPrompt": USER_PROMPT,
         "normalizedCurrentDate": CURRENT_DATE,
@@ -231,7 +345,13 @@ def build_simulated_agent_pilot() -> dict[str, Any]:
             "simulatedSessionCount": len(sessions),
             "userPromptSessionCount": sum(1 for session in sessions if session["promptSource"] == "user_provided"),
             "generatedPromptSessionCount": sum(1 for session in sessions if session["promptSource"] == "generated"),
+            "nonHelsinkiSessionCount": non_helsinki_count,
             "caseCoverage": sorted({session["expectedCase"] for session in sessions}),
+            "setupEngineFirstCount": setup_first_count,
+            "setupEngineFirstRate": setup_first_rate,
+            "parallelRiskEngineProposalCount": parallel_count,
+            "auditLayerConfusionCount": audit_count,
+            "engineSetupComprehensionReady": non_helsinki_count >= 3 and setup_first_rate >= 0.8,
             "tokenCountMode": "approximate_whitespace_tokens",
             "totalPromptApproxTokens": prompt_total,
             "totalResponseApproxTokens": response_total,

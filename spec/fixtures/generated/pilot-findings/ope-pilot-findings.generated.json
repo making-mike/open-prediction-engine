@@ -3,7 +3,7 @@
   "generatedAt": "2026-06-05T15:50:00Z",
   "findingsStatus": "agent_simulation_completed_real_sessions_needed",
   "realSessionCount": 0,
-  "simulatedAgentSessionCount": 5,
+  "simulatedAgentSessionCount": 8,
   "minimumRealSessions": 3,
   "targetRealSessions": 5,
   "sourceRecords": {
@@ -14,9 +14,16 @@
   },
   "frictionSummary": [
     {
+      "frictionClass": "audit_layer_only_confusion",
+      "syntheticSignalCount": 0,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "A simulated non-Helsinki prompt described OPE as post-hoc audit only, so setup-shortcut positioning needs real-session validation."
+    },
+    {
       "frictionClass": "claim_boundary_confusion",
       "syntheticSignalCount": 1,
-      "simulatedAgentSignalCount": 1,
+      "simulatedAgentSignalCount": 2,
       "realSessionSignalCount": 0,
       "interpretation": "Synthetic and simulated examples show claim-copy and retrospective-proof warnings still need real pilot validation."
     },
@@ -26,6 +33,13 @@
       "simulatedAgentSignalCount": 1,
       "realSessionSignalCount": 0,
       "interpretation": "Accepted synthetic and simulated examples show the intended path, but they are not real-session evidence."
+    },
+    {
+      "frictionClass": "parallel_risk_engine_confusion",
+      "syntheticSignalCount": 0,
+      "simulatedAgentSignalCount": 1,
+      "realSessionSignalCount": 0,
+      "interpretation": "A simulated non-Helsinki prompt proposed a separate risk engine before OPE setup, so first-command comprehension needs real-session validation."
     },
     {
       "frictionClass": "privacy_redaction_needed",
@@ -44,7 +58,7 @@
     {
       "frictionClass": "source_runtime_gap",
       "syntheticSignalCount": 1,
-      "simulatedAgentSignalCount": 1,
+      "simulatedAgentSignalCount": 3,
       "realSessionSignalCount": 0,
       "interpretation": "Simulated examples identify source-runtime gaps without unblocking private-source execution."
     }
@@ -61,6 +75,12 @@
       "status": "required",
       "command": "python3 scripts/ope.py pilot-session-packet",
       "reason": "Three to five supervised sessions are still required before adoption findings can be accepted."
+    },
+    {
+      "actionKey": "measure_engine_setup_comprehension",
+      "status": "required_in_next_sessions",
+      "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+      "reason": "Real sessions should check whether agents run setup-engine before inventing a parallel risk engine."
     },
     {
       "actionKey": "classify_sanitized_summaries",
@@ -87,7 +107,15 @@
   },
   "summary": {
     "acceptedRealSessionCount": 0,
-    "acceptedSimulatedAgentSessionCount": 5,
+    "acceptedSimulatedAgentSessionCount": 8,
+    "nonHelsinkiSimulatedSessionCount": 3,
+    "setupEngineFirstRate": 0.875,
+    "parallelRiskEngineProposalCount": 1,
+    "auditLayerConfusionCount": 1,
+    "localPilotEvidenceMode": "not_requested",
+    "localPilotEvidenceStatus": "not_requested",
+    "localLedgerPath": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+    "localLedgerRowCount": 0,
     "minimumRealSessions": 3,
     "targetRealSessions": 5,
     "agentSimulationEvidenceReady": true,

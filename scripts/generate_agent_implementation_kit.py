@@ -67,17 +67,17 @@ def quickstart_front_door() -> dict[str, Any]:
     steps = [
         quickstart_step(
             1,
-            "start_here",
-            "python3 scripts/ope.py agent-implementation-kit --view quickstart",
-            "Return the compact front-door sequence and wrapper outline for an external coding agent.",
-            "If this command fails, run the agent implementation kit checker before attempting forecast setup.",
+            "start_with_setup_engine",
+            'python3 scripts/ope.py setup-engine --goal "add predictions to my app"',
+            "Return the canonical setup plan; use prediction-goal-catalog when the host goal needs generic examples.",
+            "If this command fails, run setup-engine and prediction-goal-catalog checks before attempting forecast setup.",
         ),
         quickstart_step(
             2,
-            "ask_what_can_be_forecasted",
-            "python3 scripts/ope.py agent-integrate --view candidates",
-            "Return forecastable, needs-clarification, blocked, and rejected candidate contracts with reason codes.",
-            "If no candidate is forecastable, follow the returned clarification or blocked-path next action.",
+            "render_host_wrapper_setup_plan",
+            "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
+            "Render setupEnginePlan before forecast-card reads; blocked host inputs stop before forecast setup.",
+            "If setupEnginePlan reports missing roles or vague outcomes, fix host inputs before reading cards.",
         ),
         quickstart_step(
             3,
@@ -103,16 +103,16 @@ def quickstart_front_door() -> dict[str, Any]:
     ]
     return {
         "frontDoorId": "agentimplementationfrontdoor-001",
-        "frontDoorStatus": "first_external_agent_entrypoint",
-        "entryCommand": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "frontDoorStatus": "implementation_follow_up_entrypoint",
+        "entryCommand": 'python3 scripts/ope.py setup-engine --goal "add predictions to my app"',
         "targetTimeToFirstCommandMinutes": 10,
         "steps": steps,
         "copyableWrapper": {
             "wrapperStatus": "outline_only_uses_existing_surfaces",
             "callSequence": [
-                "agent_implementation_quickstart",
-                "agent_integration_candidates",
-                "agent_integration_guided_forecast",
+                "setup_engine",
+                "render_setup_engine_host_wrapper",
+                "prediction_feature_setup_response",
                 "forecast_card_readback",
                 "lifecycle_bundle_readback",
             ],

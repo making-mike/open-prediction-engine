@@ -116,7 +116,7 @@ def assert_forecast_run_result(
 def main() -> None:
     matrix, _summaries = build_matrix()
     expected_outcomes = {item["outcomeClass"]: item for item in matrix["outcomes"]}
-    forecast_run_start_id = 26
+    forecast_run_start_id = 27
     forecast_run_ids = {
         case.outcome_class: forecast_run_start_id + index
         for index, case in enumerate(CASES)
@@ -360,6 +360,17 @@ def main() -> None:
                     "arguments": {
                         "scenario": "helsinki_bus_disruption",
                         "guidedCase": "accepted_adapter_output",
+                    },
+                },
+            ),
+            message(
+                26,
+                "tools/call",
+                {
+                    "name": "ope_setup_engine",
+                    "arguments": {
+                        "goal": "add predictions to my app",
+                        "view": "summary",
                     },
                 },
             ),
@@ -746,6 +757,21 @@ def main() -> None:
         raise AssertionError("agent-integration-guided-forecast MCP tool should bind forecast-1102/question-1102")
     if guided_payload["createsForecastArtifacts"] is not False:
         raise AssertionError("agent-integration-guided-forecast MCP tool should stay readback-only")
+
+    setup_engine = indexed[26]["result"]
+    if setup_engine.get("isError"):
+        raise AssertionError("setup-engine MCP tool should succeed")
+    setup_engine_envelope = setup_engine["structuredContent"]
+    assert_envelope(setup_engine_envelope)
+    if setup_engine_envelope["operation"] != "setup_engine":
+        raise AssertionError("setup-engine MCP tool returned the wrong operation")
+    setup_engine_payload = setup_engine_envelope["payload"]
+    if setup_engine_payload["view"] != "summary":
+        raise AssertionError("setup-engine MCP tool should return the requested summary view")
+    if setup_engine_payload["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("setup-engine MCP tool should render setup before forecast artifacts")
+    if setup_engine_payload["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("setup-engine MCP tool should keep quality claims blocked")
 
     for case in CASES:
         result = indexed[forecast_run_ids[case.outcome_class]]["result"]

@@ -31,7 +31,8 @@ def evidence_review(pilot_findings: dict[str, Any]) -> dict[str, Any]:
         "smokeFailuresTypeRelated": False,
         "adoptionTraceTypeNeedObserved": False,
         "rationale": (
-            "Five simulated agent sessions exist, but no accepted real pilot sessions exist yet, and the "
+            "Eight simulated agent sessions exist, including three non-Helsinki setup-comprehension prompts, "
+            "but no accepted real pilot sessions exist yet, and the "
             "checked smoke/adoption paths do not show type-specific friction. Stable JSON examples and "
             "validators remain the right default until real agent adoption evidence identifies a "
             "language-specific bottleneck."

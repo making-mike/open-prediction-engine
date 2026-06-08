@@ -85,6 +85,7 @@ def main() -> None:
         "agent_integration_readiness",
         "agent_integration_candidates",
         "agent_integration_guided_forecast",
+        "setup_engine",
         "campaign_plan",
         "campaign_status",
         "campaign_health",
@@ -113,6 +114,23 @@ def main() -> None:
     require(
         "non-mutating dry-run mode" in internal_api["usageGuidance"],
         "internal API wrapper guidance should preserve dry-run semantics",
+    )
+    setup_engine = operations["setup_engine"]
+    require(
+        setup_engine["sideEffectLevel"] == "read_only",
+        "setup-engine operation should be read-only",
+    )
+    require(
+        setup_engine["inputRecordType"] == "setup_engine",
+        "setup-engine operation should bind setup_engine records",
+    )
+    setup_fields = {item["name"]: item for item in setup_engine["inputFields"]}
+    require({"goal", "view", "maxBytes", "callerIntent"} == set(setup_fields), "setup-engine should expose only goal, view, maxBytes, and callerIntent")
+    require(setup_fields["goal"]["type"] == "string", "setup-engine goal should be a string argument")
+    require(setup_fields["view"]["type"] == "string", "setup-engine view should be a string argument")
+    require(
+        "candidate contracts" in setup_engine["usageGuidance"],
+        "setup-engine guidance should name candidate contracts",
     )
     adapter_runbook = operations["private_setup_adapter_runbook"]
     require(

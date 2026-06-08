@@ -1,16 +1,21 @@
 {
   "predictionAgentAdoptionId": "predictionagentadoption-001",
-  "generatedAt": "2026-06-06T12:00:00Z",
+  "generatedAt": "2026-06-07T12:20:00Z",
   "surfaceStatus": "general_agent_adoption_ready",
   "capabilityManifest": {
     "manifestVersion": "1.0",
     "manifestStatus": "checked",
     "projectName": "Open Prediction Engine",
-    "tagline": "A prediction credibility layer for agents building forecast features.",
-    "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+    "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
+    "firstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
     "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
     "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
     "helpsWith": [
+      {
+        "capabilityKey": "engine_setup_shortcut",
+        "label": "Prediction engine setup shortcut",
+        "whyItMatters": "Guides agents from a host prediction goal to contracts, source roles, baselines, forecast cards, resolvers, scorers, and calibration gates."
+      },
       {
         "capabilityKey": "forecast_contracts",
         "label": "Resolvable forecast contracts",
@@ -85,8 +90,9 @@
     }
   },
   "fitDecision": {
-    "fitStatus": "use_as_prediction_credibility_layer",
+    "fitStatus": "use_as_engine_setup_shortcut",
     "useOpeFor": [
+      "engine_setup",
       "contracts",
       "evidence",
       "baselines",
@@ -101,10 +107,24 @@
       "custom_models",
       "notifications"
     ],
-    "recommendedFirstAction": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
-    "claimBoundary": "Use OPE to make predictions auditable; do not claim quality before resolved comparable evidence exists."
+    "recommendedFirstAction": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+    "claimBoundary": "Use OPE to set up the engine skeleton and credibility gates; do not claim quality before resolved comparable evidence exists."
   },
   "compactEntryPoints": [
+    {
+      "entryKey": "setup_engine",
+      "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+      "defaultFormat": "json",
+      "purpose": "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries.",
+      "mutatesState": false
+    },
+    {
+      "entryKey": "prediction_goal_catalog",
+      "command": "python3 scripts/ope.py prediction-goal-catalog --view summary",
+      "defaultFormat": "json",
+      "purpose": "Show generic non-Helsinki setup examples before an agent maps a host goal to OPE fields.",
+      "mutatesState": false
+    },
     {
       "entryKey": "explain_fit",
       "command": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
@@ -198,13 +218,13 @@
     "checks": [
       {
         "checkKey": "understand_fit",
-        "command": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
-        "expected": "Agent can explain that OPE is the prediction credibility layer, not the full app stack.",
+        "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+        "expected": "Agent can explain that OPE is an engine setup shortcut with credibility gates, not the full app stack.",
         "blocksAdoptionIfMissing": true
       },
       {
         "checkKey": "find_first_command",
-        "command": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
+        "command": "python3 scripts/ope.py setup-engine --goal <host prediction goal>",
         "expected": "Agent can identify the first command without reading the whole README.",
         "blocksAdoptionIfMissing": true
       },
@@ -225,6 +245,18 @@
         "command": "python3 scripts/ope.py explain-fit --view boundary --output-format json",
         "expected": "Agent can see hosted runtime, trained-model, frontend, and quality-claim boundaries.",
         "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "setup_engine_before_parallel_risk_engine",
+        "command": "python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+        "expected": "Agent starts with setup-engine before proposing a separate lightweight risk engine.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "avoid_audit_layer_only_framing",
+        "command": "python3 scripts/ope.py pilot-findings --section summary",
+        "expected": "Agent can see audit-layer-only framing as a comprehension signal, not OPE's product role.",
+        "blocksAdoptionIfMissing": true
       }
     ]
   },
@@ -239,8 +271,8 @@
     "qualityClaimUpgraded": false
   },
   "summary": {
-    "primaryValue": "prediction_credibility_layer",
-    "firstCommand": "python3 scripts/ope.py explain-fit --goal \"add predictions to my app\"",
+    "primaryValue": "engine_setup_shortcut",
+    "firstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
     "compactDefaultOutput": true,
     "extensionPointCount": 5,
     "adoptionEvalMinutes": 5,
@@ -249,7 +281,7 @@
     "frontendProvided": false
   },
   "warnings": [
-    "This surface is an adoption guide, not a new prediction execution path.",
+    "This surface is an adoption guide and engine setup shortcut, not a new prediction execution path.",
     "OPE remains local and read-only by default; hosted runtime and live effects require separate checked gates.",
     "Bring custom models and app runtime from the host project, then compare them through OPE records."
   ]

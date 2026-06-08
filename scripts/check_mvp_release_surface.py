@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from generate_lifecycle_operation_store import SCENARIO_NAMES
 from generate_release_manifest import build_manifest
 
 
@@ -92,7 +93,7 @@ def main() -> None:
     agent_kit = run_cli("agent-implementation-kit")
     require(agent_kit["kitStatus"] == "agent_prediction_implementation_kit_checked", "agent kit status drifted")
     require(agent_kit["summary"]["quickstartStepCount"] == 5, "agent kit quickstart step count drifted")
-    require(agent_kit["quickstartFrontDoor"]["frontDoorStatus"] == "first_external_agent_entrypoint", "agent kit quickstart status drifted")
+    require(agent_kit["quickstartFrontDoor"]["frontDoorStatus"] == "implementation_follow_up_entrypoint", "agent kit quickstart status drifted")
     require(agent_kit["summary"]["manualStepCount"] == 12, "agent kit manual step count drifted")
     require(agent_kit["summary"]["candidateReadbackCount"] == 4, "agent kit candidate readback count drifted")
     require(agent_kit["summary"]["validationReportCount"] == 4, "agent kit validation report count drifted")
@@ -127,12 +128,22 @@ def main() -> None:
 
     agent_guidance = run_cli("agent-guide", "--section", "summary")
     require(agent_guidance["guidanceCaseCount"] == 5, "agent guidance case count drifted")
-    require(agent_guidance["implementedMilestoneCount"] == 4, "agent guidance milestone coverage drifted")
+    require(agent_guidance["implementedMilestoneCount"] == 5, "agent guidance milestone coverage drifted")
     require(agent_guidance["promptPlannerReady"] is True, "agent guidance should expose prompt planner")
+    require(agent_guidance["domainAgnosticFlowReady"] is True, "agent guidance should expose generic setup flow")
     require(agent_guidance["helsinkiNarrowingFlowReady"] is True, "agent guidance should expose Helsinki narrowing flow")
     require(agent_guidance["instructionPackReady"] is True, "agent guidance should expose instruction pack")
     require(agent_guidance["forecastArtifactsCreated"] is False, "agent guidance must not create artifacts")
     require(agent_guidance["qualityClaimAllowed"] is False, "agent guidance must not allow quality claims")
+    agent_guidance_generic = run_cli("agent-guide", "--section", "generic")
+    require(
+        agent_guidance_generic["flowStatus"] == "checked_domain_agnostic_setup_flow",
+        "agent guidance generic flow status drifted",
+    )
+    require(
+        agent_guidance_generic["keepsHelsinkiAsExample"] is True,
+        "agent guidance generic flow should keep Helsinki as an example",
+    )
 
     prediction_feature_setup = run_cli("prediction-feature-setup")
     require(
@@ -160,6 +171,49 @@ def main() -> None:
         "prediction feature setup must not allow quality claims",
     )
 
+    setup_engine = run_cli("setup-engine", "--goal", "add predictions to my app")
+    require(setup_engine["engineSetupStatus"] == "checked_readback", "setup-engine status drifted")
+    require(
+        setup_engine["candidateForecastContracts"][0]["contractStatus"] == "forecastable",
+        "setup-engine should expose a forecastable first candidate",
+    )
+    require(
+        setup_engine["hostWrapper"]["renderBeforeForecastArtifacts"] is True,
+        "setup-engine host wrapper should render before forecast artifacts",
+    )
+    require(
+        setup_engine["claimBoundary"]["qualityClaimAllowed"] is False,
+        "setup-engine must keep quality claims blocked",
+    )
+    require(setup_engine["createsForecastArtifacts"] is False, "setup-engine must not create forecast artifacts")
+    require(setup_engine["hostedRuntimeRequired"] is False, "setup-engine must not require hosted runtime")
+
+    prediction_goal_catalog = run_cli("prediction-goal-catalog")
+    require(
+        prediction_goal_catalog["catalogStatus"] == "checked_domain_agnostic_goal_catalog",
+        "prediction goal catalog status drifted",
+    )
+    require(
+        prediction_goal_catalog["summary"]["goalExampleCount"] == 8,
+        "prediction goal catalog should expose eight examples",
+    )
+    require(
+        prediction_goal_catalog["summary"]["helsinkiDefaultNarrative"] is False,
+        "prediction goal catalog must not default to Helsinki",
+    )
+    require(
+        prediction_goal_catalog["qualityClaimAllowed"] is False,
+        "prediction goal catalog must block quality claims",
+    )
+    require(
+        prediction_goal_catalog["createsForecastArtifacts"] is False,
+        "prediction goal catalog must not create forecast artifacts",
+    )
+    require(
+        prediction_goal_catalog["hostedRuntimeRequired"] is False,
+        "prediction goal catalog must not require hosted runtime",
+    )
+
     embedded_example = run_command(
         [
             sys.executable,
@@ -171,8 +225,20 @@ def main() -> None:
         ]
     )
     require(
-        embedded_example["exampleStatus"] == "forecast_card_ready",
+        embedded_example["exampleStatus"] == "setup_plan_and_forecast_card_ready",
         "embedded prediction feature example status drifted",
+    )
+    require(
+        embedded_example["opeCallSequence"][0].startswith("python3 scripts/ope.py setup-engine"),
+        "embedded prediction feature example must call setup-engine first",
+    )
+    require(
+        embedded_example["setupEnginePlan"]["renderBeforeForecastArtifacts"] is True,
+        "embedded prediction feature example must render setup plan before forecast card",
+    )
+    require(
+        embedded_example["setupEnginePlan"]["baselineStatus"]["defaultMethodId"] == "historical_frequency_baseline",
+        "embedded prediction feature example should expose baseline guidance",
     )
     require(
         embedded_example["summary"]["forecastId"] == "forecast-1102",
@@ -189,6 +255,10 @@ def main() -> None:
     require(
         embedded_example["executionBoundary"]["qualityClaimAllowed"] is False,
         "embedded prediction feature example must not allow quality claims",
+    )
+    require(
+        embedded_example["executionBoundary"]["implementsCustomRiskEngine"] is False,
+        "embedded prediction feature example must not implement a host risk engine",
     )
 
     mcp_adoption = run_cli("mcp-adoption", "--view", "summary")
@@ -212,7 +282,7 @@ def main() -> None:
     postgres = run_cli("postgres-compatibility")
     require(postgres["compatibilityStatus"] == "sqlite_to_postgres_semantics_checked", "Postgres compatibility status drifted")
     require(postgres["summary"]["tableCount"] == 8, "Postgres compatibility table count drifted")
-    require(postgres["summary"]["scenarioCount"] == 15, "Postgres compatibility scenario count drifted")
+    require(postgres["summary"]["scenarioCount"] == len(SCENARIO_NAMES), "Postgres compatibility scenario count drifted")
     require(postgres["normalChecksConnectToPostgres"] is False, "Postgres compatibility checks must stay offline")
     require(postgres["postgresRuntimeImplemented"] is False, "Postgres compatibility must not claim runtime implementation")
     require(postgres["executionBoundary"]["schemaMigrationExecuted"] is False, "Postgres compatibility must not execute migrations")
@@ -526,9 +596,36 @@ def main() -> None:
     require(pilot_evidence["summary"]["pilotEvidenceStatus"] == "real_sessions_needed", "pilot evidence should require real sessions")
     require(pilot_evidence["summary"]["expansionEvidenceReady"] is False, "pilot evidence must not unblock expansion")
     require(pilot_evidence["summary"]["qualityClaimAllowed"] is False, "pilot evidence must keep quality claims blocked")
+    pilot_evidence_append = run_cli(
+        "pilot-evidence",
+        "--input-summary",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+    )
+    require(
+        pilot_evidence_append["appendDecision"] == "ready_for_local_write",
+        "pilot evidence append plan should be ready for explicit local write",
+    )
+    require(
+        pilot_evidence_append["writeLocalRequested"] is False,
+        "pilot evidence append plan should be dry-run by default",
+    )
+    require(
+        pilot_evidence_append["ledgerRowsWritten"] == 0,
+        "pilot evidence append plan must not write local rows by default",
+    )
+    pilot_lifecycle = run_cli("lifecycle-operation-store", "--scenario", "pilot-evidence-append")
+    require(pilot_lifecycle["scenarioName"] == "pilot-evidence-append", "pilot evidence lifecycle scenario drifted")
+    require(pilot_lifecycle["operationName"] == "evidence.append", "pilot evidence lifecycle operation drifted")
+    require(
+        pilot_lifecycle["preflight"]["plannedWrites"][1]["recordType"] == "pilot_evidence_ledger_row",
+        "pilot evidence lifecycle should plan a pilot evidence ledger row",
+    )
+    require("pilot_findings" in pilot_lifecycle["readModelEffects"], "pilot evidence lifecycle should update pilot findings")
+    require("calibration_status" not in pilot_lifecycle["readModelEffects"], "pilot evidence lifecycle must not update calibration status")
+    require("track_record_progress" not in pilot_lifecycle["readModelEffects"], "pilot evidence lifecycle must not update track record")
 
     pilot_session = run_cli("pilot-session-packet")
-    require(pilot_session["collectionSummary"]["taskCardCount"] == 6, "pilot session packet should expose six task cards")
+    require(pilot_session["collectionSummary"]["taskCardCount"] == 7, "pilot session packet should expose seven task cards")
     require(pilot_session["collectionSummary"]["realSessionsRecorded"] == 0, "pilot session packet must not record real sessions")
     require(pilot_session["collectionSummary"]["ledgerSubmissionReady"] is True, "pilot session packet should be ledger-submission ready")
     require(pilot_session["collectionSummary"]["expansionEvidenceReady"] is False, "pilot session packet must not unblock expansion")
@@ -541,23 +638,72 @@ def main() -> None:
     require(pilot_summary["summary"]["ledgerRowsWritten"] == 0, "pilot summary intake must not write ledger rows")
     require(pilot_summary["summary"]["expansionEvidenceReady"] is False, "pilot summary intake must not unblock expansion")
     require(pilot_summary["summary"]["qualityClaimAllowed"] is False, "pilot summary intake must keep quality claims blocked")
+    pilot_summary_input = run_cli(
+        "pilot-summary-intake",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+    )
+    require(
+        pilot_summary_input["intakeDecision"] == "accept_for_ledger_review",
+        "pilot summary input classifier should accept sanitized setup-engine summaries",
+    )
+    require(
+        pilot_summary_input["candidateRealSessionEvidence"] is True,
+        "pilot summary input classifier should mark accepted summaries as candidate real-session evidence",
+    )
+    require(
+        pilot_summary_input["contributesRealSessionEvidence"] is False,
+        "pilot summary input classifier must not count real sessions",
+    )
+    require(pilot_summary_input["ledgerRowsWritten"] == 0, "pilot summary input classifier must not write ledger rows")
+
+    pilot_summary_template = run_cli("pilot-summary-template", "--section", "summary")
+    require(pilot_summary_template["templateStatus"] == "ready_for_operator_fill", "pilot summary template should be operator-fill ready")
+    require(
+        pilot_summary_template["recommendedScenarioKey"] == "engine_setup_shortcut_comprehension",
+        "pilot summary template should default to setup-comprehension task",
+    )
+    require(pilot_summary_template["draftLedgerReady"] is False, "pilot summary template draft must not be ledger-ready unchanged")
+    require(
+        pilot_summary_template["draftContributesRealSessionEvidence"] is False,
+        "pilot summary template draft must not count real evidence",
+    )
+    require(pilot_summary_template["qualityClaimAllowed"] is False, "pilot summary template must keep quality claims blocked")
+    require(pilot_summary_template["hostedRuntimeAllowed"] is False, "pilot summary template must keep hosted runtime blocked")
 
     simulated_pilot = run_cli("simulated-agent-pilot", "--section", "summary")
-    require(simulated_pilot["simulatedSessionCount"] == 5, "simulated pilot should expose five sessions")
+    require(simulated_pilot["simulatedSessionCount"] == 8, "simulated pilot should expose eight sessions")
     require(simulated_pilot["userPromptSessionCount"] == 1, "simulated pilot should include the user prompt")
-    require(simulated_pilot["generatedPromptSessionCount"] == 4, "simulated pilot should include four generated prompts")
+    require(simulated_pilot["generatedPromptSessionCount"] == 7, "simulated pilot should include seven generated prompts")
+    require(simulated_pilot["nonHelsinkiSessionCount"] == 3, "simulated pilot should include non-Helsinki prompts")
+    require(simulated_pilot["engineSetupComprehensionReady"] is True, "simulated pilot should expose setup comprehension readiness")
     require(simulated_pilot["realSessionsRecorded"] == 0, "simulated pilot must not record real sessions")
     require(simulated_pilot["pilotEvidenceReady"] is False, "simulated pilot must not unblock real pilot evidence")
     require(simulated_pilot["qualityClaimAllowed"] is False, "simulated pilot must keep quality claims blocked")
 
     pilot_findings = run_cli("pilot-findings", "--section", "summary")
     require(pilot_findings["acceptedRealSessionCount"] == 0, "pilot findings should not fabricate real sessions")
-    require(pilot_findings["acceptedSimulatedAgentSessionCount"] == 5, "pilot findings should expose simulated sessions")
+    require(pilot_findings["acceptedSimulatedAgentSessionCount"] == 8, "pilot findings should expose simulated sessions")
+    require(pilot_findings["nonHelsinkiSimulatedSessionCount"] == 3, "pilot findings should expose non-Helsinki sessions")
     require(pilot_findings["agentSimulationEvidenceReady"] is True, "pilot findings should mark simulation evidence ready")
     require(pilot_findings["pilotEvidenceReady"] is False, "pilot findings should require real sessions")
+    require(pilot_findings["localPilotEvidenceMode"] == "not_requested", "pilot findings should not read local evidence by default")
     require(pilot_findings["generatedTypesEvidenceReady"] is False, "pilot findings should not unblock generated types")
     require(pilot_findings["qualityClaimAllowed"] is False, "pilot findings should not allow quality claims")
     require(pilot_findings["hostedRuntimeAllowed"] is False, "pilot findings should not allow hosted runtime")
+
+    pilot_supervision = run_cli("pilot-supervision-status", "--section", "summary")
+    require(pilot_supervision["status"] == "real_sessions_needed", "pilot supervision status should require real sessions")
+    require(pilot_supervision["acceptedRealSessionCount"] == 0, "pilot supervision status must not fabricate real sessions")
+    require(pilot_supervision["remainingMinimumSessions"] == 3, "pilot supervision status should expose remaining minimum sessions")
+    require(pilot_supervision["remainingTargetSessions"] == 5, "pilot supervision status should expose remaining target sessions")
+    require(
+        pilot_supervision["recommendedScenarioKey"] == "engine_setup_shortcut_comprehension",
+        "pilot supervision status should recommend setup-comprehension task",
+    )
+    require(pilot_supervision["pilotEvidenceReady"] is False, "pilot supervision status should keep pilot evidence blocked")
+    require(pilot_supervision["qualityClaimAllowed"] is False, "pilot supervision status should keep quality claims blocked")
+    require(pilot_supervision["hostedRuntimeAllowed"] is False, "pilot supervision status should keep hosted runtime blocked")
 
     generated_types = run_cli("generated-types-decision", "--section", "summary")
     require(
@@ -568,7 +714,7 @@ def main() -> None:
     require(generated_types["selectedLanguageTargetCount"] == 0, "generated types target count drifted")
     require(generated_types["acceptedRealSessionCount"] == 0, "generated types decision should reflect zero real sessions")
     require(
-        generated_types["acceptedSimulatedAgentSessionCount"] == 5,
+        generated_types["acceptedSimulatedAgentSessionCount"] == 8,
         "generated types decision should reflect simulated sessions",
     )
 

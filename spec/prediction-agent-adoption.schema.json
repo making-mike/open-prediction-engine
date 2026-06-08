@@ -28,7 +28,7 @@
     "compactEntryPoints": {
       "type": "array",
       "minItems": 3,
-      "maxItems": 5,
+      "maxItems": 6,
       "items": { "$ref": "#/$defs/entryPoint" }
     },
     "extensionPoints": {
@@ -106,6 +106,7 @@
           "type": "string",
           "enum": [
             "forecast_contracts",
+            "engine_setup_shortcut",
             "evidence_provenance",
             "baseline_scoring",
             "resolution_and_scoring",
@@ -164,14 +165,14 @@
       "additionalProperties": false,
       "required": ["fitStatus", "useOpeFor", "bringYourOwn", "recommendedFirstAction", "claimBoundary"],
       "properties": {
-        "fitStatus": { "type": "string", "enum": ["use_as_prediction_credibility_layer"] },
+        "fitStatus": { "type": "string", "enum": ["use_as_engine_setup_shortcut"] },
         "useOpeFor": {
           "type": "array",
-          "minItems": 6,
-          "maxItems": 6,
+          "minItems": 7,
+          "maxItems": 7,
           "items": {
             "type": "string",
-            "enum": ["contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"]
+            "enum": ["engine_setup", "contracts", "evidence", "baselines", "resolution", "scoring", "calibration_gates"]
           }
         },
         "bringYourOwn": {
@@ -194,7 +195,7 @@
       "properties": {
         "entryKey": {
           "type": "string",
-          "enum": ["explain_fit", "capabilities", "adoption_eval", "agent_quickstart", "implementation_kit"]
+          "enum": ["setup_engine", "prediction_goal_catalog", "explain_fit", "capabilities", "adoption_eval", "agent_quickstart", "implementation_kit"]
         },
         "command": { "type": "string", "minLength": 8, "maxLength": 180 },
         "defaultFormat": { "type": "string", "enum": ["compact_text", "json"] },
@@ -273,6 +274,8 @@
             "read_capabilities",
             "inspect_extension_points",
             "avoid_overclaiming",
+            "setup_engine_before_parallel_risk_engine",
+            "avoid_audit_layer_only_framing",
             "read_first_forecast_card"
           ]
         },
@@ -319,7 +322,7 @@
         "frontendProvided"
       ],
       "properties": {
-        "primaryValue": { "type": "string", "enum": ["prediction_credibility_layer"] },
+        "primaryValue": { "type": "string", "enum": ["engine_setup_shortcut"] },
         "firstCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
         "compactDefaultOutput": { "type": "boolean" },
         "extensionPointCount": { "type": "integer", "minimum": 5, "maximum": 5 },

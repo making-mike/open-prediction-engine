@@ -29,18 +29,20 @@ def main() -> None:
     summary = json.loads(result.stdout)
 
     require(summary["smokeStatus"] == "passed", "smoke status drifted")
-    require(summary["stepCount"] == 6, "smoke should run six adoption steps")
+    require(summary["stepCount"] == 8, "smoke should run eight adoption steps")
     require(summary["failedStep"] is None, "passing smoke should not report a failed step")
     require(summary["writesState"] is False, "smoke must not write state")
     require(summary["fetchesLiveData"] is False, "smoke must not fetch live data")
     require(summary["qualityClaimUpgraded"] is False, "smoke must not upgrade quality claims")
-    require(summary["nextCommandOnSuccess"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart", "success next command drifted")
+    require(summary["nextCommandOnSuccess"] == "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\"", "success next command drifted")
     require("[smoke] start schema sanity" in result.stderr, "smoke should print schema sanity progress")
     require("[smoke] start forecast card read" in result.stderr, "smoke should print forecast-card progress")
 
     steps = {item["stepKey"]: item for item in summary["steps"]}
     expected = [
         "schema_sanity",
+        "setup_engine_check",
+        "prediction_goal_catalog_check",
         "developer_adoption_check",
         "agent_implementation_kit_check",
         "agent_integrate_candidates",

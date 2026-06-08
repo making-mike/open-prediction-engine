@@ -52,6 +52,7 @@ The generated matrix covers every checked lifecycle operation-store scenario:
 - `campaign-resolution-record`
 - `campaign-score-create`
 - `campaign-evidence-append`
+- `pilot-evidence-append`
 - `campaign-method-apply`
 - `campaign-method-rollback`
 - `json-state-import`

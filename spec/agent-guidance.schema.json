@@ -13,6 +13,7 @@
     "sourceRecords",
     "guidanceCases",
     "promptPlanner",
+    "domainAgnosticSetupFlow",
     "helsinkiNarrowingFlow",
     "agentInstructionPack",
     "executionBoundary",
@@ -27,9 +28,9 @@
     },
     "implementedMilestones": {
       "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": { "type": "string", "enum": ["142", "143", "144", "145"] }
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "type": "string", "enum": ["142", "143", "144", "145", "156"] }
     },
     "sourceRecords": {
       "type": "object",
@@ -48,6 +49,7 @@
       "items": { "$ref": "#/$defs/guidanceCase" }
     },
     "promptPlanner": { "$ref": "#/$defs/promptPlanner" },
+    "domainAgnosticSetupFlow": { "$ref": "#/$defs/domainAgnosticSetupFlow" },
     "helsinkiNarrowingFlow": { "$ref": "#/$defs/helsinkiNarrowingFlow" },
     "agentInstructionPack": { "$ref": "#/$defs/agentInstructionPack" },
     "executionBoundary": {
@@ -85,6 +87,7 @@
         "guidanceCaseCount",
         "implementedMilestoneCount",
         "promptPlannerReady",
+        "domainAgnosticFlowReady",
         "helsinkiNarrowingFlowReady",
         "instructionPackReady",
         "realSessionsRecorded",
@@ -96,6 +99,7 @@
         "guidanceCaseCount": { "type": "integer", "minimum": 0 },
         "implementedMilestoneCount": { "type": "integer", "minimum": 0 },
         "promptPlannerReady": { "type": "boolean" },
+        "domainAgnosticFlowReady": { "type": "boolean" },
         "helsinkiNarrowingFlowReady": { "type": "boolean" },
         "instructionPackReady": { "type": "boolean" },
         "realSessionsRecorded": { "type": "integer", "minimum": 0 },
@@ -212,6 +216,34 @@
             "safeRetryCommand": { "$ref": "#/$defs/boundedString" }
           }
         }
+      }
+    },
+    "domainAgnosticSetupFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flowId",
+        "flowStatus",
+        "goalPattern",
+        "agentNextMove",
+        "clarificationQuestions",
+        "requiredSetupFacts",
+        "safeNextCommands",
+        "opeOwnedResponsibilities",
+        "hostOwnedResponsibilities",
+        "keepsHelsinkiAsExample"
+      ],
+      "properties": {
+        "flowId": { "$ref": "common.schema.json#/$defs/id" },
+        "flowStatus": { "type": "string", "enum": ["checked_domain_agnostic_setup_flow"] },
+        "goalPattern": { "$ref": "#/$defs/boundedString" },
+        "agentNextMove": { "type": "string", "enum": ["ask_user"] },
+        "clarificationQuestions": { "$ref": "#/$defs/stringList" },
+        "requiredSetupFacts": { "$ref": "#/$defs/stringList" },
+        "safeNextCommands": { "$ref": "#/$defs/stringList" },
+        "opeOwnedResponsibilities": { "$ref": "#/$defs/stringList" },
+        "hostOwnedResponsibilities": { "$ref": "#/$defs/stringList" },
+        "keepsHelsinkiAsExample": { "type": "boolean" }
       }
     },
     "helsinkiNarrowingFlow": {

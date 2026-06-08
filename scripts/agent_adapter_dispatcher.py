@@ -72,6 +72,7 @@ from generate_private_source_adapter_intake_bridge import build_bridge, load_gen
 from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
 from generate_database_source_adapter_runtime import build_database_source_adapter_runtime
 from generate_agent_integration import GUIDED_CASES, build_agent_integration, guided_case_payload, view_payload
+from generate_setup_engine import SETUP_ENGINE_VIEWS, build_setup_engine, view_payload as setup_engine_view_payload
 from generate_prediction_feature_setup import build_prediction_feature_setup, response_by_case
 from generate_internal_api import OPERATION_ORDER
 from internal_api_runtime import call_internal_api
@@ -103,6 +104,7 @@ CAPABILITY_BY_OPERATION = {
     "agent_integration_readiness": "read_only",
     "agent_integration_candidates": "read_only",
     "agent_integration_guided_forecast": "read_only",
+    "setup_engine": "read_only",
     "prediction_feature_setup": "read_only",
     "campaign_plan": "read_only",
     "campaign_status": "read_only",
@@ -134,6 +136,7 @@ INPUT_TYPE_BY_OPERATION = {
     "agent_integration_readiness": "agent_integration",
     "agent_integration_candidates": "agent_integration",
     "agent_integration_guided_forecast": "agent_integration",
+    "setup_engine": "setup_engine",
     "prediction_feature_setup": "prediction_feature_setup_response",
     "campaign_plan": "prediction_campaign_manifest",
     "campaign_status": "prediction_campaign_explain",
@@ -231,6 +234,8 @@ def input_ref_for(args: argparse.Namespace) -> str:
     if args.operation == "agent_integration_guided_forecast":
         record = build_agent_integration(args.scenario)
         return guided_case_payload(record, args.guided_case)["guidedCaseId"]
+    if args.operation == "setup_engine":
+        return build_setup_engine(args.goal)["setupEngineId"]
     if args.operation == "campaign_plan":
         payload, _binding, _state, _warnings = campaign_plan_adapter_payload()
         return payload["predictionCampaignManifestId"]
@@ -587,6 +592,30 @@ def prediction_feature_setup_payload(
         "Credential values, raw private rows, raw SQL, hidden live fetches, hosted runtime flags, and quality claims remain blocked.",
     ]
     return payload, binding, state, warnings
+
+
+def setup_engine_payload(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
+    record = build_setup_engine(args.goal)
+    payload = setup_engine_view_payload(record, args.setup_engine_view)
+    state = nullable_state(
+        decisionStatus="setup_engine_readback",
+        approvalStatus="not_required",
+        dataMode="source_refs_only",
+        planStatus=record["engineSetupStatus"],
+        executionMode="local_cli_agent_call_readback",
+        sourceMode="domain_agnostic",
+        forecastStatus="not_created_by_setup_engine",
+        resolutionStatus="not_started",
+        scoreStatus="not_created",
+        qualityClaimStatus="not_allowed",
+    )
+    warnings = [
+        *record["warnings"],
+        "Setup-engine agent-call is read-only and does not create forecast artifacts.",
+    ]
+    return payload, nullable_binding(), state, warnings
 
 
 def private_setup_bundle(request_id: str, bundle_case: str | None) -> dict[str, Any]:
@@ -1010,6 +1039,9 @@ def operation_payload(args: argparse.Namespace) -> tuple[str, dict[str, Any], di
     if args.operation == "agent_integration_guided_forecast":
         payload, binding, state, warnings = agent_integration_guided_payload(args)
         return payload["guidedCaseId"], payload, binding, state, warnings
+    if args.operation == "setup_engine":
+        payload, binding, state, warnings = setup_engine_payload(args)
+        return "setupengine-001", payload, binding, state, warnings
     if args.operation == "prediction_feature_setup":
         payload, binding, state, warnings = prediction_feature_setup_payload(args)
         return "predictionfeaturesetup-001", payload, binding, state, warnings
@@ -1136,6 +1168,8 @@ def safe_input_ref(args: argparse.Namespace) -> str:
         return "agentintegration-001"
     if args.operation == "agent_integration_guided_forecast":
         return "guidedforecastcase-000"
+    if args.operation == "setup_engine":
+        return "setupengine-001"
     if args.operation == "prediction_feature_setup":
         return "predictionfeaturesetup-001"
     if args.operation == "campaign_plan":
@@ -1205,6 +1239,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--method-gate-case", choices=METHOD_GATE_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--forecast-execution-case", choices=FORECAST_EXECUTION_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--scenario", default=DEFAULT_AGENT_INTEGRATION_SCENARIO)
+    parser.add_argument("--goal", default="add predictions to my app")
+    parser.add_argument("--view", choices=SETUP_ENGINE_VIEWS, default="full", dest="setup_engine_view")
     parser.add_argument("--case", choices=GUIDED_CASES, default="accepted_adapter_output", dest="guided_case")
     parser.add_argument("--internal-operation", choices=OPERATION_ORDER, default="read_status")
     parser.add_argument("--prediction-id", default="predictioncampaign-001")

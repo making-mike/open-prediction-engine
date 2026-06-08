@@ -16,7 +16,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - red phase until generat
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_CASES = {"accepted", "needs_clarification", "blocked", "rejected", "response_too_large"}
-EXPECTED_MILESTONES = ["142", "143", "144", "145"]
+EXPECTED_MILESTONES = ["142", "143", "144", "145", "156"]
 
 
 def require(condition: bool, message: str) -> None:
@@ -33,6 +33,7 @@ def main() -> None:
     require(record["implementedMilestones"] == EXPECTED_MILESTONES, "implemented milestone coverage drifted")
     require(record["summary"]["guidanceCaseCount"] == 5, "guidance should expose five cases")
     require(record["summary"]["promptPlannerReady"] is True, "prompt planner should be ready")
+    require(record["summary"]["domainAgnosticFlowReady"] is True, "domain-agnostic setup flow should be ready")
     require(record["summary"]["helsinkiNarrowingFlowReady"] is True, "Helsinki narrowing flow should be ready")
     require(record["summary"]["instructionPackReady"] is True, "instruction pack should be ready")
     require(record["summary"]["realSessionsRecorded"] == 0, "agent guidance must not count real sessions")
@@ -73,8 +74,42 @@ def main() -> None:
     require(planner["plannerStatus"] == "checked_prompt_to_question_planner", "planner status drifted")
     require(planner["plannerInput"]["rawPromptAllowed"] is True, "planner should accept a bounded raw prompt")
     require(planner["plannerInput"]["credentialValuesAllowed"] is False, "planner must reject credentials")
-    require(planner["plannerOutput"]["questionCount"] == 4, "planner should expose four questions")
+    require(planner["plannerOutput"]["questionCount"] == 5, "planner should expose five reusable setup questions")
     require(planner["plannerOutput"]["agentNextMove"] == "ask_user", "planner next move drifted")
+    generic_question_text = " ".join(planner["plannerOutput"]["questionsToAsk"]).lower()
+    for phrase in ["decision", "outcome", "horizon", "approved source", "resolution source"]:
+        require(phrase in generic_question_text, f"generic planner questions should mention {phrase}")
+    require(
+        "forecast_time_evidence" in planner["plannerOutput"]["requiredSourceRoles"],
+        "generic planner should require forecast-time evidence",
+    )
+    require(
+        "historical_baseline" in planner["plannerOutput"]["requiredSourceRoles"],
+        "generic planner should require a baseline role",
+    )
+    require(
+        "resolution_outcome" in planner["plannerOutput"]["requiredSourceRoles"],
+        "generic planner should require a resolution outcome role",
+    )
+
+    generic = record["domainAgnosticSetupFlow"]
+    require(
+        generic["flowStatus"] == "checked_domain_agnostic_setup_flow",
+        "domain-agnostic setup flow status drifted",
+    )
+    require(generic["keepsHelsinkiAsExample"] is True, "generic flow should keep Helsinki as one example")
+    require(
+        "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\"" in generic["safeNextCommands"],
+        "generic flow should route agents through setup-engine",
+    )
+    require(
+        "forecast_contracts" in generic["opeOwnedResponsibilities"],
+        "generic flow should name OPE-owned forecast contracts",
+    )
+    require(
+        "ui" in generic["hostOwnedResponsibilities"],
+        "generic flow should keep host UI outside OPE",
+    )
 
     helsinki = record["helsinkiNarrowingFlow"]
     require(helsinki["flowStatus"] == "checked_narrowing_flow", "Helsinki narrowing status drifted")
@@ -109,7 +144,20 @@ def main() -> None:
     require(cli.returncode == 0, f"agent-guide summary CLI failed: {cli.stderr or cli.stdout}")
     payload = json.loads(cli.stdout)
     require(payload["guidanceCaseCount"] == 5, "agent-guide summary count drifted")
+    require(payload["domainAgnosticFlowReady"] is True, "agent-guide summary generic flow drifted")
     require(payload["instructionPackReady"] is True, "agent-guide summary instruction pack drifted")
+
+    generic_cli = subprocess.run(
+        [sys.executable, "scripts/ope.py", "agent-guide", "--section", "generic"],
+        cwd=ROOT,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    require(generic_cli.returncode == 0, f"agent-guide generic CLI failed: {generic_cli.stderr or generic_cli.stdout}")
+    generic_payload = json.loads(generic_cli.stdout)
+    require(generic_payload["flowStatus"] == "checked_domain_agnostic_setup_flow", "agent-guide generic status drifted")
+    require(generic_payload["keepsHelsinkiAsExample"] is True, "agent-guide generic should keep Helsinki as example")
 
     user_prompt_cli = subprocess.run(
         [sys.executable, "scripts/ope.py", "agent-guide", "--case", "needs_clarification"],

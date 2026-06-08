@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-evidence-local-append.schema.json",
+  "title": "Pilot Evidence Local Append Plan",
+  "description": "Local-only append plan for turning one moderator-approved sanitized pilot summary into ignored pilot evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotEvidenceAppendPlanId",
+    "generatedAt",
+    "appendMode",
+    "inputRef",
+    "inputSummaryId",
+    "intakeDecision",
+    "appendDecision",
+    "localLedgerPath",
+    "writeLocalRequired",
+    "writeLocalRequested",
+    "candidateRealSessionEvidence",
+    "contributesRealSessionEvidence",
+    "ledgerRowsWritten",
+    "realSessionsRecorded",
+    "candidateRow",
+    "executionBoundary",
+    "warnings"
+  ],
+  "properties": {
+    "pilotEvidenceAppendPlanId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "appendMode": {
+      "type": "string",
+      "enum": ["local_pilot_summary_append_plan"]
+    },
+    "inputRef": { "$ref": "#/$defs/boundedString" },
+    "inputSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "intakeDecision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "appendDecision": {
+      "type": "string",
+      "enum": ["ready_for_local_write", "blocked_by_intake", "written_to_local_ledger", "already_recorded"]
+    },
+    "localLedgerPath": { "$ref": "#/$defs/boundedString" },
+    "writeLocalRequired": { "type": "boolean" },
+    "writeLocalRequested": { "type": "boolean" },
+    "candidateRealSessionEvidence": { "type": "boolean" },
+    "contributesRealSessionEvidence": { "type": "boolean" },
+    "ledgerRowsWritten": { "type": "integer", "minimum": 0, "maximum": 1 },
+    "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+    "candidateRow": {
+      "oneOf": [
+        { "$ref": "#/$defs/localCaseRow" },
+        { "type": "null" }
+      ]
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    }
+  },
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 620
+    },
+    "idList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "dimensionRating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensionId", "score", "evidenceNote"],
+      "properties": {
+        "dimensionId": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 96,
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "score": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "evidenceNote": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "inputSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptSubmitted",
+        "privateDataSubmitted",
+        "credentialLikeTextSubmitted",
+        "claimConfusionObserved",
+        "runtimeGapObserved"
+      ],
+      "properties": {
+        "rawTranscriptSubmitted": { "type": "boolean" },
+        "privateDataSubmitted": { "type": "boolean" },
+        "credentialLikeTextSubmitted": { "type": "boolean" },
+        "claimConfusionObserved": { "type": "boolean" },
+        "runtimeGapObserved": { "type": "boolean" }
+      }
+    },
+    "privacyChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawTranscriptStored",
+        "privateDataStored",
+        "credentialsStored",
+        "promptLogStored",
+        "participantIdentityStored",
+        "notesRedacted"
+      ],
+      "properties": {
+        "rawTranscriptStored": { "type": "boolean" },
+        "privateDataStored": { "type": "boolean" },
+        "credentialsStored": { "type": "boolean" },
+        "promptLogStored": { "type": "boolean" },
+        "participantIdentityStored": { "type": "boolean" },
+        "notesRedacted": { "type": "boolean" }
+      }
+    },
+    "localCaseRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "caseKey",
+        "sourceSummaryId",
+        "inputRef",
+        "evidenceClass",
+        "taskRefs",
+        "intakeStatus",
+        "acceptedForAggregation",
+        "contributesRealSessionEvidence",
+        "inputSignals",
+        "privacyChecks",
+        "dimensionRatings",
+        "sanitizedFindings",
+        "frictionClasses",
+        "expansionSignals",
+        "nextAction"
+      ],
+      "properties": {
+        "caseId": { "$ref": "common.schema.json#/$defs/id" },
+        "caseKey": {
+          "type": "string",
+          "enum": ["local_real_session_summary"]
+        },
+        "sourceSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+        "inputRef": { "$ref": "#/$defs/boundedString" },
+        "evidenceClass": {
+          "type": "string",
+          "enum": ["future_real_summary"]
+        },
+        "taskRefs": { "$ref": "#/$defs/idList" },
+        "intakeStatus": {
+          "type": "string",
+          "enum": ["accepted_for_aggregation", "accepted_with_product_signal"]
+        },
+        "acceptedForAggregation": { "type": "boolean" },
+        "contributesRealSessionEvidence": { "type": "boolean" },
+        "inputSignals": { "$ref": "#/$defs/inputSignals" },
+        "privacyChecks": { "$ref": "#/$defs/privacyChecks" },
+        "dimensionRatings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/dimensionRating" }
+        },
+        "sanitizedFindings": { "$ref": "#/$defs/stringList" },
+        "frictionClasses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "none",
+              "readback_navigation",
+              "claim_boundary_confusion",
+              "source_runtime_gap",
+              "schema_integration_friction",
+              "privacy_redaction_needed",
+              "parallel_risk_engine_confusion",
+              "audit_layer_only_confusion"
+            ]
+          }
+        },
+        "expansionSignals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "keep_local_mvp",
+              "run_more_pilots",
+              "improve_docs",
+              "consider_next_source_runtime",
+              "tighten_claim_copy"
+            ]
+          }
+        },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writesCheckedFixtures",
+        "writesIgnoredLocalLedger",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded"
+      ],
+      "properties": {
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLocalLedger": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" }
+      }
+    }
+  }
+}

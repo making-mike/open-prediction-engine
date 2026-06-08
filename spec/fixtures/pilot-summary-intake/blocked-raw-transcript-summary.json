@@ -1,0 +1,20 @@
+{
+  "summaryId": "pilotsummaryinput-002",
+  "evidenceClass": "future_real_summary",
+  "taskRefs": ["agentpilottask-006"],
+  "dimensionRatings": [],
+  "sanitizedFindings": [
+    "Submitted material was marked as raw transcript content and must not enter repository evidence."
+  ],
+  "frictionClasses": ["privacy_redaction_needed"],
+  "expansionSignals": ["run_more_pilots"],
+  "nextAction": "Discard the raw transcript and request a sanitized summary with ratings and findings.",
+  "riskSignals": {
+    "rawTranscriptDetected": true,
+    "privateRowsDetected": false,
+    "credentialLikeTextDetected": false,
+    "participantIdentityDetected": false,
+    "unredactedSourceDetailDetected": false,
+    "claimOverreachDetected": false
+  }
+}

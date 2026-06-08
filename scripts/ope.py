@@ -10,6 +10,8 @@ import sys
 import time
 from pathlib import Path
 
+from generate_lifecycle_operation_store import SCENARIO_NAMES
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -347,6 +349,12 @@ def smoke_step(key: str, label: str, command: list[str]) -> dict[str, object]:
 def build_smoke_summary() -> dict[str, object]:
     commands = [
         ("schema_sanity", "schema sanity", [sys.executable, "scripts/check_json.py"]),
+        ("setup_engine_check", "setup engine check", [sys.executable, "scripts/ope.py", "setup-engine", "--check"]),
+        (
+            "prediction_goal_catalog_check",
+            "prediction goal catalog check",
+            [sys.executable, "scripts/ope.py", "prediction-goal-catalog", "--check"],
+        ),
         ("developer_adoption_check", "developer adoption check", [sys.executable, "scripts/ope.py", "developer-adoption", "--check"]),
         ("agent_implementation_kit_check", "agent implementation kit check", [sys.executable, "scripts/ope.py", "agent-implementation-kit", "--check"]),
         ("agent_integrate_candidates", "agent integration candidates", [sys.executable, "scripts/ope.py", "agent-integrate", "--view", "candidates"]),
@@ -403,7 +411,7 @@ def build_smoke_summary() -> dict[str, object]:
         "writesState": False,
         "fetchesLiveData": False,
         "qualityClaimUpgraded": False,
-        "nextCommandOnSuccess": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
+        "nextCommandOnSuccess": "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\"",
         "nextCommandOnFailure": "Rerun the failed command shown in steps before running the full check.",
     }
 
@@ -455,6 +463,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
     runtime_security_command = [sys.executable, "scripts/generate_runtime_security.py"]
     agent_implementation_kit_command = [sys.executable, "scripts/generate_agent_implementation_kit.py"]
     agent_integration_command = [sys.executable, "scripts/generate_agent_integration.py"]
+    prediction_goal_catalog_command = [sys.executable, "scripts/generate_prediction_goal_catalog.py"]
+    setup_engine_command = [sys.executable, "scripts/generate_setup_engine.py"]
     postgres_compatibility_command = [sys.executable, "scripts/generate_postgres_compatibility.py"]
     database_source_adapter_runtime_command = [sys.executable, "scripts/generate_database_source_adapter_runtime.py"]
     opp_provider_adapter_command = [sys.executable, "scripts/generate_opp_provider_adapter.py"]
@@ -594,6 +604,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         runtime_security_command.append("--write")
         agent_implementation_kit_command.append("--write")
         agent_integration_command.append("--write")
+        prediction_goal_catalog_command.append("--write")
+        setup_engine_command.append("--write")
         postgres_compatibility_command.append("--write")
         database_source_adapter_runtime_command.append("--write")
         opp_provider_adapter_command.append("--write")
@@ -700,6 +712,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         runtime_security_command.append("--check")
         agent_implementation_kit_command.append("--check")
         agent_integration_command.append("--check")
+        prediction_goal_catalog_command.append("--check")
+        setup_engine_command.append("--check")
         postgres_compatibility_command.append("--check")
         database_source_adapter_runtime_command.append("--check")
         opp_provider_adapter_command.append("--check")
@@ -801,6 +815,8 @@ def cmd_generate_fixtures(args: argparse.Namespace) -> None:
         runtime_security_command,
         agent_implementation_kit_command,
         agent_integration_command,
+        prediction_goal_catalog_command,
+        setup_engine_command,
         postgres_compatibility_command,
         database_source_adapter_runtime_command,
         opp_provider_adapter_command,
@@ -1497,6 +1513,32 @@ def cmd_agent_integrate(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_setup_engine(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_setup_engine.py"]
+    if args.goal:
+        command.extend(["--goal", args.goal])
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_prediction_goal_catalog(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_prediction_goal_catalog.py"]
+    if args.view:
+        command.extend(["--view", args.view])
+    if args.goal:
+        command.extend(["--goal", args.goal])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
 def cmd_prediction_feature_setup(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_prediction_feature_setup.py"]
     if args.view:
@@ -1897,6 +1939,23 @@ def cmd_pilot_findings(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_pilot_findings.py"]
     if args.section:
         command.extend(["--section", args.section])
+    if args.from_local_ledger:
+        command.append("--from-local-ledger")
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_supervision_status(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_supervision_status.py"]
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.from_local_ledger:
+        command.append("--from-local-ledger")
+    if args.local_ledger:
+        command.extend(["--local-ledger", args.local_ledger])
     if args.check:
         command.append("--check")
     if args.write:
@@ -2093,6 +2152,12 @@ def cmd_pilot_evidence(args: argparse.Namespace) -> None:
         command.extend(["--case", args.case])
     if args.section:
         command.extend(["--section", args.section])
+    if args.input_summary:
+        command.extend(["--input-summary", args.input_summary])
+    if args.write_local:
+        command.append("--write-local")
+    if args.from_local_ledger:
+        command.append("--from-local-ledger")
     if args.check:
         command.append("--check")
     if args.write:
@@ -2115,8 +2180,23 @@ def cmd_pilot_session_packet(args: argparse.Namespace) -> None:
 
 def cmd_pilot_summary_intake(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_pilot_summary_intake.py"]
+    if args.input:
+        command.extend(["--input", args.input])
     if args.case:
         command.extend(["--case", args.case])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_summary_template(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_summary_template.py"]
+    if args.task:
+        command.extend(["--task", args.task])
     if args.section:
         command.extend(["--section", args.section])
     if args.check:
@@ -2516,6 +2596,10 @@ def cmd_agent_call(args: argparse.Namespace) -> None:
         command.extend(["--forecast-execution-case", args.forecast_execution_case])
     if args.scenario:
         command.extend(["--scenario", args.scenario])
+    if args.goal:
+        command.extend(["--goal", args.goal])
+    if args.setup_engine_view:
+        command.extend(["--view", args.setup_engine_view])
     if args.guided_case:
         command.extend(["--case", args.guided_case])
     if args.internal_operation:
@@ -3098,23 +3182,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     lifecycle_operation_store.add_argument(
         "--scenario",
-        choices=[
-            "create",
-            "retry-idempotent",
-            "lease-conflict",
-            "archive",
-            "redaction",
-            "method-rollback",
-            "pre-calibration-bind",
-            "campaign-forecast-create",
-            "campaign-resolution-record",
-            "campaign-score-create",
-            "campaign-evidence-append",
-            "campaign-method-apply",
-            "campaign-method-rollback",
-            "json-state-import",
-            "recovery",
-        ],
+        choices=SCENARIO_NAMES,
         help="print one checked SQLite runtime preflight/readback scenario",
     )
     lifecycle_operation_store.add_argument(
@@ -3363,6 +3431,62 @@ def build_parser() -> argparse.ArgumentParser:
     )
     agent_integrate.set_defaults(func=cmd_agent_integrate)
 
+    prediction_goal_catalog = subparsers.add_parser(
+        "prediction-goal-catalog",
+        help="print checked generic prediction-goal catalog examples",
+    )
+    prediction_goal_catalog.add_argument(
+        "--view",
+        choices=["full", "summary", "goals", "classifications", "boundary"],
+        default="full",
+        help="print a focused prediction-goal catalog view",
+    )
+    prediction_goal_catalog.add_argument(
+        "--goal",
+        choices=[
+            "delivery_delay_risk",
+            "stockout_risk",
+            "sla_breach_risk",
+            "demand_risk",
+            "churn_risk",
+            "seaport_berth_availability",
+            "weather_sensitive_operations",
+            "public_transit_disruption_risk",
+        ],
+        help="print one catalog goal example",
+    )
+    prediction_goal_catalog.add_argument("--check", action="store_true", help="check generated prediction-goal catalog drift")
+    prediction_goal_catalog.add_argument("--write", action="store_true", help="refresh generated prediction-goal catalog fixture")
+    prediction_goal_catalog.set_defaults(func=cmd_prediction_goal_catalog)
+
+    setup_engine = subparsers.add_parser(
+        "setup-engine",
+        help="turn a host prediction goal into a checked OPE engine setup readback",
+    )
+    setup_engine.add_argument(
+        "--goal",
+        default="add predictions to my app",
+        help="host prediction goal to turn into candidate contracts and source roles",
+    )
+    setup_engine.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "summary",
+            "contracts",
+            "sources",
+            "baseline",
+            "host-wrapper",
+            "claim-boundary",
+            "examples",
+        ],
+        default="full",
+        help="print a focused setup-engine view",
+    )
+    setup_engine.add_argument("--check", action="store_true", help="check generated setup-engine drift")
+    setup_engine.add_argument("--write", action="store_true", help="refresh generated setup-engine fixture")
+    setup_engine.set_defaults(func=cmd_setup_engine)
+
     prediction_feature_setup = subparsers.add_parser(
         "prediction-feature-setup",
         help="print compact prediction feature setup request/response contract readbacks",
@@ -3389,7 +3513,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     agent_guide.add_argument(
         "--section",
-        choices=["summary", "cases", "planner", "helsinki", "instructions", "boundary"],
+        choices=["summary", "cases", "planner", "generic", "helsinki", "instructions", "boundary"],
         help="print one agent guidance section",
     )
     agent_guide.add_argument(
@@ -4398,6 +4522,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="print one pilot evidence ledger section",
     )
     pilot_evidence.add_argument(
+        "--input-summary",
+        help="classify one sanitized pilot summary and print a local ledger append plan",
+    )
+    pilot_evidence.add_argument(
+        "--write-local",
+        action="store_true",
+        help="append an accepted sanitized summary to the ignored local pilot evidence ledger",
+    )
+    pilot_evidence.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="read ignored local pilot evidence instead of the checked synthetic ledger",
+    )
+    pilot_evidence.add_argument(
         "--check",
         action="store_true",
         help="check generated pilot evidence ledger drift",
@@ -4421,6 +4559,7 @@ def build_parser() -> argparse.ArgumentParser:
             "unsafe_source_block",
             "forecast_run_readback",
             "claim_gate_readback",
+            "engine_setup_shortcut_comprehension",
             "repeating_prediction_campaign",
         ],
         help="print one pilot session task card",
@@ -4464,6 +4603,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="print one pilot summary intake section",
     )
     pilot_summary_intake.add_argument(
+        "--input",
+        help="classify one caller-supplied sanitized pilot summary JSON file without writing ledger rows",
+    )
+    pilot_summary_intake.add_argument(
         "--check",
         action="store_true",
         help="check generated pilot summary intake drift",
@@ -4475,6 +4618,40 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pilot_summary_intake.set_defaults(func=cmd_pilot_summary_intake)
 
+    pilot_summary_template = subparsers.add_parser(
+        "pilot-summary-template",
+        help="check, refresh, or print the sanitized pilot summary template",
+    )
+    pilot_summary_template.add_argument(
+        "--task",
+        choices=[
+            "local_file_setup_readback",
+            "accepted_adapter_output_ready",
+            "unsafe_source_block",
+            "forecast_run_readback",
+            "claim_gate_readback",
+            "engine_setup_shortcut_comprehension",
+            "repeating_prediction_campaign",
+        ],
+        help="pilot task scenario to draft a sanitized summary for",
+    )
+    pilot_summary_template.add_argument(
+        "--section",
+        choices=["summary", "draft", "guidance", "checklist", "commands", "boundary", "warnings"],
+        help="print one pilot summary template section",
+    )
+    pilot_summary_template.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot summary template drift",
+    )
+    pilot_summary_template.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot summary template",
+    )
+    pilot_summary_template.set_defaults(func=cmd_pilot_summary_template)
+
     pilot_findings = subparsers.add_parser(
         "pilot-findings",
         help="check, refresh, or print sanitized real-session pilot findings",
@@ -4483,6 +4660,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--section",
         choices=["summary", "friction", "next-actions", "boundary"],
         help="print one pilot findings section",
+    )
+    pilot_findings.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="include ignored local pilot evidence rows from .ope/live",
     )
     pilot_findings.add_argument(
         "--check",
@@ -4495,6 +4677,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated pilot findings",
     )
     pilot_findings.set_defaults(func=cmd_pilot_findings)
+
+    pilot_supervision_status = subparsers.add_parser(
+        "pilot-supervision-status",
+        help="check, refresh, or print the supervised pilot operator status readback",
+    )
+    pilot_supervision_status.add_argument(
+        "--section",
+        choices=["summary", "progress", "commands", "checks", "boundary", "warnings"],
+        help="print one pilot supervision status section",
+    )
+    pilot_supervision_status.add_argument(
+        "--from-local-ledger",
+        action="store_true",
+        help="include ignored local pilot evidence rows from .ope/live",
+    )
+    pilot_supervision_status.add_argument(
+        "--local-ledger",
+        help="override ignored local pilot evidence ledger path for tests or local runs",
+    )
+    pilot_supervision_status.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot supervision status drift",
+    )
+    pilot_supervision_status.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot supervision status",
+    )
+    pilot_supervision_status.set_defaults(func=cmd_pilot_supervision_status)
 
     simulated_agent_pilot = subparsers.add_parser(
         "simulated-agent-pilot",
@@ -4992,6 +5204,7 @@ def build_parser() -> argparse.ArgumentParser:
             "agent_integration_readiness",
             "agent_integration_candidates",
             "agent_integration_guided_forecast",
+            "setup_engine",
             "prediction_feature_setup",
             "campaign_plan",
             "campaign_status",
@@ -5076,6 +5289,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--scenario",
         choices=["helsinki_bus_disruption"],
         help="checked agent integration starter scenario",
+    )
+    agent_call.add_argument(
+        "--goal",
+        default="add predictions to my app",
+        help="host prediction goal for setup_engine agent-call readbacks",
+    )
+    agent_call.add_argument(
+        "--view",
+        choices=[
+            "full",
+            "summary",
+            "contracts",
+            "sources",
+            "baseline",
+            "host-wrapper",
+            "claim-boundary",
+            "examples",
+        ],
+        dest="setup_engine_view",
+        help="focused setup_engine agent-call view",
     )
     agent_call.add_argument(
         "--case",

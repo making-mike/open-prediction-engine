@@ -1,0 +1,247 @@
+{
+  "pilotSummaryTemplateId": "pilotsummarytemplate-001",
+  "generatedAt": "2026-06-10T13:00:00Z",
+  "templateStatus": "ready_for_operator_fill",
+  "bindings": {
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "pilotSessionReviewId": "pilotsessionreview-001",
+    "pilotSummaryIntakeId": "pilotsummaryintake-001",
+    "pilotEvidenceLedgerId": "pilotevidenceledger-001",
+    "pilotSupervisionStatusId": "pilotsupervisionstatus-001",
+    "pilotSummarySubmissionSchema": "spec/pilot-summary-submission.schema.json"
+  },
+  "recommendedTask": {
+    "taskId": "agentpilottask-006",
+    "scenarioKey": "engine_setup_shortcut_comprehension",
+    "title": "Domain-agnostic setup-engine shortcut comprehension",
+    "taskCommand": "python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+    "expectedOutcomeClass": "setup_engine_shortcut_readback",
+    "measures": [
+      "task_completion",
+      "engine_setup_shortcut_comprehension",
+      "ope_host_responsibility_split",
+      "parallel_risk_engine_avoidance",
+      "claim_boundary_comprehension"
+    ]
+  },
+  "draftSubmission": {
+    "summaryId": "pilotsummaryinput-999",
+    "evidenceClass": "future_real_summary",
+    "taskRefs": [
+      "agentpilottask-006"
+    ],
+    "dimensionRatings": [],
+    "sanitizedFindings": [
+      "Replace this placeholder with sanitized findings only; do not include transcript text, source rows, credentials, or participant identity."
+    ],
+    "frictionClasses": [
+      "privacy_redaction_needed"
+    ],
+    "expansionSignals": [
+      "run_more_pilots"
+    ],
+    "nextAction": "Replace this placeholder with one safe next action after moderator review.",
+    "riskSignals": {
+      "rawTranscriptDetected": false,
+      "privateRowsDetected": false,
+      "credentialLikeTextDetected": false,
+      "participantIdentityDetected": false,
+      "unredactedSourceDetailDetected": true,
+      "claimOverreachDetected": false
+    }
+  },
+  "fieldGuidance": [
+    {
+      "fieldName": "summaryId",
+      "required": true,
+      "allowedValues": [
+        "pilotsummaryinput-<unique-number>"
+      ],
+      "operatorInstruction": "Use a unique local summary ID before classification and append."
+    },
+    {
+      "fieldName": "taskRefs",
+      "required": true,
+      "allowedValues": [
+        "agentpilottask-006"
+      ],
+      "operatorInstruction": "Keep the checked task ID that was actually used in the supervised session."
+    },
+    {
+      "fieldName": "dimensionRatings",
+      "required": true,
+      "allowedValues": [
+        "task_completion",
+        "engine_setup_shortcut_comprehension",
+        "ope_host_responsibility_split",
+        "parallel_risk_engine_avoidance",
+        "claim_boundary_comprehension"
+      ],
+      "operatorInstruction": "Add one to five ratings with short sanitized evidence notes for the measured dimensions."
+    },
+    {
+      "fieldName": "sanitizedFindings",
+      "required": true,
+      "allowedValues": [],
+      "operatorInstruction": "Summarize behavior without raw transcript text, private rows, credentials, prompt logs, or identity."
+    },
+    {
+      "fieldName": "frictionClasses",
+      "required": true,
+      "allowedValues": [
+        "none",
+        "readback_navigation",
+        "claim_boundary_confusion",
+        "source_runtime_gap",
+        "schema_integration_friction",
+        "privacy_redaction_needed",
+        "parallel_risk_engine_confusion",
+        "audit_layer_only_confusion"
+      ],
+      "operatorInstruction": "Choose checked friction classes only; use none when no friction was observed."
+    },
+    {
+      "fieldName": "expansionSignals",
+      "required": true,
+      "allowedValues": [
+        "keep_local_mvp",
+        "run_more_pilots",
+        "improve_docs",
+        "consider_next_source_runtime",
+        "tighten_claim_copy"
+      ],
+      "operatorInstruction": "Choose checked expansion signals without treating one session as quality or runtime evidence."
+    },
+    {
+      "fieldName": "riskSignals",
+      "required": true,
+      "allowedValues": [
+        "rawTranscriptDetected",
+        "privateRowsDetected",
+        "credentialLikeTextDetected",
+        "participantIdentityDetected",
+        "unredactedSourceDetailDetected",
+        "claimOverreachDetected"
+      ],
+      "operatorInstruction": "Keep any detected unsafe signal true until redaction is complete; unchanged drafts are not ledger-ready."
+    },
+    {
+      "fieldName": "nextAction",
+      "required": true,
+      "allowedValues": [],
+      "operatorInstruction": "Record one safe next action for adoption, documentation, runtime selection, or evidence collection."
+    }
+  ],
+  "sanitizationChecklist": [
+    {
+      "checkId": "pilotsessioncheck-001",
+      "required": true,
+      "check": "No raw transcript, recording, prompt log, or full chat excerpt is included."
+    },
+    {
+      "checkId": "pilotsessioncheck-002",
+      "required": true,
+      "check": "No private source rows, credentials, customer names, or participant identity are included."
+    },
+    {
+      "checkId": "pilotsessioncheck-003",
+      "required": true,
+      "check": "All findings are summarized enough to be stored in the repository."
+    },
+    {
+      "checkId": "pilotsessioncheck-004",
+      "required": true,
+      "check": "Dimension scores use the checked feedback dimensions and 1-5 scale."
+    },
+    {
+      "checkId": "pilotsessioncheck-005",
+      "required": true,
+      "check": "Friction classes and expansion signals use the checked ledger vocabulary."
+    },
+    {
+      "checkId": "pilotsessioncheck-006",
+      "required": true,
+      "check": "Claim-boundary confusion is recorded as a product signal, not as quality evidence."
+    },
+    {
+      "checkId": "pilotsessioncheck-007",
+      "required": true,
+      "check": "The summary does not unblock hosted runtime, generated types, stronger methods, or broad source runtimes."
+    }
+  ],
+  "commandSequence": [
+    {
+      "stepKey": "print_draft",
+      "order": 1,
+      "command": "python3 scripts/ope.py pilot-summary-template --section draft",
+      "expectedOperatorAction": "Use the printed JSON shape as a local sanitized summary draft and fill it outside checked fixtures.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "classify_summary",
+      "order": 2,
+      "command": "python3 scripts/ope.py pilot-summary-intake --input <summary.json>",
+      "expectedOperatorAction": "Classify the filled sanitized summary without writing a ledger row.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "append_local_evidence",
+      "order": 3,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary <summary.json> --write-local",
+      "expectedOperatorAction": "Append only an accepted sanitized summary after explicit moderator approval.",
+      "mutatesLocalState": true
+    },
+    {
+      "stepKey": "review_status",
+      "order": 4,
+      "command": "python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary",
+      "expectedOperatorAction": "Confirm updated local evidence count and blocked claim boundaries.",
+      "mutatesLocalState": false
+    }
+  ],
+  "templateSafety": {
+    "draftClassifiesAs": "needs_redaction",
+    "draftLedgerReady": false,
+    "draftContributesRealSessionEvidence": false,
+    "draftWritesLedgerRows": false,
+    "unchangedDraftAppendAllowed": false
+  },
+  "executionBoundary": {
+    "readOnlyTemplate": true,
+    "writesCheckedFixtures": false,
+    "writesIgnoredLocalLedger": false,
+    "runsPilotSessions": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "createsForecastArtifacts": false,
+    "unblocksExpansion": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hostedRuntimeUnblocked": false,
+    "generatedTypesUnblocked": false
+  },
+  "warnings": [
+    "The included draft is intentionally not ledger-ready until an operator fills ratings and clears sanitization risks.",
+    "Do not commit real pilot summaries; classify and append approved summaries to the ignored local ledger only.",
+    "This template does not run pilot sessions, write evidence, or upgrade quality, calibration, hosted-runtime, generated-type, or expansion claims."
+  ],
+  "summary": {
+    "templateStatus": "ready_for_operator_fill",
+    "recommendedScenarioKey": "engine_setup_shortcut_comprehension",
+    "recommendedTaskId": "agentpilottask-006",
+    "draftSummaryId": "pilotsummaryinput-999",
+    "draftClassifiesAs": "needs_redaction",
+    "draftLedgerReady": false,
+    "draftContributesRealSessionEvidence": false,
+    "realSessionsRecorded": 0,
+    "ledgerRowsWritten": 0,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "hostedRuntimeAllowed": false,
+    "generatedTypesEvidenceReady": false,
+    "expansionEvidenceReady": false
+  }
+}

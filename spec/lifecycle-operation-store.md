@@ -19,6 +19,7 @@ python3 scripts/ope.py lifecycle-operation-store --scenario method-rollback
 python3 scripts/ope.py lifecycle-operation-store --scenario pre-calibration-bind
 python3 scripts/ope.py lifecycle-operation-store --scenario campaign-forecast-create
 python3 scripts/ope.py lifecycle-operation-store --scenario campaign-evidence-append
+python3 scripts/ope.py lifecycle-operation-store --scenario pilot-evidence-append
 python3 scripts/ope.py lifecycle-operation-store --scenario json-state-import
 python3 scripts/ope.py lifecycle-operation-store --scenario recovery
 python3 scripts/ope.py lifecycle-operation-store --check
@@ -34,7 +35,7 @@ The first implementation target is local SQLite behind a storage adapter, and th
 
 The database stores:
 
-- immutable OPE records, such as forecast questions, evidence packets, forecast artifacts, histories, resolutions, scores, calibration summaries, and method-update audit records;
+- immutable OPE records, such as forecast questions, evidence packets, forecast artifacts, histories, resolutions, scores, calibration summaries, method-update audit records, and pilot evidence ledger rows;
 - lifecycle operation receipts;
 - idempotency keys for safe agent retries;
 - short leases for due forecast creation, resolution, scoring, ledger append, and method updates;
@@ -44,13 +45,13 @@ The checked SQLite schema plan covers `operation_receipts`, `operation_idempoten
 
 ## JSON Compatibility Adapter
 
-Ignored `.ope/live/prediction-campaigns` state remains an explicit compatibility adapter while the database bridge is introduced. Compatibility reads and explicit local writes remain available for existing campaign workflows, but normal checks do not write ignored state and migration is never automatic.
+Ignored `.ope/live` state remains an explicit compatibility adapter while the database bridge is introduced. Compatibility reads and explicit local writes remain available for existing campaign and pilot-evidence workflows, but normal checks do not write ignored state and migration is never automatic.
 
 Persistent local database files are gated by `spec/persistent-sqlite-policy.md`. The policy requires caller approval, an allowlisted workspace state path, traversal and symlink blockers, dry-run JSON-state import, backup-before-migration, lease alignment, and stale-lock recovery receipts before a persistent SQLite path is ready for explicit local writes.
 
 Lease requirements are classified by `spec/lifecycle-lease-policy.md`. That readback marks `campaign.create_run`, `forecast.create`, `resolution.record`, `score.create`, `evidence.append`, `pre_calibration.bind`, `method.apply`, `method.rollback`, and `state.import_json` as strict-lease operations, while retry-style operations such as `forecast.recalculate`, cancel/annul, archive, and redact remain idempotency-only. The policy readback itself does not acquire leases or mutate lifecycle state.
 
-The adapter covers forecast lifecycle records, run state, campaign state, evidence ledger rows, method bindings, and method-update audit artifacts. Importing any of those files into SQLite must use an explicit migration operation, preserve source content hashes and forecast probabilities, retain source provenance, and append a migration receipt.
+The adapter covers forecast lifecycle records, run state, campaign state, campaign evidence ledger rows, pilot evidence ledger rows, method bindings, and method-update audit artifacts. Importing any of those files into SQLite must use an explicit migration operation, preserve source content hashes and forecast probabilities where forecast records are involved, retain source provenance, and append a migration receipt.
 
 ## Operation Model
 
@@ -72,11 +73,11 @@ Agents should call lifecycle operations, not raw SQL updates:
 
 Every effectful operation needs a preflight, idempotency key, planned-write list, blocking-guard list, operation receipt, and safe retry behavior. Operations that can race across agents also need a lease.
 
-The checked runtime scenarios cover create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, pre-calibration-bind, campaign forecast creation, campaign resolution, campaign scoring, campaign evidence append, campaign method apply/rollback, JSON state import, and recovery. Scenario readbacks expose planned writes, blocking guards, idempotency keys, lease plans, source payload hash bindings, migration summaries, claim boundaries, and recovery paths before mutation.
+The checked runtime scenarios cover create, retry-idempotent, lease-conflict, archive, redaction, method-rollback, pre-calibration-bind, campaign forecast creation, campaign resolution, campaign scoring, campaign evidence append, pilot evidence append, campaign method apply/rollback, JSON state import, and recovery. Scenario readbacks expose planned writes, blocking guards, idempotency keys, lease plans, source payload hash bindings, migration summaries, claim boundaries, and recovery paths before mutation.
 
-The generated `writeLocalOperationCoverage` table maps the current explicit local mutation commands to lifecycle operations: `start --write-local`, `start --pre-calibrate --write-local`, `forecast-write --write-local`, `resolve --execute-resolvers --write-local`, `append --write-local`, `pre-calibration --write-local`, `apply-method-update --write-local`, and `rollback-method-update --write-local`. Each mapping requires operation receipts, idempotency, leases, and the read models agents need after the mutation.
+The generated `writeLocalOperationCoverage` table maps the current explicit local mutation commands to lifecycle operations: `start --write-local`, `start --pre-calibrate --write-local`, `forecast-write --write-local`, `resolve --execute-resolvers --write-local`, `append --write-local`, `pre-calibration --write-local`, `apply-method-update --write-local`, `rollback-method-update --write-local`, and `pilot-evidence --input-summary --write-local`. Each mapping requires operation receipts, idempotency, leases, and the read models agents need after the mutation.
 
-The generated `fileDatabaseCompatibilityChecks` table compares local file-mode repeat statuses with SQLite idempotent replay for forecast lifecycle records, resolution records, scoring reports, evidence ledger rows, pre-calibration method bindings, method apply bindings, and method rollback bindings. Replays must return existing receipts, create no duplicate records, perform no physical deletes, and never rewrite forecast history.
+The generated `fileDatabaseCompatibilityChecks` table compares local file-mode repeat statuses with SQLite idempotent replay for forecast lifecycle records, resolution records, scoring reports, campaign evidence ledger rows, pilot evidence ledger rows, pre-calibration method bindings, method apply bindings, and method rollback bindings. Replays must return existing receipts, create no duplicate records, perform no physical deletes, and never rewrite forecast history.
 
 ## Migration Rules
 
@@ -107,10 +108,11 @@ Agents need queryable read models instead of file guessing:
 - append readiness;
 - calibration status;
 - track-record progress;
+- pilot findings;
 - failed operations;
 - recovery actions.
 
-These read models are projections. OPE semantics stay in the immutable records and lifecycle operation receipts.
+These read models are projections. OPE semantics stay in the immutable records and lifecycle operation receipts. Pilot findings are adoption/product evidence projections only; pilot evidence appends do not update calibration status or track-record progress.
 
 ## Boundary
 

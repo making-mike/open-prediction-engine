@@ -206,6 +206,27 @@ def main() -> None:
     if adapter_conformance_record["executionBoundary"]["createsForecastArtifacts"] is not False:
         raise AssertionError("private-setup-adapter-conformance-summary agent call should not create forecasts")
 
+    setup_engine = run_dispatcher(
+        "--operation",
+        "setup_engine",
+        "--goal",
+        "add predictions to my app",
+    )
+    setup_engine_payload = payload(setup_engine)
+    if setup_engine.returncode != 0:
+        raise AssertionError(f"setup-engine agent call should succeed: {setup_engine.stderr}")
+    setup_record = setup_engine_payload["payload"]
+    if setup_record["setupEngineId"] != "setupengine-001":
+        raise AssertionError("setup-engine agent call should return the checked setup-engine record")
+    if setup_record["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
+        raise AssertionError("setup-engine agent call should expose a forecastable first candidate")
+    if setup_record["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        raise AssertionError("setup-engine agent call should render setup before forecast artifacts")
+    if setup_record["claimBoundary"]["qualityClaimAllowed"] is not False:
+        raise AssertionError("setup-engine agent call should keep quality claims blocked")
+    if setup_engine_payload["state"]["forecastStatus"] != "not_created_by_setup_engine":
+        raise AssertionError("setup-engine agent call must not create forecasts")
+
     resolution_jobs = run_dispatcher(
         "--operation",
         "resolution_jobs",

@@ -31,6 +31,7 @@ SCENARIO_NAMES = [
     "campaign-resolution-record",
     "campaign-score-create",
     "campaign-evidence-append",
+    "pilot-evidence-append",
     "campaign-method-apply",
     "campaign-method-rollback",
     "json-state-import",
@@ -177,6 +178,7 @@ def immutable_record_store() -> list[dict[str, Any]]:
         record_class("pre_calibration_binding", "spec/prediction-campaign-pre-calibration.schema.json", "operation_audit_records", "append_only"),
         record_class("method_update_audit", "spec/prediction-campaign-method-update-action.schema.json", "operation_audit_records", "append_only"),
         record_class("evidence_ledger_row", "spec/prediction-campaign-evidence-ledger.schema.json", "evidence_ledger_rows", "append_only"),
+        record_class("pilot_evidence_ledger_row", "spec/pilot-evidence-local-append.schema.json", "evidence_ledger_rows", "append_only"),
         record_class("json_state_migration_receipt", "spec/lifecycle-operation.schema.json", "operation_audit_records", "append_only"),
         record_class("operation_receipt", "spec/lifecycle-operation.schema.json", "operation_receipts", "append_only"),
         record_class("archive_tombstone", "spec/lifecycle-operation.schema.json", "operation_audit_records", "append_only"),
@@ -204,6 +206,7 @@ def read_models() -> list[dict[str, Any]]:
         read_model("append_readiness", "Classify resolved scoring records as comparable, excluded, duplicate, or blocked before ledger append.", ["ope_records", "operation_receipts"], "Can this outcome enter evidence?"),
         read_model("calibration_status", "Report sample-size, exclusion, provenance, and threshold status before calibration or method changes.", ["ope_records", "evidence_ledger_rows"], "Is calibration evidence ready?"),
         read_model("track_record_progress", "Track baseline lift, Brier summaries, comparable sample counts, and claim boundaries.", ["ope_records", "evidence_ledger_rows"], "What is the track-record state?"),
+        read_model("pilot_findings", "Report accepted ignored-local pilot evidence rows and adoption friction without quality or calibration claims.", ["evidence_ledger_rows", "operation_receipts"], "How many accepted supervised pilot sessions are locally recorded?"),
         read_model("failed_operations", "Expose failed or blocked operation receipts with sanitized recovery categories.", ["operation_receipts"], "Which operations need attention?", "rebuildable_projection"),
         read_model("recovery_actions", "Map interrupted, stale, lease-conflicted, or idempotent-repeat states to safe next commands.", ["operation_receipts", "operation_leases"], "What should the agent do next?", "rebuildable_projection"),
     ]
@@ -213,7 +216,7 @@ def json_compatibility_adapter() -> dict[str, Any]:
     return {
         "adapterName": "ignored_json_live_state",
         "adapterStatus": "current_compatibility_adapter",
-        "sourceRoot": ".ope/live/prediction-campaigns",
+        "sourceRoot": ".ope/live",
         "readCompatibilityAllowed": True,
         "writeCompatibilityAllowed": True,
         "normalChecksWriteLiveState": False,
@@ -275,11 +278,19 @@ def json_compatibility_adapter() -> dict[str, Any]:
                 "migrationReceiptRequired": True,
                 "rawCrudExposed": False,
             },
+            {
+                "stateClass": "pilot_evidence_ledger",
+                "sourcePathPattern": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+                "migrationTargetTable": "evidence_ledger_rows",
+                "contentHashPreserved": True,
+                "migrationReceiptRequired": True,
+                "rawCrudExposed": False,
+            },
         ],
         "knownLimitations": [
             "Ignored JSON compatibility is weak for concurrent agents until imported through lifecycle receipts.",
             "Compatibility writes remain explicit local actions and are never performed by normal checks.",
-            "Migration must preserve source content hashes before SQLite becomes authoritative for existing state.",
+            "Migration must preserve source content hashes before SQLite becomes authoritative for existing campaign or pilot state.",
         ],
     }
 
@@ -375,6 +386,14 @@ def write_local_operation_coverage() -> list[dict[str, Any]]:
             ["campaign-method-rollback"],
             1,
             ["campaign_status", "calibration_status", "track_record_progress"],
+        ),
+        write_local_coverage_entry(
+            "writelocalcoverage-009",
+            "pilot-evidence --input-summary --write-local",
+            ["evidence.append"],
+            ["pilot-evidence-append"],
+            1,
+            ["pilot_findings"],
         ),
     ]
 
@@ -608,6 +627,7 @@ def validate_lifecycle_operation_store(store: dict[str, Any]) -> None:
         "pre_calibration_method_binding",
         "method_apply_binding",
         "method_rollback_binding",
+        "pilot_evidence_ledger_rows",
     }
     compatibility_checks = store["fileDatabaseCompatibilityChecks"]
     if {item["recordClass"] for item in compatibility_checks} != required_compatibility_classes:

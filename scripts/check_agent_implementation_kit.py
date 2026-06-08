@@ -21,8 +21,8 @@ def main() -> None:
     require(kit["kitScope"] == "local_agent_readback_and_templates", "kit scope drifted")
 
     quickstart = kit["quickstartFrontDoor"]
-    require(quickstart["frontDoorStatus"] == "first_external_agent_entrypoint", "quickstart status drifted")
-    require(quickstart["entryCommand"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart", "quickstart command drifted")
+    require(quickstart["frontDoorStatus"] == "implementation_follow_up_entrypoint", "quickstart status drifted")
+    require(quickstart["entryCommand"] == "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"", "quickstart command drifted")
     require(quickstart["targetTimeToFirstCommandMinutes"] == 10, "quickstart target time drifted")
     require(quickstart["createsNewForecastPath"] is False, "quickstart must not create a new forecast path")
     require(quickstart["hostedRuntimeRequired"] is False, "quickstart must not require hosted runtime")
@@ -30,8 +30,8 @@ def main() -> None:
     quickstart_steps = [item["stepKey"] for item in quickstart["steps"]]
     require(
         quickstart_steps == [
-            "start_here",
-            "ask_what_can_be_forecasted",
+            "start_with_setup_engine",
+            "render_host_wrapper_setup_plan",
             "run_guided_forecast",
             "read_forecast_card",
             "inspect_lifecycle_bundle",
@@ -39,12 +39,12 @@ def main() -> None:
         "quickstart step order drifted",
     )
     require(
-        quickstart["steps"][0]["command"] == "python3 scripts/ope.py agent-implementation-kit --view quickstart",
-        "quickstart first step should point back to itself",
+        quickstart["steps"][0]["command"] == "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+        "quickstart first step should route through setup-engine",
     )
     require(
-        quickstart["steps"][1]["command"] == "python3 scripts/ope.py agent-integrate --view candidates",
-        "quickstart should route candidate discovery through agent-integrate",
+        "host_wrapper.py" in quickstart["steps"][1]["command"],
+        "quickstart should render setup-first host wrapper",
     )
     require(
         quickstart["steps"][2]["command"] == "python3 scripts/ope.py agent-integrate --run-guided --case accepted_adapter_output",
@@ -61,9 +61,9 @@ def main() -> None:
     require(wrapper["opensNetworkListener"] is False, "copyable wrapper must not open a network listener")
     require(
         wrapper["callSequence"] == [
-            "agent_implementation_quickstart",
-            "agent_integration_candidates",
-            "agent_integration_guided_forecast",
+            "setup_engine",
+            "render_setup_engine_host_wrapper",
+            "prediction_feature_setup_response",
             "forecast_card_readback",
             "lifecycle_bundle_readback",
         ],

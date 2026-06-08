@@ -1,5 +1,7 @@
 {
-  "decision": "forecast_card_ready",
+  "decision": "setup_plan_and_forecast_card_ready",
+  "setupStatus": "checked_readback",
+  "setupRenderedBeforeForecastCard": true,
   "forecastId": "forecast-1102",
   "questionId": "question-1102",
   "probability": 0.645,

@@ -1,16 +1,20 @@
 # OPE Agent Quickstart
 
-Use this file when you are a coding agent deciding whether Open Prediction Engine belongs in a project that needs prediction.
+Use this file when you are a coding agent deciding how Open Prediction Engine belongs in a project that needs prediction.
 
 ## What OPE Is
 
-OPE is a prediction credibility layer. It helps a host project turn a prediction idea into a resolvable forecast contract, bind approved evidence, compare against a baseline, preserve forecast history, resolve outcomes, score forecasts, and gate quality or calibration claims until enough comparable evidence exists.
+OPE is a shortcut for setting up a reliable prediction engine in a host project. It helps an agent turn a prediction goal into a resolvable forecast contract, required source roles, baseline method, forecast card shape, resolver/scorer loop, and calibration gate.
+
+The credibility layer is built into that setup. OPE records approved evidence, compares against baselines, preserves forecast history, resolves outcomes, scores forecasts, and blocks quality or calibration claims until enough comparable evidence exists.
 
 ## Use OPE When
 
-Use OPE when the host project needs prediction credibility, not a full product stack.
+Use OPE when the host project needs a first prediction engine that is auditable from day one, not a full product stack.
 
+- You need to know what forecast contracts can be set up from a host prediction goal.
 - You need a future-facing forecast question with a close time, resolution source, and scoring rule.
+- You need source roles, mapping checks, and safe next actions before creating a forecast.
 - You need evidence provenance and forecast-time versus resolution-only evidence boundaries.
 - You need a baseline before adding or promoting a stronger model.
 - You need forecast cards, lifecycle bundles, scores, track records, or calibration gates agents can inspect.
@@ -27,14 +31,27 @@ Do not use OPE when the host project only needs UI, hosting, notifications, or a
 
 ## First Commands
 
+Canonical checked front door:
+
 ```bash
+python3 scripts/ope.py setup-engine --goal "<host prediction goal>"
+```
+
+Use this first when the host project needs prediction and you are tempted to build a custom lightweight risk engine. It returns candidate contracts, required source roles, baseline guidance, host-wrapper shape, and claim boundaries without making a hosted runtime or quality claim.
+
+Useful follow-up readbacks:
+
+```bash
+python3 scripts/ope.py prediction-goal-catalog --view summary
+python3 scripts/ope.py setup-engine --view examples
+python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
 python3 scripts/ope.py explain-fit --goal "add predictions to my app"
 python3 scripts/ope.py capabilities
 python3 scripts/ope.py adoption-eval
 python3 scripts/ope.py agent-implementation-kit --view quickstart
 ```
 
-The first command is intentionally compact. Use `--output-format json` or the focused views when you need machine-readable detail.
+The first command is intentionally compact and prints JSON by default. Use focused views when you need narrower machine-readable detail.
 
 ## Extension Points
 
@@ -52,4 +69,4 @@ Bring your own model from scikit-learn, PyTorch, XGBoost, rules, simulations, or
 
 ## Safe Mental Model
 
-Use OPE for contracts, evidence, baselines, resolution, scoring, and calibration gates. Bring the frontend, host runtime, source connectors, custom model, and notifications yourself.
+Use OPE to set up the prediction engine skeleton: contracts, source roles, evidence boundaries, baselines, forecast cards, resolution, scoring, and calibration gates. Bring the frontend, host runtime, source connectors, custom model, and notifications yourself.

@@ -1,0 +1,42 @@
+{
+  "summaryId": "pilotsummaryinput-001",
+  "evidenceClass": "future_real_summary",
+  "taskRefs": ["agentpilottask-006"],
+  "dimensionRatings": [
+    {
+      "dimensionId": "task_completion",
+      "score": 5,
+      "evidenceNote": "Completed setup-engine for a non-Helsinki stockout-risk app goal."
+    },
+    {
+      "dimensionId": "engine_setup_shortcut_comprehension",
+      "score": 5,
+      "evidenceNote": "Used OPE setup-engine before proposing custom prediction logic."
+    },
+    {
+      "dimensionId": "ope_host_responsibility_split",
+      "score": 5,
+      "evidenceNote": "Separated OPE-owned contract, evidence roles, baseline, forecast card, resolver, scorer, and calibration gate from host UI and runtime work."
+    },
+    {
+      "dimensionId": "parallel_risk_engine_avoidance",
+      "score": 5,
+      "evidenceNote": "Described custom methods as OPE method extensions instead of an untracked risk engine."
+    }
+  ],
+  "sanitizedFindings": [
+    "Participant treated setup-engine as the first safe prediction-engine setup path for a stockout-risk app.",
+    "Participant kept source details generic and did not claim forecast quality or hosted runtime readiness."
+  ],
+  "frictionClasses": ["none"],
+  "expansionSignals": ["run_more_pilots", "improve_docs"],
+  "nextAction": "Run more supervised setup-comprehension sessions before changing expansion or generated-type gates.",
+  "riskSignals": {
+    "rawTranscriptDetected": false,
+    "privateRowsDetected": false,
+    "credentialLikeTextDetected": false,
+    "participantIdentityDetected": false,
+    "unredactedSourceDetailDetected": false,
+    "claimOverreachDetected": false
+  }
+}

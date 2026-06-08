@@ -17,7 +17,7 @@ The current decision is `defer_until_adoption_evidence`.
 No TypeScript or Python files are generated because:
 
 - `pilot-findings` reports zero accepted real sessions.
-- `pilot-findings` reports five simulated agent sessions, but they are agent-only adoption-friction evidence and not real pilot evidence.
+- `pilot-findings` reports eight simulated agent sessions, including three non-Helsinki setup-comprehension prompts, but they are agent-only adoption-friction evidence and not real pilot evidence.
 - Current smoke and adoption traces do not show type-specific integration failures.
 - Generating a broad SDK would imply more stability than the full spec package currently claims.
 - Hosted service, private-source runtime, and production source parsing remain out of scope.

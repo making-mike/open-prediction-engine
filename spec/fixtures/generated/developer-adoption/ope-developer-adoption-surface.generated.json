@@ -21,34 +21,34 @@
     {
       "stepId": "adoptionquickstart-001",
       "order": 1,
-      "title": "Start with the external-agent front door",
-      "command": "python3 scripts/ope.py agent-implementation-kit --view quickstart",
-      "expected": "The agent implementation kit returns the shortest safe sequence for adding an OPE-backed prediction feature.",
+      "title": "Start with the setup-engine front door",
+      "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+      "expected": "Setup-engine returns candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before forecast artifacts exist.",
       "timeBudgetSeconds": 20
     },
     {
       "stepId": "adoptionquickstart-002",
       "order": 2,
+      "title": "Render setup-first host wrapper",
+      "command": "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
+      "expected": "The wrapper calls setup-engine first, renders setupEnginePlan, then reads the checked forecast card only after accepted setup.",
+      "timeBudgetSeconds": 30
+    },
+    {
+      "stepId": "adoptionquickstart-003",
+      "order": 3,
       "title": "Confirm Python runtime",
       "command": "python3 --version",
       "expected": "Python 3.12+ is preferred; the repository uses only the standard library.",
       "timeBudgetSeconds": 20
     },
     {
-      "stepId": "adoptionquickstart-003",
-      "order": 3,
+      "stepId": "adoptionquickstart-004",
+      "order": 4,
       "title": "Run the local check suite",
       "command": "python3 scripts/run_checks.py",
       "expected": "All schema, fixture, read-surface, agent, and release checks pass without live network access.",
       "timeBudgetSeconds": 900
-    },
-    {
-      "stepId": "adoptionquickstart-004",
-      "order": 4,
-      "title": "Inspect approved local-folder runtime",
-      "command": "python3 scripts/ope.py local-source-runtime",
-      "expected": "The approved local-folder case binds to forecast-1102 and blocked examples remain non-generating.",
-      "timeBudgetSeconds": 30
     },
     {
       "stepId": "adoptionquickstart-005",
@@ -86,10 +86,20 @@
   "exampleScenario": {
     "scenarioId": "adoptionscenario-100",
     "title": "Approved Local Source To Forecast Readback",
-    "goal": "Reach a valid forecast card and lifecycle bundle from the checked local MVP while preserving source, method, resolution, scoring, and claim boundaries.",
+    "goal": "Render the setup-engine host plan, then reach a valid forecast card and lifecycle bundle from the checked local MVP while preserving source, method, resolution, scoring, and claim boundaries.",
     "steps": [
       {
         "stepId": "adoptionscenario-001",
+        "phase": "setup_plan_render",
+        "command": "python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json",
+        "expectedStatus": "setup_plan_and_forecast_card_ready",
+        "forecastId": "forecast-1102",
+        "questionId": "question-1102",
+        "createsArtifacts": false,
+        "qualityClaimAllowed": false
+      },
+      {
+        "stepId": "adoptionscenario-002",
         "phase": "source_setup",
         "command": "python3 scripts/ope.py private-setup-orchestrator --case local_file_confirmed",
         "expectedStatus": "completed_forecast_readback",
@@ -99,7 +109,7 @@
         "qualityClaimAllowed": false
       },
       {
-        "stepId": "adoptionscenario-002",
+        "stepId": "adoptionscenario-003",
         "phase": "runtime_gate",
         "command": "python3 scripts/ope.py local-source-runtime --case approved_local_folder",
         "expectedStatus": "forecast_card_ready",
@@ -109,7 +119,7 @@
         "qualityClaimAllowed": false
       },
       {
-        "stepId": "adoptionscenario-003",
+        "stepId": "adoptionscenario-004",
         "phase": "forecast_readback",
         "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
         "expectedStatus": "available",
@@ -119,7 +129,7 @@
         "qualityClaimAllowed": false
       },
       {
-        "stepId": "adoptionscenario-004",
+        "stepId": "adoptionscenario-005",
         "phase": "lifecycle_bundle",
         "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
         "expectedStatus": "available",
@@ -129,7 +139,7 @@
         "qualityClaimAllowed": false
       },
       {
-        "stepId": "adoptionscenario-005",
+        "stepId": "adoptionscenario-006",
         "phase": "resolution_scoring",
         "command": "python3 scripts/ope.py agent-call --operation scoring_summary --forecast-id forecast-1102 --question-id question-1102",
         "expectedStatus": "ok",
@@ -139,7 +149,7 @@
         "qualityClaimAllowed": false
       },
       {
-        "stepId": "adoptionscenario-006",
+        "stepId": "adoptionscenario-007",
         "phase": "claim_review",
         "command": "python3 scripts/ope.py transit-track-record-gate",
         "expectedStatus": "not_enough_resolved_comparable_outcomes",
@@ -236,33 +246,38 @@
     },
     {
       "checkId": "adoptioncheck-003",
+      "command": "python3 scripts/check_embed_prediction_feature_example.py",
+      "expected": "setup-first embedded host wrapper example passes"
+    },
+    {
+      "checkId": "adoptioncheck-004",
       "command": "python3 scripts/ope.py read --record-type forecast-card --id forecast-1102 --question-id question-1102",
       "expected": "forecast card readback succeeds"
     },
     {
-      "checkId": "adoptioncheck-004",
+      "checkId": "adoptioncheck-005",
       "command": "python3 scripts/ope.py read --record-type forecast-bundle --id forecast-1102 --question-id question-1102",
       "expected": "lifecycle bundle readback succeeds"
     },
     {
-      "checkId": "adoptioncheck-005",
+      "checkId": "adoptioncheck-006",
       "command": "python3 scripts/check_mvp_release_surface.py",
       "expected": "local MVP smoke check passes"
     },
     {
-      "checkId": "adoptioncheck-006",
+      "checkId": "adoptioncheck-007",
       "command": "python3 scripts/ope.py prediction-campaign explain --view summary",
       "expected": "recurring prediction campaign readback explains local status"
     },
     {
-      "checkId": "adoptioncheck-007",
+      "checkId": "adoptioncheck-008",
       "command": "python3 scripts/run_checks.py",
       "expected": "canonical dependency-free check suite passes"
     }
   ],
   "summary": {
     "quickstartStepCount": 8,
-    "scenarioStepCount": 6,
+    "scenarioStepCount": 7,
     "integrationCount": 3,
     "implementedNoteCount": 5,
     "fixtureOnlyNoteCount": 4,
