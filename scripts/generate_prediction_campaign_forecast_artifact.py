@@ -133,11 +133,15 @@ def build_prediction_campaign_forecast_artifact(
     *,
     creation: dict[str, Any] | None = None,
     pre_calibration: dict[str, Any] | None = None,
+    forecasted_at: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     if creation is None:
         creation = build_prediction_campaign_forecast_creation(run_id=run_id)
     run = creation["readyRun"]
     bindings = creation["bindings"]
+    # Checked fixtures keep the scheduled create time; effectful writes pass the
+    # actual runner clock so forecastedAt never backdates a live launch.
+    forecasted_at_value = forecasted_at or run["forecastCreateAt"]
     horizon_record = horizon(run)
     criteria = resolution_criteria(run)
     creation_path = (
@@ -156,7 +160,7 @@ def build_prediction_campaign_forecast_artifact(
             "Historical transit delay fixture",
             "public_dataset",
             HISTORY_SOURCE_PATH,
-            run["forecastCreateAt"],
+            forecasted_at_value,
         ),
         source_ref(
             run_source_id(run, 2),
@@ -234,8 +238,8 @@ def build_prediction_campaign_forecast_artifact(
             "riskLevel": "minimal",
             "notes": "Local transit delay campaign fixture; no passenger-level, fare, enforcement, or public-safety use.",
         },
-        "createdAt": run["forecastCreateAt"],
-        "updatedAt": run["forecastCreateAt"],
+        "createdAt": forecasted_at_value,
+        "updatedAt": forecasted_at_value,
     }
     evidence = {
         "evidencePacketId": run_record_id("evidence", run),
@@ -244,7 +248,7 @@ def build_prediction_campaign_forecast_artifact(
         "questionStatus": "open",
         "domain": creation["domain"],
         "horizon": horizon_record,
-        "forecastedAt": run["forecastCreateAt"],
+        "forecastedAt": forecasted_at_value,
         "model": model,
         "inputSourceClasses": ["public_dataset", "other"],
         "provenanceReferences": provenance_refs,
@@ -276,7 +280,7 @@ def build_prediction_campaign_forecast_artifact(
         "questionStatus": "open",
         "domain": creation["domain"],
         "horizon": horizon_record,
-        "forecastedAt": run["forecastCreateAt"],
+        "forecastedAt": forecasted_at_value,
         "closedAt": run["forecastCloseAt"],
         "outputType": "binary",
         "forecastOutput": forecast_output,
@@ -297,7 +301,7 @@ def build_prediction_campaign_forecast_artifact(
         "entries": [
             {
                 "forecastId": run["forecastId"],
-                "forecastedAt": run["forecastCreateAt"],
+                "forecastedAt": forecasted_at_value,
                 "state": "active",
                 "sourceClass": "baseline",
                 "model": model,
@@ -306,8 +310,8 @@ def build_prediction_campaign_forecast_artifact(
                 "evidencePacketId": evidence["evidencePacketId"],
             }
         ],
-        "createdAt": run["forecastCreateAt"],
-        "updatedAt": run["forecastCreateAt"],
+        "createdAt": forecasted_at_value,
+        "updatedAt": forecasted_at_value,
     }
     return {
         "question": question,

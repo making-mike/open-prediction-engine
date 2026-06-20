@@ -3,7 +3,16 @@
 
 from __future__ import annotations
 
-from generate_prediction_campaign_runner import build_prediction_campaign_runner, default_args, run_foreground_ticks
+from datetime import datetime, timezone
+
+from generate_prediction_campaign_runner import (
+    build_prediction_campaign_runner,
+    default_args,
+    effective_runner_clock_value,
+    parse_utc,
+    ready_run_id_for_write,
+    run_foreground_ticks,
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -214,6 +223,47 @@ def main() -> None:
     require(
         full_tick["actions"][-1]["actionStatus"] == "dry_run_ready_for_write_local",
         "full foreground tick should leave the final run ready in dry-run",
+    )
+
+    live_args = default_args()
+    live_args.write_local = True
+    live_clock_value = effective_runner_clock_value(live_args)
+    require(live_clock_value is not None, "effectful launch should derive a runner clock without --now")
+    live_clock_offset = abs((datetime.now(timezone.utc) - parse_utc(live_clock_value)).total_seconds())
+    require(live_clock_offset < 60, "effectful runner clock should track real UTC now")
+    require(
+        effective_runner_clock_value(default_args()) is None,
+        "dry-run readbacks should keep the schedule-derived fixture clock",
+    )
+    check_args = default_args()
+    check_args.watch = True
+    check_args.check = True
+    require(
+        effective_runner_clock_value(check_args) is None,
+        "--check readbacks must stay deterministic even with effectful flags",
+    )
+
+    late_args = default_args()
+    late_args.now = "2026-06-11T12:50:00Z"
+    late_args.write_local = True
+    late_runner = build_prediction_campaign_runner(late_args)
+    require(ready_run_id_for_write(late_runner) is None, "a launch after forecastCloseAt must not select a ready run")
+    late_rows = {row["runId"]: row for row in late_runner["forecastSchedule"]["scheduleRows"]}
+    require(
+        late_rows["predictionrun-1301"]["scheduleAction"] == "record_missed_without_forecast",
+        "a launch after forecastCloseAt should route the closed run to the missed-run policy",
+    )
+
+    watch_args = default_args()
+    watch_args.now = "2026-06-11T00:00:00Z"
+    watch_args.watch = True
+    watch_args.max_ticks = 2
+    watch_args.poll_seconds = 1
+    watch_result = run_foreground_ticks(build_prediction_campaign_runner(watch_args), watch_args)
+    require(watch_result["ticks"][0]["runnerClock"] == "2026-06-11T00:00:00Z", "first watch tick clock drifted")
+    require(
+        watch_result["ticks"][1]["runnerClock"] == "2026-06-11T00:00:01Z",
+        "watch ticks should re-derive an advancing runner clock instead of reusing the launch clock",
     )
 
     resolver_args = default_args()

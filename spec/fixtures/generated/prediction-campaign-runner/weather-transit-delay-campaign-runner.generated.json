@@ -121,7 +121,7 @@
     "normalChecksWriteLiveState": false,
     "requiresExplicitWriteLocal": true,
     "createsForecastArtifactsInDryRun": false,
-    "nextAction": "Use --now to inspect later due windows and --write-local to create the next due forecast; long-running polling remains separate."
+    "nextAction": "Effectful runs default the runner clock to real UTC now and --now only simulates other windows; use --write-local to create the next due forecast while long-running polling remains separate."
   },
   "methodSelectionBinding": {
     "bindingStatus": "baseline_default_no_local_override",
@@ -294,6 +294,7 @@
   },
   "warnings": [
     "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+    "Effectful invocations (--write-local, --watch, --live-weather, --execute-resolvers) derive the runner clock from real UTC now and re-derive it on every watch tick; runs past forecastCloseAt are recorded as missed instead of backdated.",
     "Optional --pre-calibrate uses historical data only and writes a prospective baseline binding only when --write-local is explicit.",
     "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
     "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",

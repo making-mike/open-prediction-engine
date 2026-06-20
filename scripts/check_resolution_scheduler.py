@@ -66,7 +66,7 @@ def main() -> None:
     if campaign_report["schedulerMode"] != "campaign_fixture_once":
         raise AssertionError("campaign scheduler fixture mode drifted")
     campaign_tick = campaign_report["ticks"][0]
-    if campaign_tick["jobSummary"]["jobCount"] != 4:
+    if campaign_tick["jobSummary"]["jobCount"] != 5:
         raise AssertionError("campaign scheduler should include one campaign job")
     if campaign_tick["jobSummary"]["pendingNotDueCount"] != 2:
         raise AssertionError("campaign scheduler should add one waiting campaign job")
@@ -93,8 +93,10 @@ def main() -> None:
     ]
     if len(due_campaign_actions) != 1:
         raise AssertionError("due campaign scheduler should expose one campaign action")
-    if due_campaign_tick["jobSummary"]["pendingDueCount"] != 2:
-        raise AssertionError("due campaign scheduler should add one due campaign job")
+    if due_campaign_tick["jobSummary"]["pendingDueCount"] != 1:
+        raise AssertionError("due campaign scheduler should expose the due campaign job")
+    if due_campaign_tick["jobSummary"]["staleDueCount"] != 2:
+        raise AssertionError("due campaign scheduler should mark day-old forward runs as stale due")
     if due_campaign_actions[0]["schedulerAction"] != "campaign_resolver_attempt_ready":
         raise AssertionError("due campaign scheduler should route to the checked campaign resolver attempt")
     if due_campaign_tick["resolverSummary"]["ranResolver"] or due_campaign_tick["resolverSummary"]["executedCount"]:

@@ -79,7 +79,9 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
                 "python3 scripts/ope.py lifecycle-operation-store --scenario pilot-evidence-append",
                 "python3 scripts/ope.py pilot-session-packet",
+                "python3 scripts/ope.py pilot-session-brief --section summary",
                 "python3 scripts/ope.py pilot-summary-intake",
+                "python3 scripts/ope.py pilot-summary-review --section summary",
                 "python3 scripts/ope.py pilot-summary-template --section summary",
                 "python3 scripts/ope.py pilot-findings --section summary",
                 "python3 scripts/ope.py pilot-supervision-status --section summary",
@@ -207,7 +209,7 @@ def mvp_local_runtime() -> dict[str, Any]:
             {
                 "checkId": "mvp-smoke-setup-engine",
                 "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
-                "expected": "setup-engine returns domain-agnostic candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries without creating forecast artifacts or hosted runtime.",
+                "expected": "setup-engine returns candidate contracts, source roles, request summary, baseline guidance, forecast-card preview, host-wrapper shape, and claim boundaries without forecast artifacts or hosted runtime.",
             },
             {
                 "checkId": "mvp-smoke-prediction-goal-catalog",
@@ -315,14 +317,19 @@ def mvp_local_runtime() -> dict[str, Any]:
                 "expected": "real pilot-session task cards, sanitization checks, and ledger-ready template are available without recording real sessions.",
             },
             {
+                "checkId": "mvp-smoke-pilot-session-brief",
+                "command": "python3 scripts/ope.py pilot-session-brief --section summary",
+                "expected": "joined moderator brief exposes the setup-comprehension task, generic agent guidance, non-ledger-ready draft status, and local evidence command loop without running sessions or writing evidence.",
+            },
+            {
                 "checkId": "mvp-smoke-pilot-summary-intake",
                 "command": "python3 scripts/ope.py pilot-summary-intake",
                 "expected": "sanitized summary intake examples classify ledger-ready, redaction-needed, and blocked cases without writing ledger rows.",
             },
             {
-                "checkId": "mvp-smoke-pilot-summary-input-classifier",
-                "command": "python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
-                "expected": "caller-supplied sanitized summary files can be classified as candidate real-session evidence without writing ledger rows or counting real sessions.",
+                "checkId": "mvp-smoke-pilot-summary-review",
+                "command": "python3 scripts/ope.py pilot-summary-review --section summary",
+                "expected": "one sanitized summary can be reviewed with intake classification, dry-run append eligibility, and explicit write-local next action without writing evidence.",
             },
             {
                 "checkId": "mvp-smoke-pilot-summary-template",

@@ -2416,3 +2416,45 @@ OPE should be agent-native without making every normal read carry implementation
 - **Choice:** Extend `agent-guide` with a domain-agnostic setup flow and default prompt planner questions for arbitrary host prediction goals, while keeping the Helsinki bus clarification path as one worked example.
 - **Why:** Real setup-comprehension sessions should test whether agents ask reusable OPE setup questions before inventing an app-specific risk engine. If the guide defaults to Helsinki-only narrowing, it reinforces the same domain-specific misunderstanding the roadmap is trying to remove.
 - **Alternatives rejected:** Leaving `agent-guide` Helsinki-first, adding separate per-domain guide commands, replacing setup-engine with free-form prompt planning, treating generic guidance as real pilot evidence, or letting guidance create forecast artifacts, execute sources, store private data, or upgrade quality/calibration/runtime claims.
+
+### DEC-151 — Join The Real Pilot Session Loop Into One Read-Only Brief
+- **Date:** 2026-06-08
+- **Status:** accepted
+- **Choice:** Add `pilot-session-brief` as a schema-bound read-only moderator brief joining the setup-comprehension task, generic agent guidance, non-ledger-ready summary draft status, evidence safety rules, and explicit local evidence command loop.
+- **Why:** The roadmap now requires real supervised sessions, but asking moderators or agents to manually stitch together task cards, generic guidance, summary templates, intake classification, local append, findings, and status review increases operator error. A joined readback reduces session friction while preserving the explicit `--write-local` boundary.
+- **Alternatives rejected:** Running sessions inside OPE, auto-writing accepted summaries, committing real evidence fixtures, making the summary draft ledger-ready by default, using Helsinki-specific guidance as the brief default, or treating pilot usability evidence as forecast-quality, calibration, hosted-runtime, generated-type, or expansion evidence.
+
+### DEC-152 — Review Sanitized Pilot Summaries Before Local Append
+- **Date:** 2026-06-08
+- **Status:** accepted
+- **Choice:** Add `pilot-summary-review` as a schema-bound read-only bundle joining caller-supplied summary classification, dry-run local append eligibility, explicit write-local command guidance, and claim boundaries.
+- **Why:** After real supervised sessions, moderators need one safe place to confirm whether a sanitized summary can be appended locally. A joined review reduces copy/paste errors between intake, dry-run append, findings, and status commands while keeping the only mutation behind explicit `pilot-evidence --write-local`.
+- **Alternatives rejected:** Auto-appending accepted summaries, counting candidate evidence during review, exposing write-local commands for blocked summaries, committing real session evidence fixtures, storing raw transcripts/private data/prompt logs/participant identity, or letting pilot usability evidence upgrade quality, calibration, hosted-runtime, generated-type, or expansion claims.
+
+### DEC-153 — Accept Structured Setup Requests In Setup-Engine
+- **Date:** 2026-06-09
+- **Status:** accepted
+- **Choice:** Extend `setup-engine` with a checked structured request input, preserving goal-only mode while allowing agents to provide decision context, outcome, horizon, source hints, resolution hints, baseline hints, and explicit execution-boundary safety flags.
+- **Why:** Agents that already have app context need a concrete OPE input shape that returns readiness and blockers before they invent a parallel lightweight prediction engine. A structured request makes OPE usable as the first setup path without relying on prompt interpretation alone.
+- **Alternatives rejected:** Keeping `setup-engine` goal-text only, creating a separate setup-request helper command, accepting raw private rows or credentials in setup inputs, changing the adapter envelope input type for request-mode calls, creating forecast artifacts from setup requests, or upgrading quality/calibration/hosted-runtime claims from setup readiness.
+
+### DEC-154 — Expose Forecast-Card Preview From Setup-Engine
+- **Date:** 2026-06-09
+- **Status:** accepted
+- **Choice:** Add a checked `forecastCardPreview` object and focused `forecast-card-preview` view to `setup-engine`, available through CLI, `agent-call`, and local MCP without creating forecast artifacts.
+- **Why:** Host-app builders and agents need to know what they may render before forecast execution. Without a safe preview, agents are likely to invent their own risk cards, probabilities, confidence labels, or quality claims instead of following OPE's forecast lifecycle.
+- **Alternatives rejected:** Waiting until real forecast artifacts exist before exposing any card shape, putting probability placeholders in host-wrapper prose only, creating a separate preview command, returning forecast IDs from setup mode, allowing confidence or quality labels before scoring evidence, or treating preview readiness as a calibrated forecast.
+
+### DEC-155 — Verify Transit Outcome Evidence Covers The Forecast Window Before Resolution
+- **Date:** 2026-06-11
+- **Status:** accepted
+- **Choice:** Stamp decoded GTFS-RT rows with the observed trip start date (a requested service date now filters instead of restamping), exclude schedule-joined rows scheduled outside the forecast horizon and resolution rows captured outside the horizon-to-resolveAt-plus-tolerance window, block live resolve attempts more than the 60-minute capture-lag tolerance past `resolveAt` with reason `stale_capture_window`, surface stale-due runs in the resolver scan, and add `late_capture_window` to the resolution runtime failure taxonomy.
+- **Why:** A reproduced forward run for the 2026-06-10 morning peak was resolved a day late from a live snapshot whose 28k rows belonged to 2026-06-11; the decoder copied the requested service date and window onto every row, so the scope filter passed trivially and a Brier score was produced from wrong-window evidence. This silently broke the core claim that forecasts are resolved from declared sources covering the declared window.
+- **Alternatives rejected:** Keeping the requested scope as a stamp override, deriving service windows from a new window registry inside the connector, refusing stale runs only in the scanner without persisting a blocked state, treating late captures as retryable, silently resolving ambiguous without counting excluded out-of-window rows, or widening the tolerance beyond one hour.
+
+### DEC-156 — Clock Live Campaign Launches Against Real UTC Now
+- **Date:** 2026-06-11
+- **Status:** accepted
+- **Choice:** Derive the prediction-campaign runner clock from real UTC now for effectful invocations (`--write-local`, `--watch`, `--live-weather`, `--execute-resolvers`) when `--now` is absent, re-derive the clock on every watch tick, stamp effectful `forecastedAt` with the actual runner clock, record windows past `forecastCloseAt` as `missed` run states with `missed_forecast_close`, and make the forecast write runtime independently refuse any write after close against real UTC now regardless of clock source.
+- **Why:** A reproduced live launch at 2026-06-11T12:50Z created `forecast-1301` with `forecastedAt` 2026-06-11T00:00:00Z for a horizon that had closed about nine hours earlier, because the runner clock defaulted to the first run's scheduled `forecastCreateAt` and was derived once per invocation. The run state's honest `writtenAt` proved the backdating. This is the second resolution-integrity catch from live operation; forecast-before-close must be enforced by code, not operator care.
+- **Alternatives rejected:** Requiring `--now` on every live launch, defaulting all dry-run readbacks to real now (which would break deterministic fixtures), backfilling late forecasts with a warning, advancing the watch clock only in real-time mode (explicit `--now` watches now advance by `--poll-seconds` per tick), recording missed runs only in memory without a run state, or enforcing close time solely in the runner schedule without a write-runtime guard.

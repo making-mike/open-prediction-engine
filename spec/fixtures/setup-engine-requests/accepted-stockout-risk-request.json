@@ -1,0 +1,72 @@
+{
+  "setupEngineRequestId": "setupenginerequest-001",
+  "goal": "set up stockout risk predictions for warehouse replenishment decisions",
+  "decisionContext": {
+    "decisionToSupport": "Prioritize replenishment and supplier escalation before store stockouts occur.",
+    "stakeholderAction": "Operations leads review high-risk store SKU pairs and escalate replenishment before the cutoff.",
+    "operatingWindow": "daily store SKU replenishment planning"
+  },
+  "outcome": {
+    "outcomeName": "store SKU stockout",
+    "outcomeType": "binary_threshold",
+    "threshold": "on-hand units below one before the next replenishment close",
+    "positiveClass": "stockout threshold exceeded"
+  },
+  "horizon": {
+    "forecastWindow": "next 24 hours after forecast creation",
+    "closeTimePolicy": "Forecasts close before the daily replenishment decision deadline.",
+    "resolutionDeadlinePolicy": "Resolve from the approved inventory snapshot after the operating window closes."
+  },
+  "sourceHints": [
+    {
+      "roleName": "forecast_time_signal",
+      "sourceKind": "source_adapter_output",
+      "sourceRef": "approved replenishment signal adapter output source-801",
+      "approvalStatus": "approved_reference",
+      "containsCredentialValue": false,
+      "containsRawPrivateRows": false,
+      "containsRawSql": false,
+      "nextAction": "Route the approved adapter output through source intake."
+    },
+    {
+      "roleName": "historical_outcome",
+      "sourceKind": "local_file",
+      "sourceRef": "caller-approved historical stockout summary file source-802",
+      "approvalStatus": "approved_reference",
+      "containsCredentialValue": false,
+      "containsRawPrivateRows": false,
+      "containsRawSql": false,
+      "nextAction": "Use only summarized comparable rows for the baseline gate."
+    },
+    {
+      "roleName": "resolution_outcome",
+      "sourceKind": "source_adapter_output",
+      "sourceRef": "approved inventory snapshot resolution output source-803",
+      "approvalStatus": "approved_reference",
+      "containsCredentialValue": false,
+      "containsRawPrivateRows": false,
+      "containsRawSql": false,
+      "nextAction": "Bind the resolver to the post-window inventory snapshot reference."
+    }
+  ],
+  "resolutionHint": {
+    "resolutionSourceRef": "approved inventory snapshot resolution output source-803",
+    "resolutionRule": "Resolve yes when the store SKU on-hand count is below one before the replenishment window closes.",
+    "scoringReady": true
+  },
+  "baselineHint": {
+    "historicalOutcomeAvailable": true,
+    "minimumComparableRowsKnown": true,
+    "suggestedBaseline": "Historical frequency by store, SKU, weekday, and supplier lead-time band.",
+    "benchmarkNotes": "Comparable historical outcomes exist, but quality claims still require resolved forecast scoring."
+  },
+  "executionBoundary": {
+    "requestsForecastArtifacts": false,
+    "requestsLiveFetch": false,
+    "containsCredentialValues": false,
+    "containsRawPrivateRows": false,
+    "containsRawSql": false,
+    "allowsSourceReads": false,
+    "writesLocalState": false
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "pilotSummaryReviewId": "pilotsummaryreview-001",
+  "generatedAt": "2026-06-11T10:00:00Z",
+  "reviewMode": "read_only_pilot_summary_review",
+  "inputRef": "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+  "inputSummaryId": "pilotsummaryinput-001",
+  "classification": {
+    "pilotSummaryIntakeResultId": "pilotsummaryintakeresult-001",
+    "inputRef": "accepted-setup-engine-summary.json",
+    "inputSummaryId": "pilotsummaryinput-001",
+    "intakeMode": "caller_supplied_sanitized_summary_file",
+    "submittedShape": {
+      "hasTaskRefs": true,
+      "hasDimensionRatings": true,
+      "hasSanitizedFindings": true,
+      "hasFrictionClasses": true,
+      "hasExpansionSignals": true,
+      "hasNextAction": true
+    },
+    "riskSignals": {
+      "rawTranscriptDetected": false,
+      "privateRowsDetected": false,
+      "credentialLikeTextDetected": false,
+      "participantIdentityDetected": false,
+      "unredactedSourceDetailDetected": false,
+      "claimOverreachDetected": false
+    },
+    "intakeDecision": "accept_for_ledger_review",
+    "ledgerReady": true,
+    "acceptedForAggregation": true,
+    "candidateRealSessionEvidence": true,
+    "contributesRealSessionEvidence": false,
+    "reviewOutcome": "Summary has required fields and no unsafe signals; it is ready for moderator ledger review.",
+    "requiredFixes": [],
+    "nextAction": "Submit for moderator review before adding any real-session ledger row.",
+    "realSessionsRecorded": 0,
+    "ledgerRowsWritten": 0,
+    "executionBoundary": {
+      "readOnlyClassifier": true,
+      "writesPilotEvidenceLedger": false,
+      "recordsRawTranscripts": false,
+      "storesPrivateData": false,
+      "storesCredentials": false,
+      "storesPromptLogs": false,
+      "storesParticipantIdentity": false,
+      "createsForecastArtifacts": false,
+      "startsHostedRuntime": false,
+      "fetchesLiveData": false,
+      "unblocksExpansion": false
+    },
+    "warnings": [
+      "This classification is read-only and does not write pilot evidence.",
+      "Candidate real-session evidence counts only after moderator review and explicit ledger intake.",
+      "Do not submit raw transcripts, private rows, credentials, prompt logs, or participant identity."
+    ]
+  },
+  "appendPlan": {
+    "pilotEvidenceAppendPlanId": "pilotevidenceappendplan-001",
+    "generatedAt": "2026-06-10T11:30:00Z",
+    "appendMode": "local_pilot_summary_append_plan",
+    "inputRef": "accepted-setup-engine-summary.json",
+    "inputSummaryId": "pilotsummaryinput-001",
+    "intakeDecision": "accept_for_ledger_review",
+    "appendDecision": "ready_for_local_write",
+    "localLedgerPath": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+    "writeLocalRequired": true,
+    "writeLocalRequested": false,
+    "candidateRealSessionEvidence": true,
+    "contributesRealSessionEvidence": false,
+    "ledgerRowsWritten": 0,
+    "realSessionsRecorded": 0,
+    "candidateRow": {
+      "caseId": "pilotevidencelocal-001",
+      "caseKey": "local_real_session_summary",
+      "sourceSummaryId": "pilotsummaryinput-001",
+      "inputRef": "accepted-setup-engine-summary.json",
+      "evidenceClass": "future_real_summary",
+      "taskRefs": [
+        "agentpilottask-006"
+      ],
+      "intakeStatus": "accepted_for_aggregation",
+      "acceptedForAggregation": true,
+      "contributesRealSessionEvidence": true,
+      "inputSignals": {
+        "rawTranscriptSubmitted": false,
+        "privateDataSubmitted": false,
+        "credentialLikeTextSubmitted": false,
+        "claimConfusionObserved": false,
+        "runtimeGapObserved": false
+      },
+      "privacyChecks": {
+        "rawTranscriptStored": false,
+        "privateDataStored": false,
+        "credentialsStored": false,
+        "promptLogStored": false,
+        "participantIdentityStored": false,
+        "notesRedacted": true
+      },
+      "dimensionRatings": [
+        {
+          "dimensionId": "task_completion",
+          "score": 5,
+          "evidenceNote": "Completed setup-engine for a non-Helsinki stockout-risk app goal."
+        },
+        {
+          "dimensionId": "engine_setup_shortcut_comprehension",
+          "score": 5,
+          "evidenceNote": "Used OPE setup-engine before proposing custom prediction logic."
+        },
+        {
+          "dimensionId": "ope_host_responsibility_split",
+          "score": 5,
+          "evidenceNote": "Separated OPE-owned contract, evidence roles, baseline, forecast card, resolver, scorer, and calibration gate from host UI and runtime work."
+        },
+        {
+          "dimensionId": "parallel_risk_engine_avoidance",
+          "score": 5,
+          "evidenceNote": "Described custom methods as OPE method extensions instead of an untracked risk engine."
+        }
+      ],
+      "sanitizedFindings": [
+        "Participant treated setup-engine as the first safe prediction-engine setup path for a stockout-risk app.",
+        "Participant kept source details generic and did not claim forecast quality or hosted runtime readiness."
+      ],
+      "frictionClasses": [
+        "none"
+      ],
+      "expansionSignals": [
+        "run_more_pilots",
+        "improve_docs"
+      ],
+      "nextAction": "Run more supervised setup-comprehension sessions before changing expansion or generated-type gates."
+    },
+    "executionBoundary": {
+      "writesCheckedFixtures": false,
+      "writesIgnoredLocalLedger": false,
+      "recordsRawTranscripts": false,
+      "storesPrivateData": false,
+      "storesCredentials": false,
+      "storesPromptLogs": false,
+      "storesParticipantIdentity": false,
+      "createsForecastArtifacts": false,
+      "startsHostedRuntime": false,
+      "fetchesLiveData": false,
+      "unblocksExpansion": false,
+      "qualityClaimsUpgraded": false,
+      "calibrationClaimsUpgraded": false
+    },
+    "warnings": [
+      "Dry-run append plans do not write pilot evidence or count real sessions.",
+      "Use --write-local only after moderator review confirms the summary is sanitized.",
+      "Local pilot evidence is stored under .ope/live/ and must not be committed.",
+      "Local pilot evidence informs adoption findings only; it does not upgrade forecast quality or calibration claims."
+    ]
+  },
+  "reviewDecision": {
+    "canAppendWithWriteLocal": true,
+    "blockedByIntake": false,
+    "needsRedaction": false,
+    "requiresModeratorApproval": true,
+    "nextAction": "Moderator may run the explicit --write-local append after confirming the summary remains sanitized."
+  },
+  "operatorCommands": [
+    {
+      "stepKey": "classify_summary",
+      "order": 1,
+      "command": "python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+      "expectedOperatorAction": "Classify the sanitized summary without writing evidence.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "dry_run_append",
+      "order": 2,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+      "expectedOperatorAction": "Inspect the local append plan without writing the ignored ledger.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "review_summary",
+      "order": 3,
+      "command": "python3 scripts/ope.py pilot-summary-review --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json --section summary",
+      "expectedOperatorAction": "Confirm whether moderator-approved --write-local append is allowed.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "write_local_append",
+      "order": 4,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json --write-local",
+      "expectedOperatorAction": "Append only after moderator approval confirms the summary is sanitized.",
+      "mutatesLocalState": true
+    },
+    {
+      "stepKey": "review_findings",
+      "order": 5,
+      "command": "python3 scripts/ope.py pilot-findings --from-local-ledger --section summary",
+      "expectedOperatorAction": "Review ignored local pilot findings after append.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "review_status",
+      "order": 6,
+      "command": "python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary",
+      "expectedOperatorAction": "Confirm remaining real-session count and blocked claim boundaries.",
+      "mutatesLocalState": false
+    }
+  ],
+  "executionBoundary": {
+    "readOnlyReview": true,
+    "writesCheckedFixtures": false,
+    "writesIgnoredLocalLedger": false,
+    "recordsRealSessions": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "createsForecastArtifacts": false,
+    "startsHostedRuntime": false,
+    "fetchesLiveData": false,
+    "unblocksExpansion": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "generatedTypesUnblocked": false
+  },
+  "warnings": [
+    "This review is read-only and does not write pilot evidence.",
+    "Only explicit moderator-approved --write-local can append accepted sanitized summaries to the ignored local ledger.",
+    "Blocked summaries must not be appended or committed.",
+    "Pilot usability evidence does not upgrade forecast quality, calibration, hosted runtime, generated types, or expansion claims."
+  ],
+  "summary": {
+    "inputSummaryId": "pilotsummaryinput-001",
+    "intakeDecision": "accept_for_ledger_review",
+    "appendDecision": "ready_for_local_write",
+    "ledgerReady": true,
+    "canAppendWithWriteLocal": true,
+    "candidateRealSessionEvidence": true,
+    "contributesRealSessionEvidence": false,
+    "writeLocalRequired": true,
+    "writeLocalRequested": false,
+    "ledgerRowsWritten": 0,
+    "realSessionsRecorded": 0,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "hostedRuntimeAllowed": false,
+    "generatedTypesEvidenceReady": false,
+    "expansionEvidenceReady": false
+  }
+}

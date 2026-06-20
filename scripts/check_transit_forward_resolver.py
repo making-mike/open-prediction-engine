@@ -30,10 +30,10 @@ def main() -> None:
 
     if report["runMode"] != "fixture_scan" or report["executionMode"] != "dry_run":
         raise AssertionError("resolver fixture should be an offline dry run")
-    if summary["scannedCount"] != 3:
-        raise AssertionError("resolver fixture should scan three representative states")
-    if summary["dueCount"] != 1 or summary["notDueCount"] != 1 or summary["alreadyResolvedCount"] != 1:
-        raise AssertionError("resolver fixture should classify due, not-due, and already-resolved states")
+    if summary["scannedCount"] != 4:
+        raise AssertionError("resolver fixture should scan four representative states")
+    if summary["dueCount"] != 2 or summary["notDueCount"] != 1 or summary["alreadyResolvedCount"] != 1:
+        raise AssertionError("resolver fixture should classify due, stale-due, not-due, and already-resolved states")
     if summary["executedCount"] != 0 or boundary["resolverCommandsExecuted"]:
         raise AssertionError("resolver fixture must not execute commands")
     if boundary["sourceFetchPerformed"] or boundary["resolvedArtifactsCreated"]:
@@ -44,6 +44,12 @@ def main() -> None:
         raise AssertionError("due pending state should expose the checked resolve command")
     if "dry-run only" not in decisions["due_pending"]["notes"][0]:
         raise AssertionError("due pending state should explain execute is required")
+    if "due_stale_capture" not in decisions:
+        raise AssertionError("resolver fixture should flag a due run past the capture-lag tolerance")
+    if "stale_capture_window" not in " ".join(decisions["due_stale_capture"]["notes"]):
+        raise AssertionError("stale due state should explain the blocked stale_capture_window outcome")
+    if decisions["due_stale_capture"]["executionResult"]["status"] != "not_run":
+        raise AssertionError("stale due state must not execute in the dry-run fixture")
     print("checked transit forward-run resolver")
 
 

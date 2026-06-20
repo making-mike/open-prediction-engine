@@ -20,6 +20,14 @@ CAPABILITIES_PATH = ROOT / "ope.capabilities.json"
 SCHEMA = SPEC / "prediction-agent-adoption.schema.json"
 GENERATED_AT = "2026-06-07T12:20:00Z"
 FIRST_COMMAND = 'python3 scripts/ope.py setup-engine --goal "add predictions to my app"'
+STRUCTURED_REQUEST_COMMAND = (
+    "python3 scripts/ope.py setup-engine "
+    "--request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request"
+)
+FORECAST_CARD_PREVIEW_COMMAND = (
+    "python3 scripts/ope.py setup-engine "
+    "--request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview"
+)
 
 
 class PredictionAgentAdoptionError(Exception):
@@ -49,6 +57,8 @@ def capability_manifest() -> dict[str, Any]:
         "projectName": "Open Prediction Engine",
         "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
         "firstCommand": FIRST_COMMAND,
+        "structuredRequestCommand": STRUCTURED_REQUEST_COMMAND,
+        "forecastCardPreviewCommand": FORECAST_CARD_PREVIEW_COMMAND,
         "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
         "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
         "helpsWith": [
@@ -179,7 +189,7 @@ def compact_entry_points() -> list[dict[str, Any]]:
             "setup_engine",
             FIRST_COMMAND,
             "json",
-            "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries.",
+            "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, forecast-card preview shape, host-wrapper shape, and claim boundaries.",
         ),
         entry_point(
             "prediction_goal_catalog",
@@ -256,6 +266,11 @@ def adoption_evaluation() -> dict[str, Any]:
                 "find_first_command",
                 "python3 scripts/ope.py setup-engine --goal <host prediction goal>",
                 "Agent can identify the first command without reading the whole README.",
+            ),
+            adoption_check(
+                "use_structured_setup_request",
+                STRUCTURED_REQUEST_COMMAND,
+                "Agent can pass decision context, outcome, horizon, source hints, and safety flags when app context exists.",
             ),
             adoption_check(
                 "read_capabilities",

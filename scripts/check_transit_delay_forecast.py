@@ -3,7 +3,15 @@
 
 from __future__ import annotations
 
-from run_transit_delay_forecast import default_records
+from run_transit_delay_forecast import (
+    DEFAULT_TRIP_UPDATES,
+    EVENT_THRESHOLD,
+    LATE_SECONDS,
+    MIN_OBSERVATIONS,
+    default_records,
+    load_rows,
+    resolve_trip_updates,
+)
 
 
 class Args:
@@ -42,6 +50,29 @@ def main() -> None:
         raise AssertionError("fixture forecast should score with positive baseline lift")
     if summary["qualityClaim"]["status"] != "not_enough_resolved_transit_delay_outcomes":
         raise AssertionError("transit delay prototype must keep quality claim blocked")
+    if records["summary"]["resolution"]["outOfWindowRowCount"] != 0:
+        raise AssertionError("fixture trip updates should all be captured inside the resolution window")
+
+    rows = load_rows(DEFAULT_TRIP_UPDATES)
+    late_capture_rows = [{**row, "captured_at": "2026-06-11T08:38:00Z"} for row in rows]
+    late_capture = resolve_trip_updates(
+        late_capture_rows,
+        Args.network,
+        Args.geography,
+        Args.service_window,
+        Args.service_date,
+        LATE_SECONDS,
+        EVENT_THRESHOLD,
+        MIN_OBSERVATIONS,
+        horizon_start=Args.horizon_start,
+        resolve_at=Args.resolve_at,
+    )
+    if late_capture["status"] != "ambiguous" or late_capture["outcome"] is not None:
+        raise AssertionError("rows captured a day after resolveAt must not resolve the question")
+    if late_capture["outOfWindowRowCount"] != len(rows) or late_capture["observationCount"] != 0:
+        raise AssertionError("rows captured outside the resolution window must be excluded from the late ratio")
+    if "outside the resolution window" not in late_capture["reason"]:
+        raise AssertionError("ambiguous late-capture resolution should explain the window exclusion")
     print("checked transit delay forecast prototype")
 
 

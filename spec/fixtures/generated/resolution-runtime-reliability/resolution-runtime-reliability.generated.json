@@ -131,6 +131,32 @@
       }
     },
     {
+      "failureClass": "late_capture_window",
+      "failureCategory": "coverage",
+      "runtimeStages": [
+        "resolver_attempt",
+        "resolution_outcome_capture"
+      ],
+      "retryable": false,
+      "retryAfter": null,
+      "nextAction": "provide_window_capture",
+      "sanitizedDiagnostic": "The outcome capture happened too long after the scheduled resolution time to contain the forecast window's trips.",
+      "safeSignals": [
+        "capture_after_resolve_window",
+        "stale_capture_window",
+        "run_marked_blocked"
+      ],
+      "rawDiagnosticsExposed": false,
+      "stackTraceExposed": false,
+      "absolutePathsExposed": false,
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "createsScoringRecords": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
       "failureClass": "resolver_failures",
       "failureCategory": "resolver",
       "runtimeStages": [

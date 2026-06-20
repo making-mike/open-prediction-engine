@@ -289,6 +289,8 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "prediction-goal-catalog.schema.json"
     if name.endswith("setup-engine.generated.json"):
         return spec_root / "setup-engine.schema.json"
+    if "setup-engine-requests" in parts and name.endswith("-request.json"):
+        return spec_root / "setup-engine-request.schema.json"
     if name.endswith("agent-integration.generated.json"):
         return spec_root / "agent-integration.schema.json"
     if name.endswith("prediction-feature-setup.generated.json"):
@@ -301,6 +303,10 @@ def schema_for(path: Path, spec_root: Path = SPEC) -> Path | None:
         return spec_root / "pilot-findings.schema.json"
     if name.endswith("pilot-supervision-status.generated.json"):
         return spec_root / "pilot-supervision-status.schema.json"
+    if name.endswith("pilot-session-brief.generated.json"):
+        return spec_root / "pilot-session-brief.schema.json"
+    if name.endswith("pilot-summary-review.generated.json"):
+        return spec_root / "pilot-summary-review.schema.json"
     if name.endswith("simulated-agent-pilot.generated.json"):
         return spec_root / "simulated-agent-pilot.schema.json"
     if name.endswith("generated-runtime-types-decision.generated.json"):

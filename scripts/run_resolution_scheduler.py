@@ -138,6 +138,8 @@ def scheduler_action(job: dict[str, Any], execute_due: bool) -> str:
         return "campaign_resolver_attempt_ready"
     if status == "pending_due":
         return "resolver_execute_requested" if execute_due else "due_waiting_for_execute_flag"
+    if status == "stale_due":
+        return "provide_window_capture"
     if status == "pending_not_due":
         return "wait_until_due"
     if status == "already_resolved":

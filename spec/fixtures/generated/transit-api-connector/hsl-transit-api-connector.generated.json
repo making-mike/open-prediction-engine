@@ -94,6 +94,7 @@
     "Live HSL capture is opt-in and writes only to the ignored local workspace.",
     "The stdlib decoder can derive delay rows through an opt-in static GTFS schedule join.",
     "HSL TripUpdates can provide predicted stop times without explicit delay fields; deriving delay seconds then requires --schedule-join and the companion static GTFS package.",
+    "Decoded rows are stamped with the observed GTFS trip start date; a requested service date filters rows out instead of restamping them.",
     "Decoded live rows are source handoff inputs, not forecast or quality claims."
   ]
 }

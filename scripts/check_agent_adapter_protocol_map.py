@@ -125,12 +125,23 @@ def main() -> None:
         "setup-engine operation should bind setup_engine records",
     )
     setup_fields = {item["name"]: item for item in setup_engine["inputFields"]}
-    require({"goal", "view", "maxBytes", "callerIntent"} == set(setup_fields), "setup-engine should expose only goal, view, maxBytes, and callerIntent")
+    require(
+        {"goal", "setupEngineRequest", "view", "maxBytes", "callerIntent"} == set(setup_fields),
+        "setup-engine should expose goal, setupEngineRequest, view, maxBytes, and callerIntent",
+    )
     require(setup_fields["goal"]["type"] == "string", "setup-engine goal should be a string argument")
+    require(
+        setup_fields["setupEngineRequest"]["type"] == "path-or-json-object",
+        "setup-engine request should accept a path or JSON object",
+    )
     require(setup_fields["view"]["type"] == "string", "setup-engine view should be a string argument")
     require(
         "candidate contracts" in setup_engine["usageGuidance"],
         "setup-engine guidance should name candidate contracts",
+    )
+    require(
+        "forecast-card preview" in setup_engine["usageGuidance"],
+        "setup-engine guidance should name forecast-card preview shape",
     )
     adapter_runbook = operations["private_setup_adapter_runbook"]
     require(

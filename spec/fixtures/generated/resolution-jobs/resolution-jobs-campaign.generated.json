@@ -73,6 +73,35 @@
     },
     {
       "resolutionJobId": "resolutionjob-003",
+      "jobStatus": "stale_due",
+      "due": true,
+      "target": {
+        "forwardRunId": "transitdelayforwardrun-001",
+        "forecastId": "forecast-1201",
+        "questionId": "question-1201",
+        "runStatus": "forecast_recorded",
+        "statePath": ".ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json",
+        "resolveAt": "2026-06-09T08:00:00Z",
+        "serviceDate": "2026-06-09",
+        "serviceWindow": "morning_peak"
+      },
+      "agentAction": {
+        "recommendedAction": "provide_window_capture",
+        "reason": "resolveAt 2026-06-09T08:00:00Z was exceeded by more than the capture-lag tolerance; a live capture cannot contain the forecast window's trips; executing this run marks it blocked with reason stale_capture_window instead of resolving",
+        "commands": [
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json",
+          "python3 scripts/ope.py resolve-due-forward-runs --live --run-state .ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json --execute --download-static-gtfs"
+        ]
+      },
+      "claimBoundary": {
+        "createsForecastArtifacts": false,
+        "createsResolutionArtifacts": false,
+        "normalChecksUseLiveNetwork": false,
+        "calibrationClaimAllowed": false
+      }
+    },
+    {
+      "resolutionJobId": "resolutionjob-004",
       "jobStatus": "already_resolved",
       "due": true,
       "target": {
@@ -100,7 +129,7 @@
       }
     },
     {
-      "resolutionJobId": "resolutionjob-004",
+      "resolutionJobId": "resolutionjob-005",
       "jobStatus": "pending_not_due",
       "due": false,
       "target": {
@@ -134,8 +163,9 @@
     }
   ],
   "summary": {
-    "jobCount": 4,
+    "jobCount": 5,
     "pendingDueCount": 1,
+    "staleDueCount": 1,
     "pendingNotDueCount": 2,
     "alreadyResolvedCount": 1,
     "invalidCount": 0

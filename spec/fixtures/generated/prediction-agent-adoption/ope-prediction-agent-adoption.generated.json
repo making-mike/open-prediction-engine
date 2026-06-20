@@ -8,6 +8,8 @@
     "projectName": "Open Prediction Engine",
     "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
     "firstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+    "structuredRequestCommand": "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request",
+    "forecastCardPreviewCommand": "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview",
     "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
     "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
     "helpsWith": [
@@ -115,7 +117,7 @@
       "entryKey": "setup_engine",
       "command": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
       "defaultFormat": "json",
-      "purpose": "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries.",
+      "purpose": "Turn a host prediction goal into candidate contracts, source roles, baseline guidance, forecast-card preview shape, host-wrapper shape, and claim boundaries.",
       "mutatesState": false
     },
     {
@@ -226,6 +228,12 @@
         "checkKey": "find_first_command",
         "command": "python3 scripts/ope.py setup-engine --goal <host prediction goal>",
         "expected": "Agent can identify the first command without reading the whole README.",
+        "blocksAdoptionIfMissing": true
+      },
+      {
+        "checkKey": "use_structured_setup_request",
+        "command": "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request",
+        "expected": "Agent can pass decision context, outcome, horizon, source hints, and safety flags when app context exists.",
         "blocksAdoptionIfMissing": true
       },
       {

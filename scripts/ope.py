@@ -1515,7 +1515,9 @@ def cmd_agent_integrate(args: argparse.Namespace) -> None:
 
 def cmd_setup_engine(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_setup_engine.py"]
-    if args.goal:
+    if args.request:
+        command.extend(["--request", str(args.request)])
+    elif args.goal:
         command.extend(["--goal", args.goal])
     if args.view:
         command.extend(["--view", args.view])
@@ -2178,12 +2180,38 @@ def cmd_pilot_session_packet(args: argparse.Namespace) -> None:
     run(command)
 
 
+def cmd_pilot_session_brief(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_session_brief.py"]
+    if args.task:
+        command.extend(["--task", args.task])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
 def cmd_pilot_summary_intake(args: argparse.Namespace) -> None:
     command = [sys.executable, "scripts/generate_pilot_summary_intake.py"]
     if args.input:
         command.extend(["--input", args.input])
     if args.case:
         command.extend(["--case", args.case])
+    if args.section:
+        command.extend(["--section", args.section])
+    if args.check:
+        command.append("--check")
+    if args.write:
+        command.append("--write")
+    run(command)
+
+
+def cmd_pilot_summary_review(args: argparse.Namespace) -> None:
+    command = [sys.executable, "scripts/generate_pilot_summary_review.py"]
+    if args.input:
+        command.extend(["--input", args.input])
     if args.section:
         command.extend(["--section", args.section])
     if args.check:
@@ -2598,6 +2626,8 @@ def cmd_agent_call(args: argparse.Namespace) -> None:
         command.extend(["--scenario", args.scenario])
     if args.goal:
         command.extend(["--goal", args.goal])
+    if args.setup_engine_request:
+        command.extend(["--setup-engine-request", str(args.setup_engine_request)])
     if args.setup_engine_view:
         command.extend(["--view", args.setup_engine_view])
     if args.guided_case:
@@ -3469,13 +3499,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="host prediction goal to turn into candidate contracts and source roles",
     )
     setup_engine.add_argument(
+        "--request",
+        help="structured setup-engine request JSON with host app context",
+    )
+    setup_engine.add_argument(
         "--view",
         choices=[
             "full",
             "summary",
+            "request",
             "contracts",
             "sources",
             "baseline",
+            "forecast-card-preview",
             "host-wrapper",
             "claim-boundary",
             "examples",
@@ -4581,6 +4617,44 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pilot_session_packet.set_defaults(func=cmd_pilot_session_packet)
 
+    pilot_session_brief = subparsers.add_parser(
+        "pilot-session-brief",
+        help="check, refresh, or print the joined moderator brief for one supervised pilot session",
+    )
+    pilot_session_brief.add_argument(
+        "--task",
+        choices=["engine_setup_shortcut_comprehension"],
+        help="checked pilot task to brief",
+    )
+    pilot_session_brief.add_argument(
+        "--section",
+        choices=[
+            "summary",
+            "task",
+            "guidance",
+            "preflight",
+            "participant",
+            "runbook",
+            "draft",
+            "commands",
+            "safety",
+            "boundary",
+            "warnings",
+        ],
+        help="print one pilot session brief section",
+    )
+    pilot_session_brief.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot session brief drift",
+    )
+    pilot_session_brief.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot session brief",
+    )
+    pilot_session_brief.set_defaults(func=cmd_pilot_session_brief)
+
     pilot_summary_intake = subparsers.add_parser(
         "pilot-summary-intake",
         help="check, refresh, or print the sanitized pilot-summary intake classifier",
@@ -4617,6 +4691,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="refresh generated pilot summary intake",
     )
     pilot_summary_intake.set_defaults(func=cmd_pilot_summary_intake)
+
+    pilot_summary_review = subparsers.add_parser(
+        "pilot-summary-review",
+        help="check, refresh, or print a read-only review for one sanitized pilot summary",
+    )
+    pilot_summary_review.add_argument(
+        "--input",
+        help="sanitized pilot summary JSON file to review without writing pilot evidence",
+    )
+    pilot_summary_review.add_argument(
+        "--section",
+        choices=[
+            "summary",
+            "classification",
+            "append-plan",
+            "decision",
+            "commands",
+            "boundary",
+            "warnings",
+        ],
+        help="print one pilot summary review section",
+    )
+    pilot_summary_review.add_argument(
+        "--check",
+        action="store_true",
+        help="check generated pilot summary review drift",
+    )
+    pilot_summary_review.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh generated pilot summary review",
+    )
+    pilot_summary_review.set_defaults(func=cmd_pilot_summary_review)
 
     pilot_summary_template = subparsers.add_parser(
         "pilot-summary-template",
@@ -5296,13 +5403,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="host prediction goal for setup_engine agent-call readbacks",
     )
     agent_call.add_argument(
+        "--setup-engine-request",
+        help="structured setup-engine request JSON for setup_engine agent-call readbacks",
+    )
+    agent_call.add_argument(
         "--view",
         choices=[
             "full",
             "summary",
+            "request",
             "contracts",
             "sources",
             "baseline",
+            "forecast-card-preview",
             "host-wrapper",
             "claim-boundary",
             "examples",

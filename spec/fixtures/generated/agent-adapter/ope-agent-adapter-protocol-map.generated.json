@@ -2678,11 +2678,18 @@
           "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
         },
         {
+          "name": "setupEngineRequest",
+          "required": false,
+          "type": "path-or-json-object",
+          "source": "agent-call --setup-engine-request or MCP setupEngineRequest",
+          "notes": "Structured setup request with decision context, outcome, horizon, source hints, resolution hints, and safety flags."
+        },
+        {
           "name": "view",
           "required": false,
           "type": "string",
           "source": "agent-call --view",
-          "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+          "notes": "Focused setup-engine view: full, summary, request, contracts, sources, baseline, forecast-card-preview, host-wrapper, claim-boundary, or examples."
         },
         {
           "name": "maxBytes",
@@ -2702,7 +2709,7 @@
       "outputEnvelopeSchema": "spec/agent-envelope.schema.json",
       "localCli": {
         "implemented": true,
-        "command": "python3 scripts/ope.py agent-call --operation setup_engine --goal \"add predictions to my app\"",
+        "command": "python3 scripts/ope.py agent-call --operation setup_engine --setup-engine-request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
         "exitCodeSource": "agentEnvelope.exitCode"
       },
       "mcp": {
@@ -2717,11 +2724,18 @@
             "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
           },
           {
+            "name": "setupEngineRequest",
+            "required": false,
+            "type": "path-or-json-object",
+            "source": "agent-call --setup-engine-request or MCP setupEngineRequest",
+            "notes": "Structured setup request with decision context, outcome, horizon, source hints, resolution hints, and safety flags."
+          },
+          {
             "name": "view",
             "required": false,
             "type": "string",
             "source": "agent-call --view",
-            "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+            "notes": "Focused setup-engine view: full, summary, request, contracts, sources, baseline, forecast-card-preview, host-wrapper, claim-boundary, or examples."
           },
           {
             "name": "maxBytes",
@@ -2740,7 +2754,7 @@
         ],
         "returns": "spec/agent-envelope.schema.json",
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
-        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, structured setup request, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
       },
       "http": {
         "implemented": false,
@@ -2755,11 +2769,18 @@
             "notes": "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal."
           },
           {
+            "name": "setupEngineRequest",
+            "required": false,
+            "type": "path-or-json-object",
+            "source": "agent-call --setup-engine-request or MCP setupEngineRequest",
+            "notes": "Structured setup request with decision context, outcome, horizon, source hints, resolution hints, and safety flags."
+          },
+          {
             "name": "view",
             "required": false,
             "type": "string",
             "source": "agent-call --view",
-            "notes": "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples."
+            "notes": "Focused setup-engine view: full, summary, request, contracts, sources, baseline, forecast-card-preview, host-wrapper, claim-boundary, or examples."
           },
           {
             "name": "maxBytes",
@@ -2809,7 +2830,7 @@
           }
         ],
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
-        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, structured setup request, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
       },
       "queue": {
         "implemented": false,
@@ -2823,9 +2844,9 @@
           "agentEnvelopeId"
         ],
         "approvalGate": "Read, validation, and status operations should remain approval-free unless caller policy marks the record sensitive.",
-        "credentialBoundary": "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+        "credentialBoundary": "Setup-engine tool arguments accept only goal, structured setup request, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
       },
-      "usageGuidance": "Use first when an agent has a host prediction goal and needs candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before building a host risk engine.",
+      "usageGuidance": "Use first for a host prediction goal or structured setup request that needs candidate contracts, source roles, baseline guidance, forecast-card preview, host-wrapper shape, and claim boundaries before a host risk engine.",
       "warnings": [
         "The local MCP stdio scaffold must preserve the envelope schema, exitCode, status, warnings, and recordBinding fields.",
         "HTTP and queue mappings are not implemented runtimes."

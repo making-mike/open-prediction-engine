@@ -61,7 +61,7 @@
     "forecast precipitation 8.5 mm",
     "resolution source excluded from forecast-time evidence"
   ],
-  "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-10 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
+  "resolutionCriteria": "Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for hsl-surface in helsinki during morning_peak on 2026-06-10 include at least 10 eligible trip-stop observations and at least 20% have delay_seconds >= 300. Eligible observations must carry the observed service date and window of the question scope and must be captured between the horizon start and 60 minutes after the scheduled resolution time. Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails.",
   "resolutionSource": {
     "sourceId": "source-1203",
     "name": "Transit Delay Outcome File",

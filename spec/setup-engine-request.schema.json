@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/setup-engine-request.schema.json",
+  "title": "Setup Engine Request",
+  "description": "Checked structured input shape for agents asking OPE to set up a prediction engine from host app context.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "setupEngineRequestId",
+    "goal",
+    "decisionContext",
+    "outcome",
+    "horizon",
+    "sourceHints",
+    "resolutionHint",
+    "baselineHint",
+    "executionBoundary"
+  ],
+  "properties": {
+    "setupEngineRequestId": { "$ref": "common.schema.json#/$defs/id" },
+    "goal": { "type": "string", "minLength": 3, "maxLength": 220 },
+    "decisionContext": { "$ref": "#/$defs/decisionContext" },
+    "outcome": { "$ref": "#/$defs/outcome" },
+    "horizon": { "$ref": "#/$defs/horizon" },
+    "sourceHints": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/sourceHint" }
+    },
+    "resolutionHint": { "$ref": "#/$defs/resolutionHint" },
+    "baselineHint": { "$ref": "#/$defs/baselineHint" },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" }
+  },
+  "$defs": {
+    "decisionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decisionToSupport", "stakeholderAction", "operatingWindow"],
+      "properties": {
+        "decisionToSupport": { "type": "string", "minLength": 12, "maxLength": 220 },
+        "stakeholderAction": { "type": "string", "minLength": 12, "maxLength": 220 },
+        "operatingWindow": { "type": "string", "minLength": 6, "maxLength": 160 }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcomeName", "outcomeType", "threshold", "positiveClass"],
+      "properties": {
+        "outcomeName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "outcomeType": {
+          "type": "string",
+          "enum": ["binary_threshold", "categorical", "numeric_threshold"]
+        },
+        "threshold": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "positiveClass": { "type": "string", "minLength": 3, "maxLength": 120 }
+      }
+    },
+    "horizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forecastWindow", "closeTimePolicy", "resolutionDeadlinePolicy"],
+      "properties": {
+        "forecastWindow": { "type": "string", "minLength": 6, "maxLength": 160 },
+        "closeTimePolicy": { "type": "string", "minLength": 12, "maxLength": 220 },
+        "resolutionDeadlinePolicy": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "sourceHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roleName",
+        "sourceKind",
+        "sourceRef",
+        "approvalStatus",
+        "containsCredentialValue",
+        "containsRawPrivateRows",
+        "containsRawSql",
+        "nextAction"
+      ],
+      "properties": {
+        "roleName": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "sourceKind": {
+          "type": "string",
+          "enum": [
+            "local_file",
+            "source_adapter_output",
+            "auto_evidence_connector",
+            "manual_mapping",
+            "source_manifest",
+            "source_binding",
+            "credential_reference",
+            "private_api",
+            "database",
+            "manual_upload"
+          ]
+        },
+        "sourceRef": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "approvalStatus": {
+          "type": "string",
+          "enum": ["approved_reference", "needs_approval", "blocked_raw_payload"]
+        },
+        "containsCredentialValue": { "type": "boolean" },
+        "containsRawPrivateRows": { "type": "boolean" },
+        "containsRawSql": { "type": "boolean" },
+        "nextAction": { "type": "string", "minLength": 12, "maxLength": 220 }
+      }
+    },
+    "resolutionHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolutionSourceRef", "resolutionRule", "scoringReady"],
+      "properties": {
+        "resolutionSourceRef": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "resolutionRule": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "scoringReady": { "type": "boolean" }
+      }
+    },
+    "baselineHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historicalOutcomeAvailable", "minimumComparableRowsKnown", "suggestedBaseline", "benchmarkNotes"],
+      "properties": {
+        "historicalOutcomeAvailable": { "type": "boolean" },
+        "minimumComparableRowsKnown": { "type": "boolean" },
+        "suggestedBaseline": { "type": "string", "minLength": 12, "maxLength": 220 },
+        "benchmarkNotes": { "type": "string", "minLength": 12, "maxLength": 260 }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestsForecastArtifacts",
+        "requestsLiveFetch",
+        "containsCredentialValues",
+        "containsRawPrivateRows",
+        "containsRawSql",
+        "allowsSourceReads",
+        "writesLocalState"
+      ],
+      "properties": {
+        "requestsForecastArtifacts": { "type": "boolean" },
+        "requestsLiveFetch": { "type": "boolean" },
+        "containsCredentialValues": { "type": "boolean" },
+        "containsRawPrivateRows": { "type": "boolean" },
+        "containsRawSql": { "type": "boolean" },
+        "allowsSourceReads": { "type": "boolean" },
+        "writesLocalState": { "type": "boolean" }
+      }
+    }
+  }
+}

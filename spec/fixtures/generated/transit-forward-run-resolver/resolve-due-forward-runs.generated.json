@@ -6,8 +6,8 @@
   "workspace": "fixture://transit-forward-run-resolver",
   "now": "2026-06-10T08:30:00Z",
   "scanSummary": {
-    "scannedCount": 3,
-    "dueCount": 1,
+    "scannedCount": 4,
+    "dueCount": 2,
     "notDueCount": 1,
     "alreadyResolvedCount": 1,
     "invalidCount": 0,
@@ -54,6 +54,26 @@
       ]
     },
     {
+      "runStatus": "forecast_recorded",
+      "resolveAt": "2026-06-09T08:00:00Z",
+      "forecastId": "forecast-1201",
+      "questionId": "question-1201",
+      "serviceDate": "2026-06-09",
+      "serviceWindow": "morning_peak",
+      "statePath": ".ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json",
+      "decision": "due_stale_capture",
+      "due": true,
+      "command": "python3 scripts/ope.py transit-delay-forward-run --phase resolve --run-state .ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json",
+      "executionResult": {
+        "status": "not_run",
+        "exitCode": 0
+      },
+      "notes": [
+        "resolveAt 2026-06-09T08:00:00Z was exceeded by more than the capture-lag tolerance; a live capture cannot contain the forecast window's trips",
+        "executing this run marks it blocked with reason stale_capture_window instead of resolving"
+      ]
+    },
+    {
       "runStatus": "scored",
       "resolveAt": "2026-06-09T08:00:00Z",
       "forecastId": "forecast-1201",
@@ -87,6 +107,7 @@
     "Default and check modes are offline fixture scans; live workspace scanning requires --live.",
     "Dry-run decisions do not fetch outcome sources or create resolution records.",
     "Executing a due run calls the checked transit-delay-forward-run resolver and may fetch HSL TripUpdates.",
+    "Due runs past the capture-lag tolerance are marked blocked by the resolver instead of resolving from a stale live snapshot.",
     "Resolved runs still do not create a calibration claim by themselves."
   ]
 }

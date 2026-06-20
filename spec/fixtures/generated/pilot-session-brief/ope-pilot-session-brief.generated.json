@@ -1,0 +1,234 @@
+{
+  "pilotSessionBriefId": "pilotsessionbrief-001",
+  "generatedAt": "2026-06-11T09:00:00Z",
+  "briefStatus": "ready_for_supervised_session",
+  "sourceRecords": {
+    "pilotSessionPacketId": "pilotsessionpacket-001",
+    "agentGuidanceId": "agentguidance-001",
+    "pilotSummaryTemplateId": "pilotsummarytemplate-001",
+    "pilotSupervisionStatusId": "pilotsupervisionstatus-001"
+  },
+  "recommendedTask": {
+    "taskId": "agentpilottask-006",
+    "scenarioKey": "engine_setup_shortcut_comprehension",
+    "title": "Domain-agnostic setup-engine shortcut comprehension",
+    "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+    "taskCommand": "python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+    "expectedOutcomeClass": "setup_engine_shortcut_readback",
+    "measures": [
+      "task_completion",
+      "engine_setup_shortcut_comprehension",
+      "ope_host_responsibility_split",
+      "parallel_risk_engine_avoidance",
+      "claim_boundary_comprehension"
+    ],
+    "claimBoundaryRequired": true
+  },
+  "genericAgentGuidance": {
+    "flowStatus": "checked_domain_agnostic_setup_flow",
+    "clarificationQuestions": [
+      "What decision will this prediction support in the host app?",
+      "What exact future outcome, threshold, entity scope, and horizon should resolve the forecast?",
+      "Which approved source references can provide forecast-time evidence?",
+      "Which approved historical source can define the baseline before stronger methods are considered?",
+      "Which resolution source will confirm the outcome after the forecast window closes?"
+    ],
+    "safeNextCommands": [
+      "python3 scripts/ope.py setup-engine --goal \"<host prediction goal>\"",
+      "python3 scripts/ope.py prediction-goal-catalog --view examples",
+      "python3 scripts/ope.py agent-guide --section instructions"
+    ],
+    "keepsHelsinkiAsExample": true
+  },
+  "moderatorPreflight": [
+    {
+      "checkKey": "open_checked_task",
+      "order": 1,
+      "instruction": "Open the checked task card for engine_setup_shortcut_comprehension before the session starts.",
+      "required": true
+    },
+    {
+      "checkKey": "use_generic_agent_guide",
+      "order": 2,
+      "instruction": "Keep the domain-agnostic agent guide visible so the participant asks reusable setup questions first.",
+      "required": true
+    },
+    {
+      "checkKey": "confirm_no_private_payloads",
+      "order": 3,
+      "instruction": "Confirm the session will not capture raw transcripts, private rows, credentials, prompt logs, or identity.",
+      "required": true
+    },
+    {
+      "checkKey": "prepare_nonledger_draft",
+      "order": 4,
+      "instruction": "Prepare a local summary draft from the checked template, but leave it outside checked fixtures.",
+      "required": true
+    },
+    {
+      "checkKey": "confirm_claim_boundary",
+      "order": 5,
+      "instruction": "Remind the participant that usability evidence does not upgrade forecast quality, calibration, or hosted runtime claims.",
+      "required": true
+    }
+  ],
+  "participantBrief": [
+    "Use OPE setup readbacks before proposing a custom prediction engine.",
+    "Explain which parts OPE owns: forecast contracts, source roles, baseline policy, forecast cards, resolver/scorer boundaries, and calibration gates.",
+    "Explain which parts the host app owns: UI, approved source connections, runtime invocation, notifications, and optional method extensions.",
+    "Run or inspect the checked task command: python3 scripts/ope.py setup-engine --goal \"add stockout-risk prediction to an inventory app\"",
+    "Do not paste raw private data, credentials, prompt logs, or participant identity into the summary."
+  ],
+  "sessionRunbook": [
+    {
+      "stepKey": "start_from_generic_questions",
+      "order": 1,
+      "instruction": "Ask the participant to identify the decision, outcome, horizon, source refs, baseline, and resolution source.",
+      "expectedOutput": "The participant narrows the host prediction goal before implementation advice."
+    },
+    {
+      "stepKey": "observe_setup_engine_first",
+      "order": 2,
+      "instruction": "Watch whether the participant uses setup-engine or equivalent OPE setup readbacks before proposing app logic.",
+      "expectedOutput": "Setup-engine-first, parallel-risk-engine, or audit-layer-only behavior can be classified."
+    },
+    {
+      "stepKey": "capture_responsibility_split",
+      "order": 3,
+      "instruction": "Ask the participant to distinguish OPE-owned records from host-owned UI/source/runtime work.",
+      "expectedOutput": "The summary can record OPE-host responsibility comprehension without raw transcript text."
+    },
+    {
+      "stepKey": "score_and_sanitize",
+      "order": 4,
+      "instruction": "Score measured dimensions, record sanitized findings, choose friction classes, and run the sanitization checklist.",
+      "expectedOutput": "Only sanitized ratings and findings are ready for intake classification."
+    },
+    {
+      "stepKey": "classify_before_append",
+      "order": 5,
+      "instruction": "Classify the filled summary, then append only accepted summaries with explicit --write-local.",
+      "expectedOutput": "Ignored local evidence can update pilot findings only after moderator approval."
+    }
+  ],
+  "summaryDraft": {
+    "draftSummaryId": "pilotsummaryinput-999",
+    "draftClassifiesAs": "needs_redaction",
+    "draftLedgerReady": false,
+    "draftContributesRealSessionEvidence": false,
+    "printCommand": "python3 scripts/ope.py pilot-summary-template --section draft",
+    "classificationCommand": "python3 scripts/ope.py pilot-summary-intake --input <summary.json>"
+  },
+  "commandSequence": [
+    {
+      "stepKey": "open_brief",
+      "order": 1,
+      "command": "python3 scripts/ope.py pilot-session-brief",
+      "expectedOperatorAction": "Open the joined moderator brief before the supervised session.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "open_agent_guide",
+      "order": 2,
+      "command": "python3 scripts/ope.py agent-guide --section generic",
+      "expectedOperatorAction": "Keep reusable setup questions visible during the session.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "open_task_packet",
+      "order": 3,
+      "command": "python3 scripts/ope.py pilot-session-packet --task engine_setup_shortcut_comprehension",
+      "expectedOperatorAction": "Open the checked task card for engine_setup_shortcut_comprehension.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "print_summary_draft",
+      "order": 4,
+      "command": "python3 scripts/ope.py pilot-summary-template --section draft",
+      "expectedOperatorAction": "Fill the draft locally after the session; do not commit the filled summary.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "classify_summary",
+      "order": 5,
+      "command": "python3 scripts/ope.py pilot-summary-intake --input <summary.json>",
+      "expectedOperatorAction": "Classify the filled sanitized summary without writing a ledger row.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "append_local_evidence",
+      "order": 6,
+      "command": "python3 scripts/ope.py pilot-evidence --input-summary <summary.json> --write-local",
+      "expectedOperatorAction": "Append only accepted sanitized summaries after explicit moderator approval.",
+      "mutatesLocalState": true
+    },
+    {
+      "stepKey": "review_findings",
+      "order": 7,
+      "command": "python3 scripts/ope.py pilot-findings --from-local-ledger --section summary",
+      "expectedOperatorAction": "Review ignored local pilot findings after append.",
+      "mutatesLocalState": false
+    },
+    {
+      "stepKey": "review_status",
+      "order": 8,
+      "command": "python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary",
+      "expectedOperatorAction": "Confirm remaining real-session count and blocked claim boundaries.",
+      "mutatesLocalState": false
+    }
+  ],
+  "evidenceSafety": {
+    "sanitizationCheckCount": 7,
+    "requiredPassCount": 7,
+    "explicitWriteRequired": true,
+    "localLedgerPath": ".ope/live/pilot-evidence/pilot-evidence-ledger.json",
+    "blockedInputs": [
+      "raw_transcripts",
+      "recordings",
+      "prompt_logs",
+      "private_rows",
+      "credential_values",
+      "participant_identity",
+      "claim_overreach"
+    ]
+  },
+  "executionBoundary": {
+    "readOnlyBrief": true,
+    "runsPilotSessions": false,
+    "writesCheckedFixtures": false,
+    "writesIgnoredLocalLedger": false,
+    "recordsRawTranscripts": false,
+    "storesPrivateData": false,
+    "storesCredentials": false,
+    "storesPromptLogs": false,
+    "storesParticipantIdentity": false,
+    "createsForecastArtifacts": false,
+    "unblocksExpansion": false,
+    "qualityClaimsUpgraded": false,
+    "calibrationClaimsUpgraded": false,
+    "hostedRuntimeUnblocked": false,
+    "generatedTypesUnblocked": false
+  },
+  "warnings": [
+    "This brief does not run a pilot session or write evidence.",
+    "Filled summaries must stay outside checked fixtures and pass pilot-summary-intake before append.",
+    "Only explicit --write-local can append accepted sanitized summaries to the ignored local ledger.",
+    "Pilot usability evidence does not upgrade forecast quality, calibration, hosted runtime, generated-type, or expansion claims."
+  ],
+  "summary": {
+    "briefStatus": "ready_for_supervised_session",
+    "recommendedScenarioKey": "engine_setup_shortcut_comprehension",
+    "recommendedTaskId": "agentpilottask-006",
+    "genericAgentGuidanceReady": true,
+    "summaryDraftReady": true,
+    "draftClassifiesAs": "needs_redaction",
+    "draftLedgerReady": false,
+    "realSessionsRecorded": 0,
+    "ledgerRowsWritten": 0,
+    "qualityClaimAllowed": false,
+    "calibrationClaimAllowed": false,
+    "hostedRuntimeAllowed": false,
+    "generatedTypesEvidenceReady": false,
+    "expansionEvidenceReady": false
+  }
+}

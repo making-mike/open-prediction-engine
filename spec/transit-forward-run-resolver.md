@@ -2,7 +2,7 @@
 
 Status: checked local resolver-agent scan; optional live execution remains explicit.
 
-Last reviewed: 2026-05-26.
+Last reviewed: 2026-06-11.
 
 This contract describes the local programmatic resolver for weather-transit-delay forward runs. It does not invent resolution logic. It scans saved `forward-run-state.json` files, classifies each run, and can call the checked `transit-delay-forward-run --phase resolve` command for runs that are due.
 
@@ -53,8 +53,9 @@ python3 scripts/ope.py resolution-scheduler --live --watch --poll-seconds 60
 The resolver emits one decision per state:
 
 - `due_pending`: the run is still `forecast_recorded` and `now >= resolveAt`
+- `due_stale_capture`: the run is due, but `now` is more than the capture-lag tolerance past `resolveAt`, so a live snapshot can no longer contain the forecast window's trips; executing it marks the run `blocked` with reason `stale_capture_window` instead of resolving
 - `not_due`: the run is still pending but the resolution time is in the future
-- `already_resolved`: the run is already `resolved`, `scored`, or `ambiguous`
+- `already_resolved`: the run is already `resolved`, `scored`, `ambiguous`, or `blocked`
 - `executed`: the resolver command completed and rewrote the state
 - `failed`: the resolver command failed and should be retried after inspection
 - `invalid_state`: the state file cannot be parsed into a resolvable forward-run state

@@ -14,7 +14,7 @@ from generate_prediction_campaign_forecast_artifact import (
 )
 from generate_prediction_campaign_forecast_creation import build_prediction_campaign_forecast_creation
 from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
-from generate_prediction_campaign_runner import build_prediction_campaign_runner
+from generate_prediction_campaign_runner import build_prediction_campaign_runner, parse_utc
 from ope_schema import SPEC, validate_record
 from ope_fixtures import compact_json, render_json, validate_and_emit
 from prediction_campaign_forecast_write_runtime import (
@@ -94,15 +94,18 @@ def build_prediction_campaign_forecast_write(
     if runner is None:
         runner = build_prediction_campaign_runner()
     creation = build_prediction_campaign_forecast_creation(run_id=run_id, manifest=manifest, runner=runner)
-    records = build_prediction_campaign_forecast_artifact(
-        run_id=run_id,
-        creation=creation,
-        pre_calibration=pre_calibration,
-    )
     run = creation["readyRun"]
     bindings = creation["bindings"]
     campaign = manifest["campaign"]
     checked_fixture_run = run["runId"] == "predictionrun-1301" and not embed_source_records
+    records = build_prediction_campaign_forecast_artifact(
+        run_id=run_id,
+        creation=creation,
+        pre_calibration=pre_calibration,
+        forecasted_at=None if checked_fixture_run else runner["forecastSchedule"]["runnerClock"],
+    )
+    forecasted_at_value = records["artifact"]["forecastedAt"]
+    forecast_before_close = parse_utc(forecasted_at_value) <= parse_utc(run["forecastCloseAt"])
     write_suffix = run["runId"].split("-")[-1]
     run_root = f".ope/live/prediction-campaigns/{campaign['campaignId']}/{run['runId']}"
     target_state = {
@@ -192,10 +195,16 @@ def build_prediction_campaign_forecast_write(
         ),
         write_guard(
             3,
-            status="pass",
+            status="pass" if forecast_before_close else "block",
             required=True,
-            blocks=False,
-            message=f"Forecast artifact {run['forecastId']} is forecasted before close time {run['forecastCloseAt']}.",
+            blocks=not forecast_before_close,
+            message=(
+                f"Forecast artifact {run['forecastId']} is forecasted at {forecasted_at_value} "
+                f"before close time {run['forecastCloseAt']}."
+                if forecast_before_close
+                else f"Forecast artifact {run['forecastId']} would be forecasted at {forecasted_at_value} "
+                f"after close time {run['forecastCloseAt']}; record the run as missed instead of backdating."
+            ),
         ),
         write_guard(
             4,
@@ -380,7 +389,18 @@ def main() -> None:
         return
     if args.write_local:
         try:
-            result = execute_local_forecast_write(run_id=args.run_id)
+            if args.run_id:
+                from generate_prediction_campaign_runner import default_args as runner_default_args
+
+                write_args = runner_default_args()
+                write_args.write_local = True
+                result = execute_local_forecast_write(
+                    run_id=args.run_id,
+                    manifest=build_prediction_campaign_manifest(),
+                    runner=build_prediction_campaign_runner(write_args),
+                )
+            else:
+                result = execute_local_forecast_write()
         except PredictionCampaignForecastWriteError as exc:
             raise SystemExit(str(exc)) from exc
         print_write_result(result, args.output_format)

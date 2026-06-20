@@ -10,6 +10,7 @@ Fixtures are split into:
 - `benchmark/`: clean and contaminated benchmark-run fixtures for anti-leakage checks.
 - `methods/`: method registry fixtures for enabled and proposed forecasting methods.
 - `requests/`: controlled request intake fixtures for accepted, blocked, canceled, rejected, and adversarial cases.
+- `setup-engine-requests/`: structured setup-engine request fixtures for accepted source-reference context and blocked unsafe input examples.
 - `generated/`: deterministic reports produced from valid fixtures.
 
 The `invalid/` fixtures may still be valid JSON and may pass an isolated JSON Schema check. They are meant to fail cross-record lifecycle validation, such as:
@@ -155,11 +156,17 @@ The pilot evidence ledger generator emits checked sanitized intake examples unde
 
 The pilot session packet generator emits a checked collection kit under `generated/pilot-session-packet/`, covering task cards, moderator and participant checklists, sanitized evidence templates, sanitization review, and stop conditions without running sessions or writing ledger rows.
 
+The pilot session brief generator emits a checked joined moderator brief under `generated/pilot-session-brief/`, covering the setup-comprehension task, generic agent guidance, non-ledger-ready draft status, and explicit local evidence commands without running sessions or writing evidence.
+
 The pilot summary intake generator emits checked classifier examples under `generated/pilot-summary-intake/`, covering ledger-ready summaries, redaction-needed source details, blocked raw transcripts, blocked private rows, and blocked quality overclaims without writing ledger rows.
+
+The pilot summary review generator emits a checked joined review under `generated/pilot-summary-review/`, covering one sanitized summary file's intake classification, dry-run append eligibility, explicit local append command, findings/status review commands, and non-mutating claim boundary.
 
 The pilot summary template generator emits a checked draft helper under `generated/pilot-summary-template/`, covering a schema-valid but non-ledger-ready draft submission, field guidance, sanitization checklist, and local classify/explicit-append command sequence without writing evidence.
 
 The local usage trace generator emits a checked synthetic trace under `generated/local-usage-trace/`, covering local MVP CLI, agent-call, MCP, blocked-path, release-smoke, and pilot-validation event rows without collecting hosted telemetry.
+
+The setup-engine generator emits a checked front-door readback under `generated/setup-engine/`. Structured request inputs live under `setup-engine-requests/` and cover an accepted source-reference stockout setup plus a blocked raw CRM setup without storing private rows, credential values, raw SQL, or creating forecast artifacts.
 
 The developer adoption surface generator emits a checked onboarding guide under `generated/developer-adoption/`, covering quickstart steps, one complete local setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and deferred generated runtime types.
 

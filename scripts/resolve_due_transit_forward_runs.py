@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import run_transit_delay_forecast as transit_forecast
 import run_transit_delay_forward as forward_run
 from ope_schema import SPEC, validate_record
 from ope_fixtures import check_generated, render_json, write_generated
@@ -106,6 +107,12 @@ def fixture_states() -> list[tuple[str, dict[str, Any]]]:
             "2026-06-11T08:00:00Z",
             "2026-06-11",
             ".ope/live/transit-forward-run/fixture-not-due/forward-run-state.json",
+        ),
+        fixture_state(
+            "forecast_recorded",
+            "2026-06-09T08:00:00Z",
+            "2026-06-09",
+            ".ope/live/transit-forward-run/fixture-stale-due/forward-run-state.json",
         ),
         fixture_state(
             "scored",
@@ -226,7 +233,23 @@ def decide(path: str, state: dict[str, Any], args: argparse.Namespace, now: str)
             "notes": [f"resolveAt {summary['resolveAt']} is still in the future"],
         }
 
+    capture_lag_seconds = int((parse_timestamp(now) - resolve_at).total_seconds())
+    needs_live_capture = not args.trip_updates and not args.input_protobuf
+    stale_capture = needs_live_capture and capture_lag_seconds > transit_forecast.MAX_CAPTURE_LAG_SECONDS
     if not args.execute:
+        if stale_capture:
+            return {
+                **summary,
+                "statePath": path,
+                "decision": "due_stale_capture",
+                "due": True,
+                "command": command,
+                "executionResult": {"status": "not_run", "exitCode": 0},
+                "notes": [
+                    f"resolveAt {summary['resolveAt']} was exceeded by more than the capture-lag tolerance; a live capture cannot contain the forecast window's trips",
+                    "executing this run marks it blocked with reason stale_capture_window instead of resolving",
+                ],
+            }
         return {
             **summary,
             "statePath": path,
@@ -239,6 +262,8 @@ def decide(path: str, state: dict[str, Any], args: argparse.Namespace, now: str)
 
     result = execute_resolver(path, args)
     decision = "executed" if result["status"] == "succeeded" else "failed"
+    if stale_capture:
+        notes.append("capture lag exceeds the tolerance; the checked resolver marks this run blocked instead of resolving")
     if result["status"] == "succeeded":
         notes.append("checked resolver command completed and rewrote the forward-run state")
     else:
@@ -270,7 +295,7 @@ def scan_live_states(args: argparse.Namespace) -> list[tuple[str, dict[str, Any]
 def scan_summary(decisions: list[dict[str, Any]]) -> dict[str, int]:
     return {
         "scannedCount": len(decisions),
-        "dueCount": sum(1 for item in decisions if item["decision"] in {"due_pending", "executed", "failed"}),
+        "dueCount": sum(1 for item in decisions if item["decision"] in {"due_pending", "due_stale_capture", "executed", "failed"}),
         "notDueCount": sum(1 for item in decisions if item["decision"] == "not_due"),
         "alreadyResolvedCount": sum(1 for item in decisions if item["decision"] == "already_resolved"),
         "invalidCount": sum(1 for item in decisions if item["decision"] == "invalid_state"),
@@ -309,6 +334,7 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
             "Default and check modes are offline fixture scans; live workspace scanning requires --live.",
             "Dry-run decisions do not fetch outcome sources or create resolution records.",
             "Executing a due run calls the checked transit-delay-forward-run resolver and may fetch HSL TripUpdates.",
+            "Due runs past the capture-lag tolerance are marked blocked by the resolver instead of resolving from a stale live snapshot.",
             "Resolved runs still do not create a calibration claim by themselves.",
         ],
     }

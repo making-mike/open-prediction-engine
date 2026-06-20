@@ -423,6 +423,30 @@ def main() -> None:
         expected_stdout="checked pilot session packet",
         label="pilot-session-packet",
     )
+    pilot_session_brief = run_cli("pilot-session-brief", "--section", "summary")
+    pilot_session_brief_payload = json.loads(pilot_session_brief.stdout)
+    if pilot_session_brief_payload["briefStatus"] != "ready_for_supervised_session":
+        raise AssertionError("CLI pilot-session-brief summary status drifted")
+    if pilot_session_brief_payload["recommendedScenarioKey"] != "engine_setup_shortcut_comprehension":
+        raise AssertionError("CLI pilot-session-brief should default to setup comprehension")
+    if pilot_session_brief_payload["genericAgentGuidanceReady"] is not True:
+        raise AssertionError("CLI pilot-session-brief should expose generic guidance")
+    if pilot_session_brief_payload["draftLedgerReady"] is not False:
+        raise AssertionError("CLI pilot-session-brief draft must not be ledger-ready unchanged")
+    if pilot_session_brief_payload["qualityClaimAllowed"] is not False:
+        raise AssertionError("CLI pilot-session-brief must keep quality claims blocked")
+    pilot_session_brief_commands = run_cli("pilot-session-brief", "--section", "commands")
+    pilot_session_brief_commands_payload = json.loads(pilot_session_brief_commands.stdout)
+    if pilot_session_brief_commands_payload[1]["command"] != "python3 scripts/ope.py agent-guide --section generic":
+        raise AssertionError("CLI pilot-session-brief should route through generic agent guidance")
+    if pilot_session_brief_commands_payload[5]["mutatesLocalState"] is not True:
+        raise AssertionError("CLI pilot-session-brief should mark explicit append as the only mutation")
+    run_optional_drift_check(
+        "pilot-session-brief",
+        "--check",
+        expected_stdout="checked pilot session brief",
+        label="pilot-session-brief",
+    )
     pilot_summary_intake = run_cli("pilot-summary-intake")
     pilot_summary_intake_payload = json.loads(pilot_summary_intake.stdout)
     if pilot_summary_intake_payload["summary"]["acceptedLedgerReadyCount"] != 2:
@@ -464,6 +488,38 @@ def main() -> None:
         raise AssertionError("CLI pilot-summary-intake input should block raw transcript summaries")
     if pilot_summary_blocked_payload["candidateRealSessionEvidence"] is not False:
         raise AssertionError("CLI pilot-summary-intake blocked input must not be candidate evidence")
+    pilot_summary_review = run_cli(
+        "pilot-summary-review",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+        "--section",
+        "summary",
+    )
+    pilot_summary_review_payload = json.loads(pilot_summary_review.stdout)
+    if pilot_summary_review_payload["appendDecision"] != "ready_for_local_write":
+        raise AssertionError("CLI pilot-summary-review should expose append-ready accepted summaries")
+    if pilot_summary_review_payload["canAppendWithWriteLocal"] is not True:
+        raise AssertionError("CLI pilot-summary-review should mark accepted summaries as write-local eligible")
+    if pilot_summary_review_payload["ledgerRowsWritten"] != 0:
+        raise AssertionError("CLI pilot-summary-review must remain read-only")
+    pilot_summary_review_blocked = run_cli(
+        "pilot-summary-review",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/blocked-raw-transcript-summary.json",
+        "--section",
+        "summary",
+    )
+    pilot_summary_review_blocked_payload = json.loads(pilot_summary_review_blocked.stdout)
+    if pilot_summary_review_blocked_payload["appendDecision"] != "blocked_by_intake":
+        raise AssertionError("CLI pilot-summary-review should block unsafe summaries")
+    if pilot_summary_review_blocked_payload["canAppendWithWriteLocal"] is not False:
+        raise AssertionError("CLI pilot-summary-review must not allow blocked summaries to append")
+    run_optional_drift_check(
+        "pilot-summary-review",
+        "--check",
+        expected_stdout="checked pilot summary review",
+        label="pilot-summary-review",
+    )
     pilot_summary_rules = run_cli("pilot-summary-intake", "--section", "rules")
     pilot_summary_rules_payload = json.loads(pilot_summary_rules.stdout)
     if pilot_summary_rules_payload[0]["decision"] != "Accept for ledger review.":
@@ -2311,8 +2367,8 @@ def main() -> None:
         raise AssertionError("CLI resolve-due-forward-runs should default to fixture scan")
     if forward_resolver_payload["executionMode"] != "dry_run":
         raise AssertionError("CLI resolve-due-forward-runs should default to dry-run mode")
-    if forward_resolver_payload["scanSummary"]["dueCount"] != 1:
-        raise AssertionError("CLI resolve-due-forward-runs fixture should find one due run")
+    if forward_resolver_payload["scanSummary"]["dueCount"] != 2:
+        raise AssertionError("CLI resolve-due-forward-runs fixture should find one due and one stale-due run")
     if forward_resolver_payload["scanSummary"]["executedCount"] != 0:
         raise AssertionError("CLI resolve-due-forward-runs fixture should not execute runs")
     if forward_resolver_payload["executionBoundary"]["sourceFetchPerformed"]:
@@ -2339,8 +2395,8 @@ def main() -> None:
     campaign_resolution_jobs_payload = json.loads(campaign_resolution_jobs.stdout)
     if campaign_resolution_jobs_payload["registryMode"] != "campaign_fixture_registry":
         raise AssertionError("CLI campaign resolution-jobs should use campaign fixture mode")
-    if campaign_resolution_jobs_payload["summary"]["jobCount"] != 4:
-        raise AssertionError("CLI campaign resolution-jobs should include one campaign forecast job")
+    if campaign_resolution_jobs_payload["summary"]["jobCount"] != 5:
+        raise AssertionError("CLI campaign resolution-jobs should include one campaign forecast job beside the four forward-run jobs")
     campaign_jobs = [
         job for job in campaign_resolution_jobs_payload["jobs"]
         if job["target"].get("campaignId") == "predictioncampaign-001"
@@ -2394,7 +2450,7 @@ def main() -> None:
     campaign_scheduler_payload = json.loads(campaign_scheduler.stdout)
     if campaign_scheduler_payload["schedulerMode"] != "campaign_fixture_once":
         raise AssertionError("CLI campaign resolution-scheduler should use campaign fixture mode")
-    if campaign_scheduler_payload["ticks"][0]["jobSummary"]["jobCount"] != 4:
+    if campaign_scheduler_payload["ticks"][0]["jobSummary"]["jobCount"] != 5:
         raise AssertionError("CLI campaign resolution-scheduler should include the campaign job")
     campaign_actions = [
         action for action in campaign_scheduler_payload["ticks"][0]["actions"]
@@ -2425,7 +2481,7 @@ def main() -> None:
     runtime_reliability = run_cli("resolution-runtime-reliability")
     runtime_reliability_payload = json.loads(runtime_reliability.stdout)
     failure_classes = {item["failureClass"] for item in runtime_reliability_payload["failureTaxonomy"]}
-    if len(failure_classes) != 10 or "rate_limits" not in failure_classes:
+    if len(failure_classes) != 11 or "rate_limits" not in failure_classes or "late_capture_window" not in failure_classes:
         raise AssertionError("CLI resolution-runtime-reliability should expose the checked failure taxonomy")
     if any(item["rawDiagnosticsExposed"] for item in runtime_reliability_payload["failureTaxonomy"]):
         raise AssertionError("CLI resolution-runtime-reliability should expose only sanitized failure diagnostics")
@@ -2899,14 +2955,66 @@ def main() -> None:
     setup_engine_payload = json.loads(setup_engine.stdout)
     if setup_engine_payload["engineSetupStatus"] != "checked_readback":
         raise AssertionError("CLI setup-engine status drifted")
+    if setup_engine_payload["inputMode"] != "goal_text":
+        raise AssertionError("CLI setup-engine goal-text input mode drifted")
+    if setup_engine_payload["requestSummary"]["completenessStatus"] != "goal_text_only":
+        raise AssertionError("CLI setup-engine goal-text request summary drifted")
     if setup_engine_payload["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
         raise AssertionError("CLI setup-engine should expose a forecastable first candidate")
     if setup_engine_payload["candidateForecastContracts"][0]["baselineMethod"]["methodId"] != "historical_frequency_baseline":
         raise AssertionError("CLI setup-engine should start from the historical baseline")
+    if setup_engine_payload["forecastCardPreview"]["forecastArtifactCreated"] is not False:
+        raise AssertionError("CLI setup-engine forecast-card preview must not create artifacts")
+    if setup_engine_payload["forecastCardPreview"]["probabilityAvailable"] is not False:
+        raise AssertionError("CLI setup-engine forecast-card preview must not expose probability")
+    if setup_engine_payload["forecastCardPreview"]["evidenceStatus"] != "source_intake_required":
+        raise AssertionError("CLI setup-engine goal-text preview evidence status drifted")
     if setup_engine_payload["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
         raise AssertionError("CLI setup-engine host wrapper should render before forecast artifacts")
+    if "forecastCardPreview" not in setup_engine_payload["hostWrapper"]["renderSections"]:
+        raise AssertionError("CLI setup-engine host wrapper should render forecast-card preview")
     if setup_engine_payload["claimBoundary"]["qualityClaimAllowed"] is not False:
         raise AssertionError("CLI setup-engine must keep quality claims blocked")
+    setup_engine_request = run_cli(
+        "setup-engine",
+        "--request",
+        "spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
+        "--view",
+        "request",
+    )
+    setup_engine_request_payload = json.loads(setup_engine_request.stdout)
+    if setup_engine_request_payload["inputMode"] != "structured_request":
+        raise AssertionError("CLI setup-engine structured request mode drifted")
+    if setup_engine_request_payload["requestSummary"]["setupEngineRequestId"] != "setupenginerequest-001":
+        raise AssertionError("CLI setup-engine request id drifted")
+    if setup_engine_request_payload["requestSummary"]["readyForSourceIntake"] is not True:
+        raise AssertionError("CLI setup-engine request should be source-intake ready")
+    setup_engine_preview = run_cli(
+        "setup-engine",
+        "--request",
+        "spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
+        "--view",
+        "forecast-card-preview",
+    )
+    setup_engine_preview_payload = json.loads(setup_engine_preview.stdout)
+    if setup_engine_preview_payload["view"] != "forecast-card-preview":
+        raise AssertionError("CLI setup-engine forecast-card-preview view drifted")
+    if setup_engine_preview_payload["forecastCardPreview"]["generatedFrom"] != "structured_request":
+        raise AssertionError("CLI setup-engine preview source drifted")
+    if setup_engine_preview_payload["forecastCardPreview"]["evidenceStatus"] != "structured_sources_ready_for_intake":
+        raise AssertionError("CLI setup-engine preview should be source-intake ready")
+    if setup_engine_preview_payload["forecastCardPreview"]["probabilityAvailable"] is not False:
+        raise AssertionError("CLI setup-engine preview must not expose probability")
+    blocked_setup_engine_request = run_cli(
+        "setup-engine",
+        "--request",
+        "spec/fixtures/setup-engine-requests/blocked-raw-crm-request.json",
+        "--view",
+        "request",
+    )
+    blocked_setup_engine_request_payload = json.loads(blocked_setup_engine_request.stdout)
+    if blocked_setup_engine_request_payload["requestSummary"]["completenessStatus"] != "blocked_by_unsafe_inputs":
+        raise AssertionError("CLI setup-engine blocked request should report unsafe inputs")
     setup_engine_sources = run_cli("setup-engine", "--goal", "add predictions to my app", "--view", "sources")
     setup_engine_sources_payload = json.loads(setup_engine_sources.stdout)
     if setup_engine_sources_payload["view"] != "sources":
@@ -4609,8 +4717,8 @@ def main() -> None:
     if setup_engine_operation["sideEffectLevel"] != "read_only":
         raise AssertionError("CLI agent-protocol-map should keep setup-engine read-only")
     setup_engine_fields = {item["name"] for item in setup_engine_operation["inputFields"]}
-    if {"goal", "view"} - setup_engine_fields:
-        raise AssertionError("CLI agent-protocol-map should expose setup-engine goal and view arguments")
+    if {"goal", "setupEngineRequest", "view"} - setup_engine_fields:
+        raise AssertionError("CLI agent-protocol-map should expose setup-engine goal, request, and view arguments")
     if protocol_operations["resolution_jobs"]["inputRecordType"] != "resolution_job_registry":
         raise AssertionError("CLI agent-protocol-map should expose resolution job registry readbacks")
     if protocol_operations["resolution_scheduler_status"]["inputRecordType"] != "resolution_scheduler_status":
@@ -4666,8 +4774,28 @@ def main() -> None:
         raise AssertionError("CLI setup-engine agent-call should preserve requested view")
     if setup_engine_call_payload["payload"]["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
         raise AssertionError("CLI setup-engine agent-call should render setup before forecast artifacts")
+    if setup_engine_call_payload["payload"]["forecastCardPreview"]["probabilityAvailable"] is not False:
+        raise AssertionError("CLI setup-engine agent-call preview must not expose probability")
     if setup_engine_call_payload["state"]["forecastStatus"] != "not_created_by_setup_engine":
         raise AssertionError("CLI setup-engine agent-call must not create forecasts")
+    setup_engine_request_call = run_cli(
+        "agent-call",
+        "--operation",
+        "setup_engine",
+        "--setup-engine-request",
+        "spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
+        "--view",
+        "summary",
+    )
+    setup_engine_request_call_payload = json.loads(setup_engine_request_call.stdout)
+    if setup_engine_request_call_payload["adapterRequest"]["inputRef"] != "setupengine-001":
+        raise AssertionError("CLI setup-engine request agent-call input ref drifted")
+    if setup_engine_request_call_payload["payload"]["inputMode"] != "structured_request":
+        raise AssertionError("CLI setup-engine request agent-call input mode drifted")
+    if setup_engine_request_call_payload["payload"]["requestSummary"]["setupEngineRequestId"] != "setupenginerequest-001":
+        raise AssertionError("CLI setup-engine request agent-call summary id drifted")
+    if setup_engine_request_call_payload["payload"]["requestSummary"]["readyForSourceIntake"] is not True:
+        raise AssertionError("CLI setup-engine request agent-call readiness drifted")
 
     private_setup_call = run_cli(
         "agent-call",

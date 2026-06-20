@@ -4,7 +4,7 @@
 
 The default surface is non-mutating. It binds `forecast-1301` question, evidence, artifact, and history records to their intended `.ope/live/prediction-campaigns/...` target paths, records content hashes and schema files, and lists the guards that must pass before local write execution.
 
-Explicit local execution is available with `--write-local`. It copies the checked lifecycle records into ignored local campaign state, writes minimal campaign/run state files with the idempotency key, refuses mismatched overwrites, rejects symlink escapes from the campaign state root, and reports `already_present` on safe repeats. It does not fetch live data, run a resolver, create scores, append corpus evidence, or allow quality and calibration claims.
+Explicit local execution is available with `--write-local`. It copies the checked lifecycle records into ignored local campaign state, writes minimal campaign/run state files with the idempotency key, refuses mismatched overwrites, rejects symlink escapes from the campaign state root, and reports `already_present` on safe repeats. The write runtime independently compares real UTC now against the run's `forecastCloseAt` before writing anything: a late write is refused and the run is recorded as a `missed` run state per the `skip_if_forecast_close_passed` policy, regardless of how the calling runner derived its clock. It does not fetch live data, run a resolver, create scores, append corpus evidence, or allow quality and calibration claims.
 
 Run it locally with:
 
@@ -19,6 +19,8 @@ Required boundaries:
 - source lifecycle records must validate against the standard OPE schemas before any local write;
 - target paths must stay relative, under ignored `.ope/live/prediction-campaigns/` after symlink resolution, and free of credentials or private rows;
 - the run must remain bound to the ready forecast-creation decision, source policy, duplicate key, and forecast-before-close window;
+- forecast-before-close is enforced at write time against real UTC now; writes after `forecastCloseAt` record the run as missed instead of backdating `forecastedAt`;
+- effectful (non-fixture) writes stamp `forecastedAt` with the actual runner clock rather than the scheduled create time;
 - normal checks must never execute the local write path;
 - explicit local writes must be idempotent and must refuse mismatched existing target files;
 - resolution, scoring, corpus append, and quality claims remain separate later milestones.

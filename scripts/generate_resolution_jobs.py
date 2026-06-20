@@ -54,6 +54,8 @@ def resolver_args(args: argparse.Namespace) -> argparse.Namespace:
 def job_status(decision: str) -> str:
     if decision == "due_pending":
         return "pending_due"
+    if decision == "due_stale_capture":
+        return "stale_due"
     if decision == "not_due":
         return "pending_not_due"
     if decision == "already_resolved":
@@ -75,6 +77,12 @@ def action_for_job(status: str, path: str, reason: str) -> dict[str, Any]:
             "recommendedAction": "wait",
             "reason": reason,
             "commands": [scan],
+        }
+    if status == "stale_due":
+        return {
+            "recommendedAction": "provide_window_capture",
+            "reason": reason,
+            "commands": [scan, execute],
         }
     if status == "already_resolved":
         return {
@@ -224,6 +232,7 @@ def summary(jobs: list[dict[str, Any]]) -> dict[str, int]:
     return {
         "jobCount": len(jobs),
         "pendingDueCount": sum(1 for job in jobs if job["jobStatus"] == "pending_due"),
+        "staleDueCount": sum(1 for job in jobs if job["jobStatus"] == "stale_due"),
         "pendingNotDueCount": sum(1 for job in jobs if job["jobStatus"] == "pending_not_due"),
         "alreadyResolvedCount": sum(1 for job in jobs if job["jobStatus"] == "already_resolved"),
         "invalidCount": sum(1 for job in jobs if job["jobStatus"] == "invalid_state"),
