@@ -89,6 +89,8 @@ The schedule join matches realtime updates to static trips by route, direction, 
 delay_seconds = predicted_stop_time - scheduled_stop_time
 ```
 
+Decoded rows are always stamped with the observed service date derived from the realtime trip descriptor's `start_date`. Passing `--service-date` filters out rows whose observed service date differs; it never restamps rows to the requested date. Callers that resolve a forecast window may also pass the horizon bounds so rows whose event time falls outside the window are excluded and counted instead of being accepted as outcome evidence.
+
 It does not yet implement route filtering, stop filtering, vehicle-position matching, service-alert reasoning, hosted polling, credential handling, or calibration claims. A live capture with zero decoded or derived delay rows is a successful API capture but not an intake-ready delay source.
 
 Live captures are local developer artifacts and must not be committed as public generated fixtures.

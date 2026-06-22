@@ -186,9 +186,9 @@
       "stepKey": "create_next_forecast",
       "phase": "forecast",
       "command": "python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
-      "operatorCheck": "Run only inside the forecast creation window and keep stdout/logs.",
-      "successSignal": "One ready forecast is created idempotently in .ope/live for the next due run.",
-      "recoveryAction": "If close time has passed, record missed and advance; never backfill.",
+      "operatorCheck": "Run only inside the forecast creation window and keep stdout/logs; the launch clock is real UTC now, so --now is never needed for a live launch.",
+      "successSignal": "One ready forecast is created idempotently in .ope/live for the next due run, with forecastedAt stamped at the actual launch time.",
+      "recoveryAction": "If close time has passed, the launch records the run as missed automatically and creates nothing; never backfill.",
       "mutatesState": true,
       "requiresLiveOptIn": false,
       "claimBoundary": "Forecast creation still uses the baseline method, with optional historical pre-calibration, until method-update gates permit otherwise."

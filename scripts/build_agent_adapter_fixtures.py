@@ -460,32 +460,41 @@ def validate_payload_binding(item: dict[str, Any]) -> None:
     if operation == "setup_engine":
         setup = payload
         expect_equal("setup engine input ref", setup["setupEngineId"], request["inputRef"])
-        expect_equal("setup engine state", setup["engineSetupStatus"], item["state"]["planStatus"])
+        if "engineSetupStatus" in setup:
+            expect_equal("setup engine state", setup["engineSetupStatus"], item["state"]["planStatus"])
+        elif item["state"]["planStatus"] != "checked_readback":
+            raise AgentAdapterError("setup-engine focused views should preserve checked_readback plan status")
         if item["state"]["forecastStatus"] != "not_created_by_setup_engine":
             raise AgentAdapterError("setup-engine envelope must not create forecast artifacts")
-        if setup["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
+        if "hostWrapper" in setup and setup["hostWrapper"]["renderBeforeForecastArtifacts"] is not True:
             raise AgentAdapterError("setup-engine host wrapper should render before forecast artifacts")
         if "candidateForecastContracts" in setup:
             if setup["candidateForecastContracts"][0]["contractStatus"] != "forecastable":
                 raise AgentAdapterError("setup-engine should expose a forecastable first candidate")
             if setup["candidateForecastContracts"][0]["baselineMethod"]["methodId"] != "historical_frequency_baseline":
                 raise AgentAdapterError("setup-engine should start from the historical baseline")
-        else:
+        if "forecastCardPreview" in setup:
+            if setup["forecastCardPreview"]["forecastArtifactCreated"] is not False:
+                raise AgentAdapterError("setup-engine forecast-card preview must not create forecast artifacts")
+            if setup["forecastCardPreview"]["probabilityAvailable"] is not False:
+                raise AgentAdapterError("setup-engine forecast-card preview must not expose probability")
+        if "candidateForecastContracts" not in setup and "forecastableCandidateCount" in setup:
             if setup.get("forecastableCandidateCount") != 1:
                 raise AgentAdapterError("setup-engine focused view should preserve forecastable candidate count")
-        boundary = setup["claimBoundary"]
-        for key in [
-            "qualityClaimAllowed",
-            "calibrationClaimAllowed",
-            "hostedRuntimeProvided",
-            "trainedModelProvided",
-            "executesLiveFetch",
-            "acceptsRawSql",
-            "acceptsCredentialValues",
-            "acceptsRawPrivateRows",
-        ]:
-            if boundary[key] is not False:
-                raise AgentAdapterError(f"setup-engine claim boundary should keep {key} false")
+        if "claimBoundary" in setup:
+            boundary = setup["claimBoundary"]
+            for key in [
+                "qualityClaimAllowed",
+                "calibrationClaimAllowed",
+                "hostedRuntimeProvided",
+                "trainedModelProvided",
+                "executesLiveFetch",
+                "acceptsRawSql",
+                "acceptsCredentialValues",
+                "acceptsRawPrivateRows",
+            ]:
+                if boundary[key] is not False:
+                    raise AgentAdapterError(f"setup-engine claim boundary should keep {key} false")
         return
 
     if operation == "resolution_jobs":

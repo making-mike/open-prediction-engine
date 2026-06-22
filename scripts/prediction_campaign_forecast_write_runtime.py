@@ -33,6 +33,28 @@ def now_timestamp() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def parse_utc_timestamp(value: str) -> datetime:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError as exc:
+        raise PredictionCampaignForecastWriteError(f"Invalid UTC timestamp: {value}") from exc
+
+
+def forecast_close_passed(forecast_close_at: str, clock_value: str) -> bool:
+    return parse_utc_timestamp(clock_value) > parse_utc_timestamp(forecast_close_at)
+
+
+def plan_forecast_close_at(plan: dict[str, Any]) -> str:
+    for artifact in plan["sourceArtifacts"]:
+        if artifact["recordType"] != "forecast_artifact":
+            continue
+        record = artifact.get("sourceRecord")
+        if record is None:
+            record = read_json(ROOT / artifact["fixturePath"])
+        return str(record["closedAt"])
+    raise PredictionCampaignForecastWriteError("Forecast write plan binds no forecast artifact record")
+
+
 def ensure_safe_local_path(
     path_value: str,
     *,
@@ -173,6 +195,75 @@ def build_run_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
     }
 
 
+def write_missed_run_state(
+    *,
+    campaign_id: str,
+    cycle_id: str,
+    run_id: str,
+    question_id: str,
+    forecast_id: str,
+    source_policy_id: str,
+    forecast_close_at: str,
+    runner_clock: str,
+    workspace_root: Path = ROOT,
+) -> dict[str, Any]:
+    """Record one missed campaign run per the skip_if_forecast_close_passed policy.
+
+    Missed runs never create forecast artifacts and never count as created
+    idempotency keys; an existing run state of any status is kept untouched.
+    """
+    state_path_value = f"{LOCAL_STATE_ROOT}/{campaign_id}/{run_id}.json"
+    target_path = ensure_safe_local_path(state_path_value, workspace_root=workspace_root)
+    if target_path.exists():
+        existing = read_json(target_path)
+        existing_status = str(existing.get("runStatus", "unknown"))
+        return {
+            "stateType": "prediction_campaign_run_state",
+            "runId": run_id,
+            "targetPath": state_path_value,
+            "runStatus": existing_status,
+            "writeStatus": "already_present" if existing_status == "missed" else "kept_existing_state",
+        }
+    state = {
+        "stateType": "prediction_campaign_run_state",
+        "stateVersion": 1,
+        "writtenAt": now_timestamp(),
+        "campaignId": campaign_id,
+        "cycleId": cycle_id,
+        "runId": run_id,
+        "questionId": question_id,
+        "forecastId": forecast_id,
+        "sourcePolicyId": source_policy_id,
+        "runStatus": "missed",
+        "missedRunPolicy": "skip_if_forecast_close_passed",
+        "exclusionReasonCode": "missed_forecast_close",
+        "excludedFromComparableEvidence": True,
+        "forecastCloseAt": forecast_close_at,
+        "runnerClock": runner_clock,
+        "artifactPaths": {},
+        "executionBoundary": {
+            "fetchesLiveData": False,
+            "executesResolvers": False,
+            "createsForecastArtifacts": False,
+            "createsResolutionArtifacts": False,
+            "createsScoringRecords": False,
+            "appendsCorpusEvidence": False,
+            "storesCredentials": False,
+            "storesPrivateRows": False,
+            "qualityClaimAllowed": False,
+        },
+    }
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(render_json(state), encoding="utf-8")
+    return {
+        "stateType": "prediction_campaign_run_state",
+        "runId": run_id,
+        "targetPath": state_path_value,
+        "runStatus": "missed",
+        "writeStatus": "written",
+    }
+
+
 def build_campaign_state(plan: dict[str, Any], written_at: str) -> dict[str, Any]:
     bindings = plan["bindings"]
     target = plan["targetState"]
@@ -309,8 +400,30 @@ def execute_local_forecast_write(
         guard_ids = ", ".join(guard["guardId"] for guard in blocking_guards)
         raise PredictionCampaignForecastWriteError(f"Forecast write blocked by guards: {guard_ids}")
 
+    # Forecast-before-close is enforced against real UTC now regardless of how
+    # the plan's runner clock was derived; a late write is recorded as missed.
+    forecast_close_at = plan_forecast_close_at(plan)
+    clock_now = now_timestamp()
+    if forecast_close_passed(forecast_close_at, clock_now):
+        bindings = plan["bindings"]
+        missed = write_missed_run_state(
+            campaign_id=bindings["campaignId"],
+            cycle_id=bindings["cycleId"],
+            run_id=bindings["runId"],
+            question_id=bindings["questionId"],
+            forecast_id=bindings["forecastId"],
+            source_policy_id=bindings["sourcePolicyId"],
+            forecast_close_at=forecast_close_at,
+            runner_clock=clock_now,
+        )
+        raise PredictionCampaignForecastWriteError(
+            f"Refusing forecast write for {bindings['runId']}: real UTC now {clock_now} is after "
+            f"forecastCloseAt {forecast_close_at}; run state recorded as missed "
+            f"({missed['writeStatus']}) per skip_if_forecast_close_passed instead of backdating."
+        )
+
     preflight_local_write(plan)
-    written_at = now_timestamp()
+    written_at = clock_now
     artifact_writes = [write_artifact_if_safe(artifact) for artifact in plan["sourceArtifacts"]]
     run_state = build_run_state(plan, written_at)
     campaign_state = build_campaign_state(plan, written_at)

@@ -141,7 +141,9 @@ Done:
 - Developer adoption surface now exposes a checked quickstart, complete local setup scenario, CLI/agent-call/MCP integration notes, release-note boundaries, and deferred generated-types decision through `python3 scripts/ope.py developer-adoption`.
 - Pilot evidence ledger now exposes checked sanitized intake examples, raw/private-data blockers, claim-confusion signals, and zero real sessions recorded through `python3 scripts/ope.py pilot-evidence`.
 - Pilot session packet now exposes checked real-session task cards, sanitization review, ledger-ready summary shape, and stop conditions through `python3 scripts/ope.py pilot-session-packet`.
+- Pilot session brief now joins the setup-comprehension task, generic agent guidance, non-ledger-ready summary draft status, and explicit local evidence command loop for one supervised session through `python3 scripts/ope.py pilot-session-brief`.
 - Pilot summary intake now classifies sanitized summary examples and caller-supplied sanitized summary files as ledger-ready, redaction-needed, or blocked through `python3 scripts/ope.py pilot-summary-intake` and `python3 scripts/ope.py pilot-summary-intake --input <summary.json>`.
+- Pilot summary review now joins one sanitized summary file's intake classification, dry-run append eligibility, and explicit local evidence next actions through `python3 scripts/ope.py pilot-summary-review --input <summary.json>`.
 - Pilot summary template now gives operators a schema-valid sanitized draft that is intentionally not ledger-ready unchanged, plus field guidance, sanitization checklist, and classify/append commands through `python3 scripts/ope.py pilot-summary-template`.
 - Simulated agent pilot readbacks now cover one user-provided Helsinki bus prompt plus seven generated prompts, including three non-Helsinki setup-comprehension prompts, across accepted, clarification, blocked, rejected, response-too-large, setup-engine-first, parallel-risk-engine, and audit-layer-only signals through `python3 scripts/ope.py simulated-agent-pilot --section summary`.
 - Pilot findings now report eight simulated agent sessions, three non-Helsinki setup-comprehension prompts, setup-engine-first rate, parallel-risk-engine and audit-layer-only confusion counts, and zero real sessions separately, keeping broader adoption, hosted runtime, generated types, and quality claims blocked until real sanitized sessions exist.
@@ -189,7 +191,7 @@ Done:
 - Lifecycle lease policy now has a checked readback through `python3 scripts/ope.py lifecycle-lease-policy`, classifying fourteen lifecycle operations into nine strict-lease operations and five idempotency-only operations, with conflict cases and a boundary that normal checks acquire no leases, write no state, expose no raw lock CRUD, and make no hosted-runtime claims.
 - Runtime transport readiness now has a checked readback through `python3 scripts/ope.py runtime-transport-readiness`, preserving in-process internal API, CLI, `agent-call`, and local MCP stdio as current surfaces while local HTTP, queue, hosted service, and OPP HTTP provider behavior remain deferred behind explicit readiness gates.
 - Workspace tenant isolation now has a checked readback through `python3 scripts/ope.py workspace-tenant-isolation`, layering tenant/workspace scope over the prediction workspace registry with tenant-local resources, operation queues, source bindings, credential scopes, idempotency namespaces, blocked cross-tenant access cases, and a non-mutating boundary before hosted tenant runtime behavior.
-- Setup-engine now has a checked domain-agnostic front door through `python3 scripts/ope.py setup-engine --goal "<host prediction goal>"`, `agent-call --operation setup_engine`, and local MCP tool `ope_setup_engine`, returning candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, examples, and claim boundaries without creating forecast artifacts or hosted runtime.
+- Setup-engine now has a checked domain-agnostic front door through `python3 scripts/ope.py setup-engine --goal "<host prediction goal>"`, `agent-call --operation setup_engine`, and local MCP tool `ope_setup_engine`, returning candidate forecast contracts, source roles, baseline guidance, forecast-card preview shape, host-wrapper shape, examples, and claim boundaries without creating forecast artifacts or hosted runtime.
 - Prediction-goal catalog now exposes eight compact non-authoritative host-goal examples through `python3 scripts/ope.py prediction-goal-catalog --view summary` and the setup-engine examples view, keeping Helsinki transit as one reusable setup example rather than the default adoption narrative.
 - The embedded host wrapper example now calls setup-engine first, renders `setupEnginePlan` before forecast-card reads, shows host-facing setup status, contracts, source roles, baseline status, forecast-card preview, required inputs, warnings, setup-only blockers, and method-extension guidance without implementing OPE scoring, calibration, hosted runtime, or an untracked risk engine.
 - The engine setup adoption comprehension gate now adds non-Helsinki simulated prompts and a real-session task card that measure whether agents run setup-engine before inventing a parallel risk engine, whether they misread OPE as audit-only, and whether they separate OPE-owned contracts/evidence/baseline/forecast-card/resolver/scorer/calibration gates from host-owned UI/sources/runtime/notifications/custom methods.
@@ -221,12 +223,12 @@ Not started:
 In progress:
 
 - Milestone 140 and Milestone 150 now have accepted agent-only simulation evidence through eight checked simulated sessions, including three non-Helsinki setup-comprehension prompts. They still have zero accepted real supervised sessions; 3-5 real sanitized sessions are required before broader adoption evidence can be claimed.
-- Milestones 152, 153, 154, 155, and 156 now provide the ignored local pilot-evidence append path, lifecycle operation coverage, supervised pilot operator status, non-ledger-ready summary template, and domain-agnostic agent guidance needed to collect real session evidence without committing it or upgrading quality claims.
+- Milestones 152, 153, 154, 155, 156, 157, and 158 now provide the ignored local pilot-evidence append path, lifecycle operation coverage, supervised pilot operator status, non-ledger-ready summary template, domain-agnostic agent guidance, joined session brief, and post-session summary review needed to collect real session evidence without committing it or upgrading quality claims.
 
 Next:
 
-1. Run `python3 scripts/ope.py pilot-supervision-status --section commands`, then run 3-5 supervised local pilot sessions using the checked pilot session packet, including the `engine_setup_shortcut_comprehension` task.
-2. Start each sanitized summary from `python3 scripts/ope.py pilot-summary-template --section draft`, fill it outside checked fixtures, classify it through `pilot-summary-intake --input <summary.json>`, append accepted summaries with `pilot-evidence --input-summary <summary.json> --write-local`, review `pilot-findings --from-local-ledger --section summary`, and recheck `pilot-supervision-status --from-local-ledger --section summary`.
+1. Run `python3 scripts/ope.py pilot-session-brief --section commands`, then run 3-5 supervised local pilot sessions using the checked setup-comprehension task and generic agent guidance.
+2. Start each sanitized summary from `python3 scripts/ope.py pilot-summary-template --section draft`, fill it outside checked fixtures, review it through `pilot-summary-review --input <summary.json> --section summary`, append only accepted summaries with `pilot-evidence --input-summary <summary.json> --write-local`, review `pilot-findings --from-local-ledger --section summary`, and recheck `pilot-supervision-status --from-local-ledger --section summary`.
 3. Use `agent-guide --section generic` during the real sessions to test whether agents ask reusable setup questions before specializing to an example domain, and use `agent-guide --case needs_clarification` only for the Helsinki example prompt.
 4. Keep generated runtime types deferred until real pilot evidence shows type-specific friction.
 5. Keep any future HTTP, OPP provider runtime, hosted service, richer private-source execution, or non-baseline method behavior behind explicit readiness gates.
@@ -4919,12 +4921,132 @@ Expected outputs:
 - `python3 scripts/ope.py agent-guide --section generic`
 - checker, CLI, MVP release-surface, docs, release-manifest, roadmap, and decision-log wiring for domain-agnostic agent guidance
 
+## Milestone 157: Supervised Pilot Session Brief
+
+Status: Accepted.
+
+Goal: give moderators one checked read-only brief for running the next real setup-comprehension pilot session without stitching together task, guide, template, and evidence commands manually.
+
+Tasks:
+
+- [x] Add a schema-bound `pilot-session-brief` readback that joins the checked setup-comprehension task, generic agent guidance, summary-template draft status, supervision status, and local evidence command loop.
+- [x] Include moderator preflight checks, participant brief, in-session runbook steps, non-ledger-ready draft status, evidence safety rules, and command sequence.
+- [x] Make `pilot-session-brief --section commands` start from the brief, open `agent-guide --section generic`, open the checked task card, print the summary draft, classify the filled summary, explicitly append accepted local evidence, and review findings/status.
+- [x] Keep the brief read-only: it does not run sessions, write checked fixtures, append ignored local evidence, store raw/private data, create forecast artifacts, or upgrade expansion, quality, calibration, hosted-runtime, or generated-type claims.
+- [x] Add CLI, schema coverage, generated fixture, checker, CLI smoke, MVP release-surface check, release-manifest wiring, docs, roadmap, and decision log.
+
+Exit criteria:
+
+- Agents and moderators can run `python3 scripts/ope.py pilot-session-brief --section summary` to see the recommended setup-comprehension task, generic guidance readiness, non-ledger-ready draft status, zero real sessions recorded, zero ledger rows written, and blocked claims.
+- Agents and moderators can run `python3 scripts/ope.py pilot-session-brief --section commands` to see the exact real-session command loop with only the explicit local append marked mutating.
+- The generated fixture remains schema-bound and normal checks remain non-mutating.
+
+Expected outputs:
+
+- `spec/pilot-session-brief.schema.json`
+- `spec/pilot-session-brief.md`
+- `spec/fixtures/generated/pilot-session-brief/ope-pilot-session-brief.generated.json`
+- `python3 scripts/ope.py pilot-session-brief`
+- checker, schema, generated fixture, docs, roadmap, release-manifest, and decision-log wiring for the supervised pilot session brief
+
+## Milestone 158: Pilot Summary Review Bundle
+
+Status: Accepted.
+
+Goal: give moderators one checked read-only review after a supervised session summary is filled, so they can see classification, append eligibility, and next commands before any ignored local evidence write.
+
+Tasks:
+
+- [x] Add a schema-bound `pilot-summary-review` readback over one sanitized summary file.
+- [x] Join `pilot-summary-intake --input <summary.json>` classification with `pilot-evidence --input-summary <summary.json>` dry-run append eligibility.
+- [x] Report whether explicit moderator-approved `--write-local` append is allowed, or whether the summary is blocked or needs redaction.
+- [x] Expose the exact operator commands for classification, dry-run append, optional explicit local append, findings review, and status review.
+- [x] Keep the review read-only: it does not write checked fixtures, append ignored local evidence, count real sessions, store raw/private data, create forecast artifacts, or upgrade expansion, quality, calibration, hosted-runtime, or generated-type claims.
+- [x] Add CLI, schema coverage, generated fixture, checker, CLI smoke, MVP release-surface check, release-manifest wiring, docs, roadmap, and decision log.
+
+Exit criteria:
+
+- Moderators can run `python3 scripts/ope.py pilot-summary-review --input <summary.json> --section summary` to see intake decision, append decision, write-local eligibility, zero ledger rows written, zero real sessions recorded, and blocked claims.
+- Accepted sanitized summaries expose one mutating command: `python3 scripts/ope.py pilot-evidence --input-summary <summary.json> --write-local`.
+- Blocked or redaction-needed summaries do not expose a write-local append command.
+- Normal checks remain non-mutating and do not inspect or write ignored local pilot ledgers by default.
+
+Expected outputs:
+
+- `spec/pilot-summary-review.schema.json`
+- `spec/pilot-summary-review.md`
+- `spec/fixtures/generated/pilot-summary-review/ope-pilot-summary-review.generated.json`
+- `python3 scripts/ope.py pilot-summary-review`
+- checker, schema, generated fixture, docs, roadmap, release-manifest, and decision-log wiring for the post-session summary review
+
+## Milestone 159: Structured Setup-Engine Request Input
+
+Status: Accepted.
+
+Goal: make `setup-engine` useful as a reliable first setup path when agents have concrete host-app context, not only a free-form goal string.
+
+Tasks:
+
+- [x] Add a checked `setup-engine-request` schema with goal, decision context, outcome, horizon, source hints, resolution hint, baseline hint, and execution-boundary safety flags.
+- [x] Add accepted and blocked request fixtures outside the Helsinki/transit path.
+- [x] Extend `setup-engine --request <json>` with `inputMode`, `requestSummary`, request readiness, blocked-input flags, missing source roles, and a request-focused view.
+- [x] Keep goal-only mode compatible and deterministic.
+- [x] Wire the structured request path through `agent-call --operation setup_engine --setup-engine-request <json>` and local MCP `setupEngineRequest` tool arguments.
+- [x] Keep the path read-only: no source execution, raw private-row storage, credential storage, raw SQL, live fetch, forecast artifact creation, hosted runtime, or quality/calibration claim upgrades.
+- [x] Add schema, CLI, setup-engine checker, agent protocol map, MCP, MVP release-surface, release-manifest, docs, and generated-fixture coverage.
+
+Exit criteria:
+
+- Agents can run `python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request` and see `ready_for_source_intake`.
+- Agents can run `python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/blocked-raw-crm-request.json --view request` and see `blocked_by_unsafe_inputs` with sanitized blocked flags.
+- Agent-call and local MCP preserve the same setup readiness without changing the adapter envelope input type or creating forecast artifacts.
+- Goal-only `setup-engine --goal "<host prediction goal>"` remains the compact first command.
+
+Expected outputs:
+
+- `spec/setup-engine-request.schema.json`
+- `spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json`
+- `spec/fixtures/setup-engine-requests/blocked-raw-crm-request.json`
+- Updated `spec/setup-engine.schema.json`
+- Updated `python3 scripts/ope.py setup-engine --request`
+- Updated `python3 scripts/ope.py agent-call --operation setup_engine --setup-engine-request`
+- Updated local MCP `ope_setup_engine` `setupEngineRequest` argument
+- checker, schema, generated fixture, docs, roadmap, release-manifest, and decision-log wiring for structured setup-engine requests
+
+## Milestone 160: Setup-Engine Forecast-Card Preview View
+
+Status: Accepted.
+
+Goal: make setup-engine output directly usable by host-app builders before forecast artifacts exist, so agents can render the future forecast-card shape without inventing their own risk card or implying a probability has been produced.
+
+Tasks:
+
+- [x] Add a checked `forecastCardPreview` object to the setup-engine readback.
+- [x] Add a focused `forecast-card-preview` CLI, agent-call, and local MCP view through the existing setup-engine operation.
+- [x] Include safe preview fields for question, outcome, positive class, horizon, resolution rule, source readiness, baseline readiness, display sections, and next action.
+- [x] Explicitly block forecast IDs, probabilities, confidence labels, quality claims, calibration claims, credential values, raw private rows, and raw SQL in preview output.
+- [x] Keep the preview read-only and non-artifact-producing for goal-text, accepted structured-request, and blocked structured-request modes.
+- [x] Add schema, setup-engine checker, CLI, adapter fixture, protocol map, MVP release-surface, release-manifest, capabilities manifest, docs, roadmap, and decision-log coverage.
+
+Exit criteria:
+
+- Agents can run `python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview` and see `structured_sources_ready_for_intake` with `probabilityAvailable: false`.
+- Agents can run the same preview against the blocked CRM request and see `blocked_until_safe_sources`.
+- `hostWrapper.renderSections` includes `forecastCardPreview` before any forecast-card read.
+- The setup-engine preview never creates a forecast artifact, forecast ID, probability, quality claim, calibration claim, hosted runtime, live fetch, credential value, raw private row, or raw SQL path.
+
+Expected outputs:
+
+- Updated `spec/setup-engine.schema.json`
+- Updated `python3 scripts/ope.py setup-engine --view forecast-card-preview`
+- Updated local MCP `ope_setup_engine` view support through `SETUP_ENGINE_VIEWS`
+- Updated `ope.capabilities.json` with `forecastCardPreviewCommand`
+- Updated generated setup-engine, agent-adapter protocol-map, agent-adapter envelope, prediction-agent-adoption, and release-manifest fixtures
+- checker, CLI, MVP release-surface, docs, roadmap, and decision-log wiring for the forecast-card preview
+
 ## Open Decisions
 
-- What is the minimum domain-agnostic setup-engine input shape: goal text only, or goal plus decision context, source hints, horizon, and resolution hints?
-- Should `setup-engine` become the canonical first command, or should it be an alias layered over `agent-implementation-kit` and `prediction-feature-setup` until real pilot evidence confirms the naming?
 - How should setup-engine rank candidate contracts without implying forecast quality before resolved outcomes exist?
-- What fields are safe and useful in a forecast-card preview before any forecast artifact exists?
 - What is the smallest domain setup contract that remains useful across private operational domains?
 - What minimum app-goal, decision, source, and resolution-hint fields are required before OPE can answer "what can be forecasted from these approved sources?"
 - How much candidate question synthesis should OPE core perform from structured inputs and setup templates versus leaving to the caller's agent or an optional labeled helper agent?

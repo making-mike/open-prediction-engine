@@ -11,6 +11,8 @@ python3 --version
 python3 scripts/ope.py smoke
 python3 scripts/run_checks.py
 python3 scripts/ope.py setup-engine --goal "add predictions to my app"
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview
 python3 scripts/ope.py prediction-goal-catalog --view summary
 python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
 python3 scripts/ope.py check
@@ -22,7 +24,9 @@ python3 scripts/ope.py pilot-evidence --section summary
 python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
 python3 scripts/ope.py pilot-evidence --from-local-ledger --section summary
 python3 scripts/ope.py pilot-session-packet --section sanitization
+python3 scripts/ope.py pilot-session-brief --section summary
 python3 scripts/ope.py pilot-summary-intake --section rules
+python3 scripts/ope.py pilot-summary-review --section summary
 python3 scripts/ope.py pilot-summary-template --section draft
 python3 scripts/ope.py pilot-findings --from-local-ledger --section summary
 python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section summary

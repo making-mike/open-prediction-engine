@@ -3,13 +3,19 @@
 
 from __future__ import annotations
 
+import json
 import tempfile
 from pathlib import Path
 
 from generate_prediction_campaign_forecast_write import build_prediction_campaign_forecast_write
+from generate_prediction_campaign_manifest import build_prediction_campaign_manifest
+from generate_prediction_campaign_runner import build_prediction_campaign_runner, default_args
 from prediction_campaign_forecast_write_runtime import (
     PredictionCampaignForecastWriteError,
     ensure_safe_local_path,
+    execute_local_forecast_write,
+    forecast_close_passed,
+    write_missed_run_state,
 )
 
 
@@ -73,8 +79,86 @@ def check_safe_local_path_guards() -> None:
         )
 
 
+def check_runner_clock_write_guards() -> None:
+    manifest = build_prediction_campaign_manifest()
+
+    late_args = default_args()
+    late_args.now = "2026-06-11T12:50:00Z"
+    late_runner = build_prediction_campaign_runner(late_args)
+    late_plan = build_prediction_campaign_forecast_write(
+        run_id="predictionrun-1301",
+        embed_source_records=True,
+        manifest=manifest,
+        runner=late_runner,
+    )
+    late_guard = next(guard for guard in late_plan["writeGuards"] if guard["guardId"] == "forecastwriteguard-003")
+    require(late_guard["guardStatus"] == "block", "late runner clock should block the forecast-before-close guard")
+    require(late_guard["blocksWrite"] is True, "late forecast-before-close guard should block the write")
+    require_raises(
+        lambda: execute_local_forecast_write(plan=late_plan),
+        "a forecast write after forecastCloseAt must be refused",
+    )
+
+    ontime_args = default_args()
+    ontime_args.now = "2026-06-11T03:00:00Z"
+    ontime_runner = build_prediction_campaign_runner(ontime_args)
+    ontime_plan = build_prediction_campaign_forecast_write(
+        run_id="predictionrun-1301",
+        embed_source_records=True,
+        manifest=manifest,
+        runner=ontime_runner,
+    )
+    ontime_guard = next(guard for guard in ontime_plan["writeGuards"] if guard["guardId"] == "forecastwriteguard-003")
+    require(ontime_guard["guardStatus"] == "pass", "in-window runner clock should pass the forecast-before-close guard")
+    artifact = next(item for item in ontime_plan["sourceArtifacts"] if item["recordType"] == "forecast_artifact")
+    require(
+        artifact["sourceRecord"]["forecastedAt"] == "2026-06-11T03:00:00Z",
+        "effectful forecastedAt should be stamped with the runner clock, not the scheduled create time",
+    )
+    history = next(item for item in ontime_plan["sourceArtifacts"] if item["recordType"] == "forecast_history")
+    require(
+        history["sourceRecord"]["entries"][0]["forecastedAt"] == "2026-06-11T03:00:00Z",
+        "effectful forecast history entries should use the runner clock",
+    )
+
+    require(forecast_close_passed("2026-06-11T04:45:00Z", "2026-06-11T12:50:00Z") is True, "close-passed comparison drifted")
+    require(forecast_close_passed("2026-06-11T04:45:00Z", "2026-06-11T04:45:00Z") is False, "close boundary should be inclusive")
+
+
+def check_missed_run_state_writer() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        workspace = Path(temp_dir) / "workspace"
+        (workspace / ".ope" / "live" / "prediction-campaigns").mkdir(parents=True)
+        kwargs = {
+            "campaign_id": "predictioncampaign-001",
+            "cycle_id": "predictioncycle-001",
+            "run_id": "predictionrun-1301",
+            "question_id": "question-1301",
+            "forecast_id": "forecast-1301",
+            "source_policy_id": "sourcepolicy-1201",
+            "forecast_close_at": "2026-06-11T04:45:00Z",
+            "runner_clock": "2026-06-11T12:50:00Z",
+            "workspace_root": workspace,
+        }
+        first = write_missed_run_state(**kwargs)
+        require(first["writeStatus"] == "written", "missed run state should be written once")
+        state = json.loads((workspace / first["targetPath"]).read_text(encoding="utf-8"))
+        require(state["runStatus"] == "missed", "missed run state status drifted")
+        require(state["exclusionReasonCode"] == "missed_forecast_close", "missed run exclusion reason drifted")
+        require(state["excludedFromComparableEvidence"] is True, "missed runs must be excluded from comparable evidence")
+        require(state["artifactPaths"] == {}, "missed run state must not bind forecast artifacts")
+        require(
+            state["executionBoundary"]["createsForecastArtifacts"] is False,
+            "missed run state must not create forecast artifacts",
+        )
+        repeat = write_missed_run_state(**kwargs)
+        require(repeat["writeStatus"] == "already_present", "missed run state should be idempotent")
+
+
 def main() -> None:
     check_safe_local_path_guards()
+    check_runner_clock_write_guards()
+    check_missed_run_state_writer()
     plan = build_prediction_campaign_forecast_write()
     bindings = plan["bindings"]
     target = plan["targetState"]

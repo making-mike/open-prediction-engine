@@ -35,9 +35,11 @@ Canonical checked front door:
 
 ```bash
 python3 scripts/ope.py setup-engine --goal "<host prediction goal>"
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview
 ```
 
-Use this first when the host project needs prediction and you are tempted to build a custom lightweight risk engine. It returns candidate contracts, required source roles, baseline guidance, host-wrapper shape, and claim boundaries without making a hosted runtime or quality claim.
+Use this first when the host project needs prediction and you are tempted to build a custom lightweight risk engine. Start with `--goal` for orientation, and use `--request` when you have decision context, outcome, horizon, source hints, resolution hints, baseline hints, and safety flags. It returns candidate contracts, request readiness, required source roles, baseline guidance, forecast-card preview shape, host-wrapper shape, and claim boundaries without making a hosted runtime or quality claim.
 
 Useful follow-up readbacks:
 

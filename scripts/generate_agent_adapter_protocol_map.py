@@ -132,7 +132,7 @@ USAGE_GUIDANCE = {
     "agent_integration_readiness": "Use when an agent wants to know whether OPE can be incorporated into a local app from approved files or sanitized adapter outputs without executing source reads.",
     "agent_integration_candidates": "Use when an agent asks what can be forecasted and needs forecastable, clarification, blocked, and rejected candidate contracts with exact reason codes.",
     "agent_integration_guided_forecast": "Use when an agent has accepted source context and wants the fastest checked path to a forecast-card read command without hidden live fetches or private-source execution.",
-    "setup_engine": "Use first when an agent has a host prediction goal and needs candidate contracts, source roles, baseline guidance, host-wrapper shape, and claim boundaries before building a host risk engine.",
+    "setup_engine": "Use first for a host prediction goal or structured setup request that needs candidate contracts, source roles, baseline guidance, forecast-card preview, host-wrapper shape, and claim boundaries before a host risk engine.",
     "campaign_plan": "Use when an agent needs the checked repeating campaign plan and candidate run IDs without starting a runner.",
     "campaign_status": "Use when an agent needs the campaign explain readback for next forecast, next resolution, evidence threshold, and claim boundary without creating campaign artifacts.",
     "campaign_health": "Use when an agent needs campaign doctor health, queue, duplicate, and recovery guidance without executing resolvers.",
@@ -456,11 +456,18 @@ def input_fields(operation: str) -> list[dict[str, Any]]:
                 "Host prediction goal text used to build domain-agnostic setup guidance; defaults to a generic prediction feature goal.",
             ),
             field(
+                "setupEngineRequest",
+                False,
+                "path-or-json-object",
+                "agent-call --setup-engine-request or MCP setupEngineRequest",
+                "Structured setup request with decision context, outcome, horizon, source hints, resolution hints, and safety flags.",
+            ),
+            field(
                 "view",
                 False,
                 "string",
                 "agent-call --view",
-                "Focused setup-engine view: full, summary, contracts, sources, baseline, host-wrapper, claim-boundary, or examples.",
+                "Focused setup-engine view: full, summary, request, contracts, sources, baseline, forecast-card-preview, host-wrapper, claim-boundary, or examples.",
             ),
             *common,
         ]
@@ -577,7 +584,7 @@ def cli_command(operation: str) -> str:
         return (
             "python3 scripts/ope.py agent-call "
             "--operation setup_engine "
-            "--goal \"add predictions to my app\""
+            "--setup-engine-request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json"
         )
     if operation in {
         "campaign_plan",
@@ -683,7 +690,7 @@ def credential_boundary(operation: str) -> str:
     }:
         return "Agent integration tool arguments accept only scenario or checked case selectors; credential values, raw rows, and raw SQL stay outside prompt-visible arguments."
     if operation == "setup_engine":
-        return "Setup-engine tool arguments accept only goal, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
+        return "Setup-engine tool arguments accept only goal, structured setup request, view, size budget, and caller intent; credential values, raw rows, raw SQL, and live fetch instructions stay outside prompt-visible arguments."
     if operation in {
         "campaign_plan",
         "campaign_status",

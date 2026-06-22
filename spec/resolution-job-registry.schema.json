@@ -89,7 +89,7 @@
           "resolutionJobId": { "$ref": "common.schema.json#/$defs/id" },
           "jobStatus": {
             "type": "string",
-            "enum": ["pending_due", "pending_not_due", "already_resolved", "invalid_state"]
+            "enum": ["pending_due", "stale_due", "pending_not_due", "already_resolved", "invalid_state"]
           },
           "due": { "type": "boolean" },
           "target": {
@@ -180,6 +180,7 @@
                   "call_resolver_execute",
                   "call_campaign_resolver_attempt",
                   "wait_for_campaign_resolver",
+                  "provide_window_capture",
                   "read_resolved_outputs",
                   "inspect_invalid_state"
                 ]
@@ -223,10 +224,11 @@
     "summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["jobCount", "pendingDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
+      "required": ["jobCount", "pendingDueCount", "staleDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
       "properties": {
         "jobCount": { "type": "integer", "minimum": 0 },
         "pendingDueCount": { "type": "integer", "minimum": 0 },
+        "staleDueCount": { "type": "integer", "minimum": 0 },
         "pendingNotDueCount": { "type": "integer", "minimum": 0 },
         "alreadyResolvedCount": { "type": "integer", "minimum": 0 },
         "invalidCount": { "type": "integer", "minimum": 0 }

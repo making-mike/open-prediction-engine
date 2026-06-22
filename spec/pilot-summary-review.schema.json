@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-summary-review.schema.json",
+  "title": "Pilot Summary Review",
+  "description": "Read-only review bundle for a caller-supplied sanitized pilot summary, joining intake classification, local append eligibility, operator commands, and claim boundaries without writing evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotSummaryReviewId",
+    "generatedAt",
+    "reviewMode",
+    "inputRef",
+    "inputSummaryId",
+    "classification",
+    "appendPlan",
+    "reviewDecision",
+    "operatorCommands",
+    "executionBoundary",
+    "warnings",
+    "summary"
+  ],
+  "properties": {
+    "pilotSummaryReviewId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "reviewMode": { "type": "string", "enum": ["read_only_pilot_summary_review"] },
+    "inputRef": { "$ref": "#/$defs/boundedString" },
+    "inputSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+    "classification": { "$ref": "pilot-summary-intake-result.schema.json" },
+    "appendPlan": { "$ref": "pilot-evidence-local-append.schema.json" },
+    "reviewDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canAppendWithWriteLocal",
+        "blockedByIntake",
+        "needsRedaction",
+        "requiresModeratorApproval",
+        "nextAction"
+      ],
+      "properties": {
+        "canAppendWithWriteLocal": { "type": "boolean" },
+        "blockedByIntake": { "type": "boolean" },
+        "needsRedaction": { "type": "boolean" },
+        "requiresModeratorApproval": { "type": "boolean" },
+        "nextAction": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "operatorCommands": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/operatorCommand" }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSummaryId",
+        "intakeDecision",
+        "appendDecision",
+        "ledgerReady",
+        "canAppendWithWriteLocal",
+        "candidateRealSessionEvidence",
+        "contributesRealSessionEvidence",
+        "writeLocalRequired",
+        "writeLocalRequested",
+        "ledgerRowsWritten",
+        "realSessionsRecorded",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesEvidenceReady",
+        "expansionEvidenceReady"
+      ],
+      "properties": {
+        "inputSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+        "intakeDecision": { "$ref": "#/$defs/boundedString" },
+        "appendDecision": { "$ref": "#/$defs/boundedString" },
+        "ledgerReady": { "type": "boolean" },
+        "canAppendWithWriteLocal": { "type": "boolean" },
+        "candidateRealSessionEvidence": { "type": "boolean" },
+        "contributesRealSessionEvidence": { "type": "boolean" },
+        "writeLocalRequired": { "type": "boolean" },
+        "writeLocalRequested": { "type": "boolean" },
+        "ledgerRowsWritten": { "type": "integer", "minimum": 0 },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" },
+        "expansionEvidenceReady": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "boundedString": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "operatorCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepKey", "order", "command", "expectedOperatorAction", "mutatesLocalState"],
+      "properties": {
+        "stepKey": { "$ref": "#/$defs/boundedString" },
+        "order": { "type": "integer", "minimum": 1 },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedOperatorAction": { "$ref": "#/$defs/boundedString" },
+        "mutatesLocalState": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyReview",
+        "writesCheckedFixtures",
+        "writesIgnoredLocalLedger",
+        "recordsRealSessions",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "startsHostedRuntime",
+        "fetchesLiveData",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "generatedTypesUnblocked"
+      ],
+      "properties": {
+        "readOnlyReview": { "type": "boolean" },
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLocalLedger": { "type": "boolean" },
+        "recordsRealSessions": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "startsHostedRuntime": { "type": "boolean" },
+        "fetchesLiveData": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" },
+        "generatedTypesUnblocked": { "type": "boolean" }
+      }
+    }
+  }
+}

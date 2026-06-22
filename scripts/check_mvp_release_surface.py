@@ -173,6 +173,11 @@ def main() -> None:
 
     setup_engine = run_cli("setup-engine", "--goal", "add predictions to my app")
     require(setup_engine["engineSetupStatus"] == "checked_readback", "setup-engine status drifted")
+    require(setup_engine["inputMode"] == "goal_text", "setup-engine default input mode drifted")
+    require(
+        setup_engine["requestSummary"]["completenessStatus"] == "goal_text_only",
+        "setup-engine default request summary drifted",
+    )
     require(
         setup_engine["candidateForecastContracts"][0]["contractStatus"] == "forecastable",
         "setup-engine should expose a forecastable first candidate",
@@ -182,11 +187,50 @@ def main() -> None:
         "setup-engine host wrapper should render before forecast artifacts",
     )
     require(
+        "forecastCardPreview" in setup_engine["hostWrapper"]["renderSections"],
+        "setup-engine host wrapper should expose forecast-card preview",
+    )
+    require(
+        setup_engine["forecastCardPreview"]["forecastArtifactCreated"] is False,
+        "setup-engine forecast-card preview must not create artifacts",
+    )
+    require(
+        setup_engine["forecastCardPreview"]["probabilityAvailable"] is False,
+        "setup-engine forecast-card preview must not expose probability",
+    )
+    require(
         setup_engine["claimBoundary"]["qualityClaimAllowed"] is False,
         "setup-engine must keep quality claims blocked",
     )
     require(setup_engine["createsForecastArtifacts"] is False, "setup-engine must not create forecast artifacts")
     require(setup_engine["hostedRuntimeRequired"] is False, "setup-engine must not require hosted runtime")
+    setup_engine_request = run_cli(
+        "setup-engine",
+        "--request",
+        "spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
+        "--view",
+        "request",
+    )
+    require(setup_engine_request["inputMode"] == "structured_request", "setup-engine request input mode drifted")
+    require(
+        setup_engine_request["requestSummary"]["readyForSourceIntake"] is True,
+        "setup-engine structured request should be source-intake ready",
+    )
+    setup_engine_preview = run_cli(
+        "setup-engine",
+        "--request",
+        "spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json",
+        "--view",
+        "forecast-card-preview",
+    )
+    require(
+        setup_engine_preview["forecastCardPreview"]["evidenceStatus"] == "structured_sources_ready_for_intake",
+        "setup-engine structured request preview should be source-intake ready",
+    )
+    require(
+        setup_engine_preview["forecastCardPreview"]["probabilityAvailable"] is False,
+        "setup-engine structured request preview must not expose probability",
+    )
 
     prediction_goal_catalog = run_cli("prediction-goal-catalog")
     require(
@@ -631,6 +675,20 @@ def main() -> None:
     require(pilot_session["collectionSummary"]["expansionEvidenceReady"] is False, "pilot session packet must not unblock expansion")
     require(pilot_session["collectionSummary"]["qualityClaimAllowed"] is False, "pilot session packet must keep quality claims blocked")
 
+    pilot_session_brief = run_cli("pilot-session-brief", "--section", "summary")
+    require(
+        pilot_session_brief["briefStatus"] == "ready_for_supervised_session",
+        "pilot session brief should be ready for supervised sessions",
+    )
+    require(
+        pilot_session_brief["recommendedScenarioKey"] == "engine_setup_shortcut_comprehension",
+        "pilot session brief should default to setup-comprehension task",
+    )
+    require(pilot_session_brief["genericAgentGuidanceReady"] is True, "pilot session brief should expose generic guidance")
+    require(pilot_session_brief["draftLedgerReady"] is False, "pilot session brief draft must not be ledger-ready unchanged")
+    require(pilot_session_brief["qualityClaimAllowed"] is False, "pilot session brief must keep quality claims blocked")
+    require(pilot_session_brief["hostedRuntimeAllowed"] is False, "pilot session brief must keep hosted runtime blocked")
+
     pilot_summary = run_cli("pilot-summary-intake")
     require(pilot_summary["summary"]["acceptedLedgerReadyCount"] == 2, "pilot summary intake should expose two ledger-ready examples")
     require(pilot_summary["summary"]["blockedCaseCount"] == 3, "pilot summary intake should expose blocked examples")
@@ -656,6 +714,25 @@ def main() -> None:
         "pilot summary input classifier must not count real sessions",
     )
     require(pilot_summary_input["ledgerRowsWritten"] == 0, "pilot summary input classifier must not write ledger rows")
+
+    pilot_summary_review = run_cli(
+        "pilot-summary-review",
+        "--input",
+        "spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json",
+        "--section",
+        "summary",
+    )
+    require(
+        pilot_summary_review["appendDecision"] == "ready_for_local_write",
+        "pilot summary review should expose append-ready accepted summaries",
+    )
+    require(
+        pilot_summary_review["canAppendWithWriteLocal"] is True,
+        "pilot summary review should mark accepted summaries as write-local eligible",
+    )
+    require(pilot_summary_review["ledgerRowsWritten"] == 0, "pilot summary review must remain read-only")
+    require(pilot_summary_review["realSessionsRecorded"] == 0, "pilot summary review must not record sessions")
+    require(pilot_summary_review["qualityClaimAllowed"] is False, "pilot summary review must keep quality claims blocked")
 
     pilot_summary_template = run_cli("pilot-summary-template", "--section", "summary")
     require(pilot_summary_template["templateStatus"] == "ready_for_operator_fill", "pilot summary template should be operator-fill ready")

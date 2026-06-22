@@ -111,6 +111,16 @@ def build_failure_taxonomy() -> list[dict[str, Any]]:
             ["below_minimum_rows", "non_comparable_window"],
         ),
         failure(
+            "late_capture_window",
+            "coverage",
+            ["resolver_attempt", "resolution_outcome_capture"],
+            False,
+            None,
+            "provide_window_capture",
+            "The outcome capture happened too long after the scheduled resolution time to contain the forecast window's trips.",
+            ["capture_after_resolve_window", "stale_capture_window", "run_marked_blocked"],
+        ),
+        failure(
             "resolver_failures",
             "resolver",
             ["resolver_attempt"],

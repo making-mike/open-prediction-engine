@@ -45,6 +45,16 @@ def main() -> None:
     summary = adoption["summary"]
     require(summary["primaryValue"] == "engine_setup_shortcut", "primary value should be engine setup shortcut")
     require(summary["firstCommand"] == "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"", "first command drifted")
+    require(
+        adoption["capabilityManifest"]["structuredRequestCommand"]
+        == "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request",
+        "structured setup request command drifted",
+    )
+    require(
+        adoption["capabilityManifest"]["forecastCardPreviewCommand"]
+        == "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview",
+        "forecast-card preview command drifted",
+    )
     require(summary["compactDefaultOutput"] is True, "agent-facing default output should be compact")
     require(summary["hostedRuntimeProvided"] is False, "adoption surface must not claim hosted runtime")
     require(summary["trainedModelProvided"] is False, "adoption surface must not claim trained model")
@@ -104,6 +114,7 @@ def main() -> None:
         "read_capabilities",
         "inspect_extension_points",
         "avoid_overclaiming",
+        "use_structured_setup_request",
         "setup_engine_before_parallel_risk_engine",
         "avoid_audit_layer_only_framing",
     ]:
@@ -121,6 +132,8 @@ def main() -> None:
         "Bring your own model",
         "Extension points",
         "python3 scripts/ope.py setup-engine",
+        "setup-engine --request",
+        "forecast-card-preview",
         "python3 scripts/ope.py prediction-goal-catalog",
         "python3 scripts/ope.py explain-fit",
     ]:

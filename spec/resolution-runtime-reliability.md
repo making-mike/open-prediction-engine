@@ -2,7 +2,7 @@
 
 Status: checked fixture read model.
 
-Last reviewed: 2026-05-27.
+Last reviewed: 2026-06-11.
 
 This contract records the failure taxonomy, retry guidance, and provenance boundary for the local resolution runtime around transit forward runs, resolution jobs, foreground scheduler ticks, resolver attempts, local live captures, and shutdown readbacks.
 
@@ -24,11 +24,14 @@ The checked taxonomy covers:
 - `decode_failures`
 - `schedule_join_failures`
 - `coverage_gaps`
+- `late_capture_window`
 - `resolver_failures`
 - `stale_state`
 - `invalid_state`
 - `network_timeouts`
 - `rate_limits`
+
+`late_capture_window` records an outcome capture attempted so long after the scheduled resolution time that a live snapshot can no longer contain the forecast window's trips. It is not retryable against the live feed; the run is marked `blocked` with reason `stale_capture_window` and may only resolve later from an on-time saved capture.
 
 Every failure row declares `retryable`, `retryAfter`, `nextAction`, sanitized diagnostics, safe signals, affected runtime stages, and artifact/claim boundaries. Raw diagnostics, stack traces, absolute paths, forecast artifacts, resolution artifacts, scoring records, and calibration claims remain blocked.
 

@@ -145,6 +145,8 @@ def outcome_from_source(
         LATE_SECONDS,
         EVENT_THRESHOLD,
         MIN_OBSERVATIONS,
+        horizon_start=run["horizonStartsAt"],
+        resolve_at=run["resolutionEligibleAt"],
     )
 
 

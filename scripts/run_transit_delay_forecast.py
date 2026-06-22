@@ -8,10 +8,11 @@ import csv
 import hashlib
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import forecast_feature_sources as feature_sources
 from ope_schema import SPEC, validate_record
 from ope_scoring import baseline_lift, binary_brier
 from ope_fixtures import render_json
@@ -35,6 +36,7 @@ RESOLVE_AT = "2026-06-10T08:00:00Z"
 LATE_SECONDS = 300
 EVENT_THRESHOLD = 0.2
 MIN_OBSERVATIONS = 10
+MAX_CAPTURE_LAG_SECONDS = 3600
 
 DEFAULT_WEATHER = LOCAL_FIXTURES / "transit-weather-forecast.json"
 DEFAULT_HISTORY = LOCAL_FIXTURES / "transit-delay-history.csv"
@@ -247,13 +249,58 @@ def weather_adjustment(features: dict[str, Any]) -> tuple[float, list[str]]:
     if temperature is not None and (float(temperature) <= -5 or float(temperature) >= 30):
         adjustment += 0.04
         factors.append(f"temperature stress {float(temperature):g} C")
+    road_surface = features.get("roadSurfaceTempC")
+    if road_surface is not None and float(road_surface) <= 0:
+        adjustment += 0.08
+        factors.append(f"road surface at/below freezing {float(road_surface):g} C")
+    visibility = features.get("visibilityM")
+    if visibility is not None and float(visibility) <= 1000:
+        adjustment += 0.04
+        factors.append(f"low visibility {float(visibility):g} m")
     if not factors:
         factors.append("no beta weather stress bucket crossed")
     return round(adjustment, 4), factors
 
 
+def fmi_features(
+    rows: list[dict[str, Any]],
+    network: str,
+    geography: str,
+    service_window: str,
+    service_date: str,
+    forecast_close_time: str,
+) -> dict[str, Any]:
+    scoped = [row for row in rows if matches_scope(row, network, geography, service_window, service_date)]
+    if not scoped:
+        raise TransitForecastError("FMI weather source has no row for the requested network/geography/window/date")
+    row = scoped[0]
+    retrieved_at = row.get("retrieved_at")
+    if retrieved_at is not None and parse_time(str(retrieved_at)) > parse_time(forecast_close_time):
+        raise TransitForecastError("FMI weather source retrieved_at is after forecast close")
+    return {
+        "temperatureC": first_number(row, ["temperature_c", "temp_c"], None),
+        "snowfallMm": first_number(row, ["snowfall_mm", "forecast_snowfall_mm"], None),
+        "roadSurfaceTempC": first_number(row, ["road_surface_temp_c", "road_temp_c"], None),
+        "visibilityM": first_number(row, ["visibility_m"], None),
+        "retrievedAt": retrieved_at,
+    }
+
+
 def forecast_probability(baseline: float, adjustment: float) -> float:
     return round(min(0.95, max(0.01, baseline + adjustment)), 4)
+
+
+def captured_within_resolution_window(row: dict[str, Any], horizon_start: str, resolve_at: str) -> bool:
+    captured_at = row.get("captured_at")
+    if captured_at is None or not str(captured_at).strip():
+        return True
+    try:
+        captured = parse_time(str(captured_at))
+    except ValueError:
+        return False
+    window_start = parse_time(horizon_start)
+    window_end = parse_time(resolve_at) + timedelta(seconds=MAX_CAPTURE_LAG_SECONDS)
+    return window_start <= captured <= window_end
 
 
 def resolve_trip_updates(
@@ -265,27 +312,40 @@ def resolve_trip_updates(
     late_seconds: int,
     event_threshold: float,
     min_observations: int,
+    *,
+    horizon_start: str | None = None,
+    resolve_at: str | None = None,
 ) -> dict[str, Any]:
     scoped = [row for row in rows if matches_scope(row, network, geography, service_window, service_date)]
-    parsed_delays = [parse_float(row.get("delay_seconds")) for row in scoped]
+    if horizon_start is not None and resolve_at is not None:
+        in_window = [row for row in scoped if captured_within_resolution_window(row, horizon_start, resolve_at)]
+    else:
+        in_window = scoped
+    out_of_window_count = len(scoped) - len(in_window)
+    parsed_delays = [parse_float(row.get("delay_seconds")) for row in in_window]
     delays = [delay for delay in parsed_delays if delay is not None]
     observation_count = len(delays)
     late_count = sum(1 for delay in delays if delay >= late_seconds)
     late_ratio = round(late_count / observation_count, 4) if observation_count else 0.0
     if observation_count < min_observations:
+        reason = "transit outcome feed did not meet the minimum observation count"
+        if out_of_window_count:
+            reason += " after excluding rows captured outside the resolution window"
         return {
             "status": "ambiguous",
             "observationCount": observation_count,
             "lateCount": late_count,
             "lateRatio": late_ratio,
+            "outOfWindowRowCount": out_of_window_count,
             "outcome": None,
-            "reason": "transit outcome feed did not meet the minimum observation count",
+            "reason": reason,
         }
     return {
         "status": "resolved",
         "observationCount": observation_count,
         "lateCount": late_count,
         "lateRatio": late_ratio,
+        "outOfWindowRowCount": out_of_window_count,
         "outcome": late_ratio >= event_threshold,
         "reason": "coverage checks passed",
     }
@@ -305,7 +365,10 @@ def resolution_criteria(network: str, geography: str, service_window: str, servi
         f"Resolve Yes if collected GTFS-RT TripUpdates or equivalent transit delay rows for {network} in "
         f"{geography} during {service_window} on {service_date} include at least {min_observations} eligible "
         f"trip-stop observations and at least {threshold_percent}% have delay_seconds >= {late_seconds}. "
-        "Resolve No if coverage passes and the ratio is below threshold. Resolve Ambiguous if coverage fails."
+        "Eligible observations must carry the observed service date and window of the question scope and must be "
+        f"captured between the horizon start and {MAX_CAPTURE_LAG_SECONDS // 60} minutes after the scheduled "
+        "resolution time. Resolve No if coverage passes and the ratio is below threshold. "
+        "Resolve Ambiguous if coverage fails."
     )
 
 
@@ -327,6 +390,8 @@ def build_records(
     horizon_start: str,
     horizon_end: str,
     resolve_at: str,
+    fmi_weather_path: Path | None = None,
+    calendar_enabled: bool = False,
 ) -> dict[str, Any]:
     weather = weather_features(
         load_rows(weather_path),
@@ -337,11 +402,33 @@ def build_records(
         forecast_close_time,
     )
     baseline = baseline_from_history(load_rows(history_path), network, geography, service_window, event_threshold)
+
+    extra_refs: list[dict[str, Any]] = []
+    if fmi_weather_path is not None:
+        fmi = fmi_features(
+            load_rows(fmi_weather_path), network, geography, service_window, service_date, forecast_close_time
+        )
+        weather = feature_sources.merge_fmi_weather(weather, fmi)
+        extra_refs.append(
+            source_ref(
+                "source-1205", "FMI Open Data Winter Weather", "official", fmi_weather_path, fmi.get("retrievedAt")
+            )
+        )
     adjustment, factors = weather_adjustment(weather)
+    if calendar_enabled:
+        calendar = feature_sources.calendar_features(service_date)
+        calendar_adjustment, calendar_factors = feature_sources.calendar_contribution(calendar)
+        adjustment = round(adjustment + calendar_adjustment, 4)
+        factors = factors + calendar_factors
+        extra_refs.append(feature_sources.calendar_provenance_ref(calendar, forecasted_at))
     probability = forecast_probability(float(baseline["probability"]), adjustment)
 
     weather_ref = source_ref("source-1201", "Transit Weather Forecast File", "public_dataset", weather_path, weather["retrievedAt"])
     history_ref = source_ref("source-1202", "Historical Transit Delay File", "public_dataset", history_path, forecasted_at)
+    source_classes: list[str] = []
+    for ref in [weather_ref, history_ref, *extra_refs]:
+        if ref["sourceType"] not in source_classes:
+            source_classes.append(ref["sourceType"])
     if trip_updates_path is None:
         outcome_ref = {
             "sourceId": "source-1203",
@@ -406,8 +493,8 @@ def build_records(
         "horizon": question["horizon"],
         "forecastedAt": forecasted_at,
         "model": model,
-        "inputSourceClasses": ["public_dataset"],
-        "provenanceReferences": [weather_ref, history_ref],
+        "inputSourceClasses": source_classes,
+        "provenanceReferences": [weather_ref, history_ref, *extra_refs],
         "featureSnapshotRef": "https://example.test/fixtures/generated/transit-delay-forecast/weather-transit-delays-feature-snapshot.generated.json",
         "forecastOutput": forecast_output,
         "baselineForecast": baseline_output,
@@ -490,6 +577,8 @@ def build_records(
             late_seconds,
             event_threshold,
             min_observations,
+            horizon_start=horizon_start,
+            resolve_at=resolve_at,
         )
         if resolution_summary["status"] == "resolved":
             resolution = {

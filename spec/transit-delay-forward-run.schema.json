@@ -93,6 +93,14 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 300
+        },
+        "fmiWeatherSourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "calendarEnabled": {
+          "type": "boolean"
         }
       }
     },
@@ -139,6 +147,41 @@
         "unmatchedTripUpdateCount": {
           "type": "integer",
           "minimum": 0
+        },
+        "serviceDateMismatchTripUpdateCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outsideHorizonStopTimeUpdateCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "resolutionGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reasonCode",
+        "resolveAt",
+        "attemptedAt",
+        "captureLagSeconds",
+        "maxCaptureLagSeconds"
+      ],
+      "properties": {
+        "reasonCode": {
+          "type": "string",
+          "enum": ["stale_capture_window"]
+        },
+        "resolveAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "attemptedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "captureLagSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxCaptureLagSeconds": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },

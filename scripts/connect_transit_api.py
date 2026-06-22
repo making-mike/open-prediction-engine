@@ -158,6 +158,7 @@ def connector_record() -> dict[str, Any]:
             "Live HSL capture is opt-in and writes only to the ignored local workspace.",
             "The stdlib decoder can derive delay rows through an opt-in static GTFS schedule join.",
             "HSL TripUpdates can provide predicted stop times without explicit delay fields; deriving delay seconds then requires --schedule-join and the companion static GTFS package.",
+            "Decoded rows are stamped with the observed GTFS trip start date; a requested service date filters rows out instead of restamping them.",
             "Decoded live rows are source handoff inputs, not forecast or quality claims.",
         ],
     }
@@ -249,6 +250,16 @@ def timestamp_to_iso(value: int | None) -> str:
     if value is None:
         return format_timestamp(utc_now())
     return format_timestamp(datetime.fromtimestamp(value, tz=timezone.utc))
+
+
+def iso_to_epoch(value: str) -> int:
+    return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp())
+
+
+def horizon_epoch_bounds(horizon_start: str | None, horizon_end: str | None) -> tuple[int, int] | None:
+    if not horizon_start or not horizon_end:
+        return None
+    return iso_to_epoch(horizon_start), iso_to_epoch(horizon_end)
 
 
 def parse_header(data: bytes) -> dict[str, Any]:
@@ -616,6 +627,8 @@ def schedule_derived_rows(
     service_window: str,
     service_date: str | None,
     header_timestamp: int | None,
+    horizon_start: str | None = None,
+    horizon_end: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     keys = feed_schedule_keys(entities)
     schedules_by_key, load_metadata = load_static_schedules(static_gtfs_path, keys)
@@ -623,11 +636,14 @@ def schedule_derived_rows(
     with zipfile.ZipFile(static_gtfs_path) as package:
         active_by_date = active_service_ids(package, {key[3] for key in keys})
 
+    bounds = horizon_epoch_bounds(horizon_start, horizon_end)
     rows: list[dict[str, Any]] = []
     matched_trip_updates = 0
     unmatched_trip_updates = 0
     matched_stop_updates = 0
     unmatched_stop_updates = 0
+    service_date_mismatch_trip_updates = 0
+    outside_horizon_stop_updates = 0
     for entity in entities:
         trip_update = entity["tripUpdate"]
         trip = trip_update.get("trip") or {}
@@ -638,6 +654,12 @@ def schedule_derived_rows(
         if not route_id or direction_id is None or not start_time or not start_date:
             unmatched_trip_updates += 1
             unmatched_stop_updates += len(trip_update.get("stopTimeUpdates", []))
+            continue
+        capture_timestamp = trip_update.get("timestamp", header_timestamp)
+        captured_at = timestamp_to_iso(capture_timestamp)
+        row_service_date = service_date_from_gtfs(str(start_date), capture_timestamp)
+        if service_date is not None and row_service_date != service_date:
+            service_date_mismatch_trip_updates += 1
             continue
         lookup_key = (str(route_id), str(direction_id), str(start_time))
         schedule = best_schedule(
@@ -652,9 +674,6 @@ def schedule_derived_rows(
         matched_trip_updates += 1
         stops = schedule["stops"]
         search_index = 0
-        capture_timestamp = trip_update.get("timestamp", header_timestamp)
-        captured_at = timestamp_to_iso(capture_timestamp)
-        row_service_date = service_date or service_date_from_gtfs(str(start_date), capture_timestamp)
         for stop_update in trip_update.get("stopTimeUpdates", []):
             stop_id = str(stop_update.get("stopId", ""))
             event = event_time(stop_update)
@@ -676,6 +695,9 @@ def schedule_derived_rows(
                 unmatched_stop_updates += 1
                 continue
             scheduled_epoch = gtfs_local_epoch(str(start_date), scheduled_seconds)
+            if bounds is not None and not bounds[0] <= scheduled_epoch <= bounds[1]:
+                outside_horizon_stop_updates += 1
+                continue
             rows.append(
                 {
                     "service_date": row_service_date,
@@ -697,6 +719,8 @@ def schedule_derived_rows(
         "unmatchedTripUpdateCount": unmatched_trip_updates,
         "matchedStopTimeUpdateCount": matched_stop_updates,
         "unmatchedStopTimeUpdateCount": unmatched_stop_updates,
+        "serviceDateMismatchTripUpdateCount": service_date_mismatch_trip_updates,
+        "outsideHorizonStopTimeUpdateCount": outside_horizon_stop_updates,
         "scheduleDerivedDelayRowCount": len(rows),
     }
     return rows, metadata
@@ -711,25 +735,38 @@ def decode_trip_update_rows(
     service_date: str | None = None,
     schedule_join: bool = False,
     static_gtfs_path: Path | None = None,
+    horizon_start: str | None = None,
+    horizon_end: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     header, entities = parse_feed(data)
 
     header_timestamp = header.get("timestamp")
+    bounds = horizon_epoch_bounds(horizon_start, horizon_end)
     rows: list[dict[str, Any]] = []
     stop_update_count = 0
+    service_date_mismatch_rows = 0
+    outside_horizon_rows = 0
     for entity in entities:
         trip_update = entity["tripUpdate"]
         trip = trip_update.get("trip") or {}
         trip_id = trip_identity(entity.get("id"), trip)
         capture_timestamp = trip_update.get("timestamp", header_timestamp)
         captured_at = timestamp_to_iso(capture_timestamp)
-        row_service_date = service_date or service_date_from_gtfs(trip.get("startDate"), capture_timestamp)
+        row_service_date = service_date_from_gtfs(trip.get("startDate"), capture_timestamp)
         trip_delay = trip_update.get("delay")
         for stop_update in trip_update.get("stopTimeUpdates", []):
             stop_update_count += 1
             delay = delay_from_stop_update(stop_update, trip_delay)
             if delay is None:
                 continue
+            if service_date is not None and row_service_date != service_date:
+                service_date_mismatch_rows += 1
+                continue
+            if bounds is not None:
+                event = event_time(stop_update)
+                if event is None or not bounds[0] <= event[1] <= bounds[1]:
+                    outside_horizon_rows += 1
+                    continue
             rows.append(
                 {
                     "service_date": row_service_date,
@@ -755,6 +792,8 @@ def decode_trip_update_rows(
             service_window=service_window,
             service_date=service_date,
             header_timestamp=header_timestamp,
+            horizon_start=horizon_start,
+            horizon_end=horizon_end,
         )
         rows = explicit_rows + schedule_rows
     metadata = {
@@ -762,6 +801,11 @@ def decode_trip_update_rows(
         "feedTimestamp": timestamp_to_iso(header_timestamp) if header_timestamp is not None else None,
         "entityCount": len(entities),
         "stopTimeUpdateCount": stop_update_count,
+        "requestedServiceDate": service_date,
+        "horizonStartsAt": horizon_start,
+        "horizonEndsAt": horizon_end,
+        "serviceDateMismatchRowCount": service_date_mismatch_rows,
+        "outsideHorizonRowCount": outside_horizon_rows,
         "explicitDelayRowCount": len(explicit_rows),
         "decodedDelayRowCount": len(rows),
         "scheduleJoin": schedule_join_metadata,
@@ -1193,7 +1237,7 @@ def save_capture(
         delay_source=delay_source,
     )
     if service_date is not None:
-        summary["serviceDateOverride"] = service_date
+        summary["requestedServiceDate"] = service_date
     metadata_path.write_text(render_json(summary), encoding="utf-8")
     return summary
 
@@ -1319,6 +1363,26 @@ def check_decoder() -> None:
         raise TransitApiConnectorError("decoder should use arrival delay when departure is absent")
     if rows[0]["service_date"] != "2026-06-10":
         raise TransitApiConnectorError("decoder should convert GTFS start_date to ISO date")
+
+    matching_rows, matching_metadata = decode_trip_update_rows(
+        synthetic_gtfs_rt(),
+        network="hsl-surface",
+        geography="helsinki",
+        service_window="morning_peak",
+        service_date="2026-06-10",
+    )
+    if len(matching_rows) != 2 or matching_metadata["serviceDateMismatchRowCount"] != 0:
+        raise TransitApiConnectorError("decoder should keep rows whose observed service date matches the request")
+    mismatch_rows, mismatch_metadata = decode_trip_update_rows(
+        synthetic_gtfs_rt(),
+        network="hsl-surface",
+        geography="helsinki",
+        service_window="morning_peak",
+        service_date="2026-06-09",
+    )
+    if mismatch_rows or mismatch_metadata["serviceDateMismatchRowCount"] != 2:
+        raise TransitApiConnectorError("decoder must reject rows whose observed service date differs from the request")
+
     with tempfile.TemporaryDirectory() as temp_dir:
         static_gtfs_path = Path(temp_dir) / "synthetic-gtfs.zip"
         write_synthetic_static_gtfs(static_gtfs_path)
@@ -1330,16 +1394,43 @@ def check_decoder() -> None:
             schedule_join=True,
             static_gtfs_path=static_gtfs_path,
         )
+        wrong_day_rows, wrong_day_metadata = decode_trip_update_rows(
+            synthetic_gtfs_rt_without_delay(),
+            network="hsl-surface",
+            geography="helsinki",
+            service_window="morning_peak",
+            service_date="2026-06-09",
+            schedule_join=True,
+            static_gtfs_path=static_gtfs_path,
+        )
+        horizon_rows, horizon_metadata = decode_trip_update_rows(
+            synthetic_gtfs_rt_without_delay(),
+            network="hsl-surface",
+            geography="helsinki",
+            service_window="morning_peak",
+            schedule_join=True,
+            static_gtfs_path=static_gtfs_path,
+            horizon_start=timestamp_to_iso(gtfs_local_epoch("20260610", 7 * 3600)),
+            horizon_end=timestamp_to_iso(gtfs_local_epoch("20260610", 8 * 3600 + 300)),
+        )
     if joined_metadata["explicitDelayRowCount"] != 0:
         raise TransitApiConnectorError("schedule-join fixture should not contain explicit delay rows")
     if joined_metadata["scheduleJoin"]["scheduleDerivedDelayRowCount"] != 2:
         raise TransitApiConnectorError("schedule join should emit two delay rows")
     if joined_rows[0]["trip_id"] != "trip-static-fixture-001":
         raise TransitApiConnectorError("schedule join should bind the static GTFS trip id")
+    if joined_rows[0]["service_date"] != "2026-06-10":
+        raise TransitApiConnectorError("schedule join should stamp the observed GTFS trip start date")
     if joined_rows[0]["delay_seconds"] != 300:
         raise TransitApiConnectorError("schedule join should compute first stop delay")
     if joined_rows[1]["delay_seconds"] != 120:
         raise TransitApiConnectorError("schedule join should compute second stop delay")
+    if wrong_day_rows or wrong_day_metadata["scheduleJoin"]["serviceDateMismatchTripUpdateCount"] != 1:
+        raise TransitApiConnectorError("schedule join must reject trips whose observed service date differs from the request")
+    if len(horizon_rows) != 1 or horizon_rows[0]["delay_seconds"] != 300:
+        raise TransitApiConnectorError("schedule join should keep only rows scheduled inside the horizon")
+    if horizon_metadata["scheduleJoin"]["outsideHorizonStopTimeUpdateCount"] != 1:
+        raise TransitApiConnectorError("schedule join should count rows scheduled outside the horizon")
 
 
 def write_connector(record: dict[str, Any]) -> None:
@@ -1386,7 +1477,7 @@ def main() -> None:
     parser.add_argument("--network", default="hsl-surface")
     parser.add_argument("--geography", default="helsinki")
     parser.add_argument("--service-window", default="api_capture")
-    parser.add_argument("--service-date", help="override decoded GTFS service date")
+    parser.add_argument("--service-date", help="keep only rows whose observed GTFS trip start date matches this date")
     parser.add_argument("--forecast-close-time", default=GENERATED_AT)
     parser.add_argument("--late-seconds", type=int, default=300)
     args = parser.parse_args()

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import sys
 from datetime import datetime, timedelta, timezone
@@ -145,6 +146,8 @@ def build_forecast_records(
         horizon_start=context["horizon_start"],
         horizon_end=context["horizon_end"],
         resolve_at=context["resolve_at"],
+        fmi_weather_path=absolutize(args.fmi_weather) if getattr(args, "fmi_weather", None) else None,
+        calendar_enabled=bool(getattr(args, "calendar", False)),
     )
 
 
@@ -199,6 +202,8 @@ def capture_transit_rows(args: argparse.Namespace, context: dict[str, str], run_
         service_date=args.service_date,
         schedule_join=True,
         static_gtfs_path=static_gtfs_path,
+        horizon_start=context["horizon_start"],
+        horizon_end=context["horizon_end"],
     )
     delay_source = (
         "static_gtfs_schedule_join"
@@ -233,6 +238,8 @@ def summary_from_records(
     forecast_dir: Path,
     resolved_dir: Path | None,
     capture_summary: dict[str, Any] | None,
+    fmi_weather_path: Path | None = None,
+    calendar_enabled: bool = False,
 ) -> dict[str, Any]:
     artifact = records["artifact"]
     run_summary = records["summary"]
@@ -275,6 +282,10 @@ def summary_from_records(
             "Transit delay outcome rows are resolution evidence, not forecast-time evidence.",
         ],
     }
+    if fmi_weather_path is not None:
+        output["forecastStage"]["fmiWeatherSourceRef"] = workspace_path(fmi_weather_path)
+    if calendar_enabled:
+        output["forecastStage"]["calendarEnabled"] = True
     if resolved_dir is not None:
         output["artifacts"]["resolvedDirectory"] = workspace_path(resolved_dir)
     if run_mode != "fixture_replay":
@@ -289,6 +300,8 @@ def summary_from_records(
             "rowCount": capture_summary["delaySummary"]["rowCount"],
             "matchedTripUpdateCount": schedule_join.get("matchedTripUpdateCount", 0),
             "unmatchedTripUpdateCount": schedule_join.get("unmatchedTripUpdateCount", 0),
+            "serviceDateMismatchTripUpdateCount": schedule_join.get("serviceDateMismatchTripUpdateCount", 0),
+            "outsideHorizonStopTimeUpdateCount": schedule_join.get("outsideHorizonStopTimeUpdateCount", 0),
         }
     elif resolution is not None:
         output["captureStage"] = {
@@ -400,6 +413,8 @@ def run_live(args: argparse.Namespace) -> dict[str, Any]:
     if args.live_weather or not args.weather_forecast:
         weather_path = write_live_weather_source(weather_path, args, context)
     history_path = absolutize(args.historical_delays)
+    fmi_path = absolutize(args.fmi_weather) if getattr(args, "fmi_weather", None) else None
+    calendar_enabled = bool(getattr(args, "calendar", False))
     forecast_dir = run_dir / "forecast"
     forecast_records = build_forecast_records(
         weather_path=weather_path,
@@ -426,6 +441,8 @@ def run_live(args: argparse.Namespace) -> dict[str, Any]:
             forecast_dir=forecast_dir,
             resolved_dir=None,
             capture_summary=None,
+            fmi_weather_path=fmi_path,
+            calendar_enabled=calendar_enabled,
         )
         (run_dir / "forward-run-state.json").write_text(render_json(summary), encoding="utf-8")
         return summary
@@ -460,8 +477,41 @@ def run_live(args: argparse.Namespace) -> dict[str, Any]:
         forecast_dir=forecast_dir,
         resolved_dir=resolved_dir,
         capture_summary=capture_summary,
+        fmi_weather_path=fmi_path,
+        calendar_enabled=calendar_enabled,
     )
     (run_dir / "forward-run-state.json").write_text(render_json(summary), encoding="utf-8")
+    return summary
+
+
+def stale_capture_blocked_state(
+    state: dict[str, Any],
+    state_path: Path,
+    now: datetime,
+    capture_lag_seconds: int,
+) -> dict[str, Any]:
+    summary = copy.deepcopy(state)
+    summary["generatedAt"] = format_timestamp(now)
+    summary["runStatus"] = "blocked"
+    summary["resolutionGuard"] = {
+        "reasonCode": "stale_capture_window",
+        "resolveAt": state["forecastStage"]["resolveAt"],
+        "attemptedAt": format_timestamp(now),
+        "captureLagSeconds": capture_lag_seconds,
+        "maxCaptureLagSeconds": transit_forecast.MAX_CAPTURE_LAG_SECONDS,
+    }
+    summary["nextAction"] = (
+        "resolve with an on-time --trip-updates capture from the forecast window, or record the run as unresolvable"
+    )
+    warnings = list(summary.get("warnings", []))
+    guard_warning = (
+        "Resolution was blocked because a live capture this long after resolveAt cannot contain the forecast window's trips."
+    )
+    if guard_warning not in warnings:
+        warnings.append(guard_warning)
+    summary["warnings"] = warnings[:12]
+    validate_summary(summary)
+    state_path.write_text(render_json(summary), encoding="utf-8")
     return summary
 
 
@@ -470,6 +520,11 @@ def run_resolve_from_state(args: argparse.Namespace) -> dict[str, Any]:
         raise ForwardRunError("--run-state is required for --phase resolve")
     state_path = absolutize(args.run_state)
     state = json.loads(state_path.read_text(encoding="utf-8"))
+    now = parse_timestamp(args.now) if args.now else utc_now()
+    capture_lag_seconds = int((now - parse_timestamp(state["forecastStage"]["resolveAt"])).total_seconds())
+    needs_live_capture = not args.trip_updates and not args.input_protobuf
+    if needs_live_capture and capture_lag_seconds > transit_forecast.MAX_CAPTURE_LAG_SECONDS:
+        return stale_capture_blocked_state(state, state_path, now, capture_lag_seconds)
     args.network = state["forecastStage"]["network"]
     args.geography = state["forecastStage"]["geography"]
     args.service_date = state["forecastStage"]["serviceDate"]
@@ -478,7 +533,9 @@ def run_resolve_from_state(args: argparse.Namespace) -> dict[str, Any]:
     args.run_dir = str(run_dir)
     args.weather_forecast = state["forecastStage"]["weatherSourceRef"]
     args.historical_delays = state["forecastStage"]["historySourceRef"]
-    args.generated_at = format_timestamp(utc_now())
+    args.fmi_weather = state["forecastStage"].get("fmiWeatherSourceRef")
+    args.calendar = bool(state["forecastStage"].get("calendarEnabled", False))
+    args.generated_at = format_timestamp(now)
     args.forecasted_at = state["forecastStage"]["forecastedAt"]
     args.forecast_close_time = state["forecastStage"]["closeAt"]
     args.horizon_start = state["forecastStage"]["horizon"]["startsAt"]
@@ -503,6 +560,8 @@ def main() -> None:
     parser.add_argument("--run-dir")
     parser.add_argument("--run-state")
     parser.add_argument("--weather-forecast")
+    parser.add_argument("--fmi-weather", help="optional FMI winter-weather CSV (temperature/snow/road-surface/visibility)")
+    parser.add_argument("--calendar", action="store_true", help="include Finnish calendar features (holidays/school/day-of-week)")
     parser.add_argument("--historical-delays", default=str(transit_forecast.DEFAULT_HISTORY))
     parser.add_argument("--trip-updates")
     parser.add_argument("--live-weather", action="store_true")
@@ -519,6 +578,7 @@ def main() -> None:
     parser.add_argument("--late-seconds", type=int, default=transit_forecast.LATE_SECONDS)
     parser.add_argument("--event-threshold", type=float, default=transit_forecast.EVENT_THRESHOLD)
     parser.add_argument("--min-observations", type=int, default=transit_forecast.MIN_OBSERVATIONS)
+    parser.add_argument("--now", help="override current timestamp for deterministic resolve freshness guards")
     parser.add_argument("--generated-at")
     parser.add_argument("--forecasted-at")
     parser.add_argument("--forecast-close-time")

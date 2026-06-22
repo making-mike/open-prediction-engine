@@ -2,7 +2,7 @@
 
 Status: checked agent-facing read model.
 
-Last reviewed: 2026-05-27.
+Last reviewed: 2026-06-11.
 
 Resolution jobs are the agent-friendly layer above saved forecast state and resolver commands. They let an agent ask OPE what needs resolving without knowing operating-system schedulers, `launchd`, cron syntax, or internal file conventions.
 
@@ -54,6 +54,7 @@ Generated adapter error examples cover missing live workspaces and unreadable st
 
 - `pending_due`: the resolution time has passed and an agent may call `resolve-due-forward-runs --execute` if live execution is approved.
 - `pending_due` with `campaignId`: the campaign run has reached `resolutionEligibleAt`; the agent should inspect `prediction-campaign resolve` and may pass `--execute-resolvers --outcome-csv ... --write-local` or `--missing-outcome --write-local` for explicit local execution.
+- `stale_due`: the resolution time passed more than the capture-lag tolerance ago, so a live snapshot can no longer contain the forecast window's trips; the agent should provide an on-time saved capture or let the resolver mark the run blocked with reason `stale_capture_window`.
 - `pending_not_due`: the resolution time is still in the future; the agent should wait or schedule a later check.
 - `pending_not_due` with `campaignId`: a checked campaign forecast exists, but `resolutionEligibleAt` has not arrived; the agent should wait and must not run a campaign resolver yet.
 - `already_resolved`: the forward run is no longer pending; the agent should read resolved outputs instead of resolving again.

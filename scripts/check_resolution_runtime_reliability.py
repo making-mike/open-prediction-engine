@@ -12,6 +12,7 @@ REQUIRED_FAILURE_CLASSES = {
     "decode_failures",
     "schedule_join_failures",
     "coverage_gaps",
+    "late_capture_window",
     "resolver_failures",
     "stale_state",
     "invalid_state",
@@ -49,7 +50,7 @@ def main() -> None:
     )
     non_retryable_failures = {item["failureClass"] for item in failures if not item["retryable"]}
     require(
-        {"schedule_join_failures", "coverage_gaps", "invalid_state"}.issubset(non_retryable_failures),
+        {"schedule_join_failures", "coverage_gaps", "late_capture_window", "invalid_state"}.issubset(non_retryable_failures),
         "structural failures should not be automatic retries",
     )
 

@@ -8,12 +8,15 @@
   "required": [
     "setupEngineId",
     "generatedAt",
+    "inputMode",
     "goal",
     "engineSetupStatus",
     "recommendedFirstCommand",
+    "requestSummary",
     "candidateForecastContracts",
     "requiredSourceRoles",
     "baselineGuidance",
+    "forecastCardPreview",
     "hostWrapper",
     "claimBoundary",
     "exampleGoals",
@@ -26,9 +29,11 @@
   "properties": {
     "setupEngineId": { "$ref": "common.schema.json#/$defs/id" },
     "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "inputMode": { "type": "string", "enum": ["goal_text", "structured_request"] },
     "goal": { "type": "string", "minLength": 3, "maxLength": 220 },
     "engineSetupStatus": { "type": "string", "enum": ["checked_readback"] },
     "recommendedFirstCommand": { "type": "string", "minLength": 12, "maxLength": 260 },
+    "requestSummary": { "$ref": "#/$defs/requestSummary" },
     "candidateForecastContracts": {
       "type": "array",
       "minItems": 3,
@@ -42,6 +47,7 @@
       "items": { "$ref": "#/$defs/sourceRole" }
     },
     "baselineGuidance": { "$ref": "#/$defs/baselineGuidance" },
+    "forecastCardPreview": { "$ref": "#/$defs/forecastCardPreview" },
     "hostWrapper": { "$ref": "#/$defs/hostWrapper" },
     "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
     "exampleGoals": {
@@ -72,6 +78,61 @@
     "hostedRuntimeRequired": { "type": "boolean" }
   },
   "$defs": {
+    "requestSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "structuredRequestProvided",
+        "completenessStatus",
+        "providedSections",
+        "approvedSourceHintCount",
+        "needsApprovalSourceHintCount",
+        "blockedInputFlags",
+        "missingSourceRoles",
+        "readyForSourceIntake",
+        "safeToUseAsSetupInput",
+        "requestCommand",
+        "nextAction"
+      ],
+      "properties": {
+        "structuredRequestProvided": { "type": "boolean" },
+        "setupEngineRequestId": { "$ref": "common.schema.json#/$defs/id" },
+        "completenessStatus": {
+          "type": "string",
+          "enum": [
+            "goal_text_only",
+            "ready_for_source_intake",
+            "needs_source_approval",
+            "blocked_by_unsafe_inputs",
+            "needs_clarification"
+          ]
+        },
+        "providedSections": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "approvedSourceHintCount": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "needsApprovalSourceHintCount": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "blockedInputFlags": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "missingSourceRoles": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "readyForSourceIntake": { "type": "boolean" },
+        "safeToUseAsSetupInput": { "type": "boolean" },
+        "requestCommand": { "type": "string", "minLength": 8, "maxLength": 260 },
+        "nextAction": { "type": "string", "minLength": 12, "maxLength": 260 }
+      }
+    },
     "candidateForecastContract": {
       "type": "object",
       "additionalProperties": false,
@@ -178,6 +239,82 @@
         "benchmarkGateRequired": { "type": "boolean" },
         "calibrationGateRequired": { "type": "boolean" },
         "notes": { "type": "string", "minLength": 12, "maxLength": 260 }
+      }
+    },
+    "forecastCardPreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "previewStatus",
+        "generatedFrom",
+        "forecastArtifactCreated",
+        "probabilityAvailable",
+        "questionPreview",
+        "outcomeLabel",
+        "positiveClassLabel",
+        "horizonLabel",
+        "resolutionRulePreview",
+        "evidenceStatus",
+        "baselineStatus",
+        "displaySections",
+        "allowedPreviewFields",
+        "blockedPreviewFields",
+        "readCommandAfterForecast",
+        "nextAction"
+      ],
+      "properties": {
+        "previewStatus": {
+          "type": "string",
+          "enum": ["setup_only_not_forecast_artifact"]
+        },
+        "generatedFrom": {
+          "type": "string",
+          "enum": ["goal_text", "structured_request"]
+        },
+        "forecastArtifactCreated": { "type": "boolean" },
+        "probabilityAvailable": { "type": "boolean" },
+        "questionPreview": { "type": "string", "minLength": 12, "maxLength": 260 },
+        "outcomeLabel": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "positiveClassLabel": { "type": "string", "minLength": 3, "maxLength": 140 },
+        "horizonLabel": { "type": "string", "minLength": 6, "maxLength": 160 },
+        "resolutionRulePreview": { "type": "string", "minLength": 20, "maxLength": 260 },
+        "evidenceStatus": {
+          "type": "string",
+          "enum": [
+            "source_intake_required",
+            "source_approval_required",
+            "structured_sources_ready_for_intake",
+            "blocked_until_safe_sources"
+          ]
+        },
+        "baselineStatus": {
+          "type": "string",
+          "enum": [
+            "baseline_required_before_model_claims",
+            "baseline_hint_ready",
+            "blocked_until_safe_sources"
+          ]
+        },
+        "displaySections": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "allowedPreviewFields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 10,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "blockedPreviewFields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 3, "maxLength": 80 }
+        },
+        "readCommandAfterForecast": { "type": "string", "minLength": 20, "maxLength": 180 },
+        "nextAction": { "type": "string", "minLength": 12, "maxLength": 260 }
       }
     },
     "hostWrapper": {

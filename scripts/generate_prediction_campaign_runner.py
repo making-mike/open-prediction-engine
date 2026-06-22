@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -100,6 +100,58 @@ def parse_utc(value: str) -> datetime:
         return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError as exc:
         raise SystemExit(f"Invalid UTC timestamp: {value}") from exc
+
+
+def format_utc(value: datetime) -> str:
+    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def utc_now_timestamp() -> str:
+    return format_utc(datetime.now(timezone.utc))
+
+
+def effectful_execution_requested(args: argparse.Namespace) -> bool:
+    return bool(
+        getattr(args, "write_local", False)
+        or getattr(args, "watch", False)
+        or getattr(args, "live_weather", False)
+        or getattr(args, "execute_resolvers", False)
+    )
+
+
+def effective_runner_clock_value(args: argparse.Namespace) -> str | None:
+    """Resolve the runner clock source for one invocation.
+
+    Explicit --now always wins. Effectful invocations (--write-local, --watch,
+    --live-weather, --execute-resolvers) must never assume they are on time for
+    the first scheduled run, so they default to real UTC now. Only deterministic
+    fixture readbacks (--write/--check and plain dry-run views) keep the
+    schedule-derived clock.
+    """
+    if getattr(args, "now", None):
+        return str(args.now)
+    if getattr(args, "write", False) or getattr(args, "check", False):
+        return None
+    if effectful_execution_requested(args):
+        return utc_now_timestamp()
+    return None
+
+
+def tick_runner_clock_value(args: argparse.Namespace, tick_number: int) -> str | None:
+    """Re-derive the runner clock for each foreground tick.
+
+    With an explicit --now the clock still advances by --poll-seconds per tick,
+    matching the real sleep between ticks; live-clock invocations re-read real
+    UTC now so long-running polls never reuse a stale launch clock.
+    """
+    if getattr(args, "now", None):
+        if tick_number == 1:
+            return str(args.now)
+        elapsed = (tick_number - 1) * args.poll_seconds
+        return format_utc(parse_utc(str(args.now)) + timedelta(seconds=elapsed))
+    if effectful_execution_requested(args):
+        return utc_now_timestamp()
+    return None
 
 
 def clock_decision(index: int, run: dict[str, Any], runner_clock: datetime) -> dict[str, Any]:
@@ -234,7 +286,10 @@ def build_forecast_schedule(
         "normalChecksWriteLiveState": False,
         "requiresExplicitWriteLocal": True,
         "createsForecastArtifactsInDryRun": False,
-        "nextAction": "Use --now to inspect later due windows and --write-local to create the next due forecast; long-running polling remains separate.",
+        "nextAction": (
+            "Effectful runs default the runner clock to real UTC now and --now only simulates other windows; "
+            "use --write-local to create the next due forecast while long-running polling remains separate."
+        ),
     }
 
 
@@ -451,7 +506,8 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         args = default_args()
     manifest, creation_request = build_runner_inputs(args)
     first_run = manifest["plannedRuns"][0]
-    runner_clock = parse_utc(args.now) if args.now else None
+    clock_value = effective_runner_clock_value(args)
+    runner_clock = parse_utc(clock_value) if clock_value else None
     decisions = build_runner_decisions(manifest, runner_clock=runner_clock)
     return {
         "predictionCampaignRunnerId": "predictioncampaignrunner-001",
@@ -500,7 +556,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
             "defaultMissedRunPolicy": "skip_if_forecast_close_passed",
         },
         "campaignCreationRequest": creation_request,
-        "forecastSchedule": build_forecast_schedule(manifest, decisions, runner_clock=args.now),
+        "forecastSchedule": build_forecast_schedule(manifest, decisions, runner_clock=clock_value),
         "methodSelectionBinding": method_selection_binding(manifest),
         "preCalibration": pre_calibration_summary(args),
         "supportedRecurrenceModes": [
@@ -558,6 +614,7 @@ def build_prediction_campaign_runner(args: argparse.Namespace | None = None) -> 
         },
         "warnings": [
             "This runner readback checks command semantics by default; --write-local performs one due-run creation tick.",
+            "Effectful invocations (--write-local, --watch, --live-weather, --execute-resolvers) derive the runner clock from real UTC now and re-derive it on every watch tick; runs past forecastCloseAt are recorded as missed instead of backdated.",
             "Optional --pre-calibrate uses historical data only and writes a prospective baseline binding only when --write-local is explicit.",
             "Long-running future-window polling remains separate and must preserve forecast-before-close boundaries.",
             "Live weather and resolver execution require explicit future flags and remain disabled in normal checks.",
@@ -626,11 +683,11 @@ def runner_next_forecast_run_id(decisions: list[dict[str, Any]], fallback_run: d
     return str(fallback_run["runId"])
 
 
-def ready_run_id_for_write(runner: dict[str, Any]) -> str:
+def ready_run_id_for_write(runner: dict[str, Any]) -> str | None:
     for row in runner["forecastSchedule"]["scheduleRows"]:
         if row["scheduleAction"] == "create_with_explicit_write_local":
             return str(row["runId"])
-    raise SystemExit("No campaign run is currently ready for --write-local")
+    return None
 
 
 def local_run_state_path(runner: dict[str, Any], run_id: str) -> Path:
@@ -665,6 +722,77 @@ def execute_pre_calibration_for_args(args: argparse.Namespace) -> tuple[dict[str
         write_result=result,
     )
     return written_record, result
+
+
+def runner_with_clock(runner: dict[str, Any], manifest: dict[str, Any], clock_value: str) -> dict[str, Any]:
+    decisions = build_runner_decisions(manifest, runner_clock=parse_utc(clock_value))
+    refreshed = dict(runner)
+    refreshed["runnerDecisions"] = decisions
+    refreshed["forecastSchedule"] = build_forecast_schedule(manifest, decisions, runner_clock=clock_value)
+    return refreshed
+
+
+def local_run_state_status(runner: dict[str, Any], run_id: str) -> str | None:
+    path = local_run_state_path(runner, run_id)
+    if not path.exists():
+        return None
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "unreadable"
+    if isinstance(state, dict):
+        return str(state.get("runStatus", "unknown"))
+    return "unknown"
+
+
+def record_missed_runs_for_write_local(runner: dict[str, Any], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    from prediction_campaign_forecast_write_runtime import write_missed_run_state
+
+    runs = {run["runId"]: run for run in manifest["plannedRuns"]}
+    bindings = runner["bindings"]
+    runner_clock = runner["forecastSchedule"]["runnerClock"]
+    results = []
+    for row in runner["forecastSchedule"]["scheduleRows"]:
+        if row["scheduleAction"] != "record_missed_without_forecast":
+            continue
+        if local_run_state_exists(runner, row["runId"]):
+            continue
+        run = runs[row["runId"]]
+        results.append(
+            write_missed_run_state(
+                campaign_id=bindings["campaignId"],
+                cycle_id=bindings["cycleId"],
+                run_id=run["runId"],
+                question_id=run["questionId"],
+                forecast_id=run["forecastId"],
+                source_policy_id=run["sourcePolicyId"],
+                forecast_close_at=run["forecastCloseAt"],
+                runner_clock=runner_clock,
+            )
+        )
+    return results
+
+
+def build_local_missed_result(runner: dict[str, Any], missed_writes: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "predictionCampaignRunnerId": runner["predictionCampaignRunnerId"],
+        "generatedAt": runner["forecastSchedule"]["runnerClock"],
+        "runnerStatus": "local_missed_runs_recorded" if missed_writes else "no_due_forecast_window",
+        "domain": runner["domain"],
+        "runnerClock": runner["forecastSchedule"]["runnerClock"],
+        "missedRunPolicy": runner["missedRunPolicy"]["policyName"],
+        "missedRunStates": missed_writes,
+        "summary": {
+            "forecastArtifactsCreated": 0,
+            "missedRunStateCount": len(missed_writes),
+            "nextForecastCreateAt": runner["forecastSchedule"]["nextForecastCreateAt"],
+            "nextForecastCloseAt": runner["forecastSchedule"]["nextForecastCloseAt"],
+            "nextAction": (
+                "Wait for the next forecastCreateAt window; windows past forecastCloseAt are recorded "
+                "as missed and excluded from comparable evidence instead of backfilled."
+            ),
+        },
+    }
 
 
 def build_resolution_attempts_for_tick(
@@ -708,15 +836,21 @@ def build_foreground_tick(
     pre_calibration_write_result: dict[str, Any] | str = "none"
     selected_run_id = None
     actions = []
+    missed_writes: list[dict[str, Any]] = []
+    runs_by_id = {run["runId"]: run for run in manifest["plannedRuns"]}
     resolution_attempts = build_resolution_attempts_for_tick(
         runner,
         manifest,
         execute_resolvers=execute_resolvers,
     )
     for row in runner["forecastSchedule"]["scheduleRows"]:
-        existing_state = execute_local_write and local_run_state_exists(runner, row["runId"])
-        if existing_state:
-            action_status = "already_created_waiting_resolution"
+        existing_run_status = local_run_state_status(runner, row["runId"]) if execute_local_write else None
+        if existing_run_status is not None:
+            action_status = (
+                "already_recorded_missed"
+                if existing_run_status == "missed"
+                else "already_created_waiting_resolution"
+            )
             forecast_created = False
             writes_campaign_state = False
         elif row["scheduleAction"] == "create_with_explicit_write_local":
@@ -753,7 +887,25 @@ def build_foreground_tick(
             forecast_created = False
             writes_campaign_state = False
         elif row["scheduleAction"] == "record_missed_without_forecast":
-            action_status = "missed_record_not_written"
+            if execute_local_write:
+                from prediction_campaign_forecast_write_runtime import write_missed_run_state
+
+                run = runs_by_id[row["runId"]]
+                missed_writes.append(
+                    write_missed_run_state(
+                        campaign_id=runner["bindings"]["campaignId"],
+                        cycle_id=runner["bindings"]["cycleId"],
+                        run_id=run["runId"],
+                        question_id=run["questionId"],
+                        forecast_id=run["forecastId"],
+                        source_policy_id=run["sourcePolicyId"],
+                        forecast_close_at=run["forecastCloseAt"],
+                        runner_clock=runner["forecastSchedule"]["runnerClock"],
+                    )
+                )
+                action_status = "missed_recorded"
+            else:
+                action_status = "missed_record_not_written"
             forecast_created = False
             writes_campaign_state = False
         else:
@@ -792,6 +944,7 @@ def build_foreground_tick(
         "runnerClock": runner["forecastSchedule"]["runnerClock"],
         "readyRunId": selected_run_id or runner["forecastSchedule"]["readyRunId"],
         "actions": actions,
+        "missedRunStates": missed_writes,
         "preCalibrationResult": pre_calibration_write_result,
         "writeResult": write_result or "none",
         "resolutionAttempts": resolution_attempts,
@@ -808,6 +961,12 @@ def build_foreground_result(
     poll_seconds: int,
 ) -> dict[str, Any]:
     created_count = sum(1 for tick in ticks for action in tick["actions"] if action["forecastCreated"])
+    missed_recorded_count = sum(
+        1
+        for tick in ticks
+        for state in tick.get("missedRunStates", [])
+        if state["writeStatus"] == "written"
+    )
     resolution_attempt_count = sum(len(tick["resolutionAttempts"]) for tick in ticks)
     pre_calibration_write_count = len(
         [
@@ -841,6 +1000,7 @@ def build_foreground_result(
             "nextDueRunSchedulingImplemented": True,
             "futureWindowPollingImplemented": False,
             "forecastArtifactsCreated": created_count,
+            "missedRunStatesRecorded": missed_recorded_count,
             "writesCampaignState": execute_local_write and created_count > 0,
             "preCalibrationRequested": runner["preCalibration"]["requestStatus"] == "requested",
             "preCalibrationWriteCount": pre_calibration_write_count,
@@ -857,7 +1017,7 @@ def build_foreground_result(
             ),
         },
         "executionBoundary": {
-            "writesIgnoredLiveState": execute_local_write and created_count > 0,
+            "writesIgnoredLiveState": execute_local_write and (created_count > 0 or missed_recorded_count > 0),
             "writesCampaignState": execute_local_write and created_count > 0,
             "writesPreCalibrationState": pre_calibration_write_count > 0,
             "fetchesLiveData": False,
@@ -883,8 +1043,10 @@ def run_foreground_ticks(runner: dict[str, Any], args: argparse.Namespace) -> di
     manifest, _creation_request = build_runner_inputs(args)
     ticks = []
     for tick_number in range(1, max_ticks + 1):
+        tick_clock = tick_runner_clock_value(args, tick_number)
+        tick_runner = runner_with_clock(runner, manifest, tick_clock) if tick_clock else runner
         tick = build_foreground_tick(
-            runner,
+            tick_runner,
             manifest,
             args,
             tick_number=tick_number,
@@ -906,6 +1068,13 @@ def run_foreground_ticks(runner: dict[str, Any], args: argparse.Namespace) -> di
 
 def print_start_result(result: dict[str, Any], output_format: str | None) -> None:
     if output_format == "human":
+        if result.get("runnerStatus") in ("local_missed_runs_recorded", "no_due_forecast_window"):
+            print(
+                f"{result['runnerStatus']} runnerClock={result['runnerClock']} "
+                f"missedRecorded={result['summary']['missedRunStateCount']} "
+                f"nextCreateAt={result['summary']['nextForecastCreateAt']}"
+            )
+            return
         if result.get("runnerStatus") == "foreground_forecast_ticks_completed":
             print(
                 f"forecast scheduler {result['executionMode']} "
@@ -1038,9 +1207,14 @@ def main() -> None:
 
         try:
             manifest, _creation_request = build_runner_inputs(args)
+            missed_writes = record_missed_runs_for_write_local(runner, manifest)
+            ready_run_id = ready_run_id_for_write(runner)
+            if ready_run_id is None:
+                print_start_result(build_local_missed_result(runner, missed_writes), args.output_format)
+                return
             pre_calibration_record, pre_calibration_result = execute_pre_calibration_for_args(args)
             write_result = execute_local_forecast_write(
-                run_id=ready_run_id_for_write(runner),
+                run_id=ready_run_id,
                 manifest=manifest,
                 runner=runner,
                 plan_builder=lambda **kwargs: build_prediction_campaign_forecast_write(
@@ -1050,14 +1224,13 @@ def main() -> None:
             )
         except (PredictionCampaignForecastWriteError, PredictionCampaignPreCalibrationError) as exc:
             raise SystemExit(str(exc)) from exc
-        print_start_result(
-            build_local_start_result(
-                runner,
-                write_result,
-                pre_calibration_result=pre_calibration_result,
-            ),
-            args.output_format,
+        start_result = build_local_start_result(
+            runner,
+            write_result,
+            pre_calibration_result=pre_calibration_result,
         )
+        start_result["missedRunStates"] = missed_writes
+        print_start_result(start_result, args.output_format)
         return
     errors = validate_record(runner, SCHEMA)
     if errors:

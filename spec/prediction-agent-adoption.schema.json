@@ -58,6 +58,8 @@
         "projectName",
         "tagline",
         "firstCommand",
+        "structuredRequestCommand",
+        "forecastCardPreviewCommand",
         "fitCommand",
         "adoptionEvalCommand",
         "helpsWith",
@@ -71,6 +73,8 @@
         "projectName": { "type": "string", "enum": ["Open Prediction Engine"] },
         "tagline": { "type": "string", "minLength": 20, "maxLength": 180 },
         "firstCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
+        "structuredRequestCommand": { "type": "string", "minLength": 8, "maxLength": 220 },
+        "forecastCardPreviewCommand": { "type": "string", "minLength": 8, "maxLength": 240 },
         "fitCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
         "adoptionEvalCommand": { "type": "string", "minLength": 8, "maxLength": 180 },
         "helpsWith": {
@@ -271,6 +275,7 @@
           "enum": [
             "understand_fit",
             "find_first_command",
+            "use_structured_setup_request",
             "read_capabilities",
             "inspect_extension_points",
             "avoid_overclaiming",

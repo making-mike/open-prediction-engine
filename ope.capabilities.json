@@ -4,6 +4,8 @@
   "projectName": "Open Prediction Engine",
   "tagline": "A prediction engine setup shortcut with built-in credibility gates.",
   "firstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+  "structuredRequestCommand": "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request",
+  "forecastCardPreviewCommand": "python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview",
   "fitCommand": "python3 scripts/ope.py explain-fit --goal <host prediction goal>",
   "adoptionEvalCommand": "python3 scripts/ope.py adoption-eval",
   "helpsWith": [

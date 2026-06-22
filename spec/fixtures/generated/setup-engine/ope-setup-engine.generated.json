@@ -1,9 +1,29 @@
 {
   "setupEngineId": "setupengine-001",
   "generatedAt": "2026-06-07T12:00:00Z",
+  "inputMode": "goal_text",
   "goal": "add predictions to my app",
   "engineSetupStatus": "checked_readback",
   "recommendedFirstCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+  "requestSummary": {
+    "structuredRequestProvided": false,
+    "completenessStatus": "goal_text_only",
+    "providedSections": [
+      "goal"
+    ],
+    "approvedSourceHintCount": 0,
+    "needsApprovalSourceHintCount": 0,
+    "blockedInputFlags": [],
+    "missingSourceRoles": [
+      "forecast_time_signal",
+      "historical_outcome",
+      "resolution_outcome"
+    ],
+    "readyForSourceIntake": false,
+    "safeToUseAsSetupInput": true,
+    "requestCommand": "python3 scripts/ope.py setup-engine --goal \"add predictions to my app\"",
+    "nextAction": "Provide a structured setup-engine request or choose one candidate contract and bind approved source references."
+  },
   "candidateForecastContracts": [
     {
       "contractId": "setupcontract-001",
@@ -187,6 +207,49 @@
     "calibrationGateRequired": true,
     "notes": "The setup-engine path ranks contracts and source roles; it does not claim model lift before scored outcomes exist."
   },
+  "forecastCardPreview": {
+    "previewStatus": "setup_only_not_forecast_artifact",
+    "generatedFrom": "goal_text",
+    "forecastArtifactCreated": false,
+    "probabilityAvailable": false,
+    "questionPreview": "Will the selected future operating window exceed the declared threshold?",
+    "outcomeLabel": "future threshold event",
+    "positiveClassLabel": "threshold exceeded",
+    "horizonLabel": "future window supplied by the host app",
+    "resolutionRulePreview": "Resolve from an approved outcome source after close time using the declared threshold.",
+    "evidenceStatus": "source_intake_required",
+    "baselineStatus": "baseline_required_before_model_claims",
+    "displaySections": [
+      "questionPreview",
+      "probabilityPlaceholder",
+      "evidenceSummary",
+      "baselineComparison",
+      "resolutionRule",
+      "claimBoundary"
+    ],
+    "allowedPreviewFields": [
+      "questionPreview",
+      "outcomeLabel",
+      "positiveClassLabel",
+      "horizonLabel",
+      "resolutionRulePreview",
+      "evidenceStatus",
+      "baselineStatus",
+      "claimBoundary"
+    ],
+    "blockedPreviewFields": [
+      "forecastId",
+      "probability",
+      "confidenceLabel",
+      "qualityClaim",
+      "calibrationClaim",
+      "credentialValues",
+      "rawPrivateRows",
+      "rawSql"
+    ],
+    "readCommandAfterForecast": "python3 scripts/ope.py read --record-type forecast-card --id <forecast-id> --question-id <question-id>",
+    "nextAction": "Provide a structured setup-engine request or choose one candidate contract and bind approved source references."
+  },
   "hostWrapper": {
     "wrapperStatus": "ready_for_host_render",
     "renderBeforeForecastArtifacts": true,
@@ -194,10 +257,11 @@
       "candidateForecastContracts",
       "requiredSourceRoles",
       "baselineGuidance",
+      "forecastCardPreview",
       "claimBoundary",
       "followUpSurfaces"
     ],
-    "recommendedDataShape": "Render this setup-engine JSON directly as the host prediction setup plan before forecast cards exist.",
+    "recommendedDataShape": "Render this setup-engine JSON, including forecastCardPreview, before forecast cards exist.",
     "blockedHostResponsibilities": [
       "do_not_invent_parallel_risk_engine_before_setup_readback",
       "do_not_claim_prediction_quality_before_resolution_scoring",
@@ -317,14 +381,14 @@
       "interface": "agent_call",
       "implementedStatus": "implemented_local",
       "command": "python3 scripts/ope.py agent-call --operation setup_engine",
-      "boundary": "Agent-call wraps the same setup plan in one transport-neutral envelope."
+      "boundary": "Agent-call wraps the same setup plan and may accept a structured setup request path."
     },
     {
       "interface": "local_mcp",
       "implementedStatus": "implemented_local",
       "command": "python3 scripts/ope.py mcp-stdio",
       "toolName": "ope_setup_engine",
-      "boundary": "MCP exposes goal and view arguments only; it rejects hidden raw payload fields."
+      "boundary": "MCP exposes goal, view, and structured request arguments while rejecting hidden raw payload fields."
     }
   ],
   "followUpSurfaces": [

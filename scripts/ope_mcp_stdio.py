@@ -249,6 +249,17 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
     else:
         request_path = ROOT / "spec" / "fixtures" / "requests" / "auto-weather-logistics-request.json"
 
+    setup_engine_request_value = arguments.get("setupEngineRequest")
+    if isinstance(setup_engine_request_value, dict):
+        temporary_request = write_request_object(setup_engine_request_value)
+        setup_engine_request_path: Path | None = temporary_request
+    elif isinstance(setup_engine_request_value, str):
+        setup_engine_request_path = Path(setup_engine_request_value)
+    elif setup_engine_request_value is None:
+        setup_engine_request_path = None
+    else:
+        raise McpProtocolError(JSONRPC_INVALID_PARAMS, "setupEngineRequest must be a path string or object.")
+
     max_bytes = arguments.get("maxBytes", DEFAULT_MAX_BYTES)
     if not isinstance(max_bytes, int) or isinstance(max_bytes, bool) or max_bytes < 1:
         raise McpProtocolError(JSONRPC_INVALID_PARAMS, "maxBytes must be a positive integer.")
@@ -332,6 +343,7 @@ def normalized_arguments(operation: str, arguments: Any) -> tuple[argparse.Names
         forecast_execution_case=forecast_execution_case,
         scenario=scenario,
         goal=goal,
+        setup_engine_request=setup_engine_request_path,
         setup_engine_view=setup_engine_view,
         guided_case=guided_case,
         internal_operation=internal_operation,

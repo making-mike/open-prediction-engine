@@ -26,6 +26,7 @@
     "observationCount": 22,
     "lateCount": 5,
     "lateRatio": 0.2273,
+    "outOfWindowRowCount": 0,
     "outcome": true,
     "reason": "coverage checks passed"
   },

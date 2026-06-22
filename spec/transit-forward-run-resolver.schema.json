@@ -83,7 +83,7 @@
           },
           "decision": {
             "type": "string",
-            "enum": ["due_pending", "not_due", "already_resolved", "executed", "failed", "invalid_state"]
+            "enum": ["due_pending", "due_stale_capture", "not_due", "already_resolved", "executed", "failed", "invalid_state"]
           },
           "runStatus": {
             "type": "string",

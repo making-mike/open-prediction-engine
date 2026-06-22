@@ -71,10 +71,11 @@
           "jobSummary": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["jobCount", "pendingDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
+            "required": ["jobCount", "pendingDueCount", "staleDueCount", "pendingNotDueCount", "alreadyResolvedCount", "invalidCount"],
             "properties": {
               "jobCount": { "type": "integer", "minimum": 0 },
               "pendingDueCount": { "type": "integer", "minimum": 0 },
+              "staleDueCount": { "type": "integer", "minimum": 0 },
               "pendingNotDueCount": { "type": "integer", "minimum": 0 },
               "alreadyResolvedCount": { "type": "integer", "minimum": 0 },
               "invalidCount": { "type": "integer", "minimum": 0 }
@@ -112,6 +113,7 @@
                     "resolver_execute_requested",
                     "due_waiting_for_execute_flag",
                     "campaign_resolver_attempt_ready",
+                    "provide_window_capture",
                     "skip_already_resolved",
                     "inspect_invalid_state"
                   ]

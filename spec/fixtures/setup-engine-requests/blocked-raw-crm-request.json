@@ -1,0 +1,52 @@
+{
+  "setupEngineRequestId": "setupenginerequest-002",
+  "goal": "set up churn risk predictions from pasted CRM account records",
+  "decisionContext": {
+    "decisionToSupport": "Prioritize customer-success outreach before renewal risk becomes irreversible.",
+    "stakeholderAction": "Customer-success managers contact high-risk accounts before the renewal window.",
+    "operatingWindow": "weekly renewal planning"
+  },
+  "outcome": {
+    "outcomeName": "account churn",
+    "outcomeType": "binary_threshold",
+    "threshold": "account does not renew before the renewal deadline",
+    "positiveClass": "churn event occurred"
+  },
+  "horizon": {
+    "forecastWindow": "next 30 days after forecast creation",
+    "closeTimePolicy": "Forecasts close before the outreach decision is finalized.",
+    "resolutionDeadlinePolicy": "Resolve from an approved renewal-status source after the renewal window closes."
+  },
+  "sourceHints": [
+    {
+      "roleName": "forecast_time_signal",
+      "sourceKind": "manual_upload",
+      "sourceRef": "raw CRM rows pasted into the prompt",
+      "approvalStatus": "blocked_raw_payload",
+      "containsCredentialValue": true,
+      "containsRawPrivateRows": true,
+      "containsRawSql": false,
+      "nextAction": "Replace pasted CRM content with an approved source reference and credential reference."
+    }
+  ],
+  "resolutionHint": {
+    "resolutionSourceRef": "unapproved renewal-status source",
+    "resolutionRule": "Resolve only after an approved renewal-status reference is supplied.",
+    "scoringReady": false
+  },
+  "baselineHint": {
+    "historicalOutcomeAvailable": false,
+    "minimumComparableRowsKnown": false,
+    "suggestedBaseline": "Historical frequency baseline after approved churn outcomes are summarized.",
+    "benchmarkNotes": "No comparable approved historical outcome summary has been supplied."
+  },
+  "executionBoundary": {
+    "requestsForecastArtifacts": false,
+    "requestsLiveFetch": false,
+    "containsCredentialValues": true,
+    "containsRawPrivateRows": true,
+    "containsRawSql": false,
+    "allowsSourceReads": false,
+    "writesLocalState": false
+  }
+}

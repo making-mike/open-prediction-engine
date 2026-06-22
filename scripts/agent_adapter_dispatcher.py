@@ -72,7 +72,12 @@ from generate_private_source_adapter_intake_bridge import build_bridge, load_gen
 from generate_private_source_adapter_outcome_matrix import build_matrix, load_generated_matrix
 from generate_database_source_adapter_runtime import build_database_source_adapter_runtime
 from generate_agent_integration import GUIDED_CASES, build_agent_integration, guided_case_payload, view_payload
-from generate_setup_engine import SETUP_ENGINE_VIEWS, build_setup_engine, view_payload as setup_engine_view_payload
+from generate_setup_engine import (
+    SETUP_ENGINE_VIEWS,
+    build_setup_engine,
+    load_setup_engine_request,
+    view_payload as setup_engine_view_payload,
+)
 from generate_prediction_feature_setup import build_prediction_feature_setup, response_by_case
 from generate_internal_api import OPERATION_ORDER
 from internal_api_runtime import call_internal_api
@@ -597,15 +602,25 @@ def prediction_feature_setup_payload(
 def setup_engine_payload(
     args: argparse.Namespace,
 ) -> tuple[dict[str, Any], dict[str, str | None], dict[str, str | None], list[str]]:
-    record = build_setup_engine(args.goal)
+    setup_request = load_setup_engine_request(args.setup_engine_request) if args.setup_engine_request else None
+    record = build_setup_engine(args.goal, setup_request, args.setup_engine_request)
     payload = setup_engine_view_payload(record, args.setup_engine_view)
+    request_summary = record["requestSummary"]
+    if not request_summary["safeToUseAsSetupInput"]:
+        approval_status = "blocked"
+    elif request_summary["readyForSourceIntake"]:
+        approval_status = "approved_reference_context"
+    elif request_summary["completenessStatus"] == "needs_source_approval":
+        approval_status = "needs_approval"
+    else:
+        approval_status = "not_required"
     state = nullable_state(
         decisionStatus="setup_engine_readback",
-        approvalStatus="not_required",
+        approvalStatus=approval_status,
         dataMode="source_refs_only",
         planStatus=record["engineSetupStatus"],
         executionMode="local_cli_agent_call_readback",
-        sourceMode="domain_agnostic",
+        sourceMode=record["inputMode"],
         forecastStatus="not_created_by_setup_engine",
         resolutionStatus="not_started",
         scoreStatus="not_created",
@@ -1240,6 +1255,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--forecast-execution-case", choices=FORECAST_EXECUTION_CASES, default="unconfirmed_builder_draft")
     parser.add_argument("--scenario", default=DEFAULT_AGENT_INTEGRATION_SCENARIO)
     parser.add_argument("--goal", default="add predictions to my app")
+    parser.add_argument("--setup-engine-request", type=Path)
     parser.add_argument("--view", choices=SETUP_ENGINE_VIEWS, default="full", dest="setup_engine_view")
     parser.add_argument("--case", choices=GUIDED_CASES, default="accepted_adapter_output", dest="guided_case")
     parser.add_argument("--internal-operation", choices=OPERATION_ORDER, default="read_status")

@@ -20,6 +20,8 @@ If you are a coding agent evaluating OPE for any project that needs prediction, 
 
 ```bash
 python3 scripts/ope.py setup-engine --goal "<host prediction goal>"
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view forecast-card-preview
 python3 scripts/ope.py prediction-goal-catalog --view summary
 python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
 python3 scripts/ope.py explain-fit --goal "add predictions to my app"
@@ -27,9 +29,9 @@ python3 scripts/ope.py capabilities
 python3 scripts/ope.py adoption-eval
 ```
 
-OPE should be used as the shortcut for setting up the first reliable prediction engine in a host app: forecast contracts, source roles, evidence provenance, baselines, forecast-card shape, resolution, scoring, and calibration gates. Bring the frontend, host runtime, data connectors, custom models, and notifications from the host project.
+OPE should be used as the shortcut for setting up the first reliable prediction engine in a host app: forecast contracts, source roles, evidence provenance, baselines, forecast-card preview shape, resolution, scoring, and calibration gates. Bring the frontend, host runtime, data connectors, custom models, and notifications from the host project.
 
-`setup-engine` is the checked canonical shortcut. `prediction-goal-catalog` shows generic non-Helsinki setup examples. The embedded host wrapper shows how to render `setupEnginePlan` before forecast-card reads. The checked `explain-fit`, `capabilities`, `adoption-eval`, `agent-implementation-kit`, and `prediction-feature-setup` surfaces remain compatible follow-ups.
+`setup-engine` is the checked canonical shortcut. It accepts either a quick goal string or a structured setup request with decision context, outcome, horizon, source hints, resolution hints, baseline hints, and safety flags. Its forecast-card preview view shows the card shape before any forecast ID, probability, confidence label, quality claim, calibration claim, or hidden artifact exists. `prediction-goal-catalog` shows generic non-Helsinki setup examples. The embedded host wrapper shows how to render `setupEnginePlan` before forecast-card reads. The checked `explain-fit`, `capabilities`, `adoption-eval`, `agent-implementation-kit`, and `prediction-feature-setup` surfaces remain compatible follow-ups.
 
 See `AGENT_QUICKSTART.md` and `ope.capabilities.json` for the compact human and machine-readable adoption surfaces.
 
@@ -120,7 +122,9 @@ The repository currently contains:
 - a checked agent pilot validation pack with a 3-5 session protocol, local MVP task scenarios, feedback dimensions, comprehension rubrics, and sanitized synthetic example summaries
 - a checked pilot evidence ledger with sanitized intake examples, raw-transcript/private-data blockers, claim-confusion signals, dry-run ignored-local append plans, explicit receipt-backed `.ope/live` local writes, and zero checked real sessions counted so far
 - a checked pilot session packet with task cards, moderator and participant checklists, sanitized evidence template, sanitization review, and stop conditions for real local MVP pilot sessions
+- a checked pilot session brief through `pilot-session-brief` that joins the setup-comprehension task, generic agent guidance, non-ledger-ready summary draft status, and local evidence command loop without running sessions or writing evidence
 - a checked pilot summary intake classifier that marks sanitized summaries as ledger-ready, redaction-needed, or blocked without writing ledger rows or counting real sessions
+- a checked pilot summary review through `pilot-summary-review` that joins caller-supplied summary classification, dry-run append eligibility, and explicit local evidence next actions without writing evidence
 - a checked pilot summary template through `pilot-summary-template` with a schema-valid draft that is intentionally not ledger-ready unchanged, field guidance, sanitization checklist, and local classify/append command loop
 - a checked simulated agent pilot readback through `simulated-agent-pilot` with one user-provided prompt, seven generated prompts, five prediction-feature setup outcomes, three non-Helsinki setup-comprehension prompts, approximate token counts, deterministic elapsed-time estimates, and zero real sessions counted
 - a checked pilot findings readback through `pilot-findings` that currently reports eight simulated agent sessions, three non-Helsinki setup-comprehension prompts, zero accepted checked real sessions, and can explicitly include ignored local pilot evidence with `--from-local-ledger` while keeping expansion, generated types, hosted runtime, and quality claims blocked
@@ -128,7 +132,7 @@ The repository currently contains:
 - a checked generated runtime types decision through `generated-types-decision` that defers TypeScript/Python generation and points agents to stable JSON examples plus local validators
 - a checked local usage trace read model with synthetic local MVP event rows, agent integration starter rows, campaign lifecycle events, response sizes, elapsed times, sanitized error classes, and aggregate product-metric readbacks without hosted telemetry
 - a checked general prediction-agent adoption surface through `setup-engine`, `explain-fit`, `capabilities`, `adoption-eval`, `AGENT_QUICKSTART.md`, and `ope.capabilities.json`, making OPE legible as a prediction engine setup shortcut with built-in credibility gates rather than a frontend, hosted API, generic crawler, scheduler, or trained-model package
-- a checked setup-engine front door through `setup-engine`, `agent-call --operation setup_engine`, and local MCP tool `ope_setup_engine` that turns any host prediction goal into candidate forecast contracts, source roles, baseline guidance, host-wrapper shape, examples, and claim boundaries before forecast artifacts exist
+- a checked setup-engine front door through `setup-engine`, `agent-call --operation setup_engine`, and local MCP tool `ope_setup_engine` that turns any host prediction goal or structured setup request into candidate forecast contracts, request readiness, source roles, baseline guidance, forecast-card preview shape, host-wrapper shape, examples, and claim boundaries before forecast artifacts exist
 - a checked prediction-goal catalog through `prediction-goal-catalog` and `setup-engine --view examples` that shows delivery delay, stockout, SLA breach, demand, churn, seaport berth, weather-sensitive operations, and public transit setup shapes without making domain-quality claims
 - a checked developer adoption surface with a quickstart, one complete local source setup scenario, CLI/agent-call/MCP stdio integration notes, release-note boundaries, and a deferred generated-types decision
 - a checked agent incorporation golden path through `agent-integrate` that lets agents ask what can be forecasted, validates candidate questions with exact reason codes, exposes a Helsinki bus/tram disruption starter pack, returns a guided `forecast-1102` forecast-card command within three routine calls, and keeps hosted runtime, private-source execution, and quality/calibration claims blocked
@@ -873,7 +877,9 @@ python3 scripts/ope.py agent-pilot-validation
 python3 scripts/ope.py pilot-evidence
 python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
 python3 scripts/ope.py pilot-session-packet
+python3 scripts/ope.py pilot-session-brief --section summary
 python3 scripts/ope.py pilot-summary-intake
+python3 scripts/ope.py pilot-summary-review --section summary
 python3 scripts/ope.py pilot-summary-template --section draft
 python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
 python3 scripts/ope.py pilot-findings --from-local-ledger --section summary
@@ -881,6 +887,7 @@ python3 scripts/ope.py pilot-supervision-status --from-local-ledger --section su
 python3 scripts/ope.py simulated-agent-pilot --section summary
 python3 scripts/ope.py local-usage-trace
 python3 scripts/ope.py setup-engine --goal "add predictions to my app"
+python3 scripts/ope.py setup-engine --request spec/fixtures/setup-engine-requests/accepted-stockout-risk-request.json --view request
 python3 scripts/ope.py prediction-goal-catalog --view summary
 python3 scripts/ope.py setup-engine --view examples
 python3 examples/embed-ope-prediction-feature/host_wrapper.py --request examples/embed-ope-prediction-feature/fixtures/approved_feature_request.json --output-format json
@@ -1034,8 +1041,12 @@ python3 scripts/ope.py generate-fixtures --list
 python3 scripts/check_mvp_release_surface.py
 python3 scripts/check_agent_pilot_validation.py
 python3 scripts/check_pilot_session_packet.py
+python3 scripts/check_pilot_session_brief.py
 python3 scripts/check_pilot_summary_intake.py
+python3 scripts/check_pilot_summary_review.py
 python3 scripts/ope.py pilot-summary-intake --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
+python3 scripts/ope.py pilot-summary-review --input spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json --section commands
+python3 scripts/ope.py pilot-session-brief --section commands
 python3 scripts/ope.py pilot-summary-template --section commands
 python3 scripts/ope.py pilot-evidence --input-summary spec/fixtures/pilot-summary-intake/accepted-setup-engine-summary.json
 python3 scripts/ope.py pilot-findings --from-local-ledger --section summary

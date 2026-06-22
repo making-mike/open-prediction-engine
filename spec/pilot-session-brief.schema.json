@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openprediction.engine/spec/pilot-session-brief.schema.json",
+  "title": "Pilot Session Brief",
+  "description": "Read-only moderator brief that joins the checked pilot task, generic agent guidance, summary template, and local evidence command loop without running sessions or writing evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pilotSessionBriefId",
+    "generatedAt",
+    "briefStatus",
+    "sourceRecords",
+    "recommendedTask",
+    "genericAgentGuidance",
+    "moderatorPreflight",
+    "participantBrief",
+    "sessionRunbook",
+    "summaryDraft",
+    "commandSequence",
+    "evidenceSafety",
+    "executionBoundary",
+    "warnings",
+    "summary"
+  ],
+  "properties": {
+    "pilotSessionBriefId": { "$ref": "common.schema.json#/$defs/id" },
+    "generatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "briefStatus": { "type": "string", "enum": ["ready_for_supervised_session"] },
+    "sourceRecords": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pilotSessionPacketId",
+        "agentGuidanceId",
+        "pilotSummaryTemplateId",
+        "pilotSupervisionStatusId"
+      ],
+      "properties": {
+        "pilotSessionPacketId": { "$ref": "common.schema.json#/$defs/id" },
+        "agentGuidanceId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSummaryTemplateId": { "$ref": "common.schema.json#/$defs/id" },
+        "pilotSupervisionStatusId": { "$ref": "common.schema.json#/$defs/id" }
+      }
+    },
+    "recommendedTask": { "$ref": "#/$defs/recommendedTask" },
+    "genericAgentGuidance": { "$ref": "#/$defs/genericAgentGuidance" },
+    "moderatorPreflight": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/briefCheck" }
+    },
+    "participantBrief": { "$ref": "#/$defs/stringList" },
+    "sessionRunbook": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/briefStep" }
+    },
+    "summaryDraft": { "$ref": "#/$defs/summaryDraft" },
+    "commandSequence": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/commandStep" }
+    },
+    "evidenceSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sanitizationCheckCount",
+        "requiredPassCount",
+        "explicitWriteRequired",
+        "localLedgerPath",
+        "blockedInputs"
+      ],
+      "properties": {
+        "sanitizationCheckCount": { "type": "integer", "minimum": 0 },
+        "requiredPassCount": { "type": "integer", "minimum": 0 },
+        "explicitWriteRequired": { "type": "boolean" },
+        "localLedgerPath": { "$ref": "#/$defs/maybeEmptyString" },
+        "blockedInputs": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "executionBoundary": { "$ref": "#/$defs/executionBoundary" },
+    "warnings": { "$ref": "#/$defs/stringList" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "briefStatus",
+        "recommendedScenarioKey",
+        "recommendedTaskId",
+        "genericAgentGuidanceReady",
+        "summaryDraftReady",
+        "draftClassifiesAs",
+        "draftLedgerReady",
+        "realSessionsRecorded",
+        "ledgerRowsWritten",
+        "qualityClaimAllowed",
+        "calibrationClaimAllowed",
+        "hostedRuntimeAllowed",
+        "generatedTypesEvidenceReady",
+        "expansionEvidenceReady"
+      ],
+      "properties": {
+        "briefStatus": { "type": "string", "enum": ["ready_for_supervised_session"] },
+        "recommendedScenarioKey": { "$ref": "#/$defs/boundedString" },
+        "recommendedTaskId": { "$ref": "common.schema.json#/$defs/id" },
+        "genericAgentGuidanceReady": { "type": "boolean" },
+        "summaryDraftReady": { "type": "boolean" },
+        "draftClassifiesAs": { "type": "string", "enum": ["needs_redaction"] },
+        "draftLedgerReady": { "type": "boolean" },
+        "realSessionsRecorded": { "type": "integer", "minimum": 0 },
+        "ledgerRowsWritten": { "type": "integer", "minimum": 0 },
+        "qualityClaimAllowed": { "type": "boolean" },
+        "calibrationClaimAllowed": { "type": "boolean" },
+        "hostedRuntimeAllowed": { "type": "boolean" },
+        "generatedTypesEvidenceReady": { "type": "boolean" },
+        "expansionEvidenceReady": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "boundedString": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "maybeEmptyString": { "type": "string", "maxLength": 1000 },
+    "stringList": {
+      "type": "array",
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/boundedString" }
+    },
+    "recommendedTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "scenarioKey",
+        "title",
+        "command",
+        "taskCommand",
+        "expectedOutcomeClass",
+        "measures",
+        "claimBoundaryRequired"
+      ],
+      "properties": {
+        "taskId": { "$ref": "common.schema.json#/$defs/id" },
+        "scenarioKey": { "$ref": "#/$defs/boundedString" },
+        "title": { "$ref": "#/$defs/boundedString" },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "taskCommand": { "$ref": "#/$defs/boundedString" },
+        "expectedOutcomeClass": { "$ref": "#/$defs/boundedString" },
+        "measures": { "$ref": "#/$defs/stringList" },
+        "claimBoundaryRequired": { "type": "boolean" }
+      }
+    },
+    "genericAgentGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flowStatus",
+        "clarificationQuestions",
+        "safeNextCommands",
+        "keepsHelsinkiAsExample"
+      ],
+      "properties": {
+        "flowStatus": { "type": "string", "enum": ["checked_domain_agnostic_setup_flow"] },
+        "clarificationQuestions": { "$ref": "#/$defs/stringList" },
+        "safeNextCommands": { "$ref": "#/$defs/stringList" },
+        "keepsHelsinkiAsExample": { "type": "boolean" }
+      }
+    },
+    "briefCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkKey", "order", "instruction", "required"],
+      "properties": {
+        "checkKey": { "$ref": "#/$defs/boundedString" },
+        "order": { "type": "integer", "minimum": 1 },
+        "instruction": { "$ref": "#/$defs/boundedString" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "briefStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepKey", "order", "instruction", "expectedOutput"],
+      "properties": {
+        "stepKey": { "$ref": "#/$defs/boundedString" },
+        "order": { "type": "integer", "minimum": 1 },
+        "instruction": { "$ref": "#/$defs/boundedString" },
+        "expectedOutput": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "summaryDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "draftSummaryId",
+        "draftClassifiesAs",
+        "draftLedgerReady",
+        "draftContributesRealSessionEvidence",
+        "printCommand",
+        "classificationCommand"
+      ],
+      "properties": {
+        "draftSummaryId": { "$ref": "common.schema.json#/$defs/id" },
+        "draftClassifiesAs": { "type": "string", "enum": ["needs_redaction"] },
+        "draftLedgerReady": { "type": "boolean" },
+        "draftContributesRealSessionEvidence": { "type": "boolean" },
+        "printCommand": { "$ref": "#/$defs/boundedString" },
+        "classificationCommand": { "$ref": "#/$defs/boundedString" }
+      }
+    },
+    "commandStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepKey", "order", "command", "expectedOperatorAction", "mutatesLocalState"],
+      "properties": {
+        "stepKey": { "$ref": "#/$defs/boundedString" },
+        "order": { "type": "integer", "minimum": 1 },
+        "command": { "$ref": "#/$defs/boundedString" },
+        "expectedOperatorAction": { "$ref": "#/$defs/boundedString" },
+        "mutatesLocalState": { "type": "boolean" }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyBrief",
+        "runsPilotSessions",
+        "writesCheckedFixtures",
+        "writesIgnoredLocalLedger",
+        "recordsRawTranscripts",
+        "storesPrivateData",
+        "storesCredentials",
+        "storesPromptLogs",
+        "storesParticipantIdentity",
+        "createsForecastArtifacts",
+        "unblocksExpansion",
+        "qualityClaimsUpgraded",
+        "calibrationClaimsUpgraded",
+        "hostedRuntimeUnblocked",
+        "generatedTypesUnblocked"
+      ],
+      "properties": {
+        "readOnlyBrief": { "type": "boolean" },
+        "runsPilotSessions": { "type": "boolean" },
+        "writesCheckedFixtures": { "type": "boolean" },
+        "writesIgnoredLocalLedger": { "type": "boolean" },
+        "recordsRawTranscripts": { "type": "boolean" },
+        "storesPrivateData": { "type": "boolean" },
+        "storesCredentials": { "type": "boolean" },
+        "storesPromptLogs": { "type": "boolean" },
+        "storesParticipantIdentity": { "type": "boolean" },
+        "createsForecastArtifacts": { "type": "boolean" },
+        "unblocksExpansion": { "type": "boolean" },
+        "qualityClaimsUpgraded": { "type": "boolean" },
+        "calibrationClaimsUpgraded": { "type": "boolean" },
+        "hostedRuntimeUnblocked": { "type": "boolean" },
+        "generatedTypesUnblocked": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -132,7 +132,7 @@ def build_checks(
             key="forecast_before_close_policy",
             status="pass",
             blocks_launch=False,
-            message="The runner policy marks missed windows instead of backfilling forecasts after forecastCloseAt.",
+            message="Effectful launches clock against real UTC now and the write runtime refuses forecasts after forecastCloseAt, recording missed windows instead of backfilling.",
             evidence_command="python3 scripts/ope.py prediction-campaign start --view missed-run-policy",
         ),
         readiness_check(
@@ -228,7 +228,7 @@ def build_launch_commands() -> list[dict[str, Any]]:
             5,
             key="launch_first_write",
             command="python3 scripts/ope.py prediction-campaign start --count 100 --full-materialization --pre-calibrate --write-local --output-format jsonl",
-            expected="Create exactly one next-due local campaign forecast before forecastCloseAt, writing pre-calibration first when requested.",
+            expected="Create exactly one next-due local campaign forecast before forecastCloseAt using the real UTC launch clock, writing pre-calibration first when requested; windows already past close are recorded as missed.",
             mutates_state=True,
         ),
         launch_command(

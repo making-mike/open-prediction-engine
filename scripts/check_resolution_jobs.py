@@ -29,16 +29,20 @@ def main() -> None:
     jobs = {job["jobStatus"]: job for job in registry["jobs"]}
     if registry["registryMode"] != "fixture_registry":
         raise AssertionError("resolution job registry should default to fixture mode")
-    if summary["jobCount"] != 3:
-        raise AssertionError("resolution job registry should expose three fixture jobs")
+    if summary["jobCount"] != 4:
+        raise AssertionError("resolution job registry should expose four fixture jobs")
     if summary["pendingDueCount"] != 1 or summary["pendingNotDueCount"] != 1:
         raise AssertionError("resolution job registry should expose due and not-due pending jobs")
-    if summary["alreadyResolvedCount"] != 1:
-        raise AssertionError("resolution job registry should expose one already-resolved job")
+    if summary["alreadyResolvedCount"] != 1 or summary["staleDueCount"] != 1:
+        raise AssertionError("resolution job registry should expose already-resolved and stale-due jobs")
     if jobs["pending_due"]["agentAction"]["recommendedAction"] != "call_resolver_execute":
         raise AssertionError("due resolution job should route agents to resolver execution")
     if jobs["pending_not_due"]["agentAction"]["recommendedAction"] != "wait":
         raise AssertionError("not-due resolution job should tell agents to wait")
+    if jobs["stale_due"]["agentAction"]["recommendedAction"] != "provide_window_capture":
+        raise AssertionError("stale-due resolution job should ask for an on-time window capture")
+    if "stale_capture_window" not in jobs["stale_due"]["agentAction"]["reason"]:
+        raise AssertionError("stale-due resolution job should explain the blocked stale_capture_window outcome")
     if registry["executionBoundary"]["registryExecutesResolvers"]:
         raise AssertionError("resolution job registry must not execute resolver commands")
     if registry["executionBoundary"]["calibrationClaimAllowed"]:
@@ -54,7 +58,7 @@ def main() -> None:
         raise AssertionError("campaign-aware resolution jobs should use campaign fixture mode")
     if campaign_registry["sourceBinding"]["sourceKind"] != "forward_run_state_and_campaign_manifest":
         raise AssertionError("campaign-aware resolution jobs should bind the campaign manifest")
-    if campaign_summary["jobCount"] != 4:
+    if campaign_summary["jobCount"] != 5:
         raise AssertionError("campaign-aware resolution jobs should include the campaign forecast")
     if campaign_summary["pendingNotDueCount"] != 2:
         raise AssertionError("campaign-aware resolution jobs should add one waiting campaign job")
