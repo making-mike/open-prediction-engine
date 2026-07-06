@@ -268,6 +268,41 @@ def test_campaign_ledger_projection() -> None:
         require(gate["sampleSummary"]["excludedSampleSize"] == 1, "projected excluded row should be retained for audit")
 
 
+def test_reused_ids_distinct_windows_not_deduped() -> None:
+    """Regression: the forward-run prototype reuses fixed ids across every daily
+    run. Runs that share ids but cover different service dates must each count;
+    only a genuine re-record of the same run deduplicates."""
+    def prototype_row(service_date: str, horizon_start: str) -> dict:
+        return cs.build_row(
+            domain=DOMAIN,
+            run_source="single",
+            run_id="transitdelayforwardrun-001",   # identical across runs (the bug's trigger)
+            question_id="question-1201",
+            forecast_id="forecast-1201",
+            scoring_report_id="score-forecast-1201",
+            service_date=service_date,
+            service_window="rolling-24h",
+            horizon_starts_at=horizon_start,
+            horizon_ends_at="2026-06-30T00:00:00Z",
+            forecast_probability=0.2,
+            baseline_probability=0.2,
+            score_status="scored",
+            primary_score=0.04,
+            baseline_score=0.04,
+            outcome_value=0,
+        )
+
+    with tempfile.TemporaryDirectory() as raw:
+        path = fresh_store_path(Path(raw))
+        cs.append_resolved_run(domain=DOMAIN, row=prototype_row("2026-06-18", "2026-06-18T21:00:00Z"), store_path=path)
+        r2 = cs.append_resolved_run(domain=DOMAIN, row=prototype_row("2026-06-19", "2026-06-19T21:00:00Z"), store_path=path)
+        require(r2["gate"]["sampleSummary"]["resolvedComparableSampleSize"] == 2, "same-id runs on different dates must both count")
+        # re-recording the 06-18 run is still an idempotent no-op
+        r3 = cs.append_resolved_run(domain=DOMAIN, row=prototype_row("2026-06-18", "2026-06-18T21:00:00Z"), store_path=path)
+        require(r3["appended"] == 0, "re-recording the same run must still dedupe")
+        require(r3["gate"]["sampleSummary"]["resolvedComparableSampleSize"] == 2, "dedupe must not drop the distinct run")
+
+
 def main() -> None:
     test_thresholds_in_sync_with_corpus()
     test_thresholds_flip_automatically()
@@ -275,6 +310,7 @@ def main() -> None:
     test_exclusions_never_advance_the_count()
     test_mixed_sources_share_one_predictor()
     test_campaign_ledger_projection()
+    test_reused_ids_distinct_windows_not_deduped()
     print("checked calibration store conformance")
 
 
