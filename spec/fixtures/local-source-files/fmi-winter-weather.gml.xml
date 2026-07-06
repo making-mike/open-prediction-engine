@@ -10,52 +10,36 @@
       <om:result>
         <wml2:MeasurementTimeseries gml:id="mts-1-1-Temperature">
           <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T05:00:00Z</wml2:time>
-            <wml2:value>-6.2</wml2:value>
+            <wml2:time>2026-01-15T05:00:00Z</wml2:time><wml2:value>-4.0</wml2:value>
           </wml2:MeasurementTVP></wml2:point>
           <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T06:00:00Z</wml2:time>
-            <wml2:value>-7.4</wml2:value>
-          </wml2:MeasurementTVP></wml2:point>
-        </wml2:MeasurementTimeseries>
-      </om:result>
-    </omso:PointTimeSeriesObservation>
-  </wfs:member>
-  <wfs:member>
-    <omso:PointTimeSeriesObservation gml:id="WFS-snowfall">
-      <om:result>
-        <wml2:MeasurementTimeseries gml:id="mts-1-2-Snowfall">
-          <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T05:00:00Z</wml2:time>
-            <wml2:value>1.8</wml2:value>
+            <wml2:time>2026-01-15T06:00:00Z</wml2:time><wml2:value>-5.5</wml2:value>
           </wml2:MeasurementTVP></wml2:point>
           <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T06:00:00Z</wml2:time>
-            <wml2:value>3.1</wml2:value>
+            <wml2:time>2026-01-15T07:00:00Z</wml2:time><wml2:value>-3.0</wml2:value>
+          </wml2:MeasurementTVP></wml2:point>
+          <wml2:point><wml2:MeasurementTVP>
+            <wml2:time>2026-01-15T08:00:00Z</wml2:time><wml2:value>NaN</wml2:value>
           </wml2:MeasurementTVP></wml2:point>
         </wml2:MeasurementTimeseries>
       </om:result>
     </omso:PointTimeSeriesObservation>
   </wfs:member>
   <wfs:member>
-    <omso:PointTimeSeriesObservation gml:id="WFS-roadsurface">
+    <omso:PointTimeSeriesObservation gml:id="WFS-precipitation">
       <om:result>
-        <wml2:MeasurementTimeseries gml:id="mts-1-3-RoadSurfaceTemperature">
+        <wml2:MeasurementTimeseries gml:id="mts-1-1-Precipitation1h">
           <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T06:00:00Z</wml2:time>
-            <wml2:value>-3.5</wml2:value>
+            <wml2:time>2026-01-15T05:00:00Z</wml2:time><wml2:value>0.0</wml2:value>
           </wml2:MeasurementTVP></wml2:point>
-        </wml2:MeasurementTimeseries>
-      </om:result>
-    </omso:PointTimeSeriesObservation>
-  </wfs:member>
-  <wfs:member>
-    <omso:PointTimeSeriesObservation gml:id="WFS-visibility">
-      <om:result>
-        <wml2:MeasurementTimeseries gml:id="mts-1-4-Visibility">
           <wml2:point><wml2:MeasurementTVP>
-            <wml2:time>2026-01-15T06:00:00Z</wml2:time>
-            <wml2:value>700.0</wml2:value>
+            <wml2:time>2026-01-15T06:00:00Z</wml2:time><wml2:value>1.2</wml2:value>
+          </wml2:MeasurementTVP></wml2:point>
+          <wml2:point><wml2:MeasurementTVP>
+            <wml2:time>2026-01-15T07:00:00Z</wml2:time><wml2:value>2.4</wml2:value>
+          </wml2:MeasurementTVP></wml2:point>
+          <wml2:point><wml2:MeasurementTVP>
+            <wml2:time>2026-01-15T08:00:00Z</wml2:time><wml2:value>0.6</wml2:value>
           </wml2:MeasurementTVP></wml2:point>
         </wml2:MeasurementTimeseries>
       </om:result>
