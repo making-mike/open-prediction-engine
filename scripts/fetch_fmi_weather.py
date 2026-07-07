@@ -38,11 +38,19 @@ FORECAST_STORED_QUERY = "fmi::forecast::harmonie::surface::point::timevaluepair"
 ALLOWLISTED_LOCATIONS = {
     "helsinki": {
         "name": "Helsinki",
-        "latlon": "60.1699,24.9384",
+        "place": "Helsinki",
         "sourceId": "source-1205",
     },
 }
-FMI_PARAMETERS = ["Temperature", "Snowfall", "RoadSurfaceTemperature", "Visibility"]
+# The HARMONIE surface point forecast exposes Temperature (deg C) and
+# Precipitation1h (mm). Snowfall is derived from these (see FREEZING_C) because
+# FMI's Snow1h parameter conflates rain and snow. Road-surface temperature and
+# visibility are NOT in this forecast product (requesting them returns HTTP 400),
+# so they are not requested live; the parser still maps them for a future FMI
+# road-weather query.
+FMI_PARAMETERS = ["Temperature", "Precipitation1h"]
+# Aggregate over roughly the next 24 forecast hours rather than a single point.
+HORIZON_POINTS = 24
 
 FIELD_COLUMNS = [
     "network",
@@ -78,7 +86,7 @@ def build_url(location_key: str) -> str:
         "version": "2.0.0",
         "request": "getFeature",
         "storedquery_id": FORECAST_STORED_QUERY,
-        "latlon": location["latlon"],
+        "place": location["place"],
         "parameters": ",".join(FMI_PARAMETERS),
     }
     return f"{FMI_ENDPOINT}?{urlencode(query)}"
@@ -97,12 +105,19 @@ def _localname(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
+# Precipitation counts as snowfall only when the hour is at/below this
+# temperature. FMI's own "Snow1h" parameter conflates rain and snow (it returns
+# large values during warm-season rain), so we derive snowfall ourselves from
+# the two parameters that read correctly: Temperature and Precipitation1h.
+FREEZING_C = 1.0
+
+
 def _field_for(series_id: str) -> str | None:
     lowered = series_id.lower()
     if "roadsurface" in lowered or "tsurf" in lowered or "roadtemperature" in lowered:
         return "road_surface_temp_c"
-    if "snow" in lowered:
-        return "snowfall_mm"
+    if "precip" in lowered:
+        return "precip_mm"
     if "visibility" in lowered or "vis" in lowered:
         return "visibility_m"
     if "temperature" in lowered or "t2m" in lowered:
@@ -110,23 +125,19 @@ def _field_for(series_id: str) -> str | None:
     return None
 
 
-def parse_timeseries(raw: bytes) -> dict[str, float]:
-    """Extract the latest value per known parameter from FMI GML timevaluepairs."""
+def _series_by_time(raw: bytes) -> dict[str, dict[str, float]]:
+    """Collect each recognized FMI parameter as a {timestamp: value} map, NaN-free."""
     root = ET.fromstring(raw)
-    values: dict[str, float] = {}
-    for series in root.iter():
-        if _localname(series.tag) != "MeasurementTimeseries":
+    series: dict[str, dict[str, float]] = {}
+    for node in root.iter():
+        if _localname(node.tag) != "MeasurementTimeseries":
             continue
-        series_id = next(
-            (v for k, v in series.attrib.items() if _localname(k) == "id"),
-            "",
-        )
+        series_id = next((v for k, v in node.attrib.items() if _localname(k) == "id"), "")
         field = _field_for(series_id)
         if field is None:
             continue
-        latest_time = ""
-        latest_value: float | None = None
-        for tvp in series.iter():
+        by_time = series.setdefault(field, {})
+        for tvp in node.iter():
             if _localname(tvp.tag) != "MeasurementTVP":
                 continue
             time_text = value_text = None
@@ -142,11 +153,32 @@ def parse_timeseries(raw: bytes) -> dict[str, float]:
                 parsed = float(value_text)
             except ValueError:
                 continue
-            if time_text >= latest_time:
-                latest_time = time_text
-                latest_value = parsed
-        if latest_value is not None:
-            values[field] = latest_value
+            if parsed != parsed:  # skip NaN fill values
+                continue
+            by_time[time_text] = parsed
+    return series
+
+
+def parse_timeseries(raw: bytes) -> dict[str, float]:
+    """Reduce the FMI forecast to horizon features: coldest temperature and the
+    peak hourly snowfall (precipitation occurring at/below freezing)."""
+    series = _series_by_time(raw)
+    temps = series.get("temperature_c", {})
+    precip = series.get("precip_mm", {})
+    horizon = sorted(set(temps) | set(precip))[:HORIZON_POINTS]
+
+    values: dict[str, float] = {}
+    temp_window = [temps[t] for t in horizon if t in temps]
+    if temp_window:
+        values["temperature_c"] = min(temp_window)
+    if precip:
+        snow_hours = [precip[t] for t in horizon if t in precip and temps.get(t, 99.0) <= FREEZING_C]
+        values["snowfall_mm"] = round(max(snow_hours), 3) if snow_hours else 0.0
+    for extra in ("road_surface_temp_c", "visibility_m"):
+        pts = series.get(extra, {})
+        window = [pts[t] for t in sorted(pts)[:HORIZON_POINTS]]
+        if window:
+            values[extra] = min(window)
     if not values:
         raise FmiWeatherError("FMI response contained no recognized parameter series")
     return values
@@ -192,7 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.check:
             raw = FIXTURE.read_bytes()
             values = parse_timeseries(raw)
-            for field in ("temperature_c", "snowfall_mm", "road_surface_temp_c"):
+            for field in ("temperature_c", "snowfall_mm"):
                 if field not in values:
                     raise FmiWeatherError(f"fixture parse missing {field}")
             print("checked fmi winter weather connector")

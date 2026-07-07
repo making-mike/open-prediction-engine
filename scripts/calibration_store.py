@@ -113,8 +113,17 @@ def row_key(
     forecast_id: str,
     scoring_report_id: str,
     row_kind: str,
+    service_date: str = "",
+    horizon_starts_at: str = "",
 ) -> str:
-    raw = "|".join([domain, str(run_id), str(forecast_id), str(scoring_report_id), row_kind])
+    # service_date + horizon_starts_at distinguish otherwise-identical runs: the
+    # forward-run prototype reuses fixed ids (forecast-1201, etc.) across every
+    # daily run, so keying on ids alone collapses a whole rolling series into one
+    # deduplicated row. The per-run window makes each resolved run distinct while
+    # still deduping a genuine re-record of the same run.
+    raw = "|".join(
+        [domain, str(run_id), str(forecast_id), str(scoring_report_id), row_kind, str(service_date), str(horizon_starts_at)]
+    )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
 
 
@@ -168,6 +177,8 @@ def build_row(
             forecast_id=forecast_id,
             scoring_report_id=scoring_report_id,
             row_kind=row_kind,
+            service_date=service_date,
+            horizon_starts_at=horizon_starts_at,
         ),
         "runSource": run_source,
         "domain": domain,
